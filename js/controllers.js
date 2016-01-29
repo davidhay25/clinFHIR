@@ -1,4 +1,4 @@
-angular.module("sampleApp").controller('sampleCtrl', function ($rootScope,$scope,$http,supportSvc) {
+angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scope,$http,supportSvc) {
 
     $scope.input = {observations:[]};
     $scope.outcome = {};
@@ -30,6 +30,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope,$scope
 
     $scope.typeSelected = function(type,bundle) {
         delete $scope.outcome.selectedResource;
+        delete $scope.vitalsTable;
         //console.log(type,bundle)
         $scope.outcome.selectedType = type;
         $scope.outcome.allResourcesOfOneType = bundle;
@@ -50,13 +51,62 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope,$scope
     };
 
     $scope.getVitals = function(){
+        delete $scope.outcome.selectedResource;
+        delete $scope.outcome.selectedType;
+        delete $scope.outcome.allResourcesOfOneType;
+
         supportSvc.getVitals({patientId:$scope.currentPatient.id}).then(
-            function(grid){
+            function(vo){
+                var codes = vo.vitalsCodes;     //an array of codes - todo: add display
+                var grid = vo.grid;             //obects where each property is a date (to become a colum
+                //get a list of dates
+                var dates = [];
+                angular.forEach(grid,function(item,date){
+                    dates.push(date);
+                });
+                dates.sort(function(a,b){
+                    if (b > a) {
+                        return 1
+                    } else {
+                        return -1
+                    }
+                });
+             //   console.log(dates)
+
+
+
+
                 //convert the data grid into one suitable for display - ie the dates (properties) as columns
+                $scope.vitalsTable = {rows:[],dates:[]};
 
 
 
 
+                var firstRow = true;
+                codes.forEach(function(code){
+                    var row = {code:code.code,unit:code.unit,display:code.display,cols:[]};
+                    //now, add a column for each date...
+                    dates.forEach(function(date){
+                        item = grid[date];
+                    //angular.forEach(grid,function(item,date){
+                        console.log(item,date)
+                        var v = '';
+                        if (item[code.code]) {      //is there a value for this code on this date
+                            v = item[code.code].valueQuantity.value;
+                        }
+                        row.cols.push({value:v});
+                        //add the date to the list of dates on the first row only
+                        if (firstRow) {
+                            $scope.vitalsTable.dates.push(date);
+                        }
+
+                    });
+                    firstRow = false
+                    $scope.vitalsTable.rows.push(row);
+                });
+
+
+//console.log($scope.vitalsTable)
 
             }
         )
@@ -81,18 +131,18 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope,$scope
 
         $http.post(uri,patient).then(
             function(data) {
-                console.log(data)
+               // console.log(data)
                 var location = data.headers('location');
                 $scope.outcome.patientId = location;
                 var ar = location.split('/');
                 var id = ar[5];
                 loadSamplePatients();
-                console.log(id)
+               // console.log(id)
                 cb(null,id);
                 addLog('Added patient: '+ location)
             },
             function(err) {
-                console.log(err)
+               // console.log(err)
                 alert(angular.toJson(err));
                 cb(err);
             }
@@ -149,7 +199,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope,$scope
         var cnt = 0;
         for (var i=0; i < 3; i++) {
             var date = moment().subtract(i,'weeks');
-            console.log(date.format());
+           // console.log(date.format());
             $scope.input.observations.forEach(function(item) {
 
                 var value = item.min + (item.max - item.min) * Math.random();   //to be improved...
@@ -199,7 +249,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope,$scope
         supportSvc.getAllData(patient.id).then(
             //returns an object hash - type as hash, contents as bundle
             function(allResources){
-                console.log(allResources);
+              //  console.log(allResources);
 
                 $scope.outcome.allResources = allResources;
             }

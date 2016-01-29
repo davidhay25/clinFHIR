@@ -17,6 +17,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
 
             var that = this;
+            var response = {vitalsCodes:[]};      //the response object as we want to return more than one thing...
 
             //create the url for retrieving the vitals data. Want to show how it could be done...
             var url = serverBase+"Observation?subject="+patientId;
@@ -26,17 +27,23 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             observations.forEach(function(item){
                 if (item.isVital) {
                     filterString += ","+item.code;
+                    response.vitalsCodes.push({code:item.code,display:item.display,unit:item.unit});
                 }
             });
 
             filterString = filterString.substring(1);
             url += "&code="+filterString;
             url += "&_count=100";
+
             console.log('url='+url);
             $http.get(url).then(
                 function(data){
                     console.log(data);
-                    deferred.resolve(that.getGridOfObservations(data.data))
+                    response.grid = that.getGridOfObservations(data.data);      //an object hashed by date.
+
+
+
+                    deferred.resolve(response)
 
                 },
                 function(err){
@@ -46,30 +53,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             );
             return deferred.promise;
 
-            /*function getGridOfObservations(bundle) {
-                var grid = {};      //there will be a property for each unique datetime, with a collection of matching observations for each time.
-                if (bundle && bundle.entry) {
-                    bundle.entry.forEach(function(entry){
-                        var obs = entry.resource;
-                        var code = entry.coding[0].code;
-                        var date = obs.effectiveDateTime;
-                        if (date) {
-                            if (! grid[date]) {
-                                grid[date] = {}
-                            }
-                            var g = grid[date];
-                            g[code] = obs
 
-                            //grid[date].push(obs)
-                        }
-
-                    });
-
-                    console.log(grid);
-
-
-                }
-            }*/
 
 
 
@@ -196,6 +180,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                 });
 
                 console.log(grid);
+
                 return grid;
 
             }

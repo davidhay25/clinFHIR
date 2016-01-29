@@ -59,9 +59,23 @@
                     <div class="col-md-8">
 
 
-                        <table>
-                            <tr ng-repeat="code in vitalCodes">
+                        <!-- The vitals table -->
+                        <table class="table table-bordered" ng-show="vitalsTable">
+                            <tr>
+                                <td>Item</td>
+                                <td ng-repeat="date in vitalsTable.dates track by $index">
+                                    <div>{{date | date : 'dd-MMM-yy hh:mm'}}</div>
+                                    <!--<div>{{date | date : 'hh:mm'}}</div>-->
+                                    <div>{{date | getAge}}</div>
+                                </td>
+                            </tr>
 
+                            <tr ng-repeat="row in vitalsTable.rows track by $index" >
+                                <td title="{{row.code}}">{{row.display}}  ({{row.unit}})</td>
+
+                                <td ng-repeat="item in row.cols track by $index">
+                                    {{item.value}}
+                                </td>
                             </tr>
                         </table>
 
