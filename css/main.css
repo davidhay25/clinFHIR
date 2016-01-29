@@ -1,0 +1,204 @@
+
+
+.listItemSelected {
+    background-color: lightsteelblue;
+}
+
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+.marginBelow {
+    margin-bottom: 8px;
+}
+
+.chat_text {
+    border : 1px solid #eeeeee;
+    padding : 5px;
+    margin:0px;
+/*
+    margin-left : 10px;
+    margin-top : 10px;
+    */
+    margin-bottom : 10px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    background-color:#F6F6F6;
+}
+
+.chat_conversation_purpose {
+    border : 1px solid #eeeeee;
+    padding : 5px;
+    margin:0px;
+    /*
+        margin-left : 10px;
+        margin-top : 10px;
+        */
+    margin-bottom : 10px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    background-color:#F6F6F6;
+}
+
+/*  classes for chat */
+.selected {
+    font-weight: bold;
+}
+
+.chat_topic {
+    color: #333;
+    background-color: #f5f5f5;
+    text-align: center;
+}
+
+/* */
+.ng-table {
+    border: 1px solid #000;
+}
+
+.popover{
+    max-width: 350px; /* Max Width of the popover (depending on the container!) */
+    width: 350px;
+}
+
+.textRow {
+    border-bottom: 1px solid gainsboro;
+    margin: 4px;
+}
+
+.addExtRow {
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+    background-color:  gainsboro;
+    margin: 4px;
+    padding: 8px;
+}
+
+.propertySelected {
+    font-weight: bold;
+}
+
+.elementExtension {
+    color: lightcoral;
+}
+
+.clickable {
+    color: blue;
+    cursor: pointer;
+}
+
+.tabMargin {
+    margin: 8px
+}
+
+.title {
+    color: #00A000;
+}
+
+
+.clickableParentNode {
+    color: orange;
+    cursor: pointer;
+}
+
+.clickableExtension {
+    color: darkgoldenrod;
+    cursor: pointer;
+}
+
+.clickableResourceReference {
+    color: green;
+    cursor: pointer;
+}
+
+.elementRequired{
+    color:red;
+}
+
+.clickableFixed{
+    color:red;
+}
+
+.strikeout {
+    text-decoration: line-through;
+}
+
+/* http://stackoverflow.com/questions/18153234/center-a-column-using-twitter-bootstrap-3*/
+
+.header  {
+    font-weight: bold;
+}
+.famHxDetail {
+    margin-left: 10px;
+}
+
+.indent {
+    margin-left: 10px;
+}
+
+.profileListDisplay {
+    background-color: #bbffbb;
+}
+
+.extensionDisplay {
+    background-color:  #ffffcc;
+}
+
+
+.required {
+    background-color:  mistyrose;
+}
+
+.col-centered{
+    float: none;
+    margin: 0 auto;
+}
+
+.showcursor {
+
+    cursor: pointer;
+}
+
+.banner {
+
+    border: 1px solid #b8b9b5;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    text-align: center;
+    padding: 2px;
+    margin-bottom: 5px;
+    background-color: #F6F6F6;
+    font-weight: bold;
+}
+	
+.rounded-box {
+    border: 1px solid gainsboro;
+    padding : 3px;
+    margin: 4px;
+    -webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+}
+        
+.rounded-box-filled {
+    border : 1px solid #eeeeee;
+    padding : 5px;
+    margin: 0px;
+  	/*margin-left : 10px;*/
+    -webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	background-color:#F6F6F6;
+}
+
+.rounded-box-element {
+    border : 1px solid #eeeeee;
+    padding : 5px;
+    margin: 1px;
+    /*margin-left : 10px;*/
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    background-color:#d6e9c6;
+}

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <script src="js/libs/angular.min.1.4.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-0.14.3.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngSanitize']); //'ngOrderObjectBy',,'ngTable'
+    </script>
+
+    <script src="js/services.js"></script>
+    <script src="js/filters.js"></script>
+    <script src="js/controllers.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+
+    <title>FHIR Sample Creator</title>
+
+</head>
+
+
+<body style="padding: 8px">
+
+    <div ng-app="sampleApp" ng-controller="sampleCtrl">
+
+        <uib-tabset>
+
+
+            <uib-tab heading="Sample Patients">
+                <br />
+                <div class="row">
+                    <div class="col-md-2">
+                        <div style="height:700px; overflow-y: auto;" >
+                            <div ng-repeat = "entry in outcome.samplePatientsBundle.entry">
+                                <p style="cursor: pointer" ng-click="showPatient(entry.resource)" ng-bind-html="entry.resource.text.div"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="list-group">
+                            <a href="#" class="list-group-item" ng-click="typeSelected(type,bundle)"
+                               ng-repeat="(type,bundle) in outcome.allResources">
+                                {{type}}
+                            </a>
+
+                            <a ng-show="outcome.allResources" href="#" class="list-group-item" ng-click="getVitals()">Vitals</a>
+
+
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+
+
+                        <table>
+                            <tr ng-repeat="code in vitalCodes">
+
+                            </tr>
+                        </table>
+
+
+
+                        <div class="row">
+                            <div class="col-md-6">
+
+                                <h4>{{outcome.selectedType}}</h4>
+                                <div class="list-group">
+                                    <a href="#" class="list-group-item"
+                                       ng-repeat="entry in outcome.allResourcesOfOneType.entry">
+
+
+                                        <div style="cursor: pointer" ng-click="outcome.selectedResource = entry.resource">
+                                            <div class="row" ng-show="entry.resource.resourceType == 'Observation'">
+                                                <div class="col-md-5">
+                                                    <div>{{entry.resource.effectiveDateTime | date : 'yyyy-MM-dd'}}</div>
+                                                    <div>{{entry.resource.effectiveDateTime | getAge}}</div>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <p  ng-bind-html="entry.resource.text.div"></p>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="row" ng-show="entry.resource.resourceType == 'Appointment'">
+                                                <div class="col-md-5">
+                                                    <div>{{entry.resource.start | date : 'yyyy-MM-dd hh:mm'}}</div>
+                                                    <div>{{entry.resource.minutesDuration}} minutes</div>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <p ng-bind-html="entry.resource.text.div"></p>
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+
+
+
+
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <pre ng-show="outcome.selectedResource">{{outcome.selectedResource | json:2}}</pre>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+
+
+
+                </div>
+
+            </uib-tab>
+
+
+
+            <uib-tab heading="New Patient">
+
+
+
+
+                <br />
+
+                <div class="row">
+                    <div class="col-md-2">
+
+                        <div class="list-group">
+                            <a href="#" class="list-group-item" ng-click="input.action='patient'">Patient</a>
+                            <a href="#" class="list-group-item" ng-click="input.action='observation'">Observations</a>
+                            <a href="#" class="list-group-item list-group-item-warning" ng-click="input.action='create'">Create</a>
+
+
+                        </div>
+
+
+                    </div>
+                    <div class="col-md-10">
+
+
+                        <div ng-show="input.action=='observation'">
+                            <ng-include src="'./includes/newObservations.html'"></ng-include>
+                        </div>
+
+
+                        <div ng-show="input.action=='patient'">
+                            <ng-include src="'./includes/newPatient.html'"></ng-include>
+                        </div>
+
+                        <div ng-show="input.action=='create'">
+                            <div class="banner">Create sample data</div>
+                            <form class="form-horizontal" role="form">
+                                <div class="form-group">
+                                    <label class="col-md-2 control-label">FHIR Server</label>
+                                    <div class="col-md-4">
+                                        <select ng-model="input.serverBase" class="form-control">
+                                            <option value="http://localhost:8080/baseDstu2/">Local Server</option>
+                                            <option value="http://fhir.hl7.org.nz/dstu2/">HL7 NZ</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <div class="row">
+                                <div class="col-md-offset-2 col-md-3">
+                                    <a href="#" ng-click="save()" class="btn btn-primary">Create sample data</a>
+                                </div>
+                            </div>
+
+                            <div class="row" ng-show="outcome.log.length > 0">
+
+                                <div class="col-md-offset-2 col-md-10">
+                                    <h4>Log</h4>
+                                    <div ng-repeat="log in outcome.log">
+                                        {{log}}
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+
+
+
+            </uib-tab>
+
+
+        </uib-tabset>
+
+    </div>
+
+</body>
+</html>
