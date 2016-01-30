@@ -1,8 +1,12 @@
 angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
 
-    var chanceConfig = {};
-    chanceConfig.encounterObservation = .5;     //chance that a group of observations will reference an encounter
+    //options for building the samples that will come from a UI
+    var buildConfig = {};
+    buildConfig.encounterObservation = .5;     //chance that a group of observations will reference an encounter
+    buildConfig.createProblemList = 'yes';      // yes | no | empty
+
+
 
     var identifierSystem ='http://fhir.hl7.org.nz/identifier';
     var serverBase;
@@ -27,14 +31,16 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
     //resources that are used as reference targets by other resources...
     var referenceResources = [];
     referenceResources.push({resourceType:'Practitioner',name:{text:'Dr John Doe'},
-        identifier : {value:'jd',system:identifierSystem}});
+        identifier : {value:'jd',system:identifierSystem},text:{status:'generated',div:'<div>Dr John Doe</div>'}});
     referenceResources.push({resourceType:'Practitioner',name:{text:'Dr Annette Jones'},
-        identifier : {value:'aj',system:identifierSystem}});
+        identifier : {value:'aj',system:identifierSystem},text:{status:'generated',div:'<div>Dr Annette Jones</div>'}});
     referenceResources.push({resourceType:'Organization',name:'clinFHIR Sample creator',
-        identifier : {value:'cf',system:identifierSystem}});
+        identifier : {value:'cf',system:identifierSystem},text:{status:'generated',div:'<div>clinFhir</div>'}});
 
     return {
-
+        getReferenceResources : function(){
+            return referenceResources;
+        },
         createAppointments : function(patientId,options) {
             var bundle = {resourceType: 'Bundle', type: 'transaction', entry: []};
             var data = [
@@ -89,7 +95,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
 
                 //decide if this set of observations will be linked to an encounter...
-                var encounter = this.getRandomReferenceResource('Encounter',chanceConfig.encounterObservation);    //half the time it will be null
+                var encounter = this.getRandomReferenceResource('Encounter',buildConfig.encounterObservation);    //half the time it will be null
 
                 observations.forEach(function(item) {
 
@@ -160,6 +166,12 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                     if (options.logFn) {
                         options.logFn('Added ' + options.count + ' Conditions')
                     }
+
+                    //now to see if a problem list shuld be created
+                    switch (buildConfig.createProblemList) {
+
+                    }
+
                     deferred.resolve()
                 },
                 function(err) {
@@ -286,7 +298,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                 var deferred = $q.defer();
                 var identifierQuery = res.identifier.system + '|' + res.identifier.value;
                 var url = serverBase + res.resourceType + "?identifier="+identifierQuery;
-                console.log(url);
+                //console.log(url);
                 $http.get(url).then(
                     function(data) {
                         if (data.data && data.data) {

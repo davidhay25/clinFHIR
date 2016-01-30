@@ -1,4 +1,4 @@
-angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scope,$http,supportSvc) {
+angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scope,$http,supportSvc,resourceSvc) {
 
     $scope.input = {observations:[]};
     $scope.outcome = {};
@@ -42,7 +42,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
             }
 
             $scope.input.referenceResourcesAvailable = true;
-            //console.log(supportSvc.getRandomnReferenceResource('Practitioner'));
+
         }
     );
 
@@ -50,13 +50,23 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
         console.log(patient);
     };
 
-    $scope.typeSelected = function(type,bundle) {
+    $scope.typeSelected = function(vo) {
+        //vo created to better support the display - has the type and the bundle containing all resources of that type
         delete $scope.outcome.selectedResource;
         delete $scope.vitalsTable;
         //console.log(type,bundle)
-        $scope.outcome.selectedType = type;
-        $scope.outcome.allResourcesOfOneType = bundle;
+        $scope.outcome.selectedType = vo.type;
+        $scope.outcome.allResourcesOfOneType = vo.bundle;
 
+    };
+
+
+    //when anindividual resource has been selected...
+    $scope.resourceSelected = function(entry) {
+        var resource = entry.resource;
+        $scope.outcome.selectedResource = resource;     //for the json display
+        $scope.resourceReferences = resourceSvc.getReference(resource,$scope.allResourcesAsList,$scope.allResourcesAsDict);
+        console.log($scope.resourceReferences);
     };
 
     $scope.save = function() {
@@ -284,6 +294,51 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
               //  console.log(allResources);
 
                 $scope.outcome.allResources = allResources;
+                //create a display object that can be sorted alphabetically...
+                $scope.outcome.resourceTypes = [];
+                angular.forEach(allResources,function(bundle,type){
+
+                    if (bundle && bundle.total > 0) {
+                        $scope.outcome.resourceTypes.push({type:type,bundle:bundle});
+                    }
+
+
+                });
+
+                $scope.outcome.resourceTypes.sort(function(a,b){
+                    if (a.type > b.type) {
+                        return 1
+                    } else {
+                        return -1
+                    }
+                })
+
+
+                //for the reference navigator we need a plain list of resources...
+                $scope.allResourcesAsList = [];
+                $scope.allResourcesAsDict = {};
+                angular.forEach(allResources,function(bundle,type){
+                    //console.log(bundle,type)
+                    if (bundle.entry) {
+                        bundle.entry.forEach(function(entry){
+                            $scope.allResourcesAsList.push(entry.resource);
+                            var hash = entry.resource.resourceType + "/"+entry.resource.id;
+                            $scope.allResourcesAsDict[hash] = entry.resource;
+
+                        })
+                    }
+                    //also need to add the reference resources to the dictionary (so thay can be found in outgoing references)
+                    supportSvc.getReferenceResources().forEach(function(resource){
+                        var hash = resource.resourceType + "/"+resource.id;
+                        $scope.allResourcesAsDict[hash] = resource;
+                    });
+                    //and finally the patient!
+                    var hash = "Patient/"+patient.id;
+                    $scope.allResourcesAsDict[hash] = patient;
+
+
+                })
+
             }
         )
     };

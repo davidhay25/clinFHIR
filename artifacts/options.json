@@ -12,6 +12,13 @@
   ],
   "conditionCode" : [
     {"text": "Asthma"},
+    {"text": "Migraine"},
+    {"text": "Rheumatiod Arthritis"},
+    {"text": "Eczema"},
+    {"text": "Hypertension"},
+    {"text": "HyperThyroidism"},
+    {"text": "Cholelithiasis"},
+    {"text": "Gout"},
     {"text": "Diabetes"}
   ]
 }

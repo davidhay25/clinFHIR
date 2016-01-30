@@ -8,9 +8,10 @@
     <link rel="stylesheet" type="text/css" href="css/main.css"/>
 
     <script src="js/libs/angular-sanitize.js"></script>
+    <script src="js/libs/toArrayFilter.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngSanitize']).run(function($http){
+        angular.module("sampleApp",['ui.bootstrap','ngSanitize','angular-toArrayFilter']).run(function($http){
           //  $http.defaults.headers.post.prefer = 'return=representation'
         })
 
@@ -18,10 +19,12 @@
     </script>
 
     <script src="js/services.js"></script>
+    <script src="js/resourceSvc.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/controllers.js"></script>
 
     <script src="js/libs/moment.min.js"></script>
+
 
 
     <title>FHIR Sample Creator</title>
@@ -49,10 +52,20 @@
 
                     <div class="col-md-2">
                         <div class="list-group">
+                            <!--
                             <a href="#" class="list-group-item" ng-click="typeSelected(type,bundle)"
-                               ng-repeat="(type,bundle) in outcome.allResources">
+                               ng-repeat="(type,bundle) in outcome.allResources ">
                                 {{type}}
                             </a>
+                            -->
+
+                            <a href="#" class="list-group-item" ng-click="typeSelected(type)"
+                               ng-repeat="type in outcome.resourceTypes ">
+                                {{type.type}}
+                                <span class="pull-right badge">{{type.bundle.total}}</span>
+                            </a>
+
+
 
                             <a ng-show="outcome.allResources" href="#" class="list-group-item" ng-click="getVitals()">Vitals</a>
 
@@ -94,7 +107,7 @@
                                        ng-repeat="entry in outcome.allResourcesOfOneType.entry">
 
 
-                                        <div style="cursor: pointer" ng-click="outcome.selectedResource = entry.resource">
+                                        <div style="cursor: pointer" ng-click="resourceSelected(entry)">
                                             <div class="row" ng-show="entry.resource.resourceType == 'Observation'">
                                                 <div class="col-md-5">
                                                     <div>{{entry.resource.effectiveDateTime | date : 'yyyy-MM-dd'}}</div>
@@ -146,7 +159,40 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <pre ng-show="outcome.selectedResource">{{outcome.selectedResource | json:2}}</pre>
+
+                                <div ng-show="outcome.selectedResource">
+                                    <uib-tabset>
+                                        <uib-tab heading="Json">
+                                            <pre>{{outcome.selectedResource | json:2}}</pre>
+                                        </uib-tab>
+
+                                        <uib-tab heading="References">
+                                            <h4>Outward references</h4>
+
+                                            <div class="list-group">
+                                                <a href="#" class="list-group-item"
+                                                   ng-repeat="reference in resourceReferences.outwardLinks">
+                                                    <div>{{reference.element}} ==> {{reference.reference}}</div>
+                                                    <div><p ng-bind-html="reference.resource.text.div"></p></div>
+                                                </a>
+                                            </div>
+
+                                            <h4>Inward references</h4>
+
+                                            <div class="list-group">
+                                                <a href="#" class="list-group-item"
+                                                   ng-repeat="reference in resourceReferences.inwardLinks">
+                                                    <div>{{reference.resource.resourceType}}/{{reference.resource.id}}.
+                                                        {{reference.name}}</div>
+                                                    <div><p ng-bind-html="reference.resource.text.div"></p></div>
+
+                                                </a>
+                                            </div>
+
+                                        </uib-tab>
+                                    </uib-tabset>
+                                </div>
+
                             </div>
                         </div>
 
