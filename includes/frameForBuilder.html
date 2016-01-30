@@ -1,0 +1,23 @@
+<div>
+    <h5>ResourceBuilder</h5>
+
+
+
+
+    <select-profile trigger="showFindProfileDialog"
+                    all-resource-types="dynamic.resourcetypes"
+                    profile-selected="selectedProfile" type="'profile'">
+
+    </select-profile>
+
+
+    <profile-form profile="dynamic.profile" allresources="dynamic.allresources"
+                  parkresource="dynamic.parkResource" patient="currentPatient"
+                  loadalldata="dynamic.loadAllData(id)" updated = "dynamic.updated"
+                  resourcetypes="dynamic.resourcetypes" show-chat="false"
+                  listen-socket="false" current-user="dynamic.currentUser"
+                  close-chat="dynamic.closeChat" select-profile="dynamic.selectProfile">
+
+    </profile-form>
+
+</div>

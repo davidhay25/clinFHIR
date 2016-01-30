@@ -34,30 +34,57 @@
 
 <body style="padding: 8px">
 
-    <div ng-app="sampleApp" ng-controller="sampleCtrl">
+    <div ng-app="sampleApp" ng-controller="sampleCtrl" class="container-fluid">
 
         <uib-tabset>
 
 
             <uib-tab heading="Sample Patients">
                 <br />
-                <div class="row">
-                    <div class="col-md-2">
-                        <div style="height:700px; overflow-y: auto;" >
-                            <div ng-repeat = "entry in outcome.samplePatientsBundle.entry">
-                                <p style="cursor: pointer" ng-click="showPatient(entry.resource)" ng-bind-html="entry.resource.text.div"></p>
+
+
+                <div class="panel panel-default">
+
+                    <div class="panel-body"  style="background-color: #ffffdd;">
+
+                        <div class="row ">
+                            <div class="col-md-2">
+                                <select class="form-control" ng-model="input.patient" ng-change="showPatient(input.patient.resource)"
+                                        ng-options = "entry as entry.resource.name[0].text for entry in outcome.samplePatientsBundle.entry">
+                                    <option value="">-- choose patient --</option>
+
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <p  ng-bind-html="outcome.demographicsHtml"></p>
+                            </div>
+
+                            <div class="col-md-2">
+                                <a href="#" class="btn btn-link pull-right"  ng-show="global.state == 'new'"
+                                   ng-click="global.state = 'view'">View Resources</a>
+
+                                <a href="#" class="btn btn-link pull-right"  ng-show="global.state == 'view'"
+                                   ng-click="global.state = 'new'">New Resource</a>
                             </div>
                         </div>
                     </div>
+                </div>
+
+
+                <div ng-show = "global.state == 'new'" class="row">
+                    new
+
+                </div>
+
+                <div ng-show = "global.state == 'view'" class="row">
+
+
+
+
 
                     <div class="col-md-2">
+                        <h4>Resource Types</h4>
                         <div class="list-group">
-                            <!--
-                            <a href="#" class="list-group-item" ng-click="typeSelected(type,bundle)"
-                               ng-repeat="(type,bundle) in outcome.allResources ">
-                                {{type}}
-                            </a>
-                            -->
 
                             <a href="#" class="list-group-item" ng-click="typeSelected(type)"
                                ng-repeat="type in outcome.resourceTypes ">
@@ -65,15 +92,13 @@
                                 <span class="pull-right badge">{{type.bundle.total}}</span>
                             </a>
 
-
-
+                        </div>
+                        <div class="list-group">
                             <a ng-show="outcome.allResources" href="#" class="list-group-item" ng-click="getVitals()">Vitals</a>
-
-
                         </div>
                     </div>
 
-                    <div class="col-md-8">
+                    <div class="col-md-10">
 
 
                         <!-- The vitals table -->
@@ -99,68 +124,64 @@
 
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
 
-                                <h4>{{outcome.selectedType}}</h4>
+                                <h4>{{outcome.selectedType}} resources</h4>
                                 <div class="list-group">
                                     <a href="#" class="list-group-item"
                                        ng-repeat="entry in outcome.allResourcesOfOneType.entry">
-
-
                                         <div style="cursor: pointer" ng-click="resourceSelected(entry)">
-                                            <div class="row" ng-show="entry.resource.resourceType == 'Observation'">
-                                                <div class="col-md-5">
-                                                    <div>{{entry.resource.effectiveDateTime | date : 'yyyy-MM-dd'}}</div>
-                                                    <div>{{entry.resource.effectiveDateTime | getAge}}</div>
-                                                </div>
-                                                <div class="col-md-7">
-                                                    <p  ng-bind-html="entry.resource.text.div"></p>
-                                                </div>
-
-                                            </div>
-
-                                            <div class="row" ng-show="entry.resource.resourceType == 'Appointment'">
-                                                <div class="col-md-5">
-                                                    <div>{{entry.resource.start | date : 'yyyy-MM-dd hh:mm'}}</div>
-                                                    <div>{{entry.resource.minutesDuration}} minutes</div>
-                                                </div>
-                                                <div class="col-md-7">
-                                                    <p ng-bind-html="entry.resource.text.div"></p>
-                                                </div>
-                                            </div>
-
-                                            <div class="row" ng-show="entry.resource.resourceType == 'Encounter'">
-                                                <div class="col-md-5">
-                                                    <div>{{entry.resource.period.start | date : 'yyyy-MM-dd hh:mm'}}</div>
-                                                    <div>{{entry.resource.period.start | getAge}} </div>
-                                                </div>
-                                                <div class="col-md-7">
-                                                    <p ng-bind-html="entry.resource.text.div"></p>
-                                                </div>
-                                            </div>
-
-                                            <div class="row" ng-show="entry.resource.resourceType == 'Condition'">
-                                                <div class="col-md-5">
-
-                                                </div>
-                                                <div class="col-md-7">
-                                                    <p ng-bind-html="entry.resource.text.div"></p>
-                                                </div>
-                                            </div>
-
-
-
+                                            <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
                                         </div>
-
-
-
-
                                     </a>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-8">
 
                                 <div ng-show="outcome.selectedResource">
+
+
+
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h4>{{outcome.selectedResource.resourceType}}/{{outcome.selectedResource.id}}</h4>
+                                            <pre>{{outcome.selectedResource | json:2}}</pre>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <h4>Outward references</h4>
+
+                                            <div class="list-group">
+                                                <a href="#"class="list-group-item"
+                                                    ng-repeat="reference in resourceReferences.outwardLinks"
+                                                    ng-click="selectNewResource(reference,$event)">
+
+                                                    <div>{{reference.element}} ==> {{reference.reference}}</div>
+                                                    <div><p ng-bind-html="reference.resource.text.div"></p></div>
+
+                                                </a>
+                                            </div>
+
+                                            <h4>Inward references</h4>
+
+                                            <div class="list-group">
+                                                <a href="#" class="list-group-item"
+                                                   ng-repeat="reference in resourceReferences.inwardLinks"
+                                                    ng-click="selectNewResource(reference,$event)">
+
+                                                    <div>{{reference.resource.resourceType}}/{{reference.resource.id}}.
+                                                        {{reference.name}}</div>
+                                                    <div><p ng-bind-html="reference.resource.text.div"></p></div>
+
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+<!--
+
+
                                     <uib-tabset>
                                         <uib-tab heading="Json">
                                             <pre>{{outcome.selectedResource | json:2}}</pre>
@@ -170,27 +191,38 @@
                                             <h4>Outward references</h4>
 
                                             <div class="list-group">
-                                                <a href="#" class="list-group-item"
+                                                <div  class="list-group-item"
                                                    ng-repeat="reference in resourceReferences.outwardLinks">
+                                                    <div class="pull-right">
+                                                        <a href="#" ng-click="selectNewResource(reference,$event)">
+                                                            <i class="glyphicon glyphicon-arrow-right"></i> </a>
+                                                    </div>
                                                     <div>{{reference.element}} ==> {{reference.reference}}</div>
                                                     <div><p ng-bind-html="reference.resource.text.div"></p></div>
-                                                </a>
+
+                                                </div>
                                             </div>
 
                                             <h4>Inward references</h4>
 
                                             <div class="list-group">
-                                                <a href="#" class="list-group-item"
+                                                <div  class="list-group-item"
                                                    ng-repeat="reference in resourceReferences.inwardLinks">
+                                                    <div class="pull-right">
+                                                        <a href="#" ng-click="selectNewResource(reference,$event)">
+                                                            <i class="glyphicon glyphicon-arrow-right"></i> </a>
+                                                    </div>
                                                     <div>{{reference.resource.resourceType}}/{{reference.resource.id}}.
                                                         {{reference.name}}</div>
                                                     <div><p ng-bind-html="reference.resource.text.div"></p></div>
 
-                                                </a>
+                                                </div>
                                             </div>
 
                                         </uib-tab>
                                     </uib-tabset>
+
+                                -->
                                 </div>
 
                             </div>
@@ -204,6 +236,12 @@
 
 
                 </div>
+
+
+
+
+
+
 
             </uib-tab>
 

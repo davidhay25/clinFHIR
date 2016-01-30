@@ -3,9 +3,9 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
     //options for building the samples that will come from a UI
     var buildConfig = {};
-    buildConfig.encounterObservation = .5;     //chance that a group of observations will reference an encounter
+    buildConfig.encounterObservation = .5;      //chance that a group of observations will reference an encounter
     buildConfig.createProblemList = 'yes';      // yes | no | empty
-
+    buildConfig.problemListLength = 3;          //size of the problemlist
 
 
     var identifierSystem ='http://fhir.hl7.org.nz/identifier';
@@ -83,9 +83,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
 
         },
-
-
-
         createObservations : function(patientId,options) {
             var bundle = {resourceType:'Bundle',type:'transaction',entry:[]};
 
@@ -129,11 +126,11 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
 
         },
-
         createConditions : function (id,options) {
            // console.log(referenceResources);
             //create a set of encounters for the patient and add them to the referenceResources (just for this session)
             var deferred = $q.defer();
+            var that = this;
             options = options || {}
             options.count = options.count || 5;     //number to reate
             options.period = options.period || 30;  //what period of time the enounters should be over
@@ -142,8 +139,8 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             for (var i = 0; i < options.count; i++) {
                 var cond = {resourceType: 'Condition', status: 'finished'};
                 cond.patient = {reference:'Patient/'+id};
-                cond.verificationStatus = this.getReadomEntryFromOptions('conditionVerificationStatus');
-                cond.code = this.getReadomEntryFromOptions('conditionCode');
+                cond.verificationStatus = this.getRandomEntryFromOptions('conditionVerificationStatus');
+                cond.code = this.getRandomEntryFromOptions('conditionCode');
                 var encounter = this.getRandomReferenceResource('Encounter');   //there may not be an encounter (if they aren't being created)
                 if (encounter) {
                     cond.encounter = {reference: "Encounter/"+ encounter.id};
@@ -155,7 +152,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                 bundle.entry.push({resource:cond,request: {method:'POST',url: 'Condition'}});
             }
 
-            this.postBundle(bundle).then(
+            this.postBundle(bundle,referenceResources).then(
                 function(data){
                     //now add the the referenceResources array in memory so that they can be used by other resources.
                     data.data.entry.forEach(function(entry){
@@ -169,10 +166,30 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
                     //now to see if a problem list shuld be created
                     switch (buildConfig.createProblemList) {
-
+                        case 'yes' :
+                            that.buildProblemList(id).then(
+                                function(){
+                                    if (options.logFn) {
+                                        options.logFn('Added ProblemList')
+                                    }
+                                },
+                                function() {
+                                    if (options.logFn) {
+                                        options.logFn('Error creating ProblemList- not saved')
+                                    }
+                                }
+                            ).finally(function(){
+                                //don't need to do anything different based on the outcome of the operation
+                                console.log('finally')
+                                deferred.resolve();
+                            });
+                            break;
+                        default :
+                            deferred.resolve();
+                            break;
                     }
 
-                    deferred.resolve()
+
                 },
                 function(err) {
                     deferred.reject("Error saving Conditions")
@@ -180,6 +197,40 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             );
             return deferred.promise;
 
+        },
+        buildProblemList : function(id,empty) {
+            //make a problem list from the conditions
+            var deferred = $q.defer();
+            var today = moment().format();
+            var problemList = {resourceType : 'List',title:'Problem List', entry:[], date : today,
+                subject : {reference:'Patient/'+id},
+                code : {coding : [{code:'problems',system:'http://hl7.org/fhir/list-example-use-codes'}]}};
+
+
+            var encounter = this.getRandomReferenceResource('Encounter');   //there may not be an encounter (if they aren't being created)
+            if (encounter) {
+                problemList.encounter = {reference: "Encounter/"+ encounter.id};
+            }
+
+            //now add the conditions to the list
+            for (var i=0; i < buildConfig.problemListLength; i++) {
+                var condition = this.getRandomReferenceResource('Condition');
+                var entry = {date: today, item : {reference : 'Condition/'+condition.id}}
+                problemList.entry.push(entry);
+            }
+            // ... and save
+            var url = serverBase+ "List";
+            $http.post(url,problemList).then(
+                function (data) {
+                    deferred.resolve();
+                },
+                function(err){
+                    alert('Error saving problem list:\n'+angular.toJson(err))
+                    deferred.reject(err)
+                }
+            );
+
+            return deferred.promise;
 
 
         },
@@ -195,8 +246,8 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                 var enc = {resourceType:'Encounter',status:'finished'};
                 enc.patient = {reference:'Patient/'+id};
                 enc.reason = [];
-                enc.reason.push(this.getReadomEntryFromOptions('encounterReason'));
-                enc.type = [(this.getReadomEntryFromOptions('encounterType'))];
+                enc.reason.push(this.getRandomEntryFromOptions('encounterReason'));
+                enc.type = [(this.getRandomEntryFromOptions('encounterType'))];
                 //var da = moment().subtract(parseInt(options.period * Math.random()),'days');
                 enc.period = {start:moment().subtract(parseInt(options.period * Math.random()),'days')};
                 var practitioner = this.getRandomReferenceResource('Practitioner');
@@ -205,7 +256,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
 
                 bundle.entry.push({resource:enc,request: {method:'POST',url: 'Encounter'}});
-                console.log(enc)
+                //console.log(enc)
             }
 
             this.postBundle(bundle,referenceResources).then(
@@ -235,7 +286,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             return deferred.promise;
 
         },
-        getReadomEntryFromOptions : function(key){
+        getRandomEntryFromOptions : function(key){
             //return a random edtry from the options onject. The caller must know what the type of subjct object will be...
             var lst = options[key];
             if (lst) {
@@ -402,6 +453,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             resources.push({type:'Encounter',patientReference:'patient'});
             resources.push({type:'Appointment',patientReference:'patient'});
             resources.push({type:'Condition',patientReference:'patient'});
+            resources.push({type:'List',patientReference:'subject'});
 
             var arQuery = [];
             var allResources = {};
@@ -489,7 +541,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
                     if (referenceResources) {
                         data.data.entry.forEach(function (entry, index) {
-                            console.log(entry)
+                            //console.log(entry)
                             var location = entry.response.location;
                             var ar = location.split('/');
                             var id = ar[1];
@@ -497,7 +549,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                             resource.id = id;
                             referenceResources.push(resource)
 
-                            console.log(resource)
+                            //console.log(resource)
 
 
                         });

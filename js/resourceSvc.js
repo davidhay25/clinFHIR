@@ -9,7 +9,7 @@ angular.module("sampleApp").service('resourceSvc', function() {
         var checkLinks = function(list,object,rootPath) {
             angular.forEach(object,function(value,key){
 
-                console.log(rootPath)
+                //console.log(rootPath)
 
                 if (value && value.reference) {
                     //console.log('->reference',value.reference)
