@@ -1,0 +1,10 @@
+{
+  "encounterReason" : [
+      {"text":"sore throat"},
+      {"text":"headache"}
+    ],
+  "encounterType" : [
+    {"text": "GP"},
+    {"text": "OutPatient"}
+  ]
+}

@@ -24,6 +24,14 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
     $scope.input.observations.push({code:'3141-9',display:'Weight',max:90,min:70,unit:'Kg',round:10});
 
 
+    //check that the reference resources need for creating sample resources exist - creating them if not...
+    supportSvc.checkReferenceResources().then(
+        function(){
+            $scope.input.referenceResourcesAvailable = true;
+            //console.log(supportSvc.getRandomnReferenceResource('Practitioner'));
+        }
+    );
+
     $scope.showPatient = function(patient) {
         console.log(patient);
     };
@@ -45,7 +53,17 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
             if (id) {
 
                 createObservations(id);
-                createAppointments(id)
+                createAppointments(id);
+                supportSvc.createEncounters(id).then(
+                    function(msg) {
+                        addLog(msg)
+                        //at this point the new encounters are now in the referece array, so any resources that need to refer to an encounter can do so
+
+
+
+
+                    }
+                )
             }
         });
     };
@@ -88,8 +106,6 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
                     //now, add a column for each date...
                     dates.forEach(function(date){
                         item = grid[date];
-                    //angular.forEach(grid,function(item,date){
-                        console.log(item,date)
                         var v = '';
                         if (item[code.code]) {      //is there a value for this code on this date
                             v = item[code.code].valueQuantity.value;
