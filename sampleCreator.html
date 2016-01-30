@@ -10,7 +10,11 @@
     <script src="js/libs/angular-sanitize.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngSanitize']); //'ngOrderObjectBy',,'ngTable'
+        angular.module("sampleApp",['ui.bootstrap','ngSanitize']).run(function($http){
+          //  $http.defaults.headers.post.prefer = 'return=representation'
+        })
+
+
     </script>
 
     <script src="js/services.js"></script>
@@ -116,6 +120,15 @@
                                                 <div class="col-md-5">
                                                     <div>{{entry.resource.period.start | date : 'yyyy-MM-dd hh:mm'}}</div>
                                                     <div>{{entry.resource.period.start | getAge}} </div>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <p ng-bind-html="entry.resource.text.div"></p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row" ng-show="entry.resource.resourceType == 'Condition'">
+                                                <div class="col-md-5">
+
                                                 </div>
                                                 <div class="col-md-7">
                                                     <p ng-bind-html="entry.resource.text.div"></p>

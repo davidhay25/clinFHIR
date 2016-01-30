@@ -1,5 +1,9 @@
 angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
+
+    var chanceConfig = {};
+    chanceConfig.encounterObservation = .5;     //chance that a group of observations will reference an encounter
+
     var identifierSystem ='http://fhir.hl7.org.nz/identifier';
     var serverBase;
     var observations=[];    //used for generating sample data plus vitals...
@@ -19,8 +23,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
     );
 
 
-    var encounters = [];
-    encounters.push({age:12,reason : {display:'Sore Throat'}})
 
     //resources that are used as reference targets by other resources...
     var referenceResources = [];
@@ -28,8 +30,147 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
         identifier : {value:'jd',system:identifierSystem}});
     referenceResources.push({resourceType:'Practitioner',name:{text:'Dr Annette Jones'},
         identifier : {value:'aj',system:identifierSystem}});
+    referenceResources.push({resourceType:'Organization',name:'clinFHIR Sample creator',
+        identifier : {value:'cf',system:identifierSystem}});
 
     return {
+
+        createAppointments : function(patientId,options) {
+            var bundle = {resourceType: 'Bundle', type: 'transaction', entry: []};
+            var data = [
+                {status:'pending',type:{text:'Cardiology'},description:'Investigate Angina',who:{text:'Clarence cardiology clinic'},delay:4},
+                {status:'pending',type:{text:'GP Visit'},description:'Routine checkup',who:{text:'Dr Dave'},delay:7}
+            ];
+
+            var cnt = data.length;
+
+            data.forEach(function(item){
+                var appt = {resourceType:'Appointment',status:item.status};
+                appt.type = {text : item.type.text};
+                appt.description = item.description;
+                appt.start = moment().add('days',item.delay).format();
+                appt.end = moment().add('days',item.delay).add('minutes',15).format();
+                appt.minutesDuration = 15;
+
+                appt.participant = [{actor:{display:item.who.text},status:'accepted'}];    //the perfromed
+                var txt ="<div><div>"+item.description + "</div><div>"+item.who.text+"</div></div>"
+                appt.text = {status:'generated',div:txt}
+
+                //the patient is modelled as a participant
+                appt.participant.push({actor:{reference:'Patient/'+patientId},status:'accepted'});
+                bundle.entry.push({resource:appt,request: {method:'POST',url: 'Appointment'}});
+
+
+            });
+
+
+            this.postBundle(bundle).then(
+                function(data){
+                    if (options.logFn) {
+                        options.logFn('Added '+cnt +' Appointments')
+                    }
+
+                }
+            )
+
+
+
+
+        },
+
+
+
+        createObservations : function(patientId,options) {
+            var bundle = {resourceType:'Bundle',type:'transaction',entry:[]};
+
+            var cnt = 0;
+            for (var i=0; i < 3; i++) {
+                var date = moment().subtract(i,'weeks');
+
+
+                //decide if this set of observations will be linked to an encounter...
+                var encounter = this.getRandomReferenceResource('Encounter',chanceConfig.encounterObservation);    //half the time it will be null
+
+                observations.forEach(function(item) {
+
+                    var value = item.min + (item.max - item.min) * Math.random();   //to be improved...
+                    value = Math.round(value * item.round) / item.round;
+
+
+                    var obs = {resourceType:'Observation',status:'final'};
+                    obs.valueQuantity = {value:value,unit:item.unit};
+                    obs.effectiveDateTime = date.format();
+                    obs.code = {'text':item.display,coding:[{system:'http://loinc.org',code:item.code}]};
+                    obs.subject = {reference:'Patient/'+patientId};
+                    if (encounter) {
+                        obs.encounter = {reference:'Encounter/'+encounter.id}
+                    }
+
+                    //obs.text = {status:'generated',div:item.display + ", "+ value + " "+ item.unit + " "+ obs.effectiveDateTime}
+                    obs.text = {status:'generated',div:item.display + ", "+ value + " "+ item.unit };
+                    bundle.entry.push({resource:obs,request: {method:'POST',url: 'Observation'}});
+                    cnt ++;
+                })
+            }
+
+            this.postBundle(bundle).then(
+                function(data){
+                    if (options && options.logFn)
+                        options.logFn('Added '+cnt +' Observations')
+                }
+            );      //don't care about the response
+
+
+
+        },
+
+        createConditions : function (id,options) {
+           // console.log(referenceResources);
+            //create a set of encounters for the patient and add them to the referenceResources (just for this session)
+            var deferred = $q.defer();
+            options = options || {}
+            options.count = options.count || 5;     //number to reate
+            options.period = options.period || 30;  //what period of time the enounters should be over
+            var bundle = {resourceType: 'Bundle', type: 'transaction', entry: []};
+
+            for (var i = 0; i < options.count; i++) {
+                var cond = {resourceType: 'Condition', status: 'finished'};
+                cond.patient = {reference:'Patient/'+id};
+                cond.verificationStatus = this.getReadomEntryFromOptions('conditionVerificationStatus');
+                cond.code = this.getReadomEntryFromOptions('conditionCode');
+                var encounter = this.getRandomReferenceResource('Encounter');   //there may not be an encounter (if they aren't being created)
+                if (encounter) {
+                    cond.encounter = {reference: "Encounter/"+ encounter.id};
+                }
+                var practitioner = this.getRandomReferenceResource('Practitioner');     //there will always be a practitioner
+                cond.asserter = {reference: "Practitioner/"+ practitioner.id};
+
+                cond.text = {status:'generated',div:cond.code.text};
+                bundle.entry.push({resource:cond,request: {method:'POST',url: 'Condition'}});
+            }
+
+            this.postBundle(bundle).then(
+                function(data){
+                    //now add the the referenceResources array in memory so that they can be used by other resources.
+                    data.data.entry.forEach(function(entry){
+                        console.log(entry)
+                       // referenceResources.push(entry.resource)
+                    });
+
+                    if (options.logFn) {
+                        options.logFn('Added ' + options.count + ' Conditions')
+                    }
+                    deferred.resolve()
+                },
+                function(err) {
+                    deferred.reject("Error saving Conditions")
+                }
+            );
+            return deferred.promise;
+
+
+
+        },
         createEncounters : function (id,options) {
             //create a set of encounters for the patient and add them to the referenceResources (just for this session)
             var deferred = $q.defer();
@@ -55,12 +196,22 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                 console.log(enc)
             }
 
-            this.postBundle(bundle).then(
+            this.postBundle(bundle,referenceResources).then(
                 function(data){
                     //now add the the referenceResources array in memory so that they can be used by other resources.
-                    data.data.entry.forEach(function(entry){
-                        referenceResources.push(entry.resource)
-                    });
+                   /* data.data.entry.forEach(function(entry,index){
+                        console.log(entry)
+                        var location = entry.response.location;
+                        var ar = location.split('/');
+                        var id = ar[1];
+                        var resource = bundle.entry[index].resource;
+                        resource.id = id;
+                        referenceResources.push(resource)
+
+                        console.log(resource)
+
+
+                    }); */
 
 
                     deferred.resolve('Added ' + options.count + ' Encounters')
@@ -68,7 +219,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                 function(err) {
                     deferred.reject("Error saving Encounters")
                 }
-            )
+            );
             return deferred.promise;
 
         },
@@ -81,10 +232,19 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                 return {};
             }
         },
-        getRandomReferenceResource : function(type) {
-            //get a reference resource of some type at random. First assemble the list of possiilities..
-            var lst = []
+        getRandomReferenceResource : function(type,probabliliyOfNull) {
+            //get a reference resource of some type at random.
+
+            //First - can the response be empty?
+            if (probabliliyOfNull) {
+                if (Math.random() < probabliliyOfNull) {
+                    return;
+                }
+            }
+            // Next assemble the list of possiilities..
+            var lst = [];
             referenceResources.forEach(function(res){
+               // console.log(res);
                 if (res.resourceType == type) {
                     lst.push(res)
                 }
@@ -109,7 +269,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             $q.all(arQuery).then(
                 function(data){
                     console.log(referenceResources);
-                    deferred.resolve();
+                    deferred.resolve(referenceResources);
                 },
                 function(err){
                     alert("error checking reference data:\n\n"+ angular.toJson(err));
@@ -229,6 +389,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             resources.push({type:'Observation',patientReference:'subject'});
             resources.push({type:'Encounter',patientReference:'patient'});
             resources.push({type:'Appointment',patientReference:'patient'});
+            resources.push({type:'Condition',patientReference:'patient'});
 
             var arQuery = [];
             var allResources = {};
@@ -303,11 +464,34 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
         setServerBase : function(sb) {
             serverBase = sb;
         },
-        postBundle : function(bundle) {
+        postBundle : function(bundle,referenceResources) {
+            //sent the bundle to the server. If referenceResources is supplied, then add the resources to that list (with id)
             var deferred = $q.defer();
+
+           // var config = {headers: {Prefer:'return=representation'}};    //to return the resource in the bundle
+            //Prefer: return=representation
 
             $http.post(serverBase,bundle).then(
                 function(data) {
+
+
+                    if (referenceResources) {
+                        data.data.entry.forEach(function (entry, index) {
+                            console.log(entry)
+                            var location = entry.response.location;
+                            var ar = location.split('/');
+                            var id = ar[1];
+                            var resource = bundle.entry[index].resource;
+                            resource.id = id;
+                            referenceResources.push(resource)
+
+                            console.log(resource)
+
+
+                        });
+                    }
+
+
                     deferred.resolve(data)
 
                 },

@@ -3,7 +3,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
     $scope.input = {observations:[]};
     $scope.outcome = {};
 
-    var organizationId = 5;
+
 
     $scope.input.serverBase = "http://localhost:8080/baseDstu2/";
 
@@ -16,17 +16,31 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
 
     //$scope.input.dob = format('YYYY-MM-DD');
 
-
+/*
     $scope.input.observations.push({code:'8310-5',display:'Body Temperature',min:36, max:39,unit:'C',round:10});
     $scope.input.observations.push({code:'8867-4',display:'Heart Rate',min:70,max:90,unit:'bpm',round:1});
     $scope.input.observations.push({code:'9279-1',display:'Respiratory Rate',min:25,max:35,unit:'resp/min',round:1});
     $scope.input.observations.push({code:'8302-2',display:'Height',max:90,min:90,unit:'cm',round:10});
     $scope.input.observations.push({code:'3141-9',display:'Weight',max:90,min:70,unit:'Kg',round:10});
 
-
+*/
+    var cfOrganization = null;
     //check that the reference resources need for creating sample resources exist - creating them if not...
     supportSvc.checkReferenceResources().then(
-        function(){
+        function(referenceResources){
+
+            //find the Organization resource that refers to the authoring tool (how we know whch patients were created by it)
+            referenceResources.forEach(function(res){
+                if (res.identifier && res.identifier.value == 'cf') {
+                    cfOrganization = res;
+                    loadSamplePatients();         //initial list of patients loaded through sample
+                }
+            });
+
+            if (!cfOrganization) {
+                alert("There was an error finding the clinFHIR Organization resource")
+            }
+
             $scope.input.referenceResourcesAvailable = true;
             //console.log(supportSvc.getRandomnReferenceResource('Practitioner'));
         }
@@ -52,14 +66,16 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
         createPatient(function(err,id){
             if (id) {
 
-                createObservations(id);
-                createAppointments(id);
+
+                //createAppointments(id);
+                supportSvc.createAppointments(id,{logFn:addLog});
                 supportSvc.createEncounters(id).then(
                     function(msg) {
                         addLog(msg)
                         //at this point the new encounters are now in the referece array, so any resources that need to refer to an encounter can do so
 
-
+                        supportSvc.createConditions(id,{logFn:addLog});
+                        supportSvc.createObservations(id,{logFn:addLog});
 
 
                     }
@@ -138,7 +154,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
         patient.name = [{use:'official',family:[$scope.input.lname],given:[$scope.input.fname],text:nameText}];
         patient.gender = $scope.input.gender;
         patient.birthDate= moment($scope.input.dob).format('YYYY-MM-DD');
-        patient.managingOrganization = {display : 'sampleBuilder',reference : "Organization/"+organizationId};      //<<<< todo make a real org... - check at startus
+        patient.managingOrganization = {display : 'sampleBuilder',reference : "Organization/"+cfOrganization.id};      //<<<< todo make a real org... - check at startus
 
         patient.text = {status:'generated',div:nameText};
         var uri = $scope.input.serverBase + "Patient";
@@ -167,7 +183,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
 
     };
 
-    var createAppointments = function(patientId) {
+    var createAppointmentsDEP = function(patientId) {
         var bundle = {resourceType: 'Bundle', type: 'transaction', entry: []};
         var data = [
             {status:'pending',type:{text:'Cardiology'},description:'Investigate Angina',who:{text:'Clarence cardiology clinic'},delay:4},
@@ -208,7 +224,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
     };
 
 
-    var createObservations = function(patientId,cb) {
+    var createObservationsDEP = function(patientId,cb) {
         var bundle = {resourceType:'Bundle',type:'transaction',entry:[]};
 
 
@@ -248,7 +264,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
 
     var loadSamplePatients = function() {
 
-        supportSvc.loadSamplePatients({organizationId:organizationId}).then(
+        supportSvc.loadSamplePatients({organizationId:cfOrganization.id}).then(
             function(data){
                 $scope.outcome.samplePatientsBundle = data.data
             },
@@ -272,7 +288,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
         )
     };
 
-    loadSamplePatients();         //initial list of patients loaded through sample
+
 
 
 });

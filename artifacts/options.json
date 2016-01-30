@@ -6,5 +6,12 @@
   "encounterType" : [
     {"text": "GP"},
     {"text": "OutPatient"}
+  ],
+  "conditionVerificationStatus" : [
+    "provisional","differential","confirmed"
+  ],
+  "conditionCode" : [
+    {"text": "Asthma"},
+    {"text": "Diabetes"}
   ]
 }
