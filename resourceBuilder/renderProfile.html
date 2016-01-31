@@ -42,8 +42,6 @@
                        class="glyphicon glyphicon-exclamation-sign"></span>
                 </div>
 
-
-
             </div>
 
 
@@ -95,11 +93,6 @@
                                 </span>
 
 
-                                <!--
-                                <span ng-hide="t.code == 'Element'">
-                                    {{t.code=='Reference'?'==>':t.code}}
-                                </span>
--->
                                 <span ng-show="t.profile">
                                     <!--{{t.profile}}-->
                                     {{t.profile | referenceType}}
@@ -116,105 +109,14 @@
 
 
 
-            <!--
-            <input type="checkbox" ng-model="results.showAllProperties" ng-click="showAllProperties()"/> Show All Properties
-            -->
+
         </div>
-        <!--  <div class="col-md-6 col-sm-6" style="border-left: 1px solid gainsboro "> -->
-        <div ng-class="{'col-md-8 col-sm-8':!chatInFullScreen,'col-md-12 col-sm-12':chatInFullScreen }"
-                class="col-md-8 col-sm-8" style="border-left: 1px solid gainsboro ">
-<!--
 
-            <div>
-                <h5>Selected item in tree</h5>
+        <!--         <div ng-class="{'col-md-8 col-sm-8':!chatInFullScreen,'col-md-12 col-sm-12':chatInFullScreen }"
 
-                <div class="row">
-                    <div class="col-md-6 col-sm-6">
-                        <div class="row textRow" >
-                            <div class="col-md-3 col-sm-3"><strong>Index</strong></div>
-                            <div class="col-md-9 col-sm-9"><div>{{currentTreeIndex}}</div></div>
-                        </div>
-                        <div class="row textRow" >
-                            <div class="col-md-3 col-sm-3"><strong>Path</strong></div>
-                            <div class="col-md-9 col-sm-9"><div>{{currentTreeElement.path}}</div></div>
-                        </div>
-                        <div class="row textRow" >
-                            <div class="col-md-3 col-sm-3"><strong>Short</strong></div>
-                            <div class="col-md-9 col-sm-9"><div>{{currentTreeElement.short}}</div></div>
-                        </div>
-                        <div class="row textRow" >
-                            <div class="col-md-3 col-sm-3"><strong>Definition</strong></div>
-                            <div class="col-md-9 col-sm-9"><div>{{currentTreeElement.definition}}</div></div>
-                        </div>
-                        <div class="row textRow" >
-                            <div class="col-md-3 col-sm-3"><strong>Multiplicity</strong></div>
-                            <div class="col-md-9 col-sm-9">{{currentTreeElement.min}}..{{currentTreeElement.max}}</div>
-                        </div>
-                        <div class="row textRow" >
-                            <div class="col-md-3 col-sm-3">
-                                <strong>Datatype<span ng-show="currentTreeElement.type.length >1">s</span></strong></div>
-                            <div class="col-md-9 col-sm-9">
-                                <div ng-repeat="t in currentTreeElement.type">
-                                    <a href="#">{{t.code}} {{t.profile | referenceType}}</a>
-                                </div>
-                            </div>
-                        </div>
+                class="col-md-8 col-sm-8" style="border-left: 1px solid gainsboro ">-->
 
-
-                    </div>
-
-
-
-                    <div class="col-md-6 col-sm-6">
-                        <uib-tabset>
-                            <uib-tab heading="Current Value">
-                                <pre>{{currentTreeElement.newValue.v | json}}</pre>
-                            </uib-tab>
-                            <uib-tab heading="Definition">
-                                <pre>{{currentTreeElement | json}}</pre>
-                            </uib-tab>
-
-                            <uib-tab heading="Internal">
-                                <pre>{{currentTreeElement.newValue | json}}</pre>
-                            </uib-tab>
-                            <uib-tab heading="Resource">
-                                <pre>{{newResource | json}}</pre>
-                            </uib-tab>
-                        </uib-tabset>
-
-
-
-                    </div>
-                </div>
-
-
-
-
-                <div>
-                    <button class="btn btn-default pull-right" ng-show="currentTreeElement.max=='*'"
-                            ng-click="insertNewBranch()">Copy Node</button>
-                </div>
-
-                <hr/>
-            </div>
-
-            -->
-
-            <!-- There can be only 1 copy of chat in the app processing the socket - otherwise weird stuff happens.
-            The resource builder does, and the profile builder doesn't-->
-           <!-- <div ng-show="showChat">
-
-                <div style="height:500px; overflow-y: auto;" >
-
-
-                    <chat project-name="chatProjectName" profile-name="profile.url"
-                          current-user="currentUser" enable-chat="listenSocket"
-                          toggle-full-screen="myToggleFullScreen"></chat>
-                </div>
-                <hr />
-            </div>
-
--->
+        <div class="col-md-8 col-sm-8" style="border-left: 1px solid gainsboro ">
 
             <div ng-show="currentlySelectedRoot.path">
 
@@ -223,7 +125,7 @@
                         <strong>Current Element: </strong> {{currentElement.path}} Parent: {{currentlySelectedRoot.path}}
 
                     </div>
-                    <div class="col-md-4 col-sm-4">
+                    <div class="col-md-3 col-sm-3">
 
                         <div ng-show="currentlySelectedRoot.max=='*' && currentlySelectedRoot.value.length > -1">
                             <div class="pull-right">
@@ -241,6 +143,15 @@
                         </div>
 
                     </div>
+
+
+                    <div class="col-md-1 col-sm-1">
+                        <div ng-show="showWaiting">
+                            <img src="css/ajax_loader_blue_32.gif" style="max-height: 20px"/>
+                        </div>
+                    </div>
+
+
                 </div>
                 <hr/>
             </div>
@@ -284,11 +195,6 @@
                 </div>
                 <br />
 
-
-                <div ng-show="showWaiting">
-                    <br />
-                    <div class="alert alert-warning">Looking up server, please wait...</div>
-                </div>
 
 
                 <div>

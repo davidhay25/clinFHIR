@@ -1,4 +1,5 @@
 angular.module("sampleApp").controller('rbFrameCtrl', function ( $scope,$http) {
+    //controller for the rbFrame page that holds the resource builder - renderProfile.js
 
     var serverBase = "http://fhir.hl7.org.nz/dstu2/"
 
@@ -11,11 +12,12 @@ angular.module("sampleApp").controller('rbFrameCtrl', function ( $scope,$http) {
     };
 
 
-    var url = serverBase + "StructureDefinition/Basic";
+
+    var url = serverBase + "StructureDefinition/Condition";
     $http.get(url).then(
         function(data) {
             $scope.dynamic.profile = angular.copy(data.data);
-            console.log(data.data)
+           // console.log(data.data)
         },
         function(err) {
             console.log(err);

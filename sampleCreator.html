@@ -27,6 +27,8 @@
 
     <script src="resourceBuilder/rbFrameCtrl.js"></script>
     <script src="resourceBuilder/renderProfile.js"></script>
+    <script src="resourceBuilder/vsBrowser.js"></script>
+
     <script src="js/libs/ngStorage.min.js"></script>
 
 
@@ -40,7 +42,6 @@
     <div ng-app="sampleApp" ng-controller="sampleCtrl" class="container-fluid">
 
         <uib-tabset>
-
 
             <uib-tab heading="Sample Patients">
                 <br />
@@ -79,10 +80,11 @@
                     <div ng-controller="rbFrameCtrl">
 
 
+                        <!-- This is the profile for the resource builder. It will show andmanage the whole UI-->
                         <profile-form profile="dynamic.profile" allresources="dynamic.allresources"
-                                      parkresource="dynamic.parkResource" patient="currentPatient"
+                                      parkresource="dynamic.parkResource" patient="dynamic.currentPatient"
                                       loadalldata="dynamic.loadAllData(id)" updated = "dynamic.updated"
-                                      resourcetypes="dynamic.resourcetypes" show-chat="false"
+                                      resourcetypes="dynamic.resourcetypes"
                                       current-user="dynamic.currentUser"
                                       select-profile="dynamic.selectProfile">
 

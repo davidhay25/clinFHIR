@@ -1,0 +1,305 @@
+
+<div>
+    <!--<div ng-controller="newResourceCtrl">-->
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h3 class="modal-title">Display ValueSet: {{selectedvs.id}}</h3>
+
+            </div>
+            <div class="col-md-4">
+                <div class="pull-right">
+                    <button class="btn btn-warning" ng-click="close()">Close</button>
+                    <button ng-show="showVSSelectButton" class="btn btn-primary" ng-click="selectNewVS()">Select</button>
+
+
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+        <div ng-show="showWaiting">
+            <div class="alert alert-warning" role="alert">Searching server, please wait...</div>
+        </div>
+
+        <tabset>
+
+            <tab ng-show="$parent.tabCtrl.showsearch"   heading = "Search">
+                <div > <!--ng-show = "tab.tabSearch" -->
+                    <br />
+                    <tabset>
+                        <tab heading="Search Parameters">
+
+                            <br/>
+                            <form class="form-horizontal" role="form">
+
+                                <div>
+                                    <div class="form-group">
+                                        <div class="col-md-2 col-sm-2">Name</div>
+                                        <div class="col-md-1 col-sm-1">==</div>
+                                        <div class="col-md-3 col-sm-3"><input type="text" class="form-control" ng-model="searchParams.name"/> </div>
+                                        <div class="col-md-6 col-sm-6">The Name of the ValueSet</div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="form-group">
+                                        <div class="col-md-2 col-sm-2">Description</div>
+                                        <div class="col-md-1 col-sm-1">==</div>
+                                        <div class="col-md-3 col-sm-3"><input type="text" class="form-control" ng-model="searchParams.description"/> </div>
+                                        <div class="col-md-6 col-sm-6">The description text in the ValueSet</div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="form-group">
+                                        <div class="col-md-2 col-sm-2">Publisher</div>
+                                        <div class="col-md-1 col-sm-1">==</div>
+                                        <div class="col-md-3 col-sm-3"><input type="text" class="form-control" ng-model="searchParams.publisher"/> </div>
+                                        <div class="col-md-6 col-sm-6">The publisher of the ValueSet</div>
+                                    </div>
+                                </div>
+
+                            </form>
+
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3 col-md-offset-3">
+                                    <div ng-hide="showWaiting">
+                                        <button class="btn btn-primary pull-right" ng-click="searchForVS()">Search</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </tab>
+                        <tab active="tab.searchResults" heading="Results">
+
+                            <br/>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-4">
+                                    <!-- The result list-->
+                                    <div class="list-group">
+                                        <a href="#" class="list-group-item" ng-repeat="ent in selectedVS.entry"
+                                           ng-click="showVS($event,ent)" style="cursor: pointer">
+                                            <div><strong>{{ent.resource.id}}</strong></div>
+                                            {{ent.resource.name}}
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-8 col-sm-8">
+
+                                    <pre>{{selectedvsJSON}}</pre>
+                                </div>
+
+                            </div>
+                        </tab>
+                    </tabset>
+
+
+
+                </div>
+
+            </tab>
+
+            <tab heading="Description" active="tab.tabDescription" select="setHelpTopic('description')">
+                <br />
+                <div class="row">
+                    <div class="col-md-2">ID</div>
+                    <div class="col-md-10">{{selectedvs.id}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">url</div>
+                    <div class="col-md-10">{{selectedvs.url}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">version</div>
+                    <div class="col-md-10">{{selectedvs.version}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">Name</div>
+                    <div class="col-md-10">{{selectedvs.name}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">Publisher</div>
+                    <div class="col-md-10">{{selectedvs.publisher}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">Description</div>
+                    <div class="col-md-10">{{selectedvs.description}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">Status</div>
+                    <div class="col-md-10">{{selectedvs.status}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">Date</div>
+                    <div class="col-md-10">{{selectedvs.date}}</div>
+                </div>
+
+            </tab>
+
+            <tab  select="setHelpTopic('define')">
+                <tab-heading>Define <span ng-show="selectedvs.define">({{selectedvs.define.concept.length}})</span></tab-heading>
+                <br />
+
+
+                <table class="table table-bordered table-condensed">
+                    <tr><th>Code</th><th>Display</th><th>Definition</th></tr>
+                    <tr ng-repeat="concept in selectedvs.codeSystem.concept | orderBy : 'code'">
+                        <td>{{concept.code}}</td>
+                        <td>{{concept.display}}</td>
+                        <td>{{concept.definition}}</td>
+                    </tr>
+                </table>
+
+
+            </tab>
+            <tab heading="Compose"  select="setHelpTopic('compose')">
+                <br />
+                <tabset>
+                    <tab>
+                        <tab-heading>Includes </tab-heading>
+                        <br />
+                        <div ng-repeat = "include in  selectedvs.compose.include">
+                            <h4>{{include.system}}</h4>
+
+
+                            <div ng-show="include.filter" >
+                                <h5>Filters</h5>
+                                <table class="table table-bordered table-condensed">
+                                    <tr><th>Property</th><th>Operation</th><th>Value</th></tr>
+                                    <tr ng-repeat="filter in include.filter">
+                                        <td>{{filter.property}}</td>
+                                        <td>{{filter.op}}</td>
+                                        <td>{{filter.value}}</td>
+
+                                    </tr>
+                                </table>
+                            </div>
+
+
+                            <div ng-show="include.concept" >
+                                <h5>Concepts</h5>
+                                <table  class="table table-bordered table-condensed">
+                                    <tr><th>Code</th><th>Display</th></tr>
+                                    <tr ng-repeat="concept in include.concept">
+                                        <td>{{concept.code}}</td>
+                                        <td>{{concept.display}}</td>
+
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+
+                    </tab>
+
+
+                    <tab>
+                        <tab-heading>Excludes </tab-heading>
+                        <br />
+                        <div ng-repeat = "exclude in  selectedvs.compose.exclude">
+                            <h4>{{exclude.system}}</h4>
+
+
+                            <div ng-show="exclude.filter" >
+                                <h5>Filters</h5>
+                                <table class="table table-bordered table-condensed">
+                                    <tr><th>Property</th><th>Operation</th><th>Value</th></tr>
+                                    <tr ng-repeat="filter in exclude.filter">
+                                        <td>{{filter.property}}</td>
+                                        <td>{{filter.op}}</td>
+                                        <td>{{filter.value}}</td>
+
+                                    </tr>
+                                </table>
+                            </div>
+
+
+                            <div ng-show="exclude.concept" >
+                                <h5>Concepts</h5>
+                                <table  class="table table-bordered table-condensed">
+                                    <tr><th>Code</th><th>Display</th></tr>
+                                    <tr ng-repeat="concept in exclude.concept">
+                                        <td>{{concept.code}}</td>
+                                        <td>{{concept.display}}</td>
+
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+
+                    </tab>
+                    
+                    
+                </tabset>
+
+
+
+            </tab>
+            <tab heading="JSON"  select="setHelpTopic('json')">
+                <br />
+                <pre>{{selectedvsJSON}}</pre>
+            </tab>
+
+            <tab heading="Expand" disabled="tab.noexpand" select="setHelpTopic('expand')">
+                <br />
+                <div class="row">
+                    <div class="col-md-2">Filter</div>
+                    <div class="col-md-8"><input type="text" ng-model="results.filter" class="form-control"/> </div>
+                    <div class="col-md-2"><a href="#" class="btn btn-primary" ng-click="expand()">Expand</a> </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-offset-2 col-md-8">{{query}}</div>
+
+                </div>
+
+                <br />
+
+                <table ng-show="data.length > 0" class="table table-bordered table-condensed">
+                    <tr><th>Code</th><th>System</th><th>Display</th></tr>
+                    <tr ng-repeat="concept in data | orderBy : 'display'">
+
+                        <td>{{concept.code}}</td>
+                        <td>{{concept.system}}</td>
+                        <td>{{concept.display}}</td>
+                    </tr>
+                </table>
+
+
+
+            </tab>
+
+        </tabset>
+
+
+    </div>
+
+    <div class="modal-footer">
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="text-left">
+
+                    <div ng-show="helpTopic=='compose'">
+                        <p>Limitations</p>
+                        <em>Define</em> concepts are not recursive
+                    </div>
+                    <div ng-show="helpTopic=='expand'">
+                        <p>Use the terminology expansion function to explore the ValueSet. Use
+                        a filter to restrict the result set - there is a limit to the number of concepts
+                        that can be returned.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

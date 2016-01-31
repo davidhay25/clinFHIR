@@ -191,13 +191,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
             function(data){
                 $scope.outcome.samplePatientsBundle = data.data
                 $scope.outcome.patientsArray = []
-  /*
-                //create an array of patients for the UI - why should  have to do this?
-                data.data.entry.forEach(function(entry){
-                    $scope.outcome.patientsArray.push(entry.resource);
-                })
 
-*/
 
             },
             function(err){

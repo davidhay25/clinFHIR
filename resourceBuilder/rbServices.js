@@ -14,20 +14,35 @@ angular.module("sampleApp")
     service('SaveDataToServer', function($http,$q) {
     return {
         saveResource : function(resource) {
+            var deferred = $q.defer();
+            alert('saving:\n'+angular.toJson(resource));
+            deferred.resolve('')
 
+
+            return deferred.promise;
         },
         sendActivityObject : function(activity) {
 
         }
     }
 
-}).service('GetDataFromServer', function($http,$q,appConfig) {
+}).service('GetDataFromServer', function($http,$q,appConfig,Utilities) {
     return {
         getValueSet : function(ref,cb) {
+            var deferred = $q.defer();
+            Utilities.getValueSetIdFromRegistry(ref,function(resp){
+                if (resp) {
+                    deferred.resolve(resp.resource);
+                } else {
+                    alert('Unable to load ValueSet: '+ ref);
+                    deferred.reject();
+                }
 
+            });
+            return deferred.promise;
         },
         getProfile : function(profileName) {
-
+            alert('getProfile stub not implemented yet');
         },
         getExpandedValueSet : function(id) {
             //return an expanded valueset. Used by renderProfile Should only use for valuesets that aren't too large...
@@ -46,9 +61,40 @@ angular.module("sampleApp")
             return deferred.promise;
         },
         findResourceByUrl : function(type,profile,cb) {
-
+            alert('findResourceByUrl stub not implemented yet');
         },
-        getFilteredValueSet : function(vs,text){
+        getFilteredValueSet : function(name,filter){
+            //return a filtered selection from a valueset. Uses the $expand operation on grahames server...
+            var config = appConfig.config();
+            var qry = config.servers.terminology + "ValueSet/"+name+"/$expand?filter="+filter;
+
+
+
+            var deferred = $q.defer();
+            $http.get(qry)
+                .success(function(data) {
+                    deferred.resolve(data);
+                }).error(function(oo, statusCode) {
+
+                //an error expanding the valueset - save the error...
+                var myEvent = {type:'expandValueSet'};   //this is an audit event
+                myEvent.error = true;
+                myEvent.display = "Error expanding "+name+ " valueset";
+                //this is the query that the server will have used...
+                var currentSettings
+                var serverQuery = Utilities.getCurrentSettings().registryServer.server + "ValueSet/"+name;
+                myEvent.data = {url:serverQuery,outcome:oo};
+
+                myEvent.error = true;
+                SaveDataToServer.sendActivityObject(myEvent);
+
+
+                deferred.reject({error:Utilities.getOOText(oo),statusCode:statusCode});
+            });
+            return deferred.promise;
+
+
+
 
         }
     }
@@ -57,13 +103,51 @@ angular.module("sampleApp")
 }).service('Utilities', function($http,$q,$localStorage,appConfig) {
     return {
         validate : function(resource,cb) {
-
+            alert('validate stub not implemented yet');
         },
         profileQualityReport :function (profile) {
+            var issues = []
+            var lstCoded=['code','CodeableConcept','Coding'];
+            if (profile && profile.snapshot) {
+                profile.snapshot.element.forEach(function (element) {
+                    if (element.type) {
+                        element.type.forEach(function(type){
+
+                            if (lstCoded.indexOf(type.code) > -1){
+                                //this is a coded item
+
+                                if (element.binding && element.binding.valueSetReference &&
+                                    element.binding.valueSetReference.reference) {
+                                    //all is OK
+                                } else {
+                                    //missing a binding
+
+
+                                    if (element.binding && element.binding.valueSetUri) {
+                                        //for now, ignore it if there is a Uri...
+                                    } else {
+                                        issues.push({path:element.path, type:'missingbinding',
+                                            display :'There is no ValueSet bound to this path'})
+                                    }
+
+
+
+
+
+
+
+                                }
+                            }
+                        })
+                    }
+
+                });
+            }
+            return issues;
 
         },
         getUCUMUnits : function(unit) {
-
+            alert('getUcumUnits stub not implemented yet');
         },
         getValueSetIdFromRegistry : function(uri,cb) {
             //return the id of the ValueSet on the terminology server. For now, assume at the VS is on the terminology.
@@ -77,12 +161,12 @@ angular.module("sampleApp")
                     if (bundle && bundle.entry && bundle.entry.length > 0) {
 
                         if (bundle.entry.length >1) {
-                            alert('The registry '+currentRegistry+' has multiple ValueSets with a URL property (in the resource) of '+uri +". I'll use the first one, but you might want to contact the registry owner and let them know.");
+                            alert('The terminology server has multiple ValueSets with a URL property (in the resource) of '+uri +". I'll use the first one, but you might want to contact the registry owner and let them know.");
                         }
-
 
                         var id = bundle.entry[0].resource.id;   //the id of the velueset in the registry
                         var resp = {id: id,minLength:3}         //response object
+                        resp.resource = bundle.entry[0].resource;
 
                         //ValueSets with a small size that can be rendered in a set of radio buttons.
                         // lookup from a fixed lis of ValueSetst. has to be this way as we will subsequently (in renderProfile)
@@ -104,7 +188,7 @@ angular.module("sampleApp")
 
         },
         validateResourceAgainstProfile : function(resource,profile) {
-
+            alert('validateResourceAgainstProfle stub not implemented yet');
         },
         isVSaList : function(uri) {
             //Is this a small set
@@ -112,12 +196,11 @@ angular.module("sampleApp")
             vsLookup = [];
             vsLookup['condition-severity'] = {id:'valueset-condition-severity',minLength:1,type:'list'};
             vsLookup['condition-category'] = {id:'valueset-condition-category',type:'list'};
-            vsLookup['condition-code'] = {id:'valueset-condition-code',minLength:3};
-            vsLookup['manifestation-or-symptom'] = {id:'valueset-manifestation-or-symptom',minLength:3};
-            vsLookup['valueset-medication-code'] = {id:'valueset-medication-code',minLength:3};
+            //vsLookup['manifestation-or-symptom'] = {id:'valueset-manifestation-or-symptom',minLength:3};
+            //vsLookup['valueset-medication-code'] = {id:'valueset-medication-code',minLength:3};
 
-            vsLookup['valueset-route-code'] = {id:'valueset-route-code',minLength:1};
-            vsLookup['valueset-administration-method-codes'] = {id:'valueset-administration-method-codes',minLength:3};
+           // vsLookup['valueset-route-code'] = {id:'valueset-route-code',minLength:1};
+            //vsLookup['valueset-administration-method-codes'] = {id:'valueset-administration-method-codes',minLength:3};
 
             vsLookup['condition-certainty'] = {id:'valueset-condition-certainty',minLength:1,type:'list'};
             vsLookup['list-empty-reason'] = {id:'valueset-list-empty-reason',minLength:1,type:'list'};
@@ -129,7 +212,7 @@ angular.module("sampleApp")
             //these 3 are from extensions - this passes in the full url - todo - does this need review??
             //I think that past DSTU-2 the urls' should all resolve directly...
             vsLookup['ReligiousAffiliation'] = {id:'v3-ReligiousAffiliation',minLength:1,type:'list'};
-            vsLookup['Race'] = {id:'v3-Race',minLength:1};
+            //vsLookup['Race'] = {id:'v3-Race',minLength:1};
             vsLookup['Ethnicity'] = {id:'v3-Ethnicity',minLength:1,type:'list'};
             vsLookup['investigation-sets'] = {id:'valueset-investigation-sets',minLength:1,type:'list'};
             vsLookup['observation-interpretation'] = {id:'valueset-observation-interpretation',minLength:1,type:'list'};
@@ -146,8 +229,6 @@ angular.module("sampleApp")
 
             vsLookup['reason-medication-not-given-codes'] = {type:'list'};
             vsLookup['care-plan-activity-category'] = {type:'list'};
-
-
 
 
             var ar = uri.split('/');
@@ -310,11 +391,11 @@ angular.module("sampleApp")
 
 //
     return {
-        getValueSetsForProfile : function(profile) {
-
+        getValueSetsForProfileDEP : function(profile) {
+            alert('getValueSetsForProfile stub not implemented yet');
         },
         getProfileStructure : function(profile,cb) {
-
+            alert('getProfileStructure stub not implemented yet');
         },
         parseProfile : function (profile) {
             //this is about 'expanding' extensions into the base profile...
@@ -889,16 +970,29 @@ angular.module("sampleApp")
         },
 
         isUrlaBaseResource : function(profile) {
-
+            alert('isUrlaBaseResource stub not implemented yet');
         },
         getResourcesSelectListOfType :function(allResources, type, url) {
-
+            alert('getResourcesSelectListOfType stub not implemented yet');
         },
         getUniqueResources : function(allResources) {
-
+            alert('getUniqueResources stub not implemented yet');
         },
         populateTimingList :function (){
+            //common timings for medication
+            var lst = [];
 
+            lst.push({description:"Twice a day",timing :{freq:2,period:1,units:'d'}});
+            lst.push({description:"Three times a day",timing :{freq:3,period:1,units:'d'}});
+
+            lst.push({description:"Every 8 hours",timing:{freq:1,period:8,units:'h'}});
+            lst.push({description:"Every 7 days",timing:{freq:1,period:7,units:'d'}});
+            lst.push({description:"3-4 times a day",timing:{freq:3,freqMax:4,period:1,units:'d'}});
+            lst.push({description:"Every 4-6 hours",timing:{freq:1,periodMax:6,period:1,units:'h'}});
+            lst.push({description:"Every 21 days for 1 hour",timing:{duration:1,units:'h',freq:1,period:21,units:'d'}});
+
+
+            return lst;
         },
         getValueSetReferenceFromBinding : function(element){
             //find the reference to the valueset..
@@ -917,7 +1011,7 @@ angular.module("sampleApp")
 }).service('ResourceUtilsSvc', function($http,$q) {
     return {
         getOneLineSummaryOfResource : function(element) {
-
+            alert('getOneLineSummaryOfResource stub not implemented yet');
         }
     }
 })

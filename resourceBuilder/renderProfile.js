@@ -21,7 +21,6 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
         controller: function ( $rootScope, $scope, $element,SaveDataToServer,GetDataFromServer,Utilities,
                                $uibModal,RenderProfileSvc,ResourceUtilsSvc ) {
 
-            console.log('loada')
 
             $scope.allResourceTypesIndexedByType = $rootScope.allResourceTypesIndexedByType;
             $scope.results = {};    //placeholder for the data...
@@ -92,7 +91,7 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
                     delete $scope.dataType;
                     delete $scope.externalSpecPage;
                     delete $scope.currentlySelectedRoot;
-                    //delete $scope.profileHasBeenParsed;     //set true when the 'drawListOfElements' has been called for this profile ?should have a specific parse function...
+
                     $scope.parsedProfile = false;           //indicates if the profile has been parsed - eg extensions expanded...
                     if ($scope.profile) {
                         $scope.pathDataEntered = {};        //reset the 'data entered' object
@@ -101,31 +100,14 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
                         //$scope.resourceId = 'rb'+new Date().getTime();
                         $scope.showProfileIssues = false;
                         $scope.profileIssues = Utilities.profileQualityReport($scope.profile);
-                        //console.log($scope.profileIssues);
 
-
-                        var downLoadText= RenderProfileSvc.getValueSetsForProfile($scope.profile);
-                        $scope.downloadLink = window.URL.createObjectURL(new Blob([downLoadText], {type: "text/text"}));
-                        //console.log(downLoadText);
-
-
-
-                        //create a object that indexes the path to the element...
-                        RenderProfileSvc.getProfileStructure($scope.profile.base,function(obj) {
-                            if (obj) {
-                                $scope.baseProfileIndexedByPath = obj;
-                               // console.log($scope.baseProfileIndexedByPath);
-                            }
-
-                        })
                     }
 
 
-                    $scope.crumbs.length=0;
+                    $scope.crumbs.length=0;     //the crumbtrail when navigating child elements
 
 
                     if ($scope.profile && $scope.profile.snapshot && $scope.profile.snapshot.element) {
-
 
                         //this draws the element list for the table...
                         RenderProfileSvc.parseProfile($scope.profile).then(
@@ -139,7 +121,7 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
                             }, function(err) {
                                 console.log(err)
                             }
-                        )
+                        );
 
                         //todo - will only work for base spec...
                         $scope.externalSpecPage = "http://hl7.org/fhir/" + $scope.profile.id + ".html";
@@ -165,16 +147,6 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
             );
 
 
-
-
-
-
-
-
-            $scope.downLoadVSReportDEP = function() {
-                var report = RenderProfileSvc.getValueSetsForProfile($scope.profile);
-
-            };
 
             $scope.toggleFullScreen = function() {
                 alert('t')
@@ -668,13 +640,22 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
                 //also need to check the 'original' multiplicity for this element - even if it is single,
                 //it may be a multiple property that has been constrained to a single - eg identifier so still needs to be in an array...
                 //so the multiplicity for the base will over-write the one in the project...
+                //fortunately, in DSTU-2 that is now a property of the profile itself...
+
+
+                if ($scope.profile.base && $scope.profile.base.max) {
+                    if ($scope.profile.base.max != '1') {
+                        isMultiple = true;
+                    }
+                }
+/*
                 if (!isMultiple && $scope.baseProfileIndexedByPath) {
                     var baseElement = $scope.baseProfileIndexedByPath[element.path];    //this is the definition for this path from the base resource
                     if (baseElement && baseElement.max == '*') {
                         isMultiple = true;
                     }
                 }
-
+*/
                 var inx = rootElement.selectedPage;// 0;//$scope.selectedPage;
                 if (!inx) {inx=0;}  //default to first page
 
@@ -761,13 +742,7 @@ console.log('key',key);
 
                     var json = angular.toJson(resource,true);
                     $scope.resource = json;
-
-
                 }
-
-
-
-
 
             }
 
@@ -777,8 +752,6 @@ console.log('key',key);
 
                 delete $scope.vsReference;
 
-
-                //console.log(element)
 
                 if (element.type) {
                     var type = element.type[0];     //todo - multi types!
@@ -804,7 +777,10 @@ console.log('key',key);
                 $scope.elementDefinition = angular.toJson(element,true);
             };
 
+
             //variables for the vs browser dialog.
+            //  <vs-browser trigger="showVSBrowserDialog"></vs-browser> is defined in renderProfile.html
+
             $scope.showVSBrowserDialog = {};
             $scope.showVSBrowser = function(vs) {
                 $scope.showVSBrowserDialog.open(vs);        //the open method defined in the directive...
@@ -813,17 +789,19 @@ console.log('key',key);
             //this is called when a user clicked on the 'explore valueset' button
             $scope.showVSBrowserDlg = function() {
 
-/*
-                if ($rootScope.canUseCache && $localStorage.valueSet[$scope.vsReference.reference]) {
-                    $scope.showVSBrowser($localStorage.valueSet[$scope.vsReference.reference])
-                    return;
-                }
-*/
                 $scope.showWaiting = true;
 
+                GetDataFromServer.getValueSet($scope.vsReference).then(
+                    function(vs) {
+                        $scope.showVSBrowserDialog.open(vs);
 
-                //$scope.showVSBrowser($scope.vsReference);
+                       // $scope.showVSBrowser(vs)
+                    }
+                ).finally (function(){
+                        $scope.showWaiting = false;
+                });
 
+/*
                 GetDataFromServer.getValueSet($scope.vsReference,function(vs){
                     $scope.showWaiting = false;
                     if (vs) {
@@ -832,10 +810,9 @@ console.log('key',key);
                         console.log()
                         alert("I'm sorry, I was unable to load the ValueSet: "+$scope.vsReference)
                     }
-
                 })
 
-
+*/
 
 
             };
@@ -972,14 +949,7 @@ console.log('key',key);
                         break;
 
                     case 'Quantity' :
-                        //load the UCUM Valueset
 
-                        /*
-                        GetDataFromServer.getValueSet('ucum-common',function(vs){
-                            console.log(vs);
-
-                        });
-*/
                         $scope.showWaiting = true;
                         //age-units
                         GetDataFromServer.getExpandedValueSet('ucum-common').then(
@@ -1078,14 +1048,7 @@ console.log('key',key);
 
                                     $scope.resourceList = RenderProfileSvc.getResourcesSelectListOfType(
                                         $scope.allresources,resourceType,profile.url);
-                                    /*
-                                    if ($scope.allResourceTypesIndexedByType[resourceType].reference) {
-                                        delete $scope.resourceList;
-                                    } else {
-                                        $scope.resourceList = RenderProfileSvc.getResourcesSelectListOfType(
-                                            $scope.allresources,resourceType,profile.url);
-                                    }
-                                    */
+
 
 
                                 }
@@ -1162,9 +1125,8 @@ console.log('key',key);
                         $scope.vsReference = null;
                         delete $scope.valueSet;
                         if (element.binding) {
+
                             //get the name of the referenced valueset in the profile - eg http://hl7.org/fhir/ValueSet/condition-code
-
-
                             var valueSetReference = RenderProfileSvc.getValueSetReferenceFromBinding(element);
 
                             //Assuming there is a valueset...
@@ -1200,6 +1162,8 @@ console.log('key',key);
                                                 $scope.showWaiting = false;
                                             }
                                         )
+                                    } else {
+                                        $scope.showWaiting = false;
                                     }
 
 
@@ -1253,16 +1217,10 @@ console.log('key',key);
 
                                 $scope.vsReference = valueSetReference.reference;
 
-
-
-
-
                             }
                         }
-                        break;
+                    break;
                 }
-
-
             };
 
 
@@ -1271,7 +1229,7 @@ console.log('key',key);
                 //todo basic validation - eg all required elements present...
 
                 $uibModal.open({
-                    templateUrl: 'modalTemplates/confirmNewResource.html',
+                    templateUrl: 'resourceBuilder/confirmNewResource.html',
                     size:'lg',
                     controller: function($scope,resource,profile,reloadAllResources,user,parentScope) {
 

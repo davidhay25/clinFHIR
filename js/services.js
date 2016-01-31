@@ -331,7 +331,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
             $q.all(arQuery).then(
                 function(data){
-                    console.log(referenceResources);
+                   // console.log(referenceResources);
                     deferred.resolve(referenceResources);
                 },
                 function(err){
