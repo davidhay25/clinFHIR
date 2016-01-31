@@ -12,7 +12,7 @@
 
     <script>
         //module for sample builder
-        angular.module("sampleApp",['ui.bootstrap','ngSanitize','angular-toArrayFilter'])
+        angular.module("sampleApp",['ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage'])
 
     </script>
 
@@ -27,7 +27,7 @@
 
     <script src="resourceBuilder/rbFrameCtrl.js"></script>
     <script src="resourceBuilder/renderProfile.js"></script>
-
+    <script src="js/libs/ngStorage.min.js"></script>
 
 
     <title>FHIR Sample Creator</title>
@@ -83,8 +83,8 @@
                                       parkresource="dynamic.parkResource" patient="currentPatient"
                                       loadalldata="dynamic.loadAllData(id)" updated = "dynamic.updated"
                                       resourcetypes="dynamic.resourcetypes" show-chat="false"
-                                      listen-socket="false" current-user="dynamic.currentUser"
-                                      close-chat="dynamic.closeChat" select-profile="dynamic.selectProfile">
+                                      current-user="dynamic.currentUser"
+                                      select-profile="dynamic.selectProfile">
 
                         </profile-form>
 

@@ -13,10 +13,7 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
             updated : '&',              //called when the resource has been updated. dirty checking basically...
             resourcetypes : '=',
             preview : '=',
-            showChat : '=',
-            listenSocket: "=",
             currentUser : '=',
-            closeChat : '&',
             selectProfile : '&'
         },
         templateUrl:'/resourceBuilder/renderProfile.html',  // was    '/js/directives/cc/renderProfile.html',
@@ -85,23 +82,11 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
             $scope.crumbs = [];
 
 
-
-/*
-            //watch for the user to login
-            $scope.$watch(
-                function() {return $scope.currentUser},
-                function() {
-                    //console.log($scope.currentUser)
-                });
-
-*/
-
             //watch for the profile to be changed by the 'host' app...
             $scope.elementList = [];
             $scope.$watch(
                 function() {return $scope.profile},
                 function() {
-console.log('prof')
 
                     delete $scope.parked;
                     delete $scope.dataType;
@@ -140,32 +125,6 @@ console.log('prof')
 
 
                     if ($scope.profile && $scope.profile.snapshot && $scope.profile.snapshot.element) {
-
-/*
-                        //this is for the tree view...
-                        $scope.treeData =RenderProfileSvc.makeTreeFromProfile($scope.profile);
-
-                        reDrawTree();
-
-                        $scope.newResource = RenderProfileSvc.newMakeResource($scope.treeData);
-
-                        */
-                        /*
-                        $('#renderTreeView').jstree('destroy');
-
-                        $('#renderTreeView').jstree(
-                            { 'core' : {'data' : tree ,'themes':{name:'proton',responsive:true}}}
-                        ).on('changed.jstree', function (e, data){
-
-                            var path = data.node.text;
-
-                            $scope.showElementDefinition($scope.profileElementsAsObject[path]);
-                            $scope.$digest();       //as the event occurred outside of angular
-
-                        });;
-*/
-
-
 
 
                         //this draws the element list for the table...
@@ -206,50 +165,10 @@ console.log('prof')
             );
 
 
-            function reDrawTree() {
-                $('#renderTreeView').jstree('destroy');
-
-                $('#renderTreeView').jstree(
-                    { 'core' : {'data' : $scope.treeData ,'themes':{name:'proton',responsive:true}}}
-                ).on('changed.jstree', function (e, data){
-                    //handler when an item selected from the tree
-                    var path = data.node.text;
-
-                    console.log(data)
-
-                    //insert a new instance of this
-                    var inx = data.node.data.inx;       //the position of this element
-                    $scope.currentTreeIndex = inx;
-                    $scope.currentTreeElement =  data.node.data.element;    //the element at this node
 
 
-                    //display the data entry form for the first type...
-                    var type = $scope.currentTreeElement.type[0];
-                    $scope.showElement($scope.currentTreeElement,type,-1)
-
-                    $scope.$digest();       //as the event occurred outside of angular
-
-                });
-            }
 
 
-            //insert a new branch (any dependents)
-            $scope.insertNewBranch = function() {
-                var inx = $scope.currentTreeIndex;
-                var nodeAtIndex = $scope.treeData[inx];
-                var elementAtIndex = nodeAtIndex.data.element;
-
-                var newElement = angular.copy(elementAtIndex)
-                delete newElement.newValue;
-                var node = angular.copy($scope.treeData[inx]);    //a copy of the selected node
-                node.data.element = newElement;
-                node.id += 'copy'+inx;
-                $scope.treeData.splice(inx+1,0,node);         //insert it below this one...
-                $scope.treeData.forEach(function(item,inx) {
-                  item.data.inx = inx;
-                })
-                reDrawTree();
-            }
 
 
             $scope.downLoadVSReportDEP = function() {
@@ -279,14 +198,7 @@ console.log('prof')
 
                 });
 
-/*
-            $scope.$watch(
-                function() {return $scope.showChat},
-                function() {
-                    //clear the decks
-//console.log('chat')
-                });
-*/
+
 
             //this populates the table with the elements from the profile...
             function drawListOfElements(parent) {
@@ -736,19 +648,6 @@ console.log('prof')
             //add the currently entered value to the current element, respecting multiplicity...
             var addValue = function(v,dataType,text,isPrimitive) {
 
-/*
-                //----- this for the new new approach
-               // var el = $scope.currentTreeElement;
-
-                //must get the element from the treeData array...
-                var el = $scope.treeData[$scope.currentTreeIndex].data.element;
-                var newValueObject = {v:v,dataType:dataType,text:text,isPrimitive: isPrimitive};
-                el.newValue = newValueObject;       //each element has only 1 value...
-
-                $scope.newResource = RenderProfileSvc.newMakeResource($scope.treeData);
-                reDrawTree();
-                //----------
-*/
                 if (!$scope.preview) {
                     $scope.updated()(true);       //this is an external function - so the container knows that the resource has been updated
                 }
@@ -860,58 +759,8 @@ console.log('key',key);
                     var resource = RenderProfileSvc.makeResource(SDClone,$scope.patient,$scope.resourceId);
                     $scope.generatedResourceForValidation = resource;
 
-                    //var resource = RenderProfileSvc.makeResource($scope.profile,$scope.patient,$scope.resourceId);
-                    //var resource = RenderProfileSvc.makeResource($scope.parsedElementList,$scope.patient,$scope.resourceId);
-
-
-                    /*  temp - while updating extension
-                     $scope.newResource = angular.toJson(RenderProfileSvc.newMakeResource($scope.profile,$scope.patient,$scope.resourceId),true);
-                     $scope.newModelJson = angular.toJson(RenderProfileSvc.showCanonicalModel($scope.profile),true);
-
-                     */
-
                     var json = angular.toJson(resource,true);
-                    /*
-                    //todo hack to fix problem with expansion of loinc codes...
-                    var g = json.indexOf("\\u0000");
-                    while (g > -1 ) {
-                        json = json.replace("\\u0000","")
-                        g = json.indexOf("\\u0000");
-                    }
-*/
-                    //$scope.resource = angular.toJson(resource,true);
-                    $scope.resource = json; //JSON.stringify(angular.copy(resource),null,2);
-
-                    //console.log($('#treeViewRenderX'));
-
-                    $('#treeViewRenderX').jstree('destroy');
-                    var tree = RenderProfileSvc.buildTree($scope.profile);
-
-                   // console.log(tree);
-
-
-
-
-
-                    $('#treeViewRenderX').jstree(
-                        { 'core' : {'data' : tree }}
-                    ) .on('loaded.jstree', function() {
-                        $('#treeViewRenderX').jstree('open_all');
-
-                    }).on('changed.jstree',function(e, data){
-                        //console.log(data.node)
-                        delete $scope.treeSelectedDatatype ;
-                        delete $scope.treeSelectedValue ;
-
-                        try {
-                            $scope.treeSelectedDatatype = data.node.data.dataType;
-                            $scope.treeSelectedValue = angular.toJson(data.node.data.v,true);
-                            $scope.$digest();       //as the event occurred outside of angular
-                        } catch (ex) {
-
-                        }
-
-                    });
+                    $scope.resource = json;
 
 
                 }
@@ -925,7 +774,7 @@ console.log('key',key);
 
             //display the complete definition for this element...
             $scope.showElementDefinition = function(element,inx){
-               // $scope.closeChat()();
+
                 delete $scope.vsReference;
 
 
@@ -1301,9 +1150,7 @@ console.log('key',key);
                         $scope.results.coding = null;
                         if (valueSetReference) {
                             Utilities.getValueSetIdFromRegistry(valueSetReference.reference,
-                                function(showWaiting) {
-                                    $scope.showWaiting = showWaiting
-                                },
+
                                 function (vsDetails) {
 
                                 $scope.vsDetails = vsDetails;
@@ -1316,17 +1163,17 @@ console.log('key',key);
                         delete $scope.valueSet;
                         if (element.binding) {
                             //get the name of the referenced valueset in the profile - eg http://hl7.org/fhir/ValueSet/condition-code
+
+
                             var valueSetReference = RenderProfileSvc.getValueSetReferenceFromBinding(element);
 
                             //Assuming there is a valueset...
                             if (valueSetReference) {
-
+                                $scope.showWaiting = true;
                                 $scope.results.cc = "";
 
                                 Utilities.getValueSetIdFromRegistry(valueSetReference.reference,
-                                    function(showWaiting) {
-                                        $scope.showWaiting = showWaiting
-                                    },
+
                                     function(vsDetails){
                                     $scope.vsDetails = vsDetails;
 
@@ -1340,9 +1187,7 @@ console.log('key',key);
                                        // delete $scope.valueSet;
                                         //$scope.showWaiting = true;
                                         GetDataFromServer.getExpandedValueSet($scope.vsDetails.id).then(   //get the expanded vs
-                                            function(data,statusCode){
-
-                                                $scope.showWaiting = false;
+                                            function(data){
                                                 //get rid of the '(qualifier value)' that is in some codes...
                                                 angular.forEach(data.expansion.contains,function(item){
                                                     if (item.display) {
@@ -1350,17 +1195,11 @@ console.log('key',key);
                                                     }
 
                                                 });
-
-
                                                 $scope.valueSet = data;
-
-                                            }, function(err){
-                                                console.log(err)
+                                            }).finally(function() {
                                                 $scope.showWaiting = false;
-                                                alert('Unable to retrieve the ValueSet:'+$scope.vsDetails.id)
                                             }
-                                        );
-
+                                        )
                                     }
 
 
@@ -1368,38 +1207,7 @@ console.log('key',key);
 
                                 $scope.vsReference = valueSetReference.reference;
 
-/*
-                                if ($scope.vsDetails.type == 'list') {
-                                    //this is a list type - ie a small number, so retrieve the entire list (expanded
-                                    //but not filtered) and set the appropriate scope. This will be rendered as a set of
-                                    //radio buttons...
-                                    $scope.showWaiting = true;
-                                    delete $scope.valueSet;
-                                    //$scope.showWaiting = true;
-                                    GetDataFromServer.getExpandedValueSet($scope.vsDetails.id).then(   //get the expanded vs
-                                        function(data,statusCode){
 
-                                            $scope.showWaiting = false;
-                                            //get rid of the '(qualifier value)' that is in some codes...
-                                            angular.forEach(data.expansion.contains,function(item){
-                                                if (item.display) {
-                                                    item.display = item.display.replace('(qualifier value)',"");
-                                                }
-
-                                            });
-
-
-                                            $scope.valueSet = data;
-
-                                        }, function(err){
-                                            console.log(err)
-                                            $scope.showWaiting = false;
-                                            alert('Unable to retrieve the ValueSet:'+$scope.vsDetails.id)
-                                        }
-                                    );
-
-                                }
-                                */
 
 
                             }
@@ -1419,9 +1227,7 @@ console.log('key',key);
 
                                 //get the id of the valueset on the registry server
                                 Utilities.getValueSetIdFromRegistry(valueSetReference.reference,
-                                    function(showWaiting) {
-                                        $scope.showWaiting = showWaiting
-                                    },
+
                                     function(vsDetails){
                                     $scope.vsDetails = vsDetails;
 
@@ -1430,30 +1236,17 @@ console.log('key',key);
                                         //get the expansion...
                                         GetDataFromServer.getExpandedValueSet(vsDetails.id).then(
                                             function(vs){
-                                                //console.log(vs)
-                                                $scope.showWaiting = false;
-
                                                 //and if the expansion worked, we're in business...
                                                 if (vs.expansion) {
                                                     $scope.vsExpansion = vs.expansion.contains;
                                                 }
 
-/* pre final dstu
-                                                if (vs.codeSystem){
-                                                    //the valueset defines it's own properties...
-                                                    $scope.codeOptionsDefine = vs.codeSystem.concept;
-                                                }
-                                                */
 
-                                            },function(err){
-                                                $scope.showWaiting = false;
-                                                alert("Unable to retrieve the ValueSet: "+vsDetails.id);
                                             }
-                                        );
+                                        ).finally(function(){
+                                            $scope.showWaiting = false;
+                                        });
                                     }
-
-
-
 
                                 });
 
@@ -1482,8 +1275,7 @@ console.log('key',key);
                     size:'lg',
                     controller: function($scope,resource,profile,reloadAllResources,user,parentScope) {
 
-                       // $scope.chatProject = chat.currentProject;
-                       // console.log(chatProject);
+
                         $scope.reloadAllResources = reloadAllResources;
                         $scope.resource = resource;
                         $scope.resourceAsString = JSON.stringify(resource,null,2);

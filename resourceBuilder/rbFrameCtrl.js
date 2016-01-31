@@ -1,8 +1,15 @@
-angular.module("sampleApp").controller('rbFrameCtrl', function ($rootScope, $scope,$http,supportSvc,resourceSvc) {
+angular.module("sampleApp").controller('rbFrameCtrl', function ( $scope,$http) {
 
     var serverBase = "http://fhir.hl7.org.nz/dstu2/"
 
-    $scope = {dynamic : {}}
+    //the 'dynamic' property is used to communicate with the profile-form directive...
+    $scope.dynamic  =  {};
+    $scope.dynamic.updated =function(){
+        //called when a new element is added to a resource...
+        console.log('updated called')
+        $scope.dirty = true;
+    };
+
 
     var url = serverBase + "StructureDefinition/Basic";
     $http.get(url).then(
@@ -18,4 +25,4 @@ angular.module("sampleApp").controller('rbFrameCtrl', function ($rootScope, $sco
 
 
 
-})
+});
