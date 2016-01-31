@@ -1,7 +1,7 @@
 /*  so I don't forget http://stackoverflow.com/questions/15279244/dynamically-add-directives-on-angularjs*/
 
 //directile to render a UI for a profile.
-angular.module("gapApp").directive( 'profileForm', function ( $compile ) {
+angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
     return {
         restrict: 'E',
         scope: {
@@ -19,10 +19,12 @@ angular.module("gapApp").directive( 'profileForm', function ( $compile ) {
             closeChat : '&',
             selectProfile : '&'
         },
-        templateUrl:'/js/directives/cc/renderProfile.html',
+        templateUrl:'/resourceBuilder/renderProfile.html',  // was    '/js/directives/cc/renderProfile.html',
 
         controller: function ( $rootScope, $scope, $element,SaveDataToServer,GetDataFromServer,Utilities,
-                               $uibModal,RenderProfileSvc,Chat,ResourceUtilsSvc ) {
+                               $uibModal,RenderProfileSvc,ResourceUtilsSvc ) {
+
+            console.log('loada')
 
             $scope.allResourceTypesIndexedByType = $rootScope.allResourceTypesIndexedByType;
             $scope.results = {};    //placeholder for the data...
@@ -35,9 +37,7 @@ angular.module("gapApp").directive( 'profileForm', function ( $compile ) {
 
             $scope.timingArray = RenderProfileSvc.populateTimingList();   //the list that converts from 'tds' to the timing units...
 
-            $scope.chatProjectName = 'cc';      //the name of the project for the chat...
-
-            $scope.index = 0;       //the index of the
+                $scope.index = 0;       //the index of the
 
             //call the validation service with the resource, displaying the outcome...
             $scope.validateResource = function() {
@@ -84,11 +84,7 @@ angular.module("gapApp").directive( 'profileForm', function ( $compile ) {
 
             $scope.crumbs = [];
 
-            $scope.chatInFullScreen = false;
-            $scope.myToggleFullScreen = function() {
 
-                $scope.chatInFullScreen = ! $scope.chatInFullScreen;
-            };
 
 /*
             //watch for the user to login
@@ -105,7 +101,7 @@ angular.module("gapApp").directive( 'profileForm', function ( $compile ) {
             $scope.$watch(
                 function() {return $scope.profile},
                 function() {
-
+console.log('prof')
 
                     delete $scope.parked;
                     delete $scope.dataType;
@@ -929,7 +925,7 @@ console.log('key',key);
 
             //display the complete definition for this element...
             $scope.showElementDefinition = function(element,inx){
-                $scope.closeChat()();
+               // $scope.closeChat()();
                 delete $scope.vsReference;
 
 
@@ -997,12 +993,6 @@ console.log('key',key);
 
             //when a user selects a datatype..
             $scope.showElement = function(element,type,inx) {
-                //if there is no close chat then just ignore errors...
-                try {
-                    $scope.closeChat()();
-                } catch (ex) {
-
-                }
 
 
                 //check if this has a fixed value.todo - what about fixed value extensions?
@@ -1306,7 +1296,7 @@ console.log('key',key);
 
                     case 'Coding' :
                         //returns the Url of the reference.
-                        var valueSetReference = RenderProfileSvc.getValueSetReferenceFromBinding(element);
+                        var valueSetReference = RenderProfileSvc.getUniqueResources(element);
 
                         $scope.results.coding = null;
                         if (valueSetReference) {
@@ -1575,9 +1565,7 @@ console.log('key',key);
                         user :function(){
                             return $scope.currentUser;
                         },
-                        chatDEP : function() {
-                            return Chat;
-                        },
+
 
                         reloadAllResources : function() {
                             return $scope.loadalldata;     //this is the external load function...

@@ -1,0 +1,28 @@
+<div>
+    <div class="row">
+        <!--<div class="col-md-6 col-sm-6">
+            <div><strong>Definition</strong></div>
+            {{element.definition}}
+            <div><strong>Requirements</strong></div>
+            {{element.requirements}}
+        </div>-->
+        <div class="col-md-12 col-sm-12">
+            <div class="row">
+                <div class="col-md-4 col-sm-4" ng-repeat="option in vsExpansion">
+                    <input type="radio" ng-model="results.code" name="name" value="{{option.code}}"  />
+                    <span title="{{option.definition}}">{{option.display}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12">
+            <a class="btn btn-link pull-right" ng-click="showVSBrowserDlg()">Explore ValueSet</a>
+        </div>
+    </div>
+
+
+</div>

@@ -1,0 +1,21 @@
+<div>
+    <div class="row">
+        <div class="col-md-2 col-sm-2">Use</div>
+        <div class="col-md-10 col-sm-10 col-sm-10">
+
+            <span ng-repeat="option in ['home','work','temp','old']">
+                <input type="radio" ng-model="results.addr.use" name="AddrName" value="{{option}}"  />
+                <span>{{option}}&nbsp;&nbsp; </span>
+            </span>
+
+
+        </div>
+
+    </div>
+<br />
+    <div class="row">
+        <div class="col-md-2 col-sm-2">Text</div>
+        <div class="col-md-10 col-sm-10 "><input type="text" class="form-control" ng-model="results.addr.text"/></div>
+
+    </div>
+</div>

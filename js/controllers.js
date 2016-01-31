@@ -2,7 +2,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
 
     $scope.input = {observations:[]};
     $scope.outcome = {};
-    $scope.global = {state:'view'}
+    $scope.global = {state:'new'}; //view | new
 
 
 

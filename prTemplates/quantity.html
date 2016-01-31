@@ -1,0 +1,37 @@
+<div class="row">
+
+
+    <div class="col-md-3 col-sm-3">
+        (Amount) <input type="text" class="form-control" placeholder = "Amount"
+                        ng-model="results.quantity_amount"/>
+    </div>
+
+    <div class="col-md-3 col-sm-3">
+        Units (Code)
+        <!--
+        <input type="text" class="form-control" placeholder = "Units"
+                       ng-model="results.quantity_units"/>
+-->
+
+        <input type="text" ng-model="results.quantity_units"
+               placeholder = "Units as the code"
+               typeahead="option.code for option in ucum | filter:$viewValue"
+               typeahead-wait-ms="10"
+               class="form-control">
+
+
+
+
+    </div>
+    <div class="col-md-3 col-sm-3" ng-show="1==2">
+        Units (Display)
+        <input type="text" ng-model="results.quantity_units"
+               placeholder = "Units as the display"
+               typeahead="option.display for option in ucum | filter:$viewValue"
+               typeahead-wait-ms="10"
+               class="form-control">
+    </div>
+
+
+
+</div>

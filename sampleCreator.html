@@ -11,10 +11,8 @@
     <script src="js/libs/toArrayFilter.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngSanitize','angular-toArrayFilter']).run(function($http){
-          //  $http.defaults.headers.post.prefer = 'return=representation'
-        })
-
+        //module for sample builder
+        angular.module("sampleApp",['ui.bootstrap','ngSanitize','angular-toArrayFilter'])
 
     </script>
 
@@ -22,8 +20,13 @@
     <script src="js/resourceSvc.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/controllers.js"></script>
-
     <script src="js/libs/moment.min.js"></script>
+
+    <!-- files needed for resourceBuilder -->
+    <script src="resourceBuilder/rbServices.js"></script>
+
+    <script src="resourceBuilder/rbFrameCtrl.js"></script>
+    <script src="resourceBuilder/renderProfile.js"></script>
 
 
 
@@ -72,7 +75,26 @@
 
 
                 <div ng-show = "global.state == 'new'" class="row">
-                    new
+
+                    <div ng-controller="rbFrameCtrl">
+
+
+                        <profile-form profile="dynamic.profile" allresources="dynamic.allresources"
+                                      parkresource="dynamic.parkResource" patient="currentPatient"
+                                      loadalldata="dynamic.loadAllData(id)" updated = "dynamic.updated"
+                                      resourcetypes="dynamic.resourcetypes" show-chat="false"
+                                      listen-socket="false" current-user="dynamic.currentUser"
+                                      close-chat="dynamic.closeChat" select-profile="dynamic.selectProfile">
+
+                        </profile-form>
+
+
+                        <!--
+                        <ng-include src="'./includes/frameForBuilder.html'"></ng-include>
+                        -->
+                    </div>
+
+
 
                 </div>
 

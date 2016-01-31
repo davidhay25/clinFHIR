@@ -1,0 +1,104 @@
+<div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3"><strong>Selector -></strong></div>
+    <div class="col-md-9 col-sm-9">
+
+
+        <select class="form-control" ng-model="results.timingDescription"
+                ng-change="updateTimingDetails(results.timingDescription)"
+                ng-options="option.description for option in timingArray">
+            <option></option>
+        </select>
+
+    </div>
+
+
+</div>
+
+
+
+
+
+
+<div class="row">
+    <div class="col-md-3 col-sm-3">Duration</div>
+    <div class="col-md-3 col-sm-3">Units</div>
+    <div class="col-md-3 col-sm-3">freq</div>
+    <div class="col-md-3 col-sm-3">freqMax</div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3">
+        <input type="text" class="form-control"  ng-model="results.timing.duration"/>
+    </div>
+    <div class="col-md-3 col-sm-3">
+        <input type="text" class="form-control"  ng-model="results.timing.units"/>
+    </div>
+    <div class="col-md-3 col-sm-3">
+        <input type="text" class="form-control"  ng-model="results.timing.freq"/>
+    </div>
+    <div class="col-md-3 col-sm-3">
+        <input type="text" class="form-control"  ng-model="results.timing.freq_max"/>
+    </div>
+
+</div>
+
+<div class="row">
+
+    <div class="col-md-3 col-sm-3">Period</div>
+    <div class="col-md-3 col-sm-3">PeriodMax</div>
+    <div class="col-md-3 col-sm-3">Units</div>
+    <div class="col-md-3 col-sm-3">When</div>
+
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3">
+        <input type="text" class="form-control"  ng-model="results.timing.period"/>
+    </div>
+    <div class="col-md-3 col-sm-3">
+        <input type="text" class="form-control"  ng-model="results.timing.period_max"/>
+    </div>
+    <div class="col-md-3 col-sm-3">
+        <input type="text" class="form-control"  ng-model="results.timing.period_units"/>
+    </div>
+    <div class="col-md-3 col-sm-3">
+        <input type="text" class="form-control" ng-model="results.timing.when"/>
+    </div>
+
+</div>
+<em>Note that the text in the Selector box will be the description, so update that appropriately if you
+    set any of the timing values manually</em>
+
+
+<div class="row">
+    <div class="col-md-1 col-sm-1"><strong>Start</strong></div>
+    <div class="col-md-6 col-sm-6">
+        <p class="input-group">
+            <input type="text" class="form-control" datepicker-popup="{{format}}"
+                   ng-model="results.timing_start" is-open="opened1"  datepicker-options="dateOptions"  close-text="Close" />
+                              <span class="input-group-btn">
+                                <button type="button" class="btn btn-default" ng-click="dateOpen1($event,'opened1')">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </button>
+                              </span>
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-1  col-sm-1"><strong>End</strong></div>
+    <div class="col-md-6 col-sm-6">
+        <p class="input-group">
+            <input type="text" class="form-control" datepicker-popup="{{format}}"
+                   ng-model="results.timing_end" is-open="opened2"  datepicker-options="dateOptions"  close-text="Close" />
+                              <span class="input-group-btn">
+                                <button type="button" class="btn btn-default" ng-click="dateOpen1($event,'opened2')">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </button>
+                              </span>
+        </p>
+    </div>
+</div>
+</div>

@@ -1,0 +1,13 @@
+<div>
+    <div class="row">
+        <div class="col-md-6 col-sm-6 ">
+            <datepicker ng-model="results.date_start"  show-weeks="true" class="well well-sm"></datepicker>
+        </div>
+
+        <div class="col-md-6 col-sm-6 ">
+            <datepicker ng-hide="results.period.startOnly" ng-model="results.date_end"  show-weeks="true" class="well well-sm"></datepicker>
+        </div>
+    </div>
+
+    <input type="checkbox" ng-model="results.period.startOnly"> Only have start date
+</div>
