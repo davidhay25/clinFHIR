@@ -528,6 +528,9 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
         setServerBase : function(sb) {
             serverBase = sb;
         },
+        getServerBase : function(sb) {
+            return serverBase;
+        },
         postBundle : function(bundle,referenceResources) {
             //sent the bundle to the server. If referenceResources is supplied, then add the resources to that list (with id)
             var deferred = $q.defer();

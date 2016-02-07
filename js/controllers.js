@@ -1,14 +1,16 @@
-angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scope,$http,supportSvc,resourceSvc) {
+angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scope,$http,supportSvc,resourceSvc,CommonDataSvc,appConfig) {
 
     $scope.input = {observations:[]};
     $scope.outcome = {};
     $scope.global = {state:'new'}; //view | new
 
-
-
-    $scope.input.serverBase = "http://localhost:8080/baseDstu2/";
-
     supportSvc.setServerBase("http://localhost:8080/baseDstu2/");
+
+
+    //the data server - ie where resources will be created. May be changed via a drop down at the time the resources are created.
+
+    $scope.input.serverBase = supportSvc.getServerBase(); //   "http://localhost:8080/baseDstu2/";
+
     $scope.input.fname  = "Pater";
     $scope.input.lname = "Jones";
     $scope.input.gender = "male";
@@ -16,7 +18,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
     $scope.input.action='patient';
 
     var cfOrganization = null;
-    //check that the reference resources need for creating sample resources exist - creating them if not...
+    //check that the reference resources (Practitioner, Organization etc) need for creating sample resources exist - creating them if not...
     supportSvc.checkReferenceResources().then(
         function(referenceResources){
 
@@ -205,9 +207,9 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
     //show a single patient - get their resources, create summary & display objects etc...
     $scope.showPatient = function(patient){
 
-
-
         $scope.currentPatient = patient;
+
+
 
         $scope.outcome.demographicsHtml = patient.text.div;
 
@@ -216,6 +218,11 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
             //returns an object hash - type as hash, contents as bundle
             function(allResources){
                 console.log(allResources);
+
+                //this is so the resourceBuilder knows who the patient is - and their data. todo A service might be better...
+                //the order is significant - allResources must be set first...
+                CommonDataSvc.setAllResources(allResources);
+                $rootScope.currentPatient = patient;
 
                 $scope.outcome.allResources = allResources;
                 //create a display object that can be sorted alphabetically...

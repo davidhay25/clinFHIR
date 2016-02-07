@@ -22,6 +22,8 @@
     <script src="js/controllers.js"></script>
     <script src="js/libs/moment.min.js"></script>
 
+    <script src="js/appConfigSvc.js"></script>
+
     <!-- files needed for resourceBuilder -->
     <script src="resourceBuilder/rbServices.js"></script>
 
@@ -75,16 +77,28 @@
                 </div>
 
 
+                <!-- Include the profile-form directive that is the resource builder -->
                 <div ng-show = "global.state == 'new'" class="row">
 
                     <div ng-controller="rbFrameCtrl">
 
+                        <div class="row">
+                            <div class="col-md-4 col-sm-4">
+                                <select class="form-control" ng-model="input.profileType"
+                                        ng-change="resourceTypeSelected(input.profileType.name)"
+                                        ng-options="standardResourceDisplay(type) for type in standardResourceTypes">
+                                    <option></option>
+                                </select>
+                            </div>
+                            <div class="col-md-8 col-sm-8">
+
+                            </div>
+                        </div>
 
                         <!-- This is the profile for the resource builder. It will show andmanage the whole UI-->
                         <profile-form profile="dynamic.profile" allresources="dynamic.allresources"
                                       parkresource="dynamic.parkResource" patient="dynamic.currentPatient"
-                                      loadalldata="dynamic.loadAllData(id)" updated = "dynamic.updated"
-                                      resourcetypes="dynamic.resourcetypes"
+                                      updated = "dynamic.updated"
                                       current-user="dynamic.currentUser"
                                       select-profile="dynamic.selectProfile">
 

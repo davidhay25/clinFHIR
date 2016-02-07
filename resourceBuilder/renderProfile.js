@@ -1,17 +1,17 @@
 /*  so I don't forget http://stackoverflow.com/questions/15279244/dynamically-add-directives-on-angularjs*/
 
-//directile to render a UI for a profile.
+//directive to render a UI for a profile.
 angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
     return {
         restrict: 'E',
         scope: {
-            allresources: '=' ,
+            //allresources: '=' ,
             profile : '=',
             patient : '=',
             loadalldata : '&',
-            parkresource : '&',
+            parkresource : '&',         //called to park the resource currently being built
             updated : '&',              //called when the resource has been updated. dirty checking basically...
-            resourcetypes : '=',
+            //resourcetypes : '=',
             preview : '=',
             currentUser : '=',
             selectProfile : '&'
@@ -19,7 +19,7 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
         templateUrl:'/resourceBuilder/renderProfile.html',  // was    '/js/directives/cc/renderProfile.html',
 
         controller: function ( $rootScope, $scope, $element,SaveDataToServer,GetDataFromServer,Utilities,
-                               $uibModal,RenderProfileSvc,ResourceUtilsSvc ) {
+                               $uibModal,RenderProfileSvc,ResourceUtilsSvc,CommonDataSvc ) {
 
 
             $scope.allResourceTypesIndexedByType = $rootScope.allResourceTypesIndexedByType;
@@ -33,12 +33,36 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
 
             $scope.timingArray = RenderProfileSvc.populateTimingList();   //the list that converts from 'tds' to the timing units...
 
-                $scope.index = 0;       //the index of the
+            $scope.index = 0;       //the index of the current set of child elements
 
             //call the validation service with the resource, displaying the outcome...
             $scope.validateResource = function() {
                 $scope.validationInProgress = true;
 
+
+                Utilities.validate($scope.generatedResourceForValidation).then(
+                    function(oo) {
+                        $scope.validateResults = {outcome:'Resource is valid.'};
+
+                    },function(oo) {
+
+                        if (oo.issue) {
+                            delete oo.text;
+                            oo.issue.forEach(function(iss){
+                                delete iss.diagnostics;
+                            });
+                        }
+                        $scope.validateResults = oo;
+
+                    }).finally(
+                        function(){
+                            $scope.validationInProgress = false;
+                         }
+                    )
+
+
+
+                /*
                 Utilities.validate($scope.generatedResourceForValidation,function(result){
                     console.log(result);
                     $scope.validationInProgress = false;
@@ -54,9 +78,12 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
                         $scope.validateResults = 'Valid Resource';
                     }
                 })
+
+                */
             };
 
-            //park the current resource, then download the profiled resource we're currently selected
+            // a convenience fucntion that will park the current resource, then download the profile
+            //  we're currently selected. eg creating
             $scope.parkAndBuild = function(){
                 $scope.activateParkResource();
 
@@ -78,7 +105,7 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
 
             };
 
-            $scope.crumbs = [];
+            $scope.crumbs = [];     //the breadcrimb to where the resource is being modified
 
 
             //watch for the profile to be changed by the 'host' app...
@@ -102,7 +129,6 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
                         $scope.profileIssues = Utilities.profileQualityReport($scope.profile);
 
                     }
-
 
                     $scope.crumbs.length=0;     //the crumbtrail when navigating child elements
 
@@ -160,6 +186,11 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
             $scope.$watch(
                 function() {return $scope.patient},
                 function() {
+
+                    $scope.allResources = CommonDataSvc.getAllResources();
+
+
+                console.log($scope.patient,$scope.allResources)
                     //clear the decks
                     delete $scope.parked;
                     delete $scope.dataType;
@@ -522,7 +553,14 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
                                 v.display = ResourceUtilsSvc.getOneLineSummaryOfResource(selectedResource);
                             }
 
-                            addValue(v,'Reference',selectedResource.text.div,false);
+
+                            var referenceDisplay = "";
+                            if (selectedResource.text) {
+                                referenceDisplay = selectedResource.text.div
+                            }
+
+
+                            addValue(v,'Reference',referenceDisplay,false);
                         } else {
                             //no resource selected - was there any text?
                             if ($scope.results.resourceItemText) {
@@ -1019,26 +1057,21 @@ console.log('key',key);
 
                     case 'Reference' :
                         //todo - have a service that creates a full summary of a resource - and a 1 liner for the drop down
-                        //we assume its a resource and not another profile...
 
-
-                        if ($scope.preview) {
-                            alert("Sorry, in preview mode you can't add resource references to the profile");
-                            return;
-                        }
                         delete $scope.resourceReferenceText;
                         delete $scope.profileUrlInReference;
 
+
                         if (! RenderProfileSvc.isUrlaBaseResource(type.profile[0])) {
-                            //this is a reference to profile on a base resource. need to load the profile so we can figure out the base
+                            //this is a reference to profile on a base resource. need to load the profile so we can figure out the base type
+
                             $scope.profileUrlInReference = type.profile[0];
                             GetDataFromServer.findResourceByUrl('StructureDefinition',type.profile[0],function(profile){
-                                //console.log(profile);
                                 if (profile) {
 
                                     var resourceType = profile.constrainedType;//  Utilities.getResourceTypeFromUrl();
                                     $scope.resourceType = resourceType;
-                                    $scope.selectedReferenceResourceType = $scope.resourcetypes[resourceType];
+                                    $scope.selectedReferenceResourceType = RenderProfileSvc.getResourceTypeDefinition(resourceType) ;//  $scope.resourcetypes[resourceType];
                                     //todo -this won;t be correct...
                                     //-temp- $scope.externalReferenceSpecPage = "http://hl7.org/fhir/2015May/" + resourceType + ".html";
                                     //todo - need to pass the profilein as welll
@@ -1047,7 +1080,7 @@ console.log('key',key);
                                     //incldue any of thm in the list
 
                                     $scope.resourceList = RenderProfileSvc.getResourcesSelectListOfType(
-                                        $scope.allresources,resourceType,profile.url);
+                                        $scope.allResources,resourceType,profile.url);
 
 
 
@@ -1064,17 +1097,14 @@ console.log('key',key);
 
                             //if any resource can be referenced here
                             if (resourceType== 'Resource') {
-                                $scope.uniqueResources = RenderProfileSvc.getUniqueResources($scope.allresources);
+                                $scope.uniqueResources = RenderProfileSvc.getUniqueResources($scope.allResources);
                             } else {
                                 delete $scope.uniqueResources;
                             }
 
-                            $scope.selectedReferenceResourceType = $scope.resourcetypes[resourceType];
-                            // -temp- $scope.externalReferenceSpecPage = "http://hl7.org/fhir/2015May/" + resourceType + ".html";
+                            //this defines the resource type - eg whether it is a reference resource rather than linked to a patient...
+                            $scope.selectedReferenceResourceType = RenderProfileSvc.getResourceTypeDefinition(resourceType);//$scope.resourcetypes[resourceType];
 
-
-                            //some profiles mistakenly have a leading '#'
-                            resourceType =resourceType.replace('#','');
 
                             $scope.resourceType = resourceType;
 
@@ -1085,14 +1115,10 @@ console.log('key',key);
                            // if ($scope.allResourceTypesIndexedByType[resourceType].reference) {
                                 delete $scope.resourceList;
                             } else {
+                                //the list of resources of this type linked to this patient that can be selected...
                                 $scope.resourceList = RenderProfileSvc.getResourcesSelectListOfType(
-                                    $scope.allresources,resourceType);
+                                    $scope.allResources,resourceType);
                             }
-
-
-
-                            //this is the list of available resource to reference
-                            //$scope.resourceList = RenderProfileSvc.getResourcesSelectListOfType($scope.allresources,resourceType);
 
                         }
 
@@ -1231,10 +1257,10 @@ console.log('key',key);
                 $uibModal.open({
                     templateUrl: 'resourceBuilder/confirmNewResource.html',
                     size:'lg',
-                    controller: function($scope,resource,profile,reloadAllResources,user,parentScope) {
+                    controller: function($scope,resource,profile,user,parentScope) {
 
 
-                        $scope.reloadAllResources = reloadAllResources;
+                        //$scope.reloadAllResources = reloadAllResources;
                         $scope.resource = resource;
                         $scope.resourceAsString = JSON.stringify(resource,null,2);
                         $scope.outcome="";       //not saved yet...
@@ -1247,24 +1273,24 @@ console.log('key',key);
                         };
 
 
-                        $scope.saveResource = function(reloadAllResources) {
+                        $scope.saveResource = function() {
                             $scope.saving = true;
                             SaveDataToServer.saveResource($scope.resource).then(
                                 function(data) {
                                     //save successful...
+                                    console.log(data);
                                     $scope.saveState='success';
                                     $scope.saving = false;
                                     $scope.outcome = "Resource saved with the ID:";
 
 
+                                    //determine the id of the resource assigned by the server
                                     var serverId;
-                                    if (!data.headers.location ) {
-                                        //$scope.outcome += data.headers['content-location']
-                                        serverId = data.headers['content-location']
-                                    } else {
-                                        //$scope.outcome += data.headers.location;
-                                        serverId = data.headers.location;
+                                    serverId = data.headers('Content-Location');
+                                    if (! serverId) {
+                                        serverId = data.headers('Location');
                                     }
+
 
                                     console.log(serverId)
                                     $scope.outcome += serverId;
@@ -1281,7 +1307,7 @@ console.log('key',key);
 
                                     //re-load all the resources for this patient as chances are this new resource references it...
                                     //http://stackoverflow.com/questions/30244358/angularjs-directive-element-method-binding-typeerror-cannot-use-in-operator
-                                    $scope.reloadAllResources({id:serverId});
+                                    //$scope.reloadAllResources({id:serverId});
                                 },
                                 function(err) {
                                     console.log(err)
@@ -1317,9 +1343,9 @@ console.log('key',key);
                         },
 
 
-                        reloadAllResources : function() {
-                            return $scope.loadalldata;     //this is the external load function...
-                        },
+                       // reloadAllResources : function() {
+                     //       return $scope.loadalldata;     //this is the external load function...
+                       // },
                         parentScope : function() {
                             //needed so we can emit events from the scope - eg when a resource is rejected...
                             return $scope;
@@ -1382,10 +1408,10 @@ console.log('key',key);
             };
 
 
-            //generate a list of all the patients resources of this type
+            //generate a list of all the patients resources of this type.I think this is the 'any resource' support..
             $scope.resourceTypeSelected = function(resourceType){
                 //this is the list of available resource to reference
-                $scope.resourceList =  RenderProfileSvc.getResourcesSelectListOfType($scope.allresources,resourceType.key);
+                $scope.resourceList =  RenderProfileSvc.getResourcesSelectListOfType($scope.allResources,resourceType.key);
             };
 
             //the user wants to locate a resource on the server that is not in the cached list of resources

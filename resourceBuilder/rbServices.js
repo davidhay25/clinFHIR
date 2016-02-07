@@ -2,21 +2,46 @@
 
 angular.module("sampleApp")
     //this returns config options. When it's all working we'll allow multiple servers...
-    .service('appConfig', function($http,$q) {
+//http://fhir.hl7.org.nz/dstu2/
+    .service('appConfig', function() {
         return {
             config : function() {
                 var config = {servers : {}}
                 config.servers.terminology = "http://fhir2.healthintersections.com.au/open/";
+                config.servers.data = "http://localhost:8080/baseDstu2/";
+                config.servers.conformance = "http://fhir2.healthintersections.com.au/open/";
                 return config
             }
         }
     }).
-    service('SaveDataToServer', function($http,$q) {
+    service('CommonDataSvc', function() {
+        var allResources;       //all the resources for the current patient
+        return {
+            setAllResources :function(allResourcesIn) {
+                allResources = allResourcesIn;
+            },
+            getAllResources : function() {
+                return allResources
+            }
+        }
+    }).
+    service('SaveDataToServer', function($http,$q,appConfig) {
     return {
         saveResource : function(resource) {
             var deferred = $q.defer();
-            alert('saving:\n'+angular.toJson(resource));
-            deferred.resolve('')
+            //alert('saving:\n'+angular.toJson(resource));
+            var config = appConfig.config();
+            var qry = config.servers.data + resource.resourceType;
+            console.log(qry)
+            $http.post(qry, resource).then(
+                function(data) {
+                    deferred.resolve(data);
+                },
+                function(err) {
+                    //alert("errr calling validate operation:\n"+angular.toJson(err))
+                    deferred.reject(err.data);
+                }
+            );
 
 
             return deferred.promise;
@@ -103,7 +128,25 @@ angular.module("sampleApp")
 }).service('Utilities', function($http,$q,$localStorage,appConfig) {
     return {
         validate : function(resource,cb) {
-            alert('validate stub not implemented yet');
+            var deferred = $q.defer();
+            var config = appConfig.config();
+
+            var clone = angular.copy(resource);
+            delete clone.localMeta;
+
+            var qry = config.servers.data + resource.resourceType + "/$validate";
+            console.log(qry)
+            $http.post(qry, clone).then(
+                function(data) {
+                    deferred.resolve(data);
+                },
+                function(err) {
+                    //alert("errr calling validate operation:\n"+angular.toJson(err))
+                    deferred.reject(err.data);
+                }
+            );
+
+            return deferred.promise;
         },
         profileQualityReport :function (profile) {
             var issues = []
@@ -226,7 +269,6 @@ angular.module("sampleApp")
             vsLookup['condition-status'] = {id:'condition-status',minLength:1,type:'list'};
             vsLookup['administrative-gender'] = {id:'administrative-gender',minLength:1,type:'list'};
 
-
             vsLookup['reason-medication-not-given-codes'] = {type:'list'};
             vsLookup['care-plan-activity-category'] = {type:'list'};
 
@@ -266,7 +308,7 @@ angular.module("sampleApp")
             return text;
         }
     }
-}).service('RenderProfileSvc', function($http,$q,Utilities) {
+}).service('RenderProfileSvc', function($http,$q,Utilities,ResourceUtilsSvc) {
     var iterateOverNodeSet = function(insertionPoint,invalue) {
         var text = "";
 
@@ -389,8 +431,33 @@ angular.module("sampleApp")
             .replace(/>/g, '&gt;');
     }
 
-//
+    //a dictionary indexed on the resource for the standard resource types.
+    var standardResourceTypes = null;
+
+
     return {
+        getAllStandardResourceTypes : function(){
+            //the basic resources in FHIR. returns an object that also indicates if it is a reference resource or not...
+            var deferred = $q.defer();
+            if (! standardResourceTypes) {
+                $http.get('resourceBuilder/allResources.json').then(
+                    function(data) {
+                        standardResourceTypes = data.data;
+
+                     //   data.data.forEach(function(item){
+                     //       standardResourceTypes[item.name] = item;
+                     //   });
+                        deferred.resolve(standardResourceTypes)
+                    },
+                    function(err) {
+                        alert('Error loading allResources.json\n'+angular.toJson(err));
+                        deferred.reject();
+                    }
+                );
+            }
+
+            return deferred.promise;
+        },
         getValueSetsForProfileDEP : function(profile) {
             alert('getValueSetsForProfile stub not implemented yet');
         },
@@ -914,7 +981,7 @@ angular.module("sampleApp")
                             var ar = element.path.split('.');
                             if (ar[1] == 'patient' && !resource['patient']) {       //always attached to the root...
                                 var reference = {reference: "Patient/" + patient.id};
-                                reference.display = patient.name;
+                                reference.display =  ResourceUtilsSvc.getOneLineSummaryOfResource(patient);
                                 resource['patient'] = reference;
                                 break;
                             }
@@ -922,7 +989,7 @@ angular.module("sampleApp")
                             //todo - there willbe a more elegant way of doing this...
                             if (ar[1] == 'subject' && !resource['subject']) {       //always attached to the root...
                                 var reference = {reference: "Patient/" + patient.id};
-                                reference.display = patient.name;
+                                reference.display = ResourceUtilsSvc.getOneLineSummaryOfResource(patient);
                                 resource['subject'] = reference;
                                 break;
                             }
@@ -968,12 +1035,81 @@ angular.module("sampleApp")
             //create a complete, but empty skeleton
 
         },
-
-        isUrlaBaseResource : function(profile) {
-            alert('isUrlaBaseResource stub not implemented yet');
+        getResourceTypeDefinition : function(resourceType) {
+            //this is needed so we can distinguish between 'reference' resources that don't have a patient reference from those that do...
+            return standardResourceTypes[resourceType]
         },
-        getResourcesSelectListOfType :function(allResources, type, url) {
-            alert('getResourcesSelectListOfType stub not implemented yet');
+
+        isUrlaBaseResource : function(profileTypeUrl) {
+            //used to determine if the resource being referenced is a base one or a profiled one.
+            //used in showing existing resources of a given type.
+            //profileUrl will be like: http://hl7.org/fhir/StructureDefinition/Patient
+            console.log(standardResourceTypes);
+            var ar = profileTypeUrl.split('/');
+            var resourceType = ar[ar.length-1];       //the actual type of resource being referenced...
+
+            if (standardResourceTypes[resourceType]) {
+                return true;
+            } else {
+                return false;
+            }
+
+        },
+        getResourcesSelectListOfType :function(allResources, resourceType, profileUrl) {
+            //return an array of the patients resources of the given type - used for displaying a list of resoruces for
+            // a user to select from. If a profileUrl is passed in
+            //then include resources that claim confirmance to that profile...
+            //allResources is a dictionary of bundles, indexed by type...
+
+            var bundle = allResources[resourceType];
+            if (!bundle) {
+                return [];      //the patient has no resources of this type...
+            }
+
+
+            var lst = [];
+
+            bundle.entry.forEach(function (entry) {
+                var display = getDisplay(entry.resource,resourceType);
+                if (profileUrl) {
+                    //if (isProfile) {
+                    if (entry.resource.meta && entry.resource.meta.profile) {   //if the resource has a profile declaration
+                        var profiles = entry.resource.meta.profile;
+                        for (var i=0; i<profiles.length;i++ ){      //iterate through each profile on the resource
+                            var profile = profiles[i];          //a profile this resource claims conformance to
+
+                            //if (profile.indexOf(resourceType) > -1) {
+                            if (profile == profileUrl) {
+                                var display = getDisplay(entry.resource,resourceType);
+                                lst.push({
+                                    resource: entry.resource,       //<<---- think I still want the actual resource type here
+                                    display: display
+                                });
+                                break;
+                            }
+                        }
+                    }
+                } else {
+
+                    lst.push({
+                        resource: entry.resource,
+                        display: display
+                    });
+
+                }
+
+            });
+
+            return lst;
+
+            function getDisplay(resource,searchType) {
+                var display = ResourceUtilsSvc.getOneLineSummaryOfResource(resource);
+                if (searchType == 'Resource') {
+                    display = resource.resourceType + ":" + display;
+                }
+                return display;
+            }
+
         },
         getUniqueResources : function(allResources) {
             alert('getUniqueResources stub not implemented yet');
@@ -1008,10 +1144,126 @@ angular.module("sampleApp")
         }
 
     }
-}).service('ResourceUtilsSvc', function($http,$q) {
+}).service('ResourceUtilsSvc', function() {
+    function getPeriodSummary(data) {
+        if (!data) {
+            return "";
+        }
+        var txt = "";
+        if (data.start) {txt += moment(data.start).format('YYYY-MM-DD') + " "}
+        if (data.end) {txt += "-> " + moment(data.end).format('YYYY-MM-DD')}
+        return txt;
+    }
+
+    function getCCSummary(data) {
+        if (!data) {
+            return "";
+        }
+        var txt = "";
+        if (data.coding && data.coding.length > 0) {
+            if (data.text) {txt += data.text + " ";}
+            var c = data.coding[0];
+            var d = c.display || '';
+            txt += d + " ["+ c.code + "]";
+
+        } else {
+            txt += data.text;
+        }
+        return txt;
+    }
+
+    function getHumanNameSummary(data){
+        if (!data) {
+            return "";
+        }
+        var txt = "";
+        if (data.text) {
+            return data.text;
+        } else {
+            txt += getString(data.given);
+            txt += getString(data.family);
+            return txt;
+        }
+        function getString(ar) {
+            var lne = '';
+            if (ar) {
+                ar.forEach(function(el){
+                    lne += el + " ";
+                } )
+            }
+            return lne;
+        }
+    }
+
     return {
-        getOneLineSummaryOfResource : function(element) {
-            alert('getOneLineSummaryOfResource stub not implemented yet');
+        getOneLineSummaryOfResource : function(resource) {
+            switch (resource.resourceType) {
+                case "DiagnosticOrder":
+                    if (resource.reason) {
+                        return getCCSummary(resource.reason[0]);
+                    } else {
+                        return resource.resourceType;
+                    }
+                    break;
+                case "AllergyIntolerance" :
+                    return getCCSummary(resource.substance);
+                    break;
+                case "Practitioner" :
+                    return getHumanNameSummary(resource.name);
+                    break;
+                case "Patient" :
+                    return getHumanNameSummary(resource.name[0]);
+                    break;
+                case "List" :
+                    if (resource.code) {
+                        return getCCSummary(resource.code);
+                    } else {return "List"}
+                    break;
+                case "Encounter" :
+                    if (resource.period) {
+                        return getPeriodSummary(resource.period);
+
+                    } else {
+                        return 'Encounter';
+                    }
+                    break;
+                case 'Observation' :
+                    var summary = resource.id;
+                    if (resource.code) {
+                        if (resource.code.text) {
+                            summary = resource.code.text;
+                        } else if (resource.code.coding) {
+                            summary = resource.code.coding[0].code;
+                        }
+                    }
+
+                    if (resource.valueString) {
+                        summary += ": " + resource.valueString.substr(0,50) ;
+                    }
+
+                    if (resource.appliesDateTime) {
+                        summary = resource.appliesDateTime + " " + summary;
+                    }
+
+
+
+                    return summary;
+
+
+
+                    break;
+                case 'Condition' :
+                    if (resource.code) {
+                        return getCCSummary(resource.code);
+
+                    } else {
+                        return resource.resourceType;
+                    }
+                    break;
+                default :
+                    return resource.resourceType;
+                    break;
+            }
         }
     }
 })
