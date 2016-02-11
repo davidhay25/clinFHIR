@@ -1,19 +1,33 @@
 angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scope,$http,supportSvc,resourceSvc,CommonDataSvc,appConfig) {
 
+
+    /* set this to true to enable a 'local development' mode. This assumes that there is an instance of the HAPI
+    command line server (http://jamesagnew.github.io/hapi-fhir/doc_cli.html) installed and running on the default
+    port (8080) which has been populated with the standard files using the 'upload-definitions' option. (see the
+     HAPI site for details
+
+    */
+    $scope.development = false;
+
+
+
+
     $scope.input = {observations:[]};
     $scope.outcome = {};
     $scope.global = {state:'new'}; //view | new
 
     supportSvc.setServerBase("http://localhost:8080/baseDstu2/");
 
-
     //the data server - ie where resources will be created. May be changed via a drop down at the time the resources are created.
 
     $scope.input.serverBase = supportSvc.getServerBase(); //   "http://localhost:8080/baseDstu2/";
 
-    $scope.input.fname  = "Pater";
+    //set defaults for the ptients demographics
+    $scope.input.fname  = "Peter";
     $scope.input.lname = "Jones";
     $scope.input.gender = "male";
+
+
 
     $scope.input.action='patient';
 

@@ -1,3 +1,8 @@
+/*
+A service that will return the configuration object for the application. Currently this defines the servers to use...
+*/
+
+
 angular.module("sampleApp")
     //this returns config options. When it's all working we'll allow multiple servers...
 
