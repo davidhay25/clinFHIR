@@ -38,8 +38,68 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
         identifier : {value:'cf',system:identifierSystem},text:{status:'generated',div:'<div>clinFhir</div>'}});
 
     return {
+        getRandomName : function() {
+            //get a random name from an on-line service...
+
+            return $http.get('https://randomuser.me/api/?format=json&nat=nz');
+
+          /*
+
+            var deferred = $q.defer();
+            $http.get('https://randomuser.me/api/?format=json').then(
+                function(data){
+                    deferred.resolve(data.data);
+                },
+                function(){
+                    deferred.reject
+                }
+            );
+
+            return deferred.promise;
+
+*/
+
+        },
         getReferenceResources : function(){
             return referenceResources;
+        },
+        createPatient : function(input,cfOrganization) {
+            var deferred = $q.defer();
+
+            var patient = {"resourceType": "Patient"};
+            var nameText = input.fname + " " +input.lname;
+            patient.name = [{use:'official',family:[input.lname],given:[input.fname],text:nameText}];
+            patient.gender = input.gender;
+            patient.birthDate= moment(input.dob).format('YYYY-MM-DD');
+            patient.managingOrganization = {display : 'sampleBuilder',reference : "Organization/"+cfOrganization.id};      //<<<< todo make a real org... - check at startus
+
+            patient.text = {status:'generated',div:nameText};
+            var uri = input.serverBase + "Patient";
+
+            $http.post(uri,patient).then(
+                function(data) {
+                    // console.log(data)
+                    var location = data.headers('location');
+
+                   // $scope.outcome.patientId = location;
+                    var ar = location.split('/');
+                    var id = ar[5];
+                    deferred.resolve(id);
+                //    loadSamplePatients();
+                    // console.log(id)
+                    //cb(null,id);
+
+                    //addLog('Added patient: '+ location)
+                },
+                function(err) {
+                    // console.log(err)
+                   // alert(angular.toJson(err));
+                    deferred.reject(err)
+                    //cb(err);
+                }
+            )
+
+            return deferred.promise;
         },
         createAppointments : function(patientId,options) {
             var bundle = {resourceType: 'Bundle', type: 'transaction', entry: []};
@@ -411,8 +471,8 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             var filterString="";
             observations.forEach(function(item){
                 if (item.isVital) {
-                    filterString += ","+item.code;
-                    response.vitalsCodes.push({code:item.code,display:item.display,unit:item.unit});
+                    filterString += ","+item.code;      //update the filter string used in the query
+                    response.vitalsCodes.push({code:item.code,display:item.display,unit:item.unit});    //the list of codes used by the display
                 }
             });
 
@@ -437,11 +497,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                 }
             );
             return deferred.promise;
-
-
-
-
-
 
         },
         getAllData : function(patientId) {
@@ -528,16 +583,12 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
         setServerBase : function(sb) {
             serverBase = sb;
         },
-        getServerBase : function(sb) {
+        getServerBaseDEP : function(sb) {
             return serverBase;
         },
         postBundle : function(bundle,referenceResources) {
             //sent the bundle to the server. If referenceResources is supplied, then add the resources to that list (with id)
             var deferred = $q.defer();
-
-           // var config = {headers: {Prefer:'return=representation'}};    //to return the resource in the bundle
-            //Prefer: return=representation
-
             $http.post(serverBase,bundle).then(
                 function(data) {
 
@@ -574,6 +625,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
         },
         getGridOfObservations : function(bundle) {
+            //generate the vitals observations grid
             var grid = {};      //there will be a property for each unique datetime, with a collection of matching observations for each time.
             if (bundle && bundle.entry) {
                 bundle.entry.forEach(function(entry){

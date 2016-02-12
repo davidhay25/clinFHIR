@@ -1,38 +1,54 @@
-angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scope,$http,supportSvc,resourceSvc,CommonDataSvc,appConfig) {
+/* Controller for the sample creator
+* Whan a patient is created, the 'managingOrganization' will be set to the pre-defined origanizatiion that the tool
+* creates (see cfOrganization). Then, when displaying patients created by the tool we search on that organization.
+* If the data server doesn't support that search, then the patient will be created, but can't be displayed at the moment
+* */
 
 
-    /* set this to true to enable a 'local development' mode. This assumes that there is an instance of the HAPI
-    command line server (http://jamesagnew.github.io/hapi-fhir/doc_cli.html) installed and running on the default
-    port (8080) which has been populated with the standard files using the 'upload-definitions' option. (see the
-     HAPI site for details
+angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scope,$http,supportSvc,resourceSvc,
+                                                        CommonDataSvc,appConfig) {
 
-    */
-    $scope.development = false;
-
+    //config - in particular the servers defined. The samples will be going to the data server...
+    var config = appConfig.config();
+    supportSvc.setServerBase(config.servers.data);
 
 
-
+    //allows the user to select a different server at run time to save the samples...
     $scope.input = {observations:[]};
+    $scope.input.serverBase = config.servers.data;
+
     $scope.outcome = {};
+
+    //the initial state when viewing an existing patient.
+    // 'new' = create a new resource using the resource builder. view = view existing data...
     $scope.global = {state:'new'}; //view | new
 
-    supportSvc.setServerBase("http://localhost:8080/baseDstu2/");
-
-    //the data server - ie where resources will be created. May be changed via a drop down at the time the resources are created.
-
-    $scope.input.serverBase = supportSvc.getServerBase(); //   "http://localhost:8080/baseDstu2/";
-
-    //set defaults for the ptients demographics
+    //set defaults for the patients demographics. uses an on-line service if available
     $scope.input.fname  = "Peter";
     $scope.input.lname = "Jones";
     $scope.input.gender = "male";
+    $scope.input.dob = "1972-05-15";
+
+    supportSvc.getRandomName().then(
+        function(data) {
+            var user = data.data.results[0].user;
+            $scope.input.dob = moment(user.dob).format();
+            $scope.input.fname  = user.name.first;
+            $scope.input.lname = user.name.last;
+            $scope.input.gender = user.gender;
+        }
+    );
 
 
 
+
+    //when setting the parameters for the sample data, set the initial page to the patient demographics
     $scope.input.action='patient';
 
+
     var cfOrganization = null;
-    //check that the reference resources (Practitioner, Organization etc) need for creating sample resources exist - creating them if not...
+    //check that the reference resources (Practitioner, Organization etc) need for creating sample resources exist
+    // on the data server - creating them if not...
     supportSvc.checkReferenceResources().then(
         function(referenceResources){
 
@@ -64,7 +80,6 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
         //console.log(type,bundle)
         $scope.outcome.selectedType = vo.type;
         $scope.outcome.allResourcesOfOneType = vo.bundle;
-
     };
 
 
@@ -79,6 +94,35 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
     $scope.save = function() {
         $scope.outcome.log = [];
 
+        supportSvc.createPatient($scope.input,cfOrganization).then(
+            //create the patient, returning the patientid created by the server...
+            function(id){
+                //now we can create the other resources...
+                addLog('Added patient with the id : '+ id)
+                loadSamplePatients();   //update the sample patients list...
+                supportSvc.createAppointments(id,{logFn:addLog});
+                supportSvc.createEncounters(id).then(
+                    function(msg) {
+                        addLog(msg);
+
+                        //at this point the new encounters are now in the referece array, so any resources that need to refer to an encounter can do so
+                        supportSvc.createConditions(id,{logFn:addLog});
+                        supportSvc.createObservations(id,{logFn:addLog});
+
+
+                    }
+                )
+
+
+            },
+            function(err){
+                alert('Unable to create patient: ' + angular.toJson(err));
+
+            }
+        );
+
+
+        /*
         //save the patient, get back the id then create & save the observations
         createPatient(function(err,id){
             if (id) {
@@ -99,9 +143,15 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
                 )
             }
         });
+
+        */
+
+
     };
 
+
     $scope.getVitals = function(){
+        //return the list of vitals observations so that a table can be generated
         delete $scope.outcome.selectedResource;
         delete $scope.outcome.selectedType;
         delete $scope.outcome.allResourcesOfOneType;
@@ -122,10 +172,6 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
                         return -1
                     }
                 });
-             //   console.log(dates)
-
-
-
 
                 //convert the data grid into one suitable for display - ie the dates (properties) as columns
                 $scope.vitalsTable = {rows:[],dates:[]};
@@ -165,7 +211,12 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
         $scope.outcome.log.push(display);
     };
 
-    var createPatient = function(cb){
+    var createPatientDEP = function(cb){
+
+
+
+        /*
+
         var patient = {"resourceType": "Patient"};
         var nameText = $scope.input.fname + " " + $scope.input.lname;
         patient.name = [{use:'official',family:[$scope.input.lname],given:[$scope.input.fname],text:nameText}];
@@ -196,6 +247,8 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
                 cb(err);
             }
         )
+
+        */
 
 
     };

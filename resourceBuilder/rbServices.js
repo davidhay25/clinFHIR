@@ -1,8 +1,7 @@
 /* These are all the services called by renderProfile */
 
 angular.module("sampleApp")
-    //this returns config options. When it's all working we'll allow multiple servers...
-//http://fhir.hl7.org.nz/dstu2/
+    //this returns config options. todo: have a user selection with storace in browser cache...
     .service('appConfig', function() {
         return {
             config : function() {
