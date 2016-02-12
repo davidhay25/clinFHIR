@@ -1,6 +1,5 @@
 angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
-
     //options for building the samples that will come from a UI
     var buildConfig = {};
     buildConfig.encounterObservation = .5;      //chance that a group of observations will reference an encounter

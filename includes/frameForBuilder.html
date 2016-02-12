@@ -1,10 +1,7 @@
 <div>
-    <!-- A frame to host the resource builder -->
-    <h5>ResourceBuilder</h5>
+    <!-- A frame to host the resource builder in the sample creator -->
 
-
-
-
+    <!-- a directive that allows a profile to be selected - not just a base one... -->
     <select-profile trigger="showFindProfileDialog"
                     all-resource-types="dynamic.resourcetypes"
                     profile-selected="selectedProfile" type="'profile'">
@@ -12,12 +9,12 @@
     </select-profile>
 
 
+    <!-- The directive for the resource builder -->
     <profile-form profile="dynamic.profile" allresources="dynamic.allresources"
-                  parkresource="dynamic.parkResource" patient="currentPatient"
-                  loadalldata="dynamic.loadAllData(id)" updated = "dynamic.updated"
-                  resourcetypes="dynamic.resourcetypes" show-chat="false"
-                  listen-socket="false" current-user="dynamic.currentUser"
-                  close-chat="dynamic.closeChat" select-profile="dynamic.selectProfile">
+                  parkresource="dynamic.parkResource" patient="dynamic.currentPatient"
+                  updated = "dynamic.updated"
+                  current-user="dynamic.currentUser"
+                  select-profile="dynamic.selectProfile">
 
     </profile-form>
 

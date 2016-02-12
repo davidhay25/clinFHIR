@@ -11,9 +11,7 @@
     <script src="js/libs/toArrayFilter.js"></script>
 
     <script>
-        //module for sample builder
         angular.module("sampleApp",['ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage'])
-
     </script>
 
     <script src="js/services.js"></script>
@@ -26,7 +24,6 @@
 
     <!-- files needed for resourceBuilder -->
     <script src="resourceBuilder/rbServices.js"></script>
-
     <script src="resourceBuilder/rbFrameCtrl.js"></script>
     <script src="resourceBuilder/renderProfile.js"></script>
     <script src="resourceBuilder/vsBrowser.js"></script>
@@ -96,6 +93,8 @@
                         </div>
 
                         <!-- This is the profile for the resource builder. It will show andmanage the whole UI-->
+
+                        <!--
                         <profile-form profile="dynamic.profile" allresources="dynamic.allresources"
                                       parkresource="dynamic.parkResource" patient="dynamic.currentPatient"
                                       updated = "dynamic.updated"
@@ -103,11 +102,12 @@
                                       select-profile="dynamic.selectProfile">
 
                         </profile-form>
-
+-->
 
                         <!--
-                        <ng-include src="'./includes/frameForBuilder.html'"></ng-include>
+
                         -->
+                        <ng-include src="'./includes/frameForBuilder.html'"></ng-include>
                     </div>
 
 
@@ -210,64 +210,11 @@
                                             </div>
                                         </div>
                                     </div>
-
-
-<!--
-
-
-                                    <uib-tabset>
-                                        <uib-tab heading="Json">
-                                            <pre>{{outcome.selectedResource | json:2}}</pre>
-                                        </uib-tab>
-
-                                        <uib-tab heading="References">
-                                            <h4>Outward references</h4>
-
-                                            <div class="list-group">
-                                                <div  class="list-group-item"
-                                                   ng-repeat="reference in resourceReferences.outwardLinks">
-                                                    <div class="pull-right">
-                                                        <a href="#" ng-click="selectNewResource(reference,$event)">
-                                                            <i class="glyphicon glyphicon-arrow-right"></i> </a>
-                                                    </div>
-                                                    <div>{{reference.element}} ==> {{reference.reference}}</div>
-                                                    <div><p ng-bind-html="reference.resource.text.div"></p></div>
-
-                                                </div>
-                                            </div>
-
-                                            <h4>Inward references</h4>
-
-                                            <div class="list-group">
-                                                <div  class="list-group-item"
-                                                   ng-repeat="reference in resourceReferences.inwardLinks">
-                                                    <div class="pull-right">
-                                                        <a href="#" ng-click="selectNewResource(reference,$event)">
-                                                            <i class="glyphicon glyphicon-arrow-right"></i> </a>
-                                                    </div>
-                                                    <div>{{reference.resource.resourceType}}/{{reference.resource.id}}.
-                                                        {{reference.name}}</div>
-                                                    <div><p ng-bind-html="reference.resource.text.div"></p></div>
-
-                                                </div>
-                                            </div>
-
-                                        </uib-tab>
-                                    </uib-tabset>
-
-                                -->
                                 </div>
 
                             </div>
                         </div>
-
-
                     </div>
-
-
-
-
-
                 </div>
 
 
@@ -290,14 +237,17 @@
                 <div class="row">
                     <div class="col-md-2">
 
+                        <h5>Options for Sample Create</h5>
                         <div class="list-group">
                             <a href="#" class="list-group-item" ng-click="input.action='patient'">Patient</a>
                             <a href="#" class="list-group-item" ng-click="input.action='observation'">Observations</a>
-                            <a href="#" class="list-group-item list-group-item-warning" ng-click="input.action='create'">Create</a>
-
 
                         </div>
 
+
+                        <div class="list-group">
+                            <a href="#" class="list-group-item" ng-click="input.action='create'">Create</a>
+                        </div>
 
                     </div>
                     <div class="col-md-10">
@@ -315,6 +265,16 @@
                         <div ng-show="input.action=='create'">
                             <div class="banner">Create sample data</div>
                             <form class="form-horizontal" role="form">
+
+
+                                <div class="form-group">
+                                    <label class="col-md-2 control-label">Patient</label>
+                                    <div class="col-md-4">
+                                        <p class="form-control">{{input.fname}} {{input.lname}}</p>
+                                    </div>
+                                </div>
+
+
                                 <div class="form-group">
                                     <label class="col-md-2 control-label">FHIR Server</label>
                                     <div class="col-md-4">
@@ -324,6 +284,8 @@
                                         </select>
                                     </div>
                                 </div>
+
+
                             </form>
 
                             <div class="row">

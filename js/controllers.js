@@ -8,6 +8,10 @@
 angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scope,$http,supportSvc,resourceSvc,
                                                         CommonDataSvc,appConfig) {
 
+    String.prototype.toProperCase = function () {
+        return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+    };
+
     //config - in particular the servers defined. The samples will be going to the data server...
     var config = appConfig.config();
     supportSvc.setServerBase(config.servers.data);
@@ -31,11 +35,17 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
 
     supportSvc.getRandomName().then(
         function(data) {
-            var user = data.data.results[0].user;
-            $scope.input.dob = moment(user.dob).format();
-            $scope.input.fname  = user.name.first;
-            $scope.input.lname = user.name.last;
-            $scope.input.gender = user.gender;
+            try {
+                var user = data.data.results[0].user;
+                $scope.input.dob = moment(user.dob).format();
+                $scope.input.fname  = user.name.first.toProperCase();
+                $scope.input.lname = user.name.last.toProperCase();
+                $scope.input.gender = user.gender;
+            } catch (ex) {
+                //in the case of an error - simply use the defaults
+                console.log('error getting sample name: ',ex)
+            }
+
         }
     );
 
