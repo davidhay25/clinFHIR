@@ -441,6 +441,15 @@ angular.module("sampleApp")
             if (! standardResourceTypes) {
                 $http.get('resourceBuilder/allResources.json').then(
                     function(data) {
+
+                        data.data.sort(function(a,b){
+                            if (a.name > b.name) {
+                                return 1
+                            } else return -1;
+
+                        });
+
+
                         standardResourceTypes = data.data;
 
                      //   data.data.forEach(function(item){

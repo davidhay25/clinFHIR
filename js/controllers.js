@@ -319,7 +319,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
                     } else {
                         return -1
                     }
-                })
+                });
 
 
                 //for the reference navigator we need a plain list of resources...
