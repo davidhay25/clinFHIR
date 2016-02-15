@@ -312,8 +312,20 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
 
     $scope.selectServer = function(server){
         supportSvc.setServerBase(server.url);
-        $scope.dataServer = server;        //so we can show the data server...
-        $scope.input.serverBase= server.url;    // the resource creator routines use this...
+        //need to check that the refernence resources (Practitioner, Organization) exist on the new server...
+        $scope.saving = true;
+        supportSvc.checkReferenceResources().then(
+            function(){
+                $scope.dataServer = server;        //so we can show the data server...
+                $scope.input.serverBase= server.url;    // the resource creator routines use this...
+            },
+        function(err){
+            alert('error creating the reference resoruces:' +angular.toJson(err));
+        }).finally(function(){
+            $scope.saving = false;
+        })
+
+
     }
 
 });

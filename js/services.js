@@ -26,6 +26,34 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
         }
     );
 
+    //create as a 'global' function - todo: is this the best way?
+    var getResourceIdFromHeaders = function(headers) {
+        //get the Id that the server assigned to the resource. The spec allows this to be either Location or Content-Location
+
+        console.log(headers)
+
+        //find where the serverId is...
+        var serverId;
+        serverId = headers('Content-Location');
+        if (! serverId) {
+            serverId = headers('Location');
+        }
+
+
+        if (! serverId) {
+            return null;
+        }
+        //the is is (or should be) of the format: [base]/[type]/[id]/_history/[vid] - so get the 3rd frm the end...
+console.log(serverId)
+        var ar = serverId.split('/');
+        if (ar.length < 3) {
+            return null;
+        }
+
+        return ar[ar.length-3];
+
+    }
+
 
 
     //resources that are used as reference targets by other resources...
@@ -81,17 +109,13 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             $http.post(uri,patient).then(
                 function(data) {
                     // console.log(data)
-                    var location = data.headers('location');
+                    var id = getResourceIdFromHeaders(data.headers)
+                    if (id) {
+                        deferred.resolve(id);
+                    } else {
+                        deferred.reject({err:'The server did not return a valid id'})
+                    }
 
-                   // $scope.outcome.patientId = location;
-                    var ar = location.split('/');
-                    var id = ar[5];
-                    deferred.resolve(id);
-                //    loadSamplePatients();
-                    // console.log(id)
-                    //cb(null,id);
-
-                    //addLog('Added patient: '+ location)
                 },
                 function(err) {
                     // console.log(err)
@@ -332,20 +356,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
             this.postBundle(bundle,referenceResources).then(
                 function(data){
-                    //now add the the referenceResources array in memory so that they can be used by other resources.
-                   /* data.data.entry.forEach(function(entry,index){
-                        console.log(entry)
-                        var location = entry.response.location;
-                        var ar = location.split('/');
-                        var id = ar[1];
-                        var resource = bundle.entry[index].resource;
-                        resource.id = id;
-                        referenceResources.push(resource)
-
-                        console.log(resource)
-
-
-                    }); */
 
 
                     deferred.resolve('Added ' + options.count + ' Encounters')
@@ -414,12 +424,13 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
             return deferred.promise;
 
-
-            //a function to check whether a resource already exists (based on the identifier), adding it if now...
+            //a function to check whether a resource already exists (based on the identifier), adding it if new...
+            //used by the 'reference' resources - eg Practitioner, Organization...
             function checkAndInsert(res) {
                 var deferred = $q.defer();
                 var identifierQuery = res.identifier.system + '|' + res.identifier.value;
                 var url = serverBase + res.resourceType + "?identifier="+identifierQuery;
+                //var that=this
                 //console.log(url);
                 $http.get(url).then(
                     function(data) {
@@ -432,9 +443,13 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                                     $http.post(postUrl,res).then(
                                         function(data){
                                             //need to get the resource id
-                                            var location = data.headers('location');
-                                            var ar = location.split('/');
-                                            res.id = ar[5];
+                                            var id = getResourceIdFromHeaders(data.headers)
+                                            if (! id) {
+                                                deferred.reject({err:'The server did not return a valid id'})
+                                            }
+
+
+                                            res.id = id;
                                             console.log('inserting:' + res);
                                             deferred.resolve()
                                         },
@@ -451,8 +466,9 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                                     deferred.resolve()
                                     break;
                                 default :
-                                    deferred.resolve()
+
                                     alert('There are ' + cnt + ' resources with this identifier');
+                                    deferred.resolve()
                                     break;
                             }
                         }
@@ -661,6 +677,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
             }
         }
+
         }
     }
 );
