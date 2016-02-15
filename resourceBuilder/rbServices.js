@@ -5,10 +5,18 @@ angular.module("sampleApp")
     .service('appConfig', function() {
         return {
             config : function() {
+                //todo - convert to a file and make async...
                 var config = {servers : {}}
                 config.servers.terminology = "http://fhir2.healthintersections.com.au/open/";
                 config.servers.data = "http://localhost:8080/baseDstu2/";
                 config.servers.conformance = "http://fhir2.healthintersections.com.au/open/";
+                config.allKnownServers = [];
+                config.allKnownServers.push({name:"Grahames server",url:"http://fhir2.healthintersections.com.au/open/"});
+                config.allKnownServers.push({name:"Local server",url:"http://localhost:8080/baseDstu2/"});
+                config.allKnownServers.push({name:"HAPI server",url:"http://fhirtest.uhn.ca/baseDstu2/"});
+                config.allKnownServers.push({name:"Spark Server",url:"http://spark-dstu2.furore.com/fhir/"});
+                config.allKnownServers.push({name:"HealthConnex (2.0",url:"http://sqlonfhir-dstu2.azurewebsites.net/fhir/"});
+
                 return config
             }
         }

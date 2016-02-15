@@ -19,9 +19,9 @@
     <script src="js/filters.js"></script>
     <script src="js/controllers.js"></script>
     <script src="js/libs/moment.min.js"></script>
-
+<!--
     <script src="js/appConfigSvc.js"></script>
-
+-->
     <!-- files needed for resourceBuilder -->
     <script src="resourceBuilder/rbServices.js"></script>
     <script src="resourceBuilder/rbFrameCtrl.js"></script>
@@ -40,7 +40,113 @@
 
     <div ng-app="sampleApp" ng-controller="sampleCtrl" class="container-fluid">
 
+        <div class="pull-right">{{dataServer.name}}</div>
+
         <uib-tabset>
+
+
+            <uib-tab heading="New Patient">
+
+                <br />
+
+                <div class="row">
+                    <div class="col-md-2">
+
+                        <h5>Options for Sample Creator</h5>
+                        <div class="list-group">
+                            <a href="#" class="list-group-item" ng-click="input.action='patient'">Patient</a>
+                            <a href="#" class="list-group-item" ng-click="input.action='observation'">Observations</a>
+
+                        </div>
+
+
+                        <h5>Action</h5>
+                        <div class="list-group">
+                            <a href="#" class="list-group-item" ng-click="input.action='create'">Create</a>
+                        </div>
+
+                    </div>
+                    <div class="col-md-10">
+
+
+                        <div ng-show="input.action=='observation'">
+                            <ng-include src="'./includes/newObservations.html'"></ng-include>
+                        </div>
+
+
+                        <div ng-show="input.action=='patient'">
+                            <ng-include src="'./includes/newPatient.html'"></ng-include>
+                        </div>
+
+                        <div ng-show="input.action=='create'">
+                            <div class="banner">Create sample data</div>
+                            <form class="form-horizontal" role="form">
+
+
+                                <div class="form-group">
+                                    <label class="col-md-2 control-label">Patient</label>
+                                    <div class="col-md-4">
+                                        <p class="form-control">{{input.fname}} {{input.lname}}</p>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <label class="col-md-2 control-label">FHIR Server</label>
+                                    <div class="col-md-4">
+                                        <!-- Todo - populate from a config server -->
+                                        <!--
+                                        <select ng-model="dataServer" class="form-control" ng-change="selectServer(dataServer)">
+                                            <option value="http://localhost:8080/baseDstu2/">Local Server</option>
+                                            <option value="http://fhir2.healthintersections.com.au/open/">Grahames server</option>
+                                        </select>
+
+-->
+                                        <select ng-model="dataServer" class="form-control" ng-change="selectServer(dataServer)"
+                                            ng-options = "item.name for item in config.allKnownServers">
+                                        </select>
+                                        <div>({{dataServer.url}})</div>
+
+
+                                    </div>
+                                </div>
+
+
+                            </form>
+
+                            <div class="row">
+                                <div class="col-md-offset-2 col-md-3">
+                                    <a href="#" ng-show="input.referenceResourcesAvailable"
+                                       ng-hide="saving"
+                                       ng-click="save()" class="btn btn-primary">Create sample data</a>
+                                    <img ng-show="saving" src="css/ajax_loader_blue_32.gif"/>
+                                </div>
+                            </div>
+
+                            <div class="row" ng-show="outcome.log.length > 0">
+
+                                <div class="col-md-offset-2 col-md-10">
+                                    <h4>Log</h4>
+                                    <div ng-repeat="log in outcome.log">
+                                        {{log}}
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+
+
+
+            </uib-tab>
+
+
 
             <uib-tab heading="Sample Patients">
                 <br />
@@ -59,10 +165,10 @@
                                 </select>
                             </div>
                             <div class="col-md-8">
-                                <p  ng-bind-html="outcome.demographicsHtml"></p>
+                                <p ng-bind-html="outcome.demographicsHtml"></p>
                             </div>
 
-                            <div class="col-md-2">
+                            <div class="col-md-2" ng-show="currentPatient">
                                 <a href="#" class="btn btn-link pull-right"  ng-show="global.state == 'new'"
                                    ng-click="global.state = 'view'">View Resources</a>
 
@@ -75,7 +181,7 @@
 
 
                 <!-- Include the profile-form directive that is the resource builder -->
-                <div ng-show = "global.state == 'new'" class="row">
+                <div ng-show = "global.state == 'new' && currentPatient" class="row">
 
                     <div ng-controller="rbFrameCtrl">
 
@@ -92,21 +198,7 @@
                             </div>
                         </div>
 
-                        <!-- This is the profile for the resource builder. It will show andmanage the whole UI-->
-
-                        <!--
-                        <profile-form profile="dynamic.profile" allresources="dynamic.allresources"
-                                      parkresource="dynamic.parkResource" patient="dynamic.currentPatient"
-                                      updated = "dynamic.updated"
-                                      current-user="dynamic.currentUser"
-                                      select-profile="dynamic.selectProfile">
-
-                        </profile-form>
--->
-
-                        <!--
-
-                        -->
+                        <!-- This is the profile for the resource builder. It will show and manage the whole resource builder UI-->
                         <ng-include src="'./includes/frameForBuilder.html'"></ng-include>
                     </div>
 
@@ -140,7 +232,6 @@
                                 <td>Item</td>
                                 <td ng-repeat="date in vitalsTable.dates track by $index">
                                     <div>{{date | date : 'dd-MMM-yy hh:mm'}}</div>
-                                    <!--<div>{{date | date : 'hh:mm'}}</div>-->
                                     <div>{{date | getAge}}</div>
                                 </td>
                             </tr>
@@ -225,98 +316,6 @@
 
             </uib-tab>
 
-
-
-            <uib-tab heading="New Patient">
-
-
-
-
-                <br />
-
-                <div class="row">
-                    <div class="col-md-2">
-
-                        <h5>Options for Sample Create</h5>
-                        <div class="list-group">
-                            <a href="#" class="list-group-item" ng-click="input.action='patient'">Patient</a>
-                            <a href="#" class="list-group-item" ng-click="input.action='observation'">Observations</a>
-
-                        </div>
-
-
-                        <div class="list-group">
-                            <a href="#" class="list-group-item" ng-click="input.action='create'">Create</a>
-                        </div>
-
-                    </div>
-                    <div class="col-md-10">
-
-
-                        <div ng-show="input.action=='observation'">
-                            <ng-include src="'./includes/newObservations.html'"></ng-include>
-                        </div>
-
-
-                        <div ng-show="input.action=='patient'">
-                            <ng-include src="'./includes/newPatient.html'"></ng-include>
-                        </div>
-
-                        <div ng-show="input.action=='create'">
-                            <div class="banner">Create sample data</div>
-                            <form class="form-horizontal" role="form">
-
-
-                                <div class="form-group">
-                                    <label class="col-md-2 control-label">Patient</label>
-                                    <div class="col-md-4">
-                                        <p class="form-control">{{input.fname}} {{input.lname}}</p>
-                                    </div>
-                                </div>
-
-
-                                <div class="form-group">
-                                    <label class="col-md-2 control-label">FHIR Server</label>
-                                    <div class="col-md-4">
-                                        <select ng-model="input.serverBase" class="form-control">
-                                            <option value="http://localhost:8080/baseDstu2/">Local Server</option>
-                                            <option value="http://fhir.hl7.org.nz/dstu2/">HL7 NZ</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-
-                            </form>
-
-                            <div class="row">
-                                <div class="col-md-offset-2 col-md-3">
-                                    <a href="#" ng-show="input.referenceResourcesAvailable"
-                                       ng-click="save()" class="btn btn-primary">Create sample data</a>
-                                </div>
-                            </div>
-
-                            <div class="row" ng-show="outcome.log.length > 0">
-
-                                <div class="col-md-offset-2 col-md-10">
-                                    <h4>Log</h4>
-                                    <div ng-repeat="log in outcome.log">
-                                        {{log}}
-                                    </div>
-                                </div>
-                            </div>
-
-
-                        </div>
-
-                    </div>
-                </div>
-
-
-
-
-
-
-            </uib-tab>
 
 
         </uib-tabset>

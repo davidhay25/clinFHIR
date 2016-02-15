@@ -6,7 +6,7 @@ A service that will return the configuration object for the application. Current
 angular.module("sampleApp")
     //this returns config options. When it's all working we'll allow multiple servers...
 
-    .service('appConfig', function() {
+    .service('appConfigDEP', function() {
         return {
             config : function() {
                 var config = {servers : {}}

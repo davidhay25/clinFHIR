@@ -18,10 +18,11 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
 
     //load the json file with all the optional values for creating samples...
-    var options;
+
+    var optionalValues;
     $http.get("artifacts/options.json").then(
         function(data) {
-            options = data.data
+            optionalValues = data.data
         }
     );
 
@@ -72,7 +73,9 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             patient.birthDate= moment(input.dob).format('YYYY-MM-DD');
             patient.managingOrganization = {display : 'sampleBuilder',reference : "Organization/"+cfOrganization.id};      //<<<< todo make a real org... - check at startus
 
-            patient.text = {status:'generated',div:nameText};
+            patient.text = {status:'generated',div:'<div>'+nameText+'</div>'};
+
+
             var uri = input.serverBase + "Patient";
 
             $http.post(uri,patient).then(
@@ -101,6 +104,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             return deferred.promise;
         },
         createAppointments : function(patientId,options) {
+            var deferred = $q.defer();
             var bundle = {resourceType: 'Bundle', type: 'transaction', entry: []};
             var data = [
                 {status:'pending',type:{text:'Cardiology'},description:'Investigate Angina',who:{text:'Clarence cardiology clinic'},delay:4},
@@ -134,11 +138,17 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                     if (options.logFn) {
                         options.logFn('Added '+cnt +' Appointments')
                     }
-
+                    deferred.resolve();
+                }, function(err) {
+                    alert(angular.toJson(err));
+                    if (options.logFn) {
+                        options.logFn('Adding appointments failed')
+                    }
+                    deferred.reject();
                 }
-            )
+            );
 
-
+            return deferred.promise;
 
 
         },
@@ -169,7 +179,8 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                     }
 
                     //obs.text = {status:'generated',div:item.display + ", "+ value + " "+ item.unit + " "+ obs.effectiveDateTime}
-                    obs.text = {status:'generated',div:item.display + ", "+ value + " "+ item.unit };
+                    var text = item.display + ", "+ value + " "+ item.unit;
+                    obs.text = {status:'generated',div: '<div>'+text+'</div>'};
                     bundle.entry.push({resource:obs,request: {method:'POST',url: 'Observation'}});
                     cnt ++;
                 })
@@ -207,7 +218,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                 var practitioner = this.getRandomReferenceResource('Practitioner');     //there will always be a practitioner
                 cond.asserter = {reference: "Practitioner/"+ practitioner.id};
 
-                cond.text = {status:'generated',div:cond.code.text};
+                cond.text = {status:'generated',div:'<div>'+cond.code.text+'</div>'};
                 bundle.entry.push({resource:cond,request: {method:'POST',url: 'Condition'}});
             }
 
@@ -263,6 +274,8 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             var today = moment().format();
             var problemList = {resourceType : 'List',title:'Problem List', entry:[], date : today,
                 subject : {reference:'Patient/'+id},
+                status : 'current',
+                mode: 'snapshot',
                 code : {coding : [{code:'problems',system:'http://hl7.org/fhir/list-example-use-codes'}]}};
 
 
@@ -290,7 +303,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             );
 
             return deferred.promise;
-
 
         },
         createEncounters : function (id,options) {
@@ -347,7 +359,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
         },
         getRandomEntryFromOptions : function(key){
             //return a random edtry from the options onject. The caller must know what the type of subjct object will be...
-            var lst = options[key];
+            var lst = optionalValues[key];
             if (lst) {
                 return lst[parseInt(lst.length * Math.random())];
             } else {

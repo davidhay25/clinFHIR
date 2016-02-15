@@ -5,21 +5,30 @@
 * */
 
 
-angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scope,$http,supportSvc,resourceSvc,
+angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scope,$http,supportSvc,resourceSvc, $q,
                                                         CommonDataSvc,appConfig) {
 
+    //function to capitalize the first letter of a word...
     String.prototype.toProperCase = function () {
         return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
     };
 
     //config - in particular the servers defined. The samples will be going to the data server...
-    var config = appConfig.config();
-    supportSvc.setServerBase(config.servers.data);
+    //var config = appConfig.config();
+    $scope.config = appConfig.config();
 
+    supportSvc.setServerBase($scope.config.servers.data);
+
+    $scope.dataServer = $scope.config.allKnownServers[0];
+
+
+    //$scope.dataServer = $scope.config.servers.data;        //so we can show the data server...
+
+    //$scope.input.server =
 
     //allows the user to select a different server at run time to save the samples...
     $scope.input = {observations:[]};
-    $scope.input.serverBase = config.servers.data;
+    $scope.input.serverBase = $scope.config.servers.data;
 
     $scope.outcome = {};
 
@@ -33,6 +42,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
     $scope.input.gender = "male";
     $scope.input.dob = "1972-05-15";
 
+    //this will call the external randomizing service...
     supportSvc.getRandomName().then(
         function(data) {
             try {
@@ -103,6 +113,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
 
     $scope.save = function() {
         $scope.outcome.log = [];
+        $scope.saving = true;
 
         supportSvc.createPatient($scope.input,cfOrganization).then(
             //create the patient, returning the patientid created by the server...
@@ -110,16 +121,26 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
                 //now we can create the other resources...
                 addLog('Added patient with the id : '+ id)
                 loadSamplePatients();   //update the sample patients list...
-                supportSvc.createAppointments(id,{logFn:addLog});
+
                 supportSvc.createEncounters(id).then(
                     function(msg) {
                         addLog(msg);
 
                         //at this point the new encounters are now in the referece array, so any resources that need to refer to an encounter can do so
-                        supportSvc.createConditions(id,{logFn:addLog});
-                        supportSvc.createObservations(id,{logFn:addLog});
 
+                        //process in a
 
+                        var query = [];
+                        query.push(supportSvc.createConditions(id,{logFn:addLog}));
+                        query.push(supportSvc.createObservations(id,{logFn:addLog}));
+                        query.push(supportSvc.createAppointments(id,{logFn:addLog}));
+
+                        $q.all(query).then(
+                            //regardless of success or failure, turn off the saving flag
+                            function() {
+                                $scope.saving = false;
+                            }
+                        )
                     }
                 )
 
@@ -127,34 +148,9 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
             },
             function(err){
                 alert('Unable to create patient: ' + angular.toJson(err));
-
+                $scope.saving = false;
             }
         );
-
-
-        /*
-        //save the patient, get back the id then create & save the observations
-        createPatient(function(err,id){
-            if (id) {
-
-
-                //createAppointments(id);
-                supportSvc.createAppointments(id,{logFn:addLog});
-                supportSvc.createEncounters(id).then(
-                    function(msg) {
-                        addLog(msg)
-                        //at this point the new encounters are now in the referece array, so any resources that need to refer to an encounter can do so
-
-                        supportSvc.createConditions(id,{logFn:addLog});
-                        supportSvc.createObservations(id,{logFn:addLog});
-
-
-                    }
-                )
-            }
-        });
-
-        */
 
 
     };
@@ -186,9 +182,6 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
                 //convert the data grid into one suitable for display - ie the dates (properties) as columns
                 $scope.vitalsTable = {rows:[],dates:[]};
 
-
-
-
                 var firstRow = true;
                 codes.forEach(function(code){
                     var row = {code:code.code,unit:code.unit,display:code.display,cols:[]};
@@ -211,56 +204,12 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
                 });
 
 
-//console.log($scope.vitalsTable)
-
             }
         )
     };
 
     var addLog = function(display) {
         $scope.outcome.log.push(display);
-    };
-
-    var createPatientDEP = function(cb){
-
-
-
-        /*
-
-        var patient = {"resourceType": "Patient"};
-        var nameText = $scope.input.fname + " " + $scope.input.lname;
-        patient.name = [{use:'official',family:[$scope.input.lname],given:[$scope.input.fname],text:nameText}];
-        patient.gender = $scope.input.gender;
-        patient.birthDate= moment($scope.input.dob).format('YYYY-MM-DD');
-        patient.managingOrganization = {display : 'sampleBuilder',reference : "Organization/"+cfOrganization.id};      //<<<< todo make a real org... - check at startus
-
-        patient.text = {status:'generated',div:nameText};
-        var uri = $scope.input.serverBase + "Patient";
-
-
-
-        $http.post(uri,patient).then(
-            function(data) {
-               // console.log(data)
-                var location = data.headers('location');
-                $scope.outcome.patientId = location;
-                var ar = location.split('/');
-                var id = ar[5];
-                loadSamplePatients();
-               // console.log(id)
-                cb(null,id);
-                addLog('Added patient: '+ location)
-            },
-            function(err) {
-               // console.log(err)
-                alert(angular.toJson(err));
-                cb(err);
-            }
-        )
-
-        */
-
-
     };
 
 
@@ -359,7 +308,12 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
         $scope.resourceSelected({resource:reference.resource})
         //$scope.resourceSelected({resource:$scope.allResourcesAsDict[reference.reference]})
 
-    }
+    };
 
+    $scope.selectServer = function(server){
+        supportSvc.setServerBase(server.url);
+        $scope.dataServer = server;        //so we can show the data server...
+        $scope.input.serverBase= server.url;    // the resource creator routines use this...
+    }
 
 });
