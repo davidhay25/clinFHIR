@@ -17,18 +17,16 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
     //var config = appConfig.config();
     $scope.config = appConfig.config();
 
-    supportSvc.setServerBase($scope.config.servers.data);
+    //supportSvc.setServerBase($scope.config.servers.data);
 
-    $scope.dataServer = $scope.config.allKnownServers[0];
+    //set the current dataserver...
+    $scope.dataServer = $scope.config.allKnownServers[0];   //{name:,url:}
+    supportSvc.setServerBase($scope.dataServer.url);
 
-
-    //$scope.dataServer = $scope.config.servers.data;        //so we can show the data server...
-
-    //$scope.input.server =
 
     //allows the user to select a different server at run time to save the samples...
     $scope.input = {observations:[]};
-    $scope.input.serverBase = $scope.config.servers.data;
+    //$scope.input.serverBase = $scope.config.servers.data;
 
     $scope.outcome = {};
 
@@ -42,22 +40,29 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
     $scope.input.gender = "male";
     $scope.input.dob = "1972-05-15";
 
-    //this will call the external randomizing service...
-    supportSvc.getRandomName().then(
-        function(data) {
-            try {
-                var user = data.data.results[0].user;
-                $scope.input.dob = moment(user.dob).format();
-                $scope.input.fname  = user.name.first.toProperCase();
-                $scope.input.lname = user.name.last.toProperCase();
-                $scope.input.gender = user.gender;
-            } catch (ex) {
-                //in the case of an error - simply use the defaults
-                console.log('error getting sample name: ',ex)
-            }
 
-        }
-    );
+
+
+    //create a random name, and set the local scope. Set as a function so can use elsewhere...
+    function getRandomName() {
+        //this will call the external randomizing service...
+        supportSvc.getRandomName().then(
+            function(data) {
+                try {
+                    var user = data.data.results[0].user;
+                    $scope.input.dob = moment(user.dob).format();
+                    $scope.input.fname  = user.name.first.toProperCase();
+                    $scope.input.lname = user.name.last.toProperCase();
+                    $scope.input.gender = user.gender;
+                } catch (ex) {
+                    //in the case of an error - simply use the defaults
+                    console.log('error getting sample name: ',ex)
+                }
+
+            }
+        );
+    }
+    getRandomName();    //invoke the function above...
 
 
 
@@ -72,9 +77,10 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
     supportSvc.checkReferenceResources().then(
         function(referenceResources){
 
+
             //find the Organization resource that refers to the authoring tool (how we know whch patients were created by it)
             referenceResources.forEach(function(res){
-                if (res.identifier && res.identifier.value == 'cf') {
+                if (res.resourceType == 'Organization'&& res.identifier && res.identifier[0].value == 'cf') {
                     cfOrganization = res;
                     loadSamplePatients();         //initial list of patients loaded through sample
                 }
@@ -89,9 +95,9 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
         }
     );
 
-    $scope.showPatient = function(patient) {
-        console.log(patient);
-    };
+
+
+
 
     $scope.typeSelected = function(vo) {
         //vo created to better support the display - has the type and the bundle containing all resources of that type
@@ -139,6 +145,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
                             //regardless of success or failure, turn off the saving flag
                             function() {
                                 $scope.saving = false;
+                                supportSvc.resetResourceReferences();   //remove all the newly created resources from the reference resource list...
                             }
                         )
                     }
@@ -232,6 +239,12 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
 
     //show a single patient - get their resources, create summary & display objects etc...
     $scope.showPatient = function(patient){
+        //triggerred by the 'onChange' event of the patiet selection - hence when the server is changed and a
+        //new set of patients retrieved, the eveny will be triggerred with no actual patient selected...
+        if (! patient) {
+            return;
+        }
+
 
         $scope.currentPatient = patient;
 
@@ -241,11 +254,11 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
 
 
         supportSvc.getAllData(patient.id).then(
-            //returns an object hash - type as hash, contents as bundle
+            //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
             function(allResources){
-                console.log(allResources);
 
-                //this is so the resourceBuilder knows who the patient is - and their data. todo A service might be better...
+
+                //this is so the resourceBuilder directive  knows who the patient is - and their data. todo A service might be better...
                 //the order is significant - allResources must be set first...
                 CommonDataSvc.setAllResources(allResources);
                 $rootScope.currentPatient = patient;
@@ -261,6 +274,10 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
 
 
                 });
+
+
+
+
 
                 $scope.outcome.resourceTypes.sort(function(a,b){
                     if (a.type > b.type) {
@@ -302,11 +319,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
 
 
     $scope.selectNewResource = function(reference) {
-        console.log(reference)
-        console.log($scope.allResourcesAsDict[reference.reference])
-
         $scope.resourceSelected({resource:reference.resource})
-        //$scope.resourceSelected({resource:$scope.allResourcesAsDict[reference.reference]})
 
     };
 
@@ -317,13 +330,33 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
         supportSvc.checkReferenceResources().then(
             function(){
                 $scope.dataServer = server;        //so we can show the data server...
-                $scope.input.serverBase= server.url;    // the resource creator routines use this...
+                supportSvc.setServerBase($scope.dataServer.url);
+                loadSamplePatients();       //get all the sample patients created by this app on that server
+
+                //these are all removing the patient specific structures. Might be better to move to a function...
+                delete $scope.currentPatient;   //no current patient selected
+                delete $scope.outcome.allResources;     //all the resources for the patient
+                delete $scope.outcome.resourceTypes;    //all the resource types for the patient
+
+                if ($scope.outcome && $scope.outcome.log) {
+                    $scope.outcome.log.length = 0;          //the log of actions...
+                }
+
+
+                //selected resource & vitals...
+                delete $scope.outcome.selectedResource;
+                delete $scope.vitalsTable;
+
+                getRandomName();                        //get a new patient name (just in case)
+                CommonDataSvc.setAllResources(null);    //the service that lets the resource builder know the patients resources (needed for resource references)
+                //$scope.input.serverBase= server.url;    // the resource creator routines use this...
             },
-        function(err){
-            alert('error creating the reference resoruces:' +angular.toJson(err));
-        }).finally(function(){
-            $scope.saving = false;
-        })
+            function(err){
+                alert('error creating the reference resoruces:' +angular.toJson(err));
+            }
+        ).finally(function(){
+                $scope.saving = false;
+            })
 
 
     }

@@ -8,7 +8,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
 
 
     var identifierSystem ='http://fhir.hl7.org.nz/identifier';
-    var serverBase;
+    var DataServerBase;
     var observations=[];    //used for generating sample data plus vitals...
     observations.push({code:'8310-5',display:'Body Temperature',min:36, max:39,unit:'C',round:10,isVital:true});
     observations.push({code:'8867-4',display:'Heart Rate',min:70,max:90,unit:'bpm',round:1,isVital:true});
@@ -30,7 +30,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
     var getResourceIdFromHeaders = function(headers) {
         //get the Id that the server assigned to the resource. The spec allows this to be either Location or Content-Location
 
-        console.log(headers)
 
         //find where the serverId is...
         var serverId;
@@ -44,7 +43,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             return null;
         }
         //the is is (or should be) of the format: [base]/[type]/[id]/_history/[vid] - so get the 3rd frm the end...
-console.log(serverId)
+
         var ar = serverId.split('/');
         if (ar.length < 3) {
             return null;
@@ -56,16 +55,26 @@ console.log(serverId)
 
 
 
-    //resources that are used as reference targets by other resources...
+    //resources that are used as reference targets by other resources. These need to be reset each time a
+    // patient is created or a server changed, as when a patient is created some of the resources are added
+    // to this arrray (like Encounter) so that they can be targets of other resources (eg when setting
+    // Condition.encounter..
     var referenceResources = [];
-    referenceResources.push({resourceType:'Practitioner',name:{text:'Dr John Doe'},
-        identifier : {value:'jd',system:identifierSystem},text:{status:'generated',div:'<div>Dr John Doe</div>'}});
-    referenceResources.push({resourceType:'Practitioner',name:{text:'Dr Annette Jones'},
-        identifier : {value:'aj',system:identifierSystem},text:{status:'generated',div:'<div>Dr Annette Jones</div>'}});
-    referenceResources.push({resourceType:'Organization',name:'clinFHIR Sample creator',
-        identifier : {value:'cf',system:identifierSystem},text:{status:'generated',div:'<div>clinFhir</div>'}});
+    function setUpReferenceResources() {
+        referenceResources.length = 0;
+        referenceResources.push({resourceType:'Practitioner',name:{text:'Dr John Doe'},
+            identifier : [{value:'jd',system:identifierSystem}],text:{status:'generated',div:'<div>Dr John Doe</div>'}});
+        referenceResources.push({resourceType:'Practitioner',name:{text:'Dr Annette Jones'},
+            identifier : [{value:'aj',system:identifierSystem}],text:{status:'generated',div:'<div>Dr Annette Jones</div>'}});
+        referenceResources.push({resourceType:'Organization',name:'clinFHIR Sample creator',
+            identifier : [{value:'cf',system:identifierSystem}],text:{status:'generated',div:'<div>clinFhir</div>'}});
+    }
+    setUpReferenceResources();
 
     return {
+        resetResourceReferences : function() {
+            setUpReferenceResources();
+        },
         getRandomName : function() {
             //get a random name from an on-line service...
 
@@ -104,11 +113,11 @@ console.log(serverId)
             patient.text = {status:'generated',div:'<div>'+nameText+'</div>'};
 
 
-            var uri = input.serverBase + "Patient";
+            var uri = DataServerBase + "Patient";
 
             $http.post(uri,patient).then(
                 function(data) {
-                    // console.log(data)
+
                     var id = getResourceIdFromHeaders(data.headers)
                     if (id) {
                         deferred.resolve(id);
@@ -118,12 +127,11 @@ console.log(serverId)
 
                 },
                 function(err) {
-                    // console.log(err)
-                   // alert(angular.toJson(err));
+
                     deferred.reject(err)
-                    //cb(err);
+
                 }
-            )
+            );
 
             return deferred.promise;
         },
@@ -221,7 +229,7 @@ console.log(serverId)
 
         },
         createConditions : function (id,options) {
-           // console.log(referenceResources);
+
             //create a set of encounters for the patient and add them to the referenceResources (just for this session)
             var deferred = $q.defer();
             var that = this;
@@ -250,8 +258,7 @@ console.log(serverId)
                 function(data){
                     //now add the the referenceResources array in memory so that they can be used by other resources.
                     data.data.entry.forEach(function(entry){
-                        console.log(entry)
-                       // referenceResources.push(entry.resource)
+
                     });
 
                     if (options.logFn) {
@@ -274,7 +281,7 @@ console.log(serverId)
                                 }
                             ).finally(function(){
                                 //don't need to do anything different based on the outcome of the operation
-                                console.log('finally')
+
                                 deferred.resolve();
                             });
                             break;
@@ -315,7 +322,7 @@ console.log(serverId)
                 problemList.entry.push(entry);
             }
             // ... and save
-            var url = serverBase+ "List";
+            var url = DataServerBase+ "List";
             $http.post(url,problemList).then(
                 function (data) {
                     deferred.resolve();
@@ -351,7 +358,7 @@ console.log(serverId)
 
 
                 bundle.entry.push({resource:enc,request: {method:'POST',url: 'Encounter'}});
-                //console.log(enc)
+
             }
 
             this.postBundle(bundle,referenceResources).then(
@@ -388,7 +395,7 @@ console.log(serverId)
             // Next assemble the list of possiilities..
             var lst = [];
             referenceResources.forEach(function(res){
-               // console.log(res);
+
                 if (res.resourceType == type) {
                     lst.push(res)
                 }
@@ -401,6 +408,7 @@ console.log(serverId)
             var deferred = $q.defer();
             var arQuery = [];
             referenceResources.forEach(function(res){
+                delete res.id;      //because this function is called when a server is selected, any Id from a previous server must be removed...
                 arQuery.push(
                 checkAndInsert(res).then(
                     function(){
@@ -412,7 +420,7 @@ console.log(serverId)
 
             $q.all(arQuery).then(
                 function(data){
-                   // console.log(referenceResources);
+
                     deferred.resolve(referenceResources);
                 },
                 function(err){
@@ -420,18 +428,23 @@ console.log(serverId)
                     deferred.reject(err);
                 });
 
-
-
             return deferred.promise;
 
             //a function to check whether a resource already exists (based on the identifier), adding it if new...
             //used by the 'reference' resources - eg Practitioner, Organization...
             function checkAndInsert(res) {
                 var deferred = $q.defer();
-                var identifierQuery = res.identifier.system + '|' + res.identifier.value;
-                var url = serverBase + res.resourceType + "?identifier="+identifierQuery;
-                //var that=this
-                //console.log(url);
+
+                //only check the resources with an identifier.
+                if (!res.identifier) {
+                    //alert('The resource has no identifer: '+angular.toJson(res))
+                    deferred.resolve();
+                    return deferred.promise;
+                }
+
+                var identifierQuery = res.identifier[0].system + '|' + res.identifier[0].value;
+                var url = DataServerBase + res.resourceType + "?identifier="+identifierQuery;
+
                 $http.get(url).then(
                     function(data) {
                         if (data.data && data.data) {
@@ -439,7 +452,7 @@ console.log(serverId)
                             switch (cnt) {
                                 case 0 :
                                     //need to add this one
-                                    var postUrl = serverBase + res.resourceType;
+                                    var postUrl = DataServerBase + res.resourceType;
                                     $http.post(postUrl,res).then(
                                         function(data){
                                             //need to get the resource id
@@ -450,7 +463,7 @@ console.log(serverId)
 
 
                                             res.id = id;
-                                            console.log('inserting:' + res);
+
                                             deferred.resolve()
                                         },
                                         function(err) {
@@ -467,7 +480,8 @@ console.log(serverId)
                                     break;
                                 default :
 
-                                    alert('There are ' + cnt + ' resources with this identifier');
+                                    console.log('There are ' + cnt + ' resources with the identifier '+identifierQuery+'(Picking the first one)');
+                                    res.id = data.data.entry[0].resource.id;
                                     deferred.resolve()
                                     break;
                             }
@@ -492,7 +506,7 @@ console.log(serverId)
             var response = {vitalsCodes:[]};      //the response object as we want to return more than one thing...
 
             //create the url for retrieving the vitals data. Want to show how it could be done...
-            var url = serverBase+"Observation?subject="+patientId;
+            var url = DataServerBase+"Observation?subject=Patient/"+patientId;
 
             //create the list of codes to include in the query
             var filterString="";
@@ -507,10 +521,10 @@ console.log(serverId)
             url += "&code="+filterString;
             url += "&_count=100";
 
-            console.log('url='+url);
+
             $http.get(url).then(
                 function(data){
-                    console.log(data);
+
                     response.grid = that.getGridOfObservations(data.data);      //an object hashed by date.
 
 
@@ -541,7 +555,20 @@ console.log(serverId)
             var allResources = {};
 
             resources.forEach(function(item){
-                var uri = serverBase + item.type + "?" + item.patientReference + "=" + patientId + "&_count=100";
+
+                //if the reference is a subject (rather than a patient) then be explicit about the
+                //type that is being searched.
+                var uri;
+                if (item.patientReference == 'subject') {
+                    uri = DataServerBase + item.type + "?" + item.patientReference + "=Patient/" + patientId + "&_count=100";
+                } else {
+                    uri = DataServerBase + item.type + "?" + item.patientReference + "=" + patientId + "&_count=100";
+                }
+
+
+
+
+
                 arQuery.push(
 
                     getAllResources(uri).then(
@@ -604,25 +631,25 @@ console.log(serverId)
         },
         loadSamplePatients : function(vo) {
             //var deferred = $q.defer();
-            var uri = serverBase + "Patient?organization="+vo.organizationId+"&_count=100";     //<<<<<
+            var uri = DataServerBase + "Patient?organization="+vo.organizationId+"&_count=100";     //<<<<<
             return $http.get(uri);
         },
         setServerBase : function(sb) {
-            serverBase = sb;
+            DataServerBase = sb;
         },
         getServerBaseDEP : function(sb) {
-            return serverBase;
+            return DataServerBase;
         },
         postBundle : function(bundle,referenceResources) {
             //sent the bundle to the server. If referenceResources is supplied, then add the resources to that list (with id)
             var deferred = $q.defer();
-            $http.post(serverBase,bundle).then(
+            $http.post(DataServerBase,bundle).then(
                 function(data) {
 
 
                     if (referenceResources) {
                         data.data.entry.forEach(function (entry, index) {
-                            //console.log(entry)
+
                             var location = entry.response.location;
                             var ar = location.split('/');
                             var id = ar[1];
@@ -630,7 +657,7 @@ console.log(serverId)
                             resource.id = id;
                             referenceResources.push(resource)
 
-                            //console.log(resource)
+
 
 
                         });
@@ -671,7 +698,6 @@ console.log(serverId)
 
                 });
 
-                console.log(grid);
 
                 return grid;
 

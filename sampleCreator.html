@@ -40,7 +40,18 @@
 
     <div ng-app="sampleApp" ng-controller="sampleCtrl" class="container-fluid">
 
-        <div class="pull-right">{{dataServer.name}}</div>
+        <div class="pull-right">
+            <!--{{dataServer.name}}-->
+
+            <select ng-model="dataServer" class="form-control" ng-change="selectServer(dataServer)"
+                    ng-options = "item.name for item in config.allKnownServers"
+                    title = "{{dataServer.url}}">
+            </select>
+
+
+        </div>
+
+
 
         <uib-tabset>
 
@@ -90,18 +101,10 @@
                                     </div>
                                 </div>
 
-
+<!--
                                 <div class="form-group">
                                     <label class="col-md-2 control-label">FHIR Server</label>
                                     <div class="col-md-4">
-                                        <!-- Todo - populate from a config server -->
-                                        <!--
-                                        <select ng-model="dataServer" class="form-control" ng-change="selectServer(dataServer)">
-                                            <option value="http://localhost:8080/baseDstu2/">Local Server</option>
-                                            <option value="http://fhir2.healthintersections.com.au/open/">Grahames server</option>
-                                        </select>
-
--->
                                         <select ng-model="dataServer" class="form-control" ng-change="selectServer(dataServer)"
                                             ng-options = "item.name for item in config.allKnownServers">
                                         </select>
@@ -110,6 +113,7 @@
 
                                     </div>
                                 </div>
+                                -->
 
 
                             </form>
