@@ -64,7 +64,7 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
 
                 /*
                 Utilities.validate($scope.generatedResourceForValidation,function(result){
-                    console.log(result);
+
                     $scope.validationInProgress = false;
                     if (result.issue) {
                         delete result.text;
@@ -139,7 +139,6 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
                         RenderProfileSvc.parseProfile($scope.profile).then(
                             function(data) {
                                 $scope.parsedElementList = data;
-                                //console.log(data)
 
                                 drawListOfElements(data[0]);     //parent as the root..
 
@@ -190,7 +189,7 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
                     $scope.allResources = CommonDataSvc.getAllResources();
 
 
-                console.log($scope.patient,$scope.allResources)
+
                     //clear the decks
                     delete $scope.parked;
                     delete $scope.dataType;
@@ -205,7 +204,7 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
 
             //this populates the table with the elements from the profile...
             function drawListOfElements(parent) {
-                //console.log('draw',parent);
+
                 $scope.elementList.length=0;
                 var arParentPath = parent.path.split('.');
 
@@ -220,7 +219,7 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
                         parent.selectedPage = 0;
                     } else if (parent.path.indexOf('.') !== -1 && ! parent.type) {
                         //this is for prpperties like medicationPrescription.dispense that have single, complex children
-                        //console.log(parent);
+
                         parent.value = [{}];
                         parent.selectedPage = 0;
                     } else {
@@ -296,8 +295,7 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
                     display:display,index:$scope.crumbs.length});  //first element is the root
 
                 $scope.currentlySelectedRoot = element;
-                //console.log(element)
-               // drawListOfElements(element)
+
 
                 drawListOfElements(element)
 
@@ -305,12 +303,12 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
 
             $scope.selectFromCrumb = function(crumb) {
                 delete $scope.dataType;
-               // drawListOfElements(crumb.element);
+
                 drawListOfElements(crumb.element)
                 $scope.currentlySelectedRoot = crumb.element;
                 //delete everything to the right in the crumb trail
                 $scope.crumbs.splice(crumb.index+1,5);
-                //console.log(crumb)
+
             };
 
             //adds a page to the currentlySelectedRoot
@@ -699,7 +697,7 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
 
                 //set the key for this value.
                 var key = rootElement.key + '-' +inx + '-' + propertyName;
-console.log('key',key);
+
 
                 var valueObject = {v:v,key:key,dataType:dataType,text:text,element:element,isPrimitive: isPrimitive};
 
@@ -718,7 +716,7 @@ console.log('key',key);
                     valueObject.v = extension;
                     //if this is a simple extension, then the propertyName will be 'extension'. Otherwise, it will come from the url (which is a code)...
                     propertyName = 'extension';      //this will cause all extensions to be places in an array wit th ename 'extension' against tthe root
-                    console.log('ext',valueObject);
+
                 }
 
 
@@ -845,7 +843,7 @@ console.log('key',key);
                     if (vs) {
                         $scope.showVSBrowser(vs)
                     } else {
-                        console.log()
+
                         alert("I'm sorry, I was unable to load the ValueSet: "+$scope.vsReference)
                     }
                 })
@@ -974,8 +972,7 @@ console.log('key',key);
 
 
                 //by default make the separate spec page a datatype. The resource reference will override this...
-                //console.log()
-                //var datatype = "";
+
                 $scope.externalReferenceSpecPage = "http://hl7.org/datatypes.html#" + $scope.dataType;
 
 
@@ -992,7 +989,7 @@ console.log('key',key);
                         //age-units
                         GetDataFromServer.getExpandedValueSet('ucum-common').then(
                             function(vs) {
-                                //console.log(vs);
+
                                 $scope.showWaiting = false;
                                 $scope.ucum = vs.expansion.contains;
                             }, function(err){
@@ -1211,7 +1208,7 @@ console.log('key',key);
                             //retrieve the reference to the ValueSet
                             var valueSetReference = RenderProfileSvc.getValueSetReferenceFromBinding(element);
 
-                            console.log(valueSetReference);
+
 
                             if (valueSetReference) {
 
@@ -1257,10 +1254,10 @@ console.log('key',key);
                 $uibModal.open({
                     templateUrl: 'resourceBuilder/confirmNewResource.html',
                     size:'lg',
-                    controller: function($scope,resource,profile,user,parentScope) {
+                    controller: function($scope,resource,profile,user,parentScope,reloadAllResources) {
 
 
-                        //$scope.reloadAllResources = reloadAllResources;
+                        $scope.reloadAllResources = reloadAllResources;
                         $scope.resource = resource;
                         $scope.resourceAsString = JSON.stringify(resource,null,2);
                         $scope.outcome="";       //not saved yet...
@@ -1278,7 +1275,7 @@ console.log('key',key);
                             SaveDataToServer.saveResource($scope.resource).then(
                                 function(data) {
                                     //save successful...
-                                    console.log(data);
+
                                     $scope.saveState='success';
                                     $scope.saving = false;
                                     $scope.outcome = "Resource saved with the ID:";
@@ -1292,7 +1289,7 @@ console.log('key',key);
                                     }
 
 
-                                    console.log(serverId)
+
                                     $scope.outcome += serverId;
 
                                     $scope.allowNewConversation = true;
@@ -1307,7 +1304,7 @@ console.log('key',key);
 
                                     //re-load all the resources for this patient as chances are this new resource references it...
                                     //http://stackoverflow.com/questions/30244358/angularjs-directive-element-method-binding-typeerror-cannot-use-in-operator
-                                    //$scope.reloadAllResources({id:serverId});
+                                    $scope.reloadAllResources()({id:serverId});
                                 },
                                 function(err) {
                                     console.log(err)
@@ -1341,11 +1338,9 @@ console.log('key',key);
                         user :function(){
                             return $scope.currentUser;
                         },
-
-
-                       // reloadAllResources : function() {
-                     //       return $scope.loadalldata;     //this is the external load function...
-                       // },
+                        reloadAllResources : function() {
+                            return $scope.loadalldata;     //this is the external load function...
+                        },
                         parentScope : function() {
                             //needed so we can emit events from the scope - eg when a resource is rejected...
                             return $scope;
@@ -1468,7 +1463,7 @@ console.log('key',key);
 
                                 var lst = data.expansion.contains;
 
-                                //console.log(lst)
+
 /*  TEMP TODO - just for connectathon testing...
                                 lst.sort(function(a,b){
                                     if (a.display > b.display) {

@@ -1,59 +1,65 @@
 <div>
 
 
-    <div class="row" ng-show="entry.resource.resourceType == 'List'">
-        <div class="col-md-5">
-            {{entry.resource.title}}
+    <div ng-switch on="entry.resource.resourceType">
 
+        <div class="row" ng-switch-when="List">
+            <div class="col-md-5">
+                {{entry.resource.title}}
+
+            </div>
+            <div class="col-md-7">
+                <p ng-bind-html="entry.resource.text.div"></p>
+            </div>
         </div>
-        <div class="col-md-7">
-            <p ng-bind-html="entry.resource.text.div"></p>
+
+        <div class="row" ng-switch-when="Observation">
+            <div class="col-md-5">
+                <div>{{entry.resource.effectiveDateTime | date : 'yyyy-MM-dd'}}</div>
+                <div>{{entry.resource.effectiveDateTime | getAge}}</div>
+            </div>
+            <div class="col-md-7">
+                <p  ng-bind-html="entry.resource.text.div"></p>
+            </div>
         </div>
+
+        <div class="row" ng-switch-when="Appointment">
+            <div class="col-md-5">
+                <div>{{entry.resource.start | date : 'yyyy-MM-dd hh:mm'}}</div>
+                <div>{{entry.resource.minutesDuration}} minutes</div>
+            </div>
+            <div class="col-md-7">
+                <p ng-bind-html="entry.resource.text.div"></p>
+            </div>
+        </div>
+
+        <div class="row" ng-switch-when="Condition">
+            <div class="col-md-5">
+
+            </div>
+            <div class="col-md-7">
+                <p ng-bind-html="entry.resource.text.div"></p>
+            </div>
+        </div>
+
+        <div class="row" ng-switch-when="Encounter">
+            <div class="col-md-5">
+                <div>{{entry.resource.period.start | date : 'yyyy-MM-dd hh:mm'}}</div>
+                <div>{{entry.resource.period.start | getAge}} ago</div>
+            </div>
+            <div class="col-md-7">
+                <p ng-bind-html="entry.resource.text.div"></p>
+            </div>
+        </div>
+
+        <div class="row" ng-switch-default>
+            <div class="col-md-12">
+                <p ng-bind-html="entry.resource.text.div"></p>
+            </div>
+        </div>
+
     </div>
 
-
-
-
-
-    <div class="row" ng-show="entry.resource.resourceType == 'Observation'">
-        <div class="col-md-5">
-            <div>{{entry.resource.effectiveDateTime | date : 'yyyy-MM-dd'}}</div>
-            <div>{{entry.resource.effectiveDateTime | getAge}}</div>
-        </div>
-        <div class="col-md-7">
-            <p  ng-bind-html="entry.resource.text.div"></p>
-        </div>
-
-    </div>
-
-    <div class="row" ng-show="entry.resource.resourceType == 'Appointment'">
-        <div class="col-md-5">
-            <div>{{entry.resource.start | date : 'yyyy-MM-dd hh:mm'}}</div>
-            <div>{{entry.resource.minutesDuration}} minutes</div>
-        </div>
-        <div class="col-md-7">
-            <p ng-bind-html="entry.resource.text.div"></p>
-        </div>
-    </div>
-
-    <div class="row" ng-show="entry.resource.resourceType == 'Encounter'">
-        <div class="col-md-5">
-            <div>{{entry.resource.period.start | date : 'yyyy-MM-dd hh:mm'}}</div>
-            <div>{{entry.resource.period.start | getAge}} ago</div>
-        </div>
-        <div class="col-md-7">
-            <p ng-bind-html="entry.resource.text.div"></p>
-        </div>
-    </div>
-
-    <div class="row" ng-show="entry.resource.resourceType == 'Condition'">
-        <div class="col-md-5">
-
-        </div>
-        <div class="col-md-7">
-            <p ng-bind-html="entry.resource.text.div"></p>
-        </div>
-    </div>
 
 
 </div>

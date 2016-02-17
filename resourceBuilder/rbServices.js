@@ -2,7 +2,7 @@
 
 angular.module("sampleApp")
     //this returns config options. todo: have a user selection with storace in browser cache...
-    .service('appConfig', function() {
+    .service('appConfigDEP', function() {
         return {
             config : function() {
                 //todo - convert to a file and make async...
@@ -32,13 +32,13 @@ angular.module("sampleApp")
             }
         }
     }).
-    service('SaveDataToServer', function($http,$q,appConfig) {
+    service('SaveDataToServer', function($http,$q,appConfigSvc) {
     return {
         saveResource : function(resource) {
             var deferred = $q.defer();
             //alert('saving:\n'+angular.toJson(resource));
-            var config = appConfig.config();
-            var qry = config.servers.data + resource.resourceType;
+            //var config = appConfigSvc.config();
+            var qry = appConfigSvc.getCurrentDataServerBase() + resource.resourceType;
             console.log(qry)
             $http.post(qry, resource).then(
                 function(data) {
@@ -58,7 +58,7 @@ angular.module("sampleApp")
         }
     }
 
-}).service('GetDataFromServer', function($http,$q,appConfig,Utilities) {
+}).service('GetDataFromServer', function($http,$q,appConfigSvc,Utilities) {
     return {
         getValueSet : function(ref,cb) {
             var deferred = $q.defer();
@@ -80,7 +80,7 @@ angular.module("sampleApp")
             //return an expanded valueset. Used by renderProfile Should only use for valuesets that aren't too large...
             //takes the Id of the valueset on the terminology server - not the url...
             var deferred = $q.defer();
-            var config = appConfig.config();
+            var config = appConfigSvc.config();
             var qry = config.servers.terminology + "ValueSet/"+id + "/$expand";
 
             $http.get(qry).then(
@@ -97,7 +97,7 @@ angular.module("sampleApp")
         },
         getFilteredValueSet : function(name,filter){
             //return a filtered selection from a valueset. Uses the $expand operation on grahames server...
-            var config = appConfig.config();
+            var config = appConfigSvc.config();
             var qry = config.servers.terminology + "ValueSet/"+name+"/$expand?filter="+filter;
 
 
@@ -132,16 +132,15 @@ angular.module("sampleApp")
     }
 
 
-}).service('Utilities', function($http,$q,$localStorage,appConfig) {
+}).service('Utilities', function($http,$q,$localStorage,appConfigSvc) {
     return {
         validate : function(resource,cb) {
             var deferred = $q.defer();
-            var config = appConfig.config();
 
             var clone = angular.copy(resource);
             delete clone.localMeta;
 
-            var qry = config.servers.data + resource.resourceType + "/$validate";
+            var qry = appConfigSvc.getCurrentDataServerBase() + resource.resourceType + "/$validate";
             console.log(qry)
             $http.post(qry, clone).then(
                 function(data) {
@@ -201,7 +200,7 @@ angular.module("sampleApp")
         },
         getValueSetIdFromRegistry : function(uri,cb) {
             //return the id of the ValueSet on the terminology server. For now, assume at the VS is on the terminology.
-            var config = appConfig.config();
+            var config = appConfigSvc.config();
             var qry = config.servers.terminology + "ValueSet?url=" + uri;
             var that = this;
 
@@ -238,23 +237,16 @@ angular.module("sampleApp")
 
         },
         validateResourceAgainstProfile : function(resource,profile) {
-            alert('validateResourceAgainstProfle stub not implemented yet');
+            //alert('validateResourceAgainstProfle stub not implemented yet');
         },
         isVSaList : function(uri) {
-            //Is this a small set
-            //todo - no need for the replace stuff any more - a simple boolean will suffice...
+            //The set of valueSets that are small and can be rendered as a set of radiobuttons
+            //todo - no need for the replace stuff any more - a simple boolean should suffice...
             vsLookup = [];
             vsLookup['condition-severity'] = {id:'valueset-condition-severity',minLength:1,type:'list'};
             vsLookup['condition-category'] = {id:'valueset-condition-category',type:'list'};
-            //vsLookup['manifestation-or-symptom'] = {id:'valueset-manifestation-or-symptom',minLength:3};
-            //vsLookup['valueset-medication-code'] = {id:'valueset-medication-code',minLength:3};
-
-           // vsLookup['valueset-route-code'] = {id:'valueset-route-code',minLength:1};
-            //vsLookup['valueset-administration-method-codes'] = {id:'valueset-administration-method-codes',minLength:3};
-
             vsLookup['condition-certainty'] = {id:'valueset-condition-certainty',minLength:1,type:'list'};
             vsLookup['list-empty-reason'] = {id:'valueset-list-empty-reason',minLength:1,type:'list'};
-
             vsLookup['list-item-flag'] = {id:'valueset-list-item-flag',minLength:1,type:'list'};
             vsLookup['basic-resource-type'] = {id:'valueset-basic-resource-type',minLength:1,type:'list'};
 
@@ -262,31 +254,21 @@ angular.module("sampleApp")
             //these 3 are from extensions - this passes in the full url - todo - does this need review??
             //I think that past DSTU-2 the urls' should all resolve directly...
             vsLookup['ReligiousAffiliation'] = {id:'v3-ReligiousAffiliation',minLength:1,type:'list'};
-            //vsLookup['Race'] = {id:'v3-Race',minLength:1};
             vsLookup['Ethnicity'] = {id:'v3-Ethnicity',minLength:1,type:'list'};
             vsLookup['investigation-sets'] = {id:'valueset-investigation-sets',minLength:1,type:'list'};
             vsLookup['observation-interpretation'] = {id:'valueset-observation-interpretation',minLength:1,type:'list'};
             vsLookup['marital-status'] = {id:'marital-status',minLength:1,type:'list'};
-
             vsLookup['ActPharmacySupplyType'] ={id:'v3-vs-ActPharmacySupplyType',minLength:1,type:'list'};
-
             vsLookup['Confidentiality'] = {id:'v2-0272',minLength:1,type:'list'};
             vsLookup['composition-status'] = {id:'composition-status',minLength:1,type:'list'};
             vsLookup['observation-status'] = {id:'observation-status',minLength:1,type:'list'};
             vsLookup['condition-status'] = {id:'condition-status',minLength:1,type:'list'};
             vsLookup['administrative-gender'] = {id:'administrative-gender',minLength:1,type:'list'};
-
             vsLookup['reason-medication-not-given-codes'] = {type:'list'};
             vsLookup['care-plan-activity-category'] = {type:'list'};
-
-
             var ar = uri.split('/');
             var vsName = ar[ar.length - 1];
 
-
-            //GetDataFromServer.getValueSet(valueSetReference.reference,function(vsDetails){
-
-            //if there's a definition then return it, otherwise return the default
 
 
 
@@ -363,10 +345,8 @@ angular.module("sampleApp")
         angular.forEach(invalue,function(value,propertyName) {     //value will be an object...
 
             //now to check the extensions...
-            //if (value.myMeta && value.myMeta.isExtension) {
             if (propertyName && propertyName == 'extension') {
 
-                //console.log(propertyName)
 
                 value.forEach(function(vo){
 
@@ -402,16 +382,8 @@ angular.module("sampleApp")
                             }
                             insertionPoint[parentPropertyName].extension.push(vo.v);
                         }
-
                     }
-
-
-
-
-
                 })
-
-
             }
         });
 
@@ -460,9 +432,6 @@ angular.module("sampleApp")
 
                         standardResourceTypes = data.data;
 
-                     //   data.data.forEach(function(item){
-                     //       standardResourceTypes[item.name] = item;
-                     //   });
                         deferred.resolve(standardResourceTypes)
                     },
                     function(err) {
@@ -985,7 +954,6 @@ angular.module("sampleApp")
                 if (SD.constrainedType) {
                     //this is a profile
                     resource.meta.profile = [SD.url]
-                    //console.log(SD);
                 }
 
                 //check for a patient reference in the resource (if a patient has been supplied

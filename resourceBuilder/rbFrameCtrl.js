@@ -1,8 +1,7 @@
-angular.module("sampleApp").controller('rbFrameCtrl', function ($rootScope, $scope,$http,RenderProfileSvc,appConfig) {
+angular.module("sampleApp").controller('rbFrameCtrl', function ($rootScope, $scope,$http,RenderProfileSvc,appConfigSvc,supportSvc) {
     //controller for the rbFrame page that holds the resource builder - renderProfile.js
 
-    //var serverBase = "http://fhir.hl7.org.nz/dstu2/";
-    var config = appConfig.config();
+    var config = appConfigSvc.config();
 
     //get all the standard resource types - the one defined in the fhor spec...
     RenderProfileSvc.getAllStandardResourceTypes().then(
@@ -50,10 +49,28 @@ angular.module("sampleApp").controller('rbFrameCtrl', function ($rootScope, $sco
         alert('Park functionality not enabled yet')
     };
     $scope.dynamic.loadAllData = function(id) {
-
-    };
-    $scope.dynamic.updated = function(id) {
         //called after a resource has been saved
+
+        console.log(id);
+
+        supportSvc.getAllData($rootScope.currentPatient.id).then(
+            //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
+            function(allResources){
+               // $scope.dynamic.allResources
+               // CommonDataSvc.setAllResources(allResources);
+                //todo - need to update the 'allResources' for the builder...
+                $rootScope.$emit('newresourcecreated');     //so the sample creator knows aboutit...
+            },
+            function(err){
+                alert('There was an error re-reading the list of resources for this patient:\n'+angular.toJson(err))
+            }
+        )
+    };
+
+    $scope.dynamic.updated = function(id) {
+        //called after a resource has been updated
+
+
 
     };
     $scope.dynamic.selectProfile = function(id) {
@@ -82,18 +99,7 @@ angular.module("sampleApp").controller('rbFrameCtrl', function ($rootScope, $sco
 
     $scope.resourceTypeSelected('Basic');
 
-/*
-    var url = config.servers.conformance + "StructureDefinition/Basic";
-    $http.get(url).then(
-        function(data) {
-            $scope.dynamic.profile = angular.copy(data.data);
-           // console.log(data.data)
-        },
-        function(err) {
-            console.log(err);
-        }
-    )
-    */
+
 
 
 

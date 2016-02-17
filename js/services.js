@@ -1,4 +1,4 @@
-angular.module("sampleApp").service('supportSvc', function($http,$q) {
+angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc) {
 
     //options for building the samples that will come from a UI
     var buildConfig = {};
@@ -6,9 +6,8 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
     buildConfig.createProblemList = 'yes';      // yes | no | empty
     buildConfig.problemListLength = 3;          //size of the problemlist
 
-
     var identifierSystem ='http://fhir.hl7.org.nz/identifier';
-    var DataServerBase;
+    //var appConfigSvc.getCurrentDataServerBase();
     var observations=[];    //used for generating sample data plus vitals...
     observations.push({code:'8310-5',display:'Body Temperature',min:36, max:39,unit:'C',round:10,isVital:true});
     observations.push({code:'8867-4',display:'Heart Rate',min:70,max:90,unit:'bpm',round:1,isVital:true});
@@ -16,6 +15,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
     observations.push({code:'8302-2',display:'Height',max:90,min:90,unit:'cm',round:10});
     observations.push({code:'3141-9',display:'Weight',max:90,min:70,unit:'Kg',round:10,isVital:true});
 
+    
 
     //load the json file with all the optional values for creating samples...
 
@@ -113,7 +113,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             patient.text = {status:'generated',div:'<div>'+nameText+'</div>'};
 
 
-            var uri = DataServerBase + "Patient";
+            var uri = appConfigSvc.getCurrentDataServerBase() + "Patient";
 
             $http.post(uri,patient).then(
                 function(data) {
@@ -322,7 +322,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                 problemList.entry.push(entry);
             }
             // ... and save
-            var url = DataServerBase+ "List";
+            var url = appConfigSvc.getCurrentDataServerBase()+ "List";
             $http.post(url,problemList).then(
                 function (data) {
                     deferred.resolve();
@@ -443,7 +443,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                 }
 
                 var identifierQuery = res.identifier[0].system + '|' + res.identifier[0].value;
-                var url = DataServerBase + res.resourceType + "?identifier="+identifierQuery;
+                var url = appConfigSvc.getCurrentDataServerBase() + res.resourceType + "?identifier="+identifierQuery;
 
                 $http.get(url).then(
                     function(data) {
@@ -452,7 +452,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                             switch (cnt) {
                                 case 0 :
                                     //need to add this one
-                                    var postUrl = DataServerBase + res.resourceType;
+                                    var postUrl = appConfigSvc.getCurrentDataServerBase() + res.resourceType;
                                     $http.post(postUrl,res).then(
                                         function(data){
                                             //need to get the resource id
@@ -486,6 +486,9 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                                     break;
                             }
                         }
+                    },function(err) {
+                        console.log(err);
+                        alert("There was an error accessing the server. It may not be set up for CORS, in which case this application won't work. Sorry.")
                     }
                 );
                 return deferred.promise;
@@ -506,7 +509,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             var response = {vitalsCodes:[]};      //the response object as we want to return more than one thing...
 
             //create the url for retrieving the vitals data. Want to show how it could be done...
-            var url = DataServerBase+"Observation?subject=Patient/"+patientId;
+            var url = appConfigSvc.getCurrentDataServerBase()+"Observation?subject=Patient/"+patientId;
 
             //create the list of codes to include in the query
             var filterString="";
@@ -550,6 +553,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
             resources.push({type:'Appointment',patientReference:'patient'});
             resources.push({type:'Condition',patientReference:'patient'});
             resources.push({type:'List',patientReference:'subject'});
+            resources.push({type:'Basic',patientReference:'subject'});
 
             var arQuery = [];
             var allResources = {};
@@ -560,9 +564,9 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
                 //type that is being searched.
                 var uri;
                 if (item.patientReference == 'subject') {
-                    uri = DataServerBase + item.type + "?" + item.patientReference + "=Patient/" + patientId + "&_count=100";
+                    uri = appConfigSvc.getCurrentDataServerBase() + item.type + "?" + item.patientReference + "=Patient/" + patientId + "&_count=100";
                 } else {
-                    uri = DataServerBase + item.type + "?" + item.patientReference + "=" + patientId + "&_count=100";
+                    uri = appConfigSvc.getCurrentDataServerBase() + item.type + "?" + item.patientReference + "=" + patientId + "&_count=100";
                 }
 
 
@@ -631,19 +635,17 @@ angular.module("sampleApp").service('supportSvc', function($http,$q) {
         },
         loadSamplePatients : function(vo) {
             //var deferred = $q.defer();
-            var uri = DataServerBase + "Patient?organization="+vo.organizationId+"&_count=100";     //<<<<<
+            var uri = appConfigSvc.getCurrentDataServerBase() + "Patient?organization="+vo.organizationId+"&_count=100";     //<<<<<
             return $http.get(uri);
         },
-        setServerBase : function(sb) {
-            DataServerBase = sb;
-        },
+
         getServerBaseDEP : function(sb) {
-            return DataServerBase;
+            return appConfigSvc.getCurrentDataServerBase();
         },
         postBundle : function(bundle,referenceResources) {
             //sent the bundle to the server. If referenceResources is supplied, then add the resources to that list (with id)
             var deferred = $q.defer();
-            $http.post(DataServerBase,bundle).then(
+            $http.post(appConfigSvc.getCurrentDataServerBase(),bundle).then(
                 function(data) {
 
 

@@ -6,7 +6,7 @@
 
 
 angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scope,$http,supportSvc,resourceSvc, $q,
-                                                        CommonDataSvc,appConfig) {
+                                                        CommonDataSvc,appConfigSvc) {
 
     //function to capitalize the first letter of a word...
     String.prototype.toProperCase = function () {
@@ -15,13 +15,12 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
 
     //config - in particular the servers defined. The samples will be going to the data server...
     //var config = appConfig.config();
-    $scope.config = appConfig.config();
+    $scope.config = appConfigSvc.config();
 
-    //supportSvc.setServerBase($scope.config.servers.data);
 
     //set the current dataserver...
     $scope.dataServer = $scope.config.allKnownServers[0];   //{name:,url:}
-    supportSvc.setServerBase($scope.dataServer.url);
+    appConfigSvc.setCurrentDataServer($scope.dataServer);
 
 
     //allows the user to select a different server at run time to save the samples...
@@ -32,13 +31,25 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
 
     //the initial state when viewing an existing patient.
     // 'new' = create a new resource using the resource builder. view = view existing data...
-    $scope.global = {state:'new'}; //view | new
+    $scope.global = {state:'view'}; //view | new
 
     //set defaults for the patients demographics. uses an on-line service if available
     $scope.input.fname  = "Peter";
     $scope.input.lname = "Jones";
     $scope.input.gender = "male";
     $scope.input.dob = "1972-05-15";
+
+
+
+    //when a new resource is added by the resource builder, it fires an event. This is handled by the
+    //host controller (rbFrameCtrl), but the sample creator also needs to know so it can update the patients
+    //list of resources for display. This does seem a bit messy...
+    $rootScope.$on('newresourcecreated',function(){
+        //re-real all the data and update the local variables.
+        //todo - should pull out the patient updating to a separate function and call from both...
+
+        $scope.showPatient($scope.currentPatient);
+    });
 
 
 
@@ -103,7 +114,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
         //vo created to better support the display - has the type and the bundle containing all resources of that type
         delete $scope.outcome.selectedResource;
         delete $scope.vitalsTable;
-        //console.log(type,bundle)
+
         $scope.outcome.selectedType = vo.type;
         $scope.outcome.allResourcesOfOneType = vo.bundle;
     };
@@ -114,7 +125,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
         var resource = entry.resource;
         $scope.outcome.selectedResource = resource;     //for the json display
         $scope.resourceReferences = resourceSvc.getReference(resource,$scope.allResourcesAsList,$scope.allResourcesAsDict);
-        console.log($scope.resourceReferences);
+
     };
 
     $scope.save = function() {
@@ -292,7 +303,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
                 $scope.allResourcesAsList = [];
                 $scope.allResourcesAsDict = {};
                 angular.forEach(allResources,function(bundle,type){
-                    //console.log(bundle,type)
+
                     if (bundle.entry) {
                         bundle.entry.forEach(function(entry){
                             $scope.allResourcesAsList.push(entry.resource);
@@ -324,13 +335,13 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
     };
 
     $scope.selectServer = function(server){
-        supportSvc.setServerBase(server.url);
+        appConfigSvc.setCurrentDataServer(server.url);
         //need to check that the refernence resources (Practitioner, Organization) exist on the new server...
         $scope.saving = true;
         supportSvc.checkReferenceResources().then(
             function(){
                 $scope.dataServer = server;        //so we can show the data server...
-                supportSvc.setServerBase($scope.dataServer.url);
+                appConfigSvc.setCurrentDataServer($scope.dataServer.url);
                 loadSamplePatients();       //get all the sample patients created by this app on that server
 
                 //these are all removing the patient specific structures. Might be better to move to a function...
