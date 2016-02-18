@@ -107,9 +107,6 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
     );
 
 
-
-
-
     $scope.typeSelected = function(vo) {
         //vo created to better support the display - has the type and the bundle containing all resources of that type
         delete $scope.outcome.selectedResource;
@@ -257,9 +254,8 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
         }
 
 
+        $scope.loadingPatient = true;       //will display the loading gif...
         $scope.currentPatient = patient;
-
-
 
         $scope.outcome.demographicsHtml = patient.text.div;
 
@@ -268,8 +264,9 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
             //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
             function(allResources){
 
+//console.log(allResources);
 
-                //this is so the resourceBuilder directive  knows who the patient is - and their data. todo A service might be better...
+                //this is so the resourceBuilder directive  knows who the patient is - and their data.
                 //the order is significant - allResources must be set first...
                 CommonDataSvc.setAllResources(allResources);
                 $rootScope.currentPatient = patient;
@@ -285,10 +282,6 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
 
 
                 });
-
-
-
-
 
                 $scope.outcome.resourceTypes.sort(function(a,b){
                     if (a.type > b.type) {
@@ -325,7 +318,10 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
                 })
 
             }
-        )
+
+        ).finally(function(){
+            $scope.loadingPatient = false;
+        })
     };
 
 
@@ -335,19 +331,20 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
     };
 
     $scope.selectServer = function(server){
-        appConfigSvc.setCurrentDataServer(server.url);
+        appConfigSvc.setCurrentDataServer(server);
         //need to check that the refernence resources (Practitioner, Organization) exist on the new server...
         $scope.saving = true;
         supportSvc.checkReferenceResources().then(
             function(){
                 $scope.dataServer = server;        //so we can show the data server...
-                appConfigSvc.setCurrentDataServer($scope.dataServer.url);
+                appConfigSvc.setCurrentDataServer($scope.dataServer);
                 loadSamplePatients();       //get all the sample patients created by this app on that server
 
                 //these are all removing the patient specific structures. Might be better to move to a function...
                 delete $scope.currentPatient;   //no current patient selected
                 delete $scope.outcome.allResources;     //all the resources for the patient
                 delete $scope.outcome.resourceTypes;    //all the resource types for the patient
+                delete $scope.outcome.allResourcesOfOneType;    //the resources of a selected type
 
                 if ($scope.outcome && $scope.outcome.log) {
                     $scope.outcome.log.length = 0;          //the log of actions...
@@ -355,7 +352,7 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
 
 
                 //selected resource & vitals...
-                delete $scope.outcome.selectedResource;
+                delete $scope.outcome.selectedResource;  //the currently selected resource
                 delete $scope.vitalsTable;
 
                 getRandomName();                        //get a new patient name (just in case)

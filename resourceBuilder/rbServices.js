@@ -1028,15 +1028,21 @@ angular.module("sampleApp")
             //used to determine if the resource being referenced is a base one or a profiled one.
             //used in showing existing resources of a given type.
             //profileUrl will be like: http://hl7.org/fhir/StructureDefinition/Patient
-            console.log(standardResourceTypes);
+            //console.log(standardResourceTypes);
             var ar = profileTypeUrl.split('/');
             var resourceType = ar[ar.length-1];       //the actual type of resource being referenced...
 
-            if (standardResourceTypes[resourceType]) {
-                return true;
-            } else {
-                return false;
+            //standardResourceTypes is an array of objects {name: }. A hash might be more efficient...
+            var isBaseType = false;
+            for (var i=0; i< standardResourceTypes.length;i++) {
+                if (standardResourceTypes[i].name==resourceType) {
+                    return true;
+                    break;
+                }
             }
+
+
+            return false;
 
         },
         getResourcesSelectListOfType :function(allResources, resourceType, profileUrl) {

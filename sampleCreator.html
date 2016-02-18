@@ -90,7 +90,7 @@
                         </div>
 
                         <div ng-show="input.action=='create'">
-                            <div class="banner">Create sample data</div>
+                            <div class="banner">Write sample data to server</div>
                             <form class="form-horizontal" role="form">
 
 
@@ -167,8 +167,18 @@
                                     <option value="">-- choose patient --</option>
 
                                 </select>
+
+
+
                             </div>
-                            <div class="col-md-8">
+
+                            <div class="col-md-1">
+                                <img ng-show="loadingPatient" src="css/ajax_loader_blue_32.gif"/>
+                            </div>
+
+
+
+                            <div class="col-md-7">
                                 <p ng-bind-html="outcome.demographicsHtml"></p>
                             </div>
 

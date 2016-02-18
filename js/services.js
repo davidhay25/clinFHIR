@@ -6,16 +6,15 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
     buildConfig.createProblemList = 'yes';      // yes | no | empty
     buildConfig.problemListLength = 3;          //size of the problemlist
 
+    //so we can identify identifiers that we create...
     var identifierSystem ='http://fhir.hl7.org.nz/identifier';
-    //var appConfigSvc.getCurrentDataServerBase();
+
     var observations=[];    //used for generating sample data plus vitals...
     observations.push({code:'8310-5',display:'Body Temperature',min:36, max:39,unit:'C',round:10,isVital:true});
     observations.push({code:'8867-4',display:'Heart Rate',min:70,max:90,unit:'bpm',round:1,isVital:true});
     observations.push({code:'9279-1',display:'Respiratory Rate',min:25,max:35,unit:'resp/min',round:1,isVital:true});
     observations.push({code:'8302-2',display:'Height',max:90,min:90,unit:'cm',round:10});
     observations.push({code:'3141-9',display:'Weight',max:90,min:70,unit:'Kg',round:10,isVital:true});
-
-    
 
     //load the json file with all the optional values for creating samples...
 
@@ -488,7 +487,8 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                         }
                     },function(err) {
                         console.log(err);
-                        alert("There was an error accessing the server. It may not be set up for CORS, in which case this application won't work. Sorry.")
+                        alert("There was an error accessing the server. It may not be set up for CORS, " +
+                            "in which case this application won't work. Sorry.\n Status code:"+err.status);
                     }
                 );
                 return deferred.promise;
@@ -544,9 +544,58 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
         },
         getAllData : function(patientId) {
-            //return all the data for the indicated patient. Don't use the 'everything' operation
-            //currently only get a max of 100 resources of each type. Need to implement paging to get more...
             var deferred = $q.defer();
+            var allResources = {};
+            //the currently selected data server
+            var dataServer = appConfigSvc.getCurrentDataServer();
+            if (dataServer.everythingOperation) {
+                //The everything operation will return all patient related resources. not all servers recognize this, and
+                //some implement paging and small default sizes (hapi) and some don't (grahame)
+                var url = dataServer.url + "Patient/"+patientId + '/$everything'
+
+                if (dataServer.everythingOperationCount) {
+                    url += "?_count="+dataServer.everythingOperationCount;
+                }
+
+                //console.log(url);
+
+                $http.get(url).then(
+                    function(data){
+                        if (data.data) {
+                            data.data.entry.forEach(function(entry){        //this is a bundle
+                                var resource = entry.resource;
+                                var type = resource.resourceType;
+                                //Grahame returns AuditEvents in $everything...
+                                if (type !== 'AuditEvent') {
+                                    if (! allResources[type]) {
+                                        allResources[type] = {entry:[],total:0};        //this is also supposed to be a bundle
+                                    }
+                                    allResources[type].entry.push({resource:resource});
+                                    allResources[type].total ++;
+                                }
+
+                            })
+                        }
+                        console.log(allResources)
+                        deferred.resolve(allResources);
+                    },
+                    function(err){
+                        alert("error loading all patient data:\n\n"+ angular.toJson(err));
+                        deferred.reject(err);
+                    }
+                );
+
+
+
+
+                return deferred.promise;
+            }
+
+
+
+            //return all the data for the indicated patient. Doesn't use the 'everything' operation so there is a fixed set of resources...
+            //currently only get a max of 100 resources of each type. Need to implement paging to get more...
+
             var resources = [];
             resources.push({type:'Observation',patientReference:'subject'});
             resources.push({type:'Encounter',patientReference:'patient'});
@@ -556,7 +605,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             resources.push({type:'Basic',patientReference:'subject'});
 
             var arQuery = [];
-            var allResources = {};
+
 
             resources.forEach(function(item){
 

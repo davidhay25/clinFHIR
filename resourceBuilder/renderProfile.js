@@ -1061,7 +1061,6 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
 
                         if (! RenderProfileSvc.isUrlaBaseResource(type.profile[0])) {
                             //this is a reference to profile on a base resource. need to load the profile so we can figure out the base type
-
                             $scope.profileUrlInReference = type.profile[0];
                             GetDataFromServer.findResourceByUrl('StructureDefinition',type.profile[0],function(profile){
                                 if (profile) {

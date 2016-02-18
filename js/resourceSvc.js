@@ -5,7 +5,7 @@ angular.module("sampleApp").service('resourceSvc', function() {
 
     var getOutwardLinks = function(resource){
 
-        //look for outgoinf references
+        //look for outgoing references
         var checkLinks = function(list,object,rootPath) {
             angular.forEach(object,function(value,key){
 
@@ -95,14 +95,19 @@ angular.module("sampleApp").service('resourceSvc', function() {
 
     return {
         getReference : function(resource,allResources,allResourcesDict){
-            getOutwardLinks(resource);
-            getInwardLinks(resource,allResources);
+            if (resource) {
+                getOutwardLinks(resource);
+                getInwardLinks(resource,allResources);
 
-            outwardLinks.forEach(function(item){
-                item.resource = allResourcesDict[item.reference];
-            })
+                outwardLinks.forEach(function(item){
+                    item.resource = allResourcesDict[item.reference];
+                })
 
-            return ({outwardLinks:outwardLinks,inwardLinks:inwardLinks})
+                return ({outwardLinks:outwardLinks,inwardLinks:inwardLinks})
+            } else {
+                return ({outwardLinks:[],inwardLinks:[]})
+            }
+
 
         }
 
