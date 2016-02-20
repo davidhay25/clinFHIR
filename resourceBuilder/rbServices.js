@@ -298,6 +298,15 @@ angular.module("sampleApp")
         }
     }
 }).service('RenderProfileSvc', function($http,$q,Utilities,ResourceUtilsSvc) {
+
+    function isEmpty(obj) {
+        for(var key in obj) {
+            if(obj.hasOwnProperty(key))
+                return false;
+        }
+        return true;
+    }
+
     var iterateOverNodeSet = function(insertionPoint,invalue) {
         var text = "";
 
