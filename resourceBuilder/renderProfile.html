@@ -591,14 +591,19 @@
 
                 <panel ng-show="validateResults && validateResults.issue && validateResults.issue.length > 0">
                     <table class="table table-bordered">
-                        <tr><th>Severity</th><th>Code</th><th>Details</th><th>Location</th></tr>
+                        <tr><th>Severity</th><th>Code</th><th>Details/Diagnostics</th><th>Location</th></tr>
                         <tr ng-repeat = "iss in validateResults.issue">
                             <td>{{iss.severity}}</td>
                             <td>{{iss.code}}</td>
-                            <td>{{iss.details.text}}</td>
+                            <td>{{iss.details.text}}
+                                <div>{{iss.diagnostics}}</div>
+                            </td>
                             <td><div ng-repeat="loc in iss.location">{{loc}}</div></td>
                         </tr>
                     </table>
+
+
+
                 </panel>
 
 <!--

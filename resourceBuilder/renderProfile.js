@@ -48,38 +48,21 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
 
                         if (oo.issue) {
                             delete oo.text;
-                            oo.issue.forEach(function(iss){
-                                delete iss.diagnostics;
-                            });
+                           // oo.issue.forEach(function(iss){
+                             //   delete iss.diagnostics;
+                           // });
                         }
                         $scope.validateResults = oo;
+
+
 
                     }).finally(
                         function(){
                             $scope.validationInProgress = false;
                          }
-                    )
+                    );
 
 
-
-                /*
-                Utilities.validate($scope.generatedResourceForValidation,function(result){
-
-                    $scope.validationInProgress = false;
-                    if (result.issue) {
-                        delete result.text;
-                        result.issue.forEach(function(iss){
-                            delete iss.diagnostics;
-                        });
-                    }
-                    $scope.validateResults = result
-                    //todo -- refactor to pass in the success message...
-                    if($scope.validateResults == 'Valid ExtensionDefinition') {
-                        $scope.validateResults = 'Valid Resource';
-                    }
-                })
-
-                */
             };
 
             // a convenience fucntion that will park the current resource, then download the profile
