@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
+    <script src="js/libs/angular.min.1.4.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-0.14.3.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+    <script src="js/libs/toArrayFilter.js"></script>
+    <script src="js/libs/jstree.min.js"></script>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage'])
+    </script>
+
+
+
+<!--
+  <script src="js/services.js"></script>
+    <script src="js/resourceSvc.js"></script>
+    <script src="js/filters.js"></script>
+    <script src="js/controllers.js"></script>
+    <script src="js/libs/moment.min.js"></script>
+
+    <script src="js/appConfigSvc.js"></script>
+
+    -->
+
+    <!-- files needed for resourceCreator -->
+    <script src="js/resourceCreatorCtrl.js"></script>
+    <script src="js/resourceCreatorSvc.js"></script>
+
+
+    <script src="js/libs/ngStorage.min.js"></script>
+
+
+    <title>FHIR Resource Creator</title>
+
+</head>
+
+
+<body style="padding: 8px">
+
+    <div ng-app="sampleApp" ng-controller="resourceCreatorCtrl" class="container-fluid">
+
+
+        <div class="row">
+            <div class="col-md-3">
+                <div style="height:250px; overflow-y: auto;" >
+                    <div id="treeView"></div>
+                </div>
+
+                <button class="btn btn-default" ng-click="buildResource()">Build</button>
+                <button class="btn btn-default" ng-click="addIdentifier()">add Identifier</button>
+
+                <pre>{{resource | json}}</pre>
+
+            </div>
+            <div class="col-md-2">
+
+                <ul class="list-unstyled">
+                    <li ng-repeat="child in children">
+                        <a href="#" ng-click="childSelected(child)">{{child.myData.display}}</a>
+                    </li>
+                </ul>
+
+
+
+<!--
+                <div class="list-group" ng-repeat="child in children">
+                    <a href="#" class="list-group-item" ng-click="childSelected(child)">
+                        {{child.path}}
+                    </a>
+
+
+                </div>
+                -->
+
+
+            </div>
+
+            <div class="col-md-7">
+
+                
+
+                <ng-include src="'/includes/dataTypeInputTemplates.html'"></ng-include>
+
+                <pre>{{selectedChild | json}}</pre>
+
+            </div>
+        </div>
+
+
+
+    </div>
+
+</body>
+</html>

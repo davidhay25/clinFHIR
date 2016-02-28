@@ -1,0 +1,331 @@
+
+<div class="rounded-box" ng-show="dataType">       <!-- The top for a box around the data entry form-->
+    <!--
+                    <div class="row">
+                        <div class="col-md-11 col-sm-11">
+                            <div><em>{{element.definition}}</em></div>
+                        </div>
+                        <div class="col-md-1">
+                            <span ng-show="externalReferenceSpecPage" style="font-size:1.5em;padding-right: 8px">
+                                <a href="{{externalReferenceSpecPage}}" target="_blank">
+                                    <i class="glyphicon glyphicon-globe"></i>
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+
+                    <br />
+    -->
+
+    <div ng-show="dataType=='Address'">
+        <ng-include src="'/prTemplates/address.html'"></ng-include>
+    </div>
+
+
+    <div ng-show="dataType=='ContactPoint'">
+        <ng-include src="'/prTemplates/contactpoint.html'"></ng-include>
+
+    </div>
+
+
+
+    <div ng-show="dataType=='HumanName'">
+        <ng-include src="'/prTemplates/humanname.html'"></ng-include>
+
+    </div>
+
+    <div ng-show="dataType=='Timing'">
+        <ng-include src="'/prTemplates/timing.html'"></ng-include>
+
+    </div>
+
+    <div ng-show="dataType=='Narrative'">
+        <div class="row">
+            <div class="col-md-10 col-sm-10 col-md-offset-2" >
+                <textarea class="form-control" rows="3" ng-model="results.narrative"></textarea>
+            </div>
+        </div>
+    </div>
+
+
+    <div ng-show="dataType=='Annotation'">
+        <div class="row">
+            <div class="col-md-2 col-sm-2">
+                <strong>Author</strong>
+            </div>
+            <div class="col-md-10 col-sm-10">
+                <input type="text" class="form-control" ng-model="results.annotation.authorString"></input>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 col-sm-2">
+                <strong>Note</strong>
+            </div>
+            <div class="col-md-10 col-sm-10">
+                <textarea class="form-control"  rows="3" ng-model="results.annotation.text"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div ng-show="dataType=='Ratio'">   <!-- Quantity x 2-->
+        <div class="row">
+
+
+            <div class="col-md-2 col-sm-2 col-md-offset-1">
+                <input type="text" class="form-control" placeholder = "Amt" ng-model="results.ratio_num_amount"/>
+            </div>
+            <div class="col-md-2 col-sm-2">
+                <input type="text" class="form-control" placeholder = "Units" ng-model="results.ratio_num_units"/>
+            </div>
+            <div class="col-md-1  col-sm-1">
+                /
+            </div>
+            <div class="col-md-2 col-sm-2">
+                <input type="text" class="form-control" placeholder = "Amt" ng-model="results.ratio_denom_amount"/>
+            </div>
+            <div class="col-md-2 col-sm-2">
+                <input type="text" class="form-control" placeholder = "Units" ng-model="results.ratio_denom_units"/>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div ng-show="dataType=='Identifier'">
+
+        <div class="row">
+
+            <div class="col-md-2 col-sm-2  control-label">Value</div>
+            <div class="col-md-8 col-sm-8">
+                <input type="text" class="form-control" ng-model="results.identifier_value" id="identifier_value"/>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-2 col-sm-2  control-label">System</div>
+            <div class="col-md-8 col-sm-8">
+                <input class="form-control" type="text" ng-model="results.identifier_system"/>
+            </div>
+
+
+        </div>
+
+
+
+    </div>
+
+    <div ng-show="dataType=='Reference'">
+        <ng-include src="'/prTemplates/reference.html'"></ng-include>
+    </div>
+
+    <div ng-show="dataType=='boolean'">
+        <div>{{element.short}}</div>
+        <div class="row">
+            <div class=" col-md-6 col-sm-6">
+
+                <div class="btn-group">
+                    <label class="btn btn-primary" ng-model="results.boolean" btn-radio="true">True</label>
+                    <label class="btn btn-primary" ng-model="results.boolean" btn-radio="false">False</label>
+
+                </div>
+            </div>
+            <div class=" col-md-2 col-sm-2">
+
+                <div class="checkbox">
+                    <input type="checkbox"  ng-model="results.boolean"/>
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+
+    <div ng-show="dataType=='string'">
+        <div>{{element.short}}</div>
+        <input type="text" class="form-control" ng-model="results.string"/>
+    </div>
+
+    <div ng-show="dataType=='positiveInt'">
+        <div>{{element.short}}</div>
+        <input type="text" class="form-control" ng-model="results.positiveint"/>
+    </div>
+
+    <div ng-show="dataType=='integer'">
+        <div>{{element.short}}</div>
+        <input type="text" class="form-control" ng-model="results.integer"/>
+    </div>
+
+
+    <div ng-show="dataType=='id'">
+        <div>{{element.short}}</div>
+        <!--
+        <input type="text" class="form-control" ng-model="results.id"/>
+        -->
+        <div><strong><em>The Id of the resource cannot be set in this client</em></strong></div>
+    </div>
+
+    <div ng-show="dataType=='Signature'">
+        <div>{{element.short}}</div>
+        <!--
+        <input type="text" class="form-control" ng-model="results.id"/>
+        -->
+        <div><strong><em>A Signature cannot be set in this client</em></strong></div>
+    </div>
+
+    <div ng-show="dataType=='uri'">
+        <input type="text" class="form-control" ng-model="results.uri"/>
+
+    </div>
+
+    <div ng-show="dataType=='code'">
+        <ng-include src="'/prTemplates/code.html'"></ng-include>
+
+    </div>
+
+    <div ng-show="dataType=='CodeableConcept'">
+        <ng-include src="'/prTemplates/codeableconcept.html'"></ng-include>
+
+    </div>
+
+    <div ng-show="dataType=='Coding'">
+        <ng-include src="'/prTemplates/coding.html'"></ng-include>
+    </div>
+
+
+    <div ng-show="dataType=='date'">
+
+        <div class="row">
+            <div class="col-md-7  col-sm-7 col-centered">
+                <datepicker ng-model="results.date_start"  show-weeks="true" class="well well-sm"></datepicker>
+            </div>
+        </div>
+
+
+
+
+    </div>
+
+
+
+    <div ng-show="dataType=='dateTime' || dataType=='instant'">
+
+        <div class="row">
+            <div class="col-md-7  col-sm-7 col-centered">
+                <datepicker ng-model="results.date_start"  show-weeks="true" class="well well-sm"></datepicker>
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+
+            </div>
+        </div>
+
+        <div class="row" ng-show="dataType=='instant'">
+            <div class="col-md-7  col-sm-7 col-centered">
+                <timepicker ng-model="results.time"></timepicker>
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <div ng-show="dataType=='Period'">
+
+        <ng-include src="'/prTemplates/period.html'"></ng-include>
+
+
+    </div>
+
+    <div ng-show="dataType=='Quantity'">
+        <ng-include src="'/prTemplates/quantity.html'"></ng-include>
+
+    </div>
+
+    <div ng-show="dataType=='Range'">   <!-- Quantity x 2-->
+        <div class="row">
+
+
+            <div class="col-md-3 col-sm-3">
+                Between <input type="text" class="form-control" placeholder = "Start Amount" ng-model="results.range_amount_start"/>
+            </div>
+            <div class="col-md-3 col-sm-3">
+                and <input type="text" class="form-control" placeholder = "End Amount" ng-model="results.range_amount_end"/>
+            </div>
+            <div class="col-md-3 col-sm-3">
+                (units) <input type="text" class="form-control" placeholder = "Units" ng-model="results.range_units"/>
+            </div>
+
+        </div>
+
+
+
+    </div>
+
+    <div ng-show="dataType=='Age'">
+
+        <div class="row">
+            <div class="col-md-2 col-sm-2">
+                <input type="text" class="form-control" ng-model="results.age.value"/>
+            </div>
+            <div class="col-md-10 col-sm-10">
+                <div class="row">
+                    <div class="col-md-3 col-sm-3" ng-repeat="unit in UCUMAgeUnits">
+                        <input type="radio" name="age" ng-model="results.ageunits" value="{{unit}}"> {{unit.display}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div ng-show="dataType=='Money'">
+
+        <div class="row">
+            <div class="col-md-2 col-sm-2">
+                <input type="text" class="form-control" ng-model="results.money_amount"/>
+            </div>
+            <div class="col-md-10 col-sm-10">
+                <div class="row">
+                    <div class="col-md-3 col-sm-3" ng-repeat="unit in UCUMMoneyUnits">
+                        <input type="radio" name="age" ng-model="results.money_units" value="{{unit}}"> {{unit.display}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div ng-show="dataType">
+        <br /><br />
+
+        <div class="row" ng-show = "element.requirementsDEP">
+            <div class="col-md-12 col-sm-12">
+                <div><strong>Requirements:</strong>{{element.requirements}}</div>
+            </div>
+        </div>
+
+        <div class="row" >
+            <div class="col-md-12 col-sm-12">
+                <button class="btn btn-primary pull-right" style="margin:8px"
+                        ng-click="saveNewDataType()">Save</button>
+                <button class="btn btn-primary pull-right" style="margin:8px"
+                        ng-click="saveNewDataType(true)">Save & Next</button>
+
+                <button class="btn btn-danger pull-right" style="margin:8px"
+                        ng-click="cancel()">Cancel</button>
+            </div>
+        </div>
+
+
+
+    </div>
+
+</div>      <!-- closes the div that suppounds the data entry form-->
+
