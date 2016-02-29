@@ -14,6 +14,7 @@
     <script src="js/libs/angular-sanitize.js"></script>
     <script src="js/libs/toArrayFilter.js"></script>
     <script src="js/libs/jstree.min.js"></script>
+    <script src="js/libs/moment.min.js"></script>
 
     <script>
         angular.module("sampleApp",['ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage'])
@@ -59,17 +60,37 @@
                 <button class="btn btn-default" ng-click="buildResource()">Build</button>
                 <button class="btn btn-default" ng-click="addIdentifier()">add Identifier</button>
 
-                <pre>{{resource | json}}</pre>
 
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
+
+                <h3 ng-show="children.length > 0">Child elements</h3>
+
+                <div ng-repeat="child in children">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="{{child.myData.displayClass}}">{{child.myData.display}}</div>
+                        </div>
+                        <div class="col-md-2">
+                            {{child.min}}..{{child.max}}
+                        </div>
+                        <div class="col-md-4">
+                            <div ng-repeat="type in child.type">
+                                <a href="#" ng-click="childSelected(child,$index)">{{type.code}} </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!--
 
                 <ul class="list-unstyled">
                     <li ng-repeat="child in children">
-                        <a href="#" ng-click="childSelected(child)">{{child.myData.display}}</a>
+                        <a href="#" class="{{child.myData.displayClass}}" ng-click="childSelected(child)">{{child.myData.display}}</a>
                     </li>
                 </ul>
-
+-->
 
 
 <!--
@@ -85,14 +106,31 @@
 
             </div>
 
-            <div class="col-md-7">
+            <div class="col-md-6">
 
-                
+                <uib-tabset>
+                    <uib-tab heading="Data input">
+                        <ng-include src="'/includes/dataTypeInputTemplates.html'"></ng-include>
+                        <pre>{{resource | json}}</pre>
+                    </uib-tab>
+                    <uib-tab heading="TreeData">
+                        <div ng-repeat="node in treeData">
+                            ID: {{node.id}}  ParentId: {{node.parent}} Path: {{node.path}}
 
-                <ng-include src="'/includes/dataTypeInputTemplates.html'"></ng-include>
+                            <div>{{node.fragment}}</div>
+                        </div>
 
+                    </uib-tab>
+                </uib-tabset>
+
+
+
+
+
+
+                <!--
                 <pre>{{selectedChild | json}}</pre>
-
+-->
             </div>
         </div>
 

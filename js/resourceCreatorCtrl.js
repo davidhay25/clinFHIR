@@ -10,22 +10,21 @@ angular.module("sampleApp").controller('resourceCreatorCtrl', function ($scope,r
 
     var type = 'CarePlan';
     var profile;            //the profile being used as the base
-    var treeData = [];
+    $scope.treeData = [];      //populates the resource tree
 
-    //$scope.childSelected = {};      //a child element selected from the current tree node...
+    $scope.results = {};        //the variable for resource property values...
+
+
 
     resourceCreatorSvc.getProfile(type).then(
         function(data) {
             profile = data;
-            //console.log(resourceCreatorSvc.getEDForPath(type));
-
-
 
             //create the root node.
-            treeData.push({id:'root',parent:'#',text:type,state:{opened:true},fragment:type,path:type,
+            $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true},fragment:type,path:type,
                 ed:resourceCreatorSvc.getEDForPath(type)});
-            resourceCreatorSvc.addPatientToTree(type+'.subject',{},treeData);  //todo - not always 'subject'
-            drawTree(treeData)
+            resourceCreatorSvc.addPatientToTree(type+'.subject',{},$scope.treeData);  //todo - not always 'subject'
+            drawTree()
         }
     );
 
@@ -35,61 +34,104 @@ angular.module("sampleApp").controller('resourceCreatorCtrl', function ($scope,r
 
     //add the currentl
     $scope.buildResource = function(){
-        $scope.resource = resourceCreatorSvc.buildResource(type,treeData)
+
+
+        var treeObject = $('#treeView').jstree().get_json();
+        console.log(treeObject);
+
+        $scope.resource = resourceCreatorSvc.buildResource(type,treeObject[0],$scope.treeData)
     };
 
 
 
-    function drawTree(treeData) {
+    //draws the tree showing the current resource
+    function drawTree() {
         $('#treeView').jstree('destroy');
         $('#treeView').jstree(
-            { 'core' : {'data' : treeData ,'themes':{name:'proton',responsive:true}}}
+            { 'core' : {'data' : $scope.treeData ,'themes':{name:'proton',responsive:true}}}
         ).on('changed.jstree', function (e, data){
 
-            delete $scope.children;
-           // var path = data.node.text;
-
-            //console.log(data.node.id)
-            //getPossibleChildNodes()
-
+            delete $scope.children;     //the node may not have children (only BackboneElement datatypes do...
             var node = getNodeFromId(data.node.id);
-//console.log(node.ed);
 
             if (node && node.ed) {
-                $scope.children = resourceCreatorSvc.getPossibleChildNodes(node.ed);
+                $scope.selectedNodeId = data.node.id;   //the currently selected element. This is the one we'll add the new data to...
+               // $scope.selectedEd = node.ed;            //
+                $scope.children = resourceCreatorSvc.getPossibleChildNodes(node.ed);    //the child nodes...
                 console.log($scope.children)
             }
 
-             $scope.$digest();       //as the event occurred outside of angular
+             $scope.$digest();       //as the event occurred outside of angular...
 
         });
     }
 
 
-    $scope.childSelected = function(ed) {
+    //when one of the child nodes of the currently selected element in the tree is selected...
+    $scope.childSelected = function(ed,inx) {
+        console.log(inx)
         $scope.selectedChild = ed;
-
         //the datatype of the selected element. This will drive the data entry form.
-        $scope.dataType = ed.type[0].code;
+        $scope.dataType = ed.type[inx].code;
+
+        if ($scope.dataType == 'BackboneElement') {
+            //if this is a BackboneElement, then add it to the tree and select it todo - may want to ask first
+            var treeNode = {id : new Date().getTime(),state:{opened:true}}
+            treeNode.parent =  $scope.selectedNodeId;
+            treeNode.ed = $scope.selectedChild;     //the ElementDefinition that we are adding
+            treeNode.text = $scope.selectedChild.myData.display;    //the property name
+            treeNode.path = $scope.selectedChild.path;
+            //add the new node to the tree...
+            $scope.treeData.push(treeNode);    //todo - may need to insert at the right place...
+
+
+            $scope.selectedNodeId = treeNode.id;   //the currently selected element in the tree. This is the one we'll add the new data to...
+            var node = getNodeFromId(treeNode.id);
+            $scope.children = resourceCreatorSvc.getPossibleChildNodes(node.ed);    //the child nodes...
+
+            drawTree() ;        //and redraw...
+
+        }
+
+
+
     };
 
+
+    //when a new element has been populated.
+    $scope.saveNewDataType = function() {
+        var fragment = resourceCreatorSvc.getJsonFragmentForDataType($scope.dataType,$scope.results);
+        console.log(fragment)
+        //now add the new property to the tree...
+        var treeNode = {id : new Date().getTime(),state:{opened:true},fragment:fragment.value}
+        treeNode.parent =  $scope.selectedNodeId;
+        treeNode.ed = $scope.selectedChild;     //the ElementDefinition that we are adding
+        treeNode.text = $scope.selectedChild.myData.display;    //the property name
+        treeNode.path = $scope.selectedChild.path;
+        //add the new node to the tree...
+        $scope.treeData.push(treeNode);    //todo - may need to insert at the right place...
+
+        drawTree() ;        //and redraw...
+        //delete the datatype - this will hide the input form...
+        delete  $scope.dataType;
+    };
 
     //---- these are dev routines
 
     $scope.addIdentifier = function() {
         //add an identifier to the root...
         var fragment = {system:'http://identifiers',value:'prp1660'}
-        treeData.push({id:'idq'+new Date().getTime(),parent:'root',text:'Identifier',state:{opened:true},
+        $scope.treeData.push({id:'idq'+new Date().getTime(),parent:'root',text:'Identifier',state:{opened:true},
             fragment:fragment,path:type+'.identifier',ed:resourceCreatorSvc.getEDForPath(type+'.identifier')});
-        drawTree(treeData)
+        drawTree()
     };
 
 
 
     var getNodeFromId = function(id) {
-        for (var i=0; i<treeData.length;i++) {
-            if (treeData[i].id == id) {
-                return treeData[i]
+        for (var i=0; i<$scope.treeData.length;i++) {
+            if ($scope.treeData[i].id == id) {
+                return $scope.treeData[i]
             }
         }
         return null;
