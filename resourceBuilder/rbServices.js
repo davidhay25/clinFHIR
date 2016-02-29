@@ -1042,6 +1042,8 @@ angular.module("sampleApp")
             var resourceType = ar[ar.length-1];       //the actual type of resource being referenced...
 
             //standardResourceTypes is an array of objects {name: }. A hash might be more efficient...
+
+            console.log(standardResourceTypes)
             var isBaseType = false;
             for (var i=0; i< standardResourceTypes.length;i++) {
                 if (standardResourceTypes[i].name==resourceType) {

@@ -1,9 +1,14 @@
-angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http) {
+angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,RenderProfileSvc,GetDataFromServer,Utilities) {
 
 
     var currentProfile;     //the profile being used...
 
-    var getElementDefinitionFromPath = function(path){
+    //function to capitalize the first letter of a word...
+    String.prototype.toProperCase = function () {
+        return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+    };
+
+    var getElementDefinitionFromPathDEP = function(path){
         //get the element definition for the path from the profile
         return currentProfile[path];
     };
@@ -11,7 +16,7 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http) {
     return {
 
         getJsonFragmentForDataType : function(dt,results) {
-            //create a js object that represents a fragment of data for a resource based on the datatype...
+            //create a js object that represents a fragment of data for inclusion in a resource based on the datatype...
 
             var fragment;
 
@@ -265,7 +270,6 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http) {
                         var daStart = moment(results.date_start).format('YYYY-MM-DD');
                         var daEnd = moment(results.date_end).format('YYYY-MM-DD');
 
-                        //addValue(da,'Date',da);
 
                         var display = 'From'+ moment(results.date_start).format('YYYY-MM-DD');
                         display += ' to '+ moment(results.date_end).format('YYYY-MM-DD');
@@ -305,8 +309,9 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http) {
 
             //set the return value. Copied from the original - hence the (currently) unused elements
             function addValue(v,dataType,text,isPrimitive) {
-                //console.log(v)
-                fragment = {value:v};
+
+
+                fragment = {value:v,text:text};
 
             }
 
@@ -366,10 +371,9 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http) {
         },
 
 
-
         buildResource : function(type,treeObject,treeData) {
-
-            var resource = {}
+            //create the sample resource...
+            var resource = {resourceType:type}
 
             //create an object hash of the treeData
             var treeHash = {};
@@ -397,22 +401,35 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http) {
             }
 
 
-            function addChildrenToNode(resource,node) {
+            function addChildrenToNode(resource,node,text) {
                 //add the node to the resource. If it has children, then recursively call
                 var lnode = treeHash[node.id];
                 var path = lnode.path;
-                var ar = path.split('.')
+                var ar = path.split('.');
                 var propertyName = ar[ar.length-1];
+
+                if (propertyName.indexOf('[x]') > -1) {
+                    //this is a polymorphic field...
+                    propertyName = propertyName.slice(0, -3) + lnode.dataType.code.toProperCase();
+
+
+                }
 
                 if (lnode.fragment) {
                     //if the 'resource' is an array, then there can be multiple elements...
+
+                    //this should never occur..
                     if (angular.isArray(resource)) {
+                        alert('array passed')
                         var o = {};
                         o[propertyName] = lnode.fragment;
                         resource.push(o)
 
                     } else {
+                        //console.log(lnode)
                         resource[propertyName] = lnode.fragment;
+                        text.value += lnode.display + ' ';
+                        //console.log(text);
                     }
 
 
@@ -430,63 +447,36 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http) {
                                 //yes! a backbone element. we need to create a new object to act as teh resource
                                 var ar1 = ed.path.split('.');
                                 var pName = ar1[ar1.length-1];
-                               // obj = {};
-                                //resource[ar1[ar1.length-1]] = obj;
+
 
                                 var obj;
                                 //is this a repeating node? - ie an array...
                                 var cr = canRepeat(ed);
-                                //cr = true;
                                 obj = {};
                                 if (cr) {
-
                                     //this is a repeating element. Is there already an array for this element?
-                                    //obj = {};
-
                                     if (! resource[pName]) {
                                         resource[pName] = [];
                                     }
                                     resource[pName].push(obj);
 
-                                    /*
-                                    if (resource[pName]) {
-                                        obj = resource[pName]
-                                    } else {
-
-                                        resource[pName] = [];
-                                        obj = resource[pName]
-                                    }*/
-
 
                                 } else {
                                     //this is a singleton...
-
-                                    /*
-                                    if (resource[pName]) {
-                                        obj=resource;
-                                    } else {
-                                        resource[pName] = {};
-                                        obj = resource[pName];
-                                    }
-*/
                                     resource[pName] = obj;
-                                    //obj=resource;
-
-                                    //resource[pName] = {};
-                                    //obj = resource[pName];
                                 }
 
 
-                                addChildrenToNode(obj,child)
+                                addChildrenToNode(obj,child,text)
                             } else {
 
-                                addChildrenToNode(resource,child)
+                                addChildrenToNode(resource,child,text)
                             }
 
 
                         } else {
                             //no, just add to the resource
-                            addChildrenToNode(resource,child)
+                            addChildrenToNode(resource,child,text)
                         }
 
 
@@ -496,10 +486,12 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http) {
 
             }
 
-            addChildrenToNode(resource,treeObject);
 
-            console.log(resource)
+            var text = {value:""};
+            addChildrenToNode(resource,treeObject,text);
 
+            console.log(text)
+            return resource;
 
 
         },
@@ -620,7 +612,307 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http) {
                 return deferred.promise;
 
 
+            },
+        dataTypeSelected : function(dt,results,element,scope) {
+            //todo - get rid of the scope...
+            switch (dt) {
+
+                case 'Period' :
+                    results.period = {startOnly:false};
+                    break;
+
+                case 'Quantity' :
+
+                    scope.showWaiting = true;
+                    //age-units
+                    GetDataFromServer.getExpandedValueSet('ucum-common').then(
+                        function(vs) {
+
+                            scope.showWaiting = false;
+                            scope.ucum = vs.expansion.contains;
+                        }, function(err){
+                            scope.showWaiting = false;
+                            alert("Unable to get the UCUM codes, you can still enter them manually");
+                            console.log(err)
+
+                        }
+                    );
+                    break;
+
+
+                case 'Identifier' :
+
+
+                    //see if there is a constraint in identifier system - if so, then set it as a default...
+                    if (element.constraint) {
+                        var search = 'identifier[system/@value=';
+                        element.constraint.forEach(function(con){
+                            if (con.xpath && con.xpath.indexOf(search)>-1) {
+                                var g = con.xpath.indexOf('=');
+                                var system = con.xpath.substr(g+1);
+                                system = system.replace(/]/g,"");
+                                results.identifier_system = system;
+                            }
+                        })
+                    };
+
+
+                    break;
+
+                case 'ContactPoint' :
+                    results.ct = {use:'home',system:'mobile'};
+                    break;
+
+                case 'HumanName' :
+                    results.hn = {use:'usual'};
+                    break;
+
+                case 'Address' :
+                    results.addr = {use:'home'};
+                    break;
+
+                case 'Narrative' :
+                    //enter extra narrative
+                    results.narrative = ""; //todo scope.profile.snapshot.element[0].valueNarrative;
+                    break;
+
+                case 'Annotation' :
+                    //enter extra narrative
+                    results.annotation = {text:'',authorString:''};
+                    break;
+
+
+                case 'Age' :
+                    scope.UCUMAgeUnits = Utilities.getUCUMUnits('age');
+                    break;
+
+                case 'Money' :
+                    scope.UCUMMoneyUnits = Utilities.getUCUMUnits('money');
+                    break;
+
+                case 'Reference' :
+                    //todo - have a service that creates a full summary of a resource - and a 1 liner for the drop down
+                    //console.log(element)
+                    if (! RenderProfileSvc.isUrlaBaseResource(element.type[0].profile[0])) {
+                        //this is a reference to profile on a base resource. need to load the profile so we can figure out the base type
+                        scope.profileUrlInReference = element.type.profile[0];
+                        GetDataFromServer.findResourceByUrl('StructureDefinition',element.type.profile[0],function(profile){
+                            if (profile) {
+
+                                var resourceType = profile.constrainedType;//  Utilities.getResourceTypeFromUrl();
+                                scope.resourceType = resourceType;
+                                scope.selectedReferenceResourceType = RenderProfileSvc.getResourceTypeDefinition(resourceType) ;//  scope.resourcetypes[resourceType];
+                                //todo -this won;t be correct...
+                                //-temp- scope.externalReferenceSpecPage = "http://hl7.org/fhir/2015May/" + resourceType + ".html";
+                                //todo - need to pass the profilein as welll
+
+                                //if this is a 'reference' type resource (lkike origanization)t then don't
+                                //incldue any of thm in the list
+
+                                scope.resourceList = RenderProfileSvc.getResourcesSelectListOfType(
+                                    scope.allResources,resourceType,profile.url);
+
+
+
+                            }
+
+                        });
+                    } else {
+                        //this is a base resource...
+
+                        //DSTU-2 - type.profile is an array
+                        var ar = element.type[0].profile[0].split('/');
+                        var resourceType = ar[ar.length-1];
+                        console.log(resourceType)
+
+                        //if any resource can be referenced here
+                        if (resourceType== 'Resource') {
+                            scope.uniqueResources = RenderProfileSvc.getUniqueResources(scope.allResources);
+                        } else {
+                            delete scope.uniqueResources;
+                        }
+
+                        //this defines the resource type - eg whether it is a reference resource rather than linked to a patient...
+                        scope.selectedReferenceResourceType = RenderProfileSvc.getResourceTypeDefinition(resourceType);//scope.resourcetypes[resourceType];
+
+
+                        scope.resourceType = resourceType;
+
+
+                        //if the resource type is one that is a 'reference' - ie doesn't link to a patient then
+                        //the resurceList is empty. Otherwise populate it with the existing resources of that type for the patient
+                        if (scope.selectedReferenceResourceType.reference) {
+                            // if (scope.allResourceTypesIndexedByType[resourceType].reference) {
+                           // delete scope.resourceList;
+                        } else {
+                            //the list of resources of this type linked to this patient that can be selected...
+                            scope.resourceList = RenderProfileSvc.getResourcesSelectListOfType(
+                                scope.allResources,resourceType);
+                        }
+
+                    }
+
+                    break;
+                case 'date' :
+                    //results.date_start = "";
+                    break;
+                case 'string' :
+                    //results.string = "";
+                    break;
+
+
+
+                case 'Coding' :
+                    //returns the Url of the reference.
+                    var valueSetReference = RenderProfileSvc.getUniqueResources(element);
+
+                    results.coding = null;
+                    if (valueSetReference) {
+                        Utilities.getValueSetIdFromRegistry(valueSetReference.reference,
+
+                            function (vsDetails) {
+
+                                scope.vsDetails = vsDetails;
+                            });
+                        scope.vsReference = valueSetReference.reference;
+                    }
+                    break;
+                case 'CodeableConcept' :
+                    scope.vsReference = null;
+                    delete scope.valueSet;
+                    if (element.binding) {
+
+                        //get the name of the referenced valueset in the profile - eg http://hl7.org/fhir/ValueSet/condition-code
+                        var valueSetReference = RenderProfileSvc.getValueSetReferenceFromBinding(element);
+
+                        //Assuming there is a valueset...
+                        if (valueSetReference) {
+                            scope.showWaiting = true;
+                            results.cc = "";
+
+                            Utilities.getValueSetIdFromRegistry(valueSetReference.reference,
+
+                                function(vsDetails){
+                                    scope.vsDetails = vsDetails;
+
+                                    //if the current registry does have a copy of the valueset, and it's a small one, then render as
+                                    //a series of radio buttons.
+                                    if (scope.vsDetails && scope.vsDetails.type == 'list') {
+                                        //this is a list type - ie a small number, so retrieve the entire list (expanded
+                                        //but not filtered) and set the appropriate scope. This will be rendered as a set of
+                                        //radio buttons...
+                                        scope.showWaiting = true;
+                                        // delete scope.valueSet;
+                                        //scope.showWaiting = true;
+                                        GetDataFromServer.getExpandedValueSet(scope.vsDetails.id).then(   //get the expanded vs
+                                            function(data){
+                                                //get rid of the '(qualifier value)' that is in some codes...
+                                                angular.forEach(data.expansion.contains,function(item){
+                                                    if (item.display) {
+                                                        item.display = item.display.replace('(qualifier value)',"");
+                                                    }
+
+                                                });
+                                                scope.valueSet = data;
+                                            }).finally(function() {
+                                                scope.showWaiting = false;
+                                            }
+                                        )
+                                    } else {
+                                        scope.showWaiting = false;
+                                    }
+
+
+                                });
+
+                            scope.vsReference = valueSetReference.reference;
+
+
+
+
+                        }
+
+                    }
+                    break;
+                case 'code' :
+                    delete scope.valueSet;
+                    delete scope.vsReference;
+                    if (element.binding) {
+                        //retrieve the reference to the ValueSet
+                        var valueSetReference = RenderProfileSvc.getValueSetReferenceFromBinding(element);
+
+
+
+                        if (valueSetReference) {
+
+                            //get the id of the valueset on the registry server
+                            Utilities.getValueSetIdFromRegistry(valueSetReference.reference,
+
+                                function(vsDetails){
+                                    scope.vsDetails = vsDetails;
+
+                                    if (vsDetails) {
+                                        scope.showWaiting = true;
+                                        //get the expansion...
+                                        GetDataFromServer.getExpandedValueSet(vsDetails.id).then(
+                                            function(vs){
+                                                //and if the expansion worked, we're in business...
+                                                if (vs.expansion) {
+                                                    scope.vsExpansion = vs.expansion.contains;
+                                                }
+
+
+                                            }
+                                        ).finally(function(){
+                                            scope.showWaiting = false;
+                                        });
+                                    }
+
+                                });
+
+
+                            scope.vsReference = valueSetReference.reference;
+
+                        }
+                    }
+                    break;
             }
+
+
+
+        },
+        cleanResource : function(treeData) {
+            //remove all the elements that are of type BackboneElement but have no references to them.
+            //these are elements that would be empty in the constructed resource
+            var arParents =[];   //this will be all elementid's that are referencey by sometheing
+            var newArray = [];      //this will be the cleaned array
+            treeData.forEach(function(item){
+                var parent = item.parent;
+                if (arParents.indexOf(parent) == -1){
+                    arParents.push(parent);
+                }
+            });
+
+            //now find elements of type bbe
+
+            treeData.forEach(function(item){
+                if (item.type == 'bbe'){
+                    var id = item.id;
+                    if (arParents.indexOf(id) > -1) {
+                        newArray.push(item);
+                    }
+                } else {
+                    newArray.push(item);
+                }
+
+            });
+
+            console.log(treeData)
+            console.log(newArray)
+
+            return newArray;
+
+        }
 
     }
 
