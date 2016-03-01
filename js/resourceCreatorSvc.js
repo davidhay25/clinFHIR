@@ -1,17 +1,14 @@
 angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,RenderProfileSvc,GetDataFromServer,Utilities) {
 
 
-    var currentProfile;     //the profile being used...
-
+    var currentProfileEl;     //the profile being used...
+    var currentProfile;         //the profile in use
     //function to capitalize the first letter of a word...
     String.prototype.toProperCase = function () {
         return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
     };
 
-    var getElementDefinitionFromPathDEP = function(path){
-        //get the element definition for the path from the profile
-        return currentProfile[path];
-    };
+
 
     return {
 
@@ -319,43 +316,73 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
 
         },
 
-        getEDForPath : function(path) {
+        getRootED : function(path) {
           //return the elementdefinition for a given path
-            return this.currentProfile[path];
+            console.log(this.currentProfile);
+
+            return this.currentProfile.snapshot.element[0];
         },
 
 
         getPossibleChildNodes : function(ed){
             //given an element definition, return a collection of the possible child nodes
-            var exclusions=['id','meta','implicitRules','language','text','contained','extension','modifierExtension'];
+            //these are nodes whose path has one more '.' - eg if ed.path = Condition.stage, then Condition.stage.summary is included
+            var exclusions=['id','meta','implicitRules','language','text','contained','modifierExtension'];
             var children = [];
             var path = ed.path;     //the path of this ed. child nodes will have this as a parent, and one more dot in the path
             //var ar = path.split('.');
             var pathLength = path.length;
             var dotCount = (path.split('.').length);
             //var dotCount = ar.length-1;
-            angular.forEach(this.currentProfile,function(e,k){
+            angular.forEach(this.currentProfile.snapshot.element,function(elementDef){
                 //console.log(e,k);
                 //console.log(k)
-                var ar = k.split('.');
-
-                if (k.substr(0,pathLength) == path && ar.length == dotCount+1) {
+                //var ar = k.split('.');
+                var elPath = elementDef.path;
+                var ar = elPath.split('.');
+                
+                //imatched
+                if (elPath.substr(0,pathLength) == path && ar.length == dotCount+1) {
                    // console.log('match')
                     //only add children that are not in the exclusion list. Will need to change this when we implement extensions...
                     var propertyName = ar[dotCount];  //the name of the property in the resource
-                    if (exclusions.indexOf(propertyName) == -1) {
-                        e.myData = {display:propertyName,displayClass:""};
-                        if (e.min !== 0) {
-                            e.myData.displayClass += 'elementRequired ';
+
+                    //if this is an extension, then need to see if there is a profile in the type. If it is, then
+                    //this is an extension attached to the profile so needs to be rendered...
+                    console.log(propertyName);
+                    if (propertyName == 'extension') {      //todo need to think about modifierExtensions
+                        console.log(ed)
+                        if (elementDef.type && elementDef.type[0].profile ) {
+
+
+                            elementDef.myData = {display:propertyName,displayClass:""};
+                            if (elementDef.min !== 0) {
+                                elementDef.myData.displayClass += 'elementRequired ';
+                            }
+
+                            children.push(elementDef);
+
                         }
+                    } else {
+                        //this is not an extension - don't include the standard components...
+                        if (exclusions.indexOf(propertyName) == -1) {
+                            elementDef.myData = {display:propertyName,displayClass:""};
+                            if (elementDef.min !== 0) {
+                                elementDef.myData.displayClass += 'elementRequired ';
+                            }
 
-                        if (e.type && e.type[0].code == 'BackboneElement') {
-                            e.myData.displayClass += "backboneElement";
+                            if (elementDef.type && elementDef.type[0].code == 'BackboneElement') {
+                                elementDef.myData.displayClass += "backboneElement";
+                            }
+
+
+                            children.push(elementDef);
                         }
-
-
-                        children.push(e);
                     }
+
+
+
+
 
 
 
@@ -497,84 +524,7 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
         },
 
 
-        buildResourceDEP : function(type,treeData) {
-            //build the resource from the treeData. Assume that it is in the correct order - ie that all nested
-            //elements follow each other properly. This assumes that the creator routines insert into the treeData array
-            //rather than appending...
-            var that = this;
-            var workingObject;  //the working object - where we are in the resource being built.
-            var resource = {};
-            treeData.forEach(function(item){
-                //console.log(item)
-                var id = item.id;       //the internal id of this node
-                var path = item.path;   //the resource path
-
-                var ed = that.currentProfile[path];    //the elementDefinition from the profile for this path
-                var fragment = item.fragment;      //the json fragment (if any) at this point
-
-                console.log(id,path,fragment,ed);
-
-
-                var ar = path.split('.');
-
-
-                switch (ar.length) {
-
-                    case 1 :
-                        //this is the root
-                        //resource[path] = fragment;
-                        workingObject = resource;//[path];
-                        break;
-                    default :
-                        //is this a 'real' property, or a parent node...
-                        if (ed.type[0].code == 'BackboneElement' ) {
-                            //so this is a parent node. Add it to the resource...
-                            var node = {}
-
-                        } else {
-                            //this is 'normal' property. add to the workingObject
-                            var propertyName = ar[ar.length-1];
-                            //is this is single or multiple value?
-                            var multiple = true;
-
-                            if (ed.base && ed.base.max) {
-                                //the base property is used in profiled resources...
-                                if (ed.base.max == '1') {
-                                    multiple = false;
-                                }
-                            } else {
-                                //this must be one of the core resource defintions...
-                                if (ed.max == '1') {
-                                    multiple = false
-                                }
-                            }
-
-                            if (multiple) {
-                                workingObject[propertyName] = workingObject[propertyName] || []
-                                workingObject[propertyName].push(fragment);
-                            } else {
-                                workingObject[propertyName] = fragment;
-                            }
-
-
-                        }
-
-                        break;
-
-                }
-
-
-
-
-            })
-
-            console.log(resource);
-            return resource;
-
-
-        },
-
-        addPatientToTree: function(path, patient, treeData) {
+           addPatientToTree: function(path, patient, treeData) {
             //add the patient reference to the tree  path = path to patient, patient = patient resource, treeData = data for tree
             var fragment = {reference:'Patient/100',display:'John Doe'};
             //path = the path in the resource - relative to the parent
@@ -591,14 +541,13 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
 
                 $http.get("artifacts/"+type+".json").then(
                     function(data) {
-                        that.currentProfile = {};
-                        data.data.snapshot.element.forEach(function(elementDefinition){
-                            that.currentProfile[elementDefinition.path] = elementDefinition;
-                        });
+                        that.currentProfile = data.data;
+
+                       // data.data.snapshot.element.forEach(function(elementDefinition){
+                         //   that.currentProfileEl[elementDefinition.path] = elementDefinition;
+                       // });
 
 
-
-                        //this.currentProfile = data.data;
                         deferred.resolve(data.data)
                     }
                 );

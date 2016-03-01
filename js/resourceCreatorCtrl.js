@@ -1,7 +1,6 @@
-/* Controller for the sample creator
-* Whan a patient is created, the 'managingOrganization' will be set to the pre-defined origanizatiion that the tool
-* creates (see cfOrganization). Then, when displaying patients created by the tool we search on that organization.
-* If the data server doesn't support that search, then the patient will be created, but can't be displayed at the moment
+/* Controller for the resource builder
+* Note that this uses jsTree to convert the internal resource model from a flat list to a hierarchy.
+* todo - should replace that with a specific funciton...
 * */
 
 
@@ -9,12 +8,19 @@ angular.module("sampleApp").controller('resourceCreatorCtrl', function ($scope,r
                                                                         SaveDataToServer,RenderProfileSvc,appConfigSvc) {
 
 
-    var type = 'Condition';
+
     var profile;            //the profile being used as the base
     $scope.treeData = [];      //populates the resource tree
-
     $scope.results = {};        //the variable for resource property values...
+    $scope.results.profileName = "Condition";   //default profile
 
+    var type = $scope.results.profileName;      //todo - change type...
+
+    $scope.selectProfile = function() {
+
+
+        loadProfile($scope.results.profileName);
+    };
 
     //config - in particular the servers defined. The samples will be going to the data server...
 
@@ -33,17 +39,41 @@ angular.module("sampleApp").controller('resourceCreatorCtrl', function ($scope,r
         }
     );
 
-    resourceCreatorSvc.getProfile(type).then(
-        function(data) {
-            profile = data;
+    function loadProfile(profileName) {
 
-            //create the root node.
-            $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true},path:type,
-                ed:resourceCreatorSvc.getEDForPath(type)});
-            resourceCreatorSvc.addPatientToTree(type+'.subject',{},$scope.treeData);  //todo - not always 'subject'
-            drawTree();
-        }
-    );
+        $scope.treeData.length = 0;
+        delete $scope.selectedChild ;
+        delete $scope.dataType ;
+        delete $scope.children;
+
+
+        resourceCreatorSvc.getProfile(profileName).then(
+            function(data) {
+                profile = data;
+
+
+                //now set the base type. If a Core profile then it will be the profile name. Otherwise, it is the constarinedType
+                if (profile.constrainedType) {
+                    type = profile.constrainedType;
+                } else {type = profileName;
+                    type = profileName;
+                }
+
+
+
+                //create the root node.
+                $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true},path:type,
+                    ed:resourceCreatorSvc.getRootED(type)});
+                resourceCreatorSvc.addPatientToTree(type+'.subject',{},$scope.treeData);  //todo - not always 'subject'
+                drawTree();
+            }
+        );
+    }
+
+    loadProfile($scope.results.profileName);
+
+
+
 
     $scope.saveToServer = function(){
         //remove bbe that are not referenced...
@@ -76,14 +106,11 @@ angular.module("sampleApp").controller('resourceCreatorCtrl', function ($scope,r
 
     $scope.$on('treebuilt',function(){
         //called after the tree has been built. Mainly to support the saving
-       // alert('built')
+
 
         console.log($scope.resource);
 
-      //  if ($scope.savingResource) {
-        //    console.log($scope.resource)
 
-//        }
 
         if ($scope.savingResource) {
             SaveDataToServer.saveResource($scope.resource).then(
@@ -110,7 +137,7 @@ angular.module("sampleApp").controller('resourceCreatorCtrl', function ($scope,r
 
             delete $scope.children;     //the node may not have children (only BackboneElement datatypes do...
             var node = getNodeFromId(data.node.id);
-console.log(node);
+//console.log(node);
 
             $scope.selectedNode = node;
             if (node && node.ed) {
@@ -136,7 +163,7 @@ console.log(node);
 
     //when one of the child nodes of the currently selected element in the tree is selected...
     $scope.childSelected = function(ed,inx) {
-        console.log(inx)
+        //console.log(inx)
         $scope.selectedChild = ed;
         //the datatype of the selected element. This will drive the data entry form.
         $scope.dataType = ed.type[inx].code;

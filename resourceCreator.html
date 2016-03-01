@@ -59,8 +59,16 @@
     <div ng-app="sampleApp" ng-controller="resourceCreatorCtrl" class="container-fluid">
 
 
-        <div class="row">
-            <div class="col-md-12">
+        <div class="row panel-body"  style="background-color: #ffffdd;">
+            <div class="col-md-2">
+                <select class="form-control" ng-model = "results.profileName" ng-change="selectProfile()">
+                    <option value="Condition">Condition</option>
+                    <option value="CarePlan">CarePlan</option>
+                    <option value="qicore-condition">QICore Condition</option>
+
+                </select>
+            </div>
+            <div class="col-md-10">
 
                 <button class="btn btn-primary pull-right" ng-click="saveToServer()">Save</button>
             </div>
@@ -97,7 +105,7 @@
 
                 <h4 ng-show="children.length > 0">Child elements</h4>
 
-                <div ng-repeat="child in children">
+                <div ng-repeat="child in children track by $index">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="{{child.myData.displayClass}}">{{child.myData.display}}</div>
