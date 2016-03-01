@@ -1,0 +1,157 @@
+<div>
+    <!--<div ng-controller="newResourceCtrl">-->
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h3 ng-show="resourceType == 'Resource'" class="modal-title">Select the type to search</h3>
+                <h3 ng-hide="resourceType == 'Resource'" class="modal-title">Search for {{resourceType}} Resource</h3>
+                <div ng-show="profileUrl"><em>Profiled: {{profileUrl}}</em></div>
+            </div>
+            <div class="col-md-4">
+                <div class="pull-right">
+                    <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+                    <button class="btn btn-primary" ng-show="selectedResource" ng-click="ok(selected.item)">Select</button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-body">
+        <div ng-show="loading" class="alert alert-info">
+            Querying server, please wait...
+        </div>
+
+        <div ng-hide="typeWasSpecified">
+            <div>
+                <div class="col-md-4 col-sm-4">
+                    Resource type
+                </div>
+                <div class="col-md-8 col-sm-8">
+                    <select ng-model="input.type" ng-change="typeSelected(input.type)" class="form-control"
+                            ng-options = "r.name for r in resourceTypeList">
+
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+        <tabset>
+            <tab heading="Query Parameters" active="tab.tabQuery">
+                <form class="form-horizontal" role="form">
+                    <div ng-repeat = "srch in searchParams">
+
+                        <div ng-if="srch.type=='string' && srch.name.substr(0,1) != '_'">
+                            <div class="form-group">
+                                <div class="col-md-2">{{srch.name}}</div>
+                                <div class="col-md-1">==</div>
+                                <div class="col-md-4"><input type="text" class="form-control" ng-model="results[srch.name]"/> </div>
+                                <div class="col-md-5">{{srch.documentation}}</div>
+                            </div>
+                        </div>
+
+                        <div ng-if="srch.type=='token' && srch.name.substr(0,1) != '_'">
+                            <div class="form-group">
+                                <div class="col-md-2">{{srch.name}}</div>
+                                <div class="col-md-1">==</div>
+
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" placeholder="Textual value of code" ng-model="results[srch.name]"/>
+                                </div>
+                                <div class="col-md-5">{{srch.documentation}}</div>
+                            </div>
+                        </div>
+
+                        <!--
+                        <div ng-if="srch.type=='token' && srch.name.substr(0,1) != '_'">
+                            <div class="form-group">
+                                <div class="col-md-2">{{srch.name}}</div>
+                                <div class="col-md-1">==</div>
+                                <div class="col-md-2">
+                                    <input type="text" class="form-control" placeholder="System"/>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="text" class="form-control" placeholder="Code" ng-model="results[srch.name]"/>
+                                </div>
+                                <div class="col-md-5">{{srch.documentation}}</div>
+                            </div>
+                        </div>
+
+                        -->
+
+                        <div ng-if="srch.type=='reference' && srch.name.substr(0,1) != '_'">
+                            <div class="form-group">
+                                <div class="col-md-2">{{srch.name}}</div>
+                                <div class="col-md-1">==</div>
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" ng-model="results[srch.name]"
+                                           placeholder="Only the id is required" /> </div>
+                                <div class="col-md-5">{{srch.documentation}}</div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </form>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        {{searchString}}
+                    </div>
+                    <div class="col-md-3">
+                        <div ng-hide="loading">
+                            <button class="btn btn-primary pull-right" ng-click="search()">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </tab>
+            <tab heading="Results" active="tab.tabResults">
+                <!-- after resources have been selected...-->
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <!-- The result list-->
+                        <div class="list-group">
+                            <a href="#" class="list-group-item" ng-repeat="ent in selectedResources.entry"
+                               ng-click="selectResource(ent)" style="cursor: pointer">
+                                <p ng-bind-html="ent.resource.text.div"></p>
+                                <div ng-hide="ent.resource.text.div">No text element</div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <pre>{{selectedResourceJson}}</pre>
+                    </div>
+
+                </div>
+
+
+
+
+            </tab>
+        </tabset>
+
+    </div>
+
+    <div class="modal-footer">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="text-left">
+                    <em>Note that only a subset of the search parameters is available (those that are of type String or Token).
+                    Also, only equality searches (=) are currently supported</em>
+                </div>
+
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+                <button class="btn btn-primary" ng-show="selectedResource" ng-click="ok(selected.item)">Select</button>
+            </div>
+        </div>
+
+
+
+    </div>
+</div>

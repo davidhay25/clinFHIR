@@ -2,6 +2,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
     <script src="js/libs/angular.min.1.4.js"></script>
     <script src="js/libs/ui-bootstrap-tpls-0.14.3.min.js"></script>
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
@@ -21,6 +22,15 @@
     <script src="js/libs/moment.min.js"></script>
 
     <script src="js/appConfigSvc.js"></script>
+
+
+    <!-- files needed for resourceCreator -->
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
+    <script src="js/libs/jstree.min.js"></script>
+    <script src="js/resourceCreatorCtrl.js"></script>
+    <script src="js/resourceCreatorSvc.js"></script>
+
 
     <!-- files needed for resourceBuilder -->
     <script src="resourceBuilder/rbServices.js"></script>
@@ -218,6 +228,14 @@
 
 
 
+                </div>
+
+                <div ng-show = "global.state == 'newNONONO' && currentPatient" class="row">
+                    <div ng-controller="resourceCreatorCtrl">
+
+
+                        <ng-include src="'/includes/resourceCreator.html'" onload="includeLoaded()"></ng-include>
+                    </div>
                 </div>
 
                 <div ng-show = "global.state == 'view'" class="row">

@@ -58,7 +58,8 @@ angular.module("sampleApp")
         }
     }
 
-}).service('GetDataFromServer', function($http,$q,appConfigSvc,Utilities) {
+}).
+    service('GetDataFromServer', function($http,$q,appConfigSvc,Utilities) {
     return {
         getValueSet : function(ref,cb) {
             var deferred = $q.defer();
@@ -76,6 +77,23 @@ angular.module("sampleApp")
         getProfile : function(profileName) {
             alert('getProfile stub not implemented yet');
         },
+        generalFhirQuery : function(qry) {
+            //return an expanded valueset. Used by renderProfile Should only use for valuesets that aren't too large...
+            //takes the Id of the valueset on the terminology server - not the url...
+            var deferred = $q.defer();
+            var config = appConfigSvc.config();
+            var qry = appConfigSvc.getCurrentDataServerBase() + qry;
+            //var qry = config.servers.data + "/"+qry;
+
+            $http.get(qry).then(
+                function(data){
+                    deferred.resolve(data.data);
+                },function(err){
+                    alert('error executing query' + qry + '\n'+angular.toJson(err));
+                }
+            );
+            return deferred.promise;
+        },
         getExpandedValueSet : function(id) {
             //return an expanded valueset. Used by renderProfile Should only use for valuesets that aren't too large...
             //takes the Id of the valueset on the terminology server - not the url...
@@ -92,7 +110,32 @@ angular.module("sampleApp")
             );
             return deferred.promise;
         },
+        findConformanceResourceByUrl : function(url) {
+            //find a StructureDefinition based on its Url
+            var deferred = $q.defer();
+            var config = appConfigSvc.config();
+            var qry = config.servers.conformance + "\StructureDefinition?url="+url;
+            $http.get(qry).then(
+                function(data){
+                    var bundle = data.data;
+                    if (bundle && bundle.entry && bundle.entry.length > 0) {
+                        //return the first on if more than one...
+                        deferred.resolve(bundle.entry[0].resource);
+                    } else {
+                        deferred.reject({msg:"No matching profile found"})
+                    }
+
+                },function(err){
+                    deferred.reject({msg:"No matching profile found: " + angular.toJson(err)})
+                }
+            );
+
+            return deferred.promise;
+
+        },
         findResourceByUrl : function(type,profile,cb) {
+            //get a resource of a given type from the server. This is used for
+
             alert('findResourceByUrl stub not implemented yet');
         },
         getFilteredValueSet : function(name,filter){
@@ -132,7 +175,8 @@ angular.module("sampleApp")
     }
 
 
-}).service('Utilities', function($http,$q,$localStorage,appConfigSvc) {
+}).
+service('Utilities', function($http,$q,$localStorage,appConfigSvc) {
     return {
         validate : function(resource,cb) {
             var deferred = $q.defer();
@@ -297,7 +341,8 @@ angular.module("sampleApp")
             return text;
         }
     }
-}).service('RenderProfileSvc', function($http,$q,Utilities,ResourceUtilsSvc) {
+})
+    .service('RenderProfileSvc', function($http,$q,Utilities,ResourceUtilsSvc) {
 
     function isEmpty(obj) {
         for(var key in obj) {
@@ -1030,7 +1075,17 @@ angular.module("sampleApp")
         },
         getResourceTypeDefinition : function(resourceType) {
             //this is needed so we can distinguish between 'reference' resources that don't have a patient reference from those that do...
-            return standardResourceTypes[resourceType]
+
+            for (var i=0;i<standardResourceTypes.length;i++) {
+                if (standardResourceTypes[i].name == resourceType) {
+                    return standardResourceTypes[i];
+                    break;
+                }
+            }
+
+
+
+           // return standardResourceTypes[resourceType]
         },
 
         isUrlaBaseResource : function(profileTypeUrl) {
@@ -1043,7 +1098,7 @@ angular.module("sampleApp")
 
             //standardResourceTypes is an array of objects {name: }. A hash might be more efficient...
 
-            console.log(standardResourceTypes)
+            
             var isBaseType = false;
             for (var i=0; i< standardResourceTypes.length;i++) {
                 if (standardResourceTypes[i].name==resourceType) {
@@ -1145,7 +1200,8 @@ angular.module("sampleApp")
         }
 
     }
-}).service('ResourceUtilsSvc', function() {
+})
+    .service('ResourceUtilsSvc', function() {
     function getPeriodSummary(data) {
         if (!data) {
             return "";

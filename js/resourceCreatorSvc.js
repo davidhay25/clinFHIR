@@ -1,4 +1,5 @@
-angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,RenderProfileSvc,GetDataFromServer,Utilities) {
+angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,RenderProfileSvc,
+                                                                   ResourceUtilsSvc,GetDataFromServer,Utilities) {
 
 
     var currentProfileEl;     //the profile being used...
@@ -6,6 +7,23 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
     //function to capitalize the first letter of a word...
     String.prototype.toProperCase = function () {
         return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+    };
+
+    //get the extension type (single, complex) and data type from the ExtensionDefinition (StructureDefinition).
+
+    //todo - for now, assume simple
+    this.processExtensionDefinition = function(sd){
+        var vo = {type:'simple'};
+        if (sd && sd.snapshot && sd.snapshot.element) {
+            sd.snapshot.element.forEach(function(ed){
+                var path = ed.path;
+                if (path.indexOf('.value')) {
+                    vo.type = ed.type
+                }
+            })
+        }
+
+        return vo;
     };
 
 
@@ -317,48 +335,81 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
         },
 
         getRootED : function(path) {
-          //return the elementdefinition for a given path
-            console.log(this.currentProfile);
+          //return the elementdefinition for the root element of the profile - always the first one...
+            //console.log(this.currentProfile);
 
             return this.currentProfile.snapshot.element[0];
         },
 
 
         getPossibleChildNodes : function(ed){
-            //given an element definition, return a collection of the possible child nodes
+            //given an element definition, return a collection of the possible child nodes. Needs to be a promise as
+            //it may need to resolve references to extension definitions...
+            var deferred = $q.defer();
+            var that = this;
             //these are nodes whose path has one more '.' - eg if ed.path = Condition.stage, then Condition.stage.summary is included
             var exclusions=['id','meta','implicitRules','language','text','contained','modifierExtension'];
-            var children = [];
+            var children = [];      //the array of potential child nodes...
+            var queries = [];         //a list of async queries required to resolve extensions...
             var path = ed.path;     //the path of this ed. child nodes will have this as a parent, and one more dot in the path
-            //var ar = path.split('.');
             var pathLength = path.length;
             var dotCount = (path.split('.').length);
-            //var dotCount = ar.length-1;
             angular.forEach(this.currentProfile.snapshot.element,function(elementDef){
-                //console.log(e,k);
-                //console.log(k)
-                //var ar = k.split('.');
                 var elPath = elementDef.path;
                 var ar = elPath.split('.');
-                
-                //imatched
+
                 if (elPath.substr(0,pathLength) == path && ar.length == dotCount+1) {
-                   // console.log('match')
                     //only add children that are not in the exclusion list. Will need to change this when we implement extensions...
                     var propertyName = ar[dotCount];  //the name of the property in the resource
 
                     //if this is an extension, then need to see if there is a profile in the type. If it is, then
                     //this is an extension attached to the profile so needs to be rendered...
-                    console.log(propertyName);
                     if (propertyName == 'extension') {      //todo need to think about modifierExtensions
-                        console.log(ed)
+                        //if there is a profile against the type, it points to the defintion of the extension. Only include it if it does...
                         if (elementDef.type && elementDef.type[0].profile ) {
+                            //so we need to retrieve the definition of the profile, and update the list of elements.
+                            //this will be an asynchronous operation, so add it to the list......
 
+                            var displayName = elementDef.name;
 
-                            elementDef.myData = {display:propertyName,displayClass:""};
+                            elementDef.myData = {display:displayName,displayClass:"elementExtension"};
                             if (elementDef.min !== 0) {
                                 elementDef.myData.displayClass += 'elementRequired ';
                             }
+
+                            var profileUrl = elementDef.type[0].profile;     //the Url of the profile
+                            queries.push(GetDataFromServer.findConformanceResourceByUrl(profileUrl).then(
+                                function(sdef) {
+
+                                    console.log(sdef)
+                                    elementDef.myData.extensionDefinition = sdef;   //save the full definition for later...
+                                    elementDef.myData.isExtension = true;
+                                    elementDef.myData.extensionDefUrl = profileUrl[0];      //it's an array (not sure why)
+
+                                    //process the definition to get the datatype and url...
+
+                                    //todo - move this to another service - and accomodate complex extensions...
+                                    //complex extensions will have a 'backboneelement' and child nodes so a lot more complicated...
+                                    if (sdef && sdef.snapshot && sdef.snapshot.element) {
+                                        sdef.snapshot.element.forEach(function(ed){
+                                            var path = ed.path;
+                                            if (path.indexOf('.value') > -1) {
+                                                elementDef.type = ed.type;
+                                                console.log(ed.type)
+                                            }
+                                        })
+                                    }
+
+
+                                },
+                                function(err) {
+                                    alert('Error retrieving '+ profileUrl + " "+ angular.toJson(err))
+                                }
+                            ));
+
+
+
+
 
                             children.push(elementDef);
 
@@ -375,42 +426,42 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                                 elementDef.myData.displayClass += "backboneElement";
                             }
 
-
                             children.push(elementDef);
                         }
                     }
 
-
-
-
-
-
-
                 }
 
-                //var dc = (k.split('.').length-1);
+
 
 
 
             });
 
-            return children;
-        },
+            //Are there any extensions that need to be resolved?
+            if (queries.length > 0) {
+                //yes - execute all the queries and resolve when all have been completed...
+                $q.all(queries).then(
+                    function() {
+                        deferred.resolve(children);
+                    },
+                    function(err){
+                        alert("error getting SD's for children "+angular.toJson(err))
+                    }
+                )
 
+            } else {
+                //no - we can return the list immediately...
+                deferred.resolve(children)
 
-        buildResource : function(type,treeObject,treeData) {
-            //create the sample resource...
-            var resource = {resourceType:type}
-
-            //create an object hash of the treeData
-            var treeHash = {};
-            for (var i=0; i<treeData.length; i++) {
-                var node = treeData[i];
-                treeHash[node.id] = node;
             }
 
-            //is this a releating element?
-            function canRepeat(ed) {
+            return deferred.promise;
+        },
+
+        canRepeat : function(ed) {
+            //whether the element can repeat...
+            if (ed) {
                 var multiple = true;
 
                 if (ed.base && ed.base.max) {
@@ -426,20 +477,39 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                 }
                 return multiple;
             }
+            return false;
+
+        },
+
+        buildResource : function(type,treeObject,treeData) {
+            //create the sample resource...
+            var resource = {resourceType:type}
+
+            //create an object hash of the treeData
+            var treeHash = {};
+            for (var i=0; i<treeData.length; i++) {
+                var node = treeData[i];
+                treeHash[node.id] = node;
+            }
+
+            var canRepeat = this.canRepeat;     //allows functions in this block to access the canRepeat function outside...
+
 
 
             function addChildrenToNode(resource,node,text) {
                 //add the node to the resource. If it has children, then recursively call
                 var lnode = treeHash[node.id];
+
+
                 var path = lnode.path;
                 var ar = path.split('.');
                 var propertyName = ar[ar.length-1];
 
+
+
                 if (propertyName.indexOf('[x]') > -1) {
                     //this is a polymorphic field...
                     propertyName = propertyName.slice(0, -3) + lnode.dataType.code.toProperCase();
-
-
                 }
 
                 if (lnode.fragment) {
@@ -453,10 +523,35 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                         resource.push(o)
 
                     } else {
-                        //console.log(lnode)
-                        resource[propertyName] = lnode.fragment;
-                        text.value += lnode.display + ' ';
-                        //console.log(text);
+
+                        //is this is repeating element?
+                        var cr = canRepeat(lnode.ed);
+
+                        if (propertyName == 'extension') {
+
+                            var url = lnode.ed.myData.extensionDefUrl;      //the Url to the profile
+                            var dt = 'value'+lnode.dataType.code;
+                            resource.extension = resource.extension || [];
+                            var extensionFragment = {url:url};
+                            extensionFragment[dt] = lnode.fragment;
+
+                            resource.extension.push(extensionFragment);
+
+
+
+                        } else {
+                            //console.log(lnode)
+                            if (cr) {
+                                resource[propertyName] = resource[propertyName] || []
+                                resource[propertyName].push(lnode.fragment)
+                            } else {
+                                resource[propertyName] = lnode.fragment;
+                                text.value += lnode.display + ' ';
+                            }
+
+                        }
+
+
                     }
 
 
@@ -464,6 +559,7 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
 
 
 
+                //now process any chldren of this node...
                 if (node.children && node.children.length > 0) {
                     node.children.forEach(function(child){
                         var childNodeHash = treeHash[child.id];
@@ -517,7 +613,6 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
             var text = {value:""};
             addChildrenToNode(resource,treeObject,text);
 
-            console.log(text)
             return resource;
 
 
@@ -542,22 +637,9 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                 $http.get("artifacts/"+type+".json").then(
                     function(data) {
                         that.currentProfile = data.data;
-
-                       // data.data.snapshot.element.forEach(function(elementDefinition){
-                         //   that.currentProfileEl[elementDefinition.path] = elementDefinition;
-                       // });
-
-
                         deferred.resolve(data.data)
                     }
                 );
-
-
-
-             //   http://fhir2.healthintersections.com.au/open/StructureDefinition/Condition
-
-
-
                 return deferred.promise;
 
 
@@ -845,7 +927,8 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
             //now find elements of type bbe
 
             treeData.forEach(function(item){
-                if (item.type == 'bbe'){
+                if (item.isBbe){
+                    //if (item.type == 'bbe'){
                     var id = item.id;
                     if (arParents.indexOf(id) > -1) {
                         newArray.push(item);
@@ -856,8 +939,6 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
 
             });
 
-            console.log(treeData)
-            console.log(newArray)
 
             return newArray;
 

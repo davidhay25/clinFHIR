@@ -25,7 +25,7 @@
 
 
 <!--
-  <script src="js/services.js"></script>
+
     <script src="js/resourceSvc.js"></script>
 
     <script src="js/controllers.js"></script>
@@ -43,12 +43,13 @@
 
     <script src="resourceBuilder/rbServices.js"></script>
     <script src="resourceBuilder/vsBrowser.js"></script>
-
+    <script src="js/services.js"></script>
 
     <script src="js/libs/ngStorage.min.js"></script>
 
     <script src="js/filters.js"></script>
-
+    <script src="js/searchForResourceCtrl.js"></script>
+    <script src="js/utilitiesSvc.js"></script>
     <title>FHIR Resource Creator</title>
 
 </head>
@@ -58,6 +59,17 @@
 
     <div ng-app="sampleApp" ng-controller="resourceCreatorCtrl" class="container-fluid">
 
+
+        <ng-include src="'/includes/resourceCreator.html'" onload="includeLoaded()"></ng-include>
+
+        <!-- a directive that allows a profile to be selected - not just a base one... -->
+        <select-profile trigger="showFindProfileDialog"
+                        all-resource-types="dynamic.resourcetypes"
+                        profile-selected="selectedProfile" type="'profile'">
+
+        </select-profile>
+
+        <!--
 
         <div class="row panel-body"  style="background-color: #ffffdd;">
             <div class="col-md-2">
@@ -69,7 +81,6 @@
                 </select>
             </div>
             <div class="col-md-10">
-
                 <button class="btn btn-primary pull-right" ng-click="saveToServer()">Save</button>
             </div>
         </div>
@@ -80,9 +91,6 @@
                 <div style="height:250px; overflow-y: auto;" >
                     <div id="treeView"></div>
                 </div>
-
-
-
             </div>
             <div class="col-md-4">
 
@@ -110,10 +118,10 @@
                         <div class="col-md-6">
                             <div class="{{child.myData.displayClass}}">{{child.myData.display}}</div>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-1">
                             {{child.min}}..{{child.max}}
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-5">
                             <div ng-repeat="type in child.type">
 
                                 <span ng-hide="type.profile">
@@ -142,32 +150,13 @@
                 <ng-include src="'/includes/dataTypeInputTemplates.html'"></ng-include>
                 <pre>{{resource | json}}</pre>
 
-                <!--
-                <uib-tabset>
-                    <uib-tab heading="Data input">
-                        <ng-include src="'/includes/dataTypeInputTemplates.html'"></ng-include>
-                        <pre>{{resource | json}}</pre>
-                    </uib-tab>
-                    <uib-tab heading="TreeData">
-                        <div ng-repeat="node in treeData">
-                            ID: {{node.id}}  ParentId: {{node.parent}} Path: {{node.path}}
-
-                            <div>{{node.fragment}}</div>
-                        </div>
-
-                    </uib-tab>
-                </uib-tabset>
--->
-
-
-
-
-
-                <!--
-                <pre>{{selectedChild | json}}</pre>
--->
             </div>
         </div>
+
+
+
+-->
+
 
         <vs-browser trigger="showVSBrowserDialog"></vs-browser>
 
