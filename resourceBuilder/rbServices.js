@@ -176,8 +176,59 @@ angular.module("sampleApp")
 
 
 }).
-service('Utilities', function($http,$q,$localStorage,appConfigSvc) {
+    service('Utilities', function($http,$q,$localStorage,appConfigSvc) {
     return {
+        getConformanceResource : function(callback) {
+            //return the conformance resource  (cached the first time ) in a simple callback for the current data server
+            if ($localStorage.conformanceResource) {
+                callback($localStorage.conformanceResource)
+            } else {
+                //todo - need to rationize the config...
+                var url = "http://fhirtest.uhn.ca/baseDstu2/metadata";
+
+                $http.get(url)
+                    .success(function(data) {
+
+                        $localStorage.conformanceResource = data;
+
+
+
+                        //generate an object keyed on resource type. Used by the resource builder to limit types for limited resurces
+                        //todo use all rest object for now
+
+                        try {
+                            var keyedConformance = {};
+                            data.rest.forEach(function(rest){
+                                if (rest.resource) {
+                                    rest.resource.forEach(function (res) {
+                                        keyedConformance[res.type] = {};
+                                        if (res.interaction) {
+                                            res.interaction.forEach(function (int) {
+                                                if (int.code == 'create') {
+                                                    keyedConformance[res.type].create = true;
+                                                }
+                                            })
+                                        }
+
+                                    })
+                                }
+                            });
+
+                            $localStorage.keyedConformance = keyedConformance;
+                        } catch (ex) {
+                            console.log('error creating keyedConformance',ex, keyedConformance)
+                        }
+                        callback(data)
+                    }).error(function(oo, statusCode) {
+                    callback(null)
+                });
+            }
+
+
+
+        },
+
+
         validate : function(resource,cb) {
             var deferred = $q.defer();
 
@@ -469,6 +520,8 @@ service('Utilities', function($http,$q,$localStorage,appConfigSvc) {
 
 
     return {
+
+
         getAllStandardResourceTypes : function(){
             //the basic resources in FHIR. returns an object that also indicates if it is a reference resource or not...
             var deferred = $q.defer();
@@ -1098,7 +1151,7 @@ service('Utilities', function($http,$q,$localStorage,appConfigSvc) {
 
             //standardResourceTypes is an array of objects {name: }. A hash might be more efficient...
 
-            
+
             var isBaseType = false;
             for (var i=0; i< standardResourceTypes.length;i++) {
                 if (standardResourceTypes[i].name==resourceType) {
