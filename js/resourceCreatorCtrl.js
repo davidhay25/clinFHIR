@@ -6,7 +6,7 @@
 
 angular.module("sampleApp").controller('resourceCreatorCtrl',
     function ($scope,resourceCreatorSvc,GetDataFromServer,CommonDataSvc,SaveDataToServer,
-              RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc) {
+              RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities) {
 
 
     //event fired by ng-include of main page after the main template page has been loaded...
@@ -112,11 +112,13 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
     //load the selected profile, and display the tree
     function loadProfile(profileName) {
 
+        delete $scope.conformProfiles;      //profiles that this resource claims conformance to. Not for baseresources
         $scope.treeData.length = 0;
         delete $scope.selectedChild;    //a child element off the current path (eg Condition.identifier
         delete $scope.children;         //all the direct children for the current path
         delete $scope.dataType ;        //the datatype selected for data entry
 
+        $scope.waiting = true;
         resourceCreatorSvc.getProfile(profileName).then(
             function(data) {
                 profile = data;
@@ -125,6 +127,7 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
                 //now set the base type. If a Core profile then it will be the profile name. Otherwise, it is the constarinedType
                 if (profile.constrainedType) {
                     type = profile.constrainedType;
+                    $scope.conformProfiles = [profileName]
                 } else {type = profileName;
                     type = profileName;
                 }
@@ -133,18 +136,33 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
                 //create the root node.
                 $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true},path:type,
                     ed:resourceCreatorSvc.getRootED(type)});
-                resourceCreatorSvc.addPatientToTree(type+'.subject',{},$scope.treeData);  //todo - not always 'subject'
+
+                //create a dummy patient;
+                resourceCreatorSvc.addPatientToTree(type+'.patient',{},$scope.treeData);  //todo - not always 'subject'
                 drawTree();
+            }
+        ).finally(
+            function(){
+                $scope.waiting = false;
             }
         );
     }
 
 
 
+    $scope.validate = function(){
+        $scope.waiting = true;
+        var cleanedData = resourceCreatorSvc.cleanResource($scope.treeData);
+        $scope.treeData = cleanedData;
+        $scope.validatingResource = true;
+
+        drawTree(); //when the tree load is complete, the 'treebuild' event is raised. the handler looks at 'savingResource' and calls save...
 
 
+    };
 
     $scope.saveToServer = function(){
+        $scope.waiting = true;
         //remove bbe that are not referenced...
         var cleanedData = resourceCreatorSvc.cleanResource($scope.treeData);
         $scope.treeData = cleanedData;
@@ -158,7 +176,13 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
     //after that has been rendered...
     var buildResource = function(){
         var treeObject = $('#treeView').jstree().get_json();    //creates a hierarchical view of the resource
-        $scope.resource = resourceCreatorSvc.buildResource(type,treeObject[0],$scope.treeData)
+
+        var config = {};
+        config.profile = $scope.conformProfiles;
+
+        //builds the resource. Parameters base type, hierarchical tree view, raw tree data, other config stuff
+        //todo note that it should be possible to generate the hierarchical view without depending on tree view which will tidy things up a bit
+        $scope.resource = resourceCreatorSvc.buildResource(type,treeObject[0],$scope.treeData,config)
     };
 
 
@@ -166,6 +190,7 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
 
         //called after the tree has been built. Mainly to support the saving
         if ($scope.savingResource) {
+            delete $scope.savingResource;
             SaveDataToServer.saveResource($scope.resource).then(
                 function (data) {
                     console.log(data)
@@ -173,12 +198,36 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
                 function (err) {
                     console.log(err)
                 }
-            )
+            ).finally(function(){
+                $scope.waiting = false;
+            })
         }
 
-
+        if ($scope.validatingResource) {
+            delete $scope.validatingResource;
+            Utilities.validate($scope.resource).then(
+                function(data){
+                    console.log(data);
+                    $scope.validateResults = {outcome:'The resource is valid!'};
+                },
+                function(data) {
+                    var oo = data.data;
+                    console.log(oo);
+                    if (oo.issue) {
+                        delete oo.text;
+                    }
+                    $scope.validateResults = oo;
+                }
+            ).finally(function(){
+                $scope.waiting = false;
+            })
+        }
 
     });
+
+    $scope.closeValidationOutcome = function(){
+        delete $scope.validateResults;
+    };
 
     //draws the tree showing the current resource
     function drawTree() {
@@ -192,6 +241,7 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
             var node = getNodeFromId(data.node.id);
 
             $scope.selectedNode = node;
+
             if (node && node.ed) {
                 //todo - now redundate.. see$scope.selectedNode
                 $scope.selectedNodeId = data.node.id;   //the currently selected element. This is the one we'll add the new data to...
@@ -242,6 +292,7 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
             $scope.selectedNodeId = treeNode.id;   //the currently selected element in the tree. This is the one we'll add the new data to...
             var node = getNodeFromId(treeNode.id);
 
+            $scope.waiting = true;
             resourceCreatorSvc.getPossibleChildNodes(node.ed).then(
                 function(data){
                     $scope.children = data;    //the child nodes...
@@ -249,7 +300,9 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
                 function(err){
 
                 }
-            );
+            ).finally(function(){
+                $scope.waiting = false;
+            });
 
 
             drawTree() ;        //and redraw...
@@ -286,7 +339,13 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
         var treeNode = {id : new Date().getTime(),state:{opened:true},fragment:fragment.value,display:fragment.text}
         treeNode.parent =  $scope.selectedNodeId;
         treeNode.ed = $scope.selectedChild;     //the ElementDefinition that we are adding
-        treeNode.text = $scope.selectedChild.myData.display;    //the property name
+
+        var display = $scope.selectedChild.myData.display;  //from the ED...
+        if (display.indexOf('[x]') > -1) {
+            //this is a polymorphic field...
+            display = display.slice(0, -3) + $scope.dataType.toProperCase();
+        }
+        treeNode.text = display;    //the property name
         treeNode.path = $scope.selectedChild.path;
         treeNode.dataType = {code : $scope.dataType};
         //add the new node to the tree...
@@ -331,11 +390,11 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
     //--------- code for CodeableConcept lookup
     $scope.vsLookup = function(text,vs) {
         if (vs) {
-            $scope.showWaiting = true;
+            $scope.waiting = true;
             return GetDataFromServer.getFilteredValueSet(vs,text).then(
                 function(data,statusCode){
 
-                    $scope.showWaiting = false;
+
 
                     if (data.expansion && data.expansion.contains) {
 
@@ -350,14 +409,16 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
                     var statusCode = vo.statusCode;
                     var msg = vo.error;
 
-                    $scope.showWaiting = false;
+
                     alert(msg);
 
                     return [
                         {'display': ""}
                     ];
                 }
-            );
+            ).finally(function(){
+                $scope.waiting = false;
+            });
 
         } else {
             return [{'display':'Select the ValueSet to query against'}];

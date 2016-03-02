@@ -340,6 +340,16 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
 
             return this.currentProfile.snapshot.element[0];
         },
+        getEDForPath : function(path) {
+            var edList = [];
+            this.currentProfile.snapshot.element.forEach(function(ed){
+                if (ed.path == path) {
+                    edList.push(ed)
+                }
+            })
+            return edList;
+
+        },
 
 
         getPossibleChildNodes : function(ed){
@@ -481,9 +491,13 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
 
         },
 
-        buildResource : function(type,treeObject,treeData) {
+        buildResource : function(type,treeObject,treeData,config) {
             //create the sample resource...
-            var resource = {resourceType:type}
+            var resource = {resourceType:type};
+            if (config.profile) {
+                resource.meta = resource.meta || {};
+                resource.meta.profile = config.profile
+            }
 
             //create an object hash of the treeData
             var treeHash = {};
@@ -619,14 +633,14 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
         },
 
 
-           addPatientToTree: function(path, patient, treeData) {
+       addPatientToTree: function(path, patient, treeData) {
             //add the patient reference to the tree  path = path to patient, patient = patient resource, treeData = data for tree
             var fragment = {reference:'Patient/100',display:'John Doe'};
             //path = the path in the resource - relative to the parent
             //fragment = the json to render at that path. If a 'parent' in the resource (node type=BackboneElement) - eg Condition.Stage then the fragment is empty.
            // var patientNode = getElementDefinitionFromPath(path)
-
-            treeData.push({id:'patient',parent:'root',text:'subject',path:path,fragment:fragment});
+            var edList = this.getEDForPath(path);
+            treeData.push({id:'patient',parent:'root',text:'patient',path:path,ed:edList[0],fragment:fragment});
 
 
         },
@@ -724,12 +738,13 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                 case 'Reference' :
                     //todo - have a service that creates a full summary of a resource - and a 1 liner for the drop down
                     //console.log(element)
-                    if (! RenderProfileSvc.isUrlaBaseResource(element.type[0].profile[0])) {
+                    var referenceProfile = element.type[0].profile[0];  //the profile of the resource being referenced...
+                    if (! RenderProfileSvc.isUrlaBaseResource(referenceProfile)) {
                         //this is a reference to profile on a base resource. need to load the profile so we can figure out the base type
-                        scope.profileUrlInReference = element.type.profile[0];
-                        GetDataFromServer.findResourceByUrl('StructureDefinition',element.type.profile[0],function(profile){
-                            if (profile) {
+                        scope.profileUrlInReference = referenceProfile;
 
+                        GetDataFromServer.findConformanceResourceByUrl(referenceProfile).then(
+                            function(profile){
                                 var resourceType = profile.constrainedType;//  Utilities.getResourceTypeFromUrl();
                                 scope.resourceType = resourceType;
                                 scope.selectedReferenceResourceType = RenderProfileSvc.getResourceTypeDefinition(resourceType) ;//  scope.resourcetypes[resourceType];
@@ -743,11 +758,13 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                                 scope.resourceList = RenderProfileSvc.getResourcesSelectListOfType(
                                     scope.allResources,resourceType,profile.url);
 
-
-
+                            },
+                            function(err) {
+                                alert('Unable to retrieve the StructureDefinition for '+referenceProfile)
                             }
+                        )
 
-                        });
+
                     } else {
                         //this is a base resource...
 

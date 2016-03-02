@@ -9,22 +9,35 @@
 
             </select>
         </div>
-        <div class="col-md-10">
+        <div class="col-md-9">
+
             <button class="btn btn-primary pull-right" ng-click="saveToServer()">Save</button>
+            <button class="btn btn-default pull-right" ng-click="validate()">Validate</button>
         </div>
+        <div class="col-md-1">
+            <div class="pull-right" ng-show="waiting">
+                <img src="css/ajax_loader_blue_32.gif"/>
+            </div>
+
+        </div>
+
     </div>
 
     <div class="row">
         <div class="col-md-3">
-            <h4>Navigator</h4>
-            <div style="height:250px; overflow-y: auto;" >
+            <h4>Resource:Navigator</h4>
+            <div style="height:400px; overflow-y: auto;" >
                 <div id="treeView"></div>
+
             </div>
+
+
+
         </div>
         <div class="col-md-4">
 
             <div ng-show="selectedNode">
-                <h4>Element details: <em>{{selectedNode.text}}</em></h4>
+                <h4>Element details: <em>{{selectedNode.ed.path}}</em></h4>
 
                 {{selectedNode.display}}
 
@@ -75,7 +88,34 @@
 
         <div class="col-md-5">
 
-            <h4>Resource</h4>
+            <h4>Resource:Json</h4>
+
+            <uib-alert close="closeValidationOutcome()" type="success"
+                       ng-show="validateResults.outcome">
+                {{validateResults.outcome}}
+            </uib-alert>
+
+
+            <uib-alert close="closeValidationOutcome()" type="warning"
+                       ng-show="validateResults && validateResults.issue && validateResults.issue.length > 0">
+                <div>Sorry, there were some issues:</div>
+                <br/>
+                    <table class="table table-bordered">
+                        <tr><th>Severity</th><th>Code</th><th>Details/Diagnostics</th><th>Location</th></tr>
+                        <tr ng-repeat = "iss in validateResults.issue">
+                            <td>{{iss.severity}}</td>
+                            <td>{{iss.code}}</td>
+                            <td>{{iss.details.text}}
+                                <div>{{iss.diagnostics}}</div>
+                            </td>
+                            <td><div ng-repeat="loc in iss.location">{{loc}}</div></td>
+                        </tr>
+                    </table>
+
+            </uib-alert>
+
+
+
             <ng-include src="'/includes/dataTypeInputTemplates.html'"></ng-include>
             <pre>{{resource | json}}</pre>
 

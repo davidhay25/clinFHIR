@@ -60,7 +60,7 @@
     <div ng-app="sampleApp" ng-controller="resourceCreatorCtrl" class="container-fluid">
 
 
-        <ng-include src="'/includes/resourceCreator.html'" onload="includeLoaded()"></ng-include>
+        <ng-include src="'/includes/resourceCreatorMain.html'" onload="includeLoaded()"></ng-include>
 
         <!-- a directive that allows a profile to be selected - not just a base one... -->
         <select-profile trigger="showFindProfileDialog"
@@ -69,93 +69,6 @@
 
         </select-profile>
 
-        <!--
-
-        <div class="row panel-body"  style="background-color: #ffffdd;">
-            <div class="col-md-2">
-                <select class="form-control" ng-model = "results.profileName" ng-change="selectProfile()">
-                    <option value="Condition">Condition</option>
-                    <option value="CarePlan">CarePlan</option>
-                    <option value="qicore-condition">QICore Condition</option>
-
-                </select>
-            </div>
-            <div class="col-md-10">
-                <button class="btn btn-primary pull-right" ng-click="saveToServer()">Save</button>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-3">
-                <h4>Navigator</h4>
-                <div style="height:250px; overflow-y: auto;" >
-                    <div id="treeView"></div>
-                </div>
-            </div>
-            <div class="col-md-4">
-
-                <div ng-show="selectedNode">
-                    <h4>Element details: <em>{{selectedNode.text}}</em></h4>
-
-                    {{selectedNode.display}}
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            <button class="btn btn-danger pull-right" ng-click="removeNode()">Remove</button>
-                        </div>
-
-                    </div>
-
-
-                </div>
-
-
-
-                <h4 ng-show="children.length > 0">Child elements</h4>
-
-                <div ng-repeat="child in children track by $index">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="{{child.myData.displayClass}}">{{child.myData.display}}</div>
-                        </div>
-                        <div class="col-md-1">
-                            {{child.min}}..{{child.max}}
-                        </div>
-                        <div class="col-md-5">
-                            <div ng-repeat="type in child.type">
-
-                                <span ng-hide="type.profile">
-                                    <a href="#" ng-click="childSelected(child,$index)">{{type.code}} </a>
-                                </span>
-
-                                <span ng-show="type.profile">
-                                    <a href="#" class="clickableResourceReference"
-                                       ng-click="childSelected(child,$index)">-> {{type.profile | referenceType}} </a>
-
-                                </span>
-
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-
-
-            </div>
-
-            <div class="col-md-5">
-
-                <h4>Resource</h4>
-                <ng-include src="'/includes/dataTypeInputTemplates.html'"></ng-include>
-                <pre>{{resource | json}}</pre>
-
-            </div>
-        </div>
-
-
-
--->
 
 
         <vs-browser trigger="showVSBrowserDialog"></vs-browser>

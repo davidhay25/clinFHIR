@@ -230,13 +230,17 @@ angular.module("sampleApp")
 
 
         validate : function(resource,cb) {
-            var deferred = $q.defer();
+            //var deferred = $q.defer();
 
             var clone = angular.copy(resource);
             delete clone.localMeta;
 
             var qry = appConfigSvc.getCurrentDataServerBase() + resource.resourceType + "/$validate";
             console.log(qry)
+
+            return $http.post(qry, clone);      //returns a promise...
+
+            /*
             $http.post(qry, clone).then(
                 function(data) {
                     deferred.resolve(data);
@@ -248,6 +252,7 @@ angular.module("sampleApp")
             );
 
             return deferred.promise;
+            */
         },
         profileQualityReport :function (profile) {
             var issues = []
