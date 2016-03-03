@@ -1,38 +1,50 @@
 /* Controller for the resource builder
 * Note that this uses jsTree to convert the internal resource model from a flat list to a hierarchy.
-* todo - should replace that with a specific funciton...
+* todo - should replace that with a specific function...
 * */
 
+//https://coderwall.com/p/rqdrwq/nginx-conf-query-string-processing
 
 angular.module("sampleApp").controller('resourceCreatorCtrl',
     function ($scope,resourceCreatorSvc,GetDataFromServer,CommonDataSvc,SaveDataToServer,
-              RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities) {
+              RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$cookies,$location) {
 
+    var profile;                    //the profile being used as the base
+    var type;       //base type
+    $scope.treeData = [];           //populates the resource tree
+    $scope.results = {};            //the variable for resource property values...
+
+
+
+    //config - in particular the servers defined. The samples will be going to the data server...
+    $scope.config = appConfigSvc.config();
+    $scope.dataServer = $scope.config.allKnownServers[0];   //set the current dataserver... {name:,url:}
+    appConfigSvc.setCurrentDataServer($scope.dataServer);
+
+
+    //the actual Url of the profile currently being used...
+    $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/Condition";   //default profile
+
+
+    //see if a profile url was passed in when invoked
+    var params = $location.search();
+    if (params) {
+        if (params.url) {
+            $scope.results.profileUrl = params.url;
+        }
+    }
 
     //event fired by ng-include of main page after the main template page has been loaded...
     $scope.includeLoaded = function() {
         //initial load..
-        loadProfile($scope.results.profileName);
+        loadProfile($scope.results.profileUrl);
     };
 
-    var profile;                    //the profile being used as the base
-    $scope.treeData = [];           //populates the resource tree
-    $scope.results = {};            //the variable for resource property values...
-    $scope.results.profileName = "Condition";   //default profile
-
-    var type = $scope.results.profileName;      //todo - change type...
+    var type;//     the base type = $scope.results.profileUrl;      //todo - change type...
 
     $scope.selectProfile = function() {
-
-
-        loadProfile($scope.results.profileName);
+        loadProfile($scope.results.profileUrl);
     };
-
-    //config - in particular the servers defined. The samples will be going to the data server...
-    $scope.config = appConfigSvc.config();
-    //set the current dataserver...
-    $scope.dataServer = $scope.config.allKnownServers[0];   //{name:,url:}
-    appConfigSvc.setCurrentDataServer($scope.dataServer);
 
 
     //sample patient data...
@@ -110,8 +122,8 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
 
 
     //load the selected profile, and display the tree
-    function loadProfile(profileName) {
-
+    //for now - use the ProfileUrl which directly points to the profile. Want to support uri as well later on..
+    function loadProfile(profileUrl) {
         delete $scope.conformProfiles;      //profiles that this resource claims conformance to. Not for baseresources
         $scope.treeData.length = 0;
         delete $scope.selectedChild;    //a child element off the current path (eg Condition.identifier
@@ -119,19 +131,30 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
         delete $scope.dataType ;        //the datatype selected for data entry
 
         $scope.waiting = true;
-        resourceCreatorSvc.getProfile(profileName).then(
-            function(data) {
-                profile = data;
 
+
+        GetDataFromServer.getConformanceResourceByUrl(profileUrl).then(
+
+
+        //resourceCreatorSvc.getProfile(profileUrl).then(
+            function(profile) {
+                //profile = data.data;
+
+                console.log(profile)
+                resourceCreatorSvc.setCurrentProfile(profile)
 
                 //now set the base type. If a Core profile then it will be the profile name. Otherwise, it is the constarinedType
                 if (profile.constrainedType) {
                     type = profile.constrainedType;
-                    $scope.conformProfiles = [profileName]
-                } else {type = profileName;
-                    type = profileName;
+                    $scope.conformProfiles = [profileUrl]
+                } else {
+                    //type = profileUrl;
+                    var ar = profileUrl.split('/')
+                    type = ar[ar.length-1]
+
                 }
 
+                console.log(type)
 
                 //create the root node.
                 $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true},path:type,
@@ -162,7 +185,7 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
     };
 
     $scope.saveToServer = function(){
-        $scope.waiting = true;
+
         //remove bbe that are not referenced...
         var cleanedData = resourceCreatorSvc.cleanResource($scope.treeData);
         $scope.treeData = cleanedData;
@@ -191,16 +214,13 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
         //called after the tree has been built. Mainly to support the saving
         if ($scope.savingResource) {
             delete $scope.savingResource;
-            SaveDataToServer.saveResource($scope.resource).then(
-                function (data) {
-                    console.log(data)
-                },
-                function (err) {
-                    console.log(err)
-                }
-            ).finally(function(){
-                $scope.waiting = false;
-            })
+
+
+            saveResourceToServer()
+
+
+
+
         }
 
         if ($scope.validatingResource) {
@@ -271,9 +291,9 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
 
     //when one of the datatypes of the child nodes of the currently selected element in the tree is selected...
     $scope.childSelected = function(ed,inx) {
-        //console.log(inx)
+        console.log(inx)
         $scope.selectedChild = ed;
-        //the datatype of the selected element. This will drive the data entry form.
+        //the datatype of the selected element. This will display the data entry form.
         $scope.dataType = ed.type[inx].code;
 
         if ($scope.dataType == 'BackboneElement') {
@@ -311,7 +331,7 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
             //this is a normal element - get set up to enter data specific to the datatype...
 
             //todo this is all carryover stuff - should go thru and check if needed...
-            $scope.index = inx;         //save the position of this element in the list for the skip & next button
+            $scope.index = inx;         //save the position of this element in the list for reference slect
             delete $scope.externalReferenceSpecPage;
             delete $scope.elementDefinition;
             delete $scope.vsExpansion;
@@ -326,7 +346,8 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
             $scope.results.timing = {};         //needed for timing values...
 
             $scope.externalReferenceSpecPage = "http://hl7.org/datatypes.html#" + $scope.dataType;
-            resourceCreatorSvc.dataTypeSelected($scope.dataType,$scope.results,ed,  $scope)
+            resourceCreatorSvc.dataTypeSelected($scope.dataType,$scope.results,ed,$scope)
+            console.log($scope.profileUrlInReference);
         }
     };
 
@@ -481,10 +502,6 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
 
                 $scope.saveNewDataType({value:v,text:v.display});
 
-                //temp v.display = ResourceUtilsSvc.getOneLineSummaryOfResource(selectedResource);
-                //addValue(v,'Reference',"");
-                //buildResource();
-                //delete $scope.dataType;
             }
 
         }, function () {
@@ -493,4 +510,77 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
     };
 
 
-});
+    //save the current resource and build another based on the profile in the currently selected child element...
+    $scope.parkAndBuild = function() {
+        console.log($scope.selectedChild)
+        var ed = $scope.selectedChild;  //the ED describing the current element
+        if (ed && ed.type && ed.type[0].profile) {
+            var profileName =ed.type[0].profile[0];
+            alert(profileUrl)
+        }
+    };
+
+    var saveResourceToServer = function() {
+        $uibModal.open({
+            templateUrl: 'modalTemplates/confirmNewResource.html',
+            size:'lg',
+            controller: function($scope,resource,showWaiting) {
+                $scope.showWaiting = showWaiting;
+                $scope.resource = resource;
+                $scope.outcome="";       //not saved yet...
+                $scope.saveState="before";
+                $scope.input ={};
+
+                $scope.showWaiting = true;
+                $scope.saveResource = function() {
+                    $scope.saving = true;
+                    SaveDataToServer.saveResource($scope.resource).then(
+                        function(data) {
+                            //save successful...
+
+                            $scope.saveState='success';
+                            $scope.saving = false;
+                            $scope.outcome = "Resource saved with the ID:";
+
+
+                            //determine the id of the resource assigned by the server
+                            var serverId;
+                            serverId = data.headers('Content-Location');
+                            if (! serverId) {
+                                serverId = data.headers('Location');
+                            }
+
+                            $scope.outcome += serverId;
+
+                        },
+                        function(oo) {
+                            console.log(oo)
+
+                            $scope.saveState='fail';
+                            $scope.saving = false;
+                            $scope.outcome = "There was an error saving the resource: " ;
+                            $scope.oo = oo;
+
+                        }
+                    ).finally(function(){
+                        $scope.showWaiting = false;
+                    })
+                }
+            },
+            resolve : {
+                resource : function() {
+                    return $scope.resource;
+                },
+                showWaiting : function(){
+                    return $scope.waiting;
+                }
+            }
+        }).result.then(function(){
+
+            });
+        };
+
+
+
+
+    });

@@ -1,0 +1,116 @@
+
+<div>
+    <!--<div ng-controller="newResourceCtrl">-->
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h3 class="modal-title" ng-show="saveState=='before'">Please confirm that you wish to save this resource</h3>
+                <h3 class="modal-title" ng-show="saveState=='success'">Resource saved</h3>
+                <h3 class="modal-title" ng-show="saveState=='fail'">Resource NOT saved</h3>
+
+            </div>
+            <div class="col-md-4">
+                <div class="pull-right">
+                    <button class="btn btn-warning" ng-hide = "outcome" ng-click="$dismiss()">Cancel</button>
+                    <button class="btn btn-primary" ng-hide = "outcome" ng-click="saveResource()">Save</button>
+                    <button class="btn btn-primary" ng-show = "outcome" ng-click="$close()">Close</button>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+        <div class="row">
+            <div class="col-md-6">
+                <pre>{{resource | json}}</pre>
+            </div>
+
+            <div class="col-md-6">
+                <div ng-show="issues.length > 0">
+                    <H4>The following issues have been identified</H4>
+
+                    <div class="row" >
+                        <div class="col-md-4">
+                            <strong>Element</strong>
+                        </div>
+                        <div class="col-md-8">
+                            <strong>Issue</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" ng-repeat="issue in issues">
+                    <div class="col-md-4">
+                        {{issue.element}}
+                    </div>
+                    <div class="col-md-8">
+                        {{issue.type}}
+                    </div>
+                </div>
+
+                <div ng-show="issues.length > 0">
+                    <br />
+                    <em>The server may still accept the Resource, but it is not valid against the Profile.</em>
+                </div>
+
+                <div ng-show="saving">
+                    <div class="alert alert-warning" role="alert">Sending resource to server, please wait...</div>
+                </div>
+
+                <strong>{{outcome}}</strong>
+
+                <hr />
+
+                <uib-alert type="danger" ng-show="saveState=='fail'">
+
+                    <table class="table table-bordered">
+                        <tr><th>Severity</th><th>Code</th><th>Details/Diagnostics</th><th>Location</th></tr>
+                        <tr ng-repeat = "iss in oo.issue">
+                            <td>{{iss.severity}}</td>
+                            <td>{{iss.code}}</td>
+                            <td>{{iss.details.text}}
+                                <div>{{iss.diagnostics}}</div>
+                            </td>
+                            <td><div ng-repeat="loc in iss.location">{{loc}}</div></td>
+                        </tr>
+                    </table>
+
+                </uib-alert>
+
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+    </div>
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="text-left">
+                    <em></em>
+                </div>
+
+            </div>
+            <div class="col-md-4">
+                <div class="pull-right">
+                    <button class="btn btn-warning" ng-hide = "outcome"ng-click="$dismiss()">Cancel</button>
+                    <button class="btn btn-primary" ng-hide = "outcome" ng-click="saveResource()">Save</button>
+                    <button class="btn btn-primary" ng-show = "outcome" ng-click="$close()">Close</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

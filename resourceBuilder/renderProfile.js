@@ -866,7 +866,7 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
                         var ar = profile.split('/');
                         //retrieve the profile that describes the extension...
                         var profileName = ar[ar.length - 1];
-                        GetDataFromServer.getProfile(profileName).then(
+                        GetDataFromServer.getProfile(profileUrl).then(
                             function (data) {
 
                                 //we update the profile (SD) by adding value elements, so make a clone...
@@ -1342,6 +1342,8 @@ angular.module("sampleApp").directive( 'profileForm', function ( $compile ) {
 
 
             };
+
+
 
             //toggle the 'hiding' of non-user enterable properties
             $scope.showAllPropertiesDEP = function() {

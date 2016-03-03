@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <base href="/" />
     <meta charset="UTF-8">
     <script src="js/libs/jquery-1.9.0.min.js"></script>
     <script src="js/libs/angular.min.1.4.js"></script>
@@ -15,11 +16,21 @@
     <script src="js/libs/toArrayFilter.js"></script>
     <script src="js/libs/jstree.min.js"></script>
     <script src="js/libs/moment.min.js"></script>
-
+    <script src="/js/libs/angular-cookies.min.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
 
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage'])
+        //http://stackoverflow.com/questions/18214835/angularjs-how-to-enable-locationprovider-html5mode-with-deeplinking
+        angular.module("sampleApp",['ngCookies','ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage']).config(
+                ['$locationProvider', function( $locationProvider) {
+
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+
+        }])
     </script>
 
 
@@ -44,8 +55,6 @@
     <script src="resourceBuilder/rbServices.js"></script>
     <script src="resourceBuilder/vsBrowser.js"></script>
     <script src="js/services.js"></script>
-
-    <script src="js/libs/ngStorage.min.js"></script>
 
     <script src="js/filters.js"></script>
     <script src="js/searchForResourceCtrl.js"></script>

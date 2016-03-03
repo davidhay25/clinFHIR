@@ -1,8 +1,8 @@
 /* These are all the services called by renderProfile */
 
-angular.module("sampleApp")
+angular.module("sampleApp").
     //this returns config options. todo: have a user selection with storace in browser cache...
-    .service('appConfigDEP', function() {
+    service('appConfigDEP', function() {
         return {
             config : function() {
                 //todo - convert to a file and make async...
@@ -59,7 +59,7 @@ angular.module("sampleApp")
     }
 
 }).
-    service('GetDataFromServer', function($http,$q,appConfigSvc,Utilities) {
+    service('GetDataFromServer', function($http,$q,appConfigSvc,Utilities,$localStorage) {
     return {
         getValueSet : function(ref,cb) {
             var deferred = $q.defer();
@@ -110,8 +110,37 @@ angular.module("sampleApp")
             );
             return deferred.promise;
         },
-        findConformanceResourceByUrl : function(url) {
-            //find a StructureDefinition based on its Url
+        getConformanceResourceByUrl : function(url) {
+            //find a StructureDefinition based on its Url. ie we assume that the url is pointing to where the SD is located...
+            var deferred = $q.defer();
+            $localStorage.profileCacheUrl = $localStorage.profileCacheUrl || {};
+            if ($localStorage.profileCacheUrl[url]) {
+                //the profile is in the browser cache...
+                deferred.resolve($localStorage.profileCacheUrl[url]);
+            } else {
+                $http.get(url).then(
+                    function(data) {
+                        //the profile was located
+                        var profile = data.data;    //a StructureDefinition, of course...
+                        console.log(profile)
+                        //temp - disable caching foe now...$localStorage.profileCacheUrl[url] = profile;       //save in the local cache
+                        deferred.resolve(profile);
+                    },
+                    function(err){
+                        alert('Unable to find '+url);
+                        deferred.reject(err);
+                    }
+                )
+            }
+
+            return deferred.promise;
+
+
+
+
+        },
+        findConformanceResourceByUri : function(url) {
+            //find a StructureDefinition based on its Uri. ie we query the registry to find the required SD
             var deferred = $q.defer();
             var config = appConfigSvc.config();
             var qry = config.servers.conformance + "\StructureDefinition?url="+url;

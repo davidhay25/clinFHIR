@@ -1,4 +1,5 @@
 <div>
+    <div>{{profileUrlInReference}}</div>
 
     <!-- ng-hide="allResourceTypesIndexedByType[item.type].reference"> -->
     <div class="row" style="margin-bottom: 8px" ng-show= "uniqueResources">
@@ -47,6 +48,7 @@
                     ng-click="searchResource()">Search for Resource</button>
 
             <div ng-hide="selectedReferenceResourceType.reference">
+
                 <em>
                     <br />
                     This resource type is always associated with a patient, so

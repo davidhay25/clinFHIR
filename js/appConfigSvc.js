@@ -18,7 +18,8 @@ angular.module("sampleApp")
                 var config = {servers : {}};
                 config.servers.terminology = "http://fhir2.healthintersections.com.au/open/";
                 config.servers.data = "";   //set from the first element of the allKnownServers array
-                config.servers.conformance = "http://fhir2.healthintersections.com.au/open/";
+                //config.servers.conformance = "http://fhir2.healthintersections.com.au/open/";
+                config.servers.conformance = "http://fhir.hl7.org.nz/dstu2/";
                 config.allKnownServers = [];
                 config.allKnownServers.push({name:"HAPI server",url:"http://fhirtest.uhn.ca/baseDstu2/"});
                 config.allKnownServers.push({name:"Grahames server",url:"http://fhir2.healthintersections.com.au/open/",everythingOperation:true});

@@ -388,7 +388,7 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                             }
 
                             var profileUrl = elementDef.type[0].profile;     //the Url of the profile
-                            queries.push(GetDataFromServer.findConformanceResourceByUrl(profileUrl).then(
+                            queries.push(GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
                                 function(sdef) {
 
                                     console.log(sdef)
@@ -644,6 +644,9 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
 
 
         },
+        setCurrentProfile : function(profile) {
+            this.currentProfile = profile;
+        },
         getProfile : function(type){
                 var deferred = $q.defer();
                 var that=this;
@@ -738,12 +741,12 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                 case 'Reference' :
                     //todo - have a service that creates a full summary of a resource - and a 1 liner for the drop down
                     //console.log(element)
-                    var referenceProfile = element.type[0].profile[0];  //the profile of the resource being referenced...
+                    var referenceProfile = element.type[scope.index].profile[0];  //the profile of the resource being referenced...
                     if (! RenderProfileSvc.isUrlaBaseResource(referenceProfile)) {
                         //this is a reference to profile on a base resource. need to load the profile so we can figure out the base type
                         scope.profileUrlInReference = referenceProfile;
 
-                        GetDataFromServer.findConformanceResourceByUrl(referenceProfile).then(
+                        GetDataFromServer.findConformanceResourceByUri(referenceProfile).then(
                             function(profile){
                                 var resourceType = profile.constrainedType;//  Utilities.getResourceTypeFromUrl();
                                 scope.resourceType = resourceType;
