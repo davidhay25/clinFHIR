@@ -25,12 +25,18 @@
         angular.module("sampleApp",['ngCookies','ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage']).config(
                 ['$locationProvider', function( $locationProvider) {
 
+            //$httpProvider.defaults.useXDomain = true;
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
             $locationProvider.hashPrefix('!');
 
         }])
+
+        /*app.config(function($httpProvider) {
+         //Enable cross domain calls
+         $httpProvider.defaults.useXDomain = true;
+         });*/
     </script>
 
 
