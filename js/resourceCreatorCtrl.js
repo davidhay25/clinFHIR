@@ -124,11 +124,12 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
     //load the selected profile, and display the tree
     //for now - use the ProfileUrl which directly points to the profile. Want to support uri as well later on..
     function loadProfile(profileUrl) {
-        delete $scope.conformProfiles;      //profiles that this resource claims conformance to. Not for baseresources
+        /*delete $scope.conformProfiles;      //profiles that this resource claims conformance to. Not for baseresources
         $scope.treeData.length = 0;
         delete $scope.selectedChild;    //a child element off the current path (eg Condition.identifier
         delete $scope.children;         //all the direct children for the current path
         delete $scope.dataType ;        //the datatype selected for data entry
+        */
 
         $scope.waiting = true;
 
@@ -139,7 +140,8 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
         //resourceCreatorSvc.getProfile(profileUrl).then(
             function(profile) {
                 //profile = data.data;
-
+                setUpForNewProfile(profile);
+/*
                 console.log(profile)
                 resourceCreatorSvc.setCurrentProfile(profile)
 
@@ -166,6 +168,7 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
                 //create a dummy patient;
                 resourceCreatorSvc.addPatientToTree(type+'.patient',{},$scope.treeData);  //todo - not always 'subject'
                 drawTree();
+                */
             }
         ).finally(
             function(){
@@ -174,6 +177,47 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
         );
     }
 
+
+    //initialize everything for a newly loaded profile...
+    function setUpForNewProfile(profile) {
+        delete $scope.conformProfiles;      //profiles that this resource claims conformance to. Not for baseresources
+        $scope.treeData.length = 0;
+        delete $scope.selectedChild;    //a child element off the current path (eg Condition.identifier
+        delete $scope.children;         //all the direct children for the current path
+        delete $scope.dataType ;        //the datatype selected for data entry
+
+        console.log(profile)
+        resourceCreatorSvc.setCurrentProfile(profile);
+        $scope.results.profileUrl = profile.url;
+
+        //alert(profile.url)
+
+        //now set the base type. If a Core profile then it will be the profile name. Otherwise, it is the constarinedType
+        if (profile.constrainedType) {
+            type = profile.constrainedType;
+            $scope.conformProfiles = [profileUrl]       //the profile/s that this resource claims conformance to
+        } else {
+            //assume that this is a core resource. The type is the SD.name element
+            type = profile.name;
+
+           // var ar = profileUrl.split('/')
+           // type = ar[ar.length-1]
+
+        }
+
+        console.log(type)
+
+        //create the root node.
+        var rootEd = resourceCreatorSvc.getRootED(type);
+        $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true},path:type,
+            ed:rootEd});
+
+        navigatorNodeSelected('root',rootEd);   //this will display the child nodes of the root
+
+        //create a dummy patient;
+        resourceCreatorSvc.addPatientToTree(type+'.patient',{},$scope.treeData);  //todo - not always 'subject'
+        drawTree();
+    }
 
 
     $scope.validate = function(){
@@ -503,7 +547,7 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
     };
 
 
-    //------- when the user wants to find a reference type resource - ie one that doesn't refernece a patient...
+    //------- when the user wants to find a reference type resource - ie one that doesn't reference a patient...
     $scope.searchResource = function() {
 
         var modalInstance = $uibModal.open({
@@ -612,6 +656,30 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
             });
         };
 
+
+    //=========== selecting a new profile ============
+
+    $scope.showFindProfileDialog = {};
+    //display the profile (SD) selector
+    $scope.findProfileNew = function() {
+        //$scope.input.profileType = null;    //reset the profile selector
+        $scope.showFindProfileDialog.open();
+    };
+
+    //when a profile is selected...  This is configured in the directive...
+    $scope.selectedProfile = function(profile) {
+        console.log(profile);
+        $scope.dirty=false;     //a new form is loaded
+        $scope.parkedHx = false;
+        setUpForNewProfile(profile);
+        //$scope.dynamic.profile = angular.copy(profile);
+
+        //add to list of favourite profiles & update list
+        //RenderProfileSvc.addToFavouriteProfiles(profile);
+        //$scope.allKnownProfiles = Utilities.addToFavouriteProfiles(profile); //RenderProfileSvc.getFavouriteProfiles();
+
+
+    };
 
 
 

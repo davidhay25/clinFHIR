@@ -1,0 +1,263 @@
+
+<div>
+    <!--<div ng-controller="newResourceCtrl">-->
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8 col-sm-8">
+                <h3 class="modal-title">{{heading}}</h3>
+
+            </div>
+            <div class="col-md-4 col-sm-4">
+                <div class="pull-right">
+                    <button class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
+                    <button ng-show="selectedProfileJson" class="btn btn-primary" ng-click="selectProfile()">Select</button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+
+        <tabset>
+            <tab heading="Query Parameters" active="tab.tabQuery" >
+                <br/>
+
+                <div ng-show="showWaiting">
+                    <div class="alert alert-warning" role="alert">Searching server, please wait...</div>
+
+                </div>
+                <div ng-show="showNone">
+                    <div class="alert alert-success" role="alert">There were no matching profiles found.</div>
+                </div>
+
+                <form class="form-horizontal" role="form">
+
+
+                    <div ng-show="baseResourceType">
+                        <div class="form-group">
+                            <div class="col-md-2 col-sm-2">Resource Type</div>
+                            <div class="col-md-1 col-sm-1">=</div>
+                            <div class="col-md-3 col-sm-3">
+                                <div class="banner">{{baseResourceType}}</div>
+                            </div>
+                            <div class="col-md-6 col-sm-6">Extensions that are defined for this resource type</div>
+                        </div>
+                    </div>
+
+                    <div ng-show="results.type=='profile'">
+                        <div class="form-group">
+                            <div class="col-md-2 col-sm-2">Resource Type</div>
+                            <div class="col-md-1 col-sm-1">=</div>
+                            <div class="col-md-3 col-sm-3">
+
+
+                                <select class="form-control" ng-model="results.profileType"
+                                        ng-options="coreResourceDisplay(type) for type in allResourceTypes">
+
+                                </select>
+                            </div>
+                            <div class="col-md-6 col-sm-6">The type of resource you are searching for</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="form-group">
+                            <div class="col-md-2 col-sm-2">Name</div>
+                            <div class="col-md-1 col-sm-1">=</div>
+                            <div class="col-md-3 col-sm-3"><input type="text" class="form-control" ng-model="results.name"/> </div>
+                            <div class="col-md-6 col-sm-6">The Name in the StructureDefinition</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="form-group">
+                            <div class="col-md-2 col-sm-2">Description</div>
+                            <div class="col-md-1 col-sm-1">=</div>
+                            <div class="col-md-3 col-sm-3"><input type="text" class="form-control" ng-model="results.description"/> </div>
+                            <div class="col-md-6 col-sm-6">The description text in the StructureDefinition</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="form-group">
+                            <div class="col-md-2 col-sm-2">Publisher</div>
+                            <div class="col-md-1 col-sm-1">=</div>
+                            <div class="col-md-3 col-sm-3"><input type="text" class="form-control" ng-model="results.publisher"/> </div>
+                            <div class="col-md-6 col-sm-6">The entity (Person, Organization, Application) that authored the StructureDefinition</div>
+                        </div>
+                    </div>
+
+
+
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-md-offset-3">
+                            <div ng-hide="showWaiting">
+                                <button class="btn btn-primary pull-right" ng-click="search()">Search</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-6" >
+                            <button ng-show="results.type=='profile' && results.profileType"
+                                    class="btn btn-primary" ng-click="selectProfile(results.profileType.name)">
+                                Select {{results.profileType.name}}
+                            </button>
+                        </div>
+
+                    </div>
+
+
+
+
+
+                </form>
+            </tab>
+            <tab heading="Results" active="tab.tabResults" >
+                <!-- after resources have been selected...-->
+                <br/>
+                <div class="row">
+                    <div class="col-md-4 col-sm-4">
+                        <!-- The result list-->
+                        <div class="list-group">
+                            <a href="#" class="list-group-item" ng-repeat="ent in selectedProfiles.entry"
+                               ng-click="showProfile(ent)" style="cursor: pointer">
+                               <!-- <div><strong>{{ent.resource.id}}</strong></div>-->
+                                <div><strong>{{ent.resource.name}}</strong></div>
+                                <div style="margin-left: 8px">{{ent.resource.description}}</div>
+                                <!--<div>{{ent.resource.base}}</div>-->
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8 col-sm-8">
+
+
+                        <div class="rounded-box" ng-show="selectedProfile.id">
+                            <table>
+                                <!--<tr><td><strong>Id</strong></td><td>{{selectedProfile.id}}</td> </tr>-->
+                                <tr><td><strong>Url</strong></td><td>{{selectedProfile.url}}</td> </tr>
+                                <tr><td><strong>Name</strong></td><td>{{selectedProfile.name}}</td> </tr>
+
+                                <tr><td valign="top"><strong style="margin-right: 12px">Description:</strong> </td>
+                                    <td>{{selectedProfile.description}}</td>
+                                </tr>
+                                <tr><td valign="top"><strong>Context</strong></td><td>
+                                    <div ng-repeat="ctx in selectedProfile.context">
+                                        {{ctx}}
+                                    </div>
+                                </td></tr>
+                                <tr><td><strong>Publisher</strong></td><td>{{selectedProfile.publisher}}</td> </tr>
+                                <!--<tr><td valign="top" ><strong>Type:</strong></td><td> {{selectedProfile.type}}</td> </tr>-->
+                                <tr ng-show="results.type=='extension'">
+                                    <td valign="top"><strong>DataType</strong></td>
+                                    <td>
+                                        <div ng-hide="extAnalysis.complexExtension">
+                                            <div ng-repeat = "dt in extAnalysis.dataTypes">
+                                                <a ng-href="http://hl7.org/fhir/datatypes.html#{{dt}}" target="_blank">
+                                                    {{dt}}
+                                                </a>
+                                            </div>
+
+                                            <div ng-repeat = "rt in extAnalysis.referenceTypes">
+                                                -> {{rt}}
+                                            </div>
+                                        </div>
+                                        <div ng-show="extAnalysis.complexExtension">
+
+                                            <table class="table table-condensed table-bordered">
+                                                <tr><th>Name</th><th>Short</th><th>Mult</th><th>DataType</th><th>Binding</th></tr>
+                                                <tr ng-repeat="comp in extAnalysis.complexExtension.contents">
+                                                    <td>{{comp.name}}</td>
+                                                    <td>{{comp.short}}</td>
+                                                    <td>{{comp.min}}...{{comp.max}}</td>
+                                                    <td>
+                                                        <a ng-href="http://hl7.org/fhir/datatypes.html#{{comp.dt}}" target="_blank">
+                                                            <div ng-repeat="dt in comp.dt track by $index">
+                                                            <a ng-href="http://hl7.org/fhir/datatypes.html#{{dt.code}}" target="_blank">
+                                                                {{dt.code}}
+                                                            <span ng-show="dt.profile">
+                                                                <span title="{{dt.profile}}">({{dt.displayType}})</span>
+                                                            </span>
+                                                            </a>
+                                                        </div>
+                                                        </a>
+
+
+                                                    </td>
+                                                    <td>
+                                                        <a ng-click="findValueSet(comp.boundValueSet)"
+                                                           href="#" title="Edit/View ValueSet">
+                                                            {{comp.boundValueSet}}
+                                                        </a>
+
+
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+
+
+
+
+                        <pre ng-show="selectedProfile.id">{{selectedProfileJson}}</pre>
+
+                    </div>
+
+                </div>
+
+
+            </tab>
+
+
+            <tab heading="results-table">
+                <table width="100%">
+                    <tr>
+                        <th>Id</th><th>Name</th><th>Description</th>
+                    </tr>
+                    <tr ng-repeat="ent in selectedProfiles.entry">
+                        <td>{{ent.resource.id}}</td>
+                        <td>{{ent.resource.name}}</td>
+                        <td>{{ent.resource.description}}</td>
+                    </tr>
+                </table>
+
+
+
+            </tab>
+
+            <tab heading="tree View" ng-show="1==2"><!-- select="createTree()" -->
+                <div id="selectProfileTreeView" ></div>
+            </tab>
+
+        </tabset>
+    </div>
+
+    <div class="modal-footer">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <div class="text-left">
+                    <div>Query: {{query}}</div>
+                    <!--
+                    <em>Select an Extension. Note that the display when one is displayed is simplified to save display space.</em>
+                    -->
+                </div>
+
+            </div>
+            <div class="col-md-4 col-sm-4">
+                <button class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
+                <button ng-show="selectedProfileJson" class="btn btn-primary" ng-click="$close()">Select</button>
+            </div>
+        </div>
+
+    </div>
+</div>

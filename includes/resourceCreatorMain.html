@@ -1,6 +1,17 @@
 <div>
 
     <div class="row panel-body"  style="background-color: #ffffdd;">
+
+
+
+
+
+        <div class="col-md-7">
+            <div><strong>Profile:</strong> {{results.profileUrl}} <button class="btn btn-link " ng-click="findProfileNew()">Change</button> </div>
+            <div><strong>Server:</strong></div>
+
+        </div>
+
         <div class="col-md-2">
             <select class="form-control" ng-model = "results.profileName" ng-change="selectProfile()">
                 <option value="Condition">Condition</option>
@@ -9,11 +20,13 @@
 
             </select>
         </div>
-        <div class="col-md-9">
 
+
+        <div class="col-md-2">
             <button class="btn btn-primary pull-right" ng-click="saveToServer()">Save</button>
             <button class="btn btn-default pull-right" ng-click="validate()">Validate</button>
         </div>
+
         <div class="col-md-1">
             <div class="pull-right" ng-show="waiting">
                 <img src="css/ajax_loader_blue_32.gif"/>
@@ -123,7 +136,12 @@
     </div>
 
 
+    <!-- a directive that allows a profile to be selected - not just a base one... -->
+    <select-profile trigger="showFindProfileDialog"
+                    all-resource-types="standardResourceTypes"
+                    profile-selected="selectedProfile" type="'profile'">
 
+    </select-profile>
 
 
 
