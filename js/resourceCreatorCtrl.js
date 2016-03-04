@@ -157,8 +157,11 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
                 console.log(type)
 
                 //create the root node.
+                var rootEd = resourceCreatorSvc.getRootED(type);
                 $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true},path:type,
-                    ed:resourceCreatorSvc.getRootED(type)});
+                    ed:rootEd});
+
+                navigatorNodeSelected('root',rootEd);   //this will display the child nodes of the root
 
                 //create a dummy patient;
                 resourceCreatorSvc.addPatientToTree(type+'.patient',{},$scope.treeData);  //todo - not always 'subject'
@@ -257,10 +260,20 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
         ).on('changed.jstree', function (e, data){
             //seems to be the node selection event...
 
+            var node = getNodeFromId(data.node.id);
+
+            //  $scope.selectedNode = node;
+
+            if (node && node.ed) {
+                navigatorNodeSelected(data.node.id,node.ed)
+            }
+
+
+            /*
             delete $scope.children;     //the node may not have children (only BackboneElement datatypes do...
             var node = getNodeFromId(data.node.id);
 
-            $scope.selectedNode = node;
+          //  $scope.selectedNode = node;
 
             if (node && node.ed) {
                 //todo - now redundate.. see$scope.selectedNode
@@ -278,6 +291,7 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
             }
 
             delete $scope.dataType;     //to hide the display...
+            */
 
             $scope.$digest();       //as the event occurred outside of angular...
 
@@ -287,6 +301,24 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
             $scope.$digest();       //as the event occurred outside of angular...
         });
     }
+
+
+
+        //when the user has selected a node in the navigator tree (or called externally). Display the value of the node or possible child nodes
+    var navigatorNodeSelected = function(nodeId,ed){
+      //  $scope.selectedNode = node;
+        delete $scope.children;     //the node may not have children (only BackboneElement datatypes do...
+        $scope.selectedNodeId = nodeId;   //the currently selected element. This is the one we'll add the new data to...
+        delete $scope.dataType;     //to hide the display...
+        resourceCreatorSvc.getPossibleChildNodes(ed).then(
+            function(data){
+                $scope.children = data;    //the child nodes...
+            },
+            function(err){
+
+            }
+        );
+    } ;
 
 
     //when one of the datatypes of the child nodes of the currently selected element in the tree is selected...
@@ -383,7 +415,7 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
     };
 
     $scope.removeNode = function() {
-        var id = $scope.selectedNode.id;
+        var id = $scope.selectedNodeId;
         var inx = -1;
         for (var i=0; i<$scope.treeData.length;i++) {
             if ($scope.treeData[i].id == id) {
