@@ -268,10 +268,10 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                                     function(err){
                                         $scope.showWaiting = false;
                                         console.log(err);
-                                        if (err.statusCode == 422) {
+                                        if (err.status == 422) {
                                             alert('There were too many concepts to expand - make the filter more restrictive.');
                                         } else {
-                                            alert('Sorry, there was an error performing the expansion: '+err.error);
+                                            alert('Sorry, there was an error performing the expansion: '+angular.toJson(err));
                                         }
                                     }
                                 )

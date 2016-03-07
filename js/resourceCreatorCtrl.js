@@ -1,20 +1,35 @@
 /* Controller for the resource builder
 * Note that this uses jsTree to convert the internal resource model from a flat list to a hierarchy.
 * todo - should replace that with a specific function...
+* todo - this controller has ben=come far too big - should be re-factored...
 * */
 
 //https://coderwall.com/p/rqdrwq/nginx-conf-query-string-processing
 
-angular.module("sampleApp").controller('resourceCreatorCtrl',
-    function ($scope,resourceCreatorSvc,GetDataFromServer,CommonDataSvc,SaveDataToServer,
-              RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$cookies,$location) {
+angular.module("sampleApp")
+    .controller('resourceCreatorCtrl',
+        function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,
+              RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location) {
 
     var profile;                    //the profile being used as the base
     var type;       //base type
     $scope.treeData = [];           //populates the resource tree
     $scope.results = {};            //the variable for resource property values...
 
+    $scope.displayMode = 'resource';    //'resource' = resource builder, ''patient = patient
+    $scope.selectedPatientResourceType = [];
 
+    //expose the config service on the scope. Used for showing the Patint details...
+    $scope.appConfigSvc = appConfigSvc;
+    $scope.ResourceUtilsSvc = ResourceUtilsSvc;
+
+
+    //the newpatient event is fired when a new patient is selected. We need to create a new resource...
+    $scope.$on('newpatient',function(event,patient){
+        console.log(patient)
+        setUpForNewProfile(resourceCreatorSvc.getCurrentProfile());
+
+    })
 
     //config - in particular the servers defined. The samples will be going to the data server...
     $scope.config = appConfigSvc.config();
@@ -25,6 +40,10 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
     //the actual Url of the profile currently being used...
     $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/Condition";   //default profile
 
+    //save the current patient in the config services - so other controllers/components can access it...
+    appConfigSvc.setCurrentPatient({resourceType:'Patient',id:'340',name : [{text:'Ryder Walker'}]});
+
+
 
     //see if a profile url was passed in when invoked
     var params = $location.search();
@@ -34,7 +53,7 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
         }
     }
 
-    //event fired by ng-include of main page after the main template page has been loaded...
+    //event fired by ng-include of main page after the main template page has been loaded... (Otherwise the treeview isn't there...)
     $scope.includeLoaded = function() {
         //initial load..
         loadProfile($scope.results.profileUrl);
@@ -48,71 +67,24 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
 
 
     //sample patient data...
-    supportSvc.getAllData('1843164').then(
+    supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
         //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
         function(allResources){
-            console.log(allResources)
-            $scope.allResources = allResources;     //needed when selecting a reference to an existing resouce for this patient...
+           // console.log(allResources)
+          //  $scope.allResources = allResources;     //needed when selecting a reference to an existing resouce for this patient...
             //this is so the resourceBuilder directive  knows who the patient is - and their data.
             //the order is significant - allResources must be set first...
-            CommonDataSvc.setAllResources(allResources);
-            //$rootScope.currentPatient = patient;
-/*
-            $scope.outcome.allResources = allResources;
-            //create a display object that can be sorted alphabetically...
-            $scope.outcome.resourceTypes = [];
-            angular.forEach(allResources,function(bundle,type){
+            appConfigSvc.setAllResources(allResources);
 
-                if (bundle && bundle.total > 0) {
-                    $scope.outcome.resourceTypes.push({type:type,bundle:bundle});
-                }
-
-
-            });
-
-            $scope.outcome.resourceTypes.sort(function(a,b){
-                if (a.type > b.type) {
-                    return 1
-                } else {
-                    return -1
-                }
-            });
-
-
-            //for the reference navigator we need a plain list of resources...
-            $scope.allResourcesAsList = [];
-            $scope.allResourcesAsDict = {};
-            angular.forEach(allResources,function(bundle,type){
-
-                if (bundle.entry) {
-                    bundle.entry.forEach(function(entry){
-                        $scope.allResourcesAsList.push(entry.resource);
-                        var hash = entry.resource.resourceType + "/"+entry.resource.id;
-                        $scope.allResourcesAsDict[hash] = entry.resource;
-
-                    })
-                }
-                //also need to add the reference resources to the dictionary (so thay can be found in outgoing references)
-                supportSvc.getReferenceResources().forEach(function(resource){
-                    var hash = resource.resourceType + "/"+resource.id;
-                    $scope.allResourcesAsDict[hash] = resource;
-                });
-                //and finally the patient!
-                var hash = "Patient/"+patient.id;
-                $scope.allResourcesAsDict[hash] = patient;
-
-
-            })
-*/
         }
 
-        )
+    )
     .finally(function(){
         $scope.loadingPatient = false;
     });
 
 
-    //get all the standard resource types - the one defined in the fhir spec...
+    //get all the standard resource types - the one defined in the fhir spec. Used for the select profile modal...
     RenderProfileSvc.getAllStandardResourceTypes().then(
         function(standardResourceTypes) {
             $scope.standardResourceTypes = standardResourceTypes ;
@@ -135,40 +107,9 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
 
 
         GetDataFromServer.getConformanceResourceByUrl(profileUrl).then(
-
-
-        //resourceCreatorSvc.getProfile(profileUrl).then(
             function(profile) {
-                //profile = data.data;
                 setUpForNewProfile(profile);
-/*
-                console.log(profile)
-                resourceCreatorSvc.setCurrentProfile(profile)
 
-                //now set the base type. If a Core profile then it will be the profile name. Otherwise, it is the constarinedType
-                if (profile.constrainedType) {
-                    type = profile.constrainedType;
-                    $scope.conformProfiles = [profileUrl]
-                } else {
-                    //type = profileUrl;
-                    var ar = profileUrl.split('/')
-                    type = ar[ar.length-1]
-
-                }
-
-                console.log(type)
-
-                //create the root node.
-                var rootEd = resourceCreatorSvc.getRootED(type);
-                $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true},path:type,
-                    ed:rootEd});
-
-                navigatorNodeSelected('root',rootEd);   //this will display the child nodes of the root
-
-                //create a dummy patient;
-                resourceCreatorSvc.addPatientToTree(type+'.patient',{},$scope.treeData);  //todo - not always 'subject'
-                drawTree();
-                */
             }
         ).finally(
             function(){
@@ -181,31 +122,26 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
     //initialize everything for a newly loaded profile...
     function setUpForNewProfile(profile) {
         delete $scope.conformProfiles;      //profiles that this resource claims conformance to. Not for baseresources
-        $scope.treeData.length = 0;
+        $scope.treeData.length = 0;         //removes all the treedata from the array
         delete $scope.selectedChild;    //a child element off the current path (eg Condition.identifier
         delete $scope.children;         //all the direct children for the current path
         delete $scope.dataType ;        //the datatype selected for data entry
+        delete $scope.validateResults;  //the results of a validation
 
-        console.log(profile)
+       // console.log(profile)
         resourceCreatorSvc.setCurrentProfile(profile);
         $scope.results.profileUrl = profile.url;
-
-        //alert(profile.url)
 
         //now set the base type. If a Core profile then it will be the profile name. Otherwise, it is the constarinedType
         if (profile.constrainedType) {
             type = profile.constrainedType;
-            $scope.conformProfiles = [profileUrl]       //the profile/s that this resource claims conformance to
+            $scope.conformProfiles = [profile.url]       //the profile/s that this resource claims conformance to
         } else {
             //assume that this is a core resource. The type is the SD.name element
             type = profile.name;
-
-           // var ar = profileUrl.split('/')
-           // type = ar[ar.length-1]
-
         }
 
-        console.log(type)
+     //   console.log(type)
 
         //create the root node.
         var rootEd = resourceCreatorSvc.getRootED(type);
@@ -214,13 +150,15 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
 
         navigatorNodeSelected('root',rootEd);   //this will display the child nodes of the root
 
-        //create a dummy patient;
-        resourceCreatorSvc.addPatientToTree(type+'.patient',{},$scope.treeData);  //todo - not always 'subject'
+        //add the current patient
+
+        resourceCreatorSvc.addPatientToTree(type+'.subject',appConfigSvc.getCurrentPatient(),$scope.treeData);  //todo - not always 'subject'
         drawTree();
     }
 
 
     $scope.validate = function(){
+        delete $scope.validateResults;
         $scope.waiting = true;
         var cleanedData = resourceCreatorSvc.cleanResource($scope.treeData);
         $scope.treeData = cleanedData;
@@ -274,7 +212,7 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
             delete $scope.validatingResource;
             Utilities.validate($scope.resource).then(
                 function(data){
-                    console.log(data);
+                  //  console.log(data);
                     $scope.validateResults = {outcome:'The resource is valid!'};
                 },
                 function(data) {
@@ -422,8 +360,8 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
             $scope.results.timing = {};         //needed for timing values...
 
             $scope.externalReferenceSpecPage = "http://hl7.org/datatypes.html#" + $scope.dataType;
-            resourceCreatorSvc.dataTypeSelected($scope.dataType,$scope.results,ed,$scope)
-            console.log($scope.profileUrlInReference);
+            resourceCreatorSvc.dataTypeSelected($scope.dataType,$scope.results,ed,$scope,appConfigSvc.getAllResources());
+            //console.log($scope.profileUrlInReference);
         }
     };
 
@@ -441,6 +379,7 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
         if (display.indexOf('[x]') > -1) {
             //this is a polymorphic field...
             display = display.slice(0, -3) + $scope.dataType.toProperCase();
+           // console.log(display)
         }
         treeNode.text = display;    //the property name
         treeNode.path = $scope.selectedChild.path;
@@ -682,5 +621,58 @@ angular.module("sampleApp").controller('resourceCreatorCtrl',
     };
 
 
+    $scope.selectPatientResourceType = function(bundle) {
+        console.log(bundle)
+        $scope.selectedPatientResourcesOfType = bundle;
+    };
 
-    });
+
+})
+    .controller('patientCtrl', function ($scope,appConfigSvc,resourceCreatorSvc,ResourceUtilsSvc,supportSvc) {
+        //expose the config service on the scope. Used for showing the Patint details...
+        $scope.appConfigSvc = appConfigSvc;
+        $scope.ResourceUtilsSvc = ResourceUtilsSvc;
+        $scope.display = {editMode:false};
+
+
+        $scope.searchForPatient = function(name) {
+            console.log(name)
+            resourceCreatorSvc.findPatientsByName(name).then(
+                function(data){
+                    // ResourceUtilsSvc.getOneLineSummaryOfResource(patient);
+                    $scope.matchingPatientsBundle = data.data;
+                    console.log($scope.matchingPatientsBundle)
+                },
+                function(err) {
+                    alert('Error finding patient: '+angular.toJson(err))
+                }
+            )
+        };
+
+        //a new patient is selected
+        $scope.selectNewPatient = function(patient) {
+            delete  $scope.allResources;
+
+            appConfigSvc.setCurrentPatient(patient);
+            $scope.display.editMode=false;
+            appConfigSvc.setAllResources({});
+            supportSvc.getAllData(patient.id).then(
+                //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
+                function(allResources){
+                    //console.log(allResources)
+                    $scope.allResources = allResources;
+                    //$scope.allResources = allResources;     //needed when selecting a reference to an existing resouce for this patient...
+                    //this is so the resourceBuilder directive  knows who the patient is - and their data.
+                    //the order is significant - allResources must be set first...
+                    appConfigSvc.setAllResources(allResources);
+                    $scope.$emit('newpatient',patient)
+
+                }
+
+                )
+                .finally(function(){
+                    $scope.loadingPatient = false;
+                });
+        }
+
+});

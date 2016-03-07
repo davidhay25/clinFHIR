@@ -82,11 +82,11 @@
                                 <div class="col-md-4 col-sm-4">
                                     <!-- The result list-->
                                     <div class="list-group">
-                                        <a href="#" class="list-group-item" ng-repeat="ent in selectedVS.entry"
+                                        <div class="list-group-item" ng-repeat="ent in selectedVS.entry"
                                            ng-click="showVS($event,ent)" style="cursor: pointer">
                                             <div><strong>{{ent.resource.id}}</strong></div>
                                             {{ent.resource.name}}
-                                        </a>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -252,7 +252,7 @@
                 <div class="row">
                     <div class="col-md-2">Filter</div>
                     <div class="col-md-8"><input type="text" ng-model="results.filter" class="form-control"/> </div>
-                    <div class="col-md-2"><a href="#" class="btn btn-primary" ng-click="expand()">Expand</a> </div>
+                    <div class="col-md-2"><button class="btn btn-primary" ng-click="expand()">Expand</button> </div>
                 </div>
 
                 <div class="row">
@@ -261,6 +261,7 @@
                 </div>
 
                 <br />
+
 
                 <table ng-show="data.length > 0" class="table table-bordered table-condensed">
                     <tr><th>Code</th><th>System</th><th>Display</th></tr>

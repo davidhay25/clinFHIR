@@ -1,26 +1,8 @@
 /* These are all the services called by renderProfile */
 
 angular.module("sampleApp").
-    //this returns config options. todo: have a user selection with storace in browser cache...
-    service('appConfigDEP', function() {
-        return {
-            config : function() {
-                //todo - convert to a file and make async...
-                var config = {servers : {}}
-                config.servers.terminology = "http://fhir2.healthintersections.com.au/open/";
-                config.servers.data = "http://localhost:8080/baseDstu2/";
-                config.servers.conformance = "http://fhir2.healthintersections.com.au/open/";
-                config.allKnownServers = [];
-                config.allKnownServers.push({name:"Grahames server",url:"http://fhir2.healthintersections.com.au/open/"});
-                config.allKnownServers.push({name:"Local server",url:"http://localhost:8080/baseDstu2/"});
-                config.allKnownServers.push({name:"HAPI server",url:"http://fhirtest.uhn.ca/baseDstu2/"});
-                config.allKnownServers.push({name:"Spark Server",url:"http://spark-dstu2.furore.com/fhir/"});
-                config.allKnownServers.push({name:"HealthConnex (2.0",url:"http://sqlonfhir-dstu2.azurewebsites.net/fhir/"});
 
-                return config
-            }
-        }
-    }).
+//todo this is ised by the sample creator...
     service('CommonDataSvc', function() {
         var allResources;       //all the resources for the current patient
         return {
@@ -76,6 +58,12 @@ angular.module("sampleApp").
         },
         getProfile : function(profileName) {
             alert('getProfile stub not implemented yet');
+        },
+        queryConformanceServer : function(qry) {
+            //find SD's that match a search query. used by selectProfile
+            var config = appConfigSvc.config();
+            var qry = config.servers.conformance + qry;
+            return $http.get(qry);
         },
         generalFhirQuery : function(qry) {
             //return an expanded valueset. Used by renderProfile Should only use for valuesets that aren't too large...
@@ -176,10 +164,11 @@ angular.module("sampleApp").
 
             var deferred = $q.defer();
             $http.get(qry)
-                .success(function(data) {
-                    deferred.resolve(data);
-                }).error(function(oo, statusCode) {
-
+                .then(function(data) {
+                    deferred.resolve(data.data);
+                },function(err) {
+                   // alert('Error expanding ValueSet:'+angular.toJson());
+                /*
                 //an error expanding the valueset - save the error...
                 var myEvent = {type:'expandValueSet'};   //this is an audit event
                 myEvent.error = true;
@@ -192,9 +181,11 @@ angular.module("sampleApp").
                 myEvent.error = true;
                 SaveDataToServer.sendActivityObject(myEvent);
 
-
-                deferred.reject({error:Utilities.getOOText(oo),statusCode:statusCode});
+*/
+                deferred.reject(err);
             });
+
+
             return deferred.promise;
 
 
@@ -1205,7 +1196,7 @@ angular.module("sampleApp").
             //allResources is a dictionary of bundles, indexed by type...
 
             var bundle = allResources[resourceType];
-            if (!bundle) {
+            if (!bundle || !bundle.entry) {
                 return [];      //the patient has no resources of this type...
             }
 
@@ -1328,6 +1319,7 @@ angular.module("sampleApp").
             txt += getString(data.family);
             return txt;
         }
+
         function getString(ar) {
             var lne = '';
             if (ar) {
@@ -1356,7 +1348,7 @@ angular.module("sampleApp").
                     return getHumanNameSummary(resource.name);
                     break;
                 case "Patient" :
-                    return getHumanNameSummary(resource.name[0]);
+                    return getHumanNameSummary(resource.name[0]);   //only the forst name
                     break;
                 case "List" :
                     if (resource.code) {

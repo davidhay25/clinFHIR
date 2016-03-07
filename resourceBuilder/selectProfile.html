@@ -122,13 +122,13 @@
                     <div class="col-md-4 col-sm-4">
                         <!-- The result list-->
                         <div class="list-group">
-                            <a href="#" class="list-group-item" ng-repeat="ent in selectedProfiles.entry"
+                            <div href="#" class="list-group-item" ng-repeat="ent in selectedProfiles.entry"
                                ng-click="showProfile(ent)" style="cursor: pointer">
-                               <!-- <div><strong>{{ent.resource.id}}</strong></div>-->
+
                                 <div><strong>{{ent.resource.name}}</strong></div>
                                 <div style="margin-left: 8px">{{ent.resource.description}}</div>
-                                <!--<div>{{ent.resource.base}}</div>-->
-                            </a>
+
+                            </div>
                         </div>
                     </div>
 

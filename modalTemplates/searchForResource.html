@@ -64,22 +64,7 @@
                             </div>
                         </div>
 
-                        <!--
-                        <div ng-if="srch.type=='token' && srch.name.substr(0,1) != '_'">
-                            <div class="form-group">
-                                <div class="col-md-2">{{srch.name}}</div>
-                                <div class="col-md-1">==</div>
-                                <div class="col-md-2">
-                                    <input type="text" class="form-control" placeholder="System"/>
-                                </div>
-                                <div class="col-md-2">
-                                    <input type="text" class="form-control" placeholder="Code" ng-model="results[srch.name]"/>
-                                </div>
-                                <div class="col-md-5">{{srch.documentation}}</div>
-                            </div>
-                        </div>
 
-                        -->
 
                         <div ng-if="srch.type=='reference' && srch.name.substr(0,1) != '_'">
                             <div class="form-group">
@@ -123,7 +108,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <pre>{{selectedResourceJson}}</pre>
+                        <pre>{{selectedResource | json}}</pre>
                     </div>
 
                 </div>

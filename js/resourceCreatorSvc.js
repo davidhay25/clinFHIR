@@ -1,5 +1,5 @@
-angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,RenderProfileSvc,
-                                                                   ResourceUtilsSvc,GetDataFromServer,Utilities) {
+angular.module("sampleApp").service('resourceCreatorSvc',
+    function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,GetDataFromServer,Utilities) {
 
 
     var currentProfileEl;     //the profile being used...
@@ -26,10 +26,14 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
         return vo;
     };
 
-
-
     return {
+        findPatientsByName : function(name) {
 
+
+            var qry = appConfigSvc.getCurrentDataServer().url + "\Patient?name="+name;
+            console.log(qry)
+            return $http.get(qry);
+        },
         getJsonFragmentForDataType : function(dt,results) {
             //create a js object that represents a fragment of data for inclusion in a resource based on the datatype...
 
@@ -333,7 +337,6 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
 
 
         },
-
         getRootED : function(path) {
           //return the elementdefinition for the root element of the profile - always the first one...
             //console.log(this.currentProfile);
@@ -350,9 +353,8 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
             return edList;
 
         },
-
-
         getPossibleChildNodes : function(ed){
+            console.log(ed)
             //given an element definition, return a collection of the possible child nodes. Needs to be a promise as
             //it may need to resolve references to extension definitions...
             var deferred = $q.defer();
@@ -376,6 +378,14 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                     //this is an extension attached to the profile so needs to be rendered...
                     if (propertyName == 'extension') {      //todo need to think about modifierExtensions
                         //if there is a profile against the type, it points to the defintion of the extension. Only include it if it does...
+
+                        //so this is an extension. have we already processed this node?
+                        if (elementDef.myData && elementDef.myData.isExtension) {
+                            children.push(elementDef);
+                        } else {
+                            //nope. not processed. see if there is a profile (SD) we can load to figure out the datatype...
+
+
                         if (elementDef.type && elementDef.type[0].profile ) {
                             //so we need to retrieve the definition of the profile, and update the list of elements.
                             //this will be an asynchronous operation, so add it to the list......
@@ -391,7 +401,7 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                             queries.push(GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
                                 function(sdef) {
 
-                                    console.log(sdef)
+                                    //console.log(sdef)
                                     elementDef.myData.extensionDefinition = sdef;   //save the full definition for later...
                                     elementDef.myData.isExtension = true;
                                     elementDef.myData.extensionDefUrl = profileUrl[0];      //it's an array (not sure why)
@@ -404,8 +414,8 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                                         sdef.snapshot.element.forEach(function(ed){
                                             var path = ed.path;
                                             if (path.indexOf('.value') > -1) {
-                                                elementDef.type = ed.type;
-                                                console.log(ed.type)
+                                                elementDef.type = ed.type;  //this is the type from the extension definition
+                                                //console.log(ed.type)
                                             }
                                         })
                                     }
@@ -424,6 +434,9 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                             children.push(elementDef);
 
                         }
+
+                        }
+
                     } else {
                         //this is not an extension - don't include the standard components...
                         if (exclusions.indexOf(propertyName) == -1) {
@@ -468,7 +481,6 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
 
             return deferred.promise;
         },
-
         canRepeat : function(ed) {
             //whether the element can repeat...
             if (ed) {
@@ -490,7 +502,6 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
             return false;
 
         },
-
         buildResource : function(type,treeObject,treeData,config) {
             //create the sample resource...
             var resource = {resourceType:type};
@@ -499,6 +510,7 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                 resource.meta.profile = config.profile
             }
 
+            resource.extension=[]
             //create an object hash of the treeData
             var treeHash = {};
             for (var i=0; i<treeData.length; i++) {
@@ -524,6 +536,7 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                 if (propertyName.indexOf('[x]') > -1) {
                     //this is a polymorphic field...
                     propertyName = propertyName.slice(0, -3) + lnode.dataType.code.toProperCase();
+                    //console.log(propertyName)
                 }
 
                 if (lnode.fragment) {
@@ -544,7 +557,9 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                         if (propertyName == 'extension') {
 
                             var url = lnode.ed.myData.extensionDefUrl;      //the Url to the profile
-                            var dt = 'value'+lnode.dataType.code;
+
+                            var dt = 'value'+lnode.dataType.code.toProperCase();
+
                             resource.extension = resource.extension || [];
                             var extensionFragment = {url:url};
                             extensionFragment[dt] = lnode.fragment;
@@ -631,11 +646,10 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
 
 
         },
-
-
-       addPatientToTree: function(path, patient, treeData) {
+        addPatientToTree: function(path, patient, treeData) {
             //add the patient reference to the tree  path = path to patient, patient = patient resource, treeData = data for tree
-            var fragment = {reference:'Patient/100',display:'John Doe'};
+
+            var fragment = {reference:'Patient/'+patient.id,display:ResourceUtilsSvc.getOneLineSummaryOfResource(patient)};
             //path = the path in the resource - relative to the parent
             //fragment = the json to render at that path. If a 'parent' in the resource (node type=BackboneElement) - eg Condition.Stage then the fragment is empty.
            // var patientNode = getElementDefinitionFromPath(path)
@@ -646,6 +660,9 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
         },
         setCurrentProfile : function(profile) {
             this.currentProfile = profile;
+        },
+        getCurrentProfile : function(){
+            return this.currentProfile;
         },
         getProfile : function(type){
                 var deferred = $q.defer();
@@ -661,7 +678,7 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
 
 
             },
-        dataTypeSelected : function(dt,results,element,scope) {
+        dataTypeSelected : function(dt,results,element,scope,allResources) {
             //todo - get rid of the scope...
             switch (dt) {
 
@@ -759,7 +776,7 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                                 //incldue any of thm in the list
 
                                 scope.resourceList = RenderProfileSvc.getResourcesSelectListOfType(
-                                    scope.allResources,resourceType,profile.url);
+                                    allResources,resourceType,profile.url);
 
                             },
                             function(err) {
@@ -771,14 +788,13 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                     } else {
                         //this is a base resource...
 
-                        //DSTU-2 - type.profile is an array
                         var ar = element.type[0].profile[0].split('/');
                         var resourceType = ar[ar.length-1];
                         console.log(resourceType)
 
                         //if any resource can be referenced here
                         if (resourceType== 'Resource') {
-                            scope.uniqueResources = RenderProfileSvc.getUniqueResources(scope.allResources);
+                            scope.uniqueResources = RenderProfileSvc.getUniqueResources(allResources);
                         } else {
                             delete scope.uniqueResources;
                         }
@@ -798,7 +814,7 @@ angular.module("sampleApp").service('resourceCreatorSvc', function($q,$http,Rend
                         } else {
                             //the list of resources of this type linked to this patient that can be selected...
                             scope.resourceList = RenderProfileSvc.getResourcesSelectListOfType(
-                                scope.allResources,resourceType);
+                                allResources,resourceType);
                         }
 
                     }

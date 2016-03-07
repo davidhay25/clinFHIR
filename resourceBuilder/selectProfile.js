@@ -23,7 +23,7 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                 $modal.open({
                     templateUrl: 'resourceBuilder/selectProfile.html',
                     size:'lg',
-                    controller: function($scope,favourites,type,profileSelectedFn,allResourceTypes,vo) {
+                    controller: function($scope,type,profileSelectedFn,allResourceTypes,vo) {
 
                         $scope.heading = "Find Profile"
 
@@ -115,8 +115,11 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                             $scope.query=searchString;
 
 
-                            GetDataFromServer.queryFHIRServer(searchString,true).then(
-                                function(bundle){
+
+                            GetDataFromServer.queryConformanceServer(searchString).then(
+                            //GetDataFromServer.queryFHIRServer(searchString,true).then(
+                                function(data){
+                                    var bundle = data.data;
                                     if (bundle.entry && bundle.entry.length > 0) {
                                         $scope.selectedProfiles = bundle;
                                         $scope.tab.tabQuery = false;
@@ -141,7 +144,6 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
 
                         //when a profile has been chosen...
                         $scope.selectProfile= function(coreProfileName) {
-
 
                             if (coreProfileName) {
                                 //a core profile was selected. Retrieve the SD and return...
@@ -183,20 +185,23 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
 
                             var dispProfile = angular.copy(entry.resource);
 
-                            delete dispProfile.text;
 
-                            $scope.extAnalysis = Utilities.analyseExtensionDefinition($scope.selectedProfile);
-                            console.log($scope.extAnalysis);
+                            //immediatly select and return
+                            $scope.$close(dispProfile);
+
+                           // delete dispProfile.text;        //because the text can be huge...
+
+                            //$scope.extAnalysis = Utilities.analyseExtensionDefinition($scope.selectedProfile);
+                            //console.log($scope.extAnalysis);
 
 
-                            $scope.selectedProfileJson = angular.toJson(dispProfile,true);
+                          //  $scope.selectedProfileJson = angular.toJson(dispProfile,true);
+                           // $scope.selectedProfileJson = angular.toJson(dispProfile,true);
 
                         }
                     },
                     resolve : {
-                        favourites : function() {
-                            return $scope.allKnownProfiles;
-                        },
+
                         type : function() {
                             return $scope.type;
                         },
