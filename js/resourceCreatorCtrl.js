@@ -599,6 +599,7 @@ angular.module("sampleApp")
     //=========== selecting a new profile ============
 
     $scope.showFindProfileDialog = {};
+
     //display the profile (SD) selector
     $scope.findProfileNew = function() {
         //$scope.input.profileType = null;    //reset the profile selector
@@ -610,6 +611,7 @@ angular.module("sampleApp")
         console.log(profile);
         $scope.dirty=false;     //a new form is loaded
         $scope.parkedHx = false;
+        appConfigSvc.addToRecent(profile);
         setUpForNewProfile(profile);
         //$scope.dynamic.profile = angular.copy(profile);
 

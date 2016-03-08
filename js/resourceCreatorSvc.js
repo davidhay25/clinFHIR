@@ -1,5 +1,5 @@
 angular.module("sampleApp").service('resourceCreatorSvc',
-    function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,GetDataFromServer,Utilities) {
+    function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,GetDataFromServer,$localStorage,Utilities) {
 
 
     var currentProfileEl;     //the profile being used...
@@ -510,7 +510,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 resource.meta.profile = config.profile
             }
 
-            resource.extension=[]
+            //resource.extension=[]
             //create an object hash of the treeData
             var treeHash = {};
             for (var i=0; i<treeData.length; i++) {

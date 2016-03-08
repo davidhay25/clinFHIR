@@ -23,8 +23,8 @@
     <div class="modal-body">
 
 
-        <tabset>
-            <tab heading="Query Parameters" active="tab.tabQuery" >
+        <uib-tabset>
+            <uib-tab heading="Query Parameters" active="tab.tabQuery" >
                 <br/>
 
                 <div ng-show="showWaiting">
@@ -114,8 +114,8 @@
 
 
                 </form>
-            </tab>
-            <tab heading="Results" active="tab.tabResults" >
+            </uib-tab>
+            <uib-tab heading="Results" active="tab.tabResults" >
                 <!-- after resources have been selected...-->
                 <br/>
                 <div class="row">
@@ -215,8 +215,24 @@
                 </div>
 
 
-            </tab>
+            </uib-tab>
 
+
+            <uib-tab ng-show="recent.length > 0"><!-- select="createTree()" -->
+                <uib-tab-heading>Recent <span class="badge">{{recent.length}}</span> </uib-tab-heading>
+                <div class="list-group">
+                    <div href="#" class="list-group-item" ng-repeat="profile in recent track by $index"
+                         ng-click="selectRecent(profile)" style="cursor: pointer">
+
+                        <div><strong>{{profile.url}}</strong></div>
+                        <div style="margin-left: 8px">{{profile.description}}</div>
+
+                    </div>
+                </div>
+
+            </uib-tab>
+
+<!--
 
             <tab heading="results-table">
                 <table width="100%">
@@ -233,12 +249,10 @@
 
 
             </tab>
+            -->
 
-            <tab heading="tree View" ng-show="1==2"><!-- select="createTree()" -->
-                <div id="selectProfileTreeView" ></div>
-            </tab>
 
-        </tabset>
+        </uib-tabset>
     </div>
 
     <div class="modal-footer">

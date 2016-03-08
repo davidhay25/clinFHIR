@@ -1,12 +1,13 @@
 //directile to render a UI for a profile.
-angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetDataFromServer,$modal  ) {
+angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetDataFromServer,$modal,appConfigSvc  ) {
     return {
         restrict: 'E',
         scope: {
             trigger: '=',
             type: '=',
             profileSelected : '&',
-            allResourceTypes:'='
+            allResourceTypes:'=',
+            recent : '='
         },
         template: '<div></div>',
 
@@ -15,6 +16,7 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
             $scope.internalControl = $scope.trigger || {};
 
             $scope.internalControl.open = function(vo) {
+                console.log(appConfigSvc.getRecent());
                 showModal(vo);
             };
 
@@ -23,9 +25,9 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                 $modal.open({
                     templateUrl: 'resourceBuilder/selectProfile.html',
                     size:'lg',
-                    controller: function($scope,type,profileSelectedFn,allResourceTypes,vo) {
+                    controller: function($scope,type,profileSelectedFn,allResourceTypes,vo,recent) {
 
-                        $scope.heading = "Find Profile"
+                        $scope.heading = "Find Profile";
 
                         if (vo) {
                             if (vo.heading) {
@@ -37,6 +39,7 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
 
                         }
 
+                        $scope.recent = recent;
                         $scope.allResourceTypes = allResourceTypes;
                         $scope.results = {};
                         $scope.tab = {};
@@ -142,6 +145,10 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                         };
 
 
+                        $scope.selectRecent = function(profile) {
+                            $scope.$close(profile);
+                        };
+
                         //when a profile has been chosen...
                         $scope.selectProfile= function(coreProfileName) {
 
@@ -214,6 +221,9 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                         },
                         vo : function() {
                             return vo;      //passed in when modal invoked...
+                        },
+                        recent : function() {
+                            return appConfigSvc.getRecent();
                         }
                     }
                 }).result.then(function(selectedProfile){

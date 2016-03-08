@@ -8,7 +8,7 @@ angular.module("sampleApp")
 //also holds the current patient and all their resources...
     //note that the current profile is maintained by resourceCreatorSvc
 
-    .service('appConfigSvc', function() {
+    .service('appConfigSvc', function($localStorage) {
 
         var DataServer;     //the currently selected data server server
         var currentPatient;    //the currently selected patint
@@ -61,6 +61,26 @@ angular.module("sampleApp")
             },
             getAllResources : function() {
                 return allResources;
+            },
+            addToRecent : function(profile) {
+                $localStorage.recent = $localStorage.recent || [];
+                var alreadyThere = false;
+                var url = profile.url;
+                for (var i=0; i < $localStorage.recent.length; i++) {
+                    if ($localStorage.recent[i].url == url) {
+                        alreadyThere = true;
+                        break;
+                    }
+                }
+
+                if (! alreadyThere) {
+                    $localStorage.recent.push(profile);
+                }
+
+
+            },
+            getRecent : function(){
+                return $localStorage.recent || [];
             }
         }
     })
