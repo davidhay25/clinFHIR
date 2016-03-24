@@ -77,6 +77,13 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         addValue(qty,'integer',text,true);
                         break;
 
+                    case 'decimal':
+                        var qty = results.decimal;
+                        var text = results.decimal;
+                        addValue(qty,'decimal',text,true);
+                        break;
+
+
                     case 'ContactPoint' :
                         var use = results.ct.use;
                         var system = results.ct.system;
@@ -965,15 +972,25 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         cleanResource : function(treeData) {
             //remove all the elements that are of type BackboneElement but have no references to them.
-            //these are elements that would be empty in the constructed resource
-            var arParents =[];   //this will be all elementid's that are referencey by sometheing
+            //these are elements that should be empty in the constructed resource
+            var arParents =[];   //this will be all elementid's that are referenced by something
             var newArray = [];      //this will be the cleaned array
+            var objId = {'#':'x'};
+            //construct an obbect of Id's
+            treeData.forEach(function(item){
+                objId[item.id] = 'x';       //the id of '#' is baked in...
+            });
+
             treeData.forEach(function(item){
                 var parent = item.parent;
-                if (arParents.indexOf(parent) == -1){
-                    arParents.push(parent);
+                if (arParents.indexOf(parent) == -1){       //not already in the array...
+                    if (objId[parent]) {                    //and the parent does actually exist...
+                        arParents.push(parent);
+                    }
                 }
             });
+
+
 
             //now find elements of type bbe
 
@@ -981,11 +998,16 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 if (item.isBbe){
                     //if (item.type == 'bbe'){
                     var id = item.id;
+                    //if the id is not in the parent array, that means that there are no child elements referencing them so don't add
                     if (arParents.indexOf(id) > -1) {
                         newArray.push(item);
                     }
                 } else {
-                    newArray.push(item);
+                    //if a normal element, then make sure the parent is in the parents array. If not, don't include in the new array. This covers removing a parent
+                    var parent = item.parent;
+                    if (arParents.indexOf(parent) > -1){
+                        newArray.push(item);
+                    }
                 }
 
             });

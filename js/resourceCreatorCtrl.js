@@ -417,6 +417,7 @@ angular.module("sampleApp")
         delete $scope.dataType;
     };
 
+
     $scope.removeNode = function() {
         var id = $scope.selectedNodeId;
         var inx = -1;
@@ -425,8 +426,18 @@ angular.module("sampleApp")
                 inx = i;
             }
         }
+
         if (inx > -1) {
+            //remove the element with this id...
             $scope.treeData.splice(inx,1);
+
+            //need to remove all childnodes as well...
+console.log(angular.copy($scope.treeData))
+            var newTreeArray = resourceCreatorSvc.cleanResource($scope.treeData);
+            $scope.treeData = newTreeArray;
+
+console.log($scope.treeData)
+
             drawTree();
         }
 

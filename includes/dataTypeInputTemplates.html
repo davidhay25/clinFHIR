@@ -152,9 +152,14 @@
         <input type="text" class="form-control" ng-model="results.positiveint"/>
     </div>
 
-    <div ng-show="dataType=='integer'">
+    <div ng-show="dataType=='integer'" >
         <div>{{element.short}}</div>
         <input type="text" class="form-control" ng-model="results.integer"/>
+    </div>
+
+    <div ng-show="dataType=='decimal'" >
+        <div>{{element.short}}</div>
+        <input type="text" class="form-control" ng-model="results.decimal"/>
     </div>
 
 
