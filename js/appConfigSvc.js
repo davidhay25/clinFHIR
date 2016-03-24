@@ -10,43 +10,45 @@ angular.module("sampleApp")
 
     .service('appConfigSvc', function($localStorage) {
 
-        var DataServer;     //the currently selected data server server
+        var dataServer;     //the currently selected data server server
         var currentPatient;    //the currently selected patint
         var allResources;       //all resources for the current patient
 
+        var config = {servers : {}};
+        config.servers.terminology = "http://fhir2.healthintersections.com.au/open/";
+        config.servers.data = "";   //set from the first element of the allKnownServers array
+        //config.servers.conformance = "http://fhir2.healthintersections.com.au/open/";
+        config.servers.conformance = "http://sqlonfhir-dstu2.azurewebsites.net/fhir/";
+        config.allKnownServers = [];
+        config.allKnownServers.push({name:"HealthConnex (2.0)",url:"http://sqlonfhir-dstu2.azurewebsites.net/fhir/"});
+        config.allKnownServers.push({name:"Grahames server",url:"http://fhir2.healthintersections.com.au/open/",everythingOperation:true});
+        config.allKnownServers.push({name:"HAPI server",url:"http://fhirtest.uhn.ca/baseDstu2/"});
+        config.allKnownServers.push({name:"Local server",url:"http://localhost:8080/baseDstu2/"});
+
+        //config.allKnownServers.push({name:"Spark Server",url:"http://spark-dstu2.furore.com/fhir/"});
 
 
         return {
             config : function() {
                 //todo - convert to a file and make async...
                 //note that the initial server selected will be the first in the allKnownServers array...
-                var config = {servers : {}};
-                config.servers.terminology = "http://fhir2.healthintersections.com.au/open/";
-                config.servers.data = "";   //set from the first element of the allKnownServers array
-                //config.servers.conformance = "http://fhir2.healthintersections.com.au/open/";
-                config.servers.conformance = "http://fhir2.healthintersections.com.au/open/";
-                config.allKnownServers = [];
-
-                config.allKnownServers.push({name:"Grahames server",url:"http://fhir2.healthintersections.com.au/open/",everythingOperation:true});
-                config.allKnownServers.push({name:"HAPI server",url:"http://fhirtest.uhn.ca/baseDstu2/"});
-                config.allKnownServers.push({name:"Local server",url:"http://localhost:8080/baseDstu2/"});
-
-                //config.allKnownServers.push({name:"Spark Server",url:"http://spark-dstu2.furore.com/fhir/"});
-                config.allKnownServers.push({name:"HealthConnex (2.0",url:"http://sqlonfhir-dstu2.azurewebsites.net/fhir/"});
-
                 return config
+            },
+            getAllServers : function() {
+                //console.log(config.allKnownServers)
+              return config.allKnownServers;
             },
             setCurrentDataServer : function(sb) {
                 //set the current data server...
-                DataServer = sb;
+                dataServer = sb;
             },
             getCurrentDataServerBase : function(sb) {
                 //return the base of the currently selected data server
-                return DataServer.url;
+                return dataServer.url;
             },
             getCurrentDataServer : function(sb) {
                 //return the currently selected data server
-                return DataServer;
+                return dataServer;
             },
             setCurrentPatient : function(patient) {
                 currentPatient = patient;

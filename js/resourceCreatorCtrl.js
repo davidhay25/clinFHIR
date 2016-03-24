@@ -22,7 +22,7 @@ angular.module("sampleApp")
     //expose the config service on the scope. Used for showing the Patint details...
     $scope.appConfigSvc = appConfigSvc;
     $scope.ResourceUtilsSvc = ResourceUtilsSvc;
-
+    $scope.resourceCreatorSvc = resourceCreatorSvc;     //used to get the parked resources
 
     //the newpatient event is fired when a new patient is selected. We need to create a new resource...
     $scope.$on('newpatient',function(event,patient){
@@ -36,11 +36,21 @@ angular.module("sampleApp")
     $scope.dataServer = $scope.config.allKnownServers[0];   //set the current dataserver... {name:,url:}
     appConfigSvc.setCurrentDataServer($scope.dataServer);
 
+    //when the user selects a new server from the navbar...
+    $scope.setDataServer = function(server){
+        appConfigSvc.setCurrentDataServer(server);  //set the server...
+
+        //todo - need to select the nw patient, reset the resource etc.
+
+    };
 
     //the actual Url of the profile currently being used...
-    $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/Condition";   //default profile
+   // $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/Condition";   //default profile
+    $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/dhSequence";   //default profile
 
-    //save the current patient in the config services - so other controllers/components can access it...
+
+
+            //save the current patient in the config services - so other controllers/components can access it...
     appConfigSvc.setCurrentPatient({resourceType:'Patient',id:'340',name : [{text:'Ryder Walker'}]});
 
 
@@ -61,7 +71,7 @@ angular.module("sampleApp")
 
     var type;//     the base type = $scope.results.profileUrl;      //todo - change type...
 
-    $scope.selectProfile = function() {
+    $scope.selectProfileDEP = function() {
         loadProfile($scope.results.profileUrl);
     };
 
@@ -129,7 +139,7 @@ angular.module("sampleApp")
         delete $scope.validateResults;  //the results of a validation
 
        // console.log(profile)
-        resourceCreatorSvc.setCurrentProfile(profile);
+        resourceCreatorSvc.setCurrentProfile(profile);  //save the profile in the service (rather than in the controller)
         $scope.results.profileUrl = profile.url;
 
         //now set the base type. If a Core profile then it will be the profile name. Otherwise, it is the constarinedType
@@ -141,8 +151,6 @@ angular.module("sampleApp")
             type = profile.name;
         }
 
-     //   console.log(type)
-
         //create the root node.
         var rootEd = resourceCreatorSvc.getRootED(type);
         $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true},path:type,
@@ -151,7 +159,8 @@ angular.module("sampleApp")
         navigatorNodeSelected('root',rootEd);   //this will display the child nodes of the root
 
         //add the current patient
-
+        var ed = resourceCreatorSvc.getPatientOrSubjectReferenceED();
+        console.log(ed);
         resourceCreatorSvc.addPatientToTree(type+'.subject',appConfigSvc.getCurrentPatient(),$scope.treeData);  //todo - not always 'subject'
         drawTree();
     }
@@ -212,7 +221,6 @@ angular.module("sampleApp")
             delete $scope.validatingResource;
             Utilities.validate($scope.resource).then(
                 function(data){
-                  //  console.log(data);
                     $scope.validateResults = {outcome:'The resource is valid!'};
                 },
                 function(data) {
@@ -242,9 +250,14 @@ angular.module("sampleApp")
         ).on('changed.jstree', function (e, data){
             //seems to be the node selection event...
 
+            //the node is the treedata[] array element that defines the node.
+            // {id, parent, ed, text, path, isBe, dataType, state, fragment, display }
             var node = getNodeFromId(data.node.id);
 
-            //  $scope.selectedNode = node;
+
+            $scope.selectedNode = node;         //used in the html template...
+
+            console.log("node:",node)
 
             if (node && node.ed) {
                 navigatorNodeSelected(data.node.id,node.ed)
@@ -284,8 +297,7 @@ angular.module("sampleApp")
         });
     }
 
-
-
+            
         //when the user has selected a node in the navigator tree (or called externally). Display the value of the node or possible child nodes
     var navigatorNodeSelected = function(nodeId,ed){
       //  $scope.selectedNode = node;
@@ -305,8 +317,11 @@ angular.module("sampleApp")
 
     //when one of the datatypes of the child nodes of the currently selected element in the tree is selected...
     $scope.childSelected = function(ed,inx) {
-        console.log(inx)
+        //console.log(inx)
         $scope.selectedChild = ed;
+
+        console.log("selected element",ed)
+
         //the datatype of the selected element. This will display the data entry form.
         $scope.dataType = ed.type[inx].code;
 
@@ -321,6 +336,8 @@ angular.module("sampleApp")
             treeNode.isBbe = true;      //so we know it's a backboneelement, so should have elements referencing it...
             //add the new node to the tree...
             $scope.treeData.push(treeNode);    //todo - may need to insert at the right place...
+
+
 
 
             $scope.selectedNodeId = treeNode.id;   //the currently selected element in the tree. This is the one we'll add the new data to...
@@ -391,6 +408,9 @@ angular.module("sampleApp")
         //delete the datatype - this will hide the input form...
         delete  $scope.dataType;
     };
+
+
+
 
     //when entering a new element
     $scope.cancel = function() {
@@ -526,7 +546,26 @@ angular.module("sampleApp")
 
 
     //save the current resource and build another based on the profile in the currently selected child element...
-    $scope.parkAndBuild = function() {
+    $scope.park = function() {
+        console.log($scope.treeData)
+        var profile = resourceCreatorSvc.getCurrentProfile();
+
+        resourceCreatorSvc.parkResource({treeData:angular.copy($scope.treeData),
+            profile:profile,display:profile.name});
+
+        alert('Resource parked.')
+    };
+
+    $scope.restoreFromParked = function(park,inx) {
+        delete $scope.treeData;
+        $scope.treeData = park.treeData;
+        console.log($scope.treeData)
+        resourceCreatorSvc.setCurrentProfile(park.profile);
+        resourceCreatorSvc.removeParkedResource(inx)
+        drawTree();
+    };
+
+    $scope.parkAndBuildDEP = function() {
         console.log($scope.selectedChild)
         var ed = $scope.selectedChild;  //the ED describing the current element
         if (ed && ed.type && ed.type[0].profile) {
@@ -608,11 +647,18 @@ angular.module("sampleApp")
 
     //when a profile is selected...  This is configured in the directive...
     $scope.selectedProfile = function(profile) {
-        console.log(profile);
+        var clone = angular.copy(profile);
+
+
+        console.log(clone);
+
+        resourceCreatorSvc.setCurrentProfile(clone);
+
         $scope.dirty=false;     //a new form is loaded
         $scope.parkedHx = false;
-        appConfigSvc.addToRecent(profile);
-        setUpForNewProfile(profile);
+        appConfigSvc.addToRecent(clone);
+        setUpForNewProfile(clone);
+
         //$scope.dynamic.profile = angular.copy(profile);
 
         //add to list of favourite profiles & update list

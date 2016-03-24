@@ -2,7 +2,8 @@
 
     <div class="row">
         <div class="col-md-3">
-            <h4>Resource:Navigator</h4>
+            <h4>Resource Navigator</h4>
+
             <div style="height:400px; overflow-y: auto;" >
                 <div id="treeView"></div>
 
@@ -65,7 +66,7 @@
 
         <div class="col-md-5">
 
-            <h4>Resource:Json</h4>
+            <h4>Resource: Json</h4>
 
             <uib-alert close="closeValidationOutcome()" type="success"
                        ng-show="validateResults.outcome">
@@ -93,8 +94,24 @@
 
 
 
+    <uib-tabset>
+        <uib-tab heading="Data Entry">
             <ng-include src="'/includes/dataTypeInputTemplates.html'"></ng-include>
+        </uib-tab>
+
+        <uib-tab heading="Definition">
+            <pre>{{selectedChild | json}}</pre>
+        </uib-tab>
+
+    </uib-tabset>
+
             <pre>{{resource | json}}</pre>
+            <!--
+            <ng-include src="'/includes/dataTypeInputTemplates.html'"></ng-include>
+
+
+            <pre>{{resource | json}}</pre>
+            -->
 
         </div>
     </div>

@@ -41,16 +41,7 @@
 
 
 
-<!--
 
-    <script src="js/resourceSvc.js"></script>
-
-    <script src="js/controllers.js"></script>
-    <script src="js/libs/moment.min.js"></script>
-
-
-
-    -->
 
     <!-- files needed for resourceCreator -->
     <script src="js/resourceCreatorCtrl.js"></script>
@@ -83,7 +74,7 @@
 
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-5">
                     <p>
                         <div>
                             <strong>Profile:</strong> {{results.profileUrl}}
@@ -97,18 +88,29 @@
                         </div>
 
                     </p>
+
+
                 </div>
 
                 <div class="col-md-2">
 
+                    <div class="navbar-text pull-right">
 
-                    <form ng-show="displayMode == 'resource'"  class="navbar-form navbar-left">
-                        <select class="form-control" ng-model = "results.profileName" ng-change="selectProfile()">
-                            <option value="Condition">Condition</option>
-                            <option value="CarePlan">CarePlan</option>
-                            <option value="qicore-condition">QICore Condition</option>
-                        </select>
-                    </form>
+
+                         <span uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
+                               uib-popover="{{appConfigSvc.getCurrentDataServer().url}}">
+                              <a href  uib-dropdown-toggle>
+                                  {{appConfigSvc.getCurrentDataServer().name }}
+                              </a>
+                              <ul uib-dropdown-menu aria-labelledby="simple-dropdown">
+                                  <li ng-repeat="server in appConfigSvc.getAllServers()">
+                                      <a href = '#' ng-click="setDataServer(server)">{{server.name}}</a>
+                                  </li>
+                              </ul>
+                         </span>
+
+                    </div>
+
 
 
                 </div>
@@ -116,18 +118,38 @@
 
 
 
-                <div class="col-md-3">
+
+                <div class="col-md-4">
+                    <div class="navbar-text">
+
+
+                        <span uib-dropdown>
+                              <a href  uib-dropdown-toggle>
+                                  Parked <span class="badge">{{resourceCreatorSvc.getParkedResources().length }}</span>
+                              </a>
+                              <ul uib-dropdown-menu aria-labelledby="simple-dropdown">
+                                  <li ng-repeat="park in resourceCreatorSvc.getParkedResources()">
+                                      <a href = '#' ng-click="restoreFromParked(park,$index)">{{park.display}}</a>
+                                  </li>
+                              </ul>
+                         </span>
+
+
+                    </div>
+
 
                     <div ng-show="displayMode == 'patient'">
                         <a class="navbar-text" href="#" ng-click="displayMode = 'resource'">View Resource</a>
                     </div>
 
 
-
-
                     <form  ng-show="displayMode == 'resource'"  class="navbar-form navbar-right">
 
                         <button class="btn btn-primary pull-right" ng-click="saveToServer()">Save</button>
+
+                        <button style="margin-right: 8px" class="btn btn-info pull-right" ng-click="park()">Park</button>
+
+
                         <button class="btn btn-link pull-right" ng-click="validate()">Validate</button>
                     </form>
 

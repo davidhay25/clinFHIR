@@ -250,8 +250,6 @@ angular.module("sampleApp").
 
 
         validate : function(resource,cb) {
-            //var deferred = $q.defer();
-
             var clone = angular.copy(resource);
             delete clone.localMeta;
 
@@ -260,19 +258,6 @@ angular.module("sampleApp").
 
             return $http.post(qry, clone);      //returns a promise...
 
-            /*
-            $http.post(qry, clone).then(
-                function(data) {
-                    deferred.resolve(data);
-                },
-                function(err) {
-                    //alert("errr calling validate operation:\n"+angular.toJson(err))
-                    deferred.reject(err.data);
-                }
-            );
-
-            return deferred.promise;
-            */
         },
         profileQualityReport :function (profile) {
             var issues = []

@@ -27,6 +27,21 @@ angular.module("sampleApp").service('resourceCreatorSvc',
     };
 
     return {
+        getPatientOrSubjectReferenceED : function(){
+            //locate an ED that is a reference to a patient - either 'patient' or 'subject' as the second element in the path
+            if (this.currentProfile) {
+                for (var i=0; i<this.currentProfile.snapshot.element.length; i++) {
+                    var ed = this.currentProfile.snapshot.element[i];
+                    var ar = ed.path.split('.')
+                    if (ar.length == 2) {
+                        if (ar[1] == 'patient' || ar[1] == 'subject') {
+                            return ed;
+                            break;
+                        }
+                    }
+                }
+            }
+        },
         findPatientsByName : function(name) {
 
 
@@ -978,6 +993,22 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             return newArray;
 
+        },
+        parkResource : function(vo) {
+            $localStorage.parkedResources = $localStorage.parkedResources || [];
+            $localStorage.parkedResources.push(angular.copy(vo));
+
+        },
+        getParkedResources : function() {
+            if ($localStorage.parkedResources) {
+                return $localStorage.parkedResources;
+            } else {
+                return []
+            }
+
+        },
+        removeParkedResource : function(inx) {
+            $localStorage.parkedResources.splice(inx,1)
         }
 
     }
