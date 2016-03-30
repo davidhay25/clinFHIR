@@ -56,6 +56,7 @@
 
     <script src="js/filters.js"></script>
     <script src="js/searchForResourceCtrl.js"></script>
+    <script src="js/resourceSvc.js"></script>
 
     <title>FHIR Resource Creator</title>
 
@@ -120,6 +121,7 @@
 
 
                 <div class="col-md-4">
+
                     <div class="navbar-text">
 
 
@@ -136,14 +138,50 @@
 
 
                     </div>
+<!--
+                    <div class="navbar-text">
+                            <span uib-dropdown>
+                              <a href uib-dropdown-toggle>
+                                  View: {{displayMode | uppercase}}
+                              </a>
+
+                              <ul uib-dropdown-menu aria-labelledby="simple-dropdown">
+
+                                  <li ng-hide="displayMode == 'view'">
+                                      <a href="#" ng-click="displayMode = 'view'">View</a></li>
+
+                                  <li ng-hide="displayMode == 'new'">
+                                      <a href="#" ng-click="displayMode = 'new'">New</a></li>
+
+                                  <li ng-hide="displayMode == 'patient'">
+                                      <a href="#" ng-click="displayMode = 'patient'">Patient</a></li>
 
 
-                    <div ng-show="displayMode == 'patient'">
-                        <a class="navbar-text" href="#" ng-click="displayMode = 'resource'">View Resource</a>
+                              </ul>
+                         </span>
+                    </div>
+                    -->
+
+
+
+                    <div ng-hide="displayMode == 'new'">
+
+                        <span class="navbar-text" uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
+                              uib-popover="Create new resource screen">
+                                <a href="#" ng-click="displayMode = 'new'">New Resource</a>
+                            </span>
+                    </div>
+
+                    <div ng-hide="displayMode == 'view'">
+
+                         <span class="navbar-text" uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
+                               uib-popover="Show all current resources">
+                            <a href="#" ng-click="displayMode = 'view'">All Resources</a>
+                         </span>
                     </div>
 
 
-                    <form  ng-show="displayMode == 'resource'"  class="navbar-form navbar-right">
+                    <form  ng-show="displayMode == 'new'"  class="navbar-form navbar-right">
 
                         <button class="btn btn-primary pull-right" ng-click="saveToServer()">Save</button>
 
@@ -199,7 +237,10 @@
         </nav>
 
 
-        <div ng-show="displayMode == 'resource'">
+
+
+
+        <div ng-show="displayMode == 'new'">
             <ng-include src="'/includes/resourceCreatorMain.html'" onload="includeLoaded()"></ng-include>
         </div>
 
@@ -207,6 +248,12 @@
             <ng-include src="'/includes/patientDetails.html'"></ng-include>
 
 
+        </div>
+
+
+
+        <div ng-show="displayMode == 'view'">
+            <ng-include src="'/includes/resourceViewer.html'"></ng-include>
         </div>
 
 

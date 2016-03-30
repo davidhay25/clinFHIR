@@ -1,0 +1,105 @@
+
+<div  class="row">
+    <div class="col-md-2">
+        <h4>Resource Types</h4>
+        <div class="list-group">
+
+            <a href="#" class="list-group-item" ng-click="typeSelected(type)"
+               ng-repeat="type in outcome.resourceTypes ">
+                {{type.type}}
+                <span class="pull-right badge">{{type.bundle.total}}</span>
+            </a>
+
+        </div>
+        <div class="list-group">
+            <a ng-show="outcome.allResources" href="#" class="list-group-item" ng-click="getVitals()">Vitals</a>
+        </div>
+    </div>
+
+    <div class="col-md-10">
+
+
+        <!-- The vitals table -->
+        <table class="table table-bordered" ng-show="vitalsTable">
+            <tr>
+                <td>Item</td>
+                <td ng-repeat="date in vitalsTable.dates track by $index">
+                    <div>{{date | date : 'dd-MMM-yy hh:mm'}}</div>
+                    <div>{{date | getAge}}</div>
+                </td>
+            </tr>
+
+            <tr ng-repeat="row in vitalsTable.rows track by $index" >
+                <td title="{{row.code}}">{{row.display}}  ({{row.unit}})</td>
+
+                <td ng-repeat="item in row.cols track by $index">
+                    {{item.value}}
+                </td>
+            </tr>
+        </table>
+
+
+
+        <div class="row">
+            <div class="col-md-4">
+
+                <h4>{{outcome.selectedType}} resources</h4>
+                <div class="list-group">
+                    <a href="#" class="list-group-item"
+                       ng-repeat="entry in outcome.allResourcesOfOneType.entry">
+                        <div style="cursor: pointer" ng-click="resourceSelected(entry)">
+                            <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-8">
+
+                <div ng-show="outcome.selectedResource">
+
+
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h4>{{outcome.selectedResource.resourceType}}/{{outcome.selectedResource.id}}</h4>
+                            <pre>{{outcome.selectedResource | json:2}}</pre>
+                        </div>
+
+                        <div class="col-md-4">
+                            <h4>Outward references</h4>
+
+                            <div class="list-group">
+                                <a href="#"class="list-group-item"
+                                   ng-repeat="reference in resourceReferences.outwardLinks"
+                                   ng-click="selectNewResource(reference,$event)">
+
+                                    <div>{{reference.element}} ==> {{reference.reference}}</div>
+                                    <div><p ng-bind-html="reference.resource.text.div"></p></div>
+
+                                </a>
+                            </div>
+
+                            <h4>Inward references</h4>
+
+                            <div class="list-group">
+                                <a href="#" class="list-group-item"
+                                   ng-repeat="reference in resourceReferences.inwardLinks"
+                                   ng-click="selectNewResource(reference,$event)">
+
+                                    <div>{{reference.resource.resourceType}}/{{reference.resource.id}}.
+                                        {{reference.name}}</div>
+                                    <div><p ng-bind-html="reference.resource.text.div"></p></div>
+
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

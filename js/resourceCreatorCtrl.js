@@ -9,14 +9,16 @@
 angular.module("sampleApp")
     .controller('resourceCreatorCtrl',
         function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,
-              RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location) {
+              RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location,resourceSvc) {
 
     var profile;                    //the profile being used as the base
     var type;       //base type
     $scope.treeData = [];           //populates the resource tree
     $scope.results = {};            //the variable for resource property values...
 
-    $scope.displayMode = 'resource';    //'resource' = resource builder, ''patient = patient
+    $scope.outcome = {};
+
+    $scope.displayMode = 'new';    //'resource' = resource builder, ''patient = patient
     $scope.selectedPatientResourceType = [];
 
     //expose the config service on the scope. Used for showing the Patint details...
@@ -48,10 +50,8 @@ angular.module("sampleApp")
    // $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/Condition";   //default profile
     $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/dhSequence";   //default profile
 
-
-
-            //save the current patient in the config services - so other controllers/components can access it...
-    appConfigSvc.setCurrentPatient({resourceType:'Patient',id:'340',name : [{text:'Ryder Walker'}]});
+    //save the current patient in the config services - so other controllers/components can access it...
+    appConfigSvc.setCurrentPatient({resourceType:'Patient',id:'302',name : [{text:'Hayley Lee'}]});
 
 
 
@@ -80,11 +80,57 @@ angular.module("sampleApp")
     supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
         //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
         function(allResources){
-           // console.log(allResources)
-          //  $scope.allResources = allResources;     //needed when selecting a reference to an existing resouce for this patient...
-            //this is so the resourceBuilder directive  knows who the patient is - and their data.
             //the order is significant - allResources must be set first...
             appConfigSvc.setAllResources(allResources);
+
+
+            //todo - all this stuff should be in a service somewhere...
+            $scope.outcome.resourceTypes = [];
+            angular.forEach(allResources,function(bundle,type){
+
+                if (bundle && bundle.total > 0) {
+                    $scope.outcome.resourceTypes.push({type:type,bundle:bundle});
+                }
+
+
+            });
+
+            $scope.outcome.resourceTypes.sort(function(a,b){
+                if (a.type > b.type) {
+                    return 1
+                } else {
+                    return -1
+                }
+            });
+
+
+            //for the reference navigator we need a plain list of resources...
+            $scope.allResourcesAsList = [];
+            $scope.allResourcesAsDict = {};
+            angular.forEach(allResources,function(bundle,type){
+
+                if (bundle.entry) {
+                    bundle.entry.forEach(function(entry){
+                        $scope.allResourcesAsList.push(entry.resource);
+                        var hash = entry.resource.resourceType + "/"+entry.resource.id;
+                        $scope.allResourcesAsDict[hash] = entry.resource;
+
+                    })
+                }
+                //also need to add the reference resources to the dictionary (so thay can be found in outgoing references)
+                supportSvc.getReferenceResources().forEach(function(resource){
+                    var hash = resource.resourceType + "/"+resource.id;
+                    $scope.allResourcesAsDict[hash] = resource;
+                });
+
+                //and finally the patient!
+                var patient = appConfigSvc.getCurrentPatient();
+                var hash = "Patient/"+patient.id;
+                $scope.allResourcesAsDict[hash] = patient;
+
+
+            })
+
 
         }
 
@@ -161,7 +207,16 @@ angular.module("sampleApp")
         //add the current patient
         var ed = resourceCreatorSvc.getPatientOrSubjectReferenceED();
         console.log(ed);
-        resourceCreatorSvc.addPatientToTree(type+'.subject',appConfigSvc.getCurrentPatient(),$scope.treeData);  //todo - not always 'subject'
+        //not all resources have a reference to a patient or subject
+        //var ar = ed.path.split('.');
+        //var patientPropertyName = ar[1];    //some resources are 'patient', others are 'subject'
+        if (ed) {
+            resourceCreatorSvc.addPatientToTree(ed.path,appConfigSvc.getCurrentPatient(),$scope.treeData);  //todo - not always 'subject'
+            //resourceCreatorSvc.addPatientToTree(type+'.subject',appConfigSvc.getCurrentPatient(),$scope.treeData);  //todo - not always 'subject'
+        }
+
+
+
         drawTree();
     }
 
@@ -408,8 +463,6 @@ angular.module("sampleApp")
         //delete the datatype - this will hide the input form...
         delete  $scope.dataType;
     };
-
-
 
 
     //when entering a new element
@@ -686,6 +739,32 @@ console.log($scope.treeData)
     };
 
 
+
+    //=========== these functions support the 'view resources' display. todo - ?move to a separate controller???
+    $scope.typeSelected = function(vo) {
+        //vo created to better support the display - has the type and the bundle containing all resources of that type
+        delete $scope.outcome.selectedResource;
+        delete $scope.vitalsTable;
+
+        $scope.outcome.selectedType = vo.type;
+        $scope.outcome.allResourcesOfOneType = vo.bundle;
+    };
+
+
+    //when an individual resource has been selected...
+    $scope.resourceSelected = function(entry) {
+        var resource = entry.resource;
+        $scope.outcome.selectedResource = resource;     //for the json display
+        $scope.resourceReferences = resourceSvc.getReference(resource,$scope.allResourcesAsList,$scope.allResourcesAsDict);
+
+    };
+
+    $scope.selectNewResource = function(reference) {
+        $scope.resourceSelected({resource:reference.resource})
+
+    };
+    //--------------------------------
+
 })
     .controller('patientCtrl', function ($scope,appConfigSvc,resourceCreatorSvc,ResourceUtilsSvc,supportSvc) {
         //expose the config service on the scope. Used for showing the Patint details...
@@ -734,4 +813,4 @@ console.log($scope.treeData)
                 });
         }
 
-});
+}) ;

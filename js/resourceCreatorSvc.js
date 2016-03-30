@@ -4,6 +4,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
     var currentProfileEl;     //the profile being used...
     var currentProfile;         //the profile in use
+        
     //function to capitalize the first letter of a word...
     String.prototype.toProperCase = function () {
         return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
@@ -676,7 +677,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             //fragment = the json to render at that path. If a 'parent' in the resource (node type=BackboneElement) - eg Condition.Stage then the fragment is empty.
            // var patientNode = getElementDefinitionFromPath(path)
             var edList = this.getEDForPath(path);
-            treeData.push({id:'patient',parent:'root',text:'patient',path:path,ed:edList[0],fragment:fragment});
+            var ar = path.split('.');
+            var patientPropertyName = ar[1];
+            treeData.push({id:'patient',parent:'root',text:patientPropertyName,path:path,ed:edList[0],fragment:fragment});
 
 
         },
@@ -975,12 +978,13 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             //these are elements that should be empty in the constructed resource
             var arParents =[];   //this will be all elementid's that are referenced by something
             var newArray = [];      //this will be the cleaned array
-            var objId = {'#':'x'};
-            //construct an obbect of Id's
+            var objId = {'#':'x'}; //all the ID's - the id of '#' is baked in...
+            //construct an object of Id's
             treeData.forEach(function(item){
-                objId[item.id] = 'x';       //the id of '#' is baked in...
+                objId[item.id] = 'x';
             });
 
+            //build up a list of parents. Assume that the item that is the parent will be before the child referencing it...
             treeData.forEach(function(item){
                 var parent = item.parent;
                 if (arParents.indexOf(parent) == -1){       //not already in the array...
