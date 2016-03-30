@@ -36,7 +36,7 @@
             <div ng-repeat="child in children track by $index">
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="{{child.myData.displayClass}}">{{child.myData.display}}</div>
+                        <div title="{{child.definition}}" class="{{child.myData.displayClass}}">{{child.myData.display}}</div>
                     </div>
                     <div class="col-md-1">
                         {{child.min}}..{{child.max}}
