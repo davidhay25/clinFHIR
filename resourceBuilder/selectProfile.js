@@ -93,11 +93,13 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                                 }
                                 $scope.showWaiting = true;
                             } else {
+                                //this will be a 'profile'
                                 if (! $scope.results.profileType) {
                                     alert("Please select the Base resource type");
                                     return;
                                 } else {
-                                    searchString += "type="+$scope.results.profileType.name
+                                    searchString += "kind=resource&type="+$scope.results.profileType.name
+                                    //searchString += "constrainedType="+$scope.results.profileType.name
                                     $scope.showWaiting = true;
                                 }
                             }

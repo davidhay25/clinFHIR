@@ -28,7 +28,7 @@ angular.module("sampleApp")
 
     //the newpatient event is fired when a new patient is selected. We need to create a new resource...
     $scope.$on('newpatient',function(event,patient){
-        console.log(patient)
+
         setUpForNewProfile(resourceCreatorSvc.getCurrentProfile());
 
     })
@@ -49,10 +49,12 @@ angular.module("sampleApp")
     //the actual Url of the profile currently being used...
    // $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/Condition";   //default profile
     //$scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/dhSequence";   //default profile
-            $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/carePlan";
 
-            //save the current patient in the config services - so other controllers/components can access it...
-    appConfigSvc.setCurrentPatient({resourceType:'Patient',id:'302',name : [{text:'Hayley Lee'}]});
+    $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/carePlan";
+
+    //save the current patient in the config services - so other controllers/components can access it...
+    appConfigSvc.setCurrentPatient({resourceType:'Patient',id:'1',name : [{text:'Eve Everywoman'}]});
+    //appConfigSvc.setCurrentPatient({resourceType:'Patient',id:'302',name : [{text:'Hayley Lee'}]});
 
 
 
@@ -185,19 +187,46 @@ angular.module("sampleApp")
         delete $scope.dataType ;        //the datatype selected for data entry
         delete $scope.validateResults;  //the results of a validation
 
-       // console.log(profile)
+
         resourceCreatorSvc.setCurrentProfile(profile);  //save the profile in the service (rather than in the controller)
         $scope.results.profileUrl = profile.url;
 
         //now set the base type. If a Core profile then it will be the profile name. Otherwise, it is the constarinedType
+        //changed in STU-3 !
+        var baseType;
         if (profile.constrainedType) {
-            type = profile.constrainedType;
+            //this is an STU-2 profile
+            baseType = profile.constrainedType;
+            $scope.conformProfiles = [profile.url]       //the profile/s that this resource claims conformance to
+        } else {
+            if (profile.baseType == 'DomainResource') {
+                //STU-3 base resource
+                baseType = profile.name;
+            } else if (profile.baseType) {
+                //STU-3 profile
+                baseType = profile.baseType;
+                $scope.conformProfiles = [profile.url]       //the profile/s that this resource claims conformance to
+            } else {
+                //STU-2 base resource
+                baseType = profile.name;
+            }
+        }
+
+
+        type = baseType;
+
+        //var baseType = profile.constrainedType || profile.baseType ;     //basetype changed in stu3!!!
+/*
+        if (baseType) {
+            type = baseType;
             $scope.conformProfiles = [profile.url]       //the profile/s that this resource claims conformance to
         } else {
             //assume that this is a core resource. The type is the SD.name element
             type = profile.name;
         }
 
+
+        */
         //create the root node.
         var rootEd = resourceCreatorSvc.getRootED(type);
         $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true},path:type,
@@ -207,7 +236,7 @@ angular.module("sampleApp")
 
         //add the current patient
         var ed = resourceCreatorSvc.getPatientOrSubjectReferenceED();
-        //console.log(ed);
+
         //not all resources have a reference to a patient or subject
         //var ar = ed.path.split('.');
         //var patientPropertyName = ar[1];    //some resources are 'patient', others are 'subject'
@@ -281,7 +310,7 @@ angular.module("sampleApp")
                 },
                 function(data) {
                     var oo = data.data;
-                    console.log(oo);
+
                     if (oo.issue) {
                         delete oo.text;
                     }
@@ -305,32 +334,31 @@ angular.module("sampleApp")
             { 'core' : {'multiple':false,  'data' : $scope.treeData ,'themes':{name:'proton',responsive:true}}}
         ).on('changed.jstree', function (e, data){
             //seems to be the node selection event...
-console.log('changed.jstree')
+
             //the node is the treedata[] array element that defines the node.
             // {id, parent, ed, text, path, isBe, dataType, state, fragment, display }
-            var node = getNodeFromId(data.node.id);
+            if (data.node) {
+                var node = getNodeFromId(data.node.id);
 
-            $scope.selectedNode = node;         //used in the html template...
+                $scope.selectedNode = node;         //used in the html template...
 
-            console.log("node:",node)
+                if (node && node.ed) {
+                    navigatorNodeSelected(data.node.id,node.ed)
+                }
 
-            if (node && node.ed) {
-                navigatorNodeSelected(data.node.id,node.ed)
+                $scope.$digest();       //as the event occurred outside of angular...
             }
 
 
-            $scope.$digest();       //as the event occurred outside of angular...
-
         }).on('redraw.jstree',function(e,data){
-            console.log('redraw.jstree')
+
             buildResource();
             $scope.$broadcast('treebuilt');
             $scope.$digest();       //as the event occurred outside of angular...
         });
     }
 
-            
-        //when the user has selected a node in the navigator tree (or called externally). Display the value of the node or possible child nodes
+            //when the user has selected a node in the navigator tree (or called externally). Display the value of the node or possible child nodes
     var navigatorNodeSelected = function(nodeId,ed){
       //  $scope.selectedNode = node;
         delete $scope.children;     //the node may not have children (only BackboneElement datatypes do...
@@ -349,10 +377,10 @@ console.log('changed.jstree')
 
     //when one of the datatypes of the child nodes of the currently selected element in the tree is selected...
     $scope.childSelected = function(ed,inx) {
-        //console.log(inx)
+
         $scope.selectedChild = ed;
 
-        console.log("selected element",ed)
+
 
         //the datatype of the selected element. This will display the data entry form.
         $scope.dataType = ed.type[inx].code;
@@ -412,7 +440,7 @@ console.log('changed.jstree')
 
             $scope.externalReferenceSpecPage = "http://hl7.org/datatypes.html#" + $scope.dataType;
             resourceCreatorSvc.dataTypeSelected($scope.dataType,$scope.results,ed,$scope,appConfigSvc.getAllResources());
-            //console.log($scope.profileUrlInReference);
+
         }
     };
 
@@ -430,7 +458,7 @@ console.log('changed.jstree')
         if (display.indexOf('[x]') > -1) {
             //this is a polymorphic field...
             display = display.slice(0, -3) + $scope.dataType.toProperCase();
-           // console.log(display)
+
         }
         treeNode.text = display;    //the property name
         treeNode.path = $scope.selectedChild.path;
@@ -439,8 +467,11 @@ console.log('changed.jstree')
         $scope.treeData.push(treeNode);    //todo - may need to insert at the right place...
        // $scope.selectedNode = treeNode;     //todo !!!!! may not be correct - may need to use getNodeFromId(treeNode.id);
 
-        var n = getNodeFromId($scope.selectedNode.id);
-        n.state.selected = true;
+        if ($scope.selectedNode) {
+            var n = getNodeFromId($scope.selectedNode.id);
+            n.state.selected = true;
+        }
+
 
         drawTree() ;        //and redraw...
         //delete the datatype - this will hide the input form...
@@ -594,7 +625,7 @@ console.log('changed.jstree')
 
     //save the current resource and build another based on the profile in the currently selected child element...
     $scope.park = function() {
-        console.log($scope.treeData)
+
         var profile = resourceCreatorSvc.getCurrentProfile();
 
         resourceCreatorSvc.parkResource({treeData:angular.copy($scope.treeData),
@@ -606,14 +637,14 @@ console.log('changed.jstree')
     $scope.restoreFromParked = function(park,inx) {
         delete $scope.treeData;
         $scope.treeData = park.treeData;
-        console.log($scope.treeData)
+
         resourceCreatorSvc.setCurrentProfile(park.profile);
         resourceCreatorSvc.removeParkedResource(inx)
         drawTree();
     };
 
     $scope.parkAndBuildDEP = function() {
-        console.log($scope.selectedChild)
+
         var ed = $scope.selectedChild;  //the ED describing the current element
         if (ed && ed.type && ed.type[0].profile) {
             var profileName =ed.type[0].profile[0];
@@ -655,7 +686,7 @@ console.log('changed.jstree')
 
                         },
                         function(oo) {
-                            console.log(oo)
+
 
                             $scope.saveState='fail';
                             $scope.saving = false;
@@ -697,7 +728,7 @@ console.log('changed.jstree')
         var clone = angular.copy(profile);
 
 
-        console.log(clone);
+
 
         resourceCreatorSvc.setCurrentProfile(clone);
 
@@ -717,7 +748,7 @@ console.log('changed.jstree')
 
 
     $scope.selectPatientResourceType = function(bundle) {
-        console.log(bundle)
+
         $scope.selectedPatientResourcesOfType = bundle;
     };
 
@@ -757,12 +788,12 @@ console.log('changed.jstree')
 
 
         $scope.searchForPatient = function(name) {
-            console.log(name)
+
             resourceCreatorSvc.findPatientsByName(name).then(
                 function(data){
                     // ResourceUtilsSvc.getOneLineSummaryOfResource(patient);
                     $scope.matchingPatientsBundle = data.data;
-                    console.log($scope.matchingPatientsBundle)
+
                 },
                 function(err) {
                     alert('Error finding patient: '+angular.toJson(err))
@@ -780,7 +811,7 @@ console.log('changed.jstree')
             supportSvc.getAllData(patient.id).then(
                 //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
                 function(allResources){
-                    //console.log(allResources)
+
                     $scope.allResources = allResources;
                     //$scope.allResources = allResources;     //needed when selecting a reference to an existing resouce for this patient...
                     //this is so the resourceBuilder directive  knows who the patient is - and their data.

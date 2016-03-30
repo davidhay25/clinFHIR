@@ -47,7 +47,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
             var qry = appConfigSvc.getCurrentDataServer().url + "\Patient?name="+name;
-            console.log(qry)
+           
             return $http.get(qry);
         },
         getJsonFragmentForDataType : function(dt,results) {
@@ -362,7 +362,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         getRootED : function(path) {
           //return the elementdefinition for the root element of the profile - always the first one...
-            //console.log(this.currentProfile);
+          
 
             return this.currentProfile.snapshot.element[0];
         },
@@ -377,7 +377,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
         },
         getPossibleChildNodes : function(ed){
-            console.log(ed)
+            
             //given an element definition, return a collection of the possible child nodes. Needs to be a promise as
             //it may need to resolve references to extension definitions...
             var deferred = $q.defer();
@@ -424,7 +424,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             queries.push(GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
                                 function(sdef) {
 
-                                    //console.log(sdef)
+                                    
                                     elementDef.myData.extensionDefinition = sdef;   //save the full definition for later...
                                     elementDef.myData.isExtension = true;
                                     elementDef.myData.extensionDefUrl = profileUrl[0];      //it's an array (not sure why)
@@ -438,7 +438,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                             var path = ed.path;
                                             if (path.indexOf('.value') > -1) {
                                                 elementDef.type = ed.type;  //this is the type from the extension definition
-                                                //console.log(ed.type)
+                                                
                                             }
                                         })
                                     }
@@ -558,8 +558,13 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                 if (propertyName.indexOf('[x]') > -1) {
                     //this is a polymorphic field...
-                    propertyName = propertyName.slice(0, -3) + lnode.dataType.code.toProperCase();
-                    //console.log(propertyName)
+
+                    //capitilize the first letter - leave the rest as-is
+                    var dt = lnode.dataType.code;   //the selected datatype
+                    dt = dt.charAt(0).toUpperCase() + dt.substr(1);
+
+                    propertyName = propertyName.slice(0, -3) + dt;
+                   
                 }
 
                 if (lnode.fragment) {
@@ -592,7 +597,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
                         } else {
-                            //console.log(lnode)
+                            
                             if (cr) {
                                 resource[propertyName] = resource[propertyName] || []
                                 resource[propertyName].push(lnode.fragment)
@@ -782,7 +787,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                 case 'Reference' :
                     //todo - have a service that creates a full summary of a resource - and a 1 liner for the drop down
-                    //console.log(element)
+                   
                     var referenceProfile = element.type[scope.index].profile[0];  //the profile of the resource being referenced...
                     if (! RenderProfileSvc.isUrlaBaseResource(referenceProfile)) {
                         //this is a reference to profile on a base resource. need to load the profile so we can figure out the base type
@@ -815,8 +820,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                         var ar = element.type[0].profile[0].split('/');
                         var resourceType = ar[ar.length-1];
-                        console.log(resourceType)
-
+                        
                         //if any resource can be referenced here
                         if (resourceType== 'Resource') {
                             scope.uniqueResources = RenderProfileSvc.getUniqueResources(allResources);

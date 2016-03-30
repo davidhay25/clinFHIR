@@ -15,17 +15,18 @@ angular.module("sampleApp")
         var allResources;       //all resources for the current patient
 
         var config = {servers : {}};
-        config.servers.terminology = "http://fhir2.healthintersections.com.au/open/";
+        config.servers.terminology = "http://fhir3.healthintersections.com.au/open/";
         config.servers.data = "";   //set from the first element of the allKnownServers array
-        //config.servers.conformance = "http://fhir2.healthintersections.com.au/open/";
-        config.servers.conformance = "http://sqlonfhir-dstu2.azurewebsites.net/fhir/";
+        config.servers.conformance = "http://fhir3.healthintersections.com.au/open/";
+        //config.servers.conformance = "http://sqlonfhir-dstu2.azurewebsites.net/fhir/";
         config.allKnownServers = [];
 
 
         //config.allKnownServers.push({name:"Grahame STU-3",url:"http://fhir3.healthintersections.com.au/open/"});
-        config.allKnownServers.push({name:"Grahames server",url:"http://fhir2.healthintersections.com.au/open/",everythingOperation:true});
+        config.allKnownServers.push({name:"Grahame STU3 server",url:"http://fhir3.healthintersections.com.au/open/",everythingOperation:true});
+        config.allKnownServers.push({name:"Grahames STU2 server",url:"http://fhir2.healthintersections.com.au/open/",everythingOperation:true});
+        //config.allKnownServers.push({name:"Grahame STU3 server",url:"http://fhir3.healthintersections.com.au/open/"});
         config.allKnownServers.push({name:"HealthConnex (2.0)",url:"http://sqlonfhir-dstu2.azurewebsites.net/fhir/"});
-
         config.allKnownServers.push({name:"HAPI server",url:"http://fhirtest.uhn.ca/baseDstu2/"});
         config.allKnownServers.push({name:"Local server",url:"http://localhost:8080/baseDstu2/"});
 
