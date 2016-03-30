@@ -98,13 +98,16 @@
                 <div class="row">
                     <div class="col-md-6">
                         <!-- The result list-->
+
                         <div class="list-group">
-                            <a href="#" class="list-group-item" ng-repeat="ent in selectedResources.entry"
+                            <div href="#" class="list-group-item" ng-repeat="ent in selectedResources.entry"
                                ng-click="selectResource(ent)" style="cursor: pointer">
                                 <p ng-bind-html="ent.resource.text.div"></p>
                                 <div ng-hide="ent.resource.text.div">No text element</div>
-                            </a>
+                            </div>
                         </div>
+
+
                     </div>
 
                     <div class="col-md-6">

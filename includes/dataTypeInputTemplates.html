@@ -1,10 +1,11 @@
 
 <div class="rounded-box" ng-show="dataType">       <!-- The top for a box around the data entry form-->
-    <!--
+
                     <div class="row">
                         <div class="col-md-11 col-sm-11">
-                            <div><em>{{element.definition}}</em></div>
+                            <div><em>{{selectedChild.definition}}</em></div>
                         </div>
+                        <!--
                         <div class="col-md-1">
                             <span ng-show="externalReferenceSpecPage" style="font-size:1.5em;padding-right: 8px">
                                 <a href="{{externalReferenceSpecPage}}" target="_blank">
@@ -12,10 +13,11 @@
                                 </a>
                             </span>
                         </div>
+                        -->
                     </div>
 
                     <br />
-    -->
+
 
     <div ng-show="dataType=='Address'">
         <ng-include src="'/prTemplates/address.html'"></ng-include>
@@ -308,13 +310,15 @@
     </div>
 
     <div ng-show="dataType">
-        <br /><br />
-
+        <br />
+<!--
+<br />
         <div class="row" ng-show = "element.requirementsDEP">
             <div class="col-md-12 col-sm-12">
                 <div><strong>Requirements:</strong>{{element.requirements}}</div>
             </div>
         </div>
+        -->
 
         <div class="row" >
             <div class="col-md-12 col-sm-12">
@@ -324,6 +328,8 @@
 
                 <button class="btn btn-danger pull-right" style="margin:8px"
                         ng-click="cancel()">Cancel</button>
+
+
             </div>
         </div>
 

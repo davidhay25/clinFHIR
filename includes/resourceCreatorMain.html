@@ -2,7 +2,9 @@
 
     <div class="row">
         <div class="col-md-3">
-            <h4>Resource Navigator</h4>
+            <h4  popover-placement="bottom" popover-trigger='mouseenter'
+                 uib-popover="A skeleton of the resource currently under construction">
+                Resource Navigator</h4>
 
             <div style="height:400px; overflow-y: auto;" >
                 <div id="treeView"></div>
@@ -25,8 +27,6 @@
                     </div>
 
                 </div>
-
-
             </div>
 
 
@@ -96,6 +96,7 @@
 
     <uib-tabset>
         <uib-tab heading="Data Entry">
+
             <ng-include src="'/includes/dataTypeInputTemplates.html'"></ng-include>
         </uib-tab>
 
@@ -106,12 +107,7 @@
     </uib-tabset>
 
             <pre>{{resource | json}}</pre>
-            <!--
-            <ng-include src="'/includes/dataTypeInputTemplates.html'"></ng-include>
 
-
-            <pre>{{resource | json}}</pre>
-            -->
 
         </div>
     </div>

@@ -48,9 +48,10 @@ angular.module("sampleApp")
 
     //the actual Url of the profile currently being used...
    // $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/Condition";   //default profile
-    $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/dhSequence";   //default profile
+    //$scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/dhSequence";   //default profile
+            $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/carePlan";
 
-    //save the current patient in the config services - so other controllers/components can access it...
+            //save the current patient in the config services - so other controllers/components can access it...
     appConfigSvc.setCurrentPatient({resourceType:'Patient',id:'302',name : [{text:'Hayley Lee'}]});
 
 
@@ -206,7 +207,7 @@ angular.module("sampleApp")
 
         //add the current patient
         var ed = resourceCreatorSvc.getPatientOrSubjectReferenceED();
-        console.log(ed);
+        //console.log(ed);
         //not all resources have a reference to a patient or subject
         //var ar = ed.path.split('.');
         //var patientPropertyName = ar[1];    //some resources are 'patient', others are 'subject'
@@ -301,14 +302,13 @@ angular.module("sampleApp")
     function drawTree() {
         $('#treeView').jstree('destroy');
         $('#treeView').jstree(
-            { 'core' : {'data' : $scope.treeData ,'themes':{name:'proton',responsive:true}}}
+            { 'core' : {'multiple':false,  'data' : $scope.treeData ,'themes':{name:'proton',responsive:true}}}
         ).on('changed.jstree', function (e, data){
             //seems to be the node selection event...
-
+console.log('changed.jstree')
             //the node is the treedata[] array element that defines the node.
             // {id, parent, ed, text, path, isBe, dataType, state, fragment, display }
             var node = getNodeFromId(data.node.id);
-
 
             $scope.selectedNode = node;         //used in the html template...
 
@@ -319,33 +319,10 @@ angular.module("sampleApp")
             }
 
 
-            /*
-            delete $scope.children;     //the node may not have children (only BackboneElement datatypes do...
-            var node = getNodeFromId(data.node.id);
-
-          //  $scope.selectedNode = node;
-
-            if (node && node.ed) {
-                //todo - now redundate.. see$scope.selectedNode
-                $scope.selectedNodeId = data.node.id;   //the currently selected element. This is the one we'll add the new data to...
-
-                resourceCreatorSvc.getPossibleChildNodes(node.ed).then(
-                    function(data){
-                        $scope.children = data;    //the child nodes...
-                    },
-                    function(err){
-
-                    }
-                );
-
-            }
-
-            delete $scope.dataType;     //to hide the display...
-            */
-
             $scope.$digest();       //as the event occurred outside of angular...
 
         }).on('redraw.jstree',function(e,data){
+            console.log('redraw.jstree')
             buildResource();
             $scope.$broadcast('treebuilt');
             $scope.$digest();       //as the event occurred outside of angular...
@@ -382,21 +359,23 @@ angular.module("sampleApp")
 
         if ($scope.dataType == 'BackboneElement') {
             //if this is a BackboneElement, then add it to the tree and select it todo - may want to ask first
-            var treeNode = {id : new Date().getTime(),state:{opened:true}}
+            var treeNode = {id : new Date().getTime(),state:{opened:true,selected:true}};       //the new node is selected and opened...
             treeNode.parent =  $scope.selectedNodeId;
             treeNode.ed = $scope.selectedChild;     //the ElementDefinition that we are adding
             treeNode.text = $scope.selectedChild.myData.display;    //the property name
             treeNode.path = $scope.selectedChild.path;
             //treeNode.type = 'bbe';      //so we know it's a backboneelement, so should have elements referencing it...
             treeNode.isBbe = true;      //so we know it's a backboneelement, so should have elements referencing it...
+
             //add the new node to the tree...
             $scope.treeData.push(treeNode);    //todo - may need to insert at the right place...
 
 
 
 
-            $scope.selectedNodeId = treeNode.id;   //the currently selected element in the tree. This is the one we'll add the new data to...
-            var node = getNodeFromId(treeNode.id);
+            $scope.selectedNodeId = treeNode.id;   //the currently selected element in the tree (now). This is the one we'll add the new data to...
+            var node = getNodeFromId(treeNode.id);  //todo can't I just use treeNode directly??
+            $scope.selectedNode = node;     //amongst other things, is the display in the middle of the screen...
 
             $scope.waiting = true;
             resourceCreatorSvc.getPossibleChildNodes(node.ed).then(
@@ -458,6 +437,10 @@ angular.module("sampleApp")
         treeNode.dataType = {code : $scope.dataType};
         //add the new node to the tree...
         $scope.treeData.push(treeNode);    //todo - may need to insert at the right place...
+       // $scope.selectedNode = treeNode;     //todo !!!!! may not be correct - may need to use getNodeFromId(treeNode.id);
+
+        var n = getNodeFromId($scope.selectedNode.id);
+        n.state.selected = true;
 
         drawTree() ;        //and redraw...
         //delete the datatype - this will hide the input form...
@@ -472,7 +455,7 @@ angular.module("sampleApp")
 
 
     $scope.removeNode = function() {
-        var id = $scope.selectedNodeId;
+        var id = $scope.selectedNode.id;
         var inx = -1;
         for (var i=0; i<$scope.treeData.length;i++) {
             if ($scope.treeData[i].id == id) {
@@ -484,12 +467,12 @@ angular.module("sampleApp")
             //remove the element with this id...
             $scope.treeData.splice(inx,1);
 
-            //need to remove all childnodes as well...
-console.log(angular.copy($scope.treeData))
+            //need to remove any childnodes as well... Note that if it leaves an empty parent, then that will be removed as well
+
             var newTreeArray = resourceCreatorSvc.cleanResource($scope.treeData);
             $scope.treeData = newTreeArray;
 
-console.log($scope.treeData)
+
 
             drawTree();
         }

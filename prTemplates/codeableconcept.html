@@ -50,8 +50,12 @@
     </div>
 
 
-    <input type="text" class="form-control" placeholder="Enter text if a suitable code cannot be found"
-           ng-model="results.ccText"/>
+    <!-- If there's a list, then no text option...-->
+    <div ng-hide="vsDetails.type=='list'">
+        <input type="text" class="form-control" placeholder="Enter text if a suitable code cannot be found"
+               ng-model="results.ccText"/>
+    </div>
+
 
     <div ng-hide="vsReference">
         <br />
