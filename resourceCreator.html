@@ -98,6 +98,16 @@
                     <div class="navbar-text pull-right">
 
 
+
+                         <span uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
+                               uib-popover="{{appConfigSvc.getCurrentDataServer().url}}">
+                              <a href ='#' ng-click="showConfig()">
+                                  {{appConfigSvc.getCurrentDataServer().name }}
+                              </a>
+
+                         </span>
+
+                        <!--
                          <span uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
                                uib-popover="{{appConfigSvc.getCurrentDataServer().url}}">
                               <a href  uib-dropdown-toggle>
@@ -108,7 +118,9 @@
                                       <a href = '#' ng-click="setDataServer(server)">{{server.name}}</a>
                                   </li>
                               </ul>
-                         </span>
+                         </span>-->
+
+
 
                     </div>
 
@@ -164,8 +176,14 @@
 
 
 
-                    <div ng-hide="displayMode == 'new'">
+                    <div ng-hide="displayMode == 'front'">
+                        <span class="navbar-text" uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
+                              uib-popover="Front screen">
+                                <a href="#" ng-click="displayMode = 'front'">Front</a>
+                            </span>
+                    </div>
 
+                    <div ng-hide="displayMode == 'new'">
                         <span class="navbar-text" uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
                               uib-popover="Create new resource screen">
                                 <a href="#" ng-click="displayMode = 'new'">New Resource</a>
@@ -238,6 +256,9 @@
 
 
 
+        <div ng-show="displayMode == 'front'" ng-controller="frontCtrl">
+            <ng-include src="'/includes/frontPage.html'"></ng-include>
+        </div>
 
 
         <div ng-show="displayMode == 'new'">

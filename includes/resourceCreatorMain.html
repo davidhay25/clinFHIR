@@ -33,10 +33,17 @@
 
             <h4 ng-show="children.length > 0">Child elements</h4>
 
-            <div ng-repeat="child in children track by $index">
+
+            <div >
+
+
+                <div ng-repeat="child in children track by $index">
                 <div class="row">
                     <div class="col-md-6">
-                        <div title="{{child.definition}}" class="{{child.myData.displayClass}}">{{child.myData.display}}</div>
+                        <div class="{{child.myData.displayClass}}">
+                            <span  popover-placement="left" popover-trigger='mouseenter'
+                                   uib-popover="{{child.definition}}">{{child.myData.display}}</span>
+                        </div>
                     </div>
                     <div class="col-md-1">
                         {{child.min}}..{{child.max}}
@@ -60,7 +67,7 @@
                 </div>
             </div>
 
-
+            </div>
 
         </div>
 

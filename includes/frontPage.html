@@ -1,0 +1,78 @@
+<strong>Front Page</strong>
+
+<style>
+    .myLink {
+        padding-top: 8px;
+    }
+
+</style>
+
+<div class="row">
+    <div class="col-md-4 col-sm-4">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h4>Recent Patients</h4>
+            </div>
+            <div class="col-md-4 col-sm-4">
+                <a href="#" class="pull-right myLink" ng-click="findPatient()">Find Patient</a>
+            </div>
+        </div>
+
+
+        <select class="form-control"
+                ng-change="selectServer('data',input.dataServer)"
+                ng-options="value.name for value in config.allKnownServers "
+                ng-model="input.dataServer">
+
+        </select>
+        <br />
+
+
+
+
+
+        <div class="list-group">
+            <a href="#"class="list-group-item"
+               ng-repeat="patient in recent.patient"
+               ng-model="input.recentProfile" >
+                {{ResourceUtilsSvc.getOneLineSummaryOfResource(patient)}}
+
+
+
+            </a>
+        </div>
+
+    </div>
+
+    <div class="col-md-4 col-sm-4">
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h4>Recent Profiles</h4>
+            </div>
+            <div class="col-md-4 col-sm-4">
+
+            </div>
+        </div>
+
+        <select class="form-control"
+                ng-change="selectServer('conformance',input.conformanceServer)"
+                ng-options="value.name for value in config.allKnownServers "
+                ng-model="input.conformanceServer">
+
+        </select>
+        <br />
+
+        <div class="list-group">
+            <a href="#"class="list-group-item"
+               ng-repeat="profile in recent.profile"
+               ng-model="input.recentProfile" >
+                {{profile.url}}
+
+
+            </a>
+        </div>
+
+    </div>
+
+</div>

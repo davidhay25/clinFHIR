@@ -16,7 +16,7 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
             $scope.internalControl = $scope.trigger || {};
 
             $scope.internalControl.open = function(vo) {
-                console.log(appConfigSvc.getRecent());
+                console.log(appConfigSvc.getRecentProfile());
                 showModal(vo);
             };
 
@@ -225,7 +225,7 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                             return vo;      //passed in when modal invoked...
                         },
                         recent : function() {
-                            return appConfigSvc.getRecent();
+                            return appConfigSvc.getRecentProfile();
                         }
                     }
                 }).result.then(function(selectedProfile){

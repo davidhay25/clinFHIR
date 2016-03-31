@@ -8,17 +8,17 @@
 
 angular.module("sampleApp")
     .controller('resourceCreatorCtrl',
-        function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,
+        function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,
               RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location,resourceSvc) {
 
     var profile;                    //the profile being used as the base
-    var type;       //base type
+    var type;                       //base type
     $scope.treeData = [];           //populates the resource tree
     $scope.results = {};            //the variable for resource property values...
 
     $scope.outcome = {};
 
-    $scope.displayMode = 'new';    //'resource' = resource builder, ''patient = patient
+    $scope.displayMode = 'front';    //'new' = resource builder, ''patient = patient
     $scope.selectedPatientResourceType = [];
 
     //expose the config service on the scope. Used for showing the Patint details...
@@ -26,20 +26,39 @@ angular.module("sampleApp")
     $scope.ResourceUtilsSvc = ResourceUtilsSvc;
     $scope.resourceCreatorSvc = resourceCreatorSvc;     //used to get the parked resources
 
-    //the newpatient event is fired when a new patient is selected. We need to create a new resource...
-    $scope.$on('newpatient',function(event,patient){
 
+    //the newpatient event is fired when a new patient is selected. We need to create a new resource...
+     $rootScope.$on('newpatient',function(event,patient){
+
+ 
+        appConfigSvc.addToRecentPatient(patient);      //the list of recent patients (for the current data server)
         setUpForNewProfile(resourceCreatorSvc.getCurrentProfile());
 
-    })
+    });
 
     //config - in particular the servers defined. The samples will be going to the data server...
+
     $scope.config = appConfigSvc.config();
-    $scope.dataServer = $scope.config.allKnownServers[0];   //set the current dataserver... {name:,url:}
-    appConfigSvc.setCurrentDataServer($scope.dataServer);
+    $scope.recent = {};
+    $scope.recent.patient = appConfigSvc.getRecentPatient();
+    $scope.recent.profile = appConfigSvc.getRecentProfile();
+            
+    //the config (ie server) has been update. We need to abandon the resource being built...
+    $rootScope.$on('configUpdated',function(event){
+        console.log('new config');
+        //when the config (servers) change,then the most recent patient & profiles will do so as well...
+        $scope.recent.patient = appConfigSvc.getRecentPatient();
+        $scope.recent.profile = appConfigSvc.getRecentProfile();
+        setUpForNewProfile();
+
+
+    });
+
+
+
 
     //when the user selects a new server from the navbar...
-    $scope.setDataServer = function(server){
+    $scope.setDataServerDEP = function(server){
         appConfigSvc.setCurrentDataServer(server);  //set the server...
 
         //todo - need to select the nw patient, reset the resource etc.
@@ -56,6 +75,26 @@ angular.module("sampleApp")
     appConfigSvc.setCurrentPatient({resourceType:'Patient',id:'1',name : [{text:'Eve Everywoman'}]});
     //appConfigSvc.setCurrentPatient({resourceType:'Patient',id:'302',name : [{text:'Hayley Lee'}]});
 
+
+
+    //change the server & other config stuff
+    $scope.showConfig = function() {
+        $scope.configIsReadOnly = false;
+
+        $uibModal.open({
+            backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
+            keyboard: false,       //same as above.
+            templateUrl: 'modalTemplates/clientConfig.html',
+            size:'lg',
+            controller: 'configCtrl',
+            resolve : {
+                configDefault: function () {          //the default config
+                    return appConfigSvc.config();
+
+                }
+            }
+        })
+    };
 
 
     //see if a profile url was passed in when invoked
@@ -182,11 +221,18 @@ angular.module("sampleApp")
     function setUpForNewProfile(profile) {
         delete $scope.conformProfiles;      //profiles that this resource claims conformance to. Not for baseresources
         $scope.treeData.length = 0;         //removes all the treedata from the array
-        delete $scope.selectedChild;    //a child element off the current path (eg Condition.identifier
-        delete $scope.children;         //all the direct children for the current path
-        delete $scope.dataType ;        //the datatype selected for data entry
-        delete $scope.validateResults;  //the results of a validation
+        delete $scope.selectedChild;        //a child element off the current path (eg Condition.identifier
+        delete $scope.children;             //all the direct children for the current path
+        delete $scope.dataType ;            //the datatype selected for data entry
+        delete $scope.validateResults;      //the results of a validation
+        delete $scope.results.profileUrl;
 
+        delete $scope.resource;
+        //if there's no profile, the clear everything. This is called when the server is changed...
+        if (!profile) {
+            drawTree();
+            return;
+        }
 
         resourceCreatorSvc.setCurrentProfile(profile);  //save the profile in the service (rather than in the controller)
         $scope.results.profileUrl = profile.url;
@@ -215,18 +261,6 @@ angular.module("sampleApp")
 
         type = baseType;
 
-        //var baseType = profile.constrainedType || profile.baseType ;     //basetype changed in stu3!!!
-/*
-        if (baseType) {
-            type = baseType;
-            $scope.conformProfiles = [profile.url]       //the profile/s that this resource claims conformance to
-        } else {
-            //assume that this is a core resource. The type is the SD.name element
-            type = profile.name;
-        }
-
-
-        */
         //create the root node.
         var rootEd = resourceCreatorSvc.getRootED(type);
         $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true},path:type,
@@ -352,9 +386,12 @@ angular.module("sampleApp")
 
         }).on('redraw.jstree',function(e,data){
 
-            buildResource();
-            $scope.$broadcast('treebuilt');
-            $scope.$digest();       //as the event occurred outside of angular...
+            if ($scope.treeData.length > 0) {
+                buildResource();
+                $scope.$broadcast('treebuilt');
+                $scope.$digest();       //as the event occurred outside of angular...
+            }
+
         });
     }
 
@@ -734,7 +771,7 @@ angular.module("sampleApp")
 
         $scope.dirty=false;     //a new form is loaded
         $scope.parkedHx = false;
-        appConfigSvc.addToRecent(clone);
+        appConfigSvc.addToRecentProfile(clone);
         setUpForNewProfile(clone);
 
         //$scope.dynamic.profile = angular.copy(profile);
@@ -779,8 +816,18 @@ angular.module("sampleApp")
     };
     //--------------------------------
 
+    //========= functions for the front page - could be in a separate controller maybe...
+
+
+
+
+
+    
+    //-------
+
+
 })
-    .controller('patientCtrl', function ($scope,appConfigSvc,resourceCreatorSvc,ResourceUtilsSvc,supportSvc) {
+    .controller('patientCtrl', function ($scope,$rootScope,appConfigSvc,resourceCreatorSvc,ResourceUtilsSvc,supportSvc) {
         //expose the config service on the scope. Used for showing the Patint details...
         $scope.appConfigSvc = appConfigSvc;
         $scope.ResourceUtilsSvc = ResourceUtilsSvc;
@@ -802,7 +849,7 @@ angular.module("sampleApp")
         };
 
         //a new patient is selected
-        $scope.selectNewPatient = function(patient) {
+        $rootScope.selectNewPatient = function(patient) {
             delete  $scope.allResources;
 
             appConfigSvc.setCurrentPatient(patient);
@@ -827,4 +874,93 @@ angular.module("sampleApp")
                 });
         }
 
-}) ;
+})
+    .controller('configCtrl',function($scope,$rootScope,configDefault,$localStorage){
+
+        //if there's no config in the browser local storage then use the default
+        var config = $localStorage.config;
+        if (! config) {
+            config = configDefault;
+        }
+
+
+        $scope.config = config;
+        console.log(config);
+        $scope.input = {};
+
+
+        config.allKnownServers.forEach(function(svr){
+            if (config.servers.data == svr.url) {$scope.input.dataServer = svr}
+            if (config.servers.conformance == svr.url) {$scope.input.conformanceServer = svr}
+            if (config.servers.terminology == svr.url) {$scope.input.terminologyServer = svr}
+        });
+
+        $scope.save = function () {
+            config.servers.data = $scope.input.dataServer.url;
+            config.servers.conformance = $scope.input.conformanceServer.url;
+            config.servers.terminology = $scope.input.terminologyServer.url;
+            $localStorage.config = config;
+            $rootScope.$emit('configUpdated')
+            $scope.$close();
+        };
+
+        $scope.cancel = function () {
+            $scope.$close();
+        }
+        
+    })
+    .controller('frontCtrl',function($scope,$rootScope,$uibModal,$localStorage,resourceCreatorSvc,ResourceUtilsSvc){
+        //the controller for the front page...
+        var config = $localStorage.config;
+        
+        //when the user selects a different server...
+        $scope.selectServer = function(serverType,server) {
+            config.servers[serverType] = server.url;
+            $localStorage.config = config;
+            $rootScope.$emit('configUpdated')
+            $scope.recent.patient = appConfigSvc.getRecentPatient();
+            $scope.recent.profile = appConfigSvc.getRecentProfile();
+            
+        };
+        
+        $scope.findPatient = function(){
+            $uibModal.open({
+                backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
+                keyboard: false,       //same as above.
+                templateUrl: 'modalTemplates/searchForPatient.html',
+                size:'lg',
+                controllerX : 'patientCtrl',
+                controller: function($scope,ResourceUtilsSvc){
+                    $scope.ResourceUtilsSvc = ResourceUtilsSvc;
+
+                    $scope.searchForPatient = function(name) {
+
+                        resourceCreatorSvc.findPatientsByName(name).then(
+                            function(data){
+                                // ResourceUtilsSvc.getOneLineSummaryOfResource(patient);
+                                $scope.matchingPatientsBundle = data.data;
+
+                            },
+                            function(err) {
+                                alert('Error finding patient: '+angular.toJson(err))
+                            }
+                        )
+                    };
+
+                    $scope.cancel = function () {
+                        $scope.$close();
+                    }
+
+                },
+                resolve : {
+                    configDefault: function () {          //the default config
+                        return "";
+
+                    }
+                }
+            })
+        }
+
+
+
+});

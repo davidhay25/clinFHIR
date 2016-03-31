@@ -1,0 +1,69 @@
+<div>
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+
+                <h3 ng-hide="resourceType == 'Resource'" class="modal-title">Search for Patient</h3>
+
+            </div>
+            <div class="col-md-4">
+                <div class="pull-right">
+                    <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+                    <button class="btn btn-primary" ng-show="selectedResource" ng-click="ok(selected.item)">Select</button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-body">
+        <div ng-show="loading" class="alert alert-info">
+            Querying server, please wait...
+        </div>
+
+        <div>
+            <div class="row">
+                <div class="col-md-11">
+                    <input type="text" ng-model="input.searchPatientName" class="form-control"
+                           placeholder="Enter name for patient search">
+                </div>
+                <div class="col-md-1"style="margin-top:10px">
+                    <span><i class="glyphicon glyphicon-search" ng-click="searchForPatient(input.searchPatientName)"></i></span>
+                </div>
+            </div>
+            <br/>
+
+            <div ng-show="matchingPatientsBundle">
+                <ul class="list-group">
+                    <li class="list-group-item" ng-repeat="entry in matchingPatientsBundle.entry">
+
+                        <div ng-click="selectNewPatient(entry.resource)">
+                            {{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}
+                        </div>
+
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+
+
+
+    </div>
+
+    <div class="modal-footer">
+        <div class="row">
+            <div class="col-md-8">
+
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+                <button class="btn btn-primary" ng-show="selectedResource" ng-click="ok(selected.item)">Select</button>
+            </div>
+        </div>
+
+
+
+    </div>
+</div>
