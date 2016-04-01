@@ -4,9 +4,13 @@
     <base href="/" />
     <meta charset="UTF-8">
     <script src="js/libs/jquery-1.9.0.min.js"></script>
-    <script src="js/libs/angular.min.1.4.js"></script>
-    <script src="js/libs/ui-bootstrap-tpls-0.14.3.min.js"></script>
+    <script src="js/libs/angular.min1-5.js"></script>
 
+    <script src="js/libs/ui-bootstrap-tpls-1.2.5.min.js"></script>
+   <!--
+   <script src="js/libs/angular.min.1.4.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-0.14.3.min.js"></script>
+-->
     <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
     <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
@@ -31,7 +35,7 @@
             $locationProvider.html5Mode(true);
             $locationProvider.hashPrefix('!');
 
-        }])
+        }]);
 
         /*app.config(function($httpProvider) {
          //Enable cross domain calls
@@ -75,24 +79,47 @@
 
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <p>
+
+
                         <div>
-                            <strong>Profile:</strong> {{results.profileUrl}}
-                            <a href="#" ng-click="findProfileNew()">Change</a>
-                            <!--<button class="btn btn-link " ng-click="findProfileNew()">Change</button>-->
+
+                            <span uib-dropdown  popover-placement="right" popover-trigger='mouseenter'
+                                  uib-popover="Data Server: {{appConfigSvc.getCurrentDataServer().url}}">
+                                <strong>Patient: </strong>
+
+                            </span>
+
+                            {{ResourceUtilsSvc.getOneLineSummaryOfResource(appConfigSvc.getCurrentPatient())}}
+                            <!--<a ng-show="appConfigSvc.getCurrentPatient()" href="#" ng-click="displayMode = 'patient'">Details</a> -->
+
+                    <a ng-show="appConfigSvc.getCurrentPatient()" href="#" ng-click="displayMode = 'view'">Details</a>
+<!--
+                    <div ng-hide="displayMode == 'view'">
+                         <span ng-show="appConfigSvc.getCurrentPatient()"
+                               class="navbar-text" uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
+                               uib-popover="Show all current resources">
+                            <a href="#" ng-click="displayMode = 'view'">All Resources</a>
+                         </span>
+                    </div>-->
+
                         </div>
 
-                        <div style="">
-                            <strong>Patient:</strong> {{ResourceUtilsSvc.getOneLineSummaryOfResource(appConfigSvc.getCurrentPatient())}}
-                            <a href="#" ng-click="displayMode = 'patient'">Details</a>
-                        </div>
+                    <div>
+                            <span uib-dropdown  popover-placement="right" popover-trigger='mouseenter'
+                                  uib-popover="Conformance Server: {{appConfigSvc.getCurrentConformanceServer().url}}">
+                                    <strong>Profile:</strong>
+                            </span>
+
+                        {{resourceCreatorSvc.getCurrentProfile().url}}
+                    </div>
 
                     </p>
 
 
                 </div>
-
+<!--
                 <div class="col-md-2">
 
                     <div class="navbar-text pull-right">
@@ -107,18 +134,7 @@
 
                          </span>
 
-                        <!--
-                         <span uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
-                               uib-popover="{{appConfigSvc.getCurrentDataServer().url}}">
-                              <a href  uib-dropdown-toggle>
-                                  {{appConfigSvc.getCurrentDataServer().name }}
-                              </a>
-                              <ul uib-dropdown-menu aria-labelledby="simple-dropdown">
-                                  <li ng-repeat="server in appConfigSvc.getAllServers()">
-                                      <a href = '#' ng-click="setDataServer(server)">{{server.name}}</a>
-                                  </li>
-                              </ul>
-                         </span>-->
+
 
 
 
@@ -127,12 +143,11 @@
 
 
                 </div>
+                -->
 
 
 
-
-
-                <div class="col-md-5">
+                <div class="col-md-6">
 
                     <div class="navbar-text">
 
@@ -183,31 +198,47 @@
                             </span>
                     </div>
 
+   <!--
                     <div ng-hide="displayMode == 'new'">
-                        <span class="navbar-text" uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
-                              uib-popover="Create new resource screen">
-                                <a href="#" ng-click="displayMode = 'new'">New Resource</a>
+                        <div ng-show="appConfigSvc.getCurrentPatient() && resourceCreatorSvc.getCurrentProfile()">
+                            <span class="navbar-text" uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
+                                  uib-popover="Create new resource screen">
+                                    <a href="#" ng-click="displayMode = 'new'">New Resource</a>
                             </span>
+                        </div>
                     </div>
+-->
 
+<!--
                     <div ng-hide="displayMode == 'view'">
-
-                         <span class="navbar-text" uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
+                         <span ng-show="appConfigSvc.getCurrentPatient()"
+                               class="navbar-text" uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
                                uib-popover="Show all current resources">
                             <a href="#" ng-click="displayMode = 'view'">All Resources</a>
                          </span>
                     </div>
+-->
 
-
-                    <form  ng-show="displayMode == 'new'"  class="navbar-form navbar-right">
-
+                    <form  ng-show="displayMode == 'new'" class="navbar-form navbar-right">
                         <button class="btn btn-primary pull-right" ng-click="saveToServer()">Save</button>
-
                         <button style="margin-right: 8px" class="btn btn-info pull-right" ng-click="park()">Park</button>
-
-
                         <button class="btn btn-link pull-right" ng-click="validate()">Validate</button>
                     </form>
+
+
+                    <form ng-hide="displayMode == 'new'" class="navbar-form navbar-right">
+                        <div ng-show="appConfigSvc.getCurrentPatient() && resourceCreatorSvc.getCurrentProfile()">
+                            <button class="btn btn-info pull-right" ng-click="displayMode = 'new'">New Resource</button>
+                            <!--
+                            <span class="navbar-text" uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
+                                  uib-popover="Create new resource screen">
+                                    <button class="btn btn-info pull-right" ng-click="displayMode = 'new'">New Resource</button>
+                            </span>
+                            -->
+                        </div>
+                    </form>
+
+
 
                     <div class="pull-right navbar-form" ng-show="waiting">
                         <img src="css/ajax_loader_blue_32.gif"/>
@@ -265,20 +296,16 @@
             <ng-include src="'/includes/resourceCreatorMain.html'" onload="includeLoaded()"></ng-include>
         </div>
 
+        <!--
         <div ng-show="displayMode == 'patient'" ng-controller="patientCtrl">
             <ng-include src="'/includes/patientDetails.html'"></ng-include>
-
-
         </div>
 
-
+        -->
 
         <div ng-show="displayMode == 'view'">
             <ng-include src="'/includes/resourceViewer.html'"></ng-include>
         </div>
-
-
-
 
 
 

@@ -1,5 +1,5 @@
 //directile to render a UI for a profile.
-angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetDataFromServer,$modal,appConfigSvc  ) {
+angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetDataFromServer,$uibModal,appConfigSvc  ) {
     return {
         restrict: 'E',
         scope: {
@@ -22,7 +22,7 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
 
             function showModal(vo) {
 
-                $modal.open({
+                $uibModal.open({
                     templateUrl: 'resourceBuilder/selectProfile.html',
                     size:'lg',
                     controller: function($scope,type,profileSelectedFn,allResourceTypes,vo,recent) {

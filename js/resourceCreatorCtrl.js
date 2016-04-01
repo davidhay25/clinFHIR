@@ -6,10 +6,16 @@
 
 //https://coderwall.com/p/rqdrwq/nginx-conf-query-string-processing
 
+//{{results.profileUrl}}
+//{{resourceCreatorSvc.getCurrentProfile().url}}
+
+
 angular.module("sampleApp")
     .controller('resourceCreatorCtrl',
         function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,
               RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location,resourceSvc) {
+
+    $scope.doDefault=false;         //whether to have default patient & profile <<<<< for debug only!
 
     var profile;                    //the profile being used as the base
     var type;                       //base type
@@ -28,7 +34,7 @@ angular.module("sampleApp")
 
 
     //the newpatient event is fired when a new patient is selected. We need to create a new resource...
-     $rootScope.$on('newpatient',function(event,patient){
+     $rootScope.$on('newpatientDEP',function(event,patient){
 
  
         appConfigSvc.addToRecentPatient(patient);      //the list of recent patients (for the current data server)
@@ -42,22 +48,46 @@ angular.module("sampleApp")
     $scope.recent = {};
     $scope.recent.patient = appConfigSvc.getRecentPatient();
     $scope.recent.profile = appConfigSvc.getRecentProfile();
-            
+
+    //============== event handlers ===================
+
     //the config (ie server) has been update. We need to abandon the resource being built...
     $rootScope.$on('configUpdated',function(event){
         console.log('new config');
         //when the config (servers) change,then the most recent patient & profiles will do so as well...
         $scope.recent.patient = appConfigSvc.getRecentPatient();
         $scope.recent.profile = appConfigSvc.getRecentProfile();
-        setUpForNewProfile();
+        setUpForNewProfile();       //if there's no profile in the call, then everything will be re-set
 
 
     });
 
+    //when a new profile is selected from the front page...
+    $rootScope.$on('profileSelected',function(event,profile){
+        $scope.dirty=false;     //a new form is loaded
+        $scope.parkedHx = false;
+        //appConfigSvc.addToRecentProfile(clone);
+        //$scope.recent.profile = appConfigSvc.getRecentProfile();    //re-establish the recent profile list
+        setUpForNewProfile(profile);
+    });
 
 
+    //when a patient is selected from the front page... Want to load the patient details and create a new starter resource for the current profile
+    $rootScope.$on('patientSelected',function(event,patient){
+        loadPatientDetails(function(){
+            setUpForNewProfile(resourceCreatorSvc.getCurrentProfile());
+        });
+    });
 
-    //when the user selects a new server from the navbar...
+    //when a new resource has been created. Don't reset as this allows incremental versions of the resource to be saved...
+    $rootScope.$on('reloadPatient',function(event){
+        loadPatientDetails(function(){
+console.log('reload')
+        });
+    });
+
+
+            //when the user selects a new server from the navbar...
     $scope.setDataServerDEP = function(server){
         appConfigSvc.setCurrentDataServer(server);  //set the server...
 
@@ -69,11 +99,15 @@ angular.module("sampleApp")
    // $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/Condition";   //default profile
     //$scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/dhSequence";   //default profile
 
-    $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/carePlan";
+
 
     //save the current patient in the config services - so other controllers/components can access it...
-    appConfigSvc.setCurrentPatient({resourceType:'Patient',id:'1',name : [{text:'Eve Everywoman'}]});
-    //appConfigSvc.setCurrentPatient({resourceType:'Patient',id:'302',name : [{text:'Hayley Lee'}]});
+    if ($scope.doDefault) {
+        $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/carePlan";
+        appConfigSvc.setCurrentPatient({resourceType:'Patient',id:'1',name : [{text:'Eve Everywoman'}]});
+        //appConfigSvc.setCurrentPatient({resourceType:'Patient',id:'302',name : [{text:'Hayley Lee'}]});
+    }
+
 
 
 
@@ -106,11 +140,11 @@ angular.module("sampleApp")
     }
 
     //event fired by ng-include of main page after the main template page has been loaded... (Otherwise the treeview isn't there...)
-    $scope.includeLoaded = function() {
+  /*  $scope.includeLoaded = function() {
         //initial load..
         loadProfile($scope.results.profileUrl);
     };
-
+*/
     var type;//     the base type = $scope.results.profileUrl;      //todo - change type...
 
     $scope.selectProfileDEP = function() {
@@ -118,68 +152,137 @@ angular.module("sampleApp")
     };
 
 
-    //sample patient data...
-    supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
-        //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
-        function(allResources){
-            //the order is significant - allResources must be set first...
-            appConfigSvc.setAllResources(allResources);
+    if ($scope.doDefault) {
+        //sample patient data...
+        supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
+            //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
+            function (allResources) {
+                //the order is significant - allResources must be set first...
+                appConfigSvc.setAllResources(allResources);
 
 
-            //todo - all this stuff should be in a service somewhere...
-            $scope.outcome.resourceTypes = [];
-            angular.forEach(allResources,function(bundle,type){
+                //todo - all this stuff should be in a service somewhere...
+                $scope.outcome.resourceTypes = [];
+                angular.forEach(allResources, function (bundle, type) {
 
-                if (bundle && bundle.total > 0) {
-                    $scope.outcome.resourceTypes.push({type:type,bundle:bundle});
-                }
-
-
-            });
-
-            $scope.outcome.resourceTypes.sort(function(a,b){
-                if (a.type > b.type) {
-                    return 1
-                } else {
-                    return -1
-                }
-            });
+                    if (bundle && bundle.total > 0) {
+                        $scope.outcome.resourceTypes.push({type: type, bundle: bundle});
+                    }
 
 
-            //for the reference navigator we need a plain list of resources...
-            $scope.allResourcesAsList = [];
-            $scope.allResourcesAsDict = {};
-            angular.forEach(allResources,function(bundle,type){
-
-                if (bundle.entry) {
-                    bundle.entry.forEach(function(entry){
-                        $scope.allResourcesAsList.push(entry.resource);
-                        var hash = entry.resource.resourceType + "/"+entry.resource.id;
-                        $scope.allResourcesAsDict[hash] = entry.resource;
-
-                    })
-                }
-                //also need to add the reference resources to the dictionary (so thay can be found in outgoing references)
-                supportSvc.getReferenceResources().forEach(function(resource){
-                    var hash = resource.resourceType + "/"+resource.id;
-                    $scope.allResourcesAsDict[hash] = resource;
                 });
 
-                //and finally the patient!
-                var patient = appConfigSvc.getCurrentPatient();
-                var hash = "Patient/"+patient.id;
-                $scope.allResourcesAsDict[hash] = patient;
+                $scope.outcome.resourceTypes.sort(function (a, b) {
+                    if (a.type > b.type) {
+                        return 1
+                    } else {
+                        return -1
+                    }
+                });
 
 
-            })
+                //for the reference navigator we need a plain list of resources...
+                $scope.allResourcesAsList = [];
+                $scope.allResourcesAsDict = {};
+                angular.forEach(allResources, function (bundle, type) {
+
+                    if (bundle.entry) {
+                        bundle.entry.forEach(function (entry) {
+                            $scope.allResourcesAsList.push(entry.resource);
+                            var hash = entry.resource.resourceType + "/" + entry.resource.id;
+                            $scope.allResourcesAsDict[hash] = entry.resource;
+
+                        })
+                    }
+                    //also need to add the reference resources to the dictionary (so thay can be found in outgoing references)
+                    supportSvc.getReferenceResources().forEach(function (resource) {
+                        var hash = resource.resourceType + "/" + resource.id;
+                        $scope.allResourcesAsDict[hash] = resource;
+                    });
+
+                    //and finally the patient!
+                    var patient = appConfigSvc.getCurrentPatient();
+                    var hash = "Patient/" + patient.id;
+                    $scope.allResourcesAsDict[hash] = patient;
 
 
-        }
+                })
 
-    )
-    .finally(function(){
-        $scope.loadingPatient = false;
-    });
+
+            }
+            )
+            .finally(function () {
+                $scope.loadingPatient = false;
+            });
+
+    }
+
+
+    function loadPatientDetails(cb) {
+        supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
+            //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
+            function (allResources) {
+                //the order is significant - allResources must be set first...
+                appConfigSvc.setAllResources(allResources);
+
+
+                //todo - all this stuff should be in a service somewhere...
+                $scope.outcome.resourceTypes = [];
+                angular.forEach(allResources, function (bundle, type) {
+
+                    if (bundle && bundle.total > 0) {
+                        $scope.outcome.resourceTypes.push({type: type, bundle: bundle});
+                    }
+
+
+                });
+
+                $scope.outcome.resourceTypes.sort(function (a, b) {
+                    if (a.type > b.type) {
+                        return 1
+                    } else {
+                        return -1
+                    }
+                });
+
+
+                //for the reference navigator we need a plain list of resources...
+                $scope.allResourcesAsList = [];
+                $scope.allResourcesAsDict = {};
+                angular.forEach(allResources, function (bundle, type) {
+
+                    if (bundle.entry) {
+                        bundle.entry.forEach(function (entry) {
+                            $scope.allResourcesAsList.push(entry.resource);
+                            var hash = entry.resource.resourceType + "/" + entry.resource.id;
+                            $scope.allResourcesAsDict[hash] = entry.resource;
+
+                        })
+                    }
+                    //also need to add the reference resources to the dictionary (so thay can be found in outgoing references)
+                    supportSvc.getReferenceResources().forEach(function (resource) {
+                        var hash = resource.resourceType + "/" + resource.id;
+                        $scope.allResourcesAsDict[hash] = resource;
+                    });
+
+                    //and finally the patient!
+                    var patient = appConfigSvc.getCurrentPatient();
+                    var hash = "Patient/" + patient.id;
+                    $scope.allResourcesAsDict[hash] = patient;
+
+
+                })
+
+
+            }
+            )
+            .finally(function () {
+                $scope.loadingPatient = false;
+                if (cb) {
+                    cb()
+                }
+            });
+    }
 
 
     //get all the standard resource types - the one defined in the fhir spec. Used for the select profile modal...
@@ -275,8 +378,7 @@ angular.module("sampleApp")
         //var ar = ed.path.split('.');
         //var patientPropertyName = ar[1];    //some resources are 'patient', others are 'subject'
         if (ed) {
-            resourceCreatorSvc.addPatientToTree(ed.path,appConfigSvc.getCurrentPatient(),$scope.treeData);  //todo - not always 'subject'
-            //resourceCreatorSvc.addPatientToTree(type+'.subject',appConfigSvc.getCurrentPatient(),$scope.treeData);  //todo - not always 'subject'
+            resourceCreatorSvc.addPatientToTree(ed.path,appConfigSvc.getCurrentPatient(),$scope.treeData);
         }
 
 
@@ -327,13 +429,7 @@ angular.module("sampleApp")
         //called after the tree has been built. Mainly to support the saving
         if ($scope.savingResource) {
             delete $scope.savingResource;
-
-
             saveResourceToServer()
-
-
-
-
         }
 
         if ($scope.validatingResource) {
@@ -735,6 +831,15 @@ angular.module("sampleApp")
                         $scope.showWaiting = false;
                     })
                 }
+                
+                $scope.close = function(){
+                    $scope.$close();
+                };
+
+                $scope.cancel = function(){
+                    $scope.$dismiss();
+                }
+
             },
             resolve : {
                 resource : function() {
@@ -745,7 +850,7 @@ angular.module("sampleApp")
                 }
             }
         }).result.then(function(){
-
+                $rootScope.$emit("reloadPatient")
             });
         };
 
@@ -755,31 +860,22 @@ angular.module("sampleApp")
     $scope.showFindProfileDialog = {};
 
     //display the profile (SD) selector
-    $scope.findProfileNew = function() {
+    $scope.findProfileNewDEP = function() {
         //$scope.input.profileType = null;    //reset the profile selector
         $scope.showFindProfileDialog.open();
     };
 
-    //when a profile is selected...  This is configured in the directive...
+    //when a profile is selected...  This is configured in the directive...  Now called from the front page
     $scope.selectedProfile = function(profile) {
         var clone = angular.copy(profile);
-
-
-
 
         resourceCreatorSvc.setCurrentProfile(clone);
 
         $scope.dirty=false;     //a new form is loaded
         $scope.parkedHx = false;
         appConfigSvc.addToRecentProfile(clone);
+        $scope.recent.profile = appConfigSvc.getRecentProfile();    //re-establish the recent profile list
         setUpForNewProfile(clone);
-
-        //$scope.dynamic.profile = angular.copy(profile);
-
-        //add to list of favourite profiles & update list
-        //RenderProfileSvc.addToFavouriteProfiles(profile);
-        //$scope.allKnownProfiles = Utilities.addToFavouriteProfiles(profile); //RenderProfileSvc.getFavouriteProfiles();
-
 
     };
 
@@ -816,18 +912,11 @@ angular.module("sampleApp")
     };
     //--------------------------------
 
-    //========= functions for the front page - could be in a separate controller maybe...
 
-
-
-
-
-    
-    //-------
 
 
 })
-    .controller('patientCtrl', function ($scope,$rootScope,appConfigSvc,resourceCreatorSvc,ResourceUtilsSvc,supportSvc) {
+    .controller('patientCtrlDEP', function ($scope,$rootScope,appConfigSvc,resourceCreatorSvc,ResourceUtilsSvc,supportSvc) {
         //expose the config service on the scope. Used for showing the Patint details...
         $scope.appConfigSvc = appConfigSvc;
         $scope.ResourceUtilsSvc = ResourceUtilsSvc;
@@ -909,9 +998,15 @@ angular.module("sampleApp")
         }
         
     })
-    .controller('frontCtrl',function($scope,$rootScope,$uibModal,$localStorage,resourceCreatorSvc,ResourceUtilsSvc){
+    .controller('frontCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,ResourceUtilsSvc){
         //the controller for the front page...
         var config = $localStorage.config;
+        $scope.input = {};
+        config.allKnownServers.forEach(function(svr){
+            if (config.servers.data == svr.url) {$scope.input.dataServer = svr}
+            if (config.servers.conformance == svr.url) {$scope.input.conformanceServer = svr}
+
+        });
         
         //when the user selects a different server...
         $scope.selectServer = function(serverType,server) {
@@ -922,7 +1017,30 @@ angular.module("sampleApp")
             $scope.recent.profile = appConfigSvc.getRecentProfile();
             
         };
-        
+
+        $scope.findProfile = function() {
+            $scope.showFindProfileDialog.open();    //note that this is defined in the parent controller...
+            //note that the function $scope.selectedProfile in the parnt controller is invoked on successful selection...
+        };
+
+        //when a profile is selected in the list...
+        $scope.selectPatient = function(patient) {
+            appConfigSvc.setCurrentPatient(patient);
+            $rootScope.$emit('patientSelected',patient);
+        };
+
+        //when a profile is selected in the list
+        $scope.selectProfile = function(profile) {
+            var clone = angular.copy(profile);
+
+            resourceCreatorSvc.setCurrentProfile(clone);
+            $rootScope.$emit('profileSelected',clone);      //will cause the builder to be set up for the seelcted profile...
+
+
+        };
+
+
+        //when the user wants to locate an existing patient in the data server
         $scope.findPatient = function(){
             $uibModal.open({
                 backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
@@ -962,5 +1080,6 @@ angular.module("sampleApp")
         }
 
 
+        
 
 });

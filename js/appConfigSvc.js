@@ -67,7 +67,15 @@ angular.module("sampleApp")
                     }
                 }
 
-                return dataServer;
+                //return dataServer;
+            },
+            getCurrentConformanceServer : function() {
+                for (var i=0; i < $localStorage.config.allKnownServers.length; i++){
+                    var svr = $localStorage.config.allKnownServers[i];
+                    if (svr.url == $localStorage.config.servers.conformance) {
+                        return svr;
+                    }
+                }
             },
             setCurrentPatient : function(patient) {
                 currentPatient = patient;
@@ -128,7 +136,7 @@ angular.module("sampleApp")
                 var url = profile.url;
                 for (var i=0; i < $localStorage.recentProfile.length; i++) {
                     var recent = $localStorage.recentProfile[i];
-                    if (recent.profile.url == url) {
+                    if (recent.profile.url == url && recent.profile.serverUrl == conformanceServerUrl) {
                         alreadyThere = true;
                         break;
                     }

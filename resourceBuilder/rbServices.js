@@ -1318,72 +1318,75 @@ angular.module("sampleApp").
 
     return {
         getOneLineSummaryOfResource : function(resource) {
-            switch (resource.resourceType) {
-                case "DiagnosticOrder":
-                    if (resource.reason) {
-                        return getCCSummary(resource.reason[0]);
-                    } else {
-                        return resource.resourceType;
-                    }
-                    break;
-                case "AllergyIntolerance" :
-                    return getCCSummary(resource.substance);
-                    break;
-                case "Practitioner" :
-                    return getHumanNameSummary(resource.name);
-                    break;
-                case "Patient" :
-                    return getHumanNameSummary(resource.name[0]);   //only the forst name
-                    break;
-                case "List" :
-                    if (resource.code) {
-                        return getCCSummary(resource.code);
-                    } else {return "List"}
-                    break;
-                case "Encounter" :
-                    if (resource.period) {
-                        return getPeriodSummary(resource.period);
-
-                    } else {
-                        return 'Encounter';
-                    }
-                    break;
-                case 'Observation' :
-                    var summary = resource.id;
-                    if (resource.code) {
-                        if (resource.code.text) {
-                            summary = resource.code.text;
-                        } else if (resource.code.coding) {
-                            summary = resource.code.coding[0].code;
+            if (resource) {
+                switch (resource.resourceType) {
+                    case "DiagnosticOrder":
+                        if (resource.reason) {
+                            return getCCSummary(resource.reason[0]);
+                        } else {
+                            return resource.resourceType;
                         }
-                    }
+                        break;
+                    case "AllergyIntolerance" :
+                        return getCCSummary(resource.substance);
+                        break;
+                    case "Practitioner" :
+                        return getHumanNameSummary(resource.name);
+                        break;
+                    case "Patient" :
+                        return getHumanNameSummary(resource.name[0]);   //only the forst name
+                        break;
+                    case "List" :
+                        if (resource.code) {
+                            return getCCSummary(resource.code);
+                        } else {
+                            return "List"
+                        }
+                        break;
+                    case "Encounter" :
+                        if (resource.period) {
+                            return getPeriodSummary(resource.period);
 
-                    if (resource.valueString) {
-                        summary += ": " + resource.valueString.substr(0,50) ;
-                    }
+                        } else {
+                            return 'Encounter';
+                        }
+                        break;
+                    case 'Observation' :
+                        var summary = resource.id;
+                        if (resource.code) {
+                            if (resource.code.text) {
+                                summary = resource.code.text;
+                            } else if (resource.code.coding) {
+                                summary = resource.code.coding[0].code;
+                            }
+                        }
 
-                    if (resource.appliesDateTime) {
-                        summary = resource.appliesDateTime + " " + summary;
-                    }
+                        if (resource.valueString) {
+                            summary += ": " + resource.valueString.substr(0, 50);
+                        }
+
+                        if (resource.appliesDateTime) {
+                            summary = resource.appliesDateTime + " " + summary;
+                        }
 
 
-
-                    return summary;
-
+                        return summary;
 
 
-                    break;
-                case 'Condition' :
-                    if (resource.code) {
-                        return getCCSummary(resource.code);
+                        break;
+                    case 'Condition' :
+                        if (resource.code) {
+                            return getCCSummary(resource.code);
 
-                    } else {
+                        } else {
+                            return resource.resourceType;
+                        }
+                        break;
+                    default :
                         return resource.resourceType;
-                    }
-                    break;
-                default :
-                    return resource.resourceType;
-                    break;
+                        break;
+                }
+
             }
         }
     }

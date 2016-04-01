@@ -3,13 +3,11 @@
     <div class="col-md-2">
         <h4>Resource Types</h4>
         <div class="list-group">
-
             <a href="#" class="list-group-item" ng-click="typeSelected(type)"
                ng-repeat="type in outcome.resourceTypes ">
                 {{type.type}}
                 <span class="pull-right badge">{{type.bundle.total}}</span>
             </a>
-
         </div>
         <div class="list-group">
             <a ng-show="outcome.allResources" href="#" class="list-group-item" ng-click="getVitals()">Vitals</a>
@@ -17,7 +15,6 @@
     </div>
 
     <div class="col-md-10">
-
 
         <!-- The vitals table -->
         <table class="table table-bordered" ng-show="vitalsTable">
@@ -38,8 +35,6 @@
             </tr>
         </table>
 
-
-
         <div class="row">
             <div class="col-md-4">
 
@@ -56,8 +51,6 @@
             <div class="col-md-8">
 
                 <div ng-show="outcome.selectedResource">
-
-
 
                     <div class="row">
                         <div class="col-md-8">
