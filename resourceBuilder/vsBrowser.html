@@ -27,13 +27,13 @@
             <div class="alert alert-warning" role="alert">Searching server, please wait...</div>
         </div>
 
-        <tabset>
+        <uib-tabset>
 
-            <tab ng-show="$parent.tabCtrl.showsearch"   heading = "Search">
+            <uib-tab ng-show="$parent.tabCtrl.showsearch"   heading = "Search">
                 <div > <!--ng-show = "tab.tabSearch" -->
                     <br />
-                    <tabset>
-                        <tab heading="Search Parameters">
+                    <uib-tabset>
+                        <uib-tab heading="Search Parameters">
 
                             <br/>
                             <form class="form-horizontal" role="form">
@@ -74,8 +74,8 @@
                                     </div>
                                 </div>
                             </div>
-                        </tab>
-                        <tab active="tab.searchResults" heading="Results">
+                        </uib-tab>
+                        <uib-tab active="tab.searchResults" heading="Results">
 
                             <br/>
                             <div class="row">
@@ -96,16 +96,16 @@
                                 </div>
 
                             </div>
-                        </tab>
-                    </tabset>
+                        </uib-tab>
+                    </uib-tabset>
 
 
 
                 </div>
 
-            </tab>
+            </uib-tab>
 
-            <tab heading="Description" active="tab.tabDescription" select="setHelpTopic('description')">
+            <uib-tab heading="Description" active="tab.tabDescription" select="setHelpTopic('description')">
                 <br />
                 <div class="row">
                     <div class="col-md-2">ID</div>
@@ -140,10 +140,10 @@
                     <div class="col-md-10">{{selectedvs.date}}</div>
                 </div>
 
-            </tab>
+            </uib-tab>
 
-            <tab  select="setHelpTopic('define')">
-                <tab-heading>Define <span ng-show="selectedvs.define">({{selectedvs.define.concept.length}})</span></tab-heading>
+            <uib-tab  select="setHelpTopic('define')">
+                <uib-tab-heading>Define <span ng-show="selectedvs.define">({{selectedvs.define.concept.length}})</span></uib-tab-heading>
                 <br />
 
 
@@ -157,12 +157,12 @@
                 </table>
 
 
-            </tab>
-            <tab heading="Compose"  select="setHelpTopic('compose')">
+            </uib-tab>
+            <uib-tab heading="Compose"  select="setHelpTopic('compose')">
                 <br />
-                <tabset>
-                    <tab>
-                        <tab-heading>Includes </tab-heading>
+                <uib-tabset>
+                    <uib-tab>
+                        <uib-tab-heading>Includes </uib-tab-heading>
                         <br />
                         <div ng-repeat = "include in  selectedvs.compose.include">
                             <h4>{{include.system}}</h4>
@@ -196,11 +196,11 @@
                         </div>
 
 
-                    </tab>
+                    </uib-tab>
 
 
-                    <tab>
-                        <tab-heading>Excludes </tab-heading>
+                    <uib-tab>
+                        <uib-tab-heading>Excludes </uib-tab-heading>
                         <br />
                         <div ng-repeat = "exclude in  selectedvs.compose.exclude">
                             <h4>{{exclude.system}}</h4>
@@ -234,20 +234,20 @@
                         </div>
 
 
-                    </tab>
+                    </uib-tab>
                     
                     
-                </tabset>
+                </uib-tabset>
 
 
 
-            </tab>
-            <tab heading="JSON"  select="setHelpTopic('json')">
+            </uib-tab>
+            <uib-tab heading="JSON"  select="setHelpTopic('json')">
                 <br />
                 <pre>{{selectedvsJSON}}</pre>
-            </tab>
+            </uib-tab>
 
-            <tab heading="Expand" disabled="tab.noexpand" select="setHelpTopic('expand')">
+            <uib-tab heading="Expand" disabled="tab.noexpand" select="setHelpTopic('expand')">
                 <br />
                 <div class="row">
                     <div class="col-md-2">Filter</div>
@@ -275,9 +275,9 @@
 
 
 
-            </tab>
+            </uib-tab>
 
-        </tabset>
+        </uib-tabset>
 
 
     </div>

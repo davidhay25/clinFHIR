@@ -677,14 +677,17 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         addPatientToTree: function(path, patient, treeData) {
             //add the patient reference to the tree  path = path to patient, patient = patient resource, treeData = data for tree
 
-            var fragment = {reference:'Patient/'+patient.id,display:ResourceUtilsSvc.getOneLineSummaryOfResource(patient)};
-            //path = the path in the resource - relative to the parent
-            //fragment = the json to render at that path. If a 'parent' in the resource (node type=BackboneElement) - eg Condition.Stage then the fragment is empty.
-           // var patientNode = getElementDefinitionFromPath(path)
-            var edList = this.getEDForPath(path);
-            var ar = path.split('.');
-            var patientPropertyName = ar[1];
-            treeData.push({id:'patient',parent:'root',text:patientPropertyName,path:path,ed:edList[0],fragment:fragment});
+            if (patient) {
+                var fragment = {reference:'Patient/'+patient.id,display:ResourceUtilsSvc.getOneLineSummaryOfResource(patient)};
+                //path = the path in the resource - relative to the parent
+                //fragment = the json to render at that path. If a 'parent' in the resource (node type=BackboneElement) - eg Condition.Stage then the fragment is empty.
+                // var patientNode = getElementDefinitionFromPath(path)
+                var edList = this.getEDForPath(path);
+                var ar = path.split('.');
+                var patientPropertyName = ar[1];
+                treeData.push({id:'patient',parent:'root',text:patientPropertyName,path:path,ed:edList[0],fragment:fragment});
+
+            }
 
 
         },

@@ -29,18 +29,12 @@
         angular.module("sampleApp",['ngCookies','ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage']).config(
                 ['$locationProvider', function( $locationProvider) {
 
-            //$httpProvider.defaults.useXDomain = true;
-
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
             $locationProvider.hashPrefix('!');
 
         }]);
 
-        /*app.config(function($httpProvider) {
-         //Enable cross domain calls
-         $httpProvider.defaults.useXDomain = true;
-         });*/
     </script>
 
 
@@ -62,6 +56,7 @@
     <script src="js/searchForResourceCtrl.js"></script>
     <script src="js/resourceSvc.js"></script>
 
+    <script src="js/modalDialogSvc.js"></script>
     <title>FHIR Resource Creator</title>
 
 </head>
@@ -95,14 +90,6 @@
                             <!--<a ng-show="appConfigSvc.getCurrentPatient()" href="#" ng-click="displayMode = 'patient'">Details</a> -->
 
                     <a ng-show="appConfigSvc.getCurrentPatient()" href="#" ng-click="displayMode = 'view'">Details</a>
-<!--
-                    <div ng-hide="displayMode == 'view'">
-                         <span ng-show="appConfigSvc.getCurrentPatient()"
-                               class="navbar-text" uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
-                               uib-popover="Show all current resources">
-                            <a href="#" ng-click="displayMode = 'view'">All Resources</a>
-                         </span>
-                    </div>-->
 
                         </div>
 
@@ -119,32 +106,6 @@
 
 
                 </div>
-<!--
-                <div class="col-md-2">
-
-                    <div class="navbar-text pull-right">
-
-
-
-                         <span uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
-                               uib-popover="{{appConfigSvc.getCurrentDataServer().url}}">
-                              <a href ='#' ng-click="showConfig()">
-                                  {{appConfigSvc.getCurrentDataServer().name }}
-                              </a>
-
-                         </span>
-
-
-
-
-
-                    </div>
-
-
-
-                </div>
-                -->
-
 
 
                 <div class="col-md-6">
@@ -165,29 +126,7 @@
 
 
                     </div>
-<!--
-                    <div class="navbar-text">
-                            <span uib-dropdown>
-                              <a href uib-dropdown-toggle>
-                                  View: {{displayMode | uppercase}}
-                              </a>
 
-                              <ul uib-dropdown-menu aria-labelledby="simple-dropdown">
-
-                                  <li ng-hide="displayMode == 'view'">
-                                      <a href="#" ng-click="displayMode = 'view'">View</a></li>
-
-                                  <li ng-hide="displayMode == 'new'">
-                                      <a href="#" ng-click="displayMode = 'new'">New</a></li>
-
-                                  <li ng-hide="displayMode == 'patient'">
-                                      <a href="#" ng-click="displayMode = 'patient'">Patient</a></li>
-
-
-                              </ul>
-                         </span>
-                    </div>
-                    -->
 
 
 
@@ -198,43 +137,25 @@
                             </span>
                     </div>
 
-   <!--
-                    <div ng-hide="displayMode == 'new'">
-                        <div ng-show="appConfigSvc.getCurrentPatient() && resourceCreatorSvc.getCurrentProfile()">
-                            <span class="navbar-text" uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
-                                  uib-popover="Create new resource screen">
-                                    <a href="#" ng-click="displayMode = 'new'">New Resource</a>
-                            </span>
-                        </div>
-                    </div>
--->
 
-<!--
-                    <div ng-hide="displayMode == 'view'">
-                         <span ng-show="appConfigSvc.getCurrentPatient()"
-                               class="navbar-text" uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
-                               uib-popover="Show all current resources">
-                            <a href="#" ng-click="displayMode = 'view'">All Resources</a>
-                         </span>
-                    </div>
--->
+                    <form ng-show="displayMode == 'new'" class="navbar-form navbar-right">
+                        <button class="btn btn-danger pull-right" ng-click="cancelNewResource()">
+                            Cancel
+                        </button>
+                    </form>
 
-                    <form  ng-show="displayMode == 'new'" class="navbar-form navbar-right">
+                    <form ng-show="displayMode == 'new'" class="navbar-form navbar-right">
                         <button class="btn btn-primary pull-right" ng-click="saveToServer()">Save</button>
                         <button style="margin-right: 8px" class="btn btn-info pull-right" ng-click="park()">Park</button>
                         <button class="btn btn-link pull-right" ng-click="validate()">Validate</button>
                     </form>
 
 
+
                     <form ng-hide="displayMode == 'new'" class="navbar-form navbar-right">
                         <div ng-show="appConfigSvc.getCurrentPatient() && resourceCreatorSvc.getCurrentProfile()">
                             <button class="btn btn-info pull-right" ng-click="displayMode = 'new'">New Resource</button>
-                            <!--
-                            <span class="navbar-text" uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
-                                  uib-popover="Create new resource screen">
-                                    <button class="btn btn-info pull-right" ng-click="displayMode = 'new'">New Resource</button>
-                            </span>
-                            -->
+
                         </div>
                     </form>
 
@@ -296,12 +217,6 @@
             <ng-include src="'/includes/resourceCreatorMain.html'" onload="includeLoaded()"></ng-include>
         </div>
 
-        <!--
-        <div ng-show="displayMode == 'patient'" ng-controller="patientCtrl">
-            <ng-include src="'/includes/patientDetails.html'"></ng-include>
-        </div>
-
-        -->
 
         <div ng-show="displayMode == 'view'">
             <ng-include src="'/includes/resourceViewer.html'"></ng-include>
@@ -317,7 +232,7 @@
         </select-profile>
 
 
-
+        <!-- A directive for browsing value sets-->
         <vs-browser trigger="showVSBrowserDialog"></vs-browser>
 
 

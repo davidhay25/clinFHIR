@@ -19,10 +19,15 @@ angular.module("sampleApp")
         defaultConfig.servers.terminology = "http://fhir3.healthintersections.com.au/open/";
         defaultConfig.servers.data = "http://fhir3.healthintersections.com.au/open/";
         defaultConfig.servers.conformance = "http://fhir3.healthintersections.com.au/open/";
+
+        //always use Grahame as the terminology server (for now)
+        defaultConfig.terminologyServers = [];
+        defaultConfig.terminologyServers.push({version:2,url:"http://fhir2.healthintersections.com.au/open/"});
+        defaultConfig.terminologyServers.push({version:3,url:"http://fhir3.healthintersections.com.au/open/"});
+
         defaultConfig.allKnownServers = [];
 
 
-        //config.allKnownServers.push({name:"Grahame STU-3",url:"http://fhir3.healthintersections.com.au/open/"});
         defaultConfig.allKnownServers.push({name:"Grahame STU3 server",url:"http://fhir3.healthintersections.com.au/open/",version:3,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://fhir2.healthintersections.com.au/open/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"HealthConnex (2.0)",url:"http://sqlonfhir-dstu2.azurewebsites.net/fhir/",version:2});
@@ -33,6 +38,35 @@ angular.module("sampleApp")
 
 
         return {
+            checkConsistency : function() {
+                //check that all the servers are on the same version
+                //
+                var tmp = [];
+                //first get the descriptive objects for the servers...
+                var config = $localStorage.config;
+                config.allKnownServers.forEach(function(svr){
+                    if (config.servers.data == svr.url) {tmp.push(svr)}
+                    if (config.servers.conformance == svr.url) {tmp.push(svr)}
+                });
+
+                //now see if they are all the same version - will need a loop if more than 2!
+                if (tmp[0].version !== tmp[1].version) {
+                    return false;
+                }
+
+                //now make sure the terminology server is the correct version..
+                //todo - need to think about how to handle where there is more than one terminology server, or Grahames is down...
+                var version = tmp[0].version;
+                for (var i=0; i <config.terminologyServers.length;i++) {
+                    var s = config.terminologyServers[i];
+                    console.log(version,s)
+                    if (s.version == version) {
+                        $localStorage.config.terminology = s.url;
+                        console.log('setting  terminology server to '+s.url)
+                    }
+                }
+                return true;
+            },
             config : function() {
 
                 if (! $localStorage.config) {

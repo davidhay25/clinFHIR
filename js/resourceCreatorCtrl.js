@@ -12,7 +12,7 @@
 
 angular.module("sampleApp")
     .controller('resourceCreatorCtrl',
-        function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,
+        function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,
               RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location,resourceSvc) {
 
     $scope.doDefault=false;         //whether to have default patient & profile <<<<< for debug only!
@@ -43,7 +43,6 @@ angular.module("sampleApp")
     });
 
     //config - in particular the servers defined. The samples will be going to the data server...
-
     $scope.config = appConfigSvc.config();
     $scope.recent = {};
     $scope.recent.patient = appConfigSvc.getRecentPatient();
@@ -74,33 +73,42 @@ angular.module("sampleApp")
 
     //when a patient is selected from the front page... Want to load the patient details and create a new starter resource for the current profile
     $rootScope.$on('patientSelected',function(event,patient){
+
+        appConfigSvc.addToRecentPatient(patient);
+        $scope.recent.patient = appConfigSvc.getRecentPatient();
+
         loadPatientDetails(function(){
             setUpForNewProfile(resourceCreatorSvc.getCurrentProfile());
         });
     });
 
-    //when a new resource has been created. Don't reset as this allows incremental versions of the resource to be saved...
+    //when a new resource has been created. Don't reset the new resource as this allows incremental versions of the resource to be saved...
     $rootScope.$on('reloadPatient',function(event){
         loadPatientDetails(function(){
-console.log('reload')
+            //console.log('reload')
         });
     });
 
 
-            //when the user selects a new server from the navbar...
-    $scope.setDataServerDEP = function(server){
-        appConfigSvc.setCurrentDataServer(server);  //set the server...
 
-        //todo - need to select the nw patient, reset the resource etc.
+    //clears the current resource being buils and re-displays the front screen 
+    $scope.cancelNewResource = function(){
+
+        var modalOptions = {
+            closeButtonText: 'No, stay here',
+            actionButtonText: 'Yes, select another',
+            headerText: 'Abandon resource',
+            bodyText: 'Are you sure you want to abandon this resource?'
+        };
+
+        modalService.showModal({}, modalOptions).then(function (result) {
+            //this is the 'yes'
+            $scope.displayMode = 'front';
+        })
+
 
     };
-
-    //the actual Url of the profile currently being used...
-   // $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/Condition";   //default profile
-    //$scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/dhSequence";   //default profile
-
-
-
+            
     //save the current patient in the config services - so other controllers/components can access it...
     if ($scope.doDefault) {
         $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/carePlan";
@@ -139,17 +147,9 @@ console.log('reload')
         }
     }
 
-    //event fired by ng-include of main page after the main template page has been loaded... (Otherwise the treeview isn't there...)
-  /*  $scope.includeLoaded = function() {
-        //initial load..
-        loadProfile($scope.results.profileUrl);
-    };
-*/
-    var type;//     the base type = $scope.results.profileUrl;      //todo - change type...
+    //var type;//     the base type = $scope.results.profileUrl;      //todo - change type...
 
-    $scope.selectProfileDEP = function() {
-        loadProfile($scope.results.profileUrl);
-    };
+
 
 
     if ($scope.doDefault) {
@@ -453,6 +453,7 @@ console.log('reload')
 
     });
 
+    //hide the outcome of the validate operation...
     $scope.closeValidationOutcome = function(){
         delete $scope.validateResults;
     };
@@ -491,7 +492,7 @@ console.log('reload')
         });
     }
 
-            //when the user has selected a node in the navigator tree (or called externally). Display the value of the node or possible child nodes
+    //when the user has selected a node in the navigator tree (or called externally). Display the value of the node or possible child nodes
     var navigatorNodeSelected = function(nodeId,ed){
       //  $scope.selectedNode = node;
         delete $scope.children;     //the node may not have children (only BackboneElement datatypes do...
@@ -785,6 +786,7 @@ console.log('reload')
         }
     };
 
+    //perform the actual save operation
     var saveResourceToServer = function() {
         $uibModal.open({
             templateUrl: 'modalTemplates/confirmNewResource.html',
@@ -859,11 +861,6 @@ console.log('reload')
 
     $scope.showFindProfileDialog = {};
 
-    //display the profile (SD) selector
-    $scope.findProfileNewDEP = function() {
-        //$scope.input.profileType = null;    //reset the profile selector
-        $scope.showFindProfileDialog.open();
-    };
 
     //when a profile is selected...  This is configured in the directive...  Now called from the front page
     $scope.selectedProfile = function(profile) {
@@ -1010,11 +1007,17 @@ console.log('reload')
         
         //when the user selects a different server...
         $scope.selectServer = function(serverType,server) {
+            delete $scope.error;
             config.servers[serverType] = server.url;
             $localStorage.config = config;
             $rootScope.$emit('configUpdated')
             $scope.recent.patient = appConfigSvc.getRecentPatient();
             $scope.recent.profile = appConfigSvc.getRecentProfile();
+            
+            if (! appConfigSvc.checkConsistency()) {
+                $scope.error = 'Warning! These servers are on a different FHIR version. Wierd things will happen...';
+            }
+            
             
         };
 
@@ -1063,6 +1066,13 @@ console.log('reload')
                                 alert('Error finding patient: '+angular.toJson(err))
                             }
                         )
+                    };
+
+                    $scope.selectNewPatient = function(patient) {
+                        appConfigSvc.setCurrentPatient(patient);
+                        //$scope.recent.patient = appConfigSvc.getRecentPatient();
+                        $rootScope.$emit('patientSelected',patient);
+                        $scope.$close();
                     };
 
                     $scope.cancel = function () {
