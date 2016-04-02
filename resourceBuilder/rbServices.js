@@ -88,6 +88,7 @@ angular.module("sampleApp").
             var deferred = $q.defer();
             var config = appConfigSvc.config();
             var qry = config.servers.terminology + "ValueSet/"+id + "/$expand";
+            config.log(qry,'rbServices:getExpandedValueSet')
 
             $http.get(qry).then(
                 function(data){
@@ -100,6 +101,7 @@ angular.module("sampleApp").
         },
         getConformanceResourceByUrl : function(url) {
             //find a StructureDefinition based on its Url. ie we assume that the url is pointing to where the SD is located...
+            config.log(qry,'getConformanceResourceByUrl');
             var deferred = $q.defer();
             $localStorage.profileCacheUrl = $localStorage.profileCacheUrl || {};
             if ($localStorage.profileCacheUrl[url]) {
@@ -132,11 +134,15 @@ angular.module("sampleApp").
             var deferred = $q.defer();
             var config = appConfigSvc.config();
             var qry = config.servers.conformance + "\StructureDefinition?url="+url;
+            config.log(qry,'findConformanceResourceByUri');
+
+
             $http.get(qry).then(
                 function(data){
                     var bundle = data.data;
                     if (bundle && bundle.entry && bundle.entry.length > 0) {
                         //return the first on if more than one...
+                        config.log('resolvedId: '+bundle.entry[0].resource.id,'findConformanceResourceByUri');
                         deferred.resolve(bundle.entry[0].resource);
                     } else {
                         deferred.reject({msg:"No matching profile found"})
@@ -158,9 +164,10 @@ angular.module("sampleApp").
         getFilteredValueSet : function(name,filter){
             //return a filtered selection from a valueset. Uses the $expand operation on grahames server...
             var config = appConfigSvc.config();
+          
             var qry = config.servers.terminology + "ValueSet/"+name+"/$expand?filter="+filter;
 
-
+            config.log(qry,'getFilteredValueSet');
 
             var deferred = $q.defer();
             $http.get(qry)
@@ -198,7 +205,7 @@ angular.module("sampleApp").
 }).
     service('Utilities', function($http,$q,$localStorage,appConfigSvc) {
     return {
-        getConformanceResource : function(callback) {
+        getConformanceResourceDEP : function(callback) {
             //return the conformance resource  (cached the first time ) in a simple callback for the current data server
             if ($localStorage.conformanceResource) {
                 callback($localStorage.conformanceResource)
@@ -252,11 +259,20 @@ angular.module("sampleApp").
         validate : function(resource,cb) {
             var clone = angular.copy(resource);
             delete clone.localMeta;
+            clone.id = 'temp';      //hapi requires an id...
+            //use the 'parameters' syntax
+            var params = {'resourceType':'Parameters',parameter:[]};
+            params.parameter.push({'name':'resource',resource:clone});
 
-            var qry = appConfigSvc.getCurrentDataServerBase() + resource.resourceType + "/$validate";
+
+            var config = appConfigSvc.config();
+            var qry = config.servers.data + resource.resourceType + "/$validate";
+
+            //var qry = appConfigSvc.getCurrentDataServerBase() + resource.resourceType + "/$validate";
+
             console.log(qry)
 
-            return $http.post(qry, clone);      //returns a promise...
+            return $http.post(qry, params);      //returns a promise...
 
         },
         profileQualityReport :function (profile) {
@@ -307,6 +323,7 @@ angular.module("sampleApp").
             //return the id of the ValueSet on the terminology server. For now, assume at the VS is on the terminology.
             var config = appConfigSvc.config();
             var qry = config.servers.terminology + "ValueSet?url=" + uri;
+            config.log(qry,'rbServices:getValueSetIdFromRegistry')
             var that = this;
 
             $http.get(qry).then(
@@ -319,6 +336,7 @@ angular.module("sampleApp").
                         }
 
                         var id = bundle.entry[0].resource.id;   //the id of the velueset in the registry
+                        config.log('resolvedId: '+id,'rbServices:getValueSetIdFromRegistry');
                         var resp = {id: id,minLength:3}         //response object
                         resp.resource = bundle.entry[0].resource;
 

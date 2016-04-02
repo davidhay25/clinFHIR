@@ -166,9 +166,10 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                                         $scope.showWaiting = false;
                                     },
                                     function(err){
-                                       // alert("There was an error retrieving the profile: "+angular.toJson(err));
-                                        $scope.$dismiss();
+                                         alert("There was an error retrieving the profile: "+angular.toJson(err));
                                         $scope.showWaiting = false;
+                                        $scope.$dismiss();
+
                                     }
                                 )
 

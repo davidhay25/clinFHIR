@@ -55,7 +55,7 @@
     <script src="js/filters.js"></script>
     <script src="js/searchForResourceCtrl.js"></script>
     <script src="js/resourceSvc.js"></script>
-
+    <script src="js/menuCtrl.js"></script>
     <script src="js/modalDialogSvc.js"></script>
     <title>FHIR Resource Creator</title>
 
@@ -151,6 +151,33 @@
                     </form>
 
 
+                    <!-- The menu-->
+                    <div ng-controller="menuCtrl" ng-show="displayMode == 'front'">
+                        <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
+                            <li uib-dropdown>
+
+                                <a href="#" uib-dropdown-toggle>
+                                <span style="font-size:2em; cursor: pointer">
+                                    <i class="glyphicon glyphicon-cog"></i>
+                                </span>
+                                </a>
+
+                                <ul class="dropdown-menu" role="menu">
+                                    <li>
+                                        <a href="#" ng-click="showQuery()">Query Servers</a>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li>
+                                        <a href="#" ng-click="resetConfig()">Reset Config</a>
+                                    </li>
+
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+
+
+
 
                     <form ng-hide="displayMode == 'new'" class="navbar-form navbar-right">
                         <div ng-show="appConfigSvc.getCurrentPatient() && resourceCreatorSvc.getCurrentProfile()">
@@ -165,37 +192,6 @@
                         <img src="css/ajax_loader_blue_32.gif"/>
                     </div>
 
-                    <!-- The menu-->
-                    <!--
-                    <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
-                        <li dropdown>
-
-                            <a href="#" dropdown-toggle>
-
-                            <span style="font-size:2em; cursor: pointer">
-                                <i class="glyphicon glyphicon-cog"></i>
-                            </span>
-                            </a>
-
-                            <ul class="dropdown-menu" role="menu">
-                                <li>
-                                    <a href="#" ng-show = "displayMode == 'patient'" ng-click="displayMode = 'resource'">Show Resource</a>
-                                </li>
-                                <li>
-                                    <a href="#"  ng-show = "displayMode == 'resource'" ng-click="displayMode = 'patient'">Show Patient</a>
-                                </li>
-                                <li class="divider"></li>
-                                <li>
-                                    <a href="#" ng-show = "displayMode == 'resource'" ng-click="validate()">Validate Resource</a>
-                                </li>
-                                <li class="divider"></li>
-
-
-                            </ul>
-                        </li>
-                    </ul>
-
-                    -->
 
                 </div>
 
@@ -211,6 +207,12 @@
         <div ng-show="displayMode == 'front'" ng-controller="frontCtrl">
             <ng-include src="'/includes/frontPage.html'"></ng-include>
         </div>
+
+
+        <div ng-show="displayMode == 'query'" ng-controller="queryCtrl">
+            <ng-include src="'/includes/serverQuery.html'"></ng-include>
+        </div>
+
 
 
         <div ng-show="displayMode == 'new'">

@@ -1,0 +1,114 @@
+
+<style>
+
+    .myScroll {
+
+        height: 400px;
+        overflow-y: scroll;
+    }
+
+    .myActive {
+        background-color: lightgrey;
+    }
+
+
+</style>
+
+<br/>
+<div class="row">
+    <div class="col-md-4">
+
+        <h5>Resource Types</h5>
+        <div class="list-group myScroll" >
+            <div href="#" ng-class="{'list-group-item':true,myActive:selectedType.type == res.type}"
+               ng-click="showType(res)"
+               ng-repeat="res in conformance.rest[0].resource">
+                {{res.type}}
+
+                <span class="pull-right">
+
+                    <a title="Load spec page in new tab" target = "_blank" ng-href="{{makeUrl(res.type)}}"><i class="glyphicon glyphicon-globe"></i></a>
+                </span>
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+    <div ng-show="selectedType" class="col-md-8">
+
+        <!--{{selectedType}}-->
+        <div class="row" ng-show="selectedType.documentation">
+            <div class="col-md-12">
+                {{selectedType.documentation}}
+                <hr />
+            </div>
+        </div>
+
+        <uib-tabset class="myScroll" >
+            <uib-tab heading="Interactions" >
+                <br/>
+                <p>Describes the interactions supported by the server </p>
+                <table class="table table-bordered">
+                    <tr><th>Code</th><th>Documentation</th></tr>
+                    <tr ng-repeat="int in selectedType.interaction ">
+                        <td>{{int.code}}</td>
+                        <td>{{int.documentation}}</td>
+                    </tr>
+                </table>
+            </uib-tab>
+            <uib-tab heading="Search Parameters">
+<!---->
+                <br />
+                <p>The Search parameters supported by the server for this resource</p>
+                <table class="table table-bordered">
+                    <tr><th>Name</th><th>Chain</th><th>Type</th><th>Documentation</th></tr>
+                    <tr ng-repeat="param in selectedType.searchParam">
+                        <td>{{param.name}}</td>
+                        <td><div ng-repeat="c in param.chain track by $index">{{c}}</div> </td>
+                        <td>{{param.type}}</td>
+
+                        <td>{{param.documentation}}</td>
+                    </tr>
+                </table>
+
+            </uib-tab>
+            <uib-tab heading="Conditionals">
+                <br/>
+                <table width="50%">
+                    <tr><td><strong>Conditional Create </strong></td><td>{{selectedType.conditionalCreate}}</td></tr>
+                    <tr><td><strong>Conditional Update </strong></td><td>{{selectedType.conditionalUpdate}}</td></tr>
+                    <tr><td><strong>Conditional Delete </strong></td><td>{{selectedType.conditionalDelete}}</td></tr>
+                </table>
+                <!--
+
+                <p>This will list - and describe - the profiles (or StructureDefinition resources) that are
+                supported by the server. Depending on how much detail we want to provide, these would be similar
+                to the woki documentation - including mappings back to HL7 version 2 messages</p>
+
+                <table class="table table-bordered">
+                    <tr><th>Path</th><th>Mult</th><th>DataType</th><th>Short</th></tr>
+                    <tr ng-repeat="el in confCtrl.profile.snapshot.element">
+                        <td>{{el.path}}</td>
+                        <td>{{el.min}}..{{el.max}}</td>
+                        <td><div ng-repeat="t in el.type">{{t.code}}</div> </td>
+                        <td>{{el.short}}</td>
+                    </tr>
+                </table>
+-->
+
+            </uib-tab>
+            <uib-tab heading="Json">
+                <br />
+                <pre>{{selectedType | json}}</pre>
+            </uib-tab>
+        </uib-tabset>
+
+
+
+    </div>
+
+
+</div>

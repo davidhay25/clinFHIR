@@ -6,6 +6,7 @@ angular.module('sampleApp').service('modalService', ['$uibModal',
             backdrop: true,
             keyboard: true,
             modalFade: true,
+
             templateUrl: '/includes/modalDialogTemplate.html'
         };
 
@@ -13,6 +14,7 @@ angular.module('sampleApp').service('modalService', ['$uibModal',
             closeButtonText: 'Close',
             actionButtonText: 'OK',
             headerText: 'Proceed?',
+            showAction:true,        //mine...
             bodyText: 'Perform this action?'
         };
 

@@ -1,0 +1,175 @@
+
+
+
+
+<div class="row">
+    <div class="col-md-8 col-sm-8">
+        <h4>Server Query</h4>
+    </div>
+    <div class="col-md-4 col-sm-4">
+        <div class="pull-right" ng-show="waiting">
+            <img src="css/ajax_loader_blue_32.gif"/>
+        </div>
+    </div>
+</div>
+
+
+
+<!--
+<div class="row">
+    <div class="col-md-4 col-sm-4">
+        <select class="form-control"
+                ng-change="selectServer(input.server)"
+                ng-options="value.name for value in config.allKnownServers track by value.name"
+                ng-model="input.server">
+
+        </select>
+    </div>
+    <div class="col-md-4 col-sm-4">
+    </div>
+</div>
+
+-->
+
+
+
+<div class="row">
+    <div class="col-md-4 col-sm-4">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <select class="form-control"
+                        ng-change="selectServer(input.server)"
+                        ng-options="value.name for value in config.allKnownServers track by value.name"
+                        ng-model="input.server">
+
+                </select>
+            </div>
+            <div class="col-md-4 col-sm-4">
+                <button ng-show="input.server"
+                        class="btn btn-default pull-right" ng-click = "showConformance()">Conformance</button>
+            </div>
+        </div>
+
+
+        <h4>Previous Queries</h4>
+
+        <div class="list-group">
+            <a href="#" class="list-group-item"
+               ng-repeat="hx in queryHistory"
+               ng-model="input.hx" ng-click = "selectFromHistory(hx)">
+                {{hx.anonQuery}}
+
+
+
+            </a>
+        </div>
+
+    </div>
+
+    <div class="col-md-8 col-sm-8">
+
+        <div ng-show="conformance">
+            <uib-tabset>
+                <uib-tab heading="REST Interface">
+                    <ng-include src="'/includes/conformanceDisplay.html'"></ng-include>
+
+                </uib-tab>
+
+                <uib-tab heading="REST Operations">
+
+                    <ng-include src="'/includes/operationsDisplay.html'"></ng-include>
+
+                </uib-tab>
+
+
+                <uib-tab heading="Json">
+                    <pre>{{conformance | json}}</pre>
+                </uib-tab>
+            </uib-tabset>
+
+        </div>
+
+
+        <div ng-hide="conformance">
+
+
+
+        <div ng-show="server">
+            <div class="row">
+                <div class="col-md-2 col-sm-2">Verb</div>
+                <div class="col-md-3 col-sm-3">Type</div>
+                <div class="col-md-4 col-sm-6">
+                    <input type="radio" ng-model="input.category" value="parameters"> Parameters
+                    <input type="radio" ng-model="input.category" value="id"> Id
+
+                </div>
+                <div class="col-md-1 col-sm-1"></div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-2 col-sm-2">
+                    <select class="form-control" ng-model="input.verb">
+                        <option value="GET">GET</option>
+                        <option value="PUT">PUT</option>
+                        <option value="POST">POST</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+                <div class="col-md-3 col-sm-3">
+                    <input type="text" ng-model="input.selectedType"
+                           uib-typeahead="type.name for type in standardResourceTypes | filter:$viewValue " class="form-control"  ng-blur="buildQuery()">
+                </div>
+                <div class="col-md-6 col-sm-6">
+                    <textarea ng-show="input.category=='parameters'" ng-model="input.parameters" class="form-control"
+                              ng-change="buildQuery()"></textarea>
+                    <input ng-show="input.category=='id'" type="text" class="form-control"
+                           ng-model="input.id" ng-change="buildQuery()"/>
+
+                </div>
+                <div class="col-md-1 col-sm-1">
+                    <button class="btn btn-default" ng-click="doit()">Run</button>
+                </div>
+            </div>
+
+
+
+
+
+            <div class="row">
+                <div class="col-md-12 col-sm-12"><strong>Query:</strong> {{query}}</div>
+            </div>
+
+        </div>
+
+<!--
+        <div class="row" ng-show="response">
+            <div class="col-md-12 col-sm-12">
+                <div ng-repeat="(key,value) in responseHeaders">
+                    {{key}} {{value}}
+                </div>
+
+
+            </div>
+        </div>
+-->
+
+        <div class="row" ng-show="err">
+            <div class="col-md-12 col-sm-12">
+                <div><strong>StatusCode:{{err.status}}</strong></div>
+                <pre>{{err.data | json}}</pre>
+            </div>
+        </div>
+
+        <div class="row" ng-show="response">
+            <div class="col-md-12 col-sm-12">
+                <div><strong>StatusCode:{{response.status}}</strong></div>
+                <pre>{{response.data | json}}</pre>
+            </div>
+        </div>
+
+
+        </div>
+    </div>
+
+</div>

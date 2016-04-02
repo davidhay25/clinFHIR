@@ -16,23 +16,31 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.servers.terminology = "http://fhir3.healthintersections.com.au/open/";
-        defaultConfig.servers.data = "http://fhir3.healthintersections.com.au/open/";
-        defaultConfig.servers.conformance = "http://fhir3.healthintersections.com.au/open/";
+        defaultConfig.baseSpecUrl = "http://hl7.org/fhir/";     //the base for spec documentation
+        defaultConfig.logLevel = 1;     //0 = no logging, 1 = log to console
+        defaultConfig.servers.terminology = "http://fhir2.healthintersections.com.au/open/";
+        //defaultConfig.servers.terminology = "http://fhir.hl7.org.nz/baseDstu2/";
+        defaultConfig.servers.data = "http://fhir2.healthintersections.com.au/open/";
+        defaultConfig.servers.conformance = "http://fhir2.healthintersections.com.au/open/";
 
-        //always use Grahame as the terminology server (for now)
+
+        //default to Grahames DSTU2 server when data and conformance servers are inconsistent...
+        defaultConfig.defaultTerminologyServerUrl = "http://fhir2.healthintersections.com.au/open/";
+
         defaultConfig.terminologyServers = [];
+        defaultConfig.terminologyServers.push({version:2,url:"http://fhir.hl7.org.nz/baseDstu2/"});
         defaultConfig.terminologyServers.push({version:2,url:"http://fhir2.healthintersections.com.au/open/"});
         defaultConfig.terminologyServers.push({version:3,url:"http://fhir3.healthintersections.com.au/open/"});
 
+
         defaultConfig.allKnownServers = [];
-
-
         defaultConfig.allKnownServers.push({name:"Grahame STU3 server",url:"http://fhir3.healthintersections.com.au/open/",version:3,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://fhir2.healthintersections.com.au/open/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"HealthConnex (2.0)",url:"http://sqlonfhir-dstu2.azurewebsites.net/fhir/",version:2});
         defaultConfig.allKnownServers.push({name:"HAPI server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2});
-        defaultConfig.allKnownServers.push({name:"Local server",url:"http://localhost:8080/baseDstu2/",version:2});
+        defaultConfig.allKnownServers.push({name:"HL7 New Zealand",url:"http://fhir.hl7.org.nz/baseDstu2/",version:2});
+
+
 
         //config.allKnownServers.push({name:"Spark Server",url:"http://spark-dstu2.furore.com/fhir/"});
 
@@ -40,7 +48,8 @@ angular.module("sampleApp")
         return {
             checkConsistency : function() {
                 //check that all the servers are on the same version
-                //
+                var rtn = {consistent:true,terminologyServers:[]};       //return an object
+
                 var tmp = [];
                 //first get the descriptive objects for the servers...
                 var config = $localStorage.config;
@@ -51,21 +60,28 @@ angular.module("sampleApp")
 
                 //now see if they are all the same version - will need a loop if more than 2!
                 if (tmp[0].version !== tmp[1].version) {
-                    return false;
+                    //if they're not the same, then return all the servers so the user can choose
+                    rtn.consistent = false;
+                    rtn.terminologyServers = config.terminologyServers;
+
+                    //select the default terminology server
+                    $localStorage.config.terminology = config.defaultTerminologyServerUrl;
+
+                    return rtn;
                 }
 
                 //now make sure the terminology server is the correct version..
                 //todo - need to think about how to handle where there is more than one terminology server, or Grahames is down...
-                var version = tmp[0].version;
+                var version = tmp[0].version;       //the FHIR version
                 for (var i=0; i <config.terminologyServers.length;i++) {
                     var s = config.terminologyServers[i];
                     console.log(version,s)
                     if (s.version == version) {
                         $localStorage.config.terminology = s.url;
-                        console.log('setting  terminology server to '+s.url)
+                        config.log('setting  terminology server to '+s.url,'appConfig:config')
                     }
                 }
-                return true;
+                return rtn;
             },
             config : function() {
 
@@ -73,7 +89,21 @@ angular.module("sampleApp")
                     $localStorage.config = defaultConfig;
                 }
 
-                return $localStorage.config
+                var config = $localStorage.config;
+
+                //add a logging function...
+                if (config.logLevel !== 0) {
+                    config.log = function(display,location) {
+                        console.log(location + ":" + display);
+                    }
+                } else {
+                    //a disabled log;
+                    config.log = function() {}
+                }
+                
+                
+                
+                return config;
 
             },
             getAllServers : function() {

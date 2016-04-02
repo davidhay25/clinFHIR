@@ -1042,6 +1042,33 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         removeParkedResource : function(inx) {
             $localStorage.parkedResources.splice(inx,1)
+        },
+        getConformanceResource :function(baseUrl) {
+            var url = baseUrl + "metadata";
+            return $http.get(url,{timeout:10000});
+        },
+        executeQuery : function(verb,qry) {
+            switch (verb) {
+                case 'GET' :
+                    return $http.get(qry);
+            }
+        },
+        addToQueryHistory : function(hx) {
+            $localStorage.queryHistory = $localStorage.queryHistory || []
+
+            var duplicate = false;
+            for (var i=0; i < $localStorage.queryHistory.length; i++) {
+                var item = $localStorage.queryHistory[i];
+                if (item.verb == hx.verb && item.type == hx.type && item.parameters == hx.parameters && item.id == hx.id) {
+                    duplicate = true;
+                    break;
+                }
+            }
+
+            if (! duplicate) {
+                $localStorage.queryHistory.push(hx);
+            }
+            return $localStorage.queryHistory;
         }
 
     }

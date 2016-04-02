@@ -90,7 +90,6 @@ angular.module("sampleApp")
     });
 
 
-
     //clears the current resource being buils and re-displays the front screen 
     $scope.cancelNewResource = function(){
 
@@ -108,7 +107,12 @@ angular.module("sampleApp")
 
 
     };
-            
+
+    //show the server query page
+    $scope.showQuery = function(){
+        $scope.displayMode="query"
+    };
+
     //save the current patient in the config services - so other controllers/components can access it...
     if ($scope.doDefault) {
         $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/carePlan";
@@ -995,26 +999,93 @@ angular.module("sampleApp")
         }
         
     })
-    .controller('frontCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,ResourceUtilsSvc){
-        //the controller for the front page...
-        var config = $localStorage.config;
-        $scope.input = {};
-        config.allKnownServers.forEach(function(svr){
-            if (config.servers.data == svr.url) {$scope.input.dataServer = svr}
-            if (config.servers.conformance == svr.url) {$scope.input.conformanceServer = svr}
+    .controller('frontCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,$interval){
+        //
 
+        $scope.input = {};
+        var config;
+        setup();
+
+        //called when the config is reset...
+        $rootScope.$on('resetConfigObject',function(event) {
+            //$scope.config = config;
+            console.log($localStorage.config)
+            setup();
+
+
+           
         });
+
+        function setup() {
+            config = $localStorage.config;
+
+            config.allKnownServers.forEach(function(svr){
+                //console.log(svr)
+                if (config.servers.data == svr.url) {
+                    $scope.input.dataServer = svr;}
+                if (config.servers.conformance == svr.url) {$scope.input.conformanceServer = svr}
+
+            });
+
+        }
+
+
+        //tests that the server is available by retrieving the conformance resource
+        $scope.testServer = function(server,type) {
+            //console.log(server,type);
+            $scope.message = 'Reading the conformance resource from '+ server.url + ' Please wait...';
+
+
+            //Display a countdown timer so the user knows something is happenning
+            var stop;
+            $scope.elapsed= 10;     //this timeout is set in the resourceCreatorSvc.getConformanceResource as well...
+            timer = function() {
+
+                if ( angular.isDefined(stop) ) return;      //only have 1 at a time...
+
+                stop = $interval(function() {
+                    $scope.elapsed --;
+                    //$scope.$apply();
+                    console.log($scope.elapsed);
+                    if ($scope.elapsed < 0) {
+                        //stopTimer();
+                        $interval.cancel(stop);
+                    }
+                }, 1000);
+            };
+
+            timer();        //Start the timer...
+
+
+            $scope.input['test'+type] = {loading : true};
+            
+            resourceCreatorSvc.getConformanceResource(server.url).then(
+                function(data) {
+                    $scope.input['test'+type] = {ok:true}
+                },
+                function(err) {
+                    $scope.input['test'+type] = {fail:true}
+                }
+            ).then(function(){
+                delete $scope.message;
+                $interval.cancel(stop);
+            });
+
+        };
         
         //when the user selects a different server...
         $scope.selectServer = function(serverType,server) {
             delete $scope.error;
+            delete $scope.input.testconformance;        //the test confrmance state
+            delete $scope.input.testdata;
+            
             config.servers[serverType] = server.url;
             $localStorage.config = config;
             $rootScope.$emit('configUpdated')
             $scope.recent.patient = appConfigSvc.getRecentPatient();
             $scope.recent.profile = appConfigSvc.getRecentProfile();
             
-            if (! appConfigSvc.checkConsistency()) {
+            if (! appConfigSvc.checkConsistency().consistent) {
                 $scope.error = 'Warning! These servers are on a different FHIR version. Wierd things will happen...';
             }
             
@@ -1041,7 +1112,6 @@ angular.module("sampleApp")
 
 
         };
-
 
         //when the user wants to locate an existing patient in the data server
         $scope.findPatient = function(){
@@ -1090,6 +1160,135 @@ angular.module("sampleApp")
         }
 
 
+})
+    .controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,$interval){
         
+        $scope.config = $localStorage.config;
+        $scope.operationsUrl = $scope.config.baseSpecUrl + "operations.html";
+        $scope.input = {};
+        $scope.queryHistory = $localStorage.queryHistory;
+        $scope.makeUrl = function(type) {
+            return  $scope.config.baseSpecUrl + type;
+        }
+        
+        setDefaultInput();
+       // $scope.input.server = config.allKnownServers[0]
 
-});
+
+        $localStorage.queryHistory = $localStorage.queryHistory || [];
+
+        
+        $scope.selectServer = function(server) {
+            $scope.input.parameters = "";
+
+            delete $scope.response;
+            delete $scope.err;
+
+            
+            delete $scope.input.selectedType;
+
+            $scope.server =server;
+            $scope.buildQuery();
+                console.log(server);
+        };
+
+        $scope.buildQuery = function() {
+
+            var qry = '';//$scope.server.url;
+
+            if ($scope.input.selectedType){
+                qry += $scope.input.selectedType;
+            }
+
+            if ($scope.input.id) {
+                qry += "/"+$scope.input.id;
+            }
+
+            if ($scope.input.parameters) {
+                qry += "?"+$scope.input.parameters;
+            }
+
+
+            $scope.anonQuery = qry;     //the query, irrespective of the server...
+            $scope.query = $scope.server.url + qry;     //the query againts the current server...
+
+        };
+
+        function setDefaultInput() {
+            var type = angular.copy($scope.input.selectedType);
+            var server = angular.copy($scope.input.server);
+            $scope.input = {};
+            $scope.input.verb = 'GET';
+            $scope.input.category="parameters";
+            if (type) {
+                $scope.input.selectedType = type;       //remember the type
+            }
+            $scope.input.server =server;
+        }
+        
+        $scope.selectFromHistory = function(hx){
+            if ($scope.server) {
+
+                delete $scope.conformance;
+                $scope.input.selectedType = hx.type;
+                $scope.input.parameters = hx.parameters;
+                $scope.input.verb = hx.verb;
+                $scope.buildQuery();
+            }
+
+        };
+
+        $scope.showConformance = function(){
+            if ($scope.server) {
+                $scope.waiting = true;
+                resourceCreatorSvc.getConformanceResource($scope.server.url).then(
+                    function (data) {
+                        //console.log(data.data)
+                        $scope.conformance = data.data
+                    },function (err) {
+                        alert('Error loading conformance resource:'+angular.toJson(err));
+                    }
+                ).finally(function(){
+                    $scope.waiting = false;
+                })
+            }
+        };
+
+        $scope.showType = function(type){
+            $scope.selectedType = type
+            console.log(type)
+        };
+
+        $scope.doit = function() {
+            delete $scope.response;
+            delete $scope.err;
+            $scope.waiting = true;
+            resourceCreatorSvc.executeQuery('GET',$scope.query).then(
+                function(data){
+                    console.log(data);
+                    $scope.response = data;
+                    //$scope.responseHeaders = data.headers();
+
+                    var hx = {
+                        anonQuery:$scope.anonQuery,
+                        type:$scope.input.selectedType,
+                        parameters:$scope.input.parameters,
+                        id:$scope.input.id,
+                        verb:$scope.input.verb};
+                   
+                    
+                    $scope.queryHistory = resourceCreatorSvc.addToQueryHistory(hx)
+
+                    
+                },
+                function(err) {
+                    $scope.err = err;
+
+                }
+            ).finally(function(){
+                $scope.waiting = false;
+                setDefaultInput();
+            })
+        }
+        
+    });

@@ -1,36 +1,29 @@
-<strong>Front Page</strong>
 
 <style>
     .myLink {
         padding-top: 8px;
     }
-
+    .pass {
+        color:green;
+    }
+    .fail {
+        color:red;
+    }
 </style>
 
 
-<!--
-<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-
-    <div class="container-fluid">
-        <div class="col-md-1">
-            <a class="navbar-brand" href="#">Select</a>
-
-        </div>
-
-        <div class="col-md-4">
-        </div>
-    </div>
-</nav>
-
--->
 
 <div class="row">
-    <div class="col-md-2 col-sm-2">
-    </div>
+
 
     <div class="col-md-8 col-sm-8">
         <uib-alert ng-show="error" type="danger">
             {{error}}
+        </uib-alert>
+
+        <uib-alert ng-show="message" type="info">
+            {{message}}
+            {{elapsed}}
         </uib-alert>
     </div>
 </div>
@@ -40,8 +33,7 @@
 
 <div class="row">
 
-    <div class="col-md-2 col-sm-2">
-    </div>
+
 
     <div class="col-md-4 col-sm-4">
 
@@ -55,12 +47,29 @@
         </div>
 
 
-        <select class="form-control"
-                ng-change="selectServer('data',input.dataServer)"
-                ng-options="value.name for value in config.allKnownServers "
-                ng-model="input.dataServer">
 
-        </select>
+        <div class="row">
+            <div class="col-md-10 col-sm-10">
+                <select class="form-control"
+                        ng-change="selectServer('data',input.dataServer)"
+                        ng-options="value.name for value in config.allKnownServers track by value.name"
+                        ng-model="input.dataServer">
+
+                </select>
+            </div>
+
+            <div class="col-md-2 col-sm-2">
+                <button ng-hide = "input.testdata.loading || input.testdata" class="btn btn-default pull-right"
+                        ng-click="testServer(input.dataServer,'data')">Test</button>
+                <i ng-show="input.testdata.ok" class="glyphicon glyphicon-ok pass"></i>
+                <i ng-show="input.testdata.fail" class="glyphicon glyphicon-remove fail"></i>
+                <img ng-show="input.testdata.loading" src="css/ajax_loader_blue_32.gif"/>
+
+            </div>
+
+        </div>
+
+
         <br />
 
         <div class="list-group">
@@ -86,12 +95,27 @@
             </div>
         </div>
 
-        <select class="form-control"
-                ng-change="selectServer('conformance',input.conformanceServer)"
-                ng-options="value.name for value in config.allKnownServers "
-                ng-model="input.conformanceServer">
+        <div class="row">
+            <div class="col-md-10 col-sm-10">
+                <select class="form-control"
+                        ng-change="selectServer('conformance',input.conformanceServer)"
+                        ng-options="value.name for value in config.allKnownServers track by value.name"
+                        ng-model="input.conformanceServer">
 
-        </select>
+                </select>
+            </div>
+            <div class="col-md-2 col-sm-2">
+                <button  ng-hide = "input.testconformance.loading || input.testconformance" class="btn btn-default pull-right"
+                         ng-click="testServer(input.conformanceServer,'conformance')">Test</button>
+                <i ng-show="input.testconformance.ok" class="glyphicon glyphicon-ok pass"></i>
+                <i ng-show="input.testconformance.fail" class="glyphicon glyphicon-remove fail"></i>
+                <img ng-show="input.testconformance.loading" src="css/ajax_loader_blue_32.gif"/>
+
+            </div>
+        </div>
+
+
+
         <br />
 
         <div class="list-group ">
@@ -104,6 +128,13 @@
 
             </a>
         </div>
+
+    </div>
+
+    <div class="col-md-3 col-sm-3">
+        <!--
+         <h4>Terminology Server</h4>
+        -->
 
     </div>
 
