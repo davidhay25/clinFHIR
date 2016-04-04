@@ -1161,11 +1161,12 @@ angular.module("sampleApp")
 
 
 })
-    .controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,$interval){
+    .controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,GetDataFromServer){
         
         $scope.config = $localStorage.config;
         $scope.operationsUrl = $scope.config.baseSpecUrl + "operations.html";
         $scope.input = {};
+
         $scope.queryHistory = $localStorage.queryHistory;
         $scope.makeUrl = function(type) {
             return  $scope.config.baseSpecUrl + type;
@@ -1177,10 +1178,82 @@ angular.module("sampleApp")
 
         $localStorage.queryHistory = $localStorage.queryHistory || [];
 
-        
+
+
+        //this will attempt to hide the 'children' of known datatypes - like CodeableConcept
+        $scope.showProfile = function(uri) {
+            delete $scope.selectedProfile;
+            if (uri.substr(0,4) !== 'http') {
+                //this is a relative reference. Assume that the profile is on the current conformance server
+                uri = $scope.config.servers.conformance + uri;
+
+            }
+
+            //todo some profiles seem to have a url like http://hl7.org/fhir/profiles/MedicationDispense
+            uri = uri.replace('/profiles/','/StructureDefinition/');
+
+            console.log(uri)
+
+            var url = GetDataFromServer.findConformanceResourceByUri(uri).then(
+                function(profile) {
+                    console.log(profile);
+                    var arDisabled = [];          //this is a list of disabled items...
+                    var lst = [];           //this will be a list of elements in the profile to show.
+                    var dataTypes = ['CodeableConcept','Identifier','Period','Quantity','Reference']
+                    profile.snapshot.element.forEach(function (item) {
+                        var el = {path:item.path};
+                        var path = item.path;
+
+                        //if max is 0, this path - and all children - are disabled in this profile...
+                        if (item.max == 0) {arDisabled.push(path)};
+
+
+
+
+
+                        //now see if this path has been disabled. There will be more elegant ways of doing this
+                        var disabled = false;
+                        for (var i=0; i< arDisabled.length; i++) {
+                            var d = arDisabled[i];
+                            if (path.substr(0,d.length) == d) {
+                                disabled = true;
+                                break;
+                            }
+                        }
+
+
+                        if (! disabled) {
+                            lst.push(item);
+                        }
+
+
+                    //if the type is a recognized datatype, then hide all child nodes todo - won't show profiled datatyoes
+                        if (item.type) {
+                            item.type.forEach(function(type){
+                                if (dataTypes.indexOf(type.code) > -1){
+                                    arDisabled.push(path)
+                                }
+                            });
+                        }
+
+
+
+                    });
+                    console.log(arDisabled)
+                    $scope.filteredProfile = lst;
+                    $scope.selectedProfile = profile;
+                },
+                function (err) {
+                    alert(angular.toJson(err));
+                }
+            );      //the url of the profile (SD) on the conformance server
+
+
+        };
+
         $scope.selectServer = function(server) {
             $scope.input.parameters = "";
-
+            delete $scope.filteredProfile
             delete $scope.response;
             delete $scope.err;
 
@@ -1218,6 +1291,7 @@ angular.module("sampleApp")
             var type = angular.copy($scope.input.selectedType);
             var server = angular.copy($scope.input.server);
             $scope.input = {};
+            $scope.input.localMode = 'serverquery'
             $scope.input.verb = 'GET';
             $scope.input.category="parameters";
             if (type) {
@@ -1253,9 +1327,29 @@ angular.module("sampleApp")
                 })
             }
         };
-
+        
+        
+        //todo - allow the conformance to be selected - maybe a separate function...
+        $scope.loadConformance = function() {
+            $scope.waiting = true;
+            var url = "http://fhir.hl7.org.nz/baseDstu2/Conformance/ohConformance"
+            resourceCreatorSvc.getConformanceResourceFromUrl(url).then(
+                function (data) {
+                    //console.log(data.data)
+                    $scope.conformance = data.data
+                },function (err) {
+                    alert('Error loading conformance resource:'+angular.toJson(err));
+                }
+            ).finally(function(){
+                $scope.waiting = false;
+            })
+        }
+        
+        
+        //whne
         $scope.showType = function(type){
-            $scope.selectedType = type
+            $scope.selectedType = type;
+            delete $scope.filteredProfile
             console.log(type)
         };
 
@@ -1273,6 +1367,7 @@ angular.module("sampleApp")
                         anonQuery:$scope.anonQuery,
                         type:$scope.input.selectedType,
                         parameters:$scope.input.parameters,
+                        server : $scope.server,
                         id:$scope.input.id,
                         verb:$scope.input.verb};
                    

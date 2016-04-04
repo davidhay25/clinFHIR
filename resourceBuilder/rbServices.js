@@ -101,6 +101,7 @@ angular.module("sampleApp").
         },
         getConformanceResourceByUrl : function(url) {
             //find a StructureDefinition based on its Url. ie we assume that the url is pointing to where the SD is located...
+            var config = appConfigSvc.config();
             config.log(qry,'getConformanceResourceByUrl');
             var deferred = $q.defer();
             $localStorage.profileCacheUrl = $localStorage.profileCacheUrl || {};

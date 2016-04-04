@@ -1,12 +1,25 @@
 
-
+<style>
+    .thisServer{
+        color: blue;
+        font-weight: bold;
+    }
+</style>
 
 
 <div class="row">
     <div class="col-md-8 col-sm-8">
-        <h4>Server Query</h4>
+        <h5>
+            <input type="radio" ng-model="input.localMode" value="serverquery"> Server Query
+
+            <input type="radio" ng-model="input.localMode" value="showconformance"> Load Conformance
+        </h5>
+
+
+
     </div>
     <div class="col-md-4 col-sm-4">
+        {{input.localMode}}
         <div class="pull-right" ng-show="waiting">
             <img src="css/ajax_loader_blue_32.gif"/>
         </div>
@@ -15,55 +28,53 @@
 
 
 
-<!--
-<div class="row">
-    <div class="col-md-4 col-sm-4">
-        <select class="form-control"
-                ng-change="selectServer(input.server)"
-                ng-options="value.name for value in config.allKnownServers track by value.name"
-                ng-model="input.server">
 
-        </select>
-    </div>
-    <div class="col-md-4 col-sm-4">
-    </div>
-</div>
-
--->
 
 
 
 <div class="row">
     <div class="col-md-4 col-sm-4">
 
-        <div class="row">
-            <div class="col-md-8 col-sm-8">
-                <select class="form-control"
-                        ng-change="selectServer(input.server)"
-                        ng-options="value.name for value in config.allKnownServers track by value.name"
-                        ng-model="input.server">
+        <div ng-show="input.localMode == 'showconformance'">
+            <button ng-hide="input.server"
+                class="btn btn-default pull-right" ng-click = "loadConformance()">Load Conformance</button>
+        </div>
 
-                </select>
+
+        <div ng-show="input.localMode == 'serverquery'">
+            <div class="row">
+                <div class="col-md-8 col-sm-8">
+                    <select class="form-control"
+                            ng-change="selectServer(input.server)"
+                            ng-options="value.name for value in config.allKnownServers track by value.name"
+                            ng-model="input.server">
+
+                    </select>
+                </div>
+                <div class="col-md-4 col-sm-4">
+                    <button ng-show="input.server"
+                            class="btn btn-default pull-right" ng-click = "showConformance()">Conformance</button>
+
+
+                </div>
             </div>
-            <div class="col-md-4 col-sm-4">
-                <button ng-show="input.server"
-                        class="btn btn-default pull-right" ng-click = "showConformance()">Conformance</button>
+
+
+            <h4>Previous Queries</h4>
+
+            <div class="list-group">
+                <a href="#" class="list-group-item"
+                   ng-repeat="hx in queryHistory"
+                   ng-model="input.hx" ng-click = "selectFromHistory(hx)">
+                    <div ng-class="{thisServer:hx.server.url == server.url}">{{hx.anonQuery}}</div>
+
+
+
+                </a>
             </div>
         </div>
 
 
-        <h4>Previous Queries</h4>
-
-        <div class="list-group">
-            <a href="#" class="list-group-item"
-               ng-repeat="hx in queryHistory"
-               ng-model="input.hx" ng-click = "selectFromHistory(hx)">
-                {{hx.anonQuery}}
-
-
-
-            </a>
-        </div>
 
     </div>
 
@@ -95,7 +106,7 @@
 
 
 
-        <div ng-show="server">
+        <div ng-show="server && input.localMode == 'serverquery'">
             <div class="row">
                 <div class="col-md-2 col-sm-2">Verb</div>
                 <div class="col-md-3 col-sm-3">Type</div>

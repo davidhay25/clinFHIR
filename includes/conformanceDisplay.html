@@ -47,10 +47,30 @@
             </div>
         </div>
 
+<!--
+        <div class="row" ng-show="selectedType.profile">
+            <div class="col-md-3">
+                Profile:
+            </div>
+            <div class="col-md-8">
+                <a href="#" ng-click="showProfile(selectedType.profile.reference)">{{selectedType.profile.reference}}</a>
+
+            </div>
+
+        </div>
+-->
+
+
+
         <uib-tabset class="myScroll" >
             <uib-tab heading="Interactions" >
                 <br/>
-                <p>Describes the interactions supported by the server </p>
+
+
+
+
+
+                <!--<p>Describes the interactions supported by the server </p>-->
                 <table class="table table-bordered">
                     <tr><th>Code</th><th>Documentation</th></tr>
                     <tr ng-repeat="int in selectedType.interaction ">
@@ -103,6 +123,20 @@
             <uib-tab heading="Json">
                 <br />
                 <pre>{{selectedType | json}}</pre>
+            </uib-tab>
+            <uib-tab heading="Profile" ng-show="selectedType.profile">
+
+                <a class="pull-right" href="#" ng-click="showProfile(selectedType.profile.reference)">{{selectedType.profile.reference}}</a>
+                <table>
+                    <tr><th>Path</th><th>DataType</th></tr>
+                    <tr ng-repeat="element in filteredProfile">
+                        <td>{{element.path}}</td>
+
+                        <td>
+                            <div ng-repeat="item in element.type">{{item.code}}</div>
+                        </td>
+                    </tr>
+                </table>
             </uib-tab>
         </uib-tabset>
 

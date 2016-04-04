@@ -130,12 +130,7 @@
 
 
 
-                    <div ng-hide="displayMode == 'front'">
-                        <span class="navbar-text" uib-dropdown  popover-placement="left" popover-trigger='mouseenter'
-                              uib-popover="Front screen">
-                                <a href="#" ng-click="displayMode = 'front'">Front</a>
-                            </span>
-                    </div>
+
 
 
                     <form ng-show="displayMode == 'new'" class="navbar-form navbar-right">
@@ -179,14 +174,19 @@
 
 
 
-                    <form ng-hide="displayMode == 'new'" class="navbar-form navbar-right">
+                    <form ng-hide="displayMode == 'new' || displayMode == 'query' " class="navbar-form navbar-right">
                         <div ng-show="appConfigSvc.getCurrentPatient() && resourceCreatorSvc.getCurrentProfile()">
                             <button class="btn btn-info pull-right" ng-click="displayMode = 'new'">New Resource</button>
-
                         </div>
                     </form>
 
 
+                    <div ng-hide="displayMode == 'front' || displayMode == 'new'" class="navbar-form navbar-right">
+                        <span class="navbar-text" popover-placement="left" popover-trigger='mouseenter'
+                              uib-popover="Load front screen">
+                                <a href="#" ng-click="displayMode = 'front'">Front</a>
+                            </span>
+                    </div>
 
                     <div class="pull-right navbar-form" ng-show="waiting">
                         <img src="css/ajax_loader_blue_32.gif"/>

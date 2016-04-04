@@ -39,7 +39,7 @@
 
         <div class="row">
             <div class="col-md-8 col-sm-8">
-                <h4>Recent Patients</h4>
+                <h4>My recent Patients</h4>
             </div>
             <div class="col-md-4 col-sm-4">
                 <a href="#" class="pull-right myLink" ng-click="findPatient()">Find Patient</a>
@@ -88,7 +88,7 @@
     <div class="col-md-4 col-sm-4">
         <div class="row">
             <div class="col-md-8 col-sm-8">
-                <h4>Recent Profiles</h4>
+                <h4>My recent Profiles</h4>
             </div>
             <div class="col-md-4 col-sm-4">
                 <a href="#" class="pull-right myLink" ng-click="findProfile()">Find Profile</a>
@@ -131,10 +131,18 @@
 
     </div>
 
-    <div class="col-md-3 col-sm-3">
-        <!--
-         <h4>Terminology Server</h4>
-        -->
+    <div class="col-md-4 col-sm-4">
+
+        <h4>System Configuration</h4>
+
+        <h5>Terminology Server</h5>
+        <div>{{config.servers.terminology}}</div>
+
+
+
+
+
+
 
     </div>
 

@@ -697,7 +697,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         getCurrentProfile : function(){
             return this.currentProfile;
         },
-        getProfile : function(type){
+        getProfileDEP : function(type){
                 var deferred = $q.defer();
                 var that=this;
 
@@ -1045,6 +1045,10 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         getConformanceResource :function(baseUrl) {
             var url = baseUrl + "metadata";
+            return $http.get(url,{timeout:10000});
+        },
+        getConformanceResourceFromUrl :function(url) {
+           
             return $http.get(url,{timeout:10000});
         },
         executeQuery : function(verb,qry) {
