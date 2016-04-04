@@ -1294,6 +1294,7 @@ angular.module("sampleApp")
             $scope.input.localMode = 'serverquery'
             $scope.input.verb = 'GET';
             $scope.input.category="parameters";
+            $scope.input.loadConformanceId= "ohConformance";
             if (type) {
                 $scope.input.selectedType = type;       //remember the type
             }
@@ -1327,12 +1328,22 @@ angular.module("sampleApp")
                 })
             }
         };
+
+        $scope.removeConformance = function(){
+            delete  $scope.conformance;
+        };
         
         
         //todo - allow the conformance to be selected - maybe a separate function...
         $scope.loadConformance = function() {
             $scope.waiting = true;
-            var url = "http://fhir.hl7.org.nz/baseDstu2/Conformance/ohConformance"
+            var url = "http://fhir.hl7.org.nz/baseDstu2/Conformance/ohConformance";
+            if ($scope.server) {
+                url = $scope.server.url + "Conformance/"+$scope.input.loadConformanceId;
+            }
+
+            console.log(url);
+
             resourceCreatorSvc.getConformanceResourceFromUrl(url).then(
                 function (data) {
                     //console.log(data.data)

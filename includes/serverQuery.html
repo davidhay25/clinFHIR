@@ -19,7 +19,7 @@
 
     </div>
     <div class="col-md-4 col-sm-4">
-        {{input.localMode}}
+       
         <div class="pull-right" ng-show="waiting">
             <img src="css/ajax_loader_blue_32.gif"/>
         </div>
@@ -27,38 +27,60 @@
 </div>
 
 
-
-
-
-
-
 <div class="row">
     <div class="col-md-4 col-sm-4">
 
-        <div ng-show="input.localMode == 'showconformance'">
-            <button ng-hide="input.server"
-                class="btn btn-default pull-right" ng-click = "loadConformance()">Load Conformance</button>
+
+
+
+
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <select class="form-control"
+                        ng-change="selectServer(input.server)"
+                        ng-options="value.name for value in config.allKnownServers track by value.name"
+                        ng-model="input.server">
+
+                </select>
+            </div>
+            <div class="col-md-4 col-sm-4">
+                <button ng-show="input.server && input.localMode == 'serverquery'"
+                        class="btn btn-default pull-right" ng-click = "showConformance()">Conformance</button>
+                <div>
+                    <button ng-show="input.server && input.localMode == 'serverquery' && conformance"
+                            class="btn btn-link pull-right" ng-click = "removeConformance()">Query</button>
+                </div>
+
+
+
+            </div>
         </div>
 
-
-        <div ng-show="input.localMode == 'serverquery'">
+        <div ng-show="input.localMode == 'showconformance'">
+            <br />
             <div class="row">
-                <div class="col-md-8 col-sm-8">
-                    <select class="form-control"
-                            ng-change="selectServer(input.server)"
-                            ng-options="value.name for value in config.allKnownServers track by value.name"
-                            ng-model="input.server">
-
-                    </select>
+                <div class="col-md-1 col-sm-1">
+                    Id
                 </div>
                 <div class="col-md-4 col-sm-4">
-                    <button ng-show="input.server"
-                            class="btn btn-default pull-right" ng-click = "showConformance()">Conformance</button>
-
-
+                    <input class="form-control" type="text" ng-model="input.loadConformanceId"/>
+                </div>
+                <div class="col-md-4 col-sm-4">
+                    <button class="btn btn-default" ng-click = "loadConformance()">Load Conformance</button>
                 </div>
             </div>
 
+
+
+        </div>
+
+
+
+
+
+
+        <div ng-show="input.localMode == 'serverquery' && input.server">
 
             <h4>Previous Queries</h4>
 
@@ -172,7 +194,7 @@
             </div>
         </div>
 
-        <div class="row" ng-show="response">
+        <div class="row" ng-show="response && input.localMode == 'serverquery'">
             <div class="col-md-12 col-sm-12">
                 <div><strong>StatusCode:{{response.status}}</strong></div>
                 <pre>{{response.data | json}}</pre>
