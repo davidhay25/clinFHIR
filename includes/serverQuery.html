@@ -8,7 +8,7 @@
 
 
 <div class="row">
-    <div class="col-md-8 col-sm-8">
+    <div class="col-md-4 col-sm-4">
         <h5>
             <input type="radio" ng-model="input.localMode" value="serverquery"> Server Query
 
@@ -18,8 +18,28 @@
 
 
     </div>
+
     <div class="col-md-4 col-sm-4">
-       
+        <select class="form-control"
+                ng-change="selectServer(input.server)"
+                ng-options="value.name for value in config.allKnownServers track by value.name"
+                ng-model="input.server">
+
+        </select>
+    </div>
+
+    <div class="col-md-3 col-sm-3">
+    <button ng-show="input.server && input.localMode == 'serverquery'"
+            class="btn btn-primary pull-right" ng-click = "showConformance()">Conformance</button>
+    <div>
+        <button ng-show="input.server && input.localMode == 'serverquery' && conformance"
+                class="btn btn-link pull-right" ng-click = "removeConformance()">Query</button>
+    </div>
+</div>
+
+
+    <div class="col-md-1 col-sm-1">
+
         <div class="pull-right" ng-show="waiting">
             <img src="css/ajax_loader_blue_32.gif"/>
         </div>
@@ -28,35 +48,7 @@
 
 
 <div class="row">
-    <div class="col-md-4 col-sm-4">
-
-
-
-
-
-
-        <div class="row">
-            <div class="col-md-8 col-sm-8">
-                <select class="form-control"
-                        ng-change="selectServer(input.server)"
-                        ng-options="value.name for value in config.allKnownServers track by value.name"
-                        ng-model="input.server">
-
-                </select>
-            </div>
-            <div class="col-md-4 col-sm-4">
-                <button ng-show="input.server && input.localMode == 'serverquery'"
-                        class="btn btn-default pull-right" ng-click = "showConformance()">Conformance</button>
-                <div>
-                    <button ng-show="input.server && input.localMode == 'serverquery' && conformance"
-                            class="btn btn-link pull-right" ng-click = "removeConformance()">Query</button>
-                </div>
-
-
-
-            </div>
-        </div>
-
+    <div class="col-md-12 col-sm-12">
         <div ng-show="input.localMode == 'showconformance'">
             <br />
             <div class="row">
@@ -67,20 +59,32 @@
                     <input class="form-control" type="text" ng-model="input.loadConformanceId"/>
                 </div>
                 <div class="col-md-4 col-sm-4">
-                    <button class="btn btn-default" ng-click = "loadConformance()">Load Conformance</button>
+                    <button class="btn btn-primary" ng-click = "loadConformance()">Load Conformance</button>
                 </div>
             </div>
 
 
 
         </div>
+    </div>
+</div>
 
 
+<div class="row">
+    <div ng-class="{'col-md-4 col-sm-4':!conformance}">
 
 
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+
+            </div>
+            <div class="col-md-4 col-sm-4">
 
 
-        <div ng-show="input.localMode == 'serverquery' && input.server">
+            </div>
+        </div>
+
+        <div ng-show="input.localMode == 'serverquery' && input.server && ! conformance">
 
             <h4>Previous Queries</h4>
 
@@ -100,7 +104,7 @@
 
     </div>
 
-    <div class="col-md-8 col-sm-8">
+    <div ng-class="{'col-md-8 col-sm-8':!conformance}">
 
         <div ng-show="conformance">
             <uib-tabset>
@@ -110,7 +114,7 @@
                 </uib-tab>
 
                 <uib-tab heading="REST Operations">
-
+                    <br />
                     <ng-include src="'/includes/operationsDisplay.html'"></ng-include>
 
                 </uib-tab>

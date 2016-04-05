@@ -1073,6 +1073,128 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 $localStorage.queryHistory.push(hx);
             }
             return $localStorage.queryHistory;
+        },
+        getProfileDisplay : function(uri) {
+            //return a collection of elements suitable for a prƒofile summary display..
+            var deferred = $q.defer();
+
+
+
+
+
+            //todo some profiles seem to have a url like http://hl7.org/fhir/profiles/MedicationDispense
+            uri = uri.replace('/profiles/','/StructureDefinition/');
+
+            console.log(uri)
+
+            var url = GetDataFromServer.findConformanceResourceByUri(uri).then(
+                function(profile) {
+                    console.log(profile);
+                    var arDisabled = [];          //this is a list of disabled items...
+                    var lst = [];           //this will be a list of elements in the profile to show.
+                    var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained'];
+                    var dataTypes = ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference'];
+                    profile.snapshot.element.forEach(function (item) {
+                        item.myMeta = {};
+
+                        var el = {path: item.path};
+                        var path = item.path;
+
+                        //if max is 0, this path - and all children - are disabled in this profile...
+                        if (item.max == 0) {
+                            arDisabled.push(path)
+                        }                        ;
+
+
+                        //now see if this path has been disabled. There will be more elegant ways of doing this
+                        var disabled = false;
+                        for (var i = 0; i < arDisabled.length; i++) {
+                            var d = arDisabled[i];
+                            if (path.substr(0, d.length) == d) {
+                                disabled = true;
+                                break;
+                            }
+                        }
+
+                        var ar = path.split('.');
+                        if (ar.length == 1) {
+                            disabled = true;
+                        }      //don't include the domain resource
+
+                        //standard element names like 'text' or 'language'
+                        if (ar.length == 2 && elementsToDisable.indexOf(ar[1]) > -1) {
+                            disabled = true;
+                        }
+
+
+                        //hide the extension. Will need to figure out how to display 'real' extensions
+                        if (ar[ar.length - 1] == 'modifierExtension') {
+                            disabled = true;
+                        }
+                        if (!disabled && ar[ar.length - 1] == 'extension') {
+                            disabled = true;    //by default extensions are disabled...
+                            //if the extension has a profile type then include it, otherwise not...
+                            if (item.type) {
+                                item.type.forEach(function (it) {
+                                    if (it.code == 'Extension' && it.profile) {
+                                        disabled = false;
+                                        //load the extension definition to
+
+
+                                    }
+                                })
+                            }
+
+
+                        }
+
+                        ar.shift();     //removes the type name
+
+                        item.myMeta.path = ar.join('. ');     //create a path that doesn't include the type (so is shorter)
+
+
+                        //make references look nicer. todo - what about references to profiles?
+                        if (item.type) {
+                            item.type.forEach(function (it) {
+                                if (it.code == 'Reference') {
+                                    if (it.profile) {
+                                        var p = it.profile[0];      //todo  <<<<<<<<<<<<<<<<<<
+                                        var ar = p.split('/');
+                                        it.code = '->' + ar[ar.length - 1];
+                                    }
+                                }
+                            })
+
+                        }
+
+
+                        if (!disabled) {
+                            lst.push(item);
+                        }
+
+
+                        //if the type is a recognized datatype, then hide all child nodes todo - won't show profiled datatyoes
+                        //note that this check is after it has been added to the list...
+                        if (item.type) {
+                            item.type.forEach(function (type) {
+                                if (dataTypes.indexOf(type.code) > -1) {
+                                    arDisabled.push(path)
+                                }
+                            });
+                        }
+
+
+                    });
+
+                    deferred.resolve({lst:lst,profile:profile})
+                }, function (err) {
+                alert(angular.toJson(err));
+                    deferred.reject();
+            })
+
+
+
+            return deferred.promise;
         }
 
     }
