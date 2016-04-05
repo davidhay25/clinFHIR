@@ -7,16 +7,20 @@
 </style>
 
 
-<div class="row">
-    <div class="col-md-4 col-sm-4">
-        <h5>
-            <input type="radio" ng-model="input.localMode" value="serverquery"> Server Query
+<!-- Display a 'select server' dialog, unless startup parameters were set...-->
+<div class="row" ng-hide="startup">
 
-            <input type="radio" ng-model="input.localMode" value="showconformance"> Load Conformance
-        </h5>
+    <div class="col-md-1 col-sm-1">
+        <strong>Select Server</strong>
+        <!--
+      <h5>
+          <input type="radio" ng-model="input.localMode" value="serverquery"> Server Query
+
+          <input type="radio" ng-model="input.localMode" value="showconformance"> Load Conformance
+      </h5>
 
 
-
+-->
     </div>
 
     <div class="col-md-4 col-sm-4">
@@ -29,13 +33,13 @@
     </div>
 
     <div class="col-md-3 col-sm-3">
-    <button ng-show="input.server && input.localMode == 'serverquery'"
-            class="btn btn-primary pull-right" ng-click = "showConformance()">Conformance</button>
-    <div>
-        <button ng-show="input.server && input.localMode == 'serverquery' && conformance"
-                class="btn btn-link pull-right" ng-click = "removeConformance()">Query</button>
+        <button ng-show="input.server && input.localMode == 'serverquery'"
+                class="btn btn-primary pull-right" ng-click = "showConformance()">Conformance</button>
+        <div>
+            <button ng-show="input.server && input.localMode == 'serverquery' && conformance"
+                    class="btn btn-link pull-right" ng-click = "removeConformance()">Query</button>
+        </div>
     </div>
-</div>
 
 
     <div class="col-md-1 col-sm-1">
@@ -46,6 +50,11 @@
     </div>
 </div>
 
+
+<!-- If a conformance was specified at startup, then show a banner-->
+<div class="row" ng-show="startup.conformanceUrl">
+    <div class="banner">Showing the conformance resource: {{startup.conformanceUrl}}</div>
+</div>
 
 <!--
 <div class="row">

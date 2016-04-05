@@ -27,6 +27,33 @@ angular.module("sampleApp")
     $scope.displayMode = 'front';    //'new' = resource builder, ''patient = patient
     $scope.selectedPatientResourceType = [];
 
+    $scope.config = appConfigSvc.config();  //the configuraton object - especially the data,terminology & conformance servers...
+
+    //show the server query page
+    $scope.showQuery = function(conformanceUrl){
+        $scope.displayMode="query";
+        $rootScope.startup = {conformanceUrl:conformanceUrl};     //the query controller will automatically download and display this resource
+    };
+
+    //check for cmmands in the usrlll
+    var params = $location.search();
+    if (params) {
+        $scope.startupParams = params;
+
+        console.log(params);
+
+        if (params.conformance) {
+            //the app is to display a conformance resource
+            $scope.showQuery(params.conformance);
+        }
+
+        if (params.url) {
+            //a specific profile is selected. Assume that this has the complete url to the profile so we'll
+            //need to think about setting the config.server.conformanceto the base...
+            $scope.results.profileUrl = params.url;
+        }
+    }
+
     //expose the config service on the scope. Used for showing the Patint details...
     $scope.appConfigSvc = appConfigSvc;
     $scope.ResourceUtilsSvc = ResourceUtilsSvc;
@@ -43,7 +70,7 @@ angular.module("sampleApp")
     });
 
     //config - in particular the servers defined. The samples will be going to the data server...
-    $scope.config = appConfigSvc.config();
+
     $scope.recent = {};
     $scope.recent.patient = appConfigSvc.getRecentPatient();
     $scope.recent.profile = appConfigSvc.getRecentProfile();
@@ -108,11 +135,7 @@ angular.module("sampleApp")
 
     };
 
-    //show the server query page
-    $scope.showQuery = function(conformanceUrl){
-        $scope.displayMode="query"
-        $rootScope.startup = {conformanceUrl:conformanceUrl};     //the query controller will automatically download and display this resource
-    };
+
 
     //save the current patient in the config services - so other controllers/components can access it...
     if ($scope.doDefault) {
@@ -144,21 +167,7 @@ angular.module("sampleApp")
     };
 
 
-    //see if a profile url was passed in when invoked
-    var params = $location.search();
-    if (params) {
 
-        console.log(params);
-
-        if (params.conformance) {
-            //the app is to display a conformance resource
-            $scope.showQuery(params.conformance);
-        }
-
-        if (params.url) {
-            $scope.results.profileUrl = params.url;
-        }
-    }
 
     //var type;//     the base type = $scope.results.profileUrl;      //todo - change type...
 
@@ -1506,6 +1515,7 @@ angular.module("sampleApp")
 
         //when the page was invoked, a conformance url was specified so display that...
         //assume the conformance url is on the NZ server...
+        $scope.startup = $rootScope.startup;        //put it on the scope so the html page can access i..
         if ($rootScope.startup && $rootScope.startup.conformanceUrl) {
             $scope.input.localMode = 'showconformance';
             $scope.config.servers.conformance = "http://fhir.hl7.org.nz/dstu2/";
