@@ -109,8 +109,9 @@ angular.module("sampleApp")
     };
 
     //show the server query page
-    $scope.showQuery = function(){
+    $scope.showQuery = function(conformanceUrl){
         $scope.displayMode="query"
+        $rootScope.startup = {conformanceUrl:conformanceUrl};     //the query controller will automatically download and display this resource
     };
 
     //save the current patient in the config services - so other controllers/components can access it...
@@ -146,6 +147,14 @@ angular.module("sampleApp")
     //see if a profile url was passed in when invoked
     var params = $location.search();
     if (params) {
+
+        console.log(params);
+
+        if (params.conformance) {
+            //the app is to display a conformance resource
+            $scope.showQuery(params.conformance);
+        }
+
         if (params.url) {
             $scope.results.profileUrl = params.url;
         }
@@ -1176,6 +1185,10 @@ angular.module("sampleApp")
        // $scope.input.server = config.allKnownServers[0]
 
 
+
+
+
+
         $localStorage.queryHistory = $localStorage.queryHistory || [];
 
 
@@ -1376,11 +1389,11 @@ angular.module("sampleApp")
             var type = angular.copy($scope.input.selectedType);
             var server = angular.copy($scope.input.server);
             $scope.input = {};
-           // $scope.input.localMode = 'serverquery'
-            $scope.input.localMode = 'showconformance'
+            $scope.input.localMode = 'serverquery'
+            //$scope.input.localMode = 'showconformance'
             $scope.input.verb = 'GET';
             $scope.input.category="parameters";
-            $scope.input.loadConformanceId= "ohConformance";
+            //$scope.input.loadConformanceId= "ohConformance";
             if (type) {
                 $scope.input.selectedType = type;       //remember the type
             }
@@ -1422,15 +1435,16 @@ angular.module("sampleApp")
         
         
         //todo - allow the conformance to be selected - maybe a separate function...
-        $scope.loadConformance = function() {
+        $scope.loadConformance = function(url) {
             $scope.waiting = true;
             delete $scope.filteredProfile;
             delete $scope.selectedType;
-            var url = "http://fhir.hl7.org.nz/baseDstu2/Conformance/ohConformance";
+            url = url || "http://fhir.hl7.org.nz/baseDstu2/Conformance/ohConformance";
+  /*
             if ($scope.server) {
                 url = $scope.server.url + "Conformance/"+$scope.input.loadConformanceId;
             }
-
+*/
             console.log(url);
 
             resourceCreatorSvc.getConformanceResourceFromUrl(url).then(
@@ -1489,5 +1503,15 @@ angular.module("sampleApp")
                 setDefaultInput();
             })
         }
-        
+
+        //when the page was invoked, a conformance url was specified so display that...
+        //assume the conformance url is on the NZ server...
+        if ($rootScope.startup && $rootScope.startup.conformanceUrl) {
+            $scope.input.localMode = 'showconformance';
+            $scope.config.servers.conformance = "http://fhir.hl7.org.nz/dstu2/";
+            var url = "http://fhir.hl7.org.nz/dstu2/Conformance/" + $rootScope.startup.conformanceUrl;
+            $scope.loadConformance(url);
+        }
+
+
     });
