@@ -1195,6 +1195,119 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
             return deferred.promise;
+        },
+        createConformanceQualityReport : function(conf){
+            //create a quality report (list of issues) for a conformance resource
+            var lstIssue = [];
+            var deferred = $q.defer();
+            console.log(conf)
+
+            var arQueryProfiles = []; //a list of queries - ie referenced profiles
+            var arProfiles = [];    //a list of the profiles that have been retrieved...
+            var arExtensions = [];      //a list of all the extensions references by profiles in the conformance resource
+            var arQueryExtensions = [];  //queries to check the existance of all extension definitions...
+            conf.rest[0].resource.forEach(function(res){
+                //console.log(res);
+                if (!res.profile) {
+                    lstIssue.push({level:"warning",display:"The "+res.type + ' type has not got a profile element'})
+                } else {
+                    var profileUrl = res.profile.reference;
+                    if (!profileUrl) {
+                        lstIssue.push({level:"warning",display:"The "+res.type + ' type has a profile element, but no reference'})
+                    } else {
+                        //now check that the reference exists
+                        arQueryProfiles.push(getProfile(res,profileUrl));
+                    }
+                }
+            });
+
+
+
+            function getExtension(res,extensionUrl){
+                //function to load an extension and save it in an array
+                var deferred = $q.defer();
+                GetDataFromServer.findConformanceResourceByUri(extensionUrl).then(
+                    function(extensionDefinition){
+                        arExtensions.push({url:extensionUrl,ed:extensionDefinition});    //this the uri for an extension
+                    },
+                    function(err){
+                        lstIssue.push({level:"error",display:"The "+res.type + ' type has a reference to an extension of '+extensionUrl + " which can't be loaded"})
+                    }
+                ).finally(function(){
+                    deferred.resolve();
+                });
+                return deferred.promise;
+            }
+
+            //function to load a profile, then save it in an array. Also generate a list of the extensions and valuesets referenced by that profile
+            function getProfile(res,profileUrl) {
+                var deferred = $q.defer();
+                GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
+                    function(profile) {
+                        arProfiles.push(profile);
+                        //now find all extensions referred by the profile
+                        if (profile && profile.snapshot) {
+                            profile.snapshot.element.forEach(function(element){
+                                if (element.path.indexOf('extension')){
+                                    if (element.type) {
+                                        element.type.forEach(function (it) {
+                                            if (it.code == 'Extension' && it.profile) {
+                                                it.profile.forEach(function(uri){
+                                                   // arExtensions.push({url:uri});    //this the uri for an extension
+                                                    arQueryExtensions.push(getExtension(res,uri));      //a function that will check that an extension exists
+
+                                                })
+
+                                            }
+                                        })
+                                    }
+                                }
+
+                            })
+                        }
+
+
+                    },
+                    function(err) {
+                        lstIssue.push({level:"error",display:"The "+res.type + ' type has a profile reference of '+profileUrl + " which can't be loaded"})
+                    }
+                ).finally(function(){
+                    deferred.resolve();
+                });
+                return deferred.promise;
+            }
+
+            //retrieve all the referenced profiles. Mark an error if one can't be found.
+            //for each profile returned, look for extensions and valuesets - we'll check those as well...
+            $q.all(arQueryProfiles).then(
+                //regardless of success or failure, turn off the saving flag
+                function() {
+                    //console.log('profiles',arProfiles);     //this will be a collection of all profiles
+                    //console.log(lstIssue)
+
+                    //so we've checked all the references from conformance -> profile, now to check the extensions
+                    arQueryExtensions
+                    $q.all(arQueryProfiles).then(
+                        function(){
+                            deferred.resolve({issues:lstIssue,profiles:arProfiles,extensions:arExtensions});
+                        },
+                        function(err) {
+                            console.log('error in $q.all reading extensions...')
+                        }
+                    )
+
+
+
+                },
+                function(err) {
+                    console.log('error in $q.all reading profiles...')
+                }
+            );
+
+
+
+            return deferred.promise;
+            
         }
 
     }

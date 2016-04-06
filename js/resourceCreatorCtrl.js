@@ -40,7 +40,6 @@ angular.module("sampleApp")
     if (params) {
         $scope.startupParams = params;
 
-        console.log(params);
 
         if (params.conformance) {
             //the app is to display a conformance resource
@@ -1449,12 +1448,7 @@ angular.module("sampleApp")
             delete $scope.filteredProfile;
             delete $scope.selectedType;
             url = url || "http://fhir.hl7.org.nz/baseDstu2/Conformance/ohConformance";
-  /*
-            if ($scope.server) {
-                url = $scope.server.url + "Conformance/"+$scope.input.loadConformanceId;
-            }
-*/
-            console.log(url);
+
 
             resourceCreatorSvc.getConformanceResourceFromUrl(url).then(
                 function (data) {
@@ -1466,7 +1460,19 @@ angular.module("sampleApp")
             ).finally(function(){
                 $scope.waiting = false;
             })
-        }
+        };
+        
+        $scope.createConformanceQualityReport = function() {
+            $scope.waiting = true;
+            resourceCreatorSvc.createConformanceQualityReport($scope.conformance).then(
+                function(report) {
+                    $scope.qualityReport = report;
+                    console.log(report)
+                    $scope.waiting = false;
+                }
+            );
+
+        };
         
         
         //whne
