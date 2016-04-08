@@ -1074,7 +1074,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             }
             return $localStorage.queryHistory;
         },
-        getProfileDisplay : function(uri) {
+        getProfileDisplay : function(url) {
             //return a collection of elements suitable for a prƒofile summary display..
             var deferred = $q.defer();
 
@@ -1083,11 +1083,13 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
             //todo some profiles seem to have a url like http://hl7.org/fhir/profiles/MedicationDispense
-            uri = uri.replace('/profiles/','/StructureDefinition/');
+           // uri = uri.replace('/profiles/','/StructureDefinition/');
 
-            console.log(uri)
+            console.log(url)
+            
+            
 
-            var url = GetDataFromServer.findConformanceResourceByUri(uri).then(
+            GetDataFromServer.getConformanceResourceByUrl(url).then(
                 function(profile) {
                     console.log(profile);
                     var arDisabled = [];          //this is a list of disabled items...
@@ -1209,7 +1211,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             conf.rest[0].resource.forEach(function(res){
                 //console.log(res);
                 if (!res.profile) {
-                    lstIssue.push({level:"warning",display:"The "+res.type + ' type has not got a profile element'})
+                    lstIssue.push({level:"warning",display:"The "+res.type + ' type does not have a profile element'})
                 } else {
                     var profileUrl = res.profile.reference;
                     if (!profileUrl) {

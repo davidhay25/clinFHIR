@@ -167,12 +167,6 @@ angular.module("sampleApp")
 
 
 
-
-    //var type;//     the base type = $scope.results.profileUrl;      //todo - change type...
-
-
-
-
     if ($scope.doDefault) {
         //sample patient data...
         supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
@@ -1217,18 +1211,19 @@ angular.module("sampleApp")
         };
 
         //this will attempt to hide the 'children' of known datatypes - like CodeableConcept
-        $scope.showProfile = function(uri) {
+        //note that the parameter is a URL - not a URI
+        $scope.showProfile = function(url) {
             console.log($scope.config)
             delete $scope.selectedProfile;
-            if (uri.substr(0,4) !== 'http') {
+            if (url.substr(0,4) !== 'http') {
                 //this is a relative reference. Assume that the profile is on the current conformance server
-                uri = $scope.config.servers.conformance + uri;
+                url = $scope.config.servers.conformance + url;
 
             }
 
 
 
-            resourceCreatorSvc.getProfileDisplay(uri).then(
+            resourceCreatorSvc.getProfileDisplay(url).then(
                 function(vo) {
                     $scope.filteredProfile = vo.lst;
                     $scope.selectedProfile = vo.profile;
@@ -1480,8 +1475,10 @@ angular.module("sampleApp")
             $scope.selectedType = type;
             delete $scope.filteredProfile
             console.log(type)
+            //note that the reference is a URL - ie a direct reference to the SD - not a URI...
             if (type.profile && type.profile.reference) {
-                $scope.showProfile(type.profile && type.profile.reference);
+                $scope.showProfile(type.profile.reference);
+                //$scope.showProfile(type.profile && type.profile.reference);
             }
 
         };

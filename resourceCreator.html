@@ -23,6 +23,11 @@
     <script src="/js/libs/angular-cookies.min.js"></script>
     <script src="js/libs/ngStorage.min.js"></script>
 
+    <style>
+        .applyPadding {
+            padding-top: 80px;
+        }
+    </style>
 
     <script>
         //http://stackoverflow.com/questions/18214835/angularjs-how-to-enable-locationprovider-html5mode-with-deeplinking
@@ -62,185 +67,185 @@
 </head>
 
 
-<body style="padding: 8px;padding-top: 80px; ">
+<body style="padding: 8px ">
 
-    <div ng-app="sampleApp" ng-controller="resourceCreatorCtrl" class="container-fluid">
+    <div  ng-app="sampleApp" ng-controller="resourceCreatorCtrl" class="container-fluid">
 
+        <div ng-class="{applyPadding : ! startupParams.hideNav}" >
         <!-- Hide the nav bar if the 'hideNav' query parameter is set in the call-->
-        <nav ng-hide="startupParams.hideNav" class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <nav ng-hide="startupParams.hideNav" class="navbar navbar-default navbar-fixed-top" role="navigation">
 
-            <div class="container-fluid">
-                <div class="col-md-1">
-                    <a class="navbar-brand" href="#">Resource Creator</a>
+                <div class="container-fluid">
+                    <div class="col-md-1">
+                        <a class="navbar-brand" href="#">Resource Creator</a>
 
-                </div>
+                    </div>
 
-                <div class="col-md-5">
-                    <p>
+                    <div class="col-md-5">
+                        <p>
 
+
+                            <div>
+
+                                <span uib-dropdown  popover-placement="right" popover-trigger='mouseenter'
+                                      uib-popover="Data Server: {{appConfigSvc.getCurrentDataServer().url}}">
+                                    <strong>Patient: </strong>
+
+                                </span>
+
+                                {{ResourceUtilsSvc.getOneLineSummaryOfResource(appConfigSvc.getCurrentPatient())}}
+                                <!--<a ng-show="appConfigSvc.getCurrentPatient()" href="#" ng-click="displayMode = 'patient'">Details</a> -->
+
+                        <a ng-show="appConfigSvc.getCurrentPatient()" href="#" ng-click="displayMode = 'view'">Details</a>
+
+                            </div>
 
                         <div>
-
-                            <span uib-dropdown  popover-placement="right" popover-trigger='mouseenter'
-                                  uib-popover="Data Server: {{appConfigSvc.getCurrentDataServer().url}}">
-                                <strong>Patient: </strong>
-
-                            </span>
-
-                            {{ResourceUtilsSvc.getOneLineSummaryOfResource(appConfigSvc.getCurrentPatient())}}
-                            <!--<a ng-show="appConfigSvc.getCurrentPatient()" href="#" ng-click="displayMode = 'patient'">Details</a> -->
-
-                    <a ng-show="appConfigSvc.getCurrentPatient()" href="#" ng-click="displayMode = 'view'">Details</a>
-
-                        </div>
-
-                    <div>
-                            <span uib-dropdown  popover-placement="right" popover-trigger='mouseenter'
-                                  uib-popover="Conformance Server: {{appConfigSvc.getCurrentConformanceServer().url}}">
-                                    <strong>Profile:</strong>
-                            </span>
-
-                        {{resourceCreatorSvc.getCurrentProfile().url}}
-                    </div>
-
-                    </p>
-
-
-                </div>
-
-
-                <div class="col-md-6">
-
-                    <div class="navbar-text">
-
-
-                        <span uib-dropdown ng-hide="resourceCreatorSvc.getParkedResources().length==0">
-                              <a href  uib-dropdown-toggle>
-                                  Parked <span class="badge">{{resourceCreatorSvc.getParkedResources().length }}</span>
-                              </a>
-                              <ul uib-dropdown-menu aria-labelledby="simple-dropdown">
-                                  <li ng-repeat="park in resourceCreatorSvc.getParkedResources()">
-                                      <a href = '#' ng-click="restoreFromParked(park,$index)">{{park.display}}</a>
-                                  </li>
-                              </ul>
-                         </span>
-
-
-                    </div>
-
-
-
-
-
-
-
-                    <form ng-show="displayMode == 'new'" class="navbar-form navbar-right">
-                        <button class="btn btn-danger pull-right" ng-click="cancelNewResource()">
-                            Cancel
-                        </button>
-                    </form>
-
-                    <form ng-show="displayMode == 'new'" class="navbar-form navbar-right">
-                        <button class="btn btn-primary pull-right" ng-click="saveToServer()">Save</button>
-                        <button style="margin-right: 8px" class="btn btn-info pull-right" ng-click="park()">Park</button>
-                        <button class="btn btn-link pull-right" ng-click="validate()">Validate</button>
-                    </form>
-
-
-                    <!-- The menu-->
-                    <div ng-controller="menuCtrl" ng-show="displayMode == 'front'">
-
-                        <a href="#" ng-click="showQuery()">Query Servers</a>
-                        <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
-                            <li uib-dropdown>
-
-                                <a href="#" uib-dropdown-toggle>
-                                <span style="font-size:2em; cursor: pointer">
-                                    <i class="glyphicon glyphicon-cog"></i>
+                                <span uib-dropdown  popover-placement="right" popover-trigger='mouseenter'
+                                      uib-popover="Conformance Server: {{appConfigSvc.getCurrentConformanceServer().url}}">
+                                        <strong>Profile:</strong>
                                 </span>
-                                </a>
 
-                                <ul class="dropdown-menu" role="menu">
-                                    <li>
-                                        <a href="#" ng-click="showQuery()">Query Servers</a>
-                                    </li>
-                                    <li class="divider"></li>
-                                    <li>
-                                        <a href="#" ng-click="resetConfig()">Reset Config</a>
-                                    </li>
-
-                                </ul>
-                            </li>
-                        </ul>
-                    </div>
-
-
-
-
-                    <form ng-hide="displayMode == 'new' || displayMode == 'query' " class="navbar-form navbar-right">
-                        <div ng-show="appConfigSvc.getCurrentPatient() && resourceCreatorSvc.getCurrentProfile()">
-                            <button class="btn btn-info pull-right" ng-click="displayMode = 'new'">New Resource</button>
+                            {{resourceCreatorSvc.getCurrentProfile().url}}
                         </div>
-                    </form>
+
+                        </p>
 
 
-                    <div ng-hide="displayMode == 'front' || displayMode == 'new'" class="navbar-form navbar-right">
-                        <span class="navbar-text" popover-placement="left" popover-trigger='mouseenter'
-                              uib-popover="Load front screen">
-                                <a href="#" ng-click="displayMode = 'front'">Front</a>
-                            </span>
                     </div>
 
-                    <div class="pull-right navbar-form" ng-show="waiting">
-                        <img src="css/ajax_loader_blue_32.gif"/>
-                    </div>
 
+                    <div class="col-md-6">
+
+                        <div class="navbar-text">
+
+
+                            <span uib-dropdown ng-hide="resourceCreatorSvc.getParkedResources().length==0">
+                                  <a href  uib-dropdown-toggle>
+                                      Parked <span class="badge">{{resourceCreatorSvc.getParkedResources().length }}</span>
+                                  </a>
+                                  <ul uib-dropdown-menu aria-labelledby="simple-dropdown">
+                                      <li ng-repeat="park in resourceCreatorSvc.getParkedResources()">
+                                          <a href = '#' ng-click="restoreFromParked(park,$index)">{{park.display}}</a>
+                                      </li>
+                                  </ul>
+                             </span>
+
+
+                        </div>
+
+
+
+
+
+
+
+                        <form ng-show="displayMode == 'new'" class="navbar-form navbar-right">
+                            <button class="btn btn-danger pull-right" ng-click="cancelNewResource()">
+                                Cancel
+                            </button>
+                        </form>
+
+                        <form ng-show="displayMode == 'new'" class="navbar-form navbar-right">
+                            <button class="btn btn-primary pull-right" ng-click="saveToServer()">Save</button>
+                            <button style="margin-right: 8px" class="btn btn-info pull-right" ng-click="park()">Park</button>
+                            <button class="btn btn-link pull-right" ng-click="validate()">Validate</button>
+                        </form>
+
+
+                        <!-- The menu-->
+                        <div ng-controller="menuCtrl" ng-show="displayMode == 'front'">
+
+                            <a class="navbar-form navbar-right" href="#" ng-click="showQuery()">Query Servers</a>
+
+
+                            <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
+                                <li uib-dropdown>
+
+                                    <a href="#" uib-dropdown-toggle>
+                                    <span style="font-size:2em; cursor: pointer">
+                                        <i class="glyphicon glyphicon-cog"></i>
+                                    </span>
+                                    </a>
+
+                                    <ul class="dropdown-menu" role="menu">
+                                        <li>
+                                            <a href="#" ng-click="showQuery()">Query Servers</a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        <li>
+                                            <a href="#" ng-click="resetConfig()">Reset Config</a>
+                                        </li>
+
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <form ng-hide="displayMode == 'new' || displayMode == 'query' " class="navbar-form navbar-right">
+                            <div ng-show="appConfigSvc.getCurrentPatient() && resourceCreatorSvc.getCurrentProfile()">
+                                <button class="btn btn-info pull-right" ng-click="displayMode = 'new'">New Resource</button>
+                            </div>
+                        </form>
+
+
+                        <form ng-hide="displayMode == 'front' || displayMode == 'new'" class="navbar-form navbar-right">
+                            <span class="navbar-text" popover-placement="left" popover-trigger='mouseenter'
+                                  uib-popover="Load front screen">
+                                    <a href="#" ng-click="displayMode = 'front'">Front</a>
+                                </span>
+                        </form>
+
+                        <div class="pull-right navbar-form" ng-show="waiting">
+                            <img src="css/ajax_loader_blue_32.gif"/>
+                        </div>
+
+
+                    </div>
 
                 </div>
 
+
+
+
+            </nav>
+
+
+
+            <div ng-show="displayMode == 'front'" ng-controller="frontCtrl">
+                <ng-include src="'/includes/frontPage.html'"></ng-include>
+            </div>
+
+
+            <div ng-show="displayMode == 'query'" ng-controller="queryCtrl">
+                <ng-include src="'/includes/serverQuery.html'"></ng-include>
             </div>
 
 
 
+            <div ng-show="displayMode == 'new'">
+                <ng-include src="'/includes/resourceCreatorMain.html'" onload="includeLoaded()"></ng-include>
+            </div>
 
-        </nav>
+
+            <div ng-show="displayMode == 'view'">
+                <ng-include src="'/includes/resourceViewer.html'"></ng-include>
+            </div>
 
 
 
-        <div ng-show="displayMode == 'front'" ng-controller="frontCtrl">
-            <ng-include src="'/includes/frontPage.html'"></ng-include>
+            <!-- a directive that allows a profile to be selected - not just a base one... -->
+            <select-profile trigger="showFindProfileDialog"
+                            all-resource-types="dynamic.resourcetypes"
+                            profile-selected="selectedProfile" type="'profile'">
+
+            </select-profile>
+
+
+            <!-- A directive for browsing value sets-->
+            <vs-browser trigger="showVSBrowserDialog"></vs-browser>
+
         </div>
-
-
-        <div ng-show="displayMode == 'query'" ng-controller="queryCtrl">
-            <ng-include src="'/includes/serverQuery.html'"></ng-include>
-        </div>
-
-
-
-        <div ng-show="displayMode == 'new'">
-            <ng-include src="'/includes/resourceCreatorMain.html'" onload="includeLoaded()"></ng-include>
-        </div>
-
-
-        <div ng-show="displayMode == 'view'">
-            <ng-include src="'/includes/resourceViewer.html'"></ng-include>
-        </div>
-
-
-
-        <!-- a directive that allows a profile to be selected - not just a base one... -->
-        <select-profile trigger="showFindProfileDialog"
-                        all-resource-types="dynamic.resourcetypes"
-                        profile-selected="selectedProfile" type="'profile'">
-
-        </select-profile>
-
-
-        <!-- A directive for browsing value sets-->
-        <vs-browser trigger="showVSBrowserDialog"></vs-browser>
-
-
     </div>
 
 </body>

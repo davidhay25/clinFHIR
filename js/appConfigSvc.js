@@ -18,15 +18,16 @@ angular.module("sampleApp")
         var defaultConfig = {servers : {}};
         defaultConfig.baseSpecUrl = "http://hl7.org/fhir/";     //the base for spec documentation
         defaultConfig.logLevel = 0;     //0 = no logging, 1 = log to console
+        defaultConfig.enableCache = false;  //whether caching is supported
         //defaultConfig.servers.terminology = "http://fhir2.healthintersections.com.au/open/";
-        defaultConfig.servers.terminology = "http://fhir.hl7.org.nz/baseDstu2/";
+        defaultConfig.servers.terminology = "http://fhir.hl7.org.nz/dstu2/";
         defaultConfig.servers.data = "http://fhir2.healthintersections.com.au/open/";
         //defaultConfig.servers.conformance = "http://fhir2.healthintersections.com.au/open/";
         defaultConfig.servers.conformance = "http://fhir.hl7.org.nz/baseDstu2/";
 
         //default to Grahames DSTU2 server when data and conformance servers are inconsistent...
         //defaultConfig.defaultTerminologyServerUrl = "http://fhir2.healthintersections.com.au/open/";
-        defaultConfig.defaultTerminologyServerUrl = "http://fhir.hl7.org.nz/baseDstu2/";
+        defaultConfig.defaultTerminologyServerUrl = "http://fhir.hl7.org.nz/dstu2/";
 
         defaultConfig.terminologyServers = [];
         defaultConfig.terminologyServers.push({version:2,url:"http://fhir.hl7.org.nz/baseDstu2/"});
