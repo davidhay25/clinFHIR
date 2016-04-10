@@ -11,7 +11,7 @@
             <div class="col-md-4 col-sm-4">
                 <div class="pull-right">
                     <button class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
-                    <button ng-show="selectedProfileJson" class="btn btn-primary" ng-click="selectProfile()">Select</button>
+                    <button ng-show="selectedProfile" class="btn btn-primary" ng-click="selectProfile()">Select</button>
 
                 </div>
 
@@ -23,16 +23,21 @@
     <div class="modal-body">
 
 
-        <uib-tabset>
-            <uib-tab heading="Query Parameters" active="tab.tabQuery" >
+        <uib-tabset active="active">
+            <uib-tab index = "0" heading="Query Parameters" >
                 <br/>
 
                 <div ng-show="showWaiting">
                     <div class="alert alert-warning" role="alert">Searching server, please wait...</div>
 
                 </div>
+
                 <div ng-show="showNone">
                     <div class="alert alert-success" role="alert">There were no matching profiles found.</div>
+                </div>
+
+                <div class="alert alert-success" ng-show="showMessage">
+                    There were {{selectedProfiles.entry.length}} profiles found. Please select the <em>Results</em> tab to view them as I can't change the tabe automatically (at the moment)
                 </div>
 
                 <form class="form-horizontal" role="form">
@@ -97,7 +102,7 @@
                     <div class="row">
                         <div class="col-md-3 col-sm-3 col-md-offset-3">
                             <div ng-hide="showWaiting">
-                                <button class="btn btn-primary pull-right" ng-click="search()">Search</button>
+                                <button class="btn btn-primary pull-right" ng-click="active=1;search()">Search</button>
                             </div>
                         </div>
                         <div class="col-md-6 col-sm-6" >
@@ -109,13 +114,10 @@
 
                     </div>
 
-
-
-
-
                 </form>
             </uib-tab>
-            <uib-tab heading="Results" active="tab.tabResults" >
+            <uib-tab index="1" >
+                <uib-tab-heading>Results <span class="badge">{{selectedProfiles.entry.length}}</span> </uib-tab-heading>
                 <!-- after resources have been selected...-->
                 <br/>
                 <div class="row">
@@ -133,82 +135,10 @@
                     </div>
 
                     <div class="col-md-8 col-sm-8">
+                        <!-- The selected profile-->
 
-
-                        <div class="rounded-box" ng-show="selectedProfile.id">
-                            <table>
-                                <!--<tr><td><strong>Id</strong></td><td>{{selectedProfile.id}}</td> </tr>-->
-                                <tr><td><strong>Url</strong></td><td>{{selectedProfile.url}}</td> </tr>
-                                <tr><td><strong>Name</strong></td><td>{{selectedProfile.name}}</td> </tr>
-
-                                <tr><td valign="top"><strong style="margin-right: 12px">Description:</strong> </td>
-                                    <td>{{selectedProfile.description}}</td>
-                                </tr>
-                                <tr><td valign="top"><strong>Context</strong></td><td>
-                                    <div ng-repeat="ctx in selectedProfile.context">
-                                        {{ctx}}
-                                    </div>
-                                </td></tr>
-                                <tr><td><strong>Publisher</strong></td><td>{{selectedProfile.publisher}}</td> </tr>
-                                <!--<tr><td valign="top" ><strong>Type:</strong></td><td> {{selectedProfile.type}}</td> </tr>-->
-                                <tr ng-show="results.type=='extension'">
-                                    <td valign="top"><strong>DataType</strong></td>
-                                    <td>
-                                        <div ng-hide="extAnalysis.complexExtension">
-                                            <div ng-repeat = "dt in extAnalysis.dataTypes">
-                                                <a ng-href="http://hl7.org/fhir/datatypes.html#{{dt}}" target="_blank">
-                                                    {{dt}}
-                                                </a>
-                                            </div>
-
-                                            <div ng-repeat = "rt in extAnalysis.referenceTypes">
-                                                -> {{rt}}
-                                            </div>
-                                        </div>
-                                        <div ng-show="extAnalysis.complexExtension">
-
-                                            <table class="table table-condensed table-bordered">
-                                                <tr><th>Name</th><th>Short</th><th>Mult</th><th>DataType</th><th>Binding</th></tr>
-                                                <tr ng-repeat="comp in extAnalysis.complexExtension.contents">
-                                                    <td>{{comp.name}}</td>
-                                                    <td>{{comp.short}}</td>
-                                                    <td>{{comp.min}}...{{comp.max}}</td>
-                                                    <td>
-                                                        <a ng-href="http://hl7.org/fhir/datatypes.html#{{comp.dt}}" target="_blank">
-                                                            <div ng-repeat="dt in comp.dt track by $index">
-                                                            <a ng-href="http://hl7.org/fhir/datatypes.html#{{dt.code}}" target="_blank">
-                                                                {{dt.code}}
-                                                            <span ng-show="dt.profile">
-                                                                <span title="{{dt.profile}}">({{dt.displayType}})</span>
-                                                            </span>
-                                                            </a>
-                                                        </div>
-                                                        </a>
-
-
-                                                    </td>
-                                                    <td>
-                                                        <a ng-click="findValueSet(comp.boundValueSet)"
-                                                           href="#" title="Edit/View ValueSet">
-                                                            {{comp.boundValueSet}}
-                                                        </a>
-
-
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                        </div>
-
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-
-
-
-
-
-                        <pre ng-show="selectedProfile.id">{{selectedProfileJson}}</pre>
+                        <!-- a component (1.5) todisplay a profile-->
+                        <show-profile profile="selectedProfile" onvaluesetselected="testVsSel(uri)"></show-profile>
 
                     </div>
 
@@ -217,8 +147,7 @@
 
             </uib-tab>
 
-
-            <uib-tab ng-show="recent.length > 0"><!-- select="createTree()" -->
+            <uib-tab index="2" ng-show="recent.length > 0">
                 <uib-tab-heading>Recent <span class="badge">{{recent.length}}</span> </uib-tab-heading>
                 <div class="list-group">
                     <div href="#" class="list-group-item" ng-repeat="profile in recent track by $index"

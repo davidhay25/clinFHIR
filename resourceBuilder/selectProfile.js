@@ -39,31 +39,19 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
 
                         }
 
+
+
                         $scope.recent = recent;
                         $scope.allResourceTypes = allResourceTypes;
                         $scope.results = {};
+                        $scope.activeTab = "1"; //the search tab
                         $scope.tab = {};
                         $scope.selectedProfile = {};
                         $scope.results.type = type;
                         $scope.profileSelectedFn = profileSelectedFn;
 
 
-                        //generate the tree representation of the profile. todo ?move to directive...
-                        $scope.createTree = function() {
-                            return;
-                            $('#treeView').jstree('destroy');
-                            console.log($scope.selectedProfile)
-                            var tree = Utilities.makeProfileJSTreeArray($scope.selectedProfile);
-                            console.log(tree);
-                            $('#selectProfileTreeView').jstree({ 'core' : {
-                                'data' : tree
-                            } }).on('changed.jstree', function (e, data){
-                                var path = data.node.text;
-                                $scope.$digest();       //as the event occurred outside of angular
 
-                            });
-
-                        };
 
                         //the display for the list of core resources - adds the (reference) label...
                         $scope.coreResourceDisplay=function(item) {
@@ -77,7 +65,8 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                         //searching for a specific profile...
                         $scope.search = function() {
                             $scope.showNone = false;    //turn off message if shown...
-
+                            $scope.showMessage = false;
+                            $scope.showWaiting = true;
 
                             delete $scope.selectedProfileJson;
 
@@ -114,8 +103,7 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
 
 
                             searchString += "&_count=100";
-
-
+                            
                             console.log(searchString);
                             $scope.query=searchString;
 
@@ -126,9 +114,11 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                                 function(data){
                                     var bundle = data.data;
                                     if (bundle.entry && bundle.entry.length > 0) {
+                                        $scope.showMessage = true;  //the message that I can't change tabs
                                         $scope.selectedProfiles = bundle;
-                                        $scope.tab.tabQuery = false;
-                                        $scope.tab.tabResults = true;
+                                        $scope.results.activeTab = "1";
+                                        //$scope.tab.tabQuery = false;
+                                        //$scope.tab.tabResults = true;
                                         //   console.log(bundle)
                                     } else {
                                         $scope.showNone = true;
@@ -141,24 +131,28 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                                     alert("Unable to retrieve Profile from the server. It may be currently unresponsive." +
                                         " You can use the 'show Servers' link at the top of the page to test it, or select " +
                                         "another Conformance server./n The error returned was: " + angular.toJson(err,true))
-                                });
+                                }).finally(function(){
+                                $scope.showWaiting = false;
+                            });
 
 
                         };
 
 
+                        //when one of the recently selected profiles is chosen..
                         $scope.selectRecent = function(profile) {
                             $scope.$close(profile);
                         };
 
-                        //when a profile has been chosen...
+                        //when a profile has been chosen, and we want to return it...
                         $scope.selectProfile= function(coreProfileName) {
 
                             if (coreProfileName) {
                                 //a core profile was selected. Retrieve the SD and return...
                                 $scope.showWaiting = true;
                                 var uri = "http://hl7.org/fhir/StructureDefinition/"+coreProfileName;
-                                
+
+                                //we get the profile based on the URI (ie SD.url)
                                 GetDataFromServer.findConformanceResourceByUri(uri).then(
                                     function(resource){
                                         console.log(resource)
@@ -191,13 +185,14 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
 
 
                             $scope.selectedProfile = entry.resource;     //save the original profile before we hack it...
-                            $scope.createTree($scope.selectedProfile);
 
-                            var dispProfile = angular.copy(entry.resource);
+                           // var dispProfile = angular.copy(entry.resource);
+
+                            //selectedProfile
 
 
                             //immediatly select and return
-                            $scope.$close(dispProfile);
+                            //$scope.$close(dispProfile);
 
                            // delete dispProfile.text;        //because the text can be huge...
 

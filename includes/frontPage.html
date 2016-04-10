@@ -125,6 +125,7 @@
             <a href="#" ng-class="{'list-group-item':true,active:profile.url == resourceCreatorSvc.getCurrentProfile().url}"
                ng-repeat="profile in recent.profile"
                ng-model="input.recentProfile" ng-click="selectProfile(profile)">
+                <!--<i class="glyphicon glyphicon-eye-open" ng-click="showLocalProfile(profile)"></i> -->
                 {{profile.url}}
 
 
@@ -139,13 +140,22 @@
         <h4>System Configuration</h4>
 
         <h5>Terminology Server</h5>
+
+
+
+        <ul class="list-group">
+            <li class="list-group-item" ng-repeat = "server in consistencyCheck.terminologyServers">
+                <input type="radio" name="terminologyServer" ng-model="input.selectedTS"
+                       ng-click="changeTerminologyServer(server)" value="{{server.url}}"/>
+                {{server.url}}
+            </li>
+        </ul>
+
+        <br/>
+<!--
         <div>{{config.servers.terminology}}</div>
 
-
-
-
-
-
+-->
 
     </div>
 

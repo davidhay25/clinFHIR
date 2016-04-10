@@ -38,8 +38,10 @@
 
         </div>
 
-        <tabset>
-            <tab heading="Query Parameters" active="tab.tabQuery">
+
+
+        <uib-tabset>
+            <uib-tab heading="Query Parameters" active="tab.tabQuery">
                 <form class="form-horizontal" role="form">
                     <div ng-repeat = "srch in searchParams">
 
@@ -91,8 +93,8 @@
                         </div>
                     </div>
                 </div>
-            </tab>
-            <tab heading="Results" active="tab.tabResults">
+            </uib-tab>
+            <uib-tab heading="Results" active="tab.tabResults">
                 <!-- after resources have been selected...-->
 
                 <div class="row">
@@ -119,8 +121,11 @@
 
 
 
-            </tab>
-        </tabset>
+            </uib-tab>
+        </uib-tabset>
+
+
+
 
     </div>
 

@@ -17,6 +17,19 @@ angular.module("sampleApp")
 
     $scope.doDefault=false;         //whether to have default patient & profile <<<<< for debug only!
 
+
+            //----------
+
+          //  $scope.testProfile = {name:'this is a test'}
+            //$scope.changeP = function(){
+        //        $scope.testProfile = {name:'whoa, changed!'}
+          //  }
+           // $scope.testVsSel = function(uri){
+             //   alert(uri);
+           // }
+
+            //---------
+
     var profile;                    //the profile being used as the base
     var type;                       //base type
     $scope.treeData = [];           //populates the resource tree
@@ -114,6 +127,8 @@ angular.module("sampleApp")
             //console.log('reload')
         });
     });
+
+
 
 
     //clears the current resource being buils and re-displays the front screen 
@@ -337,6 +352,7 @@ angular.module("sampleApp")
 
     //initialize everything for a newly loaded profile...
     function setUpForNewProfile(profile) {
+        $scope.selectedProfileForDisplay = profile;   //used for the profileDisplay component
         delete $scope.conformProfiles;      //profiles that this resource claims conformance to. Not for baseresources
         $scope.treeData.length = 0;         //removes all the treedata from the array
         delete $scope.selectedChild;        //a child element off the current path (eg Condition.identifier
@@ -402,6 +418,7 @@ angular.module("sampleApp")
     }
 
 
+    //when validating  the resource under construction
     $scope.validate = function(){
         delete $scope.validateResults;
         $scope.waiting = true;
@@ -533,6 +550,16 @@ angular.module("sampleApp")
 
         //the datatype of the selected element. This will display the data entry form.
         $scope.dataType = ed.type[inx].code;
+        if ($scope.dataType == 'Reference') {
+
+            //this is a reference to another resource. We need to get the exact type that was selected...
+            var type = ed.type[inx];
+            var ar = type.profile[0].split('/');
+            $scope.resourceType = ar[ar.length-1];         //the type name (eg 'Practitioner')
+            $scope.resourceProfile = type.profile[0];       //the profilefor this type. todo - could really lose $scope.resourceType...
+            console.log($scope.resourceType);
+
+        }
 
         if ($scope.dataType == 'BackboneElement') {
             //if this is a BackboneElement, then add it to the tree and select it todo - may want to ask first
@@ -583,12 +610,16 @@ angular.module("sampleApp")
             delete $scope.profileUrlInReference;
             delete $scope.resourceList;
 
+
             $scope.results = {};                //clear any existing data...
             $scope.results.boolean = false;
             $scope.results.timing = {};         //needed for timing values...
 
             $scope.externalReferenceSpecPage = "http://hl7.org/datatypes.html#" + $scope.dataType;
-            resourceCreatorSvc.dataTypeSelected($scope.dataType,$scope.results,ed,$scope,appConfigSvc.getAllResources());
+
+            //sets up the results variable ready for the data entry form
+            //todo - also modifies some of the scope variables - this requries a good check...
+            resourceCreatorSvc.dataTypeSelected($scope.dataType,$scope.resourceProfile, $scope.results,ed,$scope,appConfigSvc.getAllResources());
 
         }
     };
@@ -743,6 +774,7 @@ angular.module("sampleApp")
             resolve: {
                 vo : function() {
                     return {
+                       
                         resourceType: $scope.resourceType
                     }
                 },
@@ -753,7 +785,7 @@ angular.module("sampleApp")
             }
         });
 
-        //a promise to the resolved when modal exits.
+        //a promise to be resolved when modal exits.
         modalInstance.result.then(function (selectedResource) {
             //user clicked OK
             if (selectedResource) {
@@ -878,8 +910,10 @@ angular.module("sampleApp")
 
 
     //when a profile is selected...  This is configured in the directive...  Now called from the front page
-    $scope.selectedProfile = function(profile) {
+    $scope.selectedProfileFromDialog = function(profile) {
         var clone = angular.copy(profile);
+
+        console.log(clone)
 
         resourceCreatorSvc.setCurrentProfile(clone);
 
@@ -925,7 +959,7 @@ angular.module("sampleApp")
     //--------------------------------
 
 
-
+            
 
 })
     .controller('patientCtrlDEP', function ($scope,$rootScope,appConfigSvc,resourceCreatorSvc,ResourceUtilsSvc,supportSvc) {
@@ -1015,7 +1049,10 @@ angular.module("sampleApp")
 
         $scope.input = {};
         var config;
-        setup();
+        setup();        //will set config value - todo: this seems a bit clumsy...
+
+        $scope.input.selectedTS = config.servers.terminology;
+        $scope.consistencyCheck = appConfigSvc.checkConsistency();  //perform the consistelyc check for fhir versions
 
         //called when the config is reset...
         $rootScope.$on('resetConfigObject',function(event) {
@@ -1027,6 +1064,29 @@ angular.module("sampleApp")
            
         });
 
+        //when the cache of profiles for this browser is reset
+        $rootScope.$on('clearProfileCache',function(event){
+            $scope.recent.profile = appConfigSvc.getRecentProfile();
+        });
+
+
+        $scope.showLocalProfile = function(profile) {
+
+            var modalInstance = $uibModal.open({
+                template: "<div class='modal-body'>X<show-profile profile='profile'></show-profile>Y</div>",
+                controller: function(profile){
+                    $scope.profile = profile;
+                    console.log($scope.profile)
+                },
+                size: 'lg',
+                resolve: {
+                    profile: function () {
+                        return $scope.localSelectedProfile;
+                    }
+                }
+            });
+        }
+
         function setup() {
             config = $localStorage.config;
 
@@ -1037,6 +1097,7 @@ angular.module("sampleApp")
                 if (config.servers.conformance == svr.url) {$scope.input.conformanceServer = svr}
 
             });
+            $scope.config = config;
 
         }
 
@@ -1090,19 +1151,28 @@ angular.module("sampleApp")
             delete $scope.input.testconformance;        //the test confrmance state
             delete $scope.input.testdata;
             
-            config.servers[serverType] = server.url;
+            config.servers[serverType] = server.url;    //set the config to the new server...
             $localStorage.config = config;
             $rootScope.$emit('configUpdated')
             $scope.recent.patient = appConfigSvc.getRecentPatient();
             $scope.recent.profile = appConfigSvc.getRecentProfile();
-            
-            if (! appConfigSvc.checkConsistency().consistent) {
-                $scope.error = 'Warning! These servers are on a different FHIR version. Wierd things will happen...';
+
+
+            //see if profile and data servers are the same version. If so, also return a list of terminology servers... (but the call will set the default
+            $scope.consistencyCheck = appConfigSvc.checkConsistency();
+            $scope.config = $localStorage.config;   //because the terminology server may have changed...
+            $scope.input.selectedTS = $scope.config.servers.terminology;
+            if (! $scope.consistencyCheck.consistent) {
+                $scope.error = 'Warning! These servers are on a different FHIR version. Weird things will happen...';
             }
-            
-            
         };
 
+        //when the user selects a different terminology server...
+        $scope.changeTerminologyServer = function(server) {
+            $scope.config.servers.terminology = server.url;
+        };
+
+        //displays the 'select profile' dialog...
         $scope.findProfile = function() {
             $scope.showFindProfileDialog.open();    //note that this is defined in the parent controller...
             //note that the function $scope.selectedProfile in the parnt controller is invoked on successful selection...
@@ -1114,9 +1184,10 @@ angular.module("sampleApp")
             $rootScope.$emit('patientSelected',patient);
         };
 
-        //when a profile is selected in the list
+        //when a profile is selected in the list. It returns the profile (StructureDefinition resource)
         $scope.selectProfile = function(profile) {
             var clone = angular.copy(profile);
+            $scope.localSelectedProfile = profile;
 
             resourceCreatorSvc.setCurrentProfile(clone);
             $rootScope.$emit('profileSelected',clone);      //will cause the builder to be set up for the seelcted profile...
@@ -1171,6 +1242,9 @@ angular.module("sampleApp")
         }
 
 
+
+
+
 })
     .controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,GetDataFromServer){
         
@@ -1185,10 +1259,6 @@ angular.module("sampleApp")
         
         setDefaultInput();
        // $scope.input.server = config.allKnownServers[0]
-
-
-
-
 
 
         $localStorage.queryHistory = $localStorage.queryHistory || [];
@@ -1222,7 +1292,7 @@ angular.module("sampleApp")
             }
 
 
-
+            //generate a display of the profile based on it's URL. (points directly to the SD)
             resourceCreatorSvc.getProfileDisplay(url).then(
                 function(vo) {
                     $scope.filteredProfile = vo.lst;
@@ -1470,10 +1540,12 @@ angular.module("sampleApp")
         };
         
         
-        //whne
+        //when a resource type is selected in the list
         $scope.showType = function(type){
+            delete $scope.selectedProfile;
             $scope.selectedType = type;
-            delete $scope.filteredProfile
+            
+            delete $scope.filteredProfile;
             console.log(type)
             //note that the reference is a URL - ie a direct reference to the SD - not a URI...
             if (type.profile && type.profile.reference) {

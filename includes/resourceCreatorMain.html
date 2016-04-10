@@ -99,19 +99,21 @@
 
             </uib-alert>
 
+            <uib-tabset>
+                <uib-tab heading="Data Entry">
 
+                    <ng-include src="'/includes/dataTypeInputTemplates.html'"></ng-include>
+                </uib-tab>
 
-    <uib-tabset>
-        <uib-tab heading="Data Entry">
+                <uib-tab ng-show="selectedChild" heading="Selected Element">
+                    <pre>{{selectedChild | json}}</pre>
+                </uib-tab>
 
-            <ng-include src="'/includes/dataTypeInputTemplates.html'"></ng-include>
-        </uib-tab>
+                <uib-tab heading="Full Profile">
+                    <show-profile profile="selectedProfileForDisplay"></show-profile>
+                </uib-tab>
 
-        <uib-tab heading="Definition">
-            <pre>{{selectedChild | json}}</pre>
-        </uib-tab>
-
-    </uib-tabset>
+            </uib-tabset>
 
             <pre>{{resource | json}}</pre>
 
@@ -121,12 +123,13 @@
 
 
     <!-- a directive that allows a profile to be selected - not just a base one... -->
+    <!--
     <select-profile trigger="showFindProfileDialog"
                     all-resource-types="standardResourceTypes"
-                    profile-selected="selectedProfile" type="'profile'">
+                    profile-selected="selectedProfileFromDialog" type="'profile'">
 
     </select-profile>
-
+-->
 
 
 </div>

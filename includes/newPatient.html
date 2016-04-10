@@ -33,8 +33,8 @@
             <div class="form-group">
                 <label class="col-md-2 control-label">Date of Birth</label>
                 <div class="col-md-4">
-                    <datepicker ng-model="input.dob"  year-range="30"
-                                show-weeks="false" class="well well-sm"></datepicker>
+                    <uib-datepicker ng-model="input.dob"  year-range="30"
+                                show-weeks="false" class="well well-sm"></uib-datepicker>
                 </div>
                 <div class="col-md-2">
                     Age: {{input.dob | getAge}}

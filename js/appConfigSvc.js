@@ -17,7 +17,7 @@ angular.module("sampleApp")
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
         defaultConfig.baseSpecUrl = "http://hl7.org/fhir/";     //the base for spec documentation
-        defaultConfig.logLevel = 0;     //0 = no logging, 1 = log to console
+        defaultConfig.logLevel = 1;     //0 = no logging, 1 = log to console
         defaultConfig.enableCache = false;  //whether caching is supported
         //defaultConfig.servers.terminology = "http://fhir2.healthintersections.com.au/open/";
         defaultConfig.servers.terminology = "http://fhir.hl7.org.nz/dstu2/";
@@ -30,7 +30,7 @@ angular.module("sampleApp")
         defaultConfig.defaultTerminologyServerUrl = "http://fhir.hl7.org.nz/dstu2/";
 
         defaultConfig.terminologyServers = [];
-        defaultConfig.terminologyServers.push({version:2,url:"http://fhir.hl7.org.nz/baseDstu2/"});
+        defaultConfig.terminologyServers.push({version:2,url:"http://fhir.hl7.org.nz/dstu2/"});
         defaultConfig.terminologyServers.push({version:2,url:"http://fhir2.healthintersections.com.au/open/"});
         defaultConfig.terminologyServers.push({version:3,url:"http://fhir3.healthintersections.com.au/open/"});
 
@@ -61,25 +61,28 @@ angular.module("sampleApp")
                 });
 
                 //now see if they are all the same version - will need a loop if more than 2!
-                if (tmp[0].version !== tmp[1].version) {
+                if (tmp.length < 2 || tmp[0].version !== tmp[1].version) {
                     //if they're not the same, then return all the servers so the user can choose
                     rtn.consistent = false;
                     rtn.terminologyServers = config.terminologyServers;
 
                     //select the default terminology server
-                    $localStorage.config.terminology = config.defaultTerminologyServerUrl;
+
+                    $localStorage.config.servers.terminology = config.defaultTerminologyServerUrl;
 
                     return rtn;
                 }
 
                 //now make sure the terminology server is the correct version..
                 //todo - need to think about how to handle where there is more than one terminology server, or Grahames is down...
+                rtn.terminologyServers = [];    //this will be all terminlogy servers for this version...
                 var version = tmp[0].version;       //the FHIR version
                 for (var i=0; i <config.terminologyServers.length;i++) {
                     var s = config.terminologyServers[i];
-                    console.log(version,s)
+
                     if (s.version == version) {
-                        $localStorage.config.terminology = s.url;
+                        rtn.terminologyServers.push(s)
+                        $localStorage.config.servers.terminology = s.url;
                         config.log('setting  terminology server to '+s.url,'appConfig:config')
                     }
                 }
@@ -228,6 +231,9 @@ angular.module("sampleApp")
                 }
 
                 return lst;
+            },
+            clearProfileCache : function() {
+                delete $localStorage.recentProfile;
             }
         }
     });

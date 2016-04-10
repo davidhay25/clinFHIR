@@ -23,6 +23,7 @@
     <script src="/js/libs/angular-cookies.min.js"></script>
     <script src="js/libs/ngStorage.min.js"></script>
 
+
     <style>
         .applyPadding {
             padding-top: 80px;
@@ -62,6 +63,7 @@
     <script src="js/resourceSvc.js"></script>
     <script src="js/menuCtrl.js"></script>
     <script src="js/modalDialogSvc.js"></script>
+    <script src="js/components/profileDisplayComp.js"></script>
     <title>FHIR Resource Creator</title>
 
 </head>
@@ -149,7 +151,11 @@
                         <form ng-show="displayMode == 'new'" class="navbar-form navbar-right">
                             <button class="btn btn-primary pull-right" ng-click="saveToServer()">Save</button>
                             <button style="margin-right: 8px" class="btn btn-info pull-right" ng-click="park()">Park</button>
-                            <button class="btn btn-link pull-right" ng-click="validate()">Validate</button>
+
+                            <button
+                                    popover-placement="left" popover-trigger='mouseenter'
+                                    uib-popover="Validate against {{config.servers.data}}"
+                                    class="btn btn-link pull-right" ng-click="validate()">Validate</button>
                         </form>
 
 
@@ -175,6 +181,9 @@
                                         <li class="divider"></li>
                                         <li>
                                             <a href="#" ng-click="resetConfig()">Reset Config</a>
+                                        </li>
+                                        <li>
+                                            <a href="#" ng-click="clearProfileCache()">Clear Profiles Cache</a>
                                         </li>
 
                                     </ul>
@@ -212,6 +221,8 @@
 
 
 
+
+
             <div ng-show="displayMode == 'front'" ng-controller="frontCtrl">
                 <ng-include src="'/includes/frontPage.html'"></ng-include>
             </div>
@@ -233,11 +244,14 @@
             </div>
 
 
-
+            <!-- a component (1.5) todisplay a profile-->
+<!--
+            <show-profile profile="selectedProfileForDisplay" onvaluesetselected="testVsSel(uri)"></show-profile>
+-->
             <!-- a directive that allows a profile to be selected - not just a base one... -->
             <select-profile trigger="showFindProfileDialog"
                             all-resource-types="dynamic.resourcetypes"
-                            profile-selected="selectedProfile" type="'profile'">
+                            profile-selected="selectedProfileFromDialog" type="'profile'">
 
             </select-profile>
 

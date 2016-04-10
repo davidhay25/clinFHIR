@@ -3,7 +3,7 @@
 //templateUrl: "/modalTemplates/searchForResource.html",
 
 angular.module("sampleApp")
-    .controller('searchForResourceCtrl', function ($scope, $modalInstance,vo,Utilities,GetDataFromServer,profileUrl) {
+    .controller('searchForResourceCtrl', function ($scope, vo,Utilities,GetDataFromServer,profileUrl) { //$modalInstance,
         //console.log(vo)
         $scope.profileUrl = profileUrl;
         $scope.typeWasSpecified = true;
@@ -41,13 +41,18 @@ angular.module("sampleApp")
         //console.log($scope.searchParams)
         };
 
-        Utilities.getConformanceResource(function(conf){
-            //console.log(conf);
-            $scope.loading = false;
-            $scope.conf = conf;
+        //retireve the conformane resource from the current data server so we know what search paramters are avaible
+        //returns a promise from $http
+        Utilities.getConformanceResourceForServerType('data').then(
+            function(data) {
+                //console.log(conf);
+                $scope.loading = false;
+                $scope.conf = data.data;
 
-            findSearchParams();     //find the search parameters for this resource type
-
+                findSearchParams();     //find the search parameters for this resource type
+            },
+            function(err) {
+                alert('error retrieving conformance resoruce for the Data server')
 
         });
 
@@ -144,13 +149,13 @@ angular.module("sampleApp")
         $scope.ok = function () {
             var selectedResource = null;      //<<< this will be from teh selection of course...
             //console.log($scope.results)
-            $modalInstance.close($scope.selectedResource);
+            $scope.$close($scope.selectedResource);
 
         };
 
         $scope.cancel = function () {
             //alert('cancel')
-            $modalInstance.dismiss();
+            $scope.$dismiss();
         };
 
 

@@ -99,6 +99,7 @@ angular.module("sampleApp").
             );
             return deferred.promise;
         },
+
         getConformanceResourceByUrl : function(url) {
             //find a StructureDefinition based on its Url. ie we assume that the url is pointing to where the SD is located...
             var config = appConfigSvc.config();
@@ -118,7 +119,7 @@ angular.module("sampleApp").
                     function(data) {
                         //the profile was located
                         var profile = data.data;    //a StructureDefinition, of course...
-                        console.log(profile)
+                        config.log(profile)
                         //temp - disable caching foe now...$localStorage.profileCacheUrl[url] = profile;       //save in the local cache
                         deferred.resolve(profile);
                     },
@@ -260,8 +261,111 @@ angular.module("sampleApp").
 
 
         },
+        analyseExtensionDefinition : function(extension) {
+            //var extension = angular.copy(extensionDef);
+            //return a vo that contains an analysis of the extension
+            var that = this;
 
 
+            var vo = {dataTypes : [],multiple:false};
+            vo.display = extension.display; //will use this when displaying the element
+            vo.name = extension.name;       //or this one...
+            // vo.definition =extension.definition;
+
+            var discriminator;      //if this is sliced, then a discriminator will be set...
+            if (extension.snapshot) {
+                extension.snapshot.element.forEach(function(element) {
+
+                    //this is the root extension
+                    if (element.path.substr(0,9) === 'Extension') {
+                        if (! vo.definition) {
+                            vo.definition = element.definition;
+                        }
+
+                        if (!vo.short) {
+                            //pick the first one...
+                            vo.short = element.short;   //the short name of the extension - whether simple or complex
+                        }
+
+                        if (element.max == '*') {
+                            vo.multiple = true;
+                        }
+                    }
+
+                    if (element.slicing) {
+                        discriminator = element.slicing.discriminator[0];
+                    }
+
+
+                    if (element.path.indexOf('Extension.value')>-1) {
+                        //vo.element = element;
+                        var dt = element.path.replace('Extension.value','').toLowerCase();
+                        vo.dataTypes.push(dt);
+                        if (['codeableconcept','code','coding'].indexOf(dt)> -1) {
+                            vo.isCoded = true;
+                        }
+
+
+                        if (dt == 'reference' || dt == '[x]') {   //eg cgif-guidancerequest
+                            //if this is a reference, then need the list of types
+                            vo.referenceTypes = [];
+                            if (element.type) {
+                                element.type.forEach(function(t){
+                                    var p = t.profile;
+                                    if (p) {
+                                        var ar = p[0].split('/');       //only the first
+                                        var item = {display:ar[ar.length-1],url:p[0]};
+                                        item.specification = "http://hl7.org/fhir/"+ar[ar.length-1];   //really only works if this is a core resource...
+                                        //is this a core resource (or datatype)
+                                        ar.pop();   //remove the last entry - it will be the type name
+                                        var temp = ar.join('/');    //reconstruct the url...
+                                        if (temp == "http://hl7.org/fhir/") {
+                                            item.isCore = true; //this is a core resource (or datatype)
+                                        }
+
+                                        vo.referenceTypes.push(item);
+                                    }
+                                })
+                            }
+                        }
+
+
+
+                        if (element.binding) {
+
+                            vo.strength = element.binding.strength;
+                            if (element.binding.valueSetReference) {
+                                vo.valueSetReference = element.binding.valueSetReference.reference;
+                            } else {
+                                vo.errors = vo.errors || []
+                                vo.errors.push('value element has a binding with no valueSetReference')
+                            }
+
+                        }
+
+                    }
+                })
+            }
+
+            //if a discriminator has been set, then this is a complex extension so create a summary object...
+            if (discriminator) {
+                //vo.complex=true;
+                vo.complexExtension = that.processComplexExtension(extension,discriminator)
+            }
+            vo.StructureDefinition = extension;
+            return vo;
+
+        },
+        getConformanceResourceForServerType : function(serverType){
+            //return the conformance resource for the given type of server. returns a promise
+            var config = appConfigSvc.config();
+
+            var url = config.servers[serverType] + 'metadata';
+
+            config.log(url,'Utilities:getConformanceResourceForServerType')
+            
+            return $http.get(url)
+        },
         validate : function(resource,cb) {
             var clone = angular.copy(resource);
             delete clone.localMeta;

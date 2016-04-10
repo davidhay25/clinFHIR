@@ -45,13 +45,13 @@
         <div class="col-md-12 col-sm-12">
 
             <button ng-show="selectedReferenceResourceType.reference" class="btn btn-link pull-right"
-                    ng-click="searchResource()">Search for Resource</button>
+                    ng-click="searchResource()">Search for {{resourceType}} Resource</button>
 
             <div ng-hide="selectedReferenceResourceType.reference">
 
                 <em>
                     <br />
-                    This resource type is always associated with a patient, so
+                    The {{resourceType}} resource type is always associated with a patient, so
                     if it's not in the list above (or there is no list), then
                     you need to park the current resource, create a new resource of the required type
                     for this patient, and then you can retrieve this parked resource, and the new resource will be in the list.

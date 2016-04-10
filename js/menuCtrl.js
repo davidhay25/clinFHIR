@@ -1,5 +1,13 @@
 angular.module("sampleApp").controller('menuCtrl', function ( $scope,$rootScope,$localStorage,appConfigSvc,modalService){
-    
+
+
+
+    $scope.clearProfileCache = function(){
+        console.log('x')
+        appConfigSvc.clearProfileCache();
+        $rootScope.$broadcast('clearProfileCache');
+    };
+
     $scope.resetConfig = function() {
         delete $localStorage.config;
         appConfigSvc.config();      //set the value to the default
@@ -16,5 +24,8 @@ angular.module("sampleApp").controller('menuCtrl', function ( $scope,$rootScope,
 
         $rootScope.$broadcast('resetConfigObject');
         //alert('Config has been reset to the default');
+
+
+
     }
 });

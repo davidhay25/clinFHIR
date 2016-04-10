@@ -1,5 +1,5 @@
 angular.module("sampleApp").service('resourceCreatorSvc',
-    function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,GetDataFromServer,$localStorage,Utilities) {
+    function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,GetDataFromServer,$localStorage,Utilities,$sce) {
 
 
     var currentProfileEl;     //the profile being used...
@@ -362,9 +362,12 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         getRootED : function(path) {
           //return the elementdefinition for the root element of the profile - always the first one...
-          
 
-            return this.currentProfile.snapshot.element[0];
+            if (this.currentProfile && this.currentProfile.snapshot && this.currentProfile.snapshot.element) {
+                return this.currentProfile.snapshot.element[0];
+            }
+
+
         },
         getEDForPath : function(path) {
             var edList = [];
@@ -711,8 +714,14 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
             },
-        dataTypeSelected : function(dt,results,element,scope,allResources) {
+        dataTypeSelected : function(dt,resourceProfile, results,element,scope,allResources) {
             //todo - get rid of the scope...
+            //dt = dataType
+            //resourceType - selected resourceType if a resource reference
+            //element = elementDefinition 
+            //scope = really shouldn't be here
+            //allResources = all resources for the current patient...
+            
             switch (dt) {
 
                 case 'Period' :
@@ -790,13 +799,18 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                 case 'Reference' :
                     //todo - have a service that creates a full summary of a resource - and a 1 liner for the drop down
-                   
-                    var referenceProfile = element.type[scope.index].profile[0];  //the profile of the resource being referenced...
-                    if (! RenderProfileSvc.isUrlaBaseResource(referenceProfile)) {
+                   //todo - right now, we will assume the type being references is a base resource
+                    //var ar = resourceProfile.split('/');
+                    //var resourceType = ar[ar.length-1];
+
+
+                    //var referenceProfile = element.type[scope.index].profile[0];  //the profile of the resource being referenced...
+                   // if (! RenderProfileSvc.isUrlaBaseResource(referenceProfile)) {
+                    if (! RenderProfileSvc.isUrlaBaseResource(resourceProfile)) {
                         //this is a reference to profile on a base resource. need to load the profile so we can figure out the base type
                         scope.profileUrlInReference = referenceProfile;
 
-                        GetDataFromServer.findConformanceResourceByUri(referenceProfile).then(
+                        GetDataFromServer.findConformanceResourceByUri(referenceProfile).then(  //will go to the current conformance server
                             function(profile){
                                 var resourceType = profile.constrainedType;//  Utilities.getResourceTypeFromUrl();
                                 scope.resourceType = resourceType;
@@ -819,27 +833,29 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
                     } else {
-                        //this is a base resource...
+                        //this is a base resource. ..
 
-                        var ar = element.type[0].profile[0].split('/');
-                        var resourceType = ar[ar.length-1];
+                        var ar = resourceProfile.split('/');
+                        var resourceType = ar[ar.length-1];         //the type name (eg 'Practitioner')
                         
-                        //if any resource can be referenced here
+                        //if any resource can be referenced here - ie not a specific type
                         if (resourceType== 'Resource') {
+                            //scope.uniqueResources will be a collection of all the resource types for this patient
+                            //todo - it's not implemented yet...
                             scope.uniqueResources = RenderProfileSvc.getUniqueResources(allResources);
                         } else {
                             delete scope.uniqueResources;
                         }
 
                         //this defines the resource type - eg whether it is a reference resource rather than linked to a patient...
-                        scope.selectedReferenceResourceType = RenderProfileSvc.getResourceTypeDefinition(resourceType);//scope.resourcetypes[resourceType];
+                        scope.selectedReferenceResourceType = RenderProfileSvc.getResourceTypeDefinition(resourceType);
 
-
-                        scope.resourceType = resourceType;
+                        //scope.resourceType = resourceType;
 
 
                         //if the resource type is one that is a 'reference' - ie doesn't link to a patient then
                         //the resurceList is empty. Otherwise populate it with the existing resources of that type for the patient
+
                         if (scope.selectedReferenceResourceType.reference) {
                             // if (scope.allResourceTypesIndexedByType[resourceType].reference) {
                            // delete scope.resourceList;
@@ -1075,9 +1091,10 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             return $localStorage.queryHistory;
         },
         getProfileDisplay : function(url) {
-            //return a collection of elements suitable for a prƒofile summary display..
+            //return a collection of elements suitable for a profile summary display..
+            //the url is a real reference to the profile location (not the SD.url property)
             var deferred = $q.defer();
-
+            var that = this;
 
 
 
@@ -1091,112 +1108,121 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             GetDataFromServer.getConformanceResourceByUrl(url).then(
                 function(profile) {
-                    console.log(profile);
-                    var arDisabled = [];          //this is a list of disabled items...
-                    var lst = [];           //this will be a list of elements in the profile to show.
-                    var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained'];
-                    var dataTypes = ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference'];
-                    profile.snapshot.element.forEach(function (item) {
-                        item.myMeta = {};
-
-                        var el = {path: item.path};
-                        var path = item.path;
-
-                        //if max is 0, this path - and all children - are disabled in this profile...
-                        if (item.max == 0) {
-                            arDisabled.push(path)
-                        }                        ;
-
-
-                        //now see if this path has been disabled. There will be more elegant ways of doing this
-                        var disabled = false;
-                        for (var i = 0; i < arDisabled.length; i++) {
-                            var d = arDisabled[i];
-                            if (path.substr(0, d.length) == d) {
-                                disabled = true;
-                                break;
-                            }
-                        }
-
-                        var ar = path.split('.');
-                        if (ar.length == 1) {
-                            disabled = true;
-                        }      //don't include the domain resource
-
-                        //standard element names like 'text' or 'language'
-                        if (ar.length == 2 && elementsToDisable.indexOf(ar[1]) > -1) {
-                            disabled = true;
-                        }
-
-
-                        //hide the extension. Will need to figure out how to display 'real' extensions
-                        if (ar[ar.length - 1] == 'modifierExtension') {
-                            disabled = true;
-                        }
-                        if (!disabled && ar[ar.length - 1] == 'extension') {
-                            disabled = true;    //by default extensions are disabled...
-                            //if the extension has a profile type then include it, otherwise not...
-                            if (item.type) {
-                                item.type.forEach(function (it) {
-                                    if (it.code == 'Extension' && it.profile) {
-                                        disabled = false;
-                                        //load the extension definition to
-
-
-                                    }
-                                })
-                            }
-
-
-                        }
-
-                        ar.shift();     //removes the type name
-
-                        item.myMeta.path = ar.join('. ');     //create a path that doesn't include the type (so is shorter)
-
-
-                        //make references look nicer. todo - what about references to profiles?
-                        if (item.type) {
-                            item.type.forEach(function (it) {
-                                if (it.code == 'Reference') {
-                                    if (it.profile) {
-                                        var p = it.profile[0];      //todo  <<<<<<<<<<<<<<<<<<
-                                        var ar = p.split('/');
-                                        it.code = '->' + ar[ar.length - 1];
-                                    }
-                                }
-                            })
-
-                        }
-
-
-                        if (!disabled) {
-                            lst.push(item);
-                        }
-
-
-                        //if the type is a recognized datatype, then hide all child nodes todo - won't show profiled datatyoes
-                        //note that this check is after it has been added to the list...
-                        if (item.type) {
-                            item.type.forEach(function (type) {
-                                if (dataTypes.indexOf(type.code) > -1) {
-                                    arDisabled.push(path)
-                                }
-                            });
-                        }
-
-
-                    });
-
+                    var lst = that.makeProfileDisplayFromProfile;
                     deferred.resolve({lst:lst,profile:profile})
                 }, function (err) {
-                alert(angular.toJson(err));
+                    alert(angular.toJson(err));
                     deferred.reject();
-            })
+                }
+            );
 
 
 
             return deferred.promise;
+        },
+        makeProfileDisplayFromProfile : function(profile) {
+            console.log(profile);
+            var arDisabled = [];          //this is a list of disabled items...
+            var lst = [];           //this will be a list of elements in the profile to show.
+            var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained'];
+            var dataTypes = ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference'];
+            if (profile && profile.snapshot && profile.snapshot.element) {
+
+                profile.snapshot.element.forEach(function (item) {
+                    item.myMeta = {};
+
+                    var el = {path: item.path};
+                    var path = item.path;
+
+                    //if max is 0, this path - and all children - are disabled in this profile...
+                    if (item.max == 0) {
+                        arDisabled.push(path)
+                    }
+
+
+
+                    //now see if this path has been disabled. There will be more elegant ways of doing this
+                    var disabled = false;
+                    for (var i = 0; i < arDisabled.length; i++) {
+                        var d = arDisabled[i];
+                        if (path.substr(0, d.length) == d) {
+                            disabled = true;
+                            break;
+                        }
+                    }
+
+                    var ar = path.split('.');
+                    if (ar.length == 1) {
+                        disabled = true;
+                    }      //don't include the domain resource
+
+                    //standard element names like 'text' or 'language'
+                    if (ar.length == 2 && elementsToDisable.indexOf(ar[1]) > -1) {
+                        disabled = true;
+                    }
+
+
+                    //hide the extension. Will need to figure out how to display 'real' extensions
+                    if (ar[ar.length - 1] == 'modifierExtension') {
+                        disabled = true;
+                    }
+
+                    if (!disabled && ar[ar.length - 1] == 'extension') {
+                        disabled = true;    //by default extensions are disabled...
+                        //if the extension has a profile type then include it, otherwise not...
+                        if (item.type) {
+                            item.type.forEach(function (it) {
+                                if (it.code == 'Extension' && it.profile) {
+                                    disabled = false;
+                                    //load the extension definition to
+
+                                    //use the name rather than 'Extension'...
+                                    ar[ar.length - 1] = "*"+ item.name;
+                                }
+                            })
+                        }
+                    }
+
+                    ar.shift();     //removes the type name at the beginning of the path
+
+                    item.myMeta.path = ar.join('. ');     //create a path that doesn't include the type (so is shorter)
+
+                    //make references look nicer. todo - what about references to profiles?
+                    if (item.type) {
+                        item.type.forEach(function (it) {
+                            if (it.code == 'Reference') {
+                                if (it.profile) {
+                                    var p = it.profile[0];      //todo  <<<<<<<<<<<<<<<<<<
+                                    var ar = p.split('/');
+                                    it.code = '->' + ar[ar.length - 1];
+                                }
+                            }
+                        })
+                    }
+
+
+                    if (!disabled) {
+                        lst.push(item);
+                    }
+
+
+                    //if the type is a recognized datatype, then hide all child nodes todo - won't show profiled datatyoes
+                    //note that this check is after it has been added to the list...
+                    if (item.type) {
+                        item.type.forEach(function (type) {
+                            if (dataTypes.indexOf(type.code) > -1) {
+                                arDisabled.push(path)
+                            }
+                        });
+                    }
+
+
+                });
+
+            }
+
+            return lst;
+
         },
         createConformanceQualityReport : function(conf){
             //create a quality report (list of issues) for a conformance resource
@@ -1310,6 +1336,222 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             return deferred.promise;
             
+        },
+
+        createProfileTreeDisplay : function(profile,showRemoved){
+            //create a clone of the profile suitable for display...
+            var simpleDT = ['string','instant','time','date','dateTime','decimal','boolean','integer','base6Binary','uri','unsignedInt','positiveInt','code','id','oid','markdown'];
+
+
+            var that = this;
+            //var slicedExtensions = {};
+            var displayProfile = [];
+
+            if (profile && profile.snapshot && profile.snapshot.element) {
+
+                profile.snapshot.element.forEach(function (element) {
+                    //var display = {type:[],name:element.name};
+                    var display = angular.copy(element);
+                    display.myStuff = {};
+                    //display.path =  element.path;//.replace(/\./g, ". ")
+                    var path = element.path;
+                    var ar = path.split('.');
+                    display.myStuff.name = display.name;
+                    if (!display.myStuff.name) {
+                        display.myStuff.name = ar[ar.length - 1]
+                    }
+
+                    //add a space to any dots to allow the display to break...  (QIcode medication )
+                    display.myStuff.name = display.myStuff.name.replace(/\./g, " \.");
+
+                    if (display.myStuff.name == 'extension' && element.short) {
+                        display.myStuff.name = element.short;
+                    }
+
+                    if (display.myStuff.name.length > 50) {
+                        display.myStuff.name = display.myStuff.name.substr(0, 47) + '...';
+                    }
+
+                    if (element.max == '*') {
+                        display.myStuff.multiplicity = '*'
+                    } else {
+                        display.myStuff.multiplicity = ' '
+                    }
+
+                    //display.myStuff.multiplicity = element.min + '..' + element.max;
+
+
+                    //set the indenting...
+                    var spacer = "";
+                    for (var i = 0; i < ar.length; i++) {
+                        spacer += "&nbsp;&nbsp;&nbsp;&nbsp;";
+                    }
+
+                    display.myStuff.spacer = $sce.trustAsHtml(spacer);
+
+
+                    var include = true;         //default is to include an element
+
+                    //generate the discriminators based on path...
+
+                    if (ar[ar.length - 1].indexOf('xtension') > -1) {
+                        display.myStuff.isExtension = true;
+                        //   if (! slicedExtensions[path]) {
+                        //     slicedExtensions[path] = [];
+                        //   }
+                        //if it has a type with an extension, then add the element to the list of sliced elements. Assume url as the discriminator...
+                        if (element.type) {
+                            element.type.forEach(function (typ) {
+                                //console.log(typ )
+
+                                if (typ.profile) {
+                                    //only use the first profilefor now
+                                    //var profile = typ.profile[0].replace("http://hl7.org/fhir/StructureDefinition/","");
+                                    var profileUrl = typ.profile[0];
+
+                                    console.log(profileUrl)
+                                    //process Extension
+                                    GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
+                                        //GetDataFromServer.findResourceByUrlPromise('StructureDefinition', profileUrl).then(
+                                        function (data) {
+                                            var analysis = Utilities.analyseExtensionDefinition(data);
+                                            console.log(analysis)
+                                            if (analysis.isCoded) {
+                                                display.myStuff.isCoded = true;
+                                            }
+                                            display.myStuff.extensionAnalysis = analysis;
+
+                                            //if there's a referenceTypes property then this extension references another...
+                                            if (analysis.referenceTypes) {
+                                                //this is for the summary display...
+                                                display.myStuff.dataTypeIcon = "icon_reference.png";
+                                                display.myStuff.dataTypeDescription = "This is reference to another resource";
+                                                //and this for the detail....
+                                                display.myStuff.isReference = true;
+
+
+                                            }
+
+
+                                        },
+                                        function (err) {
+                                            console.log('error getting SD', err)
+                                        }
+                                    );
+
+
+                                    //  slicedExtensions[path].push(profile);
+                                    display.myStuff.notePoint = path + profileUrl;
+                                    display.myStuff.notePoint = display.myStuff.notePoint.replace(/\./g, "_");
+
+                                } else {
+                                    //don't include if there is no profile to the extension
+                                    include = false;
+                                }
+
+
+                                display.type.push(typ)
+                            });
+                        } else {
+                            //don't include if no type...
+                            include = false;
+
+                        }
+                    } else {
+                        //for non extensions, the point that notes can be attached is the path...
+                        display.myStuff.notePoint = path.replace(/\./g, "_");
+                    }
+
+                    //look for fixed values. is there a property that starts with 'fixed'?
+                    angular.forEach(element, function (value, key) {    //iterate through all the properties...
+                        if (key.substr(0, 5) == 'fixed') {
+                            //console.log(key,value)
+                            display.myStuff.fixed = value;
+                            display.myStuff.fixedType = key;
+                        }
+
+                    });
+
+                    //look for coded values - is there a binding element
+                    if (element.binding) {
+                        display.myStuff.isCoded = true;
+                    }
+
+                    //get the permissable types
+                    if (element.type) {
+                        display.myStuff.type = "";
+                        element.type.forEach(function (typ) {
+                            display.myStuff.type += ', ' + typ.code
+                        });
+
+                        display.myStuff.type = display.myStuff.type.substr(2);
+
+                        //create a datatype icon based on the first element in the type
+                        display.myStuff.dataTypeIcon = "icon_datatype.gif";
+                        display.myStuff.dataTypeDescription = "This is a complex datatype";
+                        var code = element.type[0].code;
+                        if (simpleDT.indexOf(code) > -1) {
+                            display.myStuff.dataTypeIcon = "icon_primitive.png";
+                            display.myStuff.dataTypeDescription = "This is a primitive datatype"
+                        } else if (code == 'Extension') {
+                            //display.myStuff.dataTypeIcon= "icon_extension_simple.png";
+                            //display.myStuff.dataTypeDescription = "This was added by an extension"
+                            display.myStuff.isSimpleExtension = true;// "icon_extension_simple.png";
+
+
+                        } else if (code == 'Reference') {
+                            display.myStuff.dataTypeIcon = "icon_reference.png";
+                            display.myStuff.dataTypeDescription = "This is reference to another resource";
+                            display.myStuff.isReference = true;
+                            //now create a display for the references...
+                            display.myStuff.references = [] || display.myStuff.references;
+
+                            //create an array of all the resources referenced..
+                            element.type.forEach(function (typ) {
+                                if (typ.profile) {
+                                    typ.profile.forEach(function (url) {
+                                        var details = {url: url};
+                                        var ar = url.split('/');
+                                        details.display = ar[ar.length - 1];
+                                        details.specification = "http://hl7.org/fhir/" + details.display;
+                                        display.myStuff.references.push(details);
+                                    })
+                                }
+
+
+                            });
+
+
+                        } else if (code == 'BackboneElement') {
+                            delete display.myStuff.dataTypeIcon;//= "icon_reference.png";
+                        }
+
+                    }
+
+
+                    //remove the 'standard' path elements...
+                    var arIntersection = ar.filter(function (n) {
+                        return ['meta', 'id', 'implicitRules', 'text', 'contained', 'language'].indexOf(n) != -1
+                    });
+                    if (arIntersection.length > 0) {
+                        include = false
+                    }
+
+                    //if showRemoved is false then don't display elements that are marked as removed (max = '0')
+                    if (!showRemoved) {
+                        if (element.max == '0') {
+                            include = false;
+                        }
+                    }
+
+                    if (include) {
+                        displayProfile.push(display)
+                    }
+
+                });
+            }
+
+            return displayProfile;
         }
 
     }

@@ -49,9 +49,10 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
 
                     templateUrl: 'resourceBuilder/vsBrowser.html',
                     size:'lg',
-                    controller: function($scope,selectedvs,GetDataFromServer,$filter,selectVSFn) {
+                    controller: function($scope,selectedvs,GetDataFromServer,$filter,selectVSFn,$localStorage) {
 
 
+                        $scope.config = $localStorage.config;
                         $scope.newVS = {canSave : false};
                         //console.log(selectedvs)
 
