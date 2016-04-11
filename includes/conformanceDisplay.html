@@ -59,13 +59,16 @@
                 <a class="pull-right" href="#" ng-click="showProfile(selectedType.profile.reference)">{{selectedType.profile.reference}}</a>
                 <!-- a component (1.5) todisplay a profile-->
 
-                <show-profile profile="selectedProfile"
-                              onprofileselected = "showReferencedProfile(uri)"
-                              onextensionselected="showExtensionDetail(uri)"
-                              onvaluesetselected="showValueSetForProfile(uri)"></show-profile>
+                <show-profile profile="selectedProfile"></show-profile>
 
 
 <!--
+
+onprofileselected = "showReferencedProfile(uri)"
+                              onextensionselected="showExtensionDetail(uri)"
+                              onvaluesetselected="showValueSetForProfile(uri)">
+
+
 
                 <table  ng-show="filteredProfile" class="table table-condensed">
                     <tr><th>Path</th><th>DataType</th><th>Definition</th></tr>

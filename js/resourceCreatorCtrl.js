@@ -91,7 +91,7 @@ angular.module("sampleApp")
 
     //the config (ie server) has been update. We need to abandon the resource being built...
     $rootScope.$on('configUpdated',function(event){
-        console.log('new config');
+        //console.log('new config');
         //when the config (servers) change,then the most recent patient & profiles will do so as well...
         $scope.recent.patient = appConfigSvc.getRecentPatient();
         $scope.recent.profile = appConfigSvc.getRecentProfile();
@@ -557,7 +557,7 @@ angular.module("sampleApp")
             var ar = type.profile[0].split('/');
             $scope.resourceType = ar[ar.length-1];         //the type name (eg 'Practitioner')
             $scope.resourceProfile = type.profile[0];       //the profilefor this type. todo - could really lose $scope.resourceType...
-            console.log($scope.resourceType);
+            //console.log($scope.resourceType);
 
         }
 
@@ -913,7 +913,7 @@ angular.module("sampleApp")
     $scope.selectedProfileFromDialog = function(profile) {
         var clone = angular.copy(profile);
 
-        console.log(clone)
+        //console.log(clone)
 
         resourceCreatorSvc.setCurrentProfile(clone);
 
@@ -1020,7 +1020,7 @@ angular.module("sampleApp")
 
 
         $scope.config = config;
-        console.log(config);
+        //console.log(config);
         $scope.input = {};
 
 
@@ -1057,7 +1057,7 @@ angular.module("sampleApp")
         //called when the config is reset...
         $rootScope.$on('resetConfigObject',function(event) {
             //$scope.config = config;
-            console.log($localStorage.config)
+            //console.log($localStorage.config)
             setup();
 
 
@@ -1071,7 +1071,7 @@ angular.module("sampleApp")
 
 
         $scope.showLocalProfile = function(event,profile) {
-            console.log(event)
+            //console.log(event)
             //event.stopPropagation();
 
 
@@ -1127,7 +1127,7 @@ angular.module("sampleApp")
                 stop = $interval(function() {
                     $scope.elapsed --;
                     //$scope.$apply();
-                    console.log($scope.elapsed);
+                    //console.log($scope.elapsed);
                     if ($scope.elapsed < 0) {
                         //stopTimer();
                         $interval.cancel(stop);
@@ -1294,7 +1294,7 @@ angular.module("sampleApp")
         //this will attempt to hide the 'children' of known datatypes - like CodeableConcept
         //note that the parameter is a URL - not a URI
         $scope.showProfile = function(url) {
-            console.log($scope.config)
+            //console.log($scope.config)
             delete $scope.selectedProfile;
             if (url.substr(0,4) !== 'http') {
                 //this is a relative reference. Assume that the profile is on the current conformance server
@@ -1444,7 +1444,7 @@ angular.module("sampleApp")
 
             $scope.server =server;
             $scope.buildQuery();
-                console.log(server);
+                //console.log(server);
         };
 
         $scope.buildQuery = function() {
@@ -1543,7 +1543,7 @@ angular.module("sampleApp")
             resourceCreatorSvc.createConformanceQualityReport($scope.conformance).then(
                 function(report) {
                     $scope.qualityReport = report;
-                    console.log(report)
+                    //console.log(report)
                     $scope.waiting = false;
                 }
             );
@@ -1551,9 +1551,9 @@ angular.module("sampleApp")
         };
 
         //the handler for when a valueset is selected from within the <show-profile component on conformanceDisplay.html
-        $scope.showValueSetForProfile = function(url){
+        $scope.showValueSetForProfileDEP = function(url){
             //url is actually a URI
-            console.log(url);
+            //console.log(url);
 
             GetDataFromServer.getValueSet(url).then(
                 function(vs) {
@@ -1567,14 +1567,14 @@ angular.module("sampleApp")
         };
 
         //when the user selects a reference to a profiled resource....
-        $scope.showReferencedProfile = function(uri) {
+        $scope.showReferencedProfileDEP = function(uri) {
 
 
             //retrieve the profile based on its URI and re-set the selected profile
-            console.log(uri);
+        //    console.log(uri);
             GetDataFromServer.findConformanceResourceByUri(uri).then(
                 function(profile) {
-                    console.log(profile)
+                    //console.log(profile)
                     $scope.selectedProfile = profile;
                 },
                 function(err) {
@@ -1590,7 +1590,7 @@ angular.module("sampleApp")
             $scope.selectedType = type;
             
             delete $scope.filteredProfile;
-            console.log(type)
+            //console.log(type)
             //note that the reference is a URL - ie a direct reference to the SD - not a URI...
             if (type.profile && type.profile.reference) {
                 //there is an issue that the url for the 'base' resources is not resolving - eg
@@ -1601,7 +1601,7 @@ angular.module("sampleApp")
                     //this is needs to be treated as a URI, and we have to change it a bit...
                     reference=reference.replace('profiles','StructureDefinition')
 
-console.log(reference);
+//console.log(reference);
                     localFindProfileByUri(reference)
                     /*
                     GetDataFromServer.findConformanceResourceByUri(reference).then(
@@ -1648,7 +1648,7 @@ console.log(reference);
             $scope.waiting = true;
             resourceCreatorSvc.executeQuery('GET',$scope.query).then(
                 function(data){
-                    console.log(data);
+                   // console.log(data);
                     $scope.response = data;
                     //$scope.responseHeaders = data.headers();
 

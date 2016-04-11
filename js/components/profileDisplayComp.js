@@ -8,17 +8,15 @@ angular.module('sampleApp').component('showProfile',
             onprofileselected : '&'
         },
         templateUrl : 'js/components/profileDisplayTemplate.html',
-        controller: function (resourceCreatorSvc,GetDataFromServer,$uibModal) {
+        controller: function (resourceCreatorSvc,GetDataFromServer,$uibModal,Utilities) {
             var that = this;
 
             this.follow = true;
             this.profileHistory = [];       //a history of all profiles viewed
 
             this.$onChanges = function(obj) {
-                //console.log(obj);
                 this.selectedProfile = obj.profile.currentValue;
                 this.profileHistory.push(this.selectedProfile.url)
-                console.log(this.selectedProfile)
                 this.getTable();
                 this.getTree();
                 setTypeDisplay();
@@ -44,9 +42,42 @@ angular.module('sampleApp').component('showProfile',
             this.showProfile = function(element,type,uri) {
                 console.log(element,type,uri)
                 if (element.path.indexOf('xtension') > -1 ) {
-                    that.onextensionselected({uri:uri});
+                    //this is an extension
+                    that.onextensionselected({uri:uri});        //throw the event
+                    GetDataFromServer.findConformanceResourceByUri(uri).then(       //get the extension definition
+                        function(profile) {
+                            console.log(profile);
+                            var analysis = Utilities.analyseExtensionDefinition(profile);
+                            console.log(analysis)
+
+                            var modalInstance = $uibModal.open({
+                                templateUrl: "/js/components/profileDisplayShowExtension.html",
+                                controller: function ($scope, analysis, element) {
+                                    $scope.profile=analysis.StructureDefinition;
+                                    $scope.analysis = analysis;
+                                    $scope.element = element;
+                                    console.log(element)
+
+                                },
+                                resolve: {
+                                    analysis: function () {
+                                        return analysis;
+                                    },
+                                    element : function() {
+                                        return element;
+                                    }
+                                }
+                            })
+                        },
+                        function(err) {
+                            alert(angular.toJson(err))
+                        }
+                    )
+
+
                 } else {
-                    that.onprofileselected({uri:uri});
+                    that.onprofileselected({uri:uri});          //throw the event
+                    //this is a profile
                     if (that.follow) {
                         //set to follow links to other profiles...
                         GetDataFromServer.findConformanceResourceByUri(uri).then(
@@ -67,6 +98,7 @@ angular.module('sampleApp').component('showProfile',
 
             };
 
+            //show a modal that allows the user to query the associated valueset
             this.showValueSet = function(uri) {
                 console.log(uri);
                 that.onvaluesetselected({uri:uri});
@@ -100,9 +132,9 @@ angular.module('sampleApp').component('showProfile',
 
                                 }
                             )
-                                .finally(function(){
-                                    $scope.waiting = false;
-                                })
+                            .finally(function(){
+                                $scope.waiting = false;
+                            })
                         };
 
                         $scope.search = function(filter) {
@@ -111,7 +143,7 @@ angular.module('sampleApp').component('showProfile',
                                 function(result) {
                                     if (result.expansion) {
                                         $scope.data = result.expansion.contains;
-                                        if (! data1.expansion.contains) {
+                                        if (! result.expansion.contains) {
                                             alert('The expansion worked fine, but no expanded data was returned')
                                         }
                                     } else {
@@ -149,7 +181,7 @@ angular.module('sampleApp').component('showProfile',
 
             };
 
-
+            //build the tree view
             this.getTree = function() {
                 delete that.treeDisplay;
                 if (this.selectedProfile) {
@@ -157,6 +189,7 @@ angular.module('sampleApp').component('showProfile',
                 }
             };
 
+            //build the table
             this.getTable = function(){
 
                 delete that.filteredProfile;
@@ -169,6 +202,7 @@ angular.module('sampleApp').component('showProfile',
 
             }
 
+            //the type of the current profile (displayed upper right)
             function setTypeDisplay(){
                 var ar = that.selectedProfile.url.split('/');
                 that.selectedType= ar[ar.length-1];

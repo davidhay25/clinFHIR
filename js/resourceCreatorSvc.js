@@ -1102,7 +1102,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             //todo some profiles seem to have a url like http://hl7.org/fhir/profiles/MedicationDispense
            // uri = uri.replace('/profiles/','/StructureDefinition/');
 
-            console.log(url)
+            //console.log(url)
             
             
 
@@ -1121,7 +1121,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             return deferred.promise;
         },
         makeProfileDisplayFromProfile : function(profile) {
-            console.log(profile);
+            //console.log(profile);
             var arDisabled = [];          //this is a list of disabled items...
             var lst = [];           //this will be a list of elements in the profile to show.
             var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained'];
@@ -1228,7 +1228,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             //create a quality report (list of issues) for a conformance resource
             var lstIssue = [];
             var deferred = $q.defer();
-            console.log(conf)
+            //console.log(conf)
 
             var arQueryProfiles = []; //a list of queries - ie referenced profiles
             var arProfiles = [];    //a list of the profiles that have been retrieved...
@@ -1409,13 +1409,13 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                     //var profile = typ.profile[0].replace("http://hl7.org/fhir/StructureDefinition/","");
                                     var profileUrl = typ.profile[0];
 
-                                    console.log(profileUrl)
+                                    //console.log(profileUrl)
                                     //process Extension
                                     GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
                                         //GetDataFromServer.findResourceByUrlPromise('StructureDefinition', profileUrl).then(
                                         function (data) {
                                             var analysis = Utilities.analyseExtensionDefinition(data);
-                                            console.log(analysis)
+                                            //console.log(analysis)
                                             if (analysis.isCoded) {
                                                 display.myStuff.isCoded = true;
                                             }
