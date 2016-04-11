@@ -8,7 +8,7 @@ angular.module('sampleApp').component('showProfile',
             onprofileselected : '&'
         },
         templateUrl : 'js/components/profileDisplayTemplate.html',
-        controller: function (resourceCreatorSvc,GetDataFromServer) {
+        controller: function (resourceCreatorSvc,GetDataFromServer,$uibModal) {
             var that = this;
 
             this.follow = true;
@@ -70,6 +70,82 @@ angular.module('sampleApp').component('showProfile',
             this.showValueSet = function(uri) {
                 console.log(uri);
                 that.onvaluesetselected({uri:uri});
+
+                var modalInstance = $uibModal.open({
+                    templateUrl: "/js/components/profileDisplayShowValueSet.html",
+                    controller: function($scope,uri){
+                        $scope.input={};
+
+                        $scope.showAll = function() {
+                            $scope.waiting = true;
+                            GetDataFromServer.getExpandedValueSet($scope.vs.id).then(
+                                function(result){
+                                    $scope.showWaiting = false;
+                                    if (result.expansion) {
+                                        $scope.data = result.expansion.contains;
+                                        if (! result.expansion.contains) {
+                                            alert('The expansion worked fine, but no expanded data was returned')
+                                        }
+                                    } else {
+                                        alert('Sorry, no expansion occurred');
+                                    }
+                                },function(err){
+                                    $scope.showWaiting = false;
+                                    console.log(err);
+                                    if (err.status == 422) {
+                                        alert('There were too many concepts to expand - use a filter.');
+                                    } else {
+                                        alert('Sorry, there was an error performing the expansion: '+err.msg);
+                                    }
+
+                                }
+                            )
+                                .finally(function(){
+                                    $scope.waiting = false;
+                                })
+                        };
+
+                        $scope.search = function(filter) {
+                            $scope.waiting = true;
+                            GetDataFromServer.getFilteredValueSet($scope.vs.id,filter).then(
+                                function(result) {
+                                    if (result.expansion) {
+                                        $scope.data = result.expansion.contains;
+                                        if (! data1.expansion.contains) {
+                                            alert('The expansion worked fine, but no expanded data was returned')
+                                        }
+                                    } else {
+                                        alert('Sorry, no expansion occurred');
+                                    }
+                                },
+                                function(err) {
+                                    angular.toJson(err);
+                                }
+                            ).finally(function(){
+                                $scope.waiting = false;
+                            })
+
+                        };
+
+                        //this will retrieve the valueset from the terminology server by querying the uri...
+                        GetDataFromServer.getValueSet(uri).then(
+                            function(vs) {
+                                $scope.vs = vs;
+                                console.log(vs);
+
+                            }
+                        ).finally (function(){
+
+                        });
+
+                    },
+
+                    resolve: {
+                        uri: function () {
+                            return uri;
+                        }
+                    }
+                });
 
             };
 

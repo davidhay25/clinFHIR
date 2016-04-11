@@ -245,9 +245,17 @@
 
 
             <!-- a component (1.5) todisplay a profile-->
-<!--
-            <show-profile profile="selectedProfileForDisplay" onvaluesetselected="testVsSel(uri)"></show-profile>
--->
+<!---->
+            <div class="row">
+                <div class="col-md-1">
+                </div>
+                <div class="col-md-6">
+                    <show-profile profile="selectedProfileForDisplay" onvaluesetselected="testVsSel(uri)"></show-profile>
+                </div>
+            </div>
+
+
+
             <!-- a directive that allows a profile to be selected - not just a base one... -->
            <!-- <select-profile trigger="showFindProfileDialog"
                             all-resource-types="dynamic.resourcetypes"

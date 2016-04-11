@@ -205,7 +205,7 @@ angular.module("sampleApp")
                 var url = profile.url;
                 for (var i=0; i < $localStorage.recentProfile.length; i++) {
                     var recent = $localStorage.recentProfile[i];
-                    if (recent.profile.url == url && recent.profile.serverUrl == conformanceServerUrl) {
+                    if (recent.profile.url == url && recent.serverUrl == conformanceServerUrl) {
                         alreadyThere = true;
                         break;
                     }

@@ -94,7 +94,8 @@ angular.module("sampleApp").
                 function(data){
                     deferred.resolve(data.data);
                 },function(err){
-                    alert('error expanding ValueSet\n'+angular.toJson(err));
+                    deferred.reject(err);
+                    //alert('error expanding ValueSet\n'+angular.toJson(err));
                 }
             );
             return deferred.promise;
