@@ -143,7 +143,7 @@
             </uib-tab>
 
             <uib-tab  select="setHelpTopic('define')">
-                <uib-tab-heading>Define <span ng-show="selectedvs.define">({{selectedvs.define.concept.length}})</span></uib-tab-heading>
+                <uib-tab-heading>CodeSystem <span ng-show="selectedvs.define">({{selectedvs.define.concept.length}})</span></uib-tab-heading>
                 <br />
 
 
@@ -161,6 +161,13 @@
             <uib-tab heading="Compose"  select="setHelpTopic('compose')">
                 <br />
                 <uib-tabset>
+                    <uib-tab heading="Import" ng-show="selectedvs.compose.import">
+                        <br />
+                        <ul class="list-group">
+                            <li class="list-group-item" ng-repeat="imp in selectedvs.compose.import">{{imp}}</li>
+                        </ul>
+
+                    </uib-tab>
                     <uib-tab>
                         <uib-tab-heading>Includes </uib-tab-heading>
                         <br />
@@ -202,7 +209,7 @@
                     <uib-tab>
                         <uib-tab-heading>Excludes </uib-tab-heading>
                         <br />
-                        <div ng-repeat = "exclude in  selectedvs.compose.exclude">
+                        <div ng-repeat = "exclude in selectedvs.compose.exclude">
                             <h4>{{exclude.system}}</h4>
 
 
@@ -235,8 +242,9 @@
 
 
                     </uib-tab>
-                    
-                    
+
+
+
                 </uib-tabset>
 
 

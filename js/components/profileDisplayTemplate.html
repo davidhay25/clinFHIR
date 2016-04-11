@@ -26,7 +26,7 @@
                             <div ng-repeat="type in element.type">
                                 <em ng-repeat="p in type.profile">
 
-                                    <a href="#" ng-click="showProfile(p)">{{p}}</a>
+                                    <a href="#" ng-click="$ctrl.showProfile(element,type,p)">{{p}}</a>
 
 
 
@@ -119,6 +119,9 @@
                     </tr>
                 </table>
 
+            </uib-tab>
+            <uib-tab heading="Json">
+                <pre>{{$ctrl.selectedProfile | json}}</pre>
             </uib-tab>
 
 

@@ -3,7 +3,9 @@ angular.module('sampleApp').component('showProfile',
 
         bindings : {
             profile : '<',
-            onvaluesetselected : '&'
+            onvaluesetselected : '&',
+            onextensionselected : '&',
+            onprofileselected : '&'
         },
         templateUrl : 'js/components/profileDisplayTemplate.html',
         controller: function (resourceCreatorSvc) {
@@ -15,6 +17,18 @@ angular.module('sampleApp').component('showProfile',
                 console.log(this.selectedProfile)
                 this.getTable();
                 this.getTree();
+            };
+
+            //when an item with a profile is selected. could be an extension or a reference to a profiled resource or a profiled datatype
+            this.showProfile = function(element,type,uri) {
+                console.log(element,type,uri)
+                if (element.path.indexOf('xtension') > -1 ) {
+                    that.onextensionselected({uri:uri});
+                } else {
+                    that.onprofileselected({uri:uri});
+                }
+
+
             };
 
             this.showValueSet = function(uri) {

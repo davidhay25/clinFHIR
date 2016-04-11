@@ -15,7 +15,7 @@
 
     </div>
 
-    <div class="col-md-4 col-sm-4">
+    <div class="col-md-3 col-sm-3">
         <select class="form-control"
                 ng-change="selectServer(input.server)"
                 ng-options="value.name for value in config.allKnownServers track by value.name"
@@ -26,13 +26,15 @@
 
     <div class="col-md-3 col-sm-3">
         <button ng-show="input.server && input.localMode == 'serverquery'"
-                class="btn btn-primary pull-right" ng-click = "showConformance()">Conformance</button>
+                class="btn btn-primary pull-right" ng-click = "showConformance()">Read Conformance</button>
         <div>
             <button ng-show="input.server && input.localMode == 'serverquery' && conformance"
                     class="btn btn-link pull-right" ng-click = "removeConformance()">Query</button>
         </div>
     </div>
 
+    <div class="col-md-4 col-sm-4">
+    </div>
 
     <div class="col-md-1 col-sm-1">
 
@@ -42,6 +44,7 @@
     </div>
 </div>
 
+<hr ng-hide="startup"/>
 
 <!-- If a conformance was specified at startup, then show a banner-->
 <div class="row" ng-show="startup.conformanceUrl">

@@ -1111,7 +1111,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     var lst = that.makeProfileDisplayFromProfile;
                     deferred.resolve({lst:lst,profile:profile})
                 }, function (err) {
-                    alert(angular.toJson(err));
+                    //alert(angular.toJson(err));
                     deferred.reject();
                 }
             );
@@ -1125,7 +1125,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var arDisabled = [];          //this is a list of disabled items...
             var lst = [];           //this will be a list of elements in the profile to show.
             var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained'];
-            var dataTypes = ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference'];
+            var dataTypes = ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference','HumanName'];
             if (profile && profile.snapshot && profile.snapshot.element) {
 
                 profile.snapshot.element.forEach(function (item) {

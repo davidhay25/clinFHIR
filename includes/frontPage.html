@@ -38,7 +38,7 @@
 
 
 
-    <div class="col-md-4 col-sm-4 verticalLine">
+    <div class="col-md-3 col-sm-3 verticalLine">
 
         <div class="row">
             <div class="col-md-8 col-sm-8">
@@ -88,7 +88,7 @@
 
     </div>
 
-    <div class="col-md-4 col-sm-4 verticalLine">
+    <div class="col-md-5 col-sm-5 verticalLine">
         <div class="row">
             <div class="col-md-8 col-sm-8">
                 <h4>My recent Profiles</h4>
@@ -121,11 +121,23 @@
 
         <br />
 
-        <div class="list-group ">
+
+        <div ng-show="showingLocalProfile">
+
+            <div>
+                <strong>{{frontPageProfile.url}}</strong>
+                <button class="btn btn-link pull-right" ng-click="showingLocalProfile = false">Return to list</button>
+            </div>
+            <show-profile profile="frontPageProfile" onvaluesetselected="testVsSel(uri)"></show-profile>
+
+
+        </div>
+
+        <div ng-hide = "showingLocalProfile" class="list-group ">
             <a href="#" ng-class="{'list-group-item':true,active:profile.url == resourceCreatorSvc.getCurrentProfile().url}"
                ng-repeat="profile in recent.profile"
                ng-model="input.recentProfile" ng-click="selectProfile(profile)">
-                <!--<i class="glyphicon glyphicon-eye-open" ng-click="showLocalProfile(profile)"></i> -->
+                <i class="glyphicon glyphicon-eye-open" ng-click="showLocalProfile($event,profile)"></i>
                 {{profile.url}}
 
 

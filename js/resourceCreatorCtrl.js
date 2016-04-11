@@ -1070,8 +1070,16 @@ angular.module("sampleApp")
         });
 
 
-        $scope.showLocalProfile = function(profile) {
+        $scope.showLocalProfile = function(event,profile) {
+            console.log(event)
+            //event.stopPropagation();
 
+
+            $scope.showingLocalProfile = true;
+
+            $scope.frontPageProfile = profile;
+
+            /* for some reason, componnet isn't showingin the modal...
             var modalInstance = $uibModal.open({
                 template: "<div class='modal-body'>X<show-profile profile='profile'></show-profile>Y</div>",
                 controller: function(profile){
@@ -1085,6 +1093,7 @@ angular.module("sampleApp")
                     }
                 }
             });
+            */
         }
 
         function setup() {
@@ -1173,6 +1182,7 @@ angular.module("sampleApp")
         };
 
         //displays the 'select profile' dialog...
+        //<select-profile on the resourceCreator page...
         $scope.findProfile = function() {
             $scope.showFindProfileDialog.open();    //note that this is defined in the parent controller...
             //note that the function $scope.selectedProfile in the parnt controller is invoked on successful selection...
@@ -1264,7 +1274,8 @@ angular.module("sampleApp")
         $localStorage.queryHistory = $localStorage.queryHistory || [];
 
 
-        $scope.showValueSet = function (vsUrl) {
+        //replaced by showValueSetForProfile below...
+        $scope.showValueSetDEP = function (vsUrl) {
             
 
             GetDataFromServer.getValueSet(vsUrl).then(
@@ -1538,8 +1549,41 @@ angular.module("sampleApp")
             );
 
         };
-        
-        
+
+        //the handler for when a valueset is selected from within the <show-profile component on conformanceDisplay.html
+        $scope.showValueSetForProfile = function(url){
+            //url is actually a URI
+            console.log(url);
+
+            GetDataFromServer.getValueSet(url).then(
+                function(vs) {
+
+                    $scope.showVSBrowserDialog.open(vs);
+
+                }
+            ).finally (function(){
+                $scope.showWaiting = false;
+            });
+        };
+
+        //when the user selects a reference to a profiled resource....
+        $scope.showReferencedProfile = function(uri) {
+
+
+            //retrieve the profile based on its URI and re-set the selected profile
+            console.log(uri);
+            GetDataFromServer.findConformanceResourceByUri(uri).then(
+                function(profile) {
+                    console.log(profile)
+                    $scope.selectedProfile = profile;
+                },
+                function(err) {
+                    console.log(err)
+                }
+            )
+
+        };
+
         //when a resource type is selected in the list
         $scope.showType = function(type){
             delete $scope.selectedProfile;
@@ -1549,8 +1593,51 @@ angular.module("sampleApp")
             console.log(type)
             //note that the reference is a URL - ie a direct reference to the SD - not a URI...
             if (type.profile && type.profile.reference) {
-                $scope.showProfile(type.profile.reference);
-                //$scope.showProfile(type.profile && type.profile.reference);
+                //there is an issue that the url for the 'base' resources is not resolving - eg
+                //http://hl7.org/fhir/profiles/Account *should* be a direft reference to the SD for Account - but it doesn't
+                //for the moment we'll do a 'search by url' for these ones...
+                var reference = type.profile.reference;
+                if (reference.indexOf('http://hl7.org/fhir/')> -1) {
+                    //this is needs to be treated as a URI, and we have to change it a bit...
+                    reference=reference.replace('profiles','StructureDefinition')
+
+console.log(reference);
+                    localFindProfileByUri(reference)
+                    /*
+                    GetDataFromServer.findConformanceResourceByUri(reference).then(
+                        function(profile){
+                            $scope.selectedProfile = profile;
+                            $scope.filteredProfile = resourceCreatorSvc.makeProfileDisplayFromProfile(profile)
+                        },
+                        function(err) {
+                            alert(angular.toJson(err))
+                        }
+                    )
+                    */
+                } else {
+                    //this is a 'real' reference - ie it is a resolvable URL...
+                    $scope.showProfile(reference);
+                }
+            } else {
+                //there is no profile - only a 'type' element.
+                var type = type.type;       //this is the base resource type
+                var uri = 'http://hl7.org/fhir/StructureDefinition/'+type;
+                localFindProfileByUri(uri);     //contained function
+            }
+
+            function localFindProfileByUri(uri){
+                $scope.waiting = true;
+                GetDataFromServer.findConformanceResourceByUri(uri).then(
+                    function(profile){
+                        $scope.selectedProfile = profile;
+                        $scope.filteredProfile = resourceCreatorSvc.makeProfileDisplayFromProfile(profile)
+                    },
+                    function(err) {
+                        alert(angular.toJson(err))
+                    }
+                ).finally(function(){
+                    $scope.waiting = false;
+                })
             }
 
         };
