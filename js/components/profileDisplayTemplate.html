@@ -1,6 +1,31 @@
 <!-- template for the profile view component - profileDisplayComp.js-->
+
 <div class="row">
+
+    <style>
+        .link {
+            color:blue;
+            cursor: pointer;
+        }
+    </style>
+
     <div class="col-sm-12 col-md-12">
+
+        <div class="pull-right">
+
+
+             <span uib-dropdown on-toggle="toggled(open)">
+              <div class="btn btn-link" uib-dropdown-toggle>
+                  {{$ctrl.selectedType}}
+              </div>
+              <ul class="dropdown-menu" uib-dropdown-menu aria-labelledby="simple-dropdown">
+                  <li ng-repeat="p in $ctrl.profileHistory">
+                      <div class="btn btn-link" ng-click="$ctrl.reloadProfile(p)">{{p}}</div>
+                  </li>
+
+              </ul>
+            </span>
+        </div>
 
         <uib-tabset ng-show="$ctrl.filteredProfile">
 
@@ -17,18 +42,16 @@
                         <td valign="top">{{element.definition}}
                             <div><em>
 
-                                <a href="#" ng-click="$ctrl.showValueSet(element.binding.valueSetReference.reference)">
+                                <div class="link" ng-click="$ctrl.showValueSet(element.binding.valueSetReference.reference)">
                                     {{element.binding.valueSetReference.reference}}
-                                </a>
+                                </div>
 
 
                             </em></div>
                             <div ng-repeat="type in element.type">
                                 <em ng-repeat="p in type.profile">
 
-                                    <a href="#" ng-click="$ctrl.showProfile(element,type,p)">{{p}}</a>
-
-
+                                    <div class="link" ng-click="$ctrl.showProfile(element,type,p)">{{p}}</div>
 
                                 </em>
                             </div>

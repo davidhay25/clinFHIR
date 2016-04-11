@@ -25,7 +25,7 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                 $uibModal.open({
                     templateUrl: 'resourceBuilder/selectProfile.html',
                     size:'lg',
-                    controller: function($scope,type,profileSelectedFn,allResourceTypes,vo,recent) {
+                    controller: function($scope,type,profileSelectedFn,allResourceTypes,vo,recent,config) {
 
                         $scope.heading = "Find Profile";
 
@@ -40,13 +40,13 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                         }
 
 
-
+                        $scope.config = config;
                         $scope.recent = recent;
                         $scope.allResourceTypes = allResourceTypes;
                         $scope.results = {};
                         $scope.activeTab = "1"; //the search tab
                         $scope.tab = {};
-                        $scope.selectedProfile = {};
+
                         $scope.results.type = type;
                         $scope.profileSelectedFn = profileSelectedFn;
 
@@ -68,7 +68,7 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                             $scope.showMessage = false;
                             $scope.showWaiting = true;
 
-                            delete $scope.selectedProfileJson;
+                            delete $scope.selectedProfile;
 
                             var searchString = "StructureDefinition?";
 
@@ -104,8 +104,10 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
 
                             searchString += "&_count=100";
                             
-                            console.log(searchString);
-                            $scope.query=searchString;
+                            config.log('Profile search string',searchString);
+
+
+                            $scope.query=   searchString;
 
 
 
@@ -186,22 +188,6 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
 
                             $scope.selectedProfile = entry.resource;     //save the original profile before we hack it...
 
-                           // var dispProfile = angular.copy(entry.resource);
-
-                            //selectedProfile
-
-
-                            //immediatly select and return
-                            //$scope.$close(dispProfile);
-
-                           // delete dispProfile.text;        //because the text can be huge...
-
-                            //$scope.extAnalysis = Utilities.analyseExtensionDefinition($scope.selectedProfile);
-                            //console.log($scope.extAnalysis);
-
-
-                          //  $scope.selectedProfileJson = angular.toJson(dispProfile,true);
-                           // $scope.selectedProfileJson = angular.toJson(dispProfile,true);
 
                         }
                     },
@@ -222,6 +208,9 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                         },
                         recent : function() {
                             return appConfigSvc.getRecentProfile();
+                        },
+                        config : function(){
+                            return appConfigSvc.config();
                         }
                     }
                 }).result.then(function(selectedProfile){

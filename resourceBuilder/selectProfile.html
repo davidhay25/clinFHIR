@@ -138,7 +138,7 @@
                         <!-- The selected profile-->
 
                         <!-- a component (1.5) todisplay a profile-->
-                        <show-profile profile="selectedProfile" onvaluesetselected="testVsSel(uri)"></show-profile>
+                        <show-profile profile="selectedProfile"></show-profile>
 
                     </div>
 
@@ -161,24 +161,6 @@
 
             </uib-tab>
 
-<!--
-
-            <tab heading="results-table">
-                <table width="100%">
-                    <tr>
-                        <th>Id</th><th>Name</th><th>Description</th>
-                    </tr>
-                    <tr ng-repeat="ent in selectedProfiles.entry">
-                        <td>{{ent.resource.id}}</td>
-                        <td>{{ent.resource.name}}</td>
-                        <td>{{ent.resource.description}}</td>
-                    </tr>
-                </table>
-
-
-
-            </tab>
-            -->
 
 
         </uib-tabset>
@@ -187,18 +169,17 @@
     <div class="modal-footer">
 
         <div class="row">
-            <div class="col-md-8 col-sm-8">
+            <div class="col-md-9 col-sm-9">
                 <div class="text-left">
-                    <div>Query: {{query}}</div>
-                    <!--
-                    <em>Select an Extension. Note that the display when one is displayed is simplified to save display space.</em>
-                    -->
+                    <div>{{config.servers.conformance}}</div>
+
+                    <div>{{query}}</div>
                 </div>
 
             </div>
-            <div class="col-md-4 col-sm-4">
+            <div class="col-md-3 col-sm-3">
                 <button class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
-                <button ng-show="selectedProfileJson" class="btn btn-primary" ng-click="$close()">Select</button>
+                <button ng-show="selectedProfile" class="btn btn-primary" ng-click="$close()">Select</button>
             </div>
         </div>
 
