@@ -535,6 +535,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         buildResource : function(type,treeObject,treeData,config) {
             //create the sample resource...
+            console.log(treeData);
+            console.log(treeObject);
             var resource = {resourceType:type};
             if (config.profile) {
                 resource.meta = resource.meta || {};
@@ -575,7 +577,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                    
                 }
 
-                if (lnode.fragment) {
+                //a value of false is valid for boolean - hence the simple check is not enough...
+                if (typeof lnode.fragment != 'undefined'&& lnode.fragment != null ) {
+                //if (lnode.fragment) {
                     //if the 'resource' is an array, then there can be multiple elements...
 
                     //this should never occur..
@@ -605,7 +609,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
                         } else {
-                            
+                            //if a repeating elment then it is in an array...
                             if (cr) {
                                 resource[propertyName] = resource[propertyName] || []
                                 resource[propertyName].push(lnode.fragment)

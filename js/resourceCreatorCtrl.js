@@ -17,7 +17,7 @@ angular.module("sampleApp")
 
     $scope.doDefault=false;         //whether to have default patient & profile <<<<< for debug only!
 
-            
+
 
     var profile;                    //the profile being used as the base
     var type;                       //base type
@@ -77,22 +77,6 @@ angular.module("sampleApp")
     $scope.recent.profile = appConfigSvc.getRecentProfile();
 
 
-            //======== file upload
-
-
-
-/*
-            $scope.add = function(){
-                var f = document.getElementById('file').files[0],
-                    r = new FileReader();
-                r.onloadend = function(e){
-                    var data = e.target.result;
-                    console.log(data);
-                    //send you binary data via $http or $resource or do anything else with it
-                }
-                r.readAsBinaryString(f);
-            }
-            */
 
 
 
@@ -157,7 +141,7 @@ angular.module("sampleApp")
     };
 
 
-
+/*
     //save the current patient in the config services - so other controllers/components can access it...
     if ($scope.doDefault) {
         $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/carePlan";
@@ -166,7 +150,7 @@ angular.module("sampleApp")
     }
 
 
-
+*/
 
     //change the server & other config stuff
     $scope.showConfig = function() {
@@ -258,6 +242,7 @@ angular.module("sampleApp")
             */
 
 
+    //load existing data for the current patient
     function loadPatientDetails(cb) {
 
         console.log(appConfigSvc.getCurrentPatient())
@@ -472,7 +457,7 @@ angular.module("sampleApp")
 
     $scope.$on('treebuilt',function(){
 
-        //called after the tree has been built. Mainly to support the saving
+        //called after the tree has been built. Mainly to support the saving and validating
         if ($scope.savingResource) {
             delete $scope.savingResource;
             saveResourceToServer()
@@ -645,7 +630,7 @@ angular.module("sampleApp")
         //var fragment = resourceCreatorSvc.getJsonFragmentForDataType($scope.dataType,$scope.results);
         //now add the new property to the tree...
         var treeNode = {id : new Date().getTime(),state:{opened:true},fragment:fragment.value,display:fragment.text}
-        treeNode.parent =  $scope.selectedNodeId;
+        treeNode.parent =  $scope.selectedNodeId;   //the reference to the parent...
         treeNode.ed = $scope.selectedChild;     //the ElementDefinition that we are adding
 
         var display = $scope.selectedChild.myData.display;  //from the ED...
