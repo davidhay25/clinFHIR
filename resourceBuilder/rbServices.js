@@ -66,12 +66,12 @@ angular.module("sampleApp").
             return $http.get(qry);
         },
         generalFhirQuery : function(qry) {
-            //return an expanded valueset. Used by renderProfile Should only use for valuesets that aren't too large...
-            //takes the Id of the valueset on the terminology server - not the url...
+            //runs an ad-hoc query against the data server
             var deferred = $q.defer();
             var config = appConfigSvc.config();
-            var qry = appConfigSvc.getCurrentDataServerBase() + qry;
-            //var qry = config.servers.data + "/"+qry;
+
+            //var qry = appConfigSvc.getCurrentDataServerBase() + qry;
+            var qry = config.servers.data + "/"+qry;
 
             $http.get(qry).then(
                 function(data){

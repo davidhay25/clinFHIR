@@ -37,7 +37,7 @@ angular.module("sampleApp")
         $rootScope.startup = {conformanceUrl:conformanceUrl};     //the query controller will automatically download and display this resource
     };
 
-    //check for cmmands in the usrlll
+    //check for commands in the url
     var params = $location.search();
     if (params) {
         $scope.startupParams = params;
@@ -60,7 +60,7 @@ angular.module("sampleApp")
     $scope.ResourceUtilsSvc = ResourceUtilsSvc;
     $scope.resourceCreatorSvc = resourceCreatorSvc;     //used to get the parked resources
 
-
+/*
     //the newpatient event is fired when a new patient is selected. We need to create a new resource...
      $rootScope.$on('newpatientDEP',function(event,patient){
 
@@ -70,6 +70,7 @@ angular.module("sampleApp")
 
     });
 
+*/
     //config - in particular the servers defined. The samples will be going to the data server...
 
     $scope.recent = {};
@@ -400,6 +401,10 @@ angular.module("sampleApp")
             ed:rootEd});
 
         navigatorNodeSelected('root',rootEd);   //this will display the child nodes of the root
+        
+        //used for the initial display
+        $scope.selectedNode = getNodeFromId('root');
+
 
         //add the current patient
         var ed = resourceCreatorSvc.getPatientOrSubjectReferenceED();
@@ -549,6 +554,7 @@ angular.module("sampleApp")
 
         //the datatype of the selected element. This will display the data entry form.
         $scope.dataType = ed.type[inx].code;
+        
         if ($scope.dataType == 'Reference') {
 
             //this is a reference to another resource. We need to get the exact type that was selected...
@@ -648,7 +654,12 @@ angular.module("sampleApp")
 
         if ($scope.selectedNode) {
             var n = getNodeFromId($scope.selectedNode.id);
-            n.state.selected = true;
+            if (n && n.state) {
+                n.state.selected = true;
+            } else {
+                console.log('issue: nodeid ' + $scope.selectedNode.id + ' not found in saveNewDataType')
+            }
+
         }
 
 

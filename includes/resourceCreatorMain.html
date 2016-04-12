@@ -1,4 +1,10 @@
 
+<style>
+    .borderForDetail {
+        border-left: thin solid darkgrey;
+        border-right: thin solid darkgrey;
+    }
+</style>
 
     <div class="row">
         <div class="col-md-3">
@@ -14,16 +20,19 @@
 
 
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 borderForDetail" >
 
             <div ng-show="selectedNode">
                 <h4>Element details: <em>{{selectedNode.ed.path}}</em></h4>
 
                 {{selectedNode.display}}
 
+                <!-- Show the remove node for everything except the root...-->
                 <div class="row">
                     <div class="col-md-12">
-                        <button class="btn btn-danger pull-right" ng-click="removeNode()">Remove</button>
+                        <button class="btn btn-danger pull-right"
+                                ng-hide = "selectedNode.id == 'root'"
+                                ng-click="removeNode()">Remove</button>
                     </div>
 
                 </div>

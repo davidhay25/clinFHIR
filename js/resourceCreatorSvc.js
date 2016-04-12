@@ -535,8 +535,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         buildResource : function(type,treeObject,treeData,config) {
             //create the sample resource...
-            console.log(treeData);
-            console.log(treeObject);
+            //console.log(treeData);
+            //console.log(treeObject);
             var resource = {resourceType:type};
             if (config.profile) {
                 resource.meta = resource.meta || {};
@@ -584,7 +584,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     //this should never occur..
                     if (angular.isArray(resource)) {
-                        alert('array passed')
+                        alert('array passed  - This is an error, please tell the author of clinFHIR!')
                         var o = {};
                         o[propertyName] = lnode.fragment;
                         resource.push(o)
@@ -1129,7 +1129,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             return deferred.promise;
         },
-        makeProfileDisplayFromProfile : function(profile) {
+        makeProfileDisplayFromProfile : function(inProfile) {
+
+            var profile = angular.copy(inProfile);      //w emuck around a bit with the profile, so use a copy
             //console.log(profile);
             var arDisabled = [];          //this is a list of disabled items...
             var lst = [];           //this will be a list of elements in the profile to show.

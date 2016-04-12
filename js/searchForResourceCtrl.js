@@ -3,7 +3,7 @@
 //templateUrl: "/modalTemplates/searchForResource.html",
 
 angular.module("sampleApp")
-    .controller('searchForResourceCtrl', function ($scope, vo,Utilities,GetDataFromServer,profileUrl) { //$modalInstance,
+    .controller('searchForResourceCtrl', function ($scope, vo,Utilities,GetDataFromServer,profileUrl,appConfigSvc,ResourceUtilsSvc) { //$modalInstance,
         //console.log(vo)
         $scope.profileUrl = profileUrl;
         $scope.typeWasSpecified = true;
@@ -14,11 +14,14 @@ angular.module("sampleApp")
         $scope.anyResource = false;
         $scope.tab = {tabQuery : true};
         $scope.resourceTypeList = [];
+        $scope.config = appConfigSvc.config();
 
 
+        $scope.ResourceUtilsSvc = ResourceUtilsSvc;
+        
         var searchParamsByName = {};  //indexed by name...
 
-        console.log(vo)
+        //console.log(vo)
 
         //if there was no resource type passed in, then need to allow the user to select a resource type -
         //but only from the list of resources that are 'reference'
@@ -38,10 +41,9 @@ angular.module("sampleApp")
             //console.log(type)
             $scope.resourceType= type.name;
             findSearchParams();     //there a possible race condition here if the ocnformance hasn't been loaded - but unlikley I think
-        //console.log($scope.searchParams)
         };
 
-        //retireve the conformane resource from the current data server so we know what search paramters are avaible
+        //retireve the conformane resource from the current data server so we know what search paramters are available
         //returns a promise from $http
         Utilities.getConformanceResourceForServerType('data').then(
             function(data) {
@@ -72,7 +74,8 @@ angular.module("sampleApp")
         }
 
         $scope.search = function() {
-            delete $scope.selectedResource;
+            delete $scope.selectedResources;    //the bundle of returned resources...
+            delete $scope.selectedResource;     //the selected resource. 
             delete $scope.selectedResourceJson;
 
             //build the search string;
@@ -80,8 +83,7 @@ angular.module("sampleApp")
             angular.forEach($scope.results,function(value,key){
                 console.log(value,key)
                 var param = searchParamsByName[key];    //the parameter defininition
-
-
+                
                 if (value) {
                     if (param.type == 'token') {
                         //if a token then use the text modifier to search the description rather than the code...
@@ -89,9 +91,6 @@ angular.module("sampleApp")
                     } else {
                         searchString += key + '=' + value + '&';
                     }
-
-
-
                 }
 
 
@@ -101,8 +100,7 @@ angular.module("sampleApp")
             $scope.searchString = searchString;
             $scope.loading = true;
 
-
-
+            //this will actually check the data server...
             GetDataFromServer.generalFhirQuery(searchString).then(
                 function(data){
 
@@ -123,18 +121,14 @@ angular.module("sampleApp")
                         })
 
                     } else {
-
                         $scope.selectedResources = data;
                     }
 
-
-                    $scope.tab.tabQuery = false;
-                    $scope.tab.tabResults = true;
-                   // console.log($scope.selectedResources)
-                    $scope.loading = false;
                 },function(err){
-                    $scope.loading = false;
-                });
+
+                }).finally(function(){
+                $scope.loading = false;
+            });
 
         };
 
