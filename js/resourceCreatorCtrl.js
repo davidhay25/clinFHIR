@@ -17,18 +17,7 @@ angular.module("sampleApp")
 
     $scope.doDefault=false;         //whether to have default patient & profile <<<<< for debug only!
 
-
-            //----------
-
-          //  $scope.testProfile = {name:'this is a test'}
-            //$scope.changeP = function(){
-        //        $scope.testProfile = {name:'whoa, changed!'}
-          //  }
-           // $scope.testVsSel = function(uri){
-             //   alert(uri);
-           // }
-
-            //---------
+            
 
     var profile;                    //the profile being used as the base
     var type;                       //base type
@@ -87,6 +76,26 @@ angular.module("sampleApp")
     $scope.recent.patient = appConfigSvc.getRecentPatient();
     $scope.recent.profile = appConfigSvc.getRecentProfile();
 
+
+            //======== file upload
+
+
+
+/*
+            $scope.add = function(){
+                var f = document.getElementById('file').files[0],
+                    r = new FileReader();
+                r.onloadend = function(e){
+                    var data = e.target.result;
+                    console.log(data);
+                    //send you binary data via $http or $resource or do anything else with it
+                }
+                r.readAsBinaryString(f);
+            }
+            */
+
+
+
     //============== event handlers ===================
 
     //the config (ie server) has been update. We need to abandon the resource being built...
@@ -104,8 +113,6 @@ angular.module("sampleApp")
     $rootScope.$on('profileSelected',function(event,profile){
         $scope.dirty=false;     //a new form is loaded
         $scope.parkedHx = false;
-        //appConfigSvc.addToRecentProfile(clone);
-        //$scope.recent.profile = appConfigSvc.getRecentProfile();    //re-establish the recent profile list
         setUpForNewProfile(profile);
     });
 
@@ -116,7 +123,7 @@ angular.module("sampleApp")
         appConfigSvc.addToRecentPatient(patient);
         $scope.recent.patient = appConfigSvc.getRecentPatient();
 
-        loadPatientDetails(function(){
+        loadPatientDetails(function(patient){
             setUpForNewProfile(resourceCreatorSvc.getCurrentProfile());
         });
     });
@@ -180,13 +187,15 @@ angular.module("sampleApp")
         })
     };
 
-
+/*
 
     if ($scope.doDefault) {
         //sample patient data...
         supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
             //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
             function (allResources) {
+
+                console.log(allResources)
                 //the order is significant - allResources must be set first...
                 appConfigSvc.setAllResources(allResources);
 
@@ -246,15 +255,20 @@ angular.module("sampleApp")
             });
 
     }
+            */
 
 
     function loadPatientDetails(cb) {
+
+        console.log(appConfigSvc.getCurrentPatient())
+
         supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
             //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
             function (allResources) {
                 //the order is significant - allResources must be set first...
                 appConfigSvc.setAllResources(allResources);
 
+                console.log(allResources)
 
                 //todo - all this stuff should be in a service somewhere...
                 $scope.outcome.resourceTypes = [];
@@ -911,17 +925,20 @@ angular.module("sampleApp")
 
     //when a profile is selected...  This is configured in the directive...  Now called from the front page
     $scope.selectedProfileFromDialog = function(profile) {
-        var clone = angular.copy(profile);
+
 
         //console.log(clone)
 
-        resourceCreatorSvc.setCurrentProfile(clone);
+        resourceCreatorSvc.setCurrentProfile(profile);
 
         $scope.dirty=false;     //a new form is loaded
         $scope.parkedHx = false;
+        //create aclone to store in the history, as we'll hack the profile as part of the builder (ehgwhen finding child nodes)
+        var clone = angular.copy(profile);
         appConfigSvc.addToRecentProfile(clone);
+
         $scope.recent.profile = appConfigSvc.getRecentProfile();    //re-establish the recent profile list
-        setUpForNewProfile(clone);
+        setUpForNewProfile(profile);
 
     };
 
@@ -1044,10 +1061,32 @@ angular.module("sampleApp")
         }
         
     })
-    .controller('frontCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,$interval){
+    .controller('frontCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,$interval,GetDataFromServer){
         //
 
+
+
+
         $scope.input = {};
+        $scope.input.showingLocalProfile = false;   //true when the currently selected profile is viewed...
+        //when a new resource has been uploaded. Add to the list and select...
+        $scope.resourceUploaded = function(url) {
+            //alert(url);
+
+            GetDataFromServer.getConformanceResourceByUrl(url).then(
+                function(profile){
+                    appConfigSvc.addToRecentProfile(profile);
+                    $scope.recent.profile = appConfigSvc.getRecentProfile();    //re-establish the recent profile list
+                },
+                function(err) {
+                    alert("error retrieving resource\n"+angular.toJSON(err))
+                }
+            )
+
+        };
+
+
+
         var config;
         setup();        //will set config value - todo: this seems a bit clumsy...
 
@@ -1074,27 +1113,12 @@ angular.module("sampleApp")
             //console.log(event)
             //event.stopPropagation();
 
-
-            $scope.showingLocalProfile = true;
-
             $scope.frontPageProfile = profile;
+            $scope.input.showingLocalProfile = true;
 
-            /* for some reason, componnet isn't showingin the modal...
-            var modalInstance = $uibModal.open({
-                template: "<div class='modal-body'>X<show-profile profile='profile'></show-profile>Y</div>",
-                controller: function(profile){
-                    $scope.profile = profile;
-                    console.log($scope.profile)
-                },
-                size: 'lg',
-                resolve: {
-                    profile: function () {
-                        return $scope.localSelectedProfile;
-                    }
-                }
-            });
-            */
-        }
+
+
+        };
 
         function setup() {
             config = $localStorage.config;

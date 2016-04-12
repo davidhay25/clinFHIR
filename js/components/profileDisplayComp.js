@@ -15,11 +15,15 @@ angular.module('sampleApp').component('showProfile',
             this.profileHistory = [];       //a history of all profiles viewed
 
             this.$onChanges = function(obj) {
-                this.selectedProfile = obj.profile.currentValue;
+                that.selectedProfile = obj.profile.currentValue;
+                console.log(that.selectedProfile)
+                this.profileHistory = [];
                 this.profileHistory.push(this.selectedProfile.url)
+
                 this.getTable();
                 this.getTree();
                 setTypeDisplay();
+                console.log('change selected in the profileDisplay component...')
             };
 
 
@@ -185,7 +189,7 @@ angular.module('sampleApp').component('showProfile',
             this.getTree = function() {
                 delete that.treeDisplay;
                 if (this.selectedProfile) {
-                    that.treeDisplay = resourceCreatorSvc.createProfileTreeDisplay(this.selectedProfile, false);
+                    that.treeDisplay = resourceCreatorSvc.createProfileTreeDisplay(that.selectedProfile, false);
                 }
             };
 
@@ -195,8 +199,8 @@ angular.module('sampleApp').component('showProfile',
                 delete that.filteredProfile;
                 if (this.selectedProfile) {
 
-
-                    that.filteredProfile = resourceCreatorSvc.makeProfileDisplayFromProfile(this.selectedProfile);
+                    //get the rows in the table...
+                    that.filteredProfile = resourceCreatorSvc.makeProfileDisplayFromProfile(that.selectedProfile);
 
                 }
 

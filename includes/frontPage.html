@@ -2,7 +2,12 @@
 <style>
     .myLink {
         padding-top: 8px;
+
     }
+    .padRight {
+        padding-right: 8px;
+    }
+
     .pass {
         color:green;
     }
@@ -12,6 +17,15 @@
     .verticalLine {
         border-right: thin solid darkgrey;
     }
+    .myactive {
+       background-color: lightgrey;
+    }
+
+
+     .background {
+         background-color: lightyellow;
+     }
+
 </style>
 
 
@@ -90,11 +104,18 @@
 
     <div class="col-md-5 col-sm-5 verticalLine">
         <div class="row">
-            <div class="col-md-8 col-sm-8">
+            <div class="col-md-4 col-sm-4">
                 <h4>My recent Profiles</h4>
             </div>
-            <div class="col-md-4 col-sm-4">
+            <div class="col-md-8 col-sm-8">
                 <a href="#" class="pull-right myLink" ng-click="findProfile()">Find Profile</a>
+
+
+                <a href="#" ng-hide="showUpload" class="pull-right myLink padRight"
+                   ng-click="showUpload = true">Show Upload</a>
+                <a href="#" ng-show="showUpload" class="pull-right myLink padRight"
+                   ng-click="showUpload = false">Hide Upload </a>
+
             </div>
         </div>
 
@@ -117,33 +138,34 @@
             </div>
         </div>
 
-
-
         <br />
 
 
-        <div ng-show="showingLocalProfile">
-
+        <div ng-show="input.showingLocalProfile">
             <div>
                 <strong>{{frontPageProfile.url}}</strong>
-                <button class="btn btn-link pull-right" ng-click="showingLocalProfile = false">Return to list</button>
+                <button class="btn btn-link pull-right" ng-click="input.showingLocalProfile = false">Return to list</button>
             </div>
             <show-profile profile="frontPageProfile" onvaluesetselected="testVsSel(uri)"></show-profile>
-
-
         </div>
 
-        <div ng-hide = "showingLocalProfile" class="list-group ">
-            <a href="#" ng-class="{'list-group-item':true,active:profile.url == resourceCreatorSvc.getCurrentProfile().url}"
+        <ul ng-hide = "showingLocalProfile" class="list-group ">
+            <li href="#" ng-class="{'list-group-item':true,myactive:profile.url == resourceCreatorSvc.getCurrentProfile().url}"
                ng-repeat="profile in recent.profile"
-               ng-model="input.recentProfile" ng-click="selectProfile(profile)">
+               ng-model="input.recentProfile" ng-click="selectProfile(profile)"
+                style="cursor: pointer">
                 <i class="glyphicon glyphicon-eye-open" ng-click="showLocalProfile($event,profile)"></i>
                 {{profile.url}}
 
 
 
-            </a>
-        </div>
+            </li>
+
+            <!-- The resource upload option...-->
+            <li class="list-group-item background" ng-show="showUpload">
+                <resource-upload onresourceuploaded="resourceUploaded(url)"></resource-upload>
+            </li>
+        </ul>
 
     </div>
 

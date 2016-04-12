@@ -54,7 +54,13 @@
 
         <div class="row" ng-switch-default>
             <div class="col-md-12">
+
+                <!--
                 <p ng-bind-html="entry.resource.text.div"></p>
+-->
+                {{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}
+
+
             </div>
         </div>
 

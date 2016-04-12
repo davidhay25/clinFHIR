@@ -475,7 +475,12 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 elementDef.myData.displayClass += "backboneElement";
                             }
 
-                            children.push(elementDef);
+                            //check the max value - forge leaves these elements in the snapshot...
+
+                            if (elementDef.max != '0') {
+                                children.push(elementDef);
+                            }
+
                         }
                     }
 
@@ -1170,6 +1175,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     if (!disabled && ar[ar.length - 1] == 'extension') {
                         disabled = true;    //by default extensions are disabled...
                         //if the extension has a profile type then include it, otherwise not...
+
+                        //console.log('ext ',item)
                         if (item.type) {
                             item.type.forEach(function (it) {
                                 if (it.code == 'Extension' && it.profile) {

@@ -1511,6 +1511,22 @@ angular.module("sampleApp").
                             return resource.resourceType;
                         }
                         break;
+                    case 'Procedure' :
+                        if (resource.code) {
+                            return getCCSummary(resource.code);
+
+                        } else {
+                            return resource.resourceType;
+                        }
+                        break;
+                    case 'CarePlan' :
+                        if (resource.description) {
+                            return resource.description;
+
+                        } else {
+                            return resource.resourceType;
+                        }
+                        break;
                     default :
                         return resource.resourceType;
                         break;

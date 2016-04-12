@@ -33,7 +33,7 @@
                 <!-- the template for the table -->
                 <table ng-show="$ctrl.filteredProfile" class="table table-condensed">
                     <tr><th>Path</th><th>DataType</th><th>Definition</th></tr>
-                    <tr ng-repeat="element in $ctrl.filteredProfile">
+                    <tr ng-repeat="element in $ctrl.filteredProfile ">
                         <td valign="top">{{element.myMeta.path}}</td>
 
                         <td valign="top">
