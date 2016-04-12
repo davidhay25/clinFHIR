@@ -99,6 +99,7 @@
                                 </span>
 
                                 {{ResourceUtilsSvc.getOneLineSummaryOfResource(appConfigSvc.getCurrentPatient())}}
+                                 ({{appConfigSvc.getCurrentPatient().id}})
                                 <!--<a ng-show="appConfigSvc.getCurrentPatient()" href="#" ng-click="displayMode = 'patient'">Details</a> -->
 
                         <a ng-show="appConfigSvc.getCurrentPatient()" href="#" ng-click="displayMode = 'view'">Details</a>
@@ -146,9 +147,27 @@
 
 
                         <form ng-show="displayMode == 'new'" class="navbar-form navbar-right">
+
+
+
+                            <button class="btn btn-danger pull-right" ng-show="buildState=='dirty'"
+                                    ng-click="cancelNewResource('dirty')">Cancel</button>
+
+                            <button class="btn btn-success pull-right" ng-hide="buildState=='dirty'"
+                                    ng-click="cancelNewResource('close')">Close</button>
+
+                            <!--
                             <button class="btn btn-danger pull-right" ng-click="cancelNewResource()">
-                                Cancel
+
+                                <div ng-show="buildState=='dirty'">Cancel</div>
+                                <div ng-hide="buildState=='dirty'">Close</div>
+
+
+
+
+
                             </button>
+                            -->
                         </form>
 
                         <form ng-show="displayMode == 'new'" class="navbar-form navbar-right">
@@ -165,8 +184,10 @@
                         <!-- The menu-->
                         <div ng-controller="menuCtrl" ng-show="displayMode == 'front'">
 
+                            <!--
+                            a convenience link during dev
                             <a class="navbar-form navbar-right" href="#" ng-click="showQuery()">Query Servers</a>
-
+-->
 
                             <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
                                 <li uib-dropdown>
@@ -187,6 +208,9 @@
                                         </li>
                                         <li>
                                             <a href="#" ng-click="clearProfileCache()">Clear Profiles Cache</a>
+                                        </li>
+                                        <li>
+                                            <a href="#" ng-click="clearPatientCache()">Clear Patient Cache</a>
                                         </li>
 
                                     </ul>

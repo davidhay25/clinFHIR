@@ -40,7 +40,7 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://fhir2.healthintersections.com.au/open/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"HealthConnex (2.0)",url:"http://sqlonfhir-dstu2.azurewebsites.net/fhir/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"HAPI server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2,everythingOperation:true});
-        defaultConfig.allKnownServers.push({name:"HL7 New Zealand",url:"http://fhir.hl7.org.nz/dstu2/",version:2,everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:"HL7 New Zealand",url:"http://fhir.hl7.org.nz/dstu2/",version:2});
 
 
 
@@ -234,6 +234,9 @@ angular.module("sampleApp")
             },
             clearProfileCache : function() {
                 delete $localStorage.recentProfile;
+            },
+            clearPatientCache : function() {
+                delete $localStorage.recentPatient;
             }
         }
     });

@@ -24,6 +24,8 @@ angular.module("sampleApp")
     $scope.treeData = [];           //populates the resource tree
     $scope.results = {};            //the variable for resource property values...
 
+    $scope.buildState;              //the current build state of the resource. 'new' = just created, 'dirty' = updated, 'saved' = has been saved
+
     $scope.outcome = {};
 
     $scope.displayMode = 'front';    //'new' = resource builder, ''patient = patient
@@ -124,19 +126,25 @@ angular.module("sampleApp")
 
 
     //clears the current resource being buils and re-displays the front screen 
-    $scope.cancelNewResource = function(){
+    $scope.cancelNewResource = function(state){
 
-        var modalOptions = {
-            closeButtonText: 'No, stay here',
-            actionButtonText: 'Yes, select another',
-            headerText: 'Abandon resource',
-            bodyText: 'Are you sure you want to abandon this resource?'
-        };
+        //if the resource has been edited, then confirm the cancel...
+        if (state== 'dirty') {
+            var modalOptions = {
+                closeButtonText: 'No, stay here',
+                actionButtonText: 'Yes, select another',
+                headerText: 'Abandon resource',
+                bodyText: 'Are you sure you want to abandon this resource?'
+            };
 
-        modalService.showModal({}, modalOptions).then(function (result) {
-            //this is the 'yes'
+            modalService.showModal({}, modalOptions).then(function (result) {
+                //this is the 'yes'
+                $scope.displayMode = 'front';
+            })
+
+        } else {
             $scope.displayMode = 'front';
-        })
+        }
 
 
     };
@@ -360,6 +368,7 @@ angular.module("sampleApp")
         delete $scope.dataType ;            //the datatype selected for data entry
         delete $scope.validateResults;      //the results of a validation
         delete $scope.results.profileUrl;
+        $scope.buildState = "new";
 
         delete $scope.resource;
         //if there's no profile, the clear everything. This is called when the server is changed...
@@ -635,37 +644,48 @@ angular.module("sampleApp")
         fragment = fragment || resourceCreatorSvc.getJsonFragmentForDataType($scope.dataType,$scope.results);
         //var fragment = resourceCreatorSvc.getJsonFragmentForDataType($scope.dataType,$scope.results);
         //now add the new property to the tree...
-        var treeNode = {id : new Date().getTime(),state:{opened:true},fragment:fragment.value,display:fragment.text}
-        treeNode.parent =  $scope.selectedNodeId;   //the reference to the parent...
-        treeNode.ed = $scope.selectedChild;     //the ElementDefinition that we are adding
 
-        var display = $scope.selectedChild.myData.display;  //from the ED...
-        if (display.indexOf('[x]') > -1) {
-            //this is a polymorphic field...
-            display = display.slice(0, -3) + $scope.dataType.toProperCase();
+        //console.log(fragment);
+        if (fragment) {
 
-        }
-        treeNode.text = display;    //the property name
-        treeNode.path = $scope.selectedChild.path;
-        treeNode.dataType = {code : $scope.dataType};
-        //add the new node to the tree...
-        $scope.treeData.push(treeNode);    //todo - may need to insert at the right place...
-       // $scope.selectedNode = treeNode;     //todo !!!!! may not be correct - may need to use getNodeFromId(treeNode.id);
 
-        if ($scope.selectedNode) {
-            var n = getNodeFromId($scope.selectedNode.id);
-            if (n && n.state) {
-                n.state.selected = true;
-            } else {
-                console.log('issue: nodeid ' + $scope.selectedNode.id + ' not found in saveNewDataType')
+            var treeNode = {
+                id: new Date().getTime(),
+                state: {opened: true},
+                fragment: fragment.value,
+                display: fragment.text
             }
+            treeNode.parent = $scope.selectedNodeId;   //the reference to the parent...
+            treeNode.ed = $scope.selectedChild;     //the ElementDefinition that we are adding
 
+            var display = $scope.selectedChild.myData.display;  //from the ED...
+            if (display.indexOf('[x]') > -1) {
+                //this is a polymorphic field...
+                display = display.slice(0, -3) + $scope.dataType.toProperCase();
+
+            }
+            treeNode.text = display;    //the property name
+            treeNode.path = $scope.selectedChild.path;
+            treeNode.dataType = {code: $scope.dataType};
+            //add the new node to the tree...
+            $scope.treeData.push(treeNode);    //todo - may need to insert at the right place...
+            // $scope.selectedNode = treeNode;     //todo !!!!! may not be correct - may need to use getNodeFromId(treeNode.id);
+
+            if ($scope.selectedNode) {
+                var n = getNodeFromId($scope.selectedNode.id);
+                if (n && n.state) {
+                    n.state.selected = true;
+                } else {
+                    console.log('issue: nodeid ' + $scope.selectedNode.id + ' not found in saveNewDataType')
+                }
+
+            }
+            $scope.buildState = 'dirty';        //to indicate that the resource has been updated
+
+            drawTree();        //and redraw...
+            //delete the datatype - this will hide the input form...
+            delete  $scope.dataType;
         }
-
-
-        drawTree() ;        //and redraw...
-        //delete the datatype - this will hide the input form...
-        delete  $scope.dataType;
     };
 
 
@@ -909,12 +929,13 @@ angular.module("sampleApp")
                 }
             }
         }).result.then(function(){
+            $scope.buildState = 'saved';    //todo should really check for save erors
                 $rootScope.$emit("reloadPatient")
             });
         };
 
 
-    //=========== selecting a new profile ============
+            //=========== selecting a new profile ============
 
     $scope.showFindProfileDialog = {};
 
@@ -1104,6 +1125,10 @@ angular.module("sampleApp")
             $scope.recent.profile = appConfigSvc.getRecentProfile();
         });
 
+        //when the cache of patients for this browser is reset
+        $rootScope.$on('clearPatientCache',function(event){
+            $scope.recent.patient = appConfigSvc.getRecentPatient();
+        });
 
         $scope.showLocalProfile = function(event,profile) {
             //console.log(event)

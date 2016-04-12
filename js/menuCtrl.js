@@ -8,6 +8,13 @@ angular.module("sampleApp").controller('menuCtrl', function ( $scope,$rootScope,
         $rootScope.$broadcast('clearProfileCache');
     };
 
+    $scope.clearPatientCache = function(){
+        console.log('x')
+        appConfigSvc.clearPatientCache();
+        $rootScope.$broadcast('clearPatientCache');
+    };
+    
+    
     $scope.resetConfig = function() {
         delete $localStorage.config;
         appConfigSvc.config();      //set the value to the default

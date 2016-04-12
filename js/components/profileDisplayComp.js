@@ -16,14 +16,17 @@ angular.module('sampleApp').component('showProfile',
 
             this.$onChanges = function(obj) {
                 that.selectedProfile = obj.profile.currentValue;
-                console.log(that.selectedProfile)
-                this.profileHistory = [];
-                this.profileHistory.push(this.selectedProfile.url)
+                if (that.selectedProfile) {
+                    console.log(that.selectedProfile)
+                    this.profileHistory = [];
+                    this.profileHistory.push(this.selectedProfile.url)
 
-                this.getTable();
-                this.getTree();
-                setTypeDisplay();
-                console.log('change selected in the profileDisplay component...')
+                    this.getTable();
+                    this.getTree();
+                    setTypeDisplay();
+                    console.log('change selected in the profileDisplay component...')
+                }
+
             };
 
 
