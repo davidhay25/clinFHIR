@@ -379,10 +379,24 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             return edList;
 
         },
-        getPossibleChildNodes : function(ed){
-            
+        getPossibleChildNodes : function(ed,treeData){
+
             //given an element definition, return a collection of the possible child nodes. Needs to be a promise as
             //it may need to resolve references to extension definitions...
+            // also pass in the current treedata which represents the data captured thus far
+
+           // console.log(treeData);
+            //create a hash indexed by path. we'll use that to determine if a given child path is available (ie can be more than one)
+            var dataHash = {};
+            treeData.forEach(function(item){
+                var path = item.ed.path;
+                dataHash[path] = dataHash[path] || {max : item.ed.max,values : []};      //there can be multiple values at a given path
+                dataHash[path].values.push({item:item})
+
+            });
+
+            console.log(dataHash);
+
             var deferred = $q.defer();
             var that = this;
             //these are nodes whose path has one more '.' - eg if ed.path = Condition.stage, then Condition.stage.summary is included
@@ -402,7 +416,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     //if this is an extension, then need to see if there is a profile in the type. If it is, then
                     //this is an extension attached to the profile so needs to be rendered...
-                    if (propertyName == 'extension') {      //todo need to think about modifierExtensions
+                    //todo need to think about modifierExtensions
+                    if (propertyName == 'extension') {
                         //if there is a profile against the type, it points to the defintion of the extension. Only include it if it does...
 
                         //so this is an extension. have we already processed this node?
@@ -504,7 +519,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     } else {
                         //this is not an extension - don't include the standard components...
                         if (exclusions.indexOf(propertyName) == -1) {
-                            elementDef.myData = {display:propertyName,displayClass:""};
+                            elementDef.myData = {canAddChild:true,display:propertyName,displayClass:""};
                             if (elementDef.min !== 0) {
                                 elementDef.myData.displayClass += 'elementRequired ';
                             }
@@ -516,7 +531,15 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             //check the max value - forge leaves these elements in the snapshot...
 
                             if (elementDef.max != '0') {
+                                //check to see if a child is permissable - add it if so...
+
+                                if ( ! canAddChild(elementDef.path,dataHash)){
+                                    elementDef.myData.canAddChild = false;
+                                    elementDef.myData.displayClass += " noAdd"
+                                }
+
                                 children.push(elementDef);
+
                             }
 
                         }
@@ -549,6 +572,25 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             }
 
             return deferred.promise;
+
+            //returns true if a child with this path can be added. This is either that the path is multiple, or there is no data at that path yet...
+            function canAddChild(path,dataHash) {
+                if ( !dataHash[path] ) {
+                    //no data yet, can add
+                    return true;
+                } else {
+                    //there is data - are multiple instances allowed?
+                    if (dataHash[path].max == '*') {
+                        return true
+                    } else {
+                        return false;
+                    }
+                }
+
+            }
+
+
+
         },
         canRepeat : function(ed) {
             //whether the element can repeat...

@@ -545,7 +545,7 @@ angular.module("sampleApp")
         delete $scope.children;     //the node may not have children (only BackboneElement datatypes do...
         $scope.selectedNodeId = nodeId;   //the currently selected element. This is the one we'll add the new data to...
         delete $scope.dataType;     //to hide the display...
-        resourceCreatorSvc.getPossibleChildNodes(ed).then(
+        resourceCreatorSvc.getPossibleChildNodes(ed,$scope.treeData).then(
             function(data){
                 $scope.children = data;    //the child nodes...
             },
@@ -591,6 +591,17 @@ angular.module("sampleApp")
             $scope.treeData.push(treeNode);    //todo - may need to insert at the right place...
 
 
+            //remove the 'selected' from the currently selected node. (We'll change the selectedNode to the newly added bbe below)
+            if ($scope.selectedNode) {
+                var n = getNodeFromId($scope.selectedNode.id);
+                if (n && n.state) {
+                    n.state.selected = false;
+                } else {
+                    console.log('issue: nodeid ' + $scope.selectedNode.id + ' not found in saveNewDataType')
+                }
+
+            }
+
 
 
             $scope.selectedNodeId = treeNode.id;   //the currently selected element in the tree (now). This is the one we'll add the new data to...
@@ -598,7 +609,7 @@ angular.module("sampleApp")
             $scope.selectedNode = node;     //amongst other things, is the display in the middle of the screen...
 
             $scope.waiting = true;
-            resourceCreatorSvc.getPossibleChildNodes(node.ed).then(
+            resourceCreatorSvc.getPossibleChildNodes(node.ed,$scope.treeData).then(
                 function(data){
                     $scope.children = data;    //the child nodes...
                 },
@@ -682,13 +693,30 @@ angular.module("sampleApp")
                 }
 
             }
+
             $scope.buildState = 'dirty';        //to indicate that the resource has been updated
 
+
+
+            //re-draw the child list as this might be a single value only...
+            resourceCreatorSvc.getPossibleChildNodes($scope.selectedNode.ed,$scope.treeData).then(
+                function(data){
+                    $scope.children = data;    //the child nodes...
+console.log(data)
+                    //delete the datatype - this will hide the input form...
+                },
+                function(err){
+
+                }
+
+            );
+
+
             drawTree();        //and redraw...
-            //delete the datatype - this will hide the input form...
             delete  $scope.dataType;
         }
     };
+
 
 
     //when entering a new element
