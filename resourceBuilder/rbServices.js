@@ -356,6 +356,120 @@ angular.module("sampleApp").
             vo.StructureDefinition = extension;
             return vo;
 
+        },processComplexExtension : function(extension,discriminator) {
+            //create a summary object for the extension. for extension designer & renderProfile
+            //these are comples extensions where there is a single 'parent' and multiple child elements...
+
+            var summary = {contents:[]}
+            //var contents = [];
+            var ele = {}
+            extension.snapshot.element.forEach(function (element) {
+                if (element.path) {
+                    var ar = element.path.split('.');
+                    if (ar.length == 2 && ! element.slicing) {
+                        //this marks the start of a new element - or contents of the 'parent'
+                        if (ele.name) {
+                            summary.contents.push(ele);     //save the previous one
+                        }
+
+
+                        ele ={};
+                        switch (ar[1]) {
+                            case 'id':
+                                break;
+                            case 'url' :
+                                summary.url = element.fixedUri;
+                                break;
+                            default :
+                                if (element.max > 0) {
+                                    ele.name = element.name || 'Name not given';
+                                    ele.short = element.short;
+                                    ele.definition = element.definition;
+                                    ele.min = element.min;
+                                    ele.max = element.max;
+                                }
+                                break;
+                        }
+
+                    }
+                    if (ar.length == 3) {
+                        //this will be a 'content' element for the child element currently under review..
+                        var segment2 = ar[2];
+                        switch (segment2) {
+                            case "id" :
+                                //just ignore id's for now...
+                                break;
+                            case "url" :
+                                ele.code = element.fixedUri;    //todo - probbaly not safe to assume this will always be the case..
+                                break;
+                            case "extension":
+
+
+                                break;
+                            default :
+                                if (segment2.indexOf('value')> -1) {
+                                    //this is the value extension.
+                                    ele.dt = element.type;
+                                    if (ele.dt) {
+                                        ele.dt.forEach(function(dt){
+                                            if (dt.profile) {
+                                                var p = dt.profile[0];     //only take the first one...
+
+                                                var ar = p.split('/');
+                                                dt.displayType =ar[ar.length-1];
+                                            }
+                                        })
+                                    }
+
+
+
+                                    /*
+                                     ele.dt = [];
+                                     if (element.type) {
+                                     element.type.forEach(function(typ){
+                                     var dt = {code:typ.code};
+
+                                     if (typ.profile) {
+                                     var p = typ.profile[0];     //only take the first one...
+                                     dt.profile = p;
+                                     var ar = p.split('/');
+                                     dt.type =ar[ar.length-1];
+                                     }
+                                     ele.dt.push(dt);
+                                     })
+
+                                     }
+                                     */
+                                    //var dtInName = segment2.replace('value','');
+
+                                    //ele.dt =  segment2.replace('value','');//.toLowerCase();
+
+
+
+
+                                    //is there a binding?
+                                    if (element.binding  && element.binding.valueSetReference) {
+                                        ele.boundValueSet = element.binding.valueSetReference.reference;
+                                    }
+
+                                }
+                                break;
+                        }
+                    }
+
+
+                }
+
+
+            })
+
+            if (ele.name) {
+                summary.contents.push(ele);     //save the previous one
+            }
+
+console.log(summary);
+            return summary;
+
         },
         getConformanceResourceForServerType : function(serverType){
             //return the conformance resource for the given type of server. returns a promise

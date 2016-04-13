@@ -1,5 +1,6 @@
 [
   {"name": "Condition"},
+  {"name": "CareTeam"},
   {"name": "Parameters","reference":true},
   {"name": "ProcedureRequest"},
   {"name": "DeviceComponent","reference":true},

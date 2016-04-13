@@ -576,7 +576,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
                             })
                         }
-                        console.log(allResources)
+
                         deferred.resolve(allResources);
                     },
                     function(err){

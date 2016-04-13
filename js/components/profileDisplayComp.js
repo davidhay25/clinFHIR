@@ -17,14 +17,14 @@ angular.module('sampleApp').component('showProfile',
             this.$onChanges = function(obj) {
                 that.selectedProfile = obj.profile.currentValue;
                 if (that.selectedProfile) {
-                    console.log(that.selectedProfile)
+                    //console.log(that.selectedProfile)
                     this.profileHistory = [];
                     this.profileHistory.push(this.selectedProfile.url)
 
                     this.getTable();
                     this.getTree();
                     setTypeDisplay();
-                    console.log('change selected in the profileDisplay component...')
+                    //console.log('change selected in the profileDisplay component...')
                 }
 
             };
@@ -47,13 +47,13 @@ angular.module('sampleApp').component('showProfile',
 
             //when an item with a profile is selected. could be an extension or a reference to a profiled resource or a profiled datatype
             this.showProfile = function(element,type,uri) {
-                console.log(element,type,uri)
+
                 if (element.path.indexOf('xtension') > -1 ) {
                     //this is an extension
                     that.onextensionselected({uri:uri});        //throw the event
                     GetDataFromServer.findConformanceResourceByUri(uri).then(       //get the extension definition
                         function(profile) {
-                            console.log(profile);
+                           // console.log(profile);
                             var analysis = Utilities.analyseExtensionDefinition(profile);
                             console.log(analysis)
 
@@ -63,7 +63,7 @@ angular.module('sampleApp').component('showProfile',
                                     $scope.profile=analysis.StructureDefinition;
                                     $scope.analysis = analysis;
                                     $scope.element = element;
-                                    console.log(element)
+                                    //console.log(element)
 
                                 },
                                 resolve: {

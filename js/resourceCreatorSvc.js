@@ -436,6 +436,43 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                                     //todo - move this to another service - and accomodate complex extensions...
                                     //complex extensions will have a 'backboneelement' and child nodes so a lot more complicated...
+
+                                    //analyse the extension definition - eg is it complex or not?
+
+                                    var analysis = Utilities.analyseExtensionDefinition(sdef);
+
+                                    if (analysis.complexExtension) {
+                                        //this is a complex extension...
+                                        elementDef.type = [{code:'Complex'}]
+                                        elementDef.analysis = analysis;
+                                    } else {
+                                        //this is a simple extension
+
+
+                                        if (sdef && sdef.snapshot && sdef.snapshot.element) {
+                                            sdef.snapshot.element.forEach(function(ed){
+                                                var path = ed.path;
+                                                if (path.indexOf('.value') > -1) {
+                                                    elementDef.type = ed.type;  //this is the type from the extension definition
+
+                                                }
+                                            })
+                                        }
+                                        //elementDef.type = analysis.dataTypes;
+
+
+
+                                        /*
+                                        if (analysis.dataTypes) {
+                                            elementDef.type = analysis.dataTypes[0];
+                                        } else {
+                                            elementDef.type="Unknown";
+                                        }*/
+
+                                    }
+
+
+/*
                                     if (sdef && sdef.snapshot && sdef.snapshot.element) {
                                         sdef.snapshot.element.forEach(function(ed){
                                             var path = ed.path;
@@ -445,6 +482,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                             }
                                         })
                                     }
+                                    */
 
 
                                 },

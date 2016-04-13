@@ -254,7 +254,6 @@ angular.module("sampleApp")
     //load existing data for the current patient
     function loadPatientDetails(cb) {
 
-        console.log(appConfigSvc.getCurrentPatient())
 
         supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
             //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
@@ -262,7 +261,7 @@ angular.module("sampleApp")
                 //the order is significant - allResources must be set first...
                 appConfigSvc.setAllResources(allResources);
 
-                console.log(allResources)
+                //console.log(allResources)
 
                 //todo - all this stuff should be in a service somewhere...
                 $scope.outcome.resourceTypes = [];
@@ -1731,4 +1730,19 @@ angular.module("sampleApp")
         }
 
 
-    });
+    }).filter('shortUrl',function(){
+        return function(input) {
+            //console.log(input);
+            if (input) {
+                var ar = input.split('/');
+                if (ar.length > 2) {
+                    return ar[ar.length-2]+'/'+ar[ar.length-1]
+                } else {
+                    return input
+                }
+            } else {
+                return input
+            }
+
+        }
+});

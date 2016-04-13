@@ -35,7 +35,8 @@
             <div class="col-md-9 col-sm-9">{{profile.publisher}}</div>
         </div>
 
-        <div class="row">
+        <!-- simple extension-->
+        <div ng-hide="analysis.complexExtension" class="row">
             <div class="col-md-3 col-sm-3">Datatype</div>
             <div class="col-md-9 col-sm-9">
                 <ul class="list-unstyled">
@@ -43,6 +44,34 @@
                 </ul>
             </div>
         </div>
+
+        <!-- complex extension-->
+        <div ng-show="analysis.complexExtension" class="row">
+            <div class="col-md-3 col-sm-3">Complex Ext</div>
+            <div class="col-md-9 col-sm-9">
+
+
+                <ul class="list-unstyled">
+                    <li ng-repeat="content in analysis.complexExtension.contents">
+                        <div ng-repeat = "dt in content.dt">
+                            {{dt.code}}
+                            <span ng-show="dt.profile">
+                                <span ng-repeat="p in dt.profile">
+                                     ({{p}})
+                                </span>
+
+                            </span>
+                        </div>
+
+                    </li>
+                </ul>
+
+
+            </div>
+        </div>
+
+
+
 
         <div class="row">
             <div class="col-md-3 col-sm-3">Path</div>

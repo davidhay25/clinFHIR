@@ -9,7 +9,7 @@
         }
     </style>
 
-    <div class="col-sm-12 col-md-12">
+    <div class="col-sm-12 col-md-12 col-xs-12">
 
         <div class="pull-right">
 
@@ -20,7 +20,7 @@
               </div>
               <ul class="dropdown-menu" uib-dropdown-menu aria-labelledby="simple-dropdown">
                   <li ng-repeat="p in $ctrl.profileHistory">
-                      <div class="btn btn-link" ng-click="$ctrl.reloadProfile(p)">{{p}}</div>
+                      <div class="btn btn-link" ng-click="$ctrl.reloadProfile(p)">{{p | shortUrl}}</div>
                   </li>
 
               </ul>
@@ -32,18 +32,19 @@
             <uib-tab heading="Table">
                 <!-- the template for the table -->
                 <table ng-show="$ctrl.filteredProfile" class="table table-condensed">
-                    <tr><th>Path</th><th>DataType</th><th>Definition</th></tr>
+                    <tr><th>Path</th><th>Mult</th><th>DataType</th><th>Definition</th></tr>
                     <tr ng-repeat="element in $ctrl.filteredProfile ">
                         <td valign="top">{{element.myMeta.path}}</td>
-
+                        <td>{{element.min}}..{{element.max}}</td>
                         <td valign="top">
                             <div ng-repeat="item in element.type">{{item.code}}</div>
                         </td>
                         <td valign="top">{{element.definition}}
                             <div><em>
 
-                                <div class="link" ng-click="$ctrl.showValueSet(element.binding.valueSetReference.reference)">
-                                    {{element.binding.valueSetReference.reference}}
+                                <div title="{{element.binding.valueSetReference.reference}}"
+                                        class="link" ng-click="$ctrl.showValueSet(element.binding.valueSetReference.reference)">
+                                    {{element.binding.valueSetReference.reference | shortUrl}}
                                 </div>
 
 
@@ -51,7 +52,8 @@
                             <div ng-repeat="type in element.type">
                                 <em ng-repeat="p in type.profile">
 
-                                    <div class="link" ng-click="$ctrl.showProfile(element,type,p)">{{p}}</div>
+                                    <div title="{{p}}"
+                                            class="link" ng-click="$ctrl.showProfile(element,type,p)">{{p | shortUrl}}</div>
 
                                 </em>
                             </div>
