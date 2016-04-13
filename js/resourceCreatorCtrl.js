@@ -504,36 +504,39 @@ angular.module("sampleApp")
 
     //draws the tree showing the current resource
     function drawTree() {
-        $('#treeView').jstree('destroy');
-        $('#treeView').jstree(
-            { 'core' : {'multiple':false,  'data' : $scope.treeData ,'themes':{name:'proton',responsive:true}}}
-        ).on('changed.jstree', function (e, data){
-            //seems to be the node selection event...
 
-            //the node is the treedata[] array element that defines the node.
-            // {id, parent, ed, text, path, isBe, dataType, state, fragment, display }
-            if (data.node) {
-                var node = getNodeFromId(data.node.id);
+            $('#treeView').jstree('destroy');
+            $('#treeView').jstree(
+                {'core': {'multiple': false, 'data': $scope.treeData, 'themes': {name: 'proton', responsive: true}}}
+            ).on('changed.jstree', function (e, data) {
+                //seems to be the node selection event...
 
-                $scope.selectedNode = node;         //used in the html template...
+                //the node is the treedata[] array element that defines the node.
+                // {id, parent, ed, text, path, isBe, dataType, state, fragment, display }
+                if (data.node) {
+                    var node = getNodeFromId(data.node.id);
 
-                if (node && node.ed) {
-                    navigatorNodeSelected(data.node.id,node.ed)
+                    $scope.selectedNode = node;         //used in the html template...
+
+                    if (node && node.ed) {
+                        navigatorNodeSelected(data.node.id, node.ed)
+                    }
+
+                    $scope.$digest();       //as the event occurred outside of angular...
                 }
 
-                $scope.$digest();       //as the event occurred outside of angular...
-            }
+
+            }).on('redraw.jstree', function (e, data) {
+
+                if ($scope.treeData.length > 0) {
+                    buildResource();
+                    $scope.$broadcast('treebuilt');
+                    $scope.$digest();       //as the event occurred outside of angular...
+                }
+
+            });
 
 
-        }).on('redraw.jstree',function(e,data){
-
-            if ($scope.treeData.length > 0) {
-                buildResource();
-                $scope.$broadcast('treebuilt');
-                $scope.$digest();       //as the event occurred outside of angular...
-            }
-
-        });
     }
 
     //when the user has selected a node in the navigator tree (or called externally). Display the value of the node or possible child nodes
@@ -576,7 +579,7 @@ angular.module("sampleApp")
 
         if ($scope.dataType == 'BackboneElement') {
             //if this is a BackboneElement, then add it to the tree and select it todo - may want to ask first
-            var treeNode = {id : new Date().getTime(),state:{opened:true,selected:true}};       //the new node is selected and opened...
+            var treeNode = {id : 't' + new Date().getTime(),state:{opened:true,selected:true}};       //the new node is selected and opened...
             treeNode.parent =  $scope.selectedNodeId;
             treeNode.ed = $scope.selectedChild;     //the ElementDefinition that we are adding
             treeNode.text = $scope.selectedChild.myData.display;    //the property name
@@ -649,7 +652,7 @@ angular.module("sampleApp")
 
 
             var treeNode = {
-                id: new Date().getTime(),
+                id: 't'+new Date().getTime(),
                 state: {opened: true},
                 fragment: fragment.value,
                 display: fragment.text
@@ -694,7 +697,61 @@ angular.module("sampleApp")
     };
 
 
+
     $scope.removeNode = function() {
+
+        var id = $scope.selectedNode.id;        //the node to delete
+
+        //create list of nodes to delete
+        var arDelete = [];
+        arDelete.push(id);
+
+        //so go through  the data. if an item has any antry in arDelete as a parent, then add it to the list
+        //not sure if there's an issue with ordering...
+
+        var foundElementToDelete = true
+
+        while (foundElementToDelete) {
+            console.log('pass')
+            foundElementToDelete = false;
+            for (var i=0; i<$scope.treeData.length;i++) {
+                var element = $scope.treeData[i];
+                if (arDelete.indexOf(element.parent) > -1) {     //if the parent is to be deleted, then it has to be as well...
+
+                    if (arDelete.indexOf(element.id)== -1) {
+                        //if it's not already in the array then add it
+                        arDelete.push(element.id);
+                        foundElementToDelete = true;
+                    }
+
+                }
+            }
+        }
+
+
+
+        console.log(arDelete)
+
+        //now create a new array with all the non-deleted elements...
+        var newTreeArray = [];
+        for (var i=0; i<$scope.treeData.length;i++) {
+            var element = $scope.treeData[i];
+            if (arDelete.indexOf(element.id) ==- 1) {
+                newTreeArray.push(element);
+            }
+        }
+        console.log(newTreeArray)
+
+        $scope.treeData = newTreeArray;
+        drawTree();
+
+
+
+        return;
+
+        //-----------
+
+
         var id = $scope.selectedNode.id;
         var inx = -1;
         for (var i=0; i<$scope.treeData.length;i++) {
@@ -710,11 +767,19 @@ angular.module("sampleApp")
             //need to remove any childnodes as well... Note that if it leaves an empty parent, then that will be removed as well
 
             var newTreeArray = resourceCreatorSvc.cleanResource($scope.treeData);
+            //var newTreeArray = resourceCreatorSvc.cleanResource(newTreeArray);
+
+
+
             $scope.treeData = newTreeArray;
 
 
+                try {
+                    drawTree();
+                } catch (e) {
+                    alert('de')
+                }
 
-            drawTree();
         }
 
     };
