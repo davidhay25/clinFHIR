@@ -2,7 +2,7 @@
 
 
 
-<div  class="row">
+<div class="row">
     <div class="col-md-2">
         <h4>Resource Types</h4>
         <div class="list-group">
@@ -94,8 +94,16 @@
 
             </div>
         </div>
+
     </div>
+
+
+
+
 </div>
 
-
-
+<a href='#' ng-show="showPatientJson" ng-click="showPatientJson=false">Hide Patient Json</a>
+<a href="#" ng-hide="showPatientJson" ng-click="showPatientJson=true">Show Patient Json</a>
+<div ng-show="showPatientJson">
+    <pre>{{appConfigSvc.getCurrentPatient() | json}}</pre>
+</div>

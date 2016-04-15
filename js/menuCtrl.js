@@ -9,7 +9,7 @@ angular.module("sampleApp").controller('menuCtrl', function ( $scope,$rootScope,
     };
 
     $scope.clearPatientCache = function(){
-        console.log('x')
+        
         appConfigSvc.clearPatientCache();
         $rootScope.$broadcast('clearPatientCache');
     };

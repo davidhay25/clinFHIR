@@ -3,28 +3,37 @@ angular.module('sampleApp').component('showProfile',
 
         bindings : {
             profile : '<',
+            treedivid : '<',           //the id of the tree DIV (there can only be a single div with this ID in the whole app
             onvaluesetselected : '&',
             onextensionselected : '&',
-            onprofileselected : '&'
+            onprofileselected : '&',
+            ontreenodeselected : '&'
         },
         templateUrl : 'js/components/profileDisplayTemplate.html',
         controller: function (resourceCreatorSvc,GetDataFromServer,$uibModal,Utilities) {
             var that = this;
+            var treeDivId = this.treedivid || 'pfTreeView';    //the div id is unique across the application, so if used multiple times, an external div must be supplied
 
             this.follow = true;
             this.profileHistory = [];       //a history of all profiles viewed
 
-            this.$onChanges = function(obj) {
-                that.selectedProfile = obj.profile.currentValue;
-                if (that.selectedProfile) {
-                    //console.log(that.selectedProfile)
-                    this.profileHistory = [];
-                    this.profileHistory.push(this.selectedProfile.url)
 
-                    this.getTable();
-                    this.getTree();
-                    setTypeDisplay();
-                    //console.log('change selected in the profileDisplay component...')
+            this.$onChanges = function(obj) {
+
+
+                //set the profile...
+                if (obj.profile && obj.profile.currentValue) {
+                    that.selectedProfile = obj.profile.currentValue;
+                    if (that.selectedProfile) {
+                        //console.log(that.selectedProfile)
+                      //  this.profileHistory = [];
+                        this.profileHistory.push(this.selectedProfile.url)
+
+                        this.getTable(treeDivId);
+                        //this.getTree();
+                        setTypeDisplay();
+                        //console.log('change selected in the profileDisplay component...')
+                    }
                 }
 
             };
@@ -36,8 +45,8 @@ angular.module('sampleApp').component('showProfile',
                     function(profile) {
                         that.selectedProfile = profile;
                         setTypeDisplay();
-                        that.getTable();
-                        that.getTree();
+                        that.getTable(treeDivId);
+                        //that.getTree();
                     },
                     function(err) {
                         alert(angular.toJson(err))
@@ -189,7 +198,7 @@ angular.module('sampleApp').component('showProfile',
             };
 
             //build the tree view
-            this.getTree = function() {
+            this.getTreeDEP = function() {
                 delete that.treeDisplay;
                 if (this.selectedProfile) {
                     that.treeDisplay = resourceCreatorSvc.createProfileTreeDisplay(that.selectedProfile, false);
@@ -197,17 +206,36 @@ angular.module('sampleApp').component('showProfile',
             };
 
             //build the table
-            this.getTable = function(){
+            this.getTable = function(treeDivId){
 
                 delete that.filteredProfile;
                 if (this.selectedProfile) {
 
                     //get the rows in the table...
-                    that.filteredProfile = resourceCreatorSvc.makeProfileDisplayFromProfile(that.selectedProfile);
+                    var buildView = resourceCreatorSvc.makeProfileDisplayFromProfile(that.selectedProfile);
+                    that.filteredProfile = buildView.lst
 
+
+
+/*
+                    $('#pfTreeView').jstree('destroy');
+                    $('#pfTreeView').jstree(
+                        {'core': {'multiple': false, 'data': buildView.treeData, 'themes': {name: 'proton', responsive: true}}}
+                    )
+                    */
+                    $('#'+treeDivId).jstree('destroy');
+                    $('#'+treeDivId).jstree(
+                        {'core': {'multiple': false, 'data': buildView.treeData, 'themes': {name: 'proton', responsive: true}}}
+                    ).on('changed.jstree', function (e, data) {
+                        //console.log(data);
+                        that.ontreenodeselected({item:data});
+
+                    })
+                    
+                    
                 }
 
-            }
+            };
 
             //the type of the current profile (displayed upper right)
             function setTypeDisplay(){

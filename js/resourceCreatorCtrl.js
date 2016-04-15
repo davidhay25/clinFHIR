@@ -13,13 +13,14 @@
 angular.module("sampleApp")
     .controller('resourceCreatorCtrl',
         function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,
-              RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location,resourceSvc) {
+              RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location,resourceSvc,$window) {
 
     $scope.doDefault=false;         //whether to have default patient & profile <<<<< for debug only!
 
+    
 
 
-    var profile;                    //the profile being used as the base
+            var profile;                    //the profile being used as the base
     var type;                       //base type
     $scope.treeData = [];           //populates the resource tree
     $scope.results = {};            //the variable for resource property values...
@@ -62,17 +63,7 @@ angular.module("sampleApp")
     $scope.ResourceUtilsSvc = ResourceUtilsSvc;
     $scope.resourceCreatorSvc = resourceCreatorSvc;     //used to get the parked resources
 
-/*
-    //the newpatient event is fired when a new patient is selected. We need to create a new resource...
-     $rootScope.$on('newpatientDEP',function(event,patient){
 
- 
-        appConfigSvc.addToRecentPatient(patient);      //the list of recent patients (for the current data server)
-        setUpForNewProfile(resourceCreatorSvc.getCurrentProfile());
-
-    });
-
-*/
     //config - in particular the servers defined. The samples will be going to the data server...
 
     $scope.recent = {};
@@ -80,6 +71,13 @@ angular.module("sampleApp")
     $scope.recent.profile = appConfigSvc.getRecentProfile();
 
 
+    //when the user clicks the 'New Resource' button. They may not have selected a new patient or profile
+    $scope.createNewResource = function() {
+
+
+        //setUpForNewProfile(resourceCreatorSvc.getCurrentProfile());
+        $scope.displayMode = 'new';     //display the 'enter new resouce' screen..
+    };
 
 
 
@@ -106,6 +104,9 @@ angular.module("sampleApp")
 
     //when a patient is selected from the front page... Want to load the patient details and create a new starter resource for the current profile
     $rootScope.$on('patientSelected',function(event,patient){
+
+
+       var i = 1/0;
 
         appConfigSvc.addToRecentPatient(patient);
         $scope.recent.patient = appConfigSvc.getRecentPatient();
@@ -150,16 +151,7 @@ angular.module("sampleApp")
     };
 
 
-/*
-    //save the current patient in the config services - so other controllers/components can access it...
-    if ($scope.doDefault) {
-        $scope.results.profileUrl = $scope.config.servers.conformance + "StructureDefinition/carePlan";
-        appConfigSvc.setCurrentPatient({resourceType:'Patient',id:'1',name : [{text:'Eve Everywoman'}]});
-        //appConfigSvc.setCurrentPatient({resourceType:'Patient',id:'302',name : [{text:'Hayley Lee'}]});
-    }
 
-
-*/
 
     //change the server & other config stuff
     $scope.showConfig = function() {
@@ -254,7 +246,6 @@ angular.module("sampleApp")
     //load existing data for the current patient
     function loadPatientDetails(cb) {
 
-
         supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
             //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
             function (allResources) {
@@ -333,7 +324,7 @@ angular.module("sampleApp")
 
     //load the selected profile, and display the tree
     //for now - use the ProfileUrl which directly points to the profile. Want to support uri as well later on..
-    function loadProfile(profileUrl) {
+    function loadProfileDEP(profileUrl) {
         /*delete $scope.conformProfiles;      //profiles that this resource claims conformance to. Not for baseresources
         $scope.treeData.length = 0;
         delete $scope.selectedChild;    //a child element off the current path (eg Condition.identifier
@@ -405,7 +396,7 @@ angular.module("sampleApp")
 
         //create the root node.
         var rootEd = resourceCreatorSvc.getRootED(type);
-        $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true},path:type,
+        $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true,selected:true},path:type,
             ed:rootEd});
 
         navigatorNodeSelected('root',rootEd);   //this will display the child nodes of the root
@@ -505,36 +496,61 @@ angular.module("sampleApp")
     //draws the tree showing the current resource
     function drawTree() {
 
-            $('#treeView').jstree('destroy');
-            $('#treeView').jstree(
-                {'core': {'multiple': false, 'data': $scope.treeData, 'themes': {name: 'proton', responsive: true}}}
-            ).on('changed.jstree', function (e, data) {
-                //seems to be the node selection event...
 
-                //the node is the treedata[] array element that defines the node.
-                // {id, parent, ed, text, path, isBe, dataType, state, fragment, display }
-                if (data.node) {
-                    var node = getNodeFromId(data.node.id);
+        //if there's a problem with the treeData array, then it will crash...
+        if (! resourceCreatorSvc.checkTreeConsistency( $scope.treeData)) {
+            //alert('The tree is not consistent!')
+            var modalOptions = {
+                closeButtonText: "No, I'll start again",
+                actionButtonText: 'Yes, please revert',
+                headerText: 'Resource Inconsistency Error',
+                bodyText: "I'm sorry, there's an internal problem with the resource structure - do you want to revert to the previous version?"
+            };
 
-                    $scope.selectedNode = node;         //used in the html template...
+            modalService.showModal({}, modalOptions).then(function (result) {
+                    //this is the 'yes'
 
-                    if (node && node.ed) {
-                        navigatorNodeSelected(data.node.id, node.ed)
-                    }
+                    $scope.treeData =  $scope.lastTreeData;
 
-                    $scope.$digest();       //as the event occurred outside of angular...
-                }
-
-
-            }).on('redraw.jstree', function (e, data) {
-
-                if ($scope.treeData.length > 0) {
-                    buildResource();
-                    $scope.$broadcast('treebuilt');
-                    $scope.$digest();       //as the event occurred outside of angular...
-                }
-
+                },
+                function(){
+                    //user didn't want to revert...
+                    return;
             });
+
+
+        }
+
+        $('#treeView').jstree('destroy');
+        $('#treeView').jstree(
+            {'core': {'multiple': false, 'data': $scope.treeData, 'themes': {name: 'proton', responsive: true}}}
+        ).on('changed.jstree', function (e, data) {
+            //seems to be the node selection event...
+
+            //the node is the treedata[] array element that defines the node.
+            // {id, parent, ed, text, path, isBe, dataType, state, fragment, display }
+            if (data.node) {
+                var node = getNodeFromId(data.node.id);
+
+                $scope.selectedNode = node;         //used in the html template...
+
+                if (node && node.ed) {
+                    navigatorNodeSelected(data.node.id, node.ed)
+                }
+
+                $scope.$digest();       //as the event occurred outside of angular...
+            }
+
+
+        }).on('redraw.jstree', function (e, data) {
+
+            if ($scope.treeData.length > 0) {
+                buildResource();
+                $scope.$broadcast('treebuilt');
+                $scope.$digest();       //as the event occurred outside of angular...
+            }
+
+        });
 
 
     }
@@ -588,6 +604,7 @@ angular.module("sampleApp")
             treeNode.isBbe = true;      //so we know it's a backboneelement, so should have elements referencing it...
 
             //add the new node to the tree...
+            $scope.lastTreeData = angular.copy($scope.treeData);        //to support limited undo...
             $scope.treeData.push(treeNode);    //todo - may need to insert at the right place...
 
 
@@ -655,19 +672,17 @@ angular.module("sampleApp")
     //when a new element has been populated. The 'find reference resource' function creates the fragment - the others don't
     $scope.saveNewDataType = function(fragment) {
         fragment = fragment || resourceCreatorSvc.getJsonFragmentForDataType($scope.dataType,$scope.results);
-        //var fragment = resourceCreatorSvc.getJsonFragmentForDataType($scope.dataType,$scope.results);
+       
         //now add the new property to the tree...
 
-        //console.log(fragment);
         if (fragment) {
-
-
+            
             var treeNode = {
                 id: 't'+new Date().getTime(),
                 state: {opened: true},
                 fragment: fragment.value,
                 display: fragment.text
-            }
+            };
             treeNode.parent = $scope.selectedNodeId;   //the reference to the parent...
             treeNode.ed = $scope.selectedChild;     //the ElementDefinition that we are adding
 
@@ -681,6 +696,7 @@ angular.module("sampleApp")
             treeNode.path = $scope.selectedChild.path;
             treeNode.dataType = {code: $scope.dataType};
             //add the new node to the tree...
+            $scope.lastTreeData = angular.copy($scope.treeData);
             $scope.treeData.push(treeNode);    //todo - may need to insert at the right place...
             // $scope.selectedNode = treeNode;     //todo !!!!! may not be correct - may need to use getNodeFromId(treeNode.id);
 
@@ -719,7 +735,7 @@ console.log(data)
 
 
 
-    //when entering a new element
+    //when entering a new element, if the user selects cancel...
     $scope.cancel = function() {
         delete $scope.dataType;
     };
@@ -727,6 +743,18 @@ console.log(data)
 
 
     $scope.removeNode = function() {
+
+/* this was to generate an error...
+        $scope.treeData.splice(1,1);
+
+
+
+
+        drawTree();
+return;
+
+        */
+
 
         var id = $scope.selectedNode.id;        //the node to delete
 
@@ -1411,6 +1439,16 @@ console.log(data)
         $localStorage.queryHistory = $localStorage.queryHistory || [];
 
 
+        $scope.treeNodeSelected = function(item) {
+            //console.log(item);
+            delete $scope.edFromTreeNode;
+            if (item.node && item.node.data && item.node.data.ed) {
+                $scope.edFromTreeNode = item.node.data.ed;
+                $scope.$digest();       //the event originated outside of angular...
+            }
+
+        };
+
         //replaced by showValueSetForProfile below...
         $scope.showValueSetDEP = function (vsUrl) {
             
@@ -1428,7 +1466,36 @@ console.log(data)
 
         };
 
-        //this will attempt to hide the 'children' of known datatypes - like CodeableConcept
+
+
+        //the profile is uri - ie it doesn't point directly to the resource
+
+        $scope.showProfileByUrl = function(uri) {
+
+
+
+
+            //console.log($scope.config)
+            delete $scope.selectedProfile;
+            //first get the profile from the conformance server
+
+            GetDataFromServer.findConformanceResourceByUri(uri).then(
+                function(profile) {
+                    //now get the profile
+                    $scope.selectedProfile = profile;
+
+                    //var vo = resourceCreatorSvc.makeProfileDisplayFromProfile(profile);
+
+                           // $scope.filteredProfile = vo.tab;
+                            //$scope.selectedProfile = vo.profile;
+
+
+                }
+            )
+
+
+        }
+
         //note that the parameter is a URL - not a URI
         $scope.showProfile = function(url) {
             //console.log($scope.config)
@@ -1439,7 +1506,7 @@ console.log(data)
 
             }
 
-
+console.log(url);
             //generate a display of the profile based on it's URL. (points directly to the SD)
             resourceCreatorSvc.getProfileDisplay(url).then(
                 function(vo) {
@@ -1688,7 +1755,7 @@ console.log(data)
         };
 
         //the handler for when a valueset is selected from within the <show-profile component on conformanceDisplay.html
-        $scope.showValueSetForProfileDEP = function(url){
+        $scope.showValueSetForProfile = function(url){
             //url is actually a URI
             //console.log(url);
 

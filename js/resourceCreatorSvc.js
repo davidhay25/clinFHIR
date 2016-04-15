@@ -392,10 +392,11 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 var path = item.ed.path;
                 dataHash[path] = dataHash[path] || {max : item.ed.max,values : []};      //there can be multiple values at a given path
                 dataHash[path].values.push({item:item})
+                //dataHash[path].display = item.myData.display;   //used when looking for existing extensions...
 
             });
 
-            console.log(dataHash);
+            //console.log(dataHash);
 
             var deferred = $q.defer();
             var that = this;
@@ -422,6 +423,16 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                         //so this is an extension. have we already processed this node?
                         if (elementDef.myData && elementDef.myData.isExtension) {
+                            //if we have already processed it, then we should check to see if there's already a value where max=1
+                            //we can't use path ('cause that will always be 'extension') so we'll look on url + display
+                            if ( ! canAddChild(elementDef.path,dataHash,elementDef.myData.extensionDefUrl)){
+                                elementDef.myData.canAddChild = false;
+                                elementDef.myData.displayClass += " noAdd"
+                            } else {
+                                elementDef.myData.canAddChild = true;
+                                elementDef.myData.displayClass = elementDef.myData.displayClass.replace(" noAdd","")
+                            }
+
                             children.push(elementDef);
                         } else {
                             //nope. not processed. see if there is a profile (SD) we can load to figure out the datatype...
@@ -433,7 +444,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                             var displayName = elementDef.name;
 
-                            elementDef.myData = {display:displayName,displayClass:"elementExtension"};
+                            elementDef.myData = {canAddChild:true,display:displayName,displayClass:"elementExtension"};
                             if (elementDef.min !== 0) {
                                 elementDef.myData.displayClass += 'elementRequired ';
                             }
@@ -449,11 +460,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                                     //process the definition to get the datatype and url...
 
-                                    //todo - move this to another service - and accomodate complex extensions...
-                                    //complex extensions will have a 'backboneelement' and child nodes so a lot more complicated...
-
                                     //analyse the extension definition - eg is it complex or not?
-
                                     var analysis = Utilities.analyseExtensionDefinition(sdef);
 
                                     if (analysis.complexExtension) {
@@ -473,33 +480,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                                 }
                                             })
                                         }
-                                        //elementDef.type = analysis.dataTypes;
-
-
-
-                                        /*
-                                        if (analysis.dataTypes) {
-                                            elementDef.type = analysis.dataTypes[0];
-                                        } else {
-                                            elementDef.type="Unknown";
-                                        }*/
 
                                     }
-
-
-/*
-                                    if (sdef && sdef.snapshot && sdef.snapshot.element) {
-                                        sdef.snapshot.element.forEach(function(ed){
-                                            var path = ed.path;
-                                            if (path.indexOf('.value') > -1) {
-                                                elementDef.type = ed.type;  //this is the type from the extension definition
-                                                
-                                            }
-                                        })
-                                    }
-                                    */
-
-
+                                    
                                 },
                                 function(err) {
                                     alert('Error retrieving '+ profileUrl + " "+ angular.toJson(err))
@@ -574,7 +557,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             return deferred.promise;
 
             //returns true if a child with this path can be added. This is either that the path is multiple, or there is no data at that path yet...
-            function canAddChild(path,dataHash) {
+            //if the url is passed in, then we need to check that as well...
+            function canAddChild(path,dataHash,url) {
                 if ( !dataHash[path] ) {
                     //no data yet, can add
                     return true;
@@ -583,7 +567,23 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     if (dataHash[path].max == '*') {
                         return true
                     } else {
-                        return false;
+                        if (url) {
+                            //if there's a url, then this is an extension. we need to see if there is already a value with that path & url
+                            var pathWithData = dataHash[path];      //this is all the data elements at that path
+                            for (var i=0; i<pathWithData.values.length; i++) {
+                                var v =  pathWithData.values[i];
+
+                            //pathWithData.values.forEach(function(v){
+                                if (v.item && v.item.ed && v.item.ed.myData && v.item.ed.myData.extensionDefUrl == url) {
+                                    return false;
+                                    break;
+                                }
+                            }
+                            return true;        //nope, this is the first...
+                        } else {
+                            return false;
+                        }
+
                     }
                 }
 
@@ -1184,20 +1184,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             //the url is a real reference to the profile location (not the SD.url property)
             var deferred = $q.defer();
             var that = this;
-
-
-
-
-            //todo some profiles seem to have a url like http://hl7.org/fhir/profiles/MedicationDispense
-           // uri = uri.replace('/profiles/','/StructureDefinition/');
-
-            //console.log(url)
-            
-            
-
             GetDataFromServer.getConformanceResourceByUrl(url).then(
                 function(profile) {
-                    var lst = that.makeProfileDisplayFromProfile;
+                    var lst = that.makeProfileDisplayFromProfile(profile).lst;
                     deferred.resolve({lst:lst,profile:profile})
                 }, function (err) {
                     //alert(angular.toJson(err));
@@ -1209,10 +1198,10 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             return deferred.promise;
         },
-        makeProfileDisplayFromProfile : function(inProfile) {
 
-            var profile = angular.copy(inProfile);      //w emuck around a bit with the profile, so use a copy
-            //console.log(profile);
+
+        makeProfileDisplayFromProfileDEP : function(profile) {
+            console.log(profile);
             var arDisabled = [];          //this is a list of disabled items...
             var lst = [];           //this will be a list of elements in the profile to show.
             var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained'];
@@ -1261,8 +1250,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     if (!disabled && ar[ar.length - 1] == 'extension') {
                         disabled = true;    //by default extensions are disabled...
                         //if the extension has a profile type then include it, otherwise not...
-
-                        //console.log('ext ',item)
                         if (item.type) {
                             item.type.forEach(function (it) {
                                 if (it.code == 'Extension' && it.profile) {
@@ -1315,6 +1302,192 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             }
 
             return lst;
+
+        },
+
+
+
+        makeProfileDisplayFromProfile : function(inProfile) {
+
+            var lstTree = [];
+
+            var profile = angular.copy(inProfile);      //w emuck around a bit with the profile, so use a copy
+            //console.log(profile);
+            var arIsDataType = [];          //this is a list of disabled items...
+            var lst = [];           //this will be a list of elements in the profile to show.
+            var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained'];
+            var dataTypes = ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference','HumanName'];
+            var idsInTree = {};
+            var cntExtension = 0;
+            if (profile && profile.snapshot && profile.snapshot.element) {
+
+                profile.snapshot.element.forEach(function (item) {
+                    item.myMeta = {};
+
+                    var include = true;
+                    var el = {path: item.path};
+
+                    var path = item.path;
+                    //console.log(path);
+                    var ar = path.split('.');
+
+                    if (ar.length == 1) {
+                        //this is the root node
+                        lstTree.push({id:ar[0],parent:'#',text:ar[0],state:{opened:true,selected:true},path:path});
+                        include = false;
+                    }
+
+
+                    var disabled = false;
+
+                    //console.log(path);
+                    //if max is 0, this path - and all children - are disabled in this profile...
+                    if (item.max == 0) {
+                       // arIsDataType.push(path)
+                        disabled = true;
+                        //include = false;
+                    }
+
+                    
+
+                    //now see if this path has been disabled. There will be more elegant ways of doing this
+                    //this occurs to suppress the details of datatypes - like CodeableConcept.coding.
+
+                    for (var i = 0; i < arIsDataType.length; i++) {
+                        var d = arIsDataType[i];
+                        if (path.substr(0, d.length) == d) {
+                            //tempdisabled = true;
+                            //so this a path whose parent has been suppressed (ie the contents of a datatype).
+                            //but - if it's an extension, the we don't want to suppress it just yet..
+                            if (ar[ar.length-1] == 'extension') {
+                                disabled = false;
+                            }
+
+
+                            break;
+                        }
+                    }
+
+
+
+                    //standard element names like 'text' or 'language'
+                    if (ar.length == 2 && elementsToDisable.indexOf(ar[1]) > -1) {
+                        disabled = true;
+                        include = false;
+                    }
+
+
+                    //hide the modifier extension. Will need to figure out how to display 'real' extensions
+                    if (ar[ar.length - 1] == 'modifierExtension') {
+                        disabled = true;
+                        include = false;
+                    }
+
+
+                    //process an extension. if it has a profile, then display it with a nicer name.
+                    if (!disabled && ar[ar.length - 1] == 'extension') {
+                        disabled = true;    //by default extensions are disabled...
+                        //if the extension has a profile type then include it, otherwise not...
+                        include = false;
+                        //console.log('ext ',item)
+                        if (item.type) {
+                            item.type.forEach(function (it) {
+                               if (it.code == 'Extension' && it.profile) {
+                                    disabled = false;
+                                   include=true;
+                                    //load the extension definition to
+
+                                    //use the name rather than 'Extension'...
+                                    ar[ar.length - 1] = "*"+ item.name;
+                                }
+                            })
+                        }
+                    }
+
+                    ar.shift();     //removes the type name at the beginning of the path
+
+                    item.myMeta.path = ar.join('. ');     //create a path that doesn't include the type (so is shorter)
+
+                    //make references look nicer.
+                    if (item.type) {
+                        item.type.forEach(function (it) {
+                            if (it.code == 'Reference') {
+                                if (it.profile) {
+                                    var p = it.profile[0];      //todo  <<<<<<<<<<<<<<<<<<
+                                    var ar = p.split('/');
+                                    it.code = '->' + ar[ar.length - 1];
+                                }
+                            }
+                        })
+                    }
+
+
+                    //console.log(path,disabled)
+
+
+                    if (include) {
+                        //if (!disabled) {
+
+                        //insert t
+                        var id = path;
+                        var arText = path.split('.');
+                        //arText.shift();
+                        //var text = arText.join('.');
+                        var text = arText[arText.length-1];
+
+                        var arTree = path.split('.');
+                        if (arTree[arTree.length-1] == 'extension') {
+                            text = item.name;
+                            id = id + cntExtension;
+                            cntExtension++;
+                        }
+
+                        arTree.pop();
+                        var parent = arTree.join('.');
+                        console.log(parent);
+                        if (!idsInTree[parent]) {
+                            console.log ('not in tree')
+                        }
+
+
+
+                        var dataType = '';
+                        if (item.type) {
+                            item.type.forEach(function (it){
+                                dataType += " " + it.code;
+                            })
+                        }
+
+
+                        var node = {id:id,parent:parent,text:text,state:{opened:false,selected:false},
+                            a_attr:{title: dataType}, path:path};
+                        node.data = {ed : item};
+
+                        lstTree.push(node);
+                        idsInTree[id] = 'x'
+                        lst.push(item);
+                    }
+
+
+                    //if the type is a recognized datatype, then hide all child nodes todo - won't show profiled datatyoes
+                    //note that this check is after it has been added to the list...
+
+                    if (item.type) {
+                        item.type.forEach(function (type) {
+                            if (dataTypes.indexOf(type.code) > -1) {
+                                arIsDataType.push(path)
+                            }
+                        });
+                    }
+
+
+
+
+                });
+
+            }
+
+            return {table:lst,treeData:lstTree};
 
         },
         createConformanceQualityReport : function(conf){
@@ -1645,6 +1818,27 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             }
 
             return displayProfile;
+        },
+        checkTreeConsistency : function(treeData) {
+            //check that the current tree is consistent - ie that all 'parent' references are to valid nodes
+            var nodeList = {};
+            //assemble a list of all the Ids...
+            treeData.forEach(function(item){
+                nodeList[item.id] = 'x';
+            });
+
+            //now make sure that all the 'parent' references are pointing to a valid parent...
+            var isConsistent = true;
+            treeData.forEach(function(item){
+                var parent = item.parent;
+                if (parent && parent !== '#') {
+                    if (!nodeList[parent]) {
+                        isConsistent = false;
+                    }
+                }
+                
+            });
+            return isConsistent;
         }
 
     }

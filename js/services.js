@@ -546,13 +546,13 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
         getAllData : function(patientId) {
             var deferred = $q.defer();
             var allResources = {};
-            //the currently selected data server
+            //the currently selected data server object (not just the url)
             var dataServer = appConfigSvc.getCurrentDataServer();
+            
             if (dataServer.everythingOperation) {
                 //The everything operation will return all patient related resources. not all servers recognize this, and
                 //some implement paging and small default sizes (hapi) and some don't (grahame)
                 var url = dataServer.url + "Patient/"+patientId + '/$everything'
-
                 if (dataServer.everythingOperationCount) {
                     url += "?_count="+dataServer.everythingOperationCount;
                 }

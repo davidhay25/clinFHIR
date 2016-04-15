@@ -40,6 +40,24 @@
             $locationProvider.hashPrefix('!');
 
         }]);
+/*
+        angular.module('sampleApp')
+                .factory('$exceptionHandler', function () {
+                    return function errorCatcherHandler(exception, cause) {
+                        console.log('captured exception->', exception,cause);
+                        //Raven.captureException(exception);
+                    };
+                });
+
+        */
+
+
+/*
+        window.onerror = function (em, url, ln) {
+            alert(em + ", " + url + ", " + ln);
+            return false;
+        }
+*/
 
     </script>
 
@@ -176,7 +194,7 @@
 
                             <button
                                     popover-placement="left" popover-trigger='mouseenter'
-                                    uib-popover="Validate against {{config.servers.data}}"
+                                    uib-popover="Validate against Data Server:{{config.servers.data}}"
                                     class="btn btn-link pull-right" ng-click="validate()">Validate</button>
                         </form>
 
@@ -220,9 +238,15 @@
 
                         <form ng-hide="displayMode == 'new' || displayMode == 'query' " class="navbar-form navbar-right">
                             <div ng-show="appConfigSvc.getCurrentPatient() && resourceCreatorSvc.getCurrentProfile()">
-                                <button class="btn btn-info pull-right" ng-click="displayMode = 'new'">New Resource</button>
+                                <button class="btn btn-info pull-right" ng-click="createNewResource()">New Resource</button>
                             </div>
                         </form>
+
+                        <!-- <form ng-hide="displayMode == 'new' || displayMode == 'query' " class="navbar-form navbar-right">
+                            <div ng-show="appConfigSvc.getCurrentPatient() && resourceCreatorSvc.getCurrentProfile()">
+                                <button class="btn btn-info pull-right" ng-click="displayMode = 'new'">New Resource</button>
+                            </div>
+                        </form> -->
 
 
                         <form ng-hide="displayMode == 'front' || displayMode == 'new'" class="navbar-form navbar-right">
