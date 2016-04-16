@@ -149,6 +149,9 @@ angular.module("sampleApp")
             setCurrentPatient : function(patient) {
                 currentPatient = patient;
             },
+            removeCurrentPatient : function(){
+                currentPatient = null;      //I 
+            },
             getCurrentPatient : function() {
                 return currentPatient;
             },

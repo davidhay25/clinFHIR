@@ -364,7 +364,10 @@ angular.module("sampleApp").service('resourceCreatorSvc',
           //return the elementdefinition for the root element of the profile - always the first one...
 
             if (this.currentProfile && this.currentProfile.snapshot && this.currentProfile.snapshot.element) {
-                return this.currentProfile.snapshot.element[0];
+
+                var rootElement = this.currentProfile.snapshot.element[0];
+                rootElement.myData = {sortOrder:-3};
+                return rootElement;
             }
 
 
@@ -381,11 +384,25 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         getPossibleChildNodes : function(ed,treeData){
 
-            //given an element definition, return a collection of the possible child nodes. Needs to be a promise as
+            //given an element definition, return a collection of the possible child nodes at that path. Needs to be a promise as
             //it may need to resolve references to extension definitions...
-            // also pass in the current treedata which represents the data captured thus far
+            //also pass in the current treedata which represents the data captured thus far
 
-           // console.log(treeData);
+            //create a hash indexed by path. We'll use this to find extensions of a given element...
+            var elementHash = {};
+            angular.forEach(this.currentProfile.snapshot.element,function(elementDef) {
+                var elPath = elementDef.path;
+                if (! elementHash[elPath]) {
+                    elementHash[elPath] = [];
+                }
+                elementHash[elPath].push(elementDef);
+
+            });
+
+            var sortOrder = 0;  //this wil be the order when the resource is built...
+
+            //console.log(elementHash)
+
             //create a hash indexed by path. we'll use that to determine if a given child path is available (ie can be more than one)
             var dataHash = {};
             treeData.forEach(function(item){
@@ -393,7 +410,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 dataHash[path] = dataHash[path] || {max : item.ed.max,values : []};      //there can be multiple values at a given path
                 dataHash[path].values.push({item:item})
                 //dataHash[path].display = item.myData.display;   //used when looking for existing extensions...
-
             });
 
             //console.log(dataHash);
@@ -411,9 +427,14 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 var elPath = elementDef.path;
                 var ar = elPath.split('.');
 
+                //console.log(path,elPath,ar.length,dotCount)
+
+                //this is an element that is a direct child of the node being examined...
                 if (elPath.substr(0,pathLength) == path && ar.length == dotCount+1) {
                     //only add children that are not in the exclusion list. Will need to change this when we implement extensions...
                     var propertyName = ar[dotCount];  //the name of the property in the resource
+
+                    //console.log(elementDef.path)
 
                     //if this is an extension, then need to see if there is a profile in the type. If it is, then
                     //this is an extension attached to the profile so needs to be rendered...
@@ -432,11 +453,11 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 elementDef.myData.canAddChild = true;
                                 elementDef.myData.displayClass = elementDef.myData.displayClass.replace(" noAdd","")
                             }
-
+                            elementDef.myData.sortOrder = sortOrder++;
                             children.push(elementDef);
                         } else {
                             //nope. not processed. see if there is a profile (SD) we can load to figure out the datatype...
-
+//console.log(elementDef)
 
                         if (elementDef.type && elementDef.type[0].profile ) {
                             //so we need to retrieve the definition of the profile, and update the list of elements.
@@ -449,7 +470,11 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 elementDef.myData.displayClass += 'elementRequired ';
                             }
 
+
                             var profileUrl = elementDef.type[0].profile;     //the Url of the profile
+
+                            updateFromProfileDefinition(queries, elementDef,profileUrl)
+  /*
                             queries.push(GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
                                 function(sdef) {
 
@@ -489,10 +514,10 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 }
                             ));
 
+*/
 
 
-
-
+                            elementDef.myData.sortOrder = sortOrder++;
                             children.push(elementDef);
 
                         }
@@ -521,7 +546,58 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                     elementDef.myData.displayClass += " noAdd"
                                 }
 
+                                elementDef.myData.sortOrder = sortOrder++;
                                 children.push(elementDef);
+
+                                //OK - so this element is to be included - does it have an extension?
+                                //note that we won't look for backbone element extensios here - they'll come up as children when that element is selected...
+
+
+                                var extensionPath = elPath + '.extension';
+                                if (elementHash[extensionPath] && !isBBE(elementDef)) {
+
+                                    //yes there is an extension, now find the elementDef that has the profile that has the extension definition
+
+                                    for (var i=0; i< elementHash[extensionPath].length;i++) {
+                                        var el = elementHash[extensionPath][i];
+                                        if (el.type) {
+                                            el.type.forEach(function (typ) {
+                                                if (typ.profile) {
+                                                    //so make up an elementDef to represent this extension and add it to the list...
+                                                    var urlExt = typ.profile[0];
+                                                    console.log(extensionPath,urlExt)
+                                                    var extensionED = {min:0,max:1,path:extensionPath,myData:{}};
+                                                    //var extensionED = angular.copy(elementDef)      //todo - a copy is probably not best...
+                                                    //extensionED.type = [{code:'string'}]
+                                                    //extensionED.isExtension = true;
+                                                    extensionED.name = el.name;
+                                                    extensionED.myData.canAddChild = true;
+                                                    extensionED.myData.displayClass = 'elementExtension';
+
+                                                    //extendedElement is used by the resource builder to add the extension to this element - not the branch extensions array
+                                                    extensionED.myData.extendedElement = {path:elPath,parentED:elementDef}
+                                                    extensionED.myData.extendedElement.parentName = ar[ar.length-1];  //the name of the element being extended
+                                                    extensionED.myData.extendedElement.isComplex = true;    //todo - look this up based on the datatype...
+
+
+
+
+                                                    //extensionED.myData.extensionDefUrl =  urlExt;
+                                                    extensionED.myData.display=' -- '+ el.name;
+                                                    extensionED.myData.sortOrder = sortOrder++;
+                                                    children.push(extensionED);
+
+                                                    //get's the datatype & possibly other stuff...
+                                                    updateFromProfileDefinition(queries, extensionED,urlExt)
+
+                                                }
+                                            })
+                                        }
+                                    }
+
+
+                                }
+
 
                             }
 
@@ -590,6 +666,59 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             }
 
 
+            function updateFromProfileDefinition(queries, elementDef,url) {
+                //update the elementDef from the url (the canonical url, not a direct reference. needs to be async...
+
+                queries.push(GetDataFromServer.findConformanceResourceByUri(url).then(
+                    function(sdef) {
+
+
+                        elementDef.myData.extensionDefinition = sdef;   //save the full definition for later...
+                        elementDef.myData.isExtension = true;
+                        elementDef.myData.extensionDefUrl = url;      //it's an array (not sure why)
+
+                        //process the definition to get the datatype and url...
+
+                        //analyse the extension definition - eg is it complex or not?
+                        var analysis = Utilities.analyseExtensionDefinition(sdef);
+
+                        if (analysis.complexExtension) {
+                            //this is a complex extension...
+                            elementDef.type = [{code:'Complex'}]
+                            elementDef.analysis = analysis;
+                        } else {
+                            //this is a simple extension
+
+
+                            if (sdef && sdef.snapshot && sdef.snapshot.element) {
+                                sdef.snapshot.element.forEach(function(ed){
+                                    var path = ed.path;
+                                    if (path.indexOf('.value') > -1) {
+                                        elementDef.type = ed.type;  //this is the type from the extension definition
+
+                                    }
+                                })
+                            }
+
+                        }
+
+                    },
+                    function(err) {
+                        alert('Error retrieving '+ profileUrl + " "+ angular.toJson(err))
+                    }
+                ))
+
+            }
+
+            function isBBE(elementDef) {
+                //return true if this is a backbone element
+                if (elementDef.type && elementDef.type[0].code == 'BackboneElement') {
+                    return true
+                }
+                return false
+            }
+
+
 
         },
         canRepeat : function(ed) {
@@ -637,19 +766,19 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             function addChildrenToNode(resource,node,text) {
                 //add the node to the resource. If it has children, then recursively call
-                var lnode = treeHash[node.id];
+                //note that the 'resource' might be better termed a 'branch' as it effectively represents a BackBone element. It's the resource we're building..
 
+
+                var lnode = treeHash[node.id];
 
                 var path = lnode.path;
                 var ar = path.split('.');
                 var propertyName = ar[ar.length-1];
 
-
-
                 if (propertyName.indexOf('[x]') > -1) {
                     //this is a polymorphic field...
 
-                    //capitilize the first letter - leave the rest as-is
+                    //capitilize the first letter - leave the rest as-is        //todo - need proper dt handling - name & primative ? object like resourcetype
                     var dt = lnode.dataType.code;   //the selected datatype
                     dt = dt.charAt(0).toUpperCase() + dt.substr(1);
 
@@ -659,15 +788,14 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                 //a value of false is valid for boolean - hence the simple check is not enough...
                 if (typeof lnode.fragment != 'undefined'&& lnode.fragment != null ) {
-                //if (lnode.fragment) {
                     //if the 'resource' is an array, then there can be multiple elements...
 
                     //this should never occur..
                     if (angular.isArray(resource)) {
                         alert('array passed  - This is an error, please tell the author of clinFHIR!')
-                        var o = {};
-                        o[propertyName] = lnode.fragment;
-                        resource.push(o)
+                        //var o = {};
+                        //o[propertyName] = lnode.fragment;
+                        //resource.push(o)
 
                     } else {
 
@@ -675,16 +803,46 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         var cr = canRepeat(lnode.ed);
 
                         if (propertyName == 'extension') {
-
                             var url = lnode.ed.myData.extensionDefUrl;      //the Url to the profile
+                            var dt = 'value'+lnode.dataType.code.toProperCase();        //todo same issie with capitilization
 
-                            var dt = 'value'+lnode.dataType.code.toProperCase();
 
-                            resource.extension = resource.extension || [];
                             var extensionFragment = {url:url};
-                            extensionFragment[dt] = lnode.fragment;
+                            extensionFragment[dt] = angular.copy(lnode.fragment);
 
-                            resource.extension.push(extensionFragment);
+
+                            
+                            var procesed = false;
+                            //if lnode.ed.myData.extendedElement exists then it's actually an extension on a value within this 'branch'
+                            //what we really want to do is to add it to the element - not to the extension array of this branch
+                            //the 'extendedElement' value is set by the getPossibleChildNodes function above...
+                            if (lnode.ed.myData.extendedElement) {
+                                console.log('>> extended element')
+                                var parentName = lnode.ed.myData.extendedElement.parentName; //the name of the element in this branch
+                                //is there an element of this name on the current branch?
+
+                                angular.forEach(resource,function(value,key){
+                                    console.log(value,key)
+                                    if (key ==parentName)  {
+                                        console.log('parent found')
+                                        value.extension = value.extension || [];
+                                        value.extension.push(extensionFragment);
+                                        procesed = true;
+                                    }
+                                })
+
+                            }
+                            //myData.extendedElement
+                            //var path =lnode.path;
+
+                            var arPath = path.split('.');
+                           // if
+
+                            if (! procesed){
+                                resource.extension = resource.extension || [];
+                                resource.extension.push(extensionFragment);
+                            }
+
 
 
 
@@ -716,7 +874,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         //is this a backbone
                         if (ed && ed.type) {
                             if (ed.type[0].code == 'BackboneElement') {
-                                //yes! a backbone element. we need to create a new object to act as teh resource
+                                //yes! a backbone element. we need to create a new object to act as the resource
                                 var ar1 = ed.path.split('.');
                                 var pName = ar1[ar1.length-1];
 
@@ -1198,8 +1356,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             return deferred.promise;
         },
-
-
         makeProfileDisplayFromProfileDEP : function(profile) {
             console.log(profile);
             var arDisabled = [];          //this is a list of disabled items...
@@ -1304,9 +1460,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             return lst;
 
         },
-
-
-
         makeProfileDisplayFromProfile : function(inProfile) {
 
             var lstTree = [];
@@ -1444,7 +1597,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                         arTree.pop();
                         var parent = arTree.join('.');
-                        console.log(parent);
+                        //console.log(parent);
                         if (!idsInTree[parent]) {
                             console.log ('not in tree')
                         }

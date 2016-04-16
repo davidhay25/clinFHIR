@@ -84,11 +84,18 @@ angular.module("sampleApp")
     //============== event handlers ===================
 
     //the config (ie server) has been update. We need to abandon the resource being built...
-    $rootScope.$on('configUpdated',function(event){
+    $rootScope.$on('configUpdated',function(event,data){
         //console.log('new config');
         //when the config (servers) change,then the most recent patient & profiles will do so as well...
         $scope.recent.patient = appConfigSvc.getRecentPatient();
         $scope.recent.profile = appConfigSvc.getRecentProfile();
+
+        console.log(data);
+        if (data && data.serverType == 'data') {
+            //if the data server changes, we need to remove the current patient..
+            appConfigSvc.removeCurrentPatient();
+        }
+
         setUpForNewProfile();       //if there's no profile in the call, then everything will be re-set
 
 
@@ -104,9 +111,6 @@ angular.module("sampleApp")
 
     //when a patient is selected from the front page... Want to load the patient details and create a new starter resource for the current profile
     $rootScope.$on('patientSelected',function(event,patient){
-
-
-       var i = 1/0;
 
         appConfigSvc.addToRecentPatient(patient);
         $scope.recent.patient = appConfigSvc.getRecentPatient();
@@ -698,6 +702,17 @@ angular.module("sampleApp")
             //add the new node to the tree...
             $scope.lastTreeData = angular.copy($scope.treeData);
             $scope.treeData.push(treeNode);    //todo - may need to insert at the right place...
+
+            $scope.treeData.sort(function(a,b){
+
+                if (a.ed.myData.sortOrder > b.ed.myData.sortOrder ){
+                    return 1;
+                } else {
+                    return -1;
+                }
+            });
+
+
             // $scope.selectedNode = treeNode;     //todo !!!!! may not be correct - may need to use getNodeFromId(treeNode.id);
 
             if ($scope.selectedNode) {
@@ -718,7 +733,7 @@ angular.module("sampleApp")
             resourceCreatorSvc.getPossibleChildNodes($scope.selectedNode.ed,$scope.treeData).then(
                 function(data){
                     $scope.children = data;    //the child nodes...
-console.log(data)
+//console.log(data)
                     //delete the datatype - this will hide the input form...
                 },
                 function(err){
@@ -1322,15 +1337,14 @@ return;
         //when the user selects a different server...
         $scope.selectServer = function(serverType,server) {
             delete $scope.error;
-            delete $scope.input.testconformance;        //the test confrmance state
+            delete $scope.input.testconformance;        //the test conformance state
             delete $scope.input.testdata;
             
             config.servers[serverType] = server.url;    //set the config to the new server...
             $localStorage.config = config;
-            $rootScope.$emit('configUpdated')
+            $rootScope.$emit('configUpdated',{serverType:serverType});  //tell the world which server...
             $scope.recent.patient = appConfigSvc.getRecentPatient();
             $scope.recent.profile = appConfigSvc.getRecentProfile();
-
 
             //see if profile and data servers are the same version. If so, also return a list of terminology servers... (but the call will set the default
             $scope.consistencyCheck = appConfigSvc.checkConsistency();
