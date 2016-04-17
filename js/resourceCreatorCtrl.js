@@ -699,10 +699,12 @@ angular.module("sampleApp")
             treeNode.text = display;    //the property name
             treeNode.path = $scope.selectedChild.path;
             treeNode.dataType = {code: $scope.dataType};
+            
             //add the new node to the tree...
             $scope.lastTreeData = angular.copy($scope.treeData);
             $scope.treeData.push(treeNode);    //todo - may need to insert at the right place...
 
+            //sorting is critical for the resourc ebuilder to work - as well as aligning the resource element order with the definition. Don't remove!
             $scope.treeData.sort(function(a,b){
 
                 if (a.ed.myData.sortOrder > b.ed.myData.sortOrder ){

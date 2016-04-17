@@ -429,12 +429,10 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                 //console.log(path,elPath,ar.length,dotCount)
 
-                //this is an element that is a direct child of the node being examined...
                 if (elPath.substr(0,pathLength) == path && ar.length == dotCount+1) {
-                    //only add children that are not in the exclusion list. Will need to change this when we implement extensions...
+                    //this is an element that is a direct child of the node being examined...
                     var propertyName = ar[dotCount];  //the name of the property in the resource
 
-                    //console.log(elementDef.path)
 
                     //if this is an extension, then need to see if there is a profile in the type. If it is, then
                     //this is an extension attached to the profile so needs to be rendered...
@@ -459,68 +457,68 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             //nope. not processed. see if there is a profile (SD) we can load to figure out the datatype...
 //console.log(elementDef)
 
-                        if (elementDef.type && elementDef.type[0].profile ) {
-                            //so we need to retrieve the definition of the profile, and update the list of elements.
-                            //this will be an asynchronous operation, so add it to the list......
+                            if (elementDef.type && elementDef.type[0].profile ) {
+                                //so we need to retrieve the definition of the profile, and update the list of elements.
+                                //this will be an asynchronous operation, so add it to the list......
 
-                            var displayName = elementDef.name;
+                                var displayName = elementDef.name;
 
-                            elementDef.myData = {canAddChild:true,display:displayName,displayClass:"elementExtension"};
-                            if (elementDef.min !== 0) {
-                                elementDef.myData.displayClass += 'elementRequired ';
-                            }
-
-
-                            var profileUrl = elementDef.type[0].profile;     //the Url of the profile
-
-                            updateFromProfileDefinition(queries, elementDef,profileUrl)
-  /*
-                            queries.push(GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
-                                function(sdef) {
-
-                                    
-                                    elementDef.myData.extensionDefinition = sdef;   //save the full definition for later...
-                                    elementDef.myData.isExtension = true;
-                                    elementDef.myData.extensionDefUrl = profileUrl[0];      //it's an array (not sure why)
-
-                                    //process the definition to get the datatype and url...
-
-                                    //analyse the extension definition - eg is it complex or not?
-                                    var analysis = Utilities.analyseExtensionDefinition(sdef);
-
-                                    if (analysis.complexExtension) {
-                                        //this is a complex extension...
-                                        elementDef.type = [{code:'Complex'}]
-                                        elementDef.analysis = analysis;
-                                    } else {
-                                        //this is a simple extension
+                                elementDef.myData = {canAddChild:true,display:displayName,displayClass:"elementExtension"};
+                                if (elementDef.min !== 0) {
+                                    elementDef.myData.displayClass += 'elementRequired ';
+                                }
 
 
-                                        if (sdef && sdef.snapshot && sdef.snapshot.element) {
-                                            sdef.snapshot.element.forEach(function(ed){
-                                                var path = ed.path;
-                                                if (path.indexOf('.value') > -1) {
-                                                    elementDef.type = ed.type;  //this is the type from the extension definition
+                                var profileUrl = elementDef.type[0].profile;     //the Url of the profile
 
-                                                }
-                                            })
+                                updateFromProfileDefinition(queries, elementDef,profileUrl);    //will add to the list of async queries...
+      /*
+                                queries.push(GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
+                                    function(sdef) {
+
+
+                                        elementDef.myData.extensionDefinition = sdef;   //save the full definition for later...
+                                        elementDef.myData.isExtension = true;
+                                        elementDef.myData.extensionDefUrl = profileUrl[0];      //it's an array (not sure why)
+
+                                        //process the definition to get the datatype and url...
+
+                                        //analyse the extension definition - eg is it complex or not?
+                                        var analysis = Utilities.analyseExtensionDefinition(sdef);
+
+                                        if (analysis.complexExtension) {
+                                            //this is a complex extension...
+                                            elementDef.type = [{code:'Complex'}]
+                                            elementDef.analysis = analysis;
+                                        } else {
+                                            //this is a simple extension
+
+
+                                            if (sdef && sdef.snapshot && sdef.snapshot.element) {
+                                                sdef.snapshot.element.forEach(function(ed){
+                                                    var path = ed.path;
+                                                    if (path.indexOf('.value') > -1) {
+                                                        elementDef.type = ed.type;  //this is the type from the extension definition
+
+                                                    }
+                                                })
+                                            }
+
                                         }
 
+                                    },
+                                    function(err) {
+                                        alert('Error retrieving '+ profileUrl + " "+ angular.toJson(err))
                                     }
-                                    
-                                },
-                                function(err) {
-                                    alert('Error retrieving '+ profileUrl + " "+ angular.toJson(err))
-                                }
-                            ));
+                                ));
 
-*/
+    */
 
 
-                            elementDef.myData.sortOrder = sortOrder++;
-                            children.push(elementDef);
+                                elementDef.myData.sortOrder = sortOrder++;
+                                children.push(elementDef);
 
-                        }
+                            }
 
                         }
 
@@ -566,7 +564,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                                     //so make up an elementDef to represent this extension and add it to the list...
                                                     var urlExt = typ.profile[0];
                                                     console.log(extensionPath,urlExt)
-                                                    var extensionED = {min:0,max:1,path:extensionPath,myData:{}};
+                                                    var extensionED = {min:0,max:1,path:extensionPath,myData:{}};   //todo -fix cardinality..
                                                     //var extensionED = angular.copy(elementDef)      //todo - a copy is probably not best...
                                                     //extensionED.type = [{code:'string'}]
                                                     //extensionED.isExtension = true;
@@ -577,17 +575,26 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                                     //extendedElement is used by the resource builder to add the extension to this element - not the branch extensions array
                                                     extensionED.myData.extendedElement = {path:elPath,parentED:elementDef}
                                                     extensionED.myData.extendedElement.parentName = ar[ar.length-1];  //the name of the element being extended
-                                                    extensionED.myData.extendedElement.isComplex = true;    //todo - look this up based on the datatype...
 
 
+                                                    //we need to know if the parent (this element) is simple of complex, as the extension structure is different...
+                                                    var complexDataType = false;
+                                                    var fl = elementDef.type[0].code.charAt(0);     //pretty sure this must always be present...
+                                                    if (fl == fl.toUpperCase()) {
+                                                        complexDataType = true;
+                                                    }
+                                                    extensionED.myData.extendedElement.isComplex = complexDataType;    //todo - look this up based on the datatype...
 
 
-                                                    //extensionED.myData.extensionDefUrl =  urlExt;
+                                                    //is the parent of this extension (the element we're currently evaluation) multiple?
+                                                    //used by the builder when processing an extension with no parent...
+                                                    extensionED.myData.extendedElement.isParentMultiple = that.canRepeat(elementDef);;//false;        //todo find out from the parent ED
+
                                                     extensionED.myData.display=' -- '+ el.name;
                                                     extensionED.myData.sortOrder = sortOrder++;
                                                     children.push(extensionED);
 
-                                                    //get's the datatype & possibly other stuff...
+                                                    //gets the datatype & possibly other stuff...
                                                     updateFromProfileDefinition(queries, extensionED,urlExt)
 
                                                 }
@@ -779,10 +786,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     //this is a polymorphic field...
 
                     //capitilize the first letter - leave the rest as-is        //todo - need proper dt handling - name & primative ? object like resourcetype
-                    var dt = lnode.dataType.code;   //the selected datatype
-                    dt = dt.charAt(0).toUpperCase() + dt.substr(1);
-
-                    propertyName = propertyName.slice(0, -3) + dt;
+                    var dtx = lnode.dataType.code;   //the selected datatype
+                    dtx = dtx.charAt(0).toUpperCase() + dtx.substr(1);
+                    propertyName = propertyName.slice(0, -3) + dtx;
                    
                 }
 
@@ -804,15 +810,19 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                         if (propertyName == 'extension') {
                             var url = lnode.ed.myData.extensionDefUrl;      //the Url to the profile
-                            var dt = 'value'+lnode.dataType.code.toProperCase();        //todo same issie with capitilization
-
-
-                            var extensionFragment = {url:url};
-                            extensionFragment[dt] = angular.copy(lnode.fragment);
-
-
+                            var dt = 'value'+lnode.dataType.code;
                             
-                            var procesed = false;
+                            var extensionFragment = {url:url};
+                            extensionFragment[dt] = angular.copy(lnode.fragment);   //we don't want to change the object in the tree view...
+/*
+                            //now to determine if this is a primitive or complex datatype. The 'case' of the first letter will tell us...
+                            var complexDataType = false;
+                            var fl = lnode.dataType.code.charAt(0);
+                            if (fl == fl.toUpperCase()) {
+                                complexDataType = true;
+                            }*/
+                            
+                            var processed = false;
                             //if lnode.ed.myData.extendedElement exists then it's actually an extension on a value within this 'branch'
                             //what we really want to do is to add it to the element - not to the extension array of this branch
                             //the 'extendedElement' value is set by the getPossibleChildNodes function above...
@@ -821,32 +831,79 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 var parentName = lnode.ed.myData.extendedElement.parentName; //the name of the element in this branch
                                 //is there an element of this name on the current branch?
 
+                                //this routine will add the extension to the element if the element being extended has a value...
                                 angular.forEach(resource,function(value,key){
                                     console.log(value,key)
                                     if (key ==parentName)  {
                                         console.log('parent found')
-                                        value.extension = value.extension || [];
-                                        value.extension.push(extensionFragment);
-                                        procesed = true;
+
+                                        if (lnode.ed.myData.extendedElement.isComplex) {
+                                            //the parent is a complex datatype
+                                            value.extension = value.extension || [];
+                                            value.extension.push(extensionFragment);
+                                        } else {
+                                            //this is a primitive datatype. We actually add a new element to represent the extension
+                                            var elementName = '_' + parentName;
+                                            resource[elementName] = {extension:[]};
+                                            resource[elementName].extension.push(extensionFragment);
+
+                                        }
+
+                                        processed = true;
                                     }
-                                })
+                                });
+
+                                if (! processed) {
+                                    //if not processed, then the 'parent' element is not (?yet) present. This is legal in FHIR
+                                    //so need to create an 'empty' element to add the extension to.
+
+                                    //first we need to find out if the parent would be a repeating one (CanRepeat)...
+                                    var parentCR = lnode.ed.myData.extendedElement.isParentMultiple;
+                                    if (parentCR) {
+                                        //can repeat
+                                        //todo - does a primitive ever repeat? I'm going to assume not, but be prepared to fix here if if can...
+                                        resource[parentName] = [];  //parent is an array of properties...
+                                        var extToAdd = {extension:[extensionFragment]}
+
+
+                                        resource[parentName].push({extension:[extensionFragment]});
+                                        processed = true;
+
+                                    } else {
+                                        //single only
+
+                                        if (lnode.ed.myData.extendedElement.isComplex) {
+                                            //resource.extension = resource.extension || [];
+                                            //resource.extension.push(extensionFragment);
+                                            resource[parentName] = {extension:[]};
+                                            resource[parentName].extension.push(extensionFragment);
+                                        } else {
+                                            var elementName = '_' + parentName;
+                                            resource[elementName] = {extension:[]};
+                                            resource[elementName].extension.push(extensionFragment);
+                                        }
+
+
+                                        processed = true;
+                                    }
+                                }
+                            }       //marks the end of an extended alement (rather than an extension to the resource root)
+
+                            //the extension may have been added to al element. If not, then add to the main extensions array
+                            if (! processed){
+                                if (lnode.ed.myData.extendedElement.isComplex) {
+                                    resource.extension = resource.extension || [];
+                                    resource.extension.push(extensionFragment);
+                                } else {
+                                    var elementName = '_' + parentName;
+                                    resource[elementName] = {extension:[]};
+                                    resource[elementName].extension.push(extensionFragment);
+                                }
 
                             }
-                            //myData.extendedElement
-                            //var path =lnode.path;
-
-                            var arPath = path.split('.');
-                           // if
-
-                            if (! procesed){
-                                resource.extension = resource.extension || [];
-                                resource.extension.push(extensionFragment);
-                            }
-
-
-
 
                         } else {
+                            //this is an 'ordinary' element - not an extension...
                             //if a repeating elment then it is in an array...
                             if (cr) {
                                 resource[propertyName] = resource[propertyName] || []
