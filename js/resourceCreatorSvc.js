@@ -890,15 +890,23 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             }       //marks the end of an extended alement (rather than an extension to the resource root)
 
                             //the extension may have been added to al element. If not, then add to the main extensions array
-                            if (! processed){
-                                if (lnode.ed.myData.extendedElement.isComplex) {
-                                    resource.extension = resource.extension || [];
-                                    resource.extension.push(extensionFragment);
-                                } else {
-                                    var elementName = '_' + parentName;
-                                    resource[elementName] = {extension:[]};
-                                    resource[elementName].extension.push(extensionFragment);
+                            if (! processed) {
+                                resource.extension = resource.extension || [];
+                                resource.extension.push(extensionFragment);
+
+                                /* - don't think this is needed...
+                                if (lnode.ed.myData.extendedElement) {
+                                   //this is still an extenstion to add to an element
+                                    if (lnode.ed.myData.extendedElement.isComplex) {
+                                        resource.extension = resource.extension || [];
+                                        resource.extension.push(extensionFragment);
+                                    } else {
+                                        var elementName = '_' + parentName;
+                                        resource[elementName] = {extension: []};
+                                        resource[elementName].extension.push(extensionFragment);
+                                    }
                                 }
+                                */
 
                             }
 
