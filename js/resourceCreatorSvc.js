@@ -468,8 +468,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                     elementDef.myData.displayClass += 'elementRequired ';
                                 }
 
+                                //get the first one (we know it is populated..)
+                                var profileUrl = elementDef.type[0].profile[0];     //the Url of the profile
 
-                                var profileUrl = elementDef.type[0].profile;     //the Url of the profile
 
                                 updateFromProfileDefinition(queries, elementDef,profileUrl);    //will add to the list of async queries...
       /*
