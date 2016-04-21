@@ -1536,8 +1536,12 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var lst = [];           //this will be a list of elements in the profile to show.
             var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained'];
             var dataTypes = ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference','HumanName'];
-            var idsInTree = {};
+
             var cntExtension = 0;
+            //a hash of the id's in the tree. used to ensure we don't add an element to a non-esixtant parent.
+            //this occurs when the parent has a max of 0, but child nodes don't
+            var idsInTree = {};
+            var hashTree = {};
             if (profile && profile.snapshot && profile.snapshot.element) {
 
                 profile.snapshot.element.forEach(function (item) {
@@ -1550,24 +1554,49 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     //console.log(path);
                     var ar = path.split('.');
 
+
+                    //process extensions first as this can set the include true or false - all the others only se false
+                    //process an extension. if it has a profile, then display it with a nicer name.
+                    if (ar[ar.length - 1] == 'extension') {
+                       // disabled = true;    //by default extensions are disabled...
+                        //if the extension has a profile type then include it, otherwise not...
+                        include = false;
+                        //console.log('ext ',item)
+                        if (item.type) {
+                            item.type.forEach(function (it) {
+                                if (it.code == 'Extension' && it.profile) {
+                                   // disabled = false;
+                                    include=true;
+                                    //load the extension definition to
+
+                                    //use the name rather than 'Extension'...
+                                    ar[ar.length - 1] = "*"+ item.name;
+                                }
+                            })
+                        }
+                    }
+
+                    //hide the modifier extension. Will need to figure out how to display 'real' extensions
+                    if (ar[ar.length - 1] == 'modifierExtension') {
+                        //disabled = true;
+                        include = false;
+                    }
+
                     if (ar.length == 1) {
                         //this is the root node
                         lstTree.push({id:ar[0],parent:'#',text:ar[0],state:{opened:true,selected:true},path:path});
+                        idsInTree[ar[0]] = 'x'
                         include = false;
                     }
 
 
-                    var disabled = false;
-
-                    //console.log(path);
-                    //if max is 0, this path - and all children - are disabled in this profile...
                     if (item.max == 0) {
                        // arIsDataType.push(path)
-                        disabled = true;
-                        //include = false;
+                        //disabled = true;
+                        include = false;
                     }
 
-                    
+                    /*
 
                     //now see if this path has been disabled. There will be more elegant ways of doing this
                     //this occurs to suppress the details of datatypes - like CodeableConcept.coding.
@@ -1587,41 +1616,19 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         }
                     }
 
-
+*/
 
                     //standard element names like 'text' or 'language'
                     if (ar.length == 2 && elementsToDisable.indexOf(ar[1]) > -1) {
-                        disabled = true;
+                        //disabled = true;
                         include = false;
                     }
 
 
-                    //hide the modifier extension. Will need to figure out how to display 'real' extensions
-                    if (ar[ar.length - 1] == 'modifierExtension') {
-                        disabled = true;
-                        include = false;
-                    }
 
 
-                    //process an extension. if it has a profile, then display it with a nicer name.
-                    if (!disabled && ar[ar.length - 1] == 'extension') {
-                        disabled = true;    //by default extensions are disabled...
-                        //if the extension has a profile type then include it, otherwise not...
-                        include = false;
-                        //console.log('ext ',item)
-                        if (item.type) {
-                            item.type.forEach(function (it) {
-                               if (it.code == 'Extension' && it.profile) {
-                                    disabled = false;
-                                   include=true;
-                                    //load the extension definition to
 
-                                    //use the name rather than 'Extension'...
-                                    ar[ar.length - 1] = "*"+ item.name;
-                                }
-                            })
-                        }
-                    }
+
 
                     ar.shift();     //removes the type name at the beginning of the path
 
@@ -1639,6 +1646,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             }
                         })
                     }
+
+
 
 
                     //console.log(path,disabled)
@@ -1663,10 +1672,14 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                         arTree.pop();
                         var parent = arTree.join('.');
+
+
+
+
                         //console.log(parent);
-                        if (!idsInTree[parent]) {
-                            console.log ('not in tree')
-                        }
+                       // if (!idsInTree[parent]) {
+                           // console.log ('not in tree')
+                       // }
 
 
 
@@ -1681,10 +1694,13 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         var node = {id:id,parent:parent,text:text,state:{opened:false,selected:false},
                             a_attr:{title: dataType}, path:path};
                         node.data = {ed : item};
+                        //so long as the parent is in the tree, it's safe to add...
+                        if (idsInTree[parent]) {
+                            lstTree.push(node);
+                            idsInTree[id] = 'x'
+                            lst.push(item);
+                        }
 
-                        lstTree.push(node);
-                        idsInTree[id] = 'x'
-                        lst.push(item);
                     }
 
 
