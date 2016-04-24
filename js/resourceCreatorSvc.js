@@ -2074,6 +2074,18 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 
             });
             return isConsistent;
+        },
+        registerAccess : function(){
+            //register access for the logs...
+            $http.post('http://clinfhir.com/stats/login',{}).then(
+                function(data){
+                    //console.log(data);
+                },
+                function(err){
+                    console.log('error accessing clinfhir',err)
+                }
+            );
+
         }
 
     }

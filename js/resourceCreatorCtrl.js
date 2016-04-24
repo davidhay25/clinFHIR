@@ -17,10 +17,13 @@ angular.module("sampleApp")
 
     $scope.doDefault=false;         //whether to have default patient & profile <<<<< for debug only!
 
-    
+    resourceCreatorSvc.registerAccess();
 
 
-            var profile;                    //the profile being used as the base
+
+
+
+    var profile;                    //the profile being used as the base
     var type;                       //base type
     $scope.treeData = [];           //populates the resource tree
     $scope.results = {};            //the variable for resource property values...
@@ -1398,17 +1401,24 @@ return;
                     $scope.ResourceUtilsSvc = ResourceUtilsSvc;
 
                     $scope.searchForPatient = function(name) {
-
+                        $scope.nomatch=false;
+                        $scope.waiting = true;
                         resourceCreatorSvc.findPatientsByName(name).then(
                             function(data){
                                 // ResourceUtilsSvc.getOneLineSummaryOfResource(patient);
                                 $scope.matchingPatientsBundle = data.data;
+                                if (! data.data.entry || data.data.entry.length == 0) {
+                                    $scope.nomatch=true;
+                                }
+
 
                             },
                             function(err) {
                                 alert('Error finding patient: '+angular.toJson(err))
                             }
-                        )
+                        ).finally(function(){
+                            $scope.waiting = false;
+                        })
                     };
 
                     $scope.selectNewPatient = function(patient) {
