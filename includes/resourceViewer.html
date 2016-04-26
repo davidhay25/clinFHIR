@@ -12,8 +12,10 @@
                 <span class="pull-right badge">{{type.bundle.total}}</span>
             </a>
         </div>
+
+        <!-- Show the vitals if there are any observations-->
         <div class="list-group">
-            <a ng-show="outcome.allResources" href="#" class="list-group-item" ng-click="getVitals()">Vitals</a>
+            <a ng-show="hasVitals" href="#" class="list-group-item" ng-click="getVitals()">Vitals</a>
         </div>
     </div>
 

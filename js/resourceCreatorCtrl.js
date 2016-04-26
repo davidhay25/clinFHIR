@@ -252,7 +252,8 @@ angular.module("sampleApp")
 
     //load existing data for the current patient
     function loadPatientDetails(cb) {
-
+        $scope.hasVitals = false;
+        delete $scope.vitalsTable;
         supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
             //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
             function (allResources) {
@@ -267,6 +268,10 @@ angular.module("sampleApp")
 
                     if (bundle && bundle.total > 0) {
                         $scope.outcome.resourceTypes.push({type: type, bundle: bundle});
+                        if (type == 'Observation') {
+                            //if there are Obervations, then may be able to build a Vitals table...
+                            $scope.hasVitals = true;
+                        }
                     }
 
 
@@ -318,6 +323,60 @@ angular.module("sampleApp")
                 }
             });
     }
+
+
+    //generate the table of vitals
+    $scope.getVitals = function(){
+        //return the list of vitals observations so that a table can be generated
+        delete $scope.outcome.selectedResource;
+        delete $scope.outcome.selectedType;
+        delete $scope.outcome.allResourcesOfOneType;
+
+        supportSvc.getVitals({patientId:appConfigSvc.getCurrentPatient().id}).then(
+            function(vo){
+                var codes = vo.vitalsCodes;     //an array of codes - todo: add display
+                var grid = vo.grid;             //obects where each property is a date (to become a colum
+                //get a list of dates
+                var dates = [];
+                angular.forEach(grid,function(item,date){
+                    dates.push(date);
+                });
+                dates.sort(function(a,b){
+                    if (b > a) {
+                        return 1
+                    } else {
+                        return -1
+                    }
+                });
+
+                //convert the data grid into one suitable for display - ie the dates (properties) as columns
+                $scope.vitalsTable = {rows:[],dates:[]};
+
+                var firstRow = true;
+                codes.forEach(function(code){
+                    var row = {code:code.code,unit:code.unit,display:code.display,cols:[]};
+                    //now, add a column for each date...
+                    dates.forEach(function(date){
+                        item = grid[date];
+                        var v = '';
+                        if (item[code.code]) {      //is there a value for this code on this date
+                            v = item[code.code].valueQuantity.value;
+                        }
+                        row.cols.push({value:v});
+                        //add the date to the list of dates on the first row only
+                        if (firstRow) {
+                            $scope.vitalsTable.dates.push(date);
+                        }
+
+                    });
+                    firstRow = false
+                    $scope.vitalsTable.rows.push(row);
+                });
+
+
+            }
+        )
+    };
 
 
     //get all the standard resource types - the one defined in the fhir spec. Used for the select profile modal...
@@ -1136,54 +1195,7 @@ return;
             
 
 })
-    .controller('patientCtrlDEP', function ($scope,$rootScope,appConfigSvc,resourceCreatorSvc,ResourceUtilsSvc,supportSvc) {
-        //expose the config service on the scope. Used for showing the Patint details...
-        $scope.appConfigSvc = appConfigSvc;
-        $scope.ResourceUtilsSvc = ResourceUtilsSvc;
-        $scope.display = {editMode:false};
 
-
-        $scope.searchForPatient = function(name) {
-
-            resourceCreatorSvc.findPatientsByName(name).then(
-                function(data){
-                    // ResourceUtilsSvc.getOneLineSummaryOfResource(patient);
-                    $scope.matchingPatientsBundle = data.data;
-
-                },
-                function(err) {
-                    alert('Error finding patient: '+angular.toJson(err))
-                }
-            )
-        };
-
-        //a new patient is selected
-        $rootScope.selectNewPatient = function(patient) {
-            delete  $scope.allResources;
-
-            appConfigSvc.setCurrentPatient(patient);
-            $scope.display.editMode=false;
-            appConfigSvc.setAllResources({});
-            supportSvc.getAllData(patient.id).then(
-                //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
-                function(allResources){
-
-                    $scope.allResources = allResources;
-                    //$scope.allResources = allResources;     //needed when selecting a reference to an existing resouce for this patient...
-                    //this is so the resourceBuilder directive  knows who the patient is - and their data.
-                    //the order is significant - allResources must be set first...
-                    appConfigSvc.setAllResources(allResources);
-                    $scope.$emit('newpatient',patient)
-
-                }
-
-                )
-                .finally(function(){
-                    $scope.loadingPatient = false;
-                });
-        }
-
-})
     .controller('configCtrl',function($scope,$rootScope,configDefault,$localStorage){
 
         //if there's no config in the browser local storage then use the default
@@ -1439,7 +1451,8 @@ return;
                     $scope.addNewPatient = function() {
                         $scope.showLog = true;
                         $scope.allowClose = false;
-                        addLog('Adding new Patient');
+                        var nameText = $scope.input.fname + " " + $scope.input.lname;
+                        addLog('Adding '+nameText);
                         supportSvc.createPatient($scope.input).then(
                             function(patient){
                                 var id = patient.id;
@@ -1467,7 +1480,7 @@ return;
                                                             // not yet.. $scope.$close();
                                                             appConfigSvc.setCurrentPatient(patient);
                                                             $rootScope.$emit('patientSelected',patient);
-                                                            
+
                                                             $scope.allowClose = true;
                                                         },
                                                         function(err) {
