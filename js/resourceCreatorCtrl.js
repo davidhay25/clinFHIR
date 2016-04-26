@@ -1397,8 +1397,126 @@ return;
                 templateUrl: 'modalTemplates/searchForPatient.html',
                 size:'lg',
                 controllerX : 'patientCtrl',
-                controller: function($scope,ResourceUtilsSvc){
+                controller: function($scope,ResourceUtilsSvc,supportSvc,$q){
+                    
+                    $scope.input={mode:'find',gender:'male'};   //will be replaced by name randomizer
+                    $scope.input.dob = new Date(1982,9,31);     //will be replaced by name randomizer
+                    $scope.outcome = {log:[]};
+
+                    $scope.input.createSamples = true;
+                    //when the 'Add new patient' is selected...
+                    $scope.seletNewPatientOption = function(){
+                        $scope.input.mode='new'
+                        supportSvc.getRandomName().then(
+                            function(data) {
+                                try {
+                                    console.log(data)
+
+                                    var user = data.data.results[0];
+                                    $scope.input.dob = moment(user.dob).format();
+                                    $scope.input.fname  = user.name.first.toProperCase();
+                                    $scope.input.lname = user.name.last.toProperCase();
+                                    $scope.input.gender = user.gender;
+                                } catch (ex) {
+                                    //in the case of an error - simply use the defaults
+                                    console.log('error getting sample name: ',ex)
+                                }
+
+                            }
+                        );
+                    }
+
+                    var addLog = function(display) {
+                        $scope.outcome.log.push(display);
+                    };
+
                     $scope.ResourceUtilsSvc = ResourceUtilsSvc;
+
+
+                    //supportSvc.checkReferenceResources
+
+                    //add - and select - a new patient..
+                    $scope.addNewPatient = function() {
+                        $scope.showLog = true;
+                        $scope.allowClose = false;
+                        addLog('Adding new Patient');
+                        supportSvc.createPatient($scope.input).then(
+                            function(patient){
+                                var id = patient.id;
+                                console.log(patient)
+                                addLog('Added patient with the id : '+ id)
+
+
+                                if ($scope.input.createSamples) {
+                                    addLog('Checking that the required reference resources exist');
+                                    supportSvc.checkReferenceResources().then(
+                                        function() {
+                                            supportSvc.createEncounters(id).then(
+                                                function(msg) {
+                                                    addLog(msg);
+                                                   var query = [];
+                                                    query.push(supportSvc.createConditions(id,{logFn:addLog}));
+                                                    query.push(supportSvc.createObservations(id,{logFn:addLog}));
+                                                    query.push(supportSvc.createAppointments(id,{logFn:addLog}));
+
+                                                    $q.all(query).then(
+                                                        //regardless of success or failure, turn off the saving flag
+                                                        function() {
+                                                            $scope.saving = false;
+                                                            supportSvc.resetResourceReferences();   //remove all the newly created resources from the reference resource list...
+                                                            // not yet.. $scope.$close();
+                                                            appConfigSvc.setCurrentPatient(patient);
+                                                            $rootScope.$emit('patientSelected',patient);
+                                                            
+                                                            $scope.allowClose = true;
+                                                        },
+                                                        function(err) {
+                                                            alert('error creating sample resources\n'+angular.toJson(err))
+                                                        }
+
+                                                    )
+                                                }
+                                            )},
+                                        function(err){
+                                            //service will display error
+                                        }
+                                    )
+
+
+
+                                } else {
+                                    //$scope.$close();
+                                    appConfigSvc.setCurrentPatient(patient);
+                                    $rootScope.$emit('patientSelected',patient);
+
+                                    $scope.allowClose = true;
+                                }
+
+
+
+
+
+                            },
+                            function(err) {
+                                alert('error saving patient\n'+angular.toJson(err))
+                            }
+                        );
+                        
+                        /*
+                        var patient = {"resourceType": "Patient"};
+                        var nameText = $scope.input.fname + " " + $scope.input.lname;
+                        patient.name = [{use:'official',family:[$scope.input.lname],given:[$scope.input.fname],text:nameText}];
+
+                        patient.gender = $scope.input.gender;
+                        patient.birthDate= moment($scope.input.dob).format('YYYY-MM-DD');
+
+                        console.log(patient)
+*/
+
+                        //$rootScope.$emit('patientSelected',patient);
+                        //$scope.$close();
+
+                    }
 
                     $scope.searchForPatient = function(name) {
                         $scope.nomatch=false;

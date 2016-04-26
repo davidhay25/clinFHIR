@@ -107,7 +107,10 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             patient.name = [{use:'official',family:[input.lname],given:[input.fname],text:nameText}];
             patient.gender = input.gender;
             patient.birthDate= moment(input.dob).format('YYYY-MM-DD');
-            patient.managingOrganization = {display : 'sampleBuilder',reference : "Organization/"+cfOrganization.id};      //<<<< todo make a real org... - check at startus
+            if (cfOrganization) {
+                patient.managingOrganization = {display : 'sampleBuilder',reference : "Organization/"+cfOrganization.id};      //<<<< todo make a real org... - check at startus
+
+            }
 
             patient.text = {status:'generated',div:'<div>'+nameText+'</div>'};
 
@@ -119,7 +122,9 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
                     var id = getResourceIdFromHeaders(data.headers)
                     if (id) {
-                        deferred.resolve(id);
+                        patient.id = id;
+                        //NOTE  - CHANGED RESPONSE !!!
+                        deferred.resolve(patient);
                     } else {
                         deferred.reject({err:'The server did not return a valid id'})
                     }

@@ -10,6 +10,14 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
     };
 
+    String.prototype.capitalize = function () {
+        var txt = this;
+        return txt.charAt(0).toUpperCase() + txt.substr(1);
+    };
+
+
+
+
     //get the extension type (single, complex) and data type from the ExtensionDefinition (StructureDefinition).
 
     //todo - for now, assume simple
@@ -789,6 +797,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     //capitilize the first letter - leave the rest as-is        //todo - need proper dt handling - name & primative ? object like resourcetype
                     var dtx = lnode.dataType.code;   //the selected datatype
                     dtx = dtx.charAt(0).toUpperCase() + dtx.substr(1);
+                  //  console.log()
                     propertyName = propertyName.slice(0, -3) + dtx;
                    
                 }
@@ -811,7 +820,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                         if (propertyName == 'extension') {
                             var url = lnode.ed.myData.extensionDefUrl;      //the Url to the profile
-                            var dt = 'value'+lnode.dataType.code;
+                            var dt = 'value'+lnode.dataType.code.capitalize();
                             
                             var extensionFragment = {url:url};
                             extensionFragment[dt] = angular.copy(lnode.fragment);   //we don't want to change the object in the tree view...

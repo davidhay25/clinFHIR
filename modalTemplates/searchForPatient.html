@@ -14,7 +14,7 @@
                 <div class="pull-right">
                     <img ng-show='waiting' src="css/ajax_loader_blue_32.gif"/>
                     <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
-                    <button class="btn btn-primary" ng-show="selectedResource" ng-click="ok(selected.item)">Select</button>
+                    <button class="btn btn-primary" ng-show="allowClose" ng-click="$close()">Close</button>
                 </div>
 
             </div>
@@ -26,7 +26,7 @@
             Querying server, please wait...
         </div>
 
-        <div>
+        <div ng-show="input.mode == 'find'">
             <div class="row">
                 <div class="col-md-11">
                     <input type="text" ng-model="input.searchPatientName" class="form-control"
@@ -57,16 +57,98 @@
 
 
 
+        <div ng-show="input.mode == 'new'">
+
+
+            <div ng-repeat="log in outcome.log">
+                {{log}}
+            </div>
+
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label class="col-md-3 control-label">First Name</label>
+                    <div class="col-md-9">
+                        <input class="form-control" type="text" ng-model="input.fname"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label">Last Name</label>
+                    <div class="col-md-9">
+                        <input class="form-control" type="text" ng-model="input.lname"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label">Date of Birth</label>
+
+
+                    <div class="col-md-4">
+                        <p class="input-group">
+                            <input type="text" class="form-control" uib-datepicker-popup ng-model="input.dob" is-open="popup2.opened"
+                                   datepicker-options="dateOptions" ng-required="true" close-text="Close" />
+                                  <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="popup2.opened = true">
+                                        <i class="glyphicon glyphicon-calendar"></i></button>
+                                  </span>
+                        </p>
+                    </div>
+
+                    <!--
+                                        <div class="col-md-7">
+                                            <uib-datepicker ng-model="input.dob" class="well well-sm"></uib-datepicker>
+                                        </div>
+                                            -->
+                    <div class="col-md-2">
+                        Age: {{input.dob | getAge}}
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label">Gender</label>
+                    <div class="col-md-4">
+
+                        <span><input type="radio" name="gendernewpat" value='male' ng-model="input.gender"> Male</span>
+                        &nbsp;&nbsp;
+                        <span><input type="radio" name="gendernewpat" value='female' ng-model="input.gender"> Female</span>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label">Generate samples</label>
+                    <div class="col-md-4">
+
+                        <span><input type="checkbox"  ng-model="input.createSamples"> </span>
+
+
+                    </div>
+                    <div class="col-md-5">
+                        <div href="#" ng-click="addNewPatient()" class="btn btn-primary pull-right">Save</div>
+                    </div>
+
+                </div>
+
+
+
+            </form>
+
+
+        </div>
+
     </div>
 
     <div class="modal-footer">
         <div class="row">
             <div class="col-md-8">
-
+                <div ng-show="input.mode=='find'" class="btn btn-link pull-left" ng-click="seletNewPatientOption()">Add new patient</div>
+                <div ng-show="input.mode=='new'" class="btn btn-link pull-left" ng-click="input.mode='find'">Find patient</div>
             </div>
             <div class="col-md-4">
                 <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
-                <button class="btn btn-primary" ng-show="selectedResource" ng-click="ok(selected.item)">Select</button>
+                <button class="btn btn-primary" ng-show="allowClose" ng-click="$close()">Close</button>
             </div>
         </div>
 
