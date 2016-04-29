@@ -243,7 +243,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             var bundle = {resourceType: 'Bundle', type: 'transaction', entry: []};
 
             for (var i = 0; i < options.count; i++) {
-                var cond = {resourceType: 'Condition', status: 'finished'};
+                var cond = {resourceType: 'Condition'};
                 cond.patient = {reference:'Patient/'+id};
                 cond.verificationStatus = this.getRandomEntryFromOptions('conditionVerificationStatus');
                 cond.code = this.getRandomEntryFromOptions('conditionCode');
@@ -706,11 +706,22 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                     if (referenceResources) {
                         data.data.entry.forEach(function (entry, index) {
 
-                            var location = entry.response.location;
-                            var ar = location.split('/');
-                            var id = ar[1];
-                            var resource = bundle.entry[index].resource;
-                            resource.id = id;
+                            var resource = entry.resource;
+                            if (resource && resource.id ) {
+                                //there is already a resource with an id, nothing else to be donr...
+                            } else if (resource && entry.response.location) {
+                                //if not a resource, ten is there a location
+                                var location = entry.response.location;
+                                var ar = location.split('/');
+                                var id = ar[1];
+                               // var resource = bundle.entry[index].resource;
+                                resource.id = id;
+                            } else {
+                                deferred.reject("a resource was added, but no id was supplied")
+                            }
+
+
+
                             referenceResources.push(resource)
 
 

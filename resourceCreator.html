@@ -22,6 +22,7 @@
     <script src="js/libs/moment.min.js"></script>
     <script src="/js/libs/angular-cookies.min.js"></script>
     <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/libs/angular-translate.min.js"></script>
 
 
     <style>
@@ -32,14 +33,69 @@
 
     <script>
         //http://stackoverflow.com/questions/18214835/angularjs-how-to-enable-locationprovider-html5mode-with-deeplinking
-        angular.module("sampleApp",['ngCookies','ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage']).config(
-                ['$locationProvider', function( $locationProvider) {
+        //http://www.ng-newsletter.com/posts/angular-translate.html
+/*        angular.module("sampleApp",['ngCookies','ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage','pascalprecht.translate']).config(
+                ['$locationProvider', function( $locationProvider,$translateProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
             $locationProvider.hashPrefix('!');
 
+
+
         }]);
+*/
+        angular.module("sampleApp",['ngCookies','ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage','pascalprecht.translate'])
+
+
+        angular.module("sampleApp").config(function($locationProvider,$translateProvider){
+            console.log($translateProvider)
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+
+             $translateProvider.translations('en', {
+             TITLE: 'Resource Creator',
+             MYRECENTPATIENTS : 'My recent patients',
+             MYRECENTPROFILES : 'My recent profiles',
+             SYSTEMCONFIGURATION : 'System Configuration',
+             PATIENT : 'Patient',
+             PROFILE : 'Profile',
+             'LANGUAGE.ENGLISH' : 'English',
+             'LANGUAGE.RUSSIAN' : 'Russian',
+             'LANGUAGE.DUTCH' : 'Dutch'
+             });
+
+            $translateProvider.translations('ru', {
+                TITLE: 'Создатель ресурсов',
+                MYRECENTPATIENTS : 'Мои недавние пациенты',
+                MYRECENTPROFILES : 'Мои недавние профили',
+                SYSTEMCONFIGURATION : 'Конфигурация системы',
+                PATIENT : 'Пациент',
+                PROFILE : 'Профиль',
+                'LANGUAGE.ENGLISH' : 'английский',
+                'LANGUAGE.RUSSIAN' : 'русский',
+                'LANGUAGE.DUTCH' : 'Голландский'
+            });
+
+            $translateProvider.translations('du', {
+                TITLE: 'schepper resource',
+                MYRECENTPATIENTS : 'Mijn recente patiënten',
+                MYRECENTPROFILES : 'Mijn recente profielen',
+                SYSTEMCONFIGURATION : 'Systeem configuratie',
+                PATIENT : 'Geduldig',
+                PROFILE : 'Profiel',
+                'LANGUAGE.ENGLISH' : 'Engels',
+                'LANGUAGE.RUSSIAN' : 'Russisch',
+                'LANGUAGE.DUTCH' : 'Nederlands'
+            });
+
+            $translateProvider.preferredLanguage('ru');
+
+            console.log($translateProvider.translations())
+
+        })
 /*
         angular.module('sampleApp')
                 .factory('$exceptionHandler', function () {
@@ -100,7 +156,13 @@
 
                 <div class="container-fluid">
                     <div class="col-md-1">
-                        <a class="navbar-brand" href="#">Resource Creator</a>
+                        <a class="navbar-brand" href="#">
+                            <!--
+                            Resource Creator
+                            -->
+                            {{ 'TITLE' | translate }}
+
+                        </a>
 
                     </div>
 
@@ -112,7 +174,7 @@
 
                                 <span uib-dropdown  popover-placement="right" popover-trigger='mouseenter'
                                       uib-popover="Data Server: {{appConfigSvc.getCurrentDataServer().url}}">
-                                    <strong>Patient: </strong>
+                                    <strong>{{'PATIENT' | translate}}: </strong>
 
                                 </span>
 
@@ -127,7 +189,7 @@
                         <div>
                                 <span uib-dropdown  popover-placement="right" popover-trigger='mouseenter'
                                       uib-popover="Conformance Server: {{appConfigSvc.getCurrentConformanceServer().url}}">
-                                        <strong>Profile:</strong>
+                                        <strong>{{'PROFILE'|translate}}:</strong>
                                 </span>
 
                             {{resourceCreatorSvc.getCurrentProfile().url}}
@@ -229,6 +291,11 @@
                                         </li>
                                         <li>
                                             <a href="#" ng-click="clearPatientCache()">Clear Patient Cache</a>
+                                        </li>
+                                        <li class="divider"></li>
+
+                                        <li>
+                                            <a href="#" ng-click="changeLanguage()">Change Language</a>
                                         </li>
 
                                     </ul>

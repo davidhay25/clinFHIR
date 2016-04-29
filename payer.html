@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Payer input file</title>
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+
+
+            $('#convert').click(function(){
+                var contents = $("#input").val();
+
+                //console.log(contents);
+                var arLines= contents.split("\n");
+                //each line is a column in all files
+                //console.log(arLines)
+                arTable = [];
+                for (var i=1; i < arLines.length; i++) {    //ignore the forst line - it's a comment...
+                    var line = arLines[i];
+                    var ar = line.split(',');
+                    arTable.push(ar);
+                }
+
+              //  arLines.forEach(function(line){
+                  //  var ar = line.split(',');
+                   // arTable.push(ar);
+             //   })
+             //   console.log(arTable)
+
+
+                //the firts line has the file name. If there is an entry here, then the file is made up from the data
+                //in each row at that column.
+
+                var output = [];
+
+                for (var col = 0; col < arTable[0].length;col++) {
+                    var fileName = arTable[0][col];
+                    if (fileName) {
+                        console.log(fileName)
+                        var arFile = [];
+                        //now go through all the rows in arTable and get the value for this file from the same position
+                        for (var row = 1; row < arTable.length;row++) {     //ignore the first row..
+                            var arLine = arTable[row];
+                            var index = arLine[0];      //the first position is always the index
+                            arFile[index] = arLine[col];
+                        }
+                        console.log(arFile)
+                        var s = arFile.join('|');
+                        console.log(s);
+                        output.push(s)
+
+                    }
+
+                }
+
+                var o = output.join('\n');
+                $('#output').val(o)
+
+
+                //alert(contents)
+            })
+
+        })
+    </script>
+
+
+</head>
+<body>
+
+    <textarea id="input" rows="15" cols="160"></textarea>
+<br />
+
+    <button id="convert">Convert</button>
+    <br />
+
+    <textarea id="output" rows="15" cols="160"></textarea>
+
+
+</body>
+</html>

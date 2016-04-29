@@ -250,6 +250,18 @@ angular.module("sampleApp")
             */
 
 
+    $scope.changeLanguage = function() {
+        var modalInstance = $uibModal.open({
+            templateUrl: "/modalTemplates/selectLanguage.html",
+            size: 'sm',
+            controller: function ($scope,$translate) {
+                $scope.selectLanguage = function(code) {
+                    $translate.use(code)
+                }
+            }
+        })
+    };
+
     //load existing data for the current patient
     function loadPatientDetails(cb) {
         $scope.hasVitals = false;
@@ -1064,7 +1076,7 @@ return;
 
     //perform the actual save operation
     var saveResourceToServer = function() {
-        $uibModal.open({
+        var modalInstance = $uibModal.open({
             templateUrl: 'modalTemplates/confirmNewResource.html',
             size:'lg',
             controller: function($scope,resource,showWaiting) {
@@ -1230,7 +1242,8 @@ return;
         }
         
     })
-    .controller('frontCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,$interval,GetDataFromServer){
+    .controller('frontCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,
+                                     $translate,$interval,GetDataFromServer){
         //
 
 
@@ -1485,6 +1498,7 @@ return;
                                                         },
                                                         function(err) {
                                                             alert('error creating sample resources\n'+angular.toJson(err))
+                                                            $scope.allowClose = true;;
                                                         }
 
                                                     )
