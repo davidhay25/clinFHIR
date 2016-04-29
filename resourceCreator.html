@@ -48,8 +48,17 @@
         angular.module("sampleApp",['ngCookies','ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage','pascalprecht.translate'])
 
 
-        angular.module("sampleApp").config(function($locationProvider,$translateProvider){
-            console.log($translateProvider)
+        angular.module("sampleApp").config(function($locationProvider,$translateProvider,$localStorageProvider){
+            console.log($localStorageProvider)
+            var localStorage = $localStorageProvider.$get();
+
+            var preferredLanguage = 'ru';// $localStorageProvider.get('preferredLanguage') || 'ru';
+            if (localStorage && localStorage.preferredLanguage) {
+                preferredLanguage = localStorage.preferredLanguage
+            }
+
+            console.log(localStorage)
+
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -60,8 +69,22 @@
              MYRECENTPATIENTS : 'My recent patients',
              MYRECENTPROFILES : 'My recent profiles',
              SYSTEMCONFIGURATION : 'System Configuration',
+             TERMINOLOGYSERVER: 'Terminology Server',
              PATIENT : 'Patient',
              PROFILE : 'Profile',
+             SELECTPATIENT : 'Select Patient',
+             FINDPROFILE: 'Find Profile',
+             NEWRESOURCE : 'New Resource',
+             RESOURCENAVIGATOR : 'Resource Navigator',
+             ELEMENTDETAILS : 'Element Details',
+             CHILDELEMENTS : 'Child Elements',
+             RESOURCE : 'Resource',
+             VALIDATE : 'Validate',
+             PARK : 'Park',
+             SAVE : 'Save',
+             CLOSE : 'Close',
+             DETAILS : 'Details',
+            TEST : 'Test',
              'LANGUAGE.ENGLISH' : 'English',
              'LANGUAGE.RUSSIAN' : 'Russian',
              'LANGUAGE.DUTCH' : 'Dutch'
@@ -72,8 +95,23 @@
                 MYRECENTPATIENTS : 'Мои недавние пациенты',
                 MYRECENTPROFILES : 'Мои недавние профили',
                 SYSTEMCONFIGURATION : 'Конфигурация системы',
+                TERMINOLOGYSERVER: 'Терминология Сервер',
                 PATIENT : 'Пациент',
                 PROFILE : 'Профиль',
+                SELECTPATIENT : 'Выбор пациента',
+                FINDPROFILE: 'Найти профиль',
+
+                NEWRESOURCE : 'Новый ресурс',
+                RESOURCENAVIGATOR : 'Ресурс Навигатор',
+                ELEMENTDETAILS : 'Элемент подробности',
+                CHILDELEMENTS : 'Дочерние элементы',
+                RESOURCE : 'Ресурс',
+                VALIDATE : 'утверждать',
+                PARK : 'Парк',
+                SAVE : 'Сохранить',
+                CLOSE : 'Закрыть',
+                DETAILS : 'Детали',
+                TEST : 'Контрольная работа',
                 'LANGUAGE.ENGLISH' : 'английский',
                 'LANGUAGE.RUSSIAN' : 'русский',
                 'LANGUAGE.DUTCH' : 'Голландский'
@@ -84,16 +122,32 @@
                 MYRECENTPATIENTS : 'Mijn recente patiënten',
                 MYRECENTPROFILES : 'Mijn recente profielen',
                 SYSTEMCONFIGURATION : 'Systeem configuratie',
+                TERMINOLOGYSERVER: 'terminologie Server',
                 PATIENT : 'Geduldig',
                 PROFILE : 'Profiel',
+                SELECTPATIENT : 'Kies een patiënt',
+                FINDPROFILE: 'Vind profiel',
+                NEWRESOURCE : 'nieuwe resource',
+                RESOURCENAVIGATOR : 'resource Navigator',
+                ELEMENTDETAILS : 'element Details',
+                CHILDELEMENTS : 'Child Elements',
+                RESOURCE : 'hulpbron',
+                VALIDATE : 'bevestigen',
+                PARK : 'Park',
+                SAVE : 'Save',
+                CLOSE : 'Dichtbij',
+                DETAILS : 'Details',
+                TEST : 'Proef',
                 'LANGUAGE.ENGLISH' : 'Engels',
                 'LANGUAGE.RUSSIAN' : 'Russisch',
                 'LANGUAGE.DUTCH' : 'Nederlands'
             });
 
-            $translateProvider.preferredLanguage('ru');
+            //var preferredLanguage = 'ru';// $localStorageProvider.get('preferredLanguage') || 'ru';
 
-            console.log($translateProvider.translations())
+            $translateProvider.preferredLanguage(preferredLanguage);
+
+            //console.log($translateProvider.translations())
 
         })
 /*
@@ -182,7 +236,7 @@
                                  ({{appConfigSvc.getCurrentPatient().id}})
                                 <!--<a ng-show="appConfigSvc.getCurrentPatient()" href="#" ng-click="displayMode = 'patient'">Details</a> -->
 
-                        <a ng-show="appConfigSvc.getCurrentPatient()" href="#" ng-click="displayMode = 'view'">Details</a>
+                        <a ng-show="appConfigSvc.getCurrentPatient()" href="#" ng-click="displayMode = 'view'">{{'DETAILS'| translate}}</a>
 
                             </div>
 
@@ -222,10 +276,6 @@
 
 
 
-
-
-
-
                         <form ng-show="displayMode == 'new'" class="navbar-form navbar-right">
 
 
@@ -234,7 +284,7 @@
                                     ng-click="cancelNewResource('dirty')">Cancel</button>
 
                             <button class="btn btn-success pull-right" ng-hide="buildState=='dirty'"
-                                    ng-click="cancelNewResource('close')">Close</button>
+                                    ng-click="cancelNewResource('close')">{{'CLOSE'|translate}}</button>
 
                             <!--
                             <button class="btn btn-danger pull-right" ng-click="cancelNewResource()">
@@ -251,13 +301,13 @@
                         </form>
 
                         <form ng-show="displayMode == 'new'" class="navbar-form navbar-right">
-                            <button class="btn btn-primary pull-right" ng-click="saveToServer()">Save</button>
-                            <button style="margin-right: 8px" class="btn btn-info pull-right" ng-click="park()">Park</button>
+                            <button class="btn btn-primary pull-right" ng-click="saveToServer()">{{'SAVE' | translate}}</button>
+                            <button style="margin-right: 8px" class="btn btn-info pull-right" ng-click="park()">{{'PARK' | translate}}</button>
 
                             <button
                                     popover-placement="left" popover-trigger='mouseenter'
                                     uib-popover="Validate against Data Server:{{config.servers.data}}"
-                                    class="btn btn-link pull-right" ng-click="validate()">Validate</button>
+                                    class="btn btn-link pull-right" ng-click="validate()">{{'VALIDATE' | translate}}</button>
                         </form>
 
 
@@ -305,7 +355,7 @@
 
                         <form ng-hide="displayMode == 'new' || displayMode == 'query' " class="navbar-form navbar-right">
                             <div ng-show="appConfigSvc.getCurrentPatient() && resourceCreatorSvc.getCurrentProfile()">
-                                <button class="btn btn-info pull-right" ng-click="createNewResource()">New Resource</button>
+                                <button class="btn btn-info pull-right" ng-click="createNewResource()">{{'NEWRESOURCE' | translate}}</button>
                             </div>
                         </form>
 

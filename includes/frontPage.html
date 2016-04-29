@@ -50,8 +50,6 @@
 
 <div class="row">
 
-
-
     <div class="col-md-3 col-sm-3 verticalLine">
 
         <div class="row">
@@ -59,14 +57,13 @@
                 <h4>{{'MYRECENTPATIENTS' | translate}}</h4>
             </div>
             <div class="col-md-4 col-sm-4">
-                <a href="#" class="pull-right myLink" ng-click="findPatient()">Select Patient</a>
+                <a href="#" class="pull-right myLink" ng-click="findPatient()">{{'SELECTPATIENT' | translate}}</a>
             </div>
         </div>
 
 
-
         <div class="row">
-            <div class="col-md-10 col-sm-10">
+            <div class="col-md-8 col-sm-8">
                 <select class="form-control"
                         ng-change="selectServer('data',input.dataServer)"
                         ng-options="value.name for value in config.allKnownServers track by value.name"
@@ -75,9 +72,9 @@
                 </select>
             </div>
 
-            <div class="col-md-2 col-sm-2">
+            <div class="col-md-4 col-sm-4">
                 <button ng-hide = "input.testdata.loading || input.testdata" class="btn btn-default pull-right"
-                        ng-click="testServer(input.dataServer,'data')">Test</button>
+                        ng-click="testServer(input.dataServer,'data')">{{'TEST' | translate}}</button>
                 <i ng-show="input.testdata.ok" class="glyphicon glyphicon-ok pass"></i>
                 <i ng-show="input.testdata.fail" class="glyphicon glyphicon-remove fail"></i>
                 <img ng-show="input.testdata.loading" src="css/ajax_loader_blue_32.gif"/>
@@ -108,7 +105,7 @@
                 <h4>{{'MYRECENTPROFILES' | translate}}</h4>
             </div>
             <div class="col-md-8 col-sm-8">
-                <a href="#" class="pull-right myLink" ng-click="findProfile()">Find Profile</a>
+                <a href="#" class="pull-right myLink" ng-click="findProfile()">{{'FINDPROFILE'| translate}}</a>
 
 <!--
                 <a href="#" ng-hide="showUpload" class="pull-right myLink padRight"
@@ -131,7 +128,7 @@
             </div>
             <div class="col-md-2 col-sm-2">
                 <button  ng-hide = "input.testconformance.loading || input.testconformance" class="btn btn-default pull-right"
-                         ng-click="testServer(input.conformanceServer,'conformance')">Test</button>
+                         ng-click="testServer(input.conformanceServer,'conformance')">{{'TEST' | translate}}</button>
                 <i ng-show="input.testconformance.ok" class="glyphicon glyphicon-ok pass"></i>
                 <i ng-show="input.testconformance.fail" class="glyphicon glyphicon-remove fail"></i>
                 <img ng-show="input.testconformance.loading" src="css/ajax_loader_blue_32.gif"/>
@@ -176,7 +173,7 @@
 
 
 
-        <h5>Terminology Server</h5>
+        <h5>{{'TERMINOLOGYSERVER' | translate}}</h5>
 
 
 

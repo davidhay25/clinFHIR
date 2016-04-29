@@ -12,7 +12,7 @@
 
 angular.module("sampleApp")
     .controller('resourceCreatorCtrl',
-        function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,
+        function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,$translate,
               RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location,resourceSvc,$window) {
 
     $scope.doDefault=false;         //whether to have default patient & profile <<<<< for debug only!
@@ -254,8 +254,9 @@ angular.module("sampleApp")
         var modalInstance = $uibModal.open({
             templateUrl: "/modalTemplates/selectLanguage.html",
             size: 'sm',
-            controller: function ($scope,$translate) {
+            controller: function ($scope,$translate,$localStorage) {
                 $scope.selectLanguage = function(code) {
+                    $localStorage.preferredLanguage = code;     //save default language
                     $translate.use(code)
                 }
             }
