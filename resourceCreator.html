@@ -52,7 +52,7 @@
             console.log($localStorageProvider)
             var localStorage = $localStorageProvider.$get();
 
-            var preferredLanguage = 'ru';// $localStorageProvider.get('preferredLanguage') || 'ru';
+            var preferredLanguage = 'en';// $localStorageProvider.get('preferredLanguage') || 'ru';
             if (localStorage && localStorage.preferredLanguage) {
                 preferredLanguage = localStorage.preferredLanguage
             }
