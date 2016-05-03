@@ -257,6 +257,9 @@ angular.module("sampleApp")
             controller: function ($scope,$translate,$localStorage) {
                 $scope.selectLanguage = function(code) {
                     $localStorage.preferredLanguage = code;     //save default language
+                   // var url = 'translate/'+code+'.json';
+                   // $translateProvider.useUrlLoader(url);
+
                     $translate.use(code)
                 }
             }
@@ -1301,10 +1304,8 @@ return;
             //event.stopPropagation();
 
             $scope.frontPageProfile = profile;
-            $scope.input.showingLocalProfile = true;
-
-
-
+            // TEMP - just to disable duplicate tree $scope.input.showingLocalProfile = true;
+            
         };
 
         function setup() {
@@ -1593,7 +1594,8 @@ return;
 
 
 })
-    .controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,GetDataFromServer){
+    .controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,
+                                     GetDataFromServer){
         
         $scope.config = $localStorage.config;
         $scope.operationsUrl = $scope.config.baseSpecUrl + "operations.html";
@@ -1643,9 +1645,6 @@ return;
         //the profile is uri - ie it doesn't point directly to the resource
 
         $scope.showProfileByUrl = function(uri) {
-
-
-
 
             //console.log($scope.config)
             delete $scope.selectedProfile;
@@ -2062,7 +2061,89 @@ console.log(url);
         }
 
 
-    }).filter('shortUrl',function(){
+    })
+    .controller('logicalModelCtrl',function($scope,resourceCreatorSvc){
+
+        $scope.input = {};
+        $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();      //all the known data types
+
+        //set all the values for a new node to default...
+        function resetInput() {
+            $scope.input.multiplicity = 'opt';
+            delete $scope.input.newElementPath;
+            delete $scope.input.definition;
+            $scope.newNode = "";
+            $scope.input.newDatatype =$scope.dataTypes[0];
+        }
+        resetInput();       //initial setting...
+
+
+        $scope.onTreeDraw = function(item) {
+            //console.log(item);
+            $scope.model = item;
+        };
+
+
+
+        $scope.addNewNode = function(type) {
+            //add a new child node to the current one
+            console.log(type);
+            var newPath,parentId,ed;
+            var edParent = $scope.selectedNode.data.ed;       //the elementDefinition of the parent
+            if (type == 'child') {
+                newPath = edParent.path + '.' + $scope.input.newElementPath;     //the full path of the new child node
+                parentId = edParent.path;
+            } else {
+                parentId = $scope.selectedNode.parent;
+                if (parentId == '#') {
+                    alert("Can't add a sibling to the parent");
+                    return;
+                }
+                newPath = parentId + '.' + $scope.input.newElementPath;
+            }
+
+            ed = {path:newPath};
+            switch ($scope.input.multiplicity) {
+                case 'opt' :
+                    ed.min=0; ed.max = 1;
+                    break;
+                case 'req' :
+                    ed.min=1; ed.max='1';
+                    break;
+                case 'mult' :
+                    ed.min=1; ed.max='*';
+                    break;
+            }
+            ed.definition = $scope.input.definition;
+            ed.type = [{code:$scope.input.newDatatype.code}];
+
+            $scope.newNodeToAdd = ed;
+
+           // $scope.newNodeToAdd = {id:newPath,parent:parentId,text:newPath,state:{opened:true},data : {ed:ed}}
+
+            //$scope.lstTree.push({id:newPath,parent:parentId,text:newPath,state:{opened:true},data : {ed:ed}});
+
+            resetInput()
+
+           // buildTree();
+
+        };
+
+
+        $scope.treeNodeSelected = function(item) {
+            console.log(item);
+            $scope.selectedNode = item.node;    //the node in the tree view...
+
+            delete $scope.edFromTreeNode;
+            if (item.node && item.node.data && item.node.data.ed) {
+                $scope.edFromTreeNode = item.node.data.ed;
+                $scope.$digest();       //the event originated outside of angular...
+            }
+
+        }
+        
+    })
+    .filter('shortUrl',function(){
         return function(input) {
             //console.log(input);
             if (input) {

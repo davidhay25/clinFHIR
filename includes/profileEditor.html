@@ -1,0 +1,144 @@
+<style>
+    .applyPadding {
+        padding-top: 80px;
+    }
+    .myScroll {
+
+        height: 500px;
+        overflow-y: scroll;
+    }
+    .mygap {
+        margin-bottom: 8px;
+    }
+
+</style>
+
+<div ng-controller="logicalModelCtrl">
+    <div class="row" ng-show="model">
+        <div class="col-md-4">
+            <show-profile profile="frontPageProfile" treedivid="'localTree'"
+                          ontreenodeselected="treeNodeSelected(item)"
+                          ontreedraw="onTreeDraw(item)" newnode="newNodeToAdd"></show-profile>
+            <div class="myScroll">
+                <div id="localTree"></div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="rounded-box"></div>
+            <uib-tabset ng-show='edFromTreeNode'>
+                <uib-tab heading="Details">
+                    <br/>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3">Path</div>
+                        <div class="col-md-9 col-sm-9">
+                            <div ng-repeat="item in edFromTreeNode.type">{{edFromTreeNode.path}}</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3">DataType/s</div>
+                        <div class="col-md-9 col-sm-9">
+                            <div ng-repeat="item in edFromTreeNode.type">{{item.code}}</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3">Definition</div>
+                        <div class="col-md-9 col-sm-9">{{edFromTreeNode.definition}}</div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3">
+                            Multiplicity
+                        </div>
+                        <div class="col-md-9 col-sm-9">
+                            {{edFromTreeNode.min}}..{{edFromTreeNode.max}}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3">
+                        </div>
+                        <div class="col-md-9 col-sm-9">
+                            <div ng-repeat="type in edFromTreeNode.type">
+                                <em ng-repeat="p in type.profile">
+
+                                    <a href="#" ng-click="showProfileByUrl(p)">{{p}}</a>
+
+                                </em>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3">
+                            Binding
+                        </div>
+                        <div class="col-md-9 col-sm-9">
+                            <a href="#" ng-click="showValueSetForProfile(edFromTreeNode.binding.valueSetReference.reference)">
+                                {{edFromTreeNode.binding.valueSetReference.reference}}
+                            </a>
+                        </div>
+                    </div>
+
+                    <hr/>
+                    <button ng-show="selectedNode" class="btn btn-link"
+                            ng-click="newNode = 'child'">Add Child Node</button>
+
+                    <button ng-show="selectedNode" class="btn btn-link"
+                            ng-click="newNode = 'sibling'">Add Sibling Node</button>
+
+                    <div ng-show="newNode">
+
+                        <h4>Add {{newNode}} node</h4>
+
+
+
+                        <input placeholder="path relative to parent" type="text" class="form-control mygap"
+                               ng-model="input.newElementPath"/>
+
+
+
+                        <select class="form-control mygap" ng-model="input.newDatatype"
+                                ng-options="dt.description for dt in dataTypes"></select>
+
+                        <textarea placeholder="Definition" class="form-control mygap" ng-model="input.definition"></textarea>
+                        <div class="row mygap">
+                            <div class="col-sm-6 col-md-6">
+                                Multiplicity
+                            </div>
+                            <div class="col-sm-6 col-md-6">
+                                <div class="btn-group">
+                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'opt'">0..1</label>
+                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'req'">1..1</label>
+                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'mult'">0..*</label>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+                        <div>
+                            <button class="btn btn-link pull-right" ng-click="newNode=''">Cancel</button>
+                            <button class="btn btn-primary pull-right"
+                                    ng-show="input.newElementPath"
+                                    ng-click="addNewNode(newNode)">Add</button> </div>
+                    </div>
+
+
+
+                </uib-tab>
+                <uib-tab heading="Json">
+                    <pre>{{edFromTreeNode | json}}</pre>
+                </uib-tab>
+                <uib-tab heading="Model">
+                    <div ng-repeat="line in model">
+                        {{line.data.ed.path}}
+                    </div>
+
+                </uib-tab>
+            </uib-tabset>
+
+
+
+        </div>
+    </div>
+
+</div

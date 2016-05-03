@@ -23,7 +23,9 @@
     <script src="/js/libs/angular-cookies.min.js"></script>
     <script src="js/libs/ngStorage.min.js"></script>
     <script src="js/libs/angular-translate.min.js"></script>
+    <script src="js/libs/angular-translate-loader-url.min.js"></script>
 
+    <script src="js/libs/angular-translate-loader-static-files.min.js"></script>
 
     <style>
         .applyPadding {
@@ -49,7 +51,11 @@
 
 
         angular.module("sampleApp").config(function($locationProvider,$translateProvider,$localStorageProvider){
-            console.log($localStorageProvider)
+            //console.log($localStorageProvider)
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+
             var localStorage = $localStorageProvider.$get();
 
             var preferredLanguage = 'en';// $localStorageProvider.get('preferredLanguage') || 'ru';
@@ -57,40 +63,76 @@
                 preferredLanguage = localStorage.preferredLanguage
             }
 
-            console.log(localStorage)
+            //console.log(localStorage)
+            $translateProvider.useSanitizeValueStrategy('escape');
 
 
-            // enable html5Mode for pushstate ('#'-less URLs)
-            $locationProvider.html5Mode(true);
-            $locationProvider.hashPrefix('!');
+            //to avoif FOUC - https://angular-translate.github.io/docs/#/guide/12_asynchronous-loading
+            $translateProvider.translations('en', {
+                TITLE: 'Resource Creator',
+                MYRECENTPATIENTS : 'My recent patients',
+                MYRECENTPROFILES : 'My recent profiles',
+                SYSTEMCONFIGURATION : 'System Configuration',
+                TERMINOLOGYSERVER: 'Terminology Server',
+                PATIENT : 'Patient',
+                PROFILE : 'Profile',
+                SELECTPATIENT : 'Select Patient',
+                FINDPROFILE: 'Find Profile',
+                NEWRESOURCE : 'New Resource',
+                RESOURCENAVIGATOR : 'Resource Navigator',
+                ELEMENTDETAILS : 'Element Details',
+                CHILDELEMENTS : 'Child Elements',
+                RESOURCE : 'Resource',
+                VALIDATE : 'Validate',
+                PARK : 'Park',
+                SAVE : 'Save',
+                CLOSE : 'Close',
+                DETAILS : 'Details',
+                TEST : 'Test',
+                'LANGUAGE.ENGLISH' : 'English',
+                'LANGUAGE.RUSSIAN' : 'Russian',
+                'LANGUAGE.DUTCH' : 'Dutch',
+                "MENU.QUERYSERVERS":"Query Servers",
+                "MENU.RESETCONFIG" : "Reset Config",
+                "MENU.CLEARPROFILECACHE":"Clear Profile Cache",
+                "MENU.CLEARPATIENTCACHE":"Clear Patient Cache",
+                "MENU.CHANGELANGUAGE":"Change Language"
+            });
+            $translateProvider.preferredLanguage('en');
 
-             $translateProvider.translations('en', {
-             TITLE: 'Resource Creator',
-             MYRECENTPATIENTS : 'My recent patients',
-             MYRECENTPROFILES : 'My recent profiles',
-             SYSTEMCONFIGURATION : 'System Configuration',
-             TERMINOLOGYSERVER: 'Terminology Server',
-             PATIENT : 'Patient',
-             PROFILE : 'Profile',
-             SELECTPATIENT : 'Select Patient',
-             FINDPROFILE: 'Find Profile',
-             NEWRESOURCE : 'New Resource',
-             RESOURCENAVIGATOR : 'Resource Navigator',
-             ELEMENTDETAILS : 'Element Details',
-             CHILDELEMENTS : 'Child Elements',
-             RESOURCE : 'Resource',
-             VALIDATE : 'Validate',
-             PARK : 'Park',
-             SAVE : 'Save',
-             CLOSE : 'Close',
-             DETAILS : 'Details',
-            TEST : 'Test',
-             'LANGUAGE.ENGLISH' : 'English',
-             'LANGUAGE.RUSSIAN' : 'Russian',
-             'LANGUAGE.DUTCH' : 'Dutch'
-             });
 
-            $translateProvider.translations('ru', {
+            //this will load the language files automatically when $translate.use() is invoked in the controller...
+            $translateProvider.useStaticFilesLoader({
+                prefix: 'translate/',
+                suffix: '.json'
+            });
+            $translateProvider.preferredLanguage(preferredLanguage);
+
+            return;
+
+            var initInjector = angular.injector(['ng']);
+            var $http = initInjector.get('$http');
+
+            $http.get('translate/ru.json').then(
+                    function(data) {
+                        console.log(data)
+                        $translateProvider.translations('ru', data.data)
+                        console.log(data.data)
+                        $translateProvider.preferredLanguage('ru');
+                    }
+            )
+            /*
+*/
+           // $translateProvider.useUrlLoader('translate/ru.json');
+            //$translateProvider.preferredLanguage('ru');
+
+
+
+
+
+
+/*
+            $translateProvider.translations('ruX', {
                 TITLE: 'Создатель ресурсов',
                 MYRECENTPATIENTS : 'Мои недавние пациенты',
                 MYRECENTPROFILES : 'Мои недавние профили',
@@ -117,6 +159,7 @@
                 'LANGUAGE.DUTCH' : 'Голландский'
             });
 
+
             $translateProvider.translations('du', {
                 TITLE: 'schepper resource',
                 MYRECENTPATIENTS : 'Mijn recente patiënten',
@@ -142,10 +185,12 @@
                 'LANGUAGE.RUSSIAN' : 'Russisch',
                 'LANGUAGE.DUTCH' : 'Nederlands'
             });
-
+*/
             //var preferredLanguage = 'ru';// $localStorageProvider.get('preferredLanguage') || 'ru';
 
             $translateProvider.preferredLanguage(preferredLanguage);
+
+
 
             //console.log($translateProvider.translations())
 
@@ -200,7 +245,7 @@
 </head>
 
 
-<body style="padding: 8px ">
+<body style="padding: 8px " >
 
     <div  ng-app="sampleApp" ng-controller="resourceCreatorCtrl" class="container-fluid">
 
@@ -328,24 +373,28 @@
                                     </span>
                                     </a>
 
+
+
+
+
                                     <ul class="dropdown-menu" role="menu">
                                         <li>
-                                            <a href="#" ng-click="showQuery()">Query Servers</a>
+                                            <a href="#" ng-click="showQuery()">{{'MENU.QUERYSERVERS'|translate}}</a>
                                         </li>
                                         <li class="divider"></li>
                                         <li>
-                                            <a href="#" ng-click="resetConfig()">Reset Config</a>
+                                            <a href="#" ng-click="resetConfig()">{{'MENU.RESETCONFIG'|translate}}</a>
                                         </li>
                                         <li>
-                                            <a href="#" ng-click="clearProfileCache()">Clear Profiles Cache</a>
+                                            <a href="#" ng-click="clearProfileCache()">{{'MENU.CLEARPROFILECACHE'|translate}}</a>
                                         </li>
                                         <li>
-                                            <a href="#" ng-click="clearPatientCache()">Clear Patient Cache</a>
+                                            <a href="#" ng-click="clearPatientCache()">{{'MENU.CLEARPATIENTCACHE'|translate}}</a>
                                         </li>
                                         <li class="divider"></li>
 
                                         <li>
-                                            <a href="#" ng-click="changeLanguage()">Change Language</a>
+                                            <a href="#" ng-click="changeLanguage()">{{'MENU.CHANGELANGUAGE'|translate}}</a>
                                         </li>
 
                                     </ul>

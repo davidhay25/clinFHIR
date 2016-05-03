@@ -1,5 +1,12 @@
 
 
+.myScroll {
+
+    height: 100px;
+    overflow-y: scroll;
+}
+
+
 .listItemSelected {
     background-color: lightsteelblue;
 }

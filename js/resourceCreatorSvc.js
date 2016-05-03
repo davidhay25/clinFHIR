@@ -1560,6 +1560,11 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     var el = {path: item.path};
 
                     var path = item.path;
+
+                    if (! path) {
+                        alert('empty path in Element Definition\n'+angular.toJson(item))
+                        return;
+                    }
                     //console.log(path);
                     var ar = path.split('.');
 
@@ -2094,6 +2099,36 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     console.log('error accessing clinfhir',err)
                 }
             );
+
+        },
+        getDataTypesForProfileCreator: function () {
+            //return a list of all the possible datatypes
+            //right now it is hard coded, but eventually it will be loaded by examining available SDs...
+            var lst = [];
+            lst.push({code:'II',description:'Instance Identifier'});
+            lst.push({code:'CS',description:'Coded Simple'});
+            lst.push({code:'code',description:'Code'});
+            lst.push({code:'CE',description:'Coded with Equivalents'});
+            lst.push({code:'ST',description:'String'});
+            lst.push({code:'TS',description:'Timestamp'});
+            lst.push({code:'INT',description:'Integer'});
+            lst.push({code:'AD',description:'Address'});
+            lst.push({code:'TEL',description:'Telecom'});
+            lst.push({code:'EN',description:'Encapsulated Name'});
+            lst.push({code:'ED',description:'Encapsulated Data'});
+            lst.push({code:'BL',description:'Boolean'});
+            lst.push({code:'IVL_TL',description:'Interval of timestamp'});
+            lst.push({code:'SC',description:'Character String with Code'});
+
+
+            lst.forEach(function(item){
+                item.description = item.description + " ("+ item.code + ")";
+            });
+
+
+            lst.push({code:'BackboneElement'});
+
+            return lst
 
         }
 

@@ -14,7 +14,7 @@
         <div class="col-md-3">
             <h4  popover-placement="bottom" popover-trigger='mouseenter'
                  uib-popover="A skeleton of the resource currently under construction">
-                Resource Navigator</h4>
+                {{'RESOURCENAVIGATOR' | translate}}</h4>
 
             <div style="height:400px; overflow-y: auto;" >
                 <div id="treeView"></div>
@@ -27,7 +27,7 @@
         <div class="col-md-4 borderForDetail" >
 
             <div ng-show="selectedNode">
-                <h4>Element details: <em>{{selectedNode.ed.path}}</em></h4>
+                <h4>{{'ELEMENTDETAILS' | translate}}: <em>{{selectedNode.ed.path}}</em></h4>
 
                 {{selectedNode.display}}
 
@@ -44,7 +44,7 @@
 
 
 
-            <h4 ng-show="children.length > 0">Child elements</h4>
+            <h4 ng-show="children.length > 0">{{'CHILDELEMENTS' | translate}}</h4>
 
 
             <div >
@@ -91,7 +91,7 @@
 
         <div class="col-md-5">
 
-            <h4>Resource: Json</h4>
+            <h4>{{'RESOURCE' | translate}}: Json</h4>
 
             <uib-alert close="closeValidationOutcome()" type="success"
                        ng-show="validateResults.outcome">

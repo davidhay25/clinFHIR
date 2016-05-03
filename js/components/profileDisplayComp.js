@@ -7,12 +7,15 @@ angular.module('sampleApp').component('showProfile',
             onvaluesetselected : '&',
             onextensionselected : '&',
             onprofileselected : '&',
-            ontreenodeselected : '&'
+            ontreenodeselected : '&',
+            ontreedraw : '&',
+            newnode :'<'
         },
         templateUrl : 'js/components/profileDisplayTemplate.html',
         controller: function (resourceCreatorSvc,GetDataFromServer,$uibModal,Utilities) {
             var that = this;
-            var treeDivId = this.treedivid || 'pfTreeView';    //the div id is unique across the application, so if used multiple times, an external div must be supplied
+            //todo - issue with componnet timing. For now require all uses of tree specify the tree id externally
+            var treeDivId = this.treedivid;// || 'pfTreeView';    //the div id is unique across the application, so if used multiple times, an external div must be supplied
 
             this.follow = true;
             this.profileHistory = [];       //a history of all profiles viewed
@@ -21,9 +24,18 @@ angular.module('sampleApp').component('showProfile',
             this.$onChanges = function(obj) {
 
 
+                if (obj.newnode) {
+                    //this is adding a new node to the tree... We add it to the profile, even if it might
+                    //be in the wrong place. Won't upset the tree display, but does mean we need to sort
+                    //by path before saving. todo - posisbly just insert in the right place to start with??
+                    that.selectedProfile.snapshot.element.push(obj.newnode.currentValue);
+                    this.getTable(treeDivId);
+                }
+                console.log(obj);
+
                 //set the profile...
                 if (obj.profile && obj.profile.currentValue) {
-                    that.selectedProfile = obj.profile.currentValue;
+                    that.selectedProfile = angular.copy(obj.profile.currentValue);
                     if (that.selectedProfile) {
                         //console.log(that.selectedProfile)
                       //  this.profileHistory = [];
@@ -208,21 +220,17 @@ angular.module('sampleApp').component('showProfile',
             //build the table
             this.getTable = function(treeDivId){
 
+
+
                 delete that.filteredProfile;
                 if (this.selectedProfile) {
 
                     //get the rows in the table...
                     var buildView = resourceCreatorSvc.makeProfileDisplayFromProfile(that.selectedProfile);
+                    that.ontreedraw({item:buildView.treeData});
+
                     that.filteredProfile = buildView.lst
 
-
-
-/*
-                    $('#pfTreeView').jstree('destroy');
-                    $('#pfTreeView').jstree(
-                        {'core': {'multiple': false, 'data': buildView.treeData, 'themes': {name: 'proton', responsive: true}}}
-                    )
-                    */
                     $('#'+treeDivId).jstree('destroy');
                     $('#'+treeDivId).jstree(
                         {'core': {'multiple': false, 'data': buildView.treeData, 'themes': {name: 'proton', responsive: true}}}
