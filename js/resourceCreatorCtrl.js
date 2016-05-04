@@ -1299,14 +1299,19 @@ return;
             $scope.recent.patient = appConfigSvc.getRecentPatient();
         });
 
+        //when we want to view the profile in the tree
         $scope.showLocalProfile = function(event,profile) {
             //console.log(event)
             //event.stopPropagation();
-
+            $scope.$broadcast('profileSelected',{profile:profile});
             $scope.frontPageProfile = profile;
             // TEMP - just to disable duplicate tree $scope.input.showingLocalProfile = true;
-            
+
+
         };
+
+
+
 
         function setup() {
             config = $localStorage.config;
@@ -1530,20 +1535,7 @@ return;
                                 alert('error saving patient\n'+angular.toJson(err))
                             }
                         );
-                        
-                        /*
-                        var patient = {"resourceType": "Patient"};
-                        var nameText = $scope.input.fname + " " + $scope.input.lname;
-                        patient.name = [{use:'official',family:[$scope.input.lname],given:[$scope.input.fname],text:nameText}];
 
-                        patient.gender = $scope.input.gender;
-                        patient.birthDate= moment($scope.input.dob).format('YYYY-MM-DD');
-
-                        console.log(patient)
-*/
-
-                        //$rootScope.$emit('patientSelected',patient);
-                        //$scope.$close();
 
                     }
 
@@ -1588,9 +1580,6 @@ return;
                 }
             })
         }
-
-
-
 
 
 })
@@ -2062,10 +2051,44 @@ console.log(url);
 
 
     })
-    .controller('logicalModelCtrl',function($scope,resourceCreatorSvc){
+    .controller('logicalModelCtrl',function($scope,resourceCreatorSvc,GetDataFromServer){
 
-        $scope.input = {};
+        $scope.input = {dirty:false};
+        $scope.mode = 'view';       //can view or edit profiles
         $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();      //all the known data types
+
+        //$scope.editText = 'Edit';       //will change the text when a core profile...
+        $scope.startEdit = function() {
+            $scope.mode = 'edit';           //edit (current), new, view
+        };
+
+        //allows the user to view the contents of a valueSet. Note that the '$scope.showVSBrowserDialog.open' call is
+        //actually implemented in the 'resourceCreatorCtrl' controller - it's the parent of this one...
+        $scope.showValueSetForProfile = function(url) {
+            //console.log(url);
+            $scope.showWaiting = true;
+            GetDataFromServer.getValueSet(url).then(
+                function(vs) {
+
+                    $scope.showVSBrowserDialog.open(vs);
+
+                }
+            ).finally (function(){
+                $scope.showWaiting = false;
+            });
+        };
+
+        //when a profile is selected, check if it is a core type
+        $scope.$on('profileSelected',function(event,data){
+          console.log(data);
+            $scope.allowEdit = true;    //the profile being viewed can be altered
+            var selectedProfile = data.profile;
+            //is this a core profile? If it is, it cannot be edited.
+            if (selectedProfile.base && selectedProfile.base.indexOf('DomainResource')> -1) {
+                //yes, this is a base resource.
+                $scope.allowEdit = false;
+            }
+        });
 
         //set all the values for a new node to default...
         function resetInput() {
@@ -2077,7 +2100,15 @@ console.log(url);
         }
         resetInput();       //initial setting...
 
+        //when the editor is closed. mightwant to check for dirty...
+        $scope.close = function(){
+            delete $scope.model;
+            delete $scope.selectedNode;
+            delete $scope.edFromTreeNode;
 
+        };
+
+        //when the tree is re-drawn. model is the array of tree nodes.
         $scope.onTreeDraw = function(item) {
             //console.log(item);
             $scope.model = item;
@@ -2102,7 +2133,8 @@ console.log(url);
                 newPath = parentId + '.' + $scope.input.newElementPath;
             }
 
-            ed = {path:newPath};
+            //create a
+            ed = {path:newPath,myMeta : {isNew:true}};
             switch ($scope.input.multiplicity) {
                 case 'opt' :
                     ed.min=0; ed.max = 1;
@@ -2117,26 +2149,28 @@ console.log(url);
             ed.definition = $scope.input.definition;
             ed.type = [{code:$scope.input.newDatatype.code}];
 
+            //this is a property against the compent that will add the ed to the tree view
             $scope.newNodeToAdd = ed;
-
-           // $scope.newNodeToAdd = {id:newPath,parent:parentId,text:newPath,state:{opened:true},data : {ed:ed}}
-
-            //$scope.lstTree.push({id:newPath,parent:parentId,text:newPath,state:{opened:true},data : {ed:ed}});
-
-            resetInput()
+            $scope.input.dirty = true;
+            delete $scope.newNode;
+            resetInput();
 
            // buildTree();
 
         };
 
 
+        //when an element is selected in the tree....
         $scope.treeNodeSelected = function(item) {
-            console.log(item);
+           // console.log(item);
+            delete $scope.newNode;      //the var that displays the new node data
             $scope.selectedNode = item.node;    //the node in the tree view...
 
             delete $scope.edFromTreeNode;
             if (item.node && item.node.data && item.node.data.ed) {
                 $scope.edFromTreeNode = item.node.data.ed;
+
+                console.log(item.node.data.ed);
                 $scope.$digest();       //the event originated outside of angular...
             }
 

@@ -14,17 +14,60 @@
 </style>
 
 <div ng-controller="logicalModelCtrl">
-    <div class="row" ng-show="model">
+   <!-- <div class="row" ng-show="model">
+        <div class="col-md-12">
+            <h3 ng-show="mode=='view'">Viewing profile</h3>
+            <h3 ng-show="mode=='edit'">Editing profile</h3>
+            <h3 ng-show="mode=='new'">Creating a new profile</h3>
+        </div>
+    </div>
+-->
+    <div class="row animate-show" ng-show="model" >
         <div class="col-md-4">
             <show-profile profile="frontPageProfile" treedivid="'localTree'"
                           ontreenodeselected="treeNodeSelected(item)"
+
                           ontreedraw="onTreeDraw(item)" newnode="newNodeToAdd"></show-profile>
             <div class="myScroll">
                 <div id="localTree"></div>
             </div>
         </div>
         <div class="col-md-8">
-            <div class="rounded-box"></div>
+
+                <h3 ng-show="mode=='view'">Viewing profile</h3>
+                <h3 ng-show="mode=='edit'">Editing profile</h3>
+                <h3 ng-show="mode=='new'">Creating a new profile</h3>
+
+
+            <uib-alert>
+                <div class="row">
+                    <div class="col-md-4">
+                        <button  ng-hide="mode=='edit' || !allowEdit" class="btn btn-link" ng-click="startEdit()">Edit this profile</button>
+                        <button  class="btn btn-link" ng-click="mode = 'new'">New Profile</button>
+                    </div>
+                    <div class="col-md-3">
+
+                        <input ng-show="mode=='new'" type="text" ng-model="input.profileName" class="form-control"/>
+
+                    </div>
+                    <div class="col-md-5">
+                        <div class="pull-right">
+                            <button ng-show="input.profileName && mode=='new'" class="btn btn-primary" ng-click="save()">Save</button>
+                            <button class="btn btn-danger" ng-click="close()">Close</button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="clearfix"></div>
+            </uib-alert>
+
+            <div class="row">
+                <div class="col-md-12">
+
+                </div>
+            </div>
+
             <uib-tabset ng-show='edFromTreeNode'>
                 <uib-tab heading="Details">
                     <br/>
@@ -78,11 +121,29 @@
                     </div>
 
                     <hr/>
+
+
+
+
+
+
+
+
+                    <!--
+
+                    <div ng-show="edFromTreeNode && ! edFromTreeNode.myMeta.isExtension">
+                        <button class="btn btn-link" ng-click="newNode = 'child'">Add Child Node</button>
+
+                        <button class="btn btn-link" ng-click="newNode = 'sibling'">Add Sibling Node</button>
+                    </div>
+
                     <button ng-show="selectedNode" class="btn btn-link"
                             ng-click="newNode = 'child'">Add Child Node</button>
 
                     <button ng-show="selectedNode" class="btn btn-link"
-                            ng-click="newNode = 'sibling'">Add Sibling Node</button>
+                            ng-click="newNode = 'sibling'">Add Sibling Node</button>-->
+
+<!--
 
                     <div ng-show="newNode">
 
@@ -122,18 +183,75 @@
                                     ng-click="addNewNode(newNode)">Add</button> </div>
                     </div>
 
+-->
 
+                </uib-tab>
+                <uib-tab heading="New Node">
+                    <div ng-show="edFromTreeNode && ! edFromTreeNode.myMeta.isExtension">
+                        <button class="btn btn-default" ng-click="newNode = 'child'">Add Child Node</button>
+                        <button class="btn btn-default" ng-click="newNode = 'sibling'">Add Sibling Node</button>
+                    </div>
+
+                    <div ng-show="newNode">
+
+                        <h4>Add {{newNode}} node</h4>
+
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <input placeholder="path relative to parent" type="text" class="form-control mygap"
+                                       ng-model="input.newElementPath"/>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-control mygap" ng-model="input.newDatatype"
+                                        ng-options="dt.description for dt in dataTypes"></select>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="btn-group pull-right">
+                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'opt'">0..1</label>
+                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'req'">1..1</label>
+                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'mult'">0..*</label>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+
+
+
+
+                        <textarea placeholder="Definition" class="form-control mygap" ng-model="input.definition"></textarea>
+                        <!--<div class="row mygap">
+                            <div class="col-sm-6 col-md-6">
+                                Multiplicity
+                            </div>
+                            <div class="col-sm-6 col-md-6">
+                                <div class="btn-group">
+                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'opt'">0..1</label>
+                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'req'">1..1</label>
+                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'mult'">0..*</label>
+                                </div>
+                            </div>
+                        </div>
+                        -->
+
+
+
+
+                        <div>
+                            <button class="btn btn-link pull-right" ng-click="newNode=''">Cancel</button>
+                            <button class="btn btn-primary pull-right"
+                                    ng-show="input.newElementPath"
+                                    ng-click="addNewNode(newNode)">Add</button> </div>
+                    </div>
 
                 </uib-tab>
                 <uib-tab heading="Json">
                     <pre>{{edFromTreeNode | json}}</pre>
                 </uib-tab>
-                <uib-tab heading="Model">
-                    <div ng-repeat="line in model">
-                        {{line.data.ed.path}}
-                    </div>
 
-                </uib-tab>
             </uib-tabset>
 
 
@@ -141,4 +259,4 @@
         </div>
     </div>
 
-</div
+</div>

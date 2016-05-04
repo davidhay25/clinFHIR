@@ -26,6 +26,7 @@
     <script src="js/libs/angular-translate-loader-url.min.js"></script>
 
     <script src="js/libs/angular-translate-loader-static-files.min.js"></script>
+    <script src="js/libs/angular-animate.min.js"></script>
 
     <style>
         .applyPadding {
@@ -47,7 +48,7 @@
 
         }]);
 */
-        angular.module("sampleApp",['ngCookies','ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage','pascalprecht.translate'])
+        angular.module("sampleApp",['ngAnimate','ngCookies','ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage','pascalprecht.translate'])
 
 
         angular.module("sampleApp").config(function($locationProvider,$translateProvider,$localStorageProvider){

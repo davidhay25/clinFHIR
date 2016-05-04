@@ -31,7 +31,7 @@ angular.module('sampleApp').component('showProfile',
                     that.selectedProfile.snapshot.element.push(obj.newnode.currentValue);
                     this.getTable(treeDivId);
                 }
-                console.log(obj);
+                //console.log(obj);
 
                 //set the profile...
                 if (obj.profile && obj.profile.currentValue) {

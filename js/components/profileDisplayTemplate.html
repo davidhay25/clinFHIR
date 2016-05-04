@@ -18,7 +18,7 @@
                   {{$ctrl.selectedType}}
               </div>
               <ul class="dropdown-menu" uib-dropdown-menu aria-labelledby="simple-dropdown">
-                  <li ng-repeat="p in $ctrl.profileHistory">
+                  <li ng-repeat="p in $ctrl.profileHistory track by $index">
                       <div class="btn btn-link" ng-click="$ctrl.reloadProfile(p)">{{p | shortUrl}}</div>
                   </li>
 

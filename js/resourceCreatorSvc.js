@@ -1651,6 +1651,11 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     //make references look nicer.
                     if (item.type) {
                         item.type.forEach(function (it) {
+
+                            if (it.code == 'Extension') {
+                                item.myMeta.isExtension = true;
+                            }
+
                             if (it.code == 'Reference') {
                                 if (it.profile) {
                                     var p = it.profile[0];      //todo  <<<<<<<<<<<<<<<<<<
@@ -2104,6 +2109,29 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         getDataTypesForProfileCreator: function () {
             //return a list of all the possible datatypes
             //right now it is hard coded, but eventually it will be loaded by examining available SDs...
+
+            var lst = [];
+            lst.push({code:'string'});
+            lst.push({code:'CodeableConcept',isCoded:true});
+            lst.push({code:'decimal'});
+            lst.push({code:'Quantity'});
+            lst.push({code:'date'});
+            lst.push({code:'dateTime'});
+            lst.push({code:'Period'});
+            lst.push({code:'Range'});
+            lst.push({code:'Age'});
+            lst.push({code:'boolean'});
+            lst.push({code:'Reference'});
+            lst.push({code:'Identifier'});
+            lst.push({code:'uri'});
+            lst.push({code:'Ratio'});
+            lst.push({code:'Humancode'});
+            lst.push({code:'Address'});
+            lst.push({code:'ContactPoint'});
+            lst.push({code:'code',isCoded:true});
+            lst.push({code:'Coding',isCoded:true});
+  /*          return lst;
+            
             var lst = [];
             lst.push({code:'II',description:'Instance Identifier'});
             lst.push({code:'CS',description:'Coded Simple'});
@@ -2119,10 +2147,12 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             lst.push({code:'BL',description:'Boolean'});
             lst.push({code:'IVL_TL',description:'Interval of timestamp'});
             lst.push({code:'SC',description:'Character String with Code'});
-
+*/
 
             lst.forEach(function(item){
-                item.description = item.description + " ("+ item.code + ")";
+               // item.description = item.description + " ("+ item.code + ")";
+                item.description = item.code;
+
             });
 
 

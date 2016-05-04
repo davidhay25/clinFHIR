@@ -136,10 +136,10 @@
     <div class="col-md-3 col-sm-3 verticalLine">
 
         <div class="row">
-            <div class="col-md-8 col-sm-8">
+            <div class="col-md-7 col-sm-7">
                 <h4>{{'MYRECENTPATIENTS' | translate}}</h4>
             </div>
-            <div class="col-md-4 col-sm-4">
+            <div class="col-md-5 col-sm-5">
                 <a href="#" class="pull-right myLink" ng-click="findPatient()">{{'SELECTPATIENT' | translate}}</a>
             </div>
         </div>
@@ -236,7 +236,13 @@
                ng-repeat="profile in recent.profile"
                ng-model="input.recentProfile" ng-click="selectProfile(profile)"
                 style="cursor: pointer">
+
                 <i class="glyphicon glyphicon-eye-open" ng-click="showLocalProfile($event,profile)"></i>
+<!--
+                <i class="glyphicon glyphicon-edit" ng-click="editLocalProfile($event,profile)"></i>
+-->
+
+
                 {{profile.url}}
 
 
