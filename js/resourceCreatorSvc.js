@@ -1554,7 +1554,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             if (profile && profile.snapshot && profile.snapshot.element) {
 
                 profile.snapshot.element.forEach(function (item) {
-                    item.myMeta = {};
+                    item.myMeta = item.myMeta || {};
 
                     var include = true;
                     var el = {path: item.path};
@@ -1633,13 +1633,22 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 */
 
                     //standard element names like 'text' or 'language'
+                    //if ( elementsToDisable.indexOf(ar[1]) > -1) {
                     if (ar.length == 2 && elementsToDisable.indexOf(ar[1]) > -1) {
                         //disabled = true;
                         include = false;
                     }
 
+                    //don't include id elements...
+                    if (ar[ar.length-1] == 'id') {
+                        include = false;
+                    }
 
 
+                    //don't include removed elements
+                    if (item.myMeta.remove) {
+                        include = false;
+                    }
 
 
 
@@ -1671,7 +1680,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     //console.log(path,disabled)
 
-
+                    //add to tree only if include is still true...
                     if (include) {
                         //if (!disabled) {
 
@@ -1712,6 +1721,10 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                         var node = {id:id,parent:parent,text:text,state:{opened:false,selected:false},
                             a_attr:{title: dataType}, path:path};
+
+                        //node['li_attr'] = {class:'myDeleted'}
+                        //node['a_attr'] = {class:'myDeleted'}
+
                         node.data = {ed : item};
                         //so long as the parent is in the tree, it's safe to add...
                         if (idsInTree[parent]) {
@@ -2159,6 +2172,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             lst.push({code:'BackboneElement'});
 
             return lst
+
+        },
+        saveProfile : function() {
 
         }
 

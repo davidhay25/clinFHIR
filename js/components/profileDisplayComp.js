@@ -9,7 +9,9 @@ angular.module('sampleApp').component('showProfile',
             onprofileselected : '&',
             ontreenodeselected : '&',
             ontreedraw : '&',
-            newnode :'<'
+            newnode :'<',
+            deleteatpath : '<',
+            restoreremoved : '<'
         },
         templateUrl : 'js/components/profileDisplayTemplate.html',
         controller: function (resourceCreatorSvc,GetDataFromServer,$uibModal,Utilities) {
@@ -21,8 +23,42 @@ angular.module('sampleApp').component('showProfile',
             this.profileHistory = [];       //a history of all profiles viewed
 
 
+
             this.$onChanges = function(obj) {
 
+                //restore a path that was removed in this session.
+                if (obj.restoreremoved) {
+                    var edToRestore = obj.restoreremoved.currentValue;
+
+                    //alert(edToRestore)
+                    console.log(edToRestore)
+                    that.selectedProfile.snapshot.element.forEach(function(ed){
+                        if (ed.path == edToRestore.path) {
+
+                            delete ed.myMeta.remove;
+                        }
+                    })
+
+
+                    this.getTable(treeDivId);
+                }
+
+                if (obj.deleteatpath) {
+                    var pathToDelete = obj.deleteatpath.currentValue;
+                    //alert(pathToDelete)
+                    that.selectedProfile.snapshot.element.forEach(function(ed){
+                        if (ed.path.indexOf('xtension') == -1 &&  ed.path.substring(0, pathToDelete.length) == pathToDelete) {
+                            ed.myMeta = ed.myMeta || {}
+                           // if (ed.myMeta) {
+                                ed.myMeta.remove=true;
+                           // }
+
+                        }
+                    });
+                    this.getTable(treeDivId);
+
+
+                }
 
                 if (obj.newnode) {
                     //this is adding a new node to the tree... We add it to the profile, even if it might
@@ -225,7 +261,7 @@ angular.module('sampleApp').component('showProfile',
                 delete that.filteredProfile;
                 if (this.selectedProfile) {
 
-                    //get the rows in the table...
+                    //get the rows in the tree source table...
                     var buildView = resourceCreatorSvc.makeProfileDisplayFromProfile(that.selectedProfile);
                     that.ontreedraw({item:buildView.treeData});
 

@@ -2053,6 +2053,7 @@ console.log(url);
     })
     .controller('logicalModelCtrl',function($scope,resourceCreatorSvc,GetDataFromServer){
 
+        $scope.logOfChanges = [];
         $scope.input = {dirty:false};
         $scope.mode = 'view';       //can view or edit profiles
         $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();      //all the known data types
@@ -2115,6 +2116,66 @@ console.log(url);
         };
 
 
+        //remove the current node (and all child nodes)
+        $scope.removeNode = function(){
+            var ed = $scope.selectedNode.data.ed; //the ExtensionDefinition we want to remove
+            var path = ed.path;     //the path of the element to be removed...
+
+
+           // $scope.deleteAtPath(path);     //is a component property - will cause the element and all children to be removed...
+            $scope.deleteAtPath = path;     //is a component property - will cause the element and all children to be removed...
+
+            //now move through the model, marking the ED's that start with this path to be removed
+            //ed.myMeta.remove = true;
+
+            $scope.logOfChanges.push({type:'D',display:'Removed '+ path,path:path,ed:ed})
+
+
+        };
+
+       
+
+        $scope.restore = function(ed,inx){
+           // $scope.restoreRemoved = path;
+            console.log(ed)
+            $scope.restoreRemoved = ed;
+            $scope.logOfChanges.splice(inx,1)
+            
+        };
+
+        //save the new resource
+        $scope.save = function() {
+            var name = $scope.input.profileName;
+            if (! name) {
+                alert('Please enter a name')
+                return;
+            }
+            //iterate through the model to build the profile;
+            var sd = {resourceType:'StructureDefinition',name : name, status:'draft',experimental : true, snapshot : {element:[]}}
+            $scope.model.forEach(function(item) {
+                if (item.data && item.data.ed) {
+                    var ed = item.data.ed;
+                    //console.log(item.data.ed)
+                    var inProfile = true;
+                    if (ed.myMeta) {
+                        if (ed.myMeta.remove) {
+                            inProfile = false;
+                        }
+                    }
+
+                    if (inProfile) {
+                        delete ed.myMeta;
+                        sd.snapshot.element.push(ed)
+                    }
+
+                }
+
+            })
+
+            console.log(sd);
+            
+            
+        };
 
         $scope.addNewNode = function(type) {
             //add a new child node to the current one
@@ -2149,10 +2210,12 @@ console.log(url);
             ed.definition = $scope.input.definition;
             ed.type = [{code:$scope.input.newDatatype.code}];
 
-            //this is a property against the compent that will add the ed to the tree view
+            $scope.logOfChanges.push({type:'A',display:'Added '+ newPath,ed:ed})
+
+            //this is a property against the component that will add the ed to the tree view
             $scope.newNodeToAdd = ed;
             $scope.input.dirty = true;
-            delete $scope.newNode;
+            delete $scope.input.newNode;
             resetInput();
 
            // buildTree();

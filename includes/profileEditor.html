@@ -10,23 +10,75 @@
     .mygap {
         margin-bottom: 8px;
     }
+    .myDeleted {
+        text-decoration: line-through;
+        color: red;
+    }
 
 </style>
 
 <div ng-controller="logicalModelCtrl">
-   <!-- <div class="row" ng-show="model">
-        <div class="col-md-12">
-            <h3 ng-show="mode=='view'">Viewing profile</h3>
-            <h3 ng-show="mode=='edit'">Editing profile</h3>
-            <h3 ng-show="mode=='new'">Creating a new profile</h3>
+
+    <div ng-show="model"  class="row rounded-box">
+        <div class="col-md-4">
+            <strong ng-show="mode=='view'">Viewing profile</strong>
+            <strong ng-show="mode=='edit'">Editing profile</strong>
+            <strong ng-show="mode=='new'">Creating a new profile</strong>
         </div>
+
+
+        <div class="col-md-3">
+
+            <input ng-show="mode=='new'" type="text" ng-model="input.profileName" class="form-control"/>
+
+        </div>
+        <div class="col-md-5">
+
+<!--
+            <ul class="navbar-nav"  ng-hide="waiting">
+                <li uib-dropdown>
+
+                    <a href="#" uib-dropdown-toggle>
+                        <span style="font-size:2em; cursor: pointer">
+                            <i class="glyphicon glyphicon-cog"></i>
+                        </span>
+                    </a>
+
+
+
+
+
+                    <ul class="dropdown-menu" role="menu">
+                        <li>line 1
+                            </li>
+                    </ul>
+                </li>
+            </ul>
+            -->
+
+
+            <div class="pull-right">
+
+                <button  ng-hide="mode=='edit' || !allowEdit" class="btn btn-link" ng-click="startEdit()">Edit this profile</button>
+                <button  class="btn btn-link" ng-click="mode = 'new'">New Profile</button>
+                <button ng-show="input.profileName && mode=='new'" class="btn btn-success" ng-click="save()">Save</button>
+                <button class="btn btn-danger" ng-click="close()">Close</button>
+
+
+            </div>
+        </div>
+
+
     </div>
--->
+
+
+
     <div class="row animate-show" ng-show="model" >
         <div class="col-md-4">
             <show-profile profile="frontPageProfile" treedivid="'localTree'"
                           ontreenodeselected="treeNodeSelected(item)"
-
+                          deleteatpath="deleteAtPath"
+                          restoreremoved ="restoreRemoved"
                           ontreedraw="onTreeDraw(item)" newnode="newNodeToAdd"></show-profile>
             <div class="myScroll">
                 <div id="localTree"></div>
@@ -34,39 +86,8 @@
         </div>
         <div class="col-md-8">
 
-                <h3 ng-show="mode=='view'">Viewing profile</h3>
-                <h3 ng-show="mode=='edit'">Editing profile</h3>
-                <h3 ng-show="mode=='new'">Creating a new profile</h3>
 
 
-            <uib-alert>
-                <div class="row">
-                    <div class="col-md-4">
-                        <button  ng-hide="mode=='edit' || !allowEdit" class="btn btn-link" ng-click="startEdit()">Edit this profile</button>
-                        <button  class="btn btn-link" ng-click="mode = 'new'">New Profile</button>
-                    </div>
-                    <div class="col-md-3">
-
-                        <input ng-show="mode=='new'" type="text" ng-model="input.profileName" class="form-control"/>
-
-                    </div>
-                    <div class="col-md-5">
-                        <div class="pull-right">
-                            <button ng-show="input.profileName && mode=='new'" class="btn btn-primary" ng-click="save()">Save</button>
-                            <button class="btn btn-danger" ng-click="close()">Close</button>
-                        </div>
-                    </div>
-                </div>
-
-
-                <div class="clearfix"></div>
-            </uib-alert>
-
-            <div class="row">
-                <div class="col-md-12">
-
-                </div>
-            </div>
 
             <uib-tabset ng-show='edFromTreeNode'>
                 <uib-tab heading="Details">
@@ -74,7 +95,10 @@
                     <div class="row">
                         <div class="col-md-3 col-sm-3">Path</div>
                         <div class="col-md-9 col-sm-9">
+                            {{edFromTreeNode.path}}
+                            <!--
                             <div ng-repeat="item in edFromTreeNode.type">{{edFromTreeNode.path}}</div>
+                            -->
                         </div>
                     </div>
                     <div class="row">
@@ -98,6 +122,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-3 col-sm-3">
+                            Profiles
                         </div>
                         <div class="col-md-9 col-sm-9">
                             <div ng-repeat="type in edFromTreeNode.type">
@@ -111,7 +136,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-3 col-sm-3">
-                            Binding
+                            ValueSet
                         </div>
                         <div class="col-md-9 col-sm-9">
                             <a href="#" ng-click="showValueSetForProfile(edFromTreeNode.binding.valueSetReference.reference)">
@@ -120,6 +145,16 @@
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3">
+                            MetaData
+                        </div>
+                        <div class="col-md-9 col-sm-9">
+
+                                {{edFromTreeNode.myMeta}}
+
+                        </div>
+                    </div>
                     <hr/>
 
 
@@ -186,15 +221,23 @@
 -->
 
                 </uib-tab>
-                <uib-tab heading="New Node">
+                <uib-tab heading="Edit">
+
+
+                    <br/>
+
+                    <button class="btn btn-default" ng-click="removeNode()">Remove from profile</button>
+
+
+                    <h4>Add new node</h4>
                     <div ng-show="edFromTreeNode && ! edFromTreeNode.myMeta.isExtension">
-                        <button class="btn btn-default" ng-click="newNode = 'child'">Add Child Node</button>
-                        <button class="btn btn-default" ng-click="newNode = 'sibling'">Add Sibling Node</button>
+                        <button class="btn btn-default" ng-click="input.newNode = 'child'">Add Child Node</button>
+                        <button class="btn btn-default" ng-click="input.newNode = 'sibling'">Add Sibling Node</button>
                     </div>
 
-                    <div ng-show="newNode">
+                    <div ng-show="input.newNode">
 
-                        <h4>Add {{newNode}} node</h4>
+                        <h4>Add {{input.newNode}} node</h4>
 
 
                         <div class="row">
@@ -241,19 +284,35 @@
 
 
                         <div>
-                            <button class="btn btn-link pull-right" ng-click="newNode=''">Cancel</button>
+                            <button class="btn btn-link pull-right" ng-click="input.newNode=''">Cancel</button>
                             <button class="btn btn-primary pull-right"
                                     ng-show="input.newElementPath"
-                                    ng-click="addNewNode(newNode)">Add</button> </div>
+                                    ng-click="addNewNode(input.newNode)">Add</button> </div>
                     </div>
 
                 </uib-tab>
                 <uib-tab heading="Json">
+                    <br/>
                     <pre>{{edFromTreeNode | json}}</pre>
                 </uib-tab>
 
             </uib-tabset>
 
+
+            <div ng-show="logOfChanges.length > 0">
+                <hr />
+                <h4>Changes</h4>
+                <table class="table table-condensed">
+                    <tr ng-repeat="item in logOfChanges">
+                        <td>{{item.display}}</td>
+                        <td>
+                            <button ng-show="item.type=='D'" class="btn btn-default" ng-click="restore(item.ed,$index)">Restore</button>
+                            <button ng-show="item.type=='A'" class="btn btn-default">Remove</button>
+                        </td>
+                    </tr>
+                </table>
+
+            </div>
 
 
         </div>
