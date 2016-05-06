@@ -2066,7 +2066,7 @@ console.log(url);
         //allows the user to view the contents of a valueSet. Note that the '$scope.showVSBrowserDialog.open' call is
         //actually implemented in the 'resourceCreatorCtrl' controller - it's the parent of this one...
         $scope.showValueSetForProfile = function(url) {
-            //console.log(url);
+
             $scope.showWaiting = true;
             GetDataFromServer.getValueSet(url).then(
                 function(vs) {
@@ -2101,7 +2101,7 @@ console.log(url);
         }
         resetInput();       //initial setting...
 
-        //when the editor is closed. mightwant to check for dirty...
+        //when the editor is closed. todo mightwant to check for dirty...
         $scope.close = function(){
             delete $scope.model;
             delete $scope.selectedNode;
@@ -2146,35 +2146,23 @@ console.log(url);
         //save the new resource
         $scope.save = function() {
             var name = $scope.input.profileName;
+
+            var name='devonly3';
+
             if (! name) {
                 alert('Please enter a name')
                 return;
             }
-            //iterate through the model to build the profile;
-            var sd = {resourceType:'StructureDefinition',name : name, status:'draft',experimental : true, snapshot : {element:[]}}
-            $scope.model.forEach(function(item) {
-                if (item.data && item.data.ed) {
-                    var ed = item.data.ed;
-                    //console.log(item.data.ed)
-                    var inProfile = true;
-                    if (ed.myMeta) {
-                        if (ed.myMeta.remove) {
-                            inProfile = false;
-                        }
-                    }
 
-                    if (inProfile) {
-                        delete ed.myMeta;
-                        sd.snapshot.element.push(ed)
-                    }
-
+            resourceCreatorSvc.saveNewProfile(name,$scope.model).then(
+                function(log) {
+                    alert(angular.toJson(log))
+                },
+                function(log) {
+                    alert(angular.toJson(log))
                 }
+            );
 
-            })
-
-            console.log(sd);
-            
-            
         };
 
         $scope.addNewNode = function(type) {
@@ -2195,7 +2183,7 @@ console.log(url);
             }
 
             //create a
-            ed = {path:newPath,myMeta : {isNew:true}};
+            ed = {path:newPath,name: $scope.input.newElementPath,myMeta : {isNew:true}};
             switch ($scope.input.multiplicity) {
                 case 'opt' :
                     ed.min=0; ed.max = 1;
@@ -2227,9 +2215,12 @@ console.log(url);
         $scope.treeNodeSelected = function(item) {
            // console.log(item);
             delete $scope.newNode;      //the var that displays the new node data
+            delete $scope.edFromTreeNode;
+            delete $scope.selectedNode;
+
             $scope.selectedNode = item.node;    //the node in the tree view...
 
-            delete $scope.edFromTreeNode;
+
             if (item.node && item.node.data && item.node.data.ed) {
                 $scope.edFromTreeNode = item.node.data.ed;
 

@@ -271,7 +271,7 @@ angular.module('sampleApp').component('showProfile',
                     $('#'+treeDivId).jstree(
                         {'core': {'multiple': false, 'data': buildView.treeData, 'themes': {name: 'proton', responsive: true}}}
                     ).on('changed.jstree', function (e, data) {
-                        //console.log(data);
+                        console.log(data);
                         that.ontreenodeselected({item:data});
 
                     })

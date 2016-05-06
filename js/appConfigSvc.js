@@ -41,7 +41,7 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:"HealthConnex (2.0)",url:"http://sqlonfhir-dstu2.azurewebsites.net/fhir/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Local HAPI server",url:"http://localhost:8080/baseDstu2/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Public HAPI server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2,everythingOperation:true});
-        defaultConfig.allKnownServers.push({name:"HL7 New Zealand",url:"http://fhir.hl7.org.nz/dstu2/",version:2});
+        defaultConfig.allKnownServers.push({name:"HL7 New Zealand",url:"http://fhir.hl7.org.nz/baseDstu2/",version:2});
 
 
 
@@ -49,6 +49,16 @@ angular.module("sampleApp")
 
 
         return {
+            getServerByUrl : function(url) {
+              //return the server definition  for a given url. Wouldn't need this if I was saving the object rather than the string
+                for (var i=0; i < defaultConfig.allKnownServers.length;i++) {
+                    if (defaultConfig.allKnownServers[i].url == url) {
+                        return defaultConfig.allKnownServers[i];
+                        break;
+                    }
+                }
+                
+            },
             checkConsistency : function() {
                 //check that all the servers are on the same version
                 var rtn = {consistent:true,terminologyServers:[]};       //return an object

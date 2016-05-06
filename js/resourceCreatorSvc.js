@@ -1598,9 +1598,13 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     if (ar.length == 1) {
                         //this is the root node
-                        lstTree.push({id:ar[0],parent:'#',text:ar[0],state:{opened:true,selected:true},path:path});
+                        //note - added data friday pm montreal
+                        lstTree.push({id:ar[0],parent:'#',text:ar[0],state:{opened:true,selected:true},path:path,data: {ed : item}});
                         idsInTree[ar[0]] = 'x'
                         include = false;
+
+
+
                     }
 
 
@@ -2174,8 +2178,126 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             return lst
 
         },
-        saveProfile : function() {
+        saveNewProfile : function(profileName,model) {
+            //save the newly created profile.
+            var deferred = $q.defer();
+            var config = appConfigSvc.config();
+            //model is the array of tree nodes...
+            //iterate through the model to build the profile;
+            var sd = {resourceType:'StructureDefinition',name : profileName, kind:'resource',
+                status:'draft',experimental : true, snapshot : {element:[]}};
+            var profileId = profileName;       //todo - ensure not yet used (or this is an update)
+            var profileUrl = config.servers.conformance + "StructureDefinition/" +profileId;
+            sd.url = profileUrl;
 
+            //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
+            var typeName = 'baseType';
+            var svr = appConfigSvc.getServerByUrl(config.servers.conformance);
+            if (svr && svr.version == 2) {
+                typeName = 'constrainedType';
+            }
+            console.log(svr,typeName);
+
+
+
+            var log = [];
+
+            var SDsToSave = [];
+            model.forEach(function(item) {
+                if (item.data && item.data.ed) {
+                    var ed = item.data.ed;
+
+                    //the first entry is always the root, which in this case will have the base type being extended...
+                    if (! sd[typeName]) {
+                        sd[typeName] = ed.path;
+                    }
+
+                    //console.log(item.data.ed)
+                    var inProfile = true;       //true if this ed is to be included in the profile
+                    if (ed.myMeta) {
+                        if (ed.myMeta.remove) {
+                            inProfile = false;
+                        } else if (ed.myMeta.isNew) {
+                            //this is a new extension. we'll create a new extension for now - later will allow the user to select an existing one
+                            //the extension will only have a single datatype (for now)
+                            var extensionId = profileName +  ed.path.replace(/./,'-');
+                            var extensionUrl = config.servers.conformance + "StructureDefinition/" +extensionId;
+                            var dt = ed.type[0].code;   //only a single dt per entry (right now)
+                            //now change the datatype in the profile to be an extension, with a profile pointing to the ED
+                            ed.type[0].code = "Extension";      // 'cause that's what it is...
+                            ed.type[0].profile = extensionUrl;      //and where to find it.
+                            //and change the path to be 'Extension'
+                            var ar = ed.path.split('.');
+                          
+                            ar[ar.length-1] = 'extension';
+                            ed.path = ar.join('.');
+
+                            //ed.url = extensionUrl;  //the
+
+                            var valueName = "Extension.value" + dt.capitalize();    //the value name in the extension definition
+                            console.log(ed);
+
+                            //the extensionDefinition that describes this extension...
+                            var extensionSD = {"resourceType": "StructureDefinition","url": extensionUrl,
+                                "name": ed.path,"kind": "datatype","constrainedType": "Extension",
+                                "base": "http://hl7.org/fhir/StructureDefinition/Extension",
+                                "snapshot" : {element:[]}
+                            };
+
+                            extensionSD.snapshot.element.push({path:'Extension',min:0,max:'1',type:[{code:'Extension'}]});
+                            extensionSD.snapshot.element.push({path:'Extension.url',min:1,max:'1',type:[{code:'Uri'}]});
+                            extensionSD.snapshot.element.push({path:valueName,min:0,max:'1',type:[{code:dt}]});
+
+                            SDsToSave.push(saveStructureDefinition(extensionId,extensionSD).then(
+                                function() {
+                                    log.push('Saved '+extensionSD.url);
+                                },function(err){
+                                    log.push('Error saving '+extensionSD.url+ ' ' + angular.toJson(err));
+                                }
+                            ));
+                        }
+                    }
+
+                    if (inProfile) {
+                        delete ed.myMeta;
+                        sd.snapshot.element.push(ed)
+                    }
+
+                }
+
+            });
+
+            //now add the profile to the list of SD's to save
+            SDsToSave.push(saveStructureDefinition(profileId,sd).then(
+                function() {
+                    log.push('Saved '+sd.url);
+                },function(err){
+                    log.push('Error saving '+extensionSD.url+ ' ' + angular.toJson(err));
+                }));
+
+            console.log(SDsToSave);
+
+            $q.all(SDsToSave).then(
+                function(){
+                    deferred.resolve(log);
+                },function(err) {
+                    alert('Error saving profile and/or extension definitions '+ angular.toJson(err))
+                    deferred.reject(log);
+                }
+            );
+
+
+
+            return deferred.promise;
+
+
+            function saveStructureDefinition(extensionId,extensionDefinition) {
+                console.log(extensionId,extensionDefinition);
+                return $http.put(extensionDefinition.url,extensionDefinition)
+
+
+
+            }
         }
 
     }
