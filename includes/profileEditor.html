@@ -19,7 +19,7 @@
 
 <div ng-controller="logicalModelCtrl">
 
-    <div ng-show="model"  class="row rounded-box">
+    <div ng-show="showProfileEditPage"  class="row rounded-box">
         <div class="col-md-4">
             <strong ng-show="mode=='view'">Viewing profile</strong>
             <strong ng-show="mode=='edit'">Editing profile</strong>
@@ -29,42 +29,24 @@
 
         <div class="col-md-3">
 
-            <input ng-show="mode=='new'" type="text" ng-model="input.profileName" class="form-control"/>
+            <input ng-show="mode=='new' || mode=='edit'" type="text" placeholder="Enter profile name (no spaces)"
+                   ng-model="input.profileName" class="form-control"/>
+
 
         </div>
         <div class="col-md-5">
 
-<!--
-            <ul class="navbar-nav"  ng-hide="waiting">
-                <li uib-dropdown>
-
-                    <a href="#" uib-dropdown-toggle>
-                        <span style="font-size:2em; cursor: pointer">
-                            <i class="glyphicon glyphicon-cog"></i>
-                        </span>
-                    </a>
-
-
-
-
-
-                    <ul class="dropdown-menu" role="menu">
-                        <li>line 1
-                            </li>
-                    </ul>
-                </li>
-            </ul>
-            -->
 
 
             <div class="pull-right">
 
                 <button  ng-hide="mode=='edit' || !allowEdit" class="btn btn-link" ng-click="startEdit()">Edit this profile</button>
                 <button  class="btn btn-link" ng-click="mode = 'new'">New Profile</button>
-                <button ng-show="input.profileName && mode=='new'" class="btn btn-success" ng-click="save()">Save</button>
 
+                <button ng-show="input.profileName && (mode=='new'|| mode=='edit')  " class="btn btn-success" ng-click="save()">Save</button>
+<!--
                 <button  class="btn btn-warning" ng-click="save()">Dev-Save</button>
-
+-->
                 <button class="btn btn-danger" ng-click="close()">Close</button>
 
 
@@ -76,7 +58,7 @@
 
 
 
-    <div class="row animate-show" ng-show="model" >
+    <div class="row animate-show" ng-show="showProfileEditPage" >
         <div class="col-md-4">
             <show-profile profile="frontPageProfile" treedivid="'localTree'"
                           ontreenodeselected="treeNodeSelected(item)"
@@ -222,7 +204,7 @@
 -->
 
                 </uib-tab>
-                <uib-tab heading="Edit">
+                <uib-tab heading="Edit" ng-show="mode=='new' || mode=='edit' ">
 
 
                     <br/>
@@ -238,10 +220,9 @@
 
                         <h4>Add {{input.newNode}} node</h4>
 
-
                         <div class="row">
                             <div class="col-md-4">
-                                <input placeholder="path relative to parent" type="text" class="form-control mygap"
+                                <input placeholder="name (no spaces)" type="text" class="form-control mygap"
                                        ng-model="input.newElementPath"/>
                             </div>
                             <div class="col-md-4">

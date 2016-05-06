@@ -45,7 +45,7 @@
     </div>
 </div>
 
-<!-- temp location - just while developing-->
+
 
 <ng-include src="'/includes/profileEditor.html'"></ng-include>
 
@@ -221,7 +221,7 @@
 
         <br />
 
-
+<!--
         <div ng-show="input.showingLocalProfile">
             <div>
                 <strong>{{frontPageProfile.url}}</strong>
@@ -230,6 +230,7 @@
 
             <show-profile profile="frontPageProfile" onvaluesetselected="testVsSel(uri)"></show-profile>
         </div>
+        -->
 
         <ul ng-hide = "input.showingLocalProfile" class="list-group ">
             <li href="#" ng-class="{'list-group-item':true,myactive:profile.url == resourceCreatorSvc.getCurrentProfile().url}"

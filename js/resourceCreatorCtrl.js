@@ -839,16 +839,7 @@ angular.module("sampleApp")
 
     $scope.removeNode = function() {
 
-/* this was to generate an error...
-        $scope.treeData.splice(1,1);
 
-
-
-
-        drawTree();
-return;
-
-        */
 
 
         var id = $scope.selectedNode.id;        //the node to delete
@@ -1303,13 +1294,14 @@ return;
         $scope.showLocalProfile = function(event,profile) {
             //console.log(event)
             //event.stopPropagation();
-            $scope.$broadcast('profileSelected',{profile:profile});
+            $scope.showProfileEditPage = true;
             $scope.frontPageProfile = profile;
-            // TEMP - just to disable duplicate tree $scope.input.showingLocalProfile = true;
-
-
+            //broadcast an event so that the profile edit controller can determine if this is a core profile and can't be edited...
+            $scope.$broadcast('profileSelected',{profile:profile});
         };
-
+        $rootScope.$on('closeProfileEditPage',function(){
+            $scope.showProfileEditPage = false;
+        });
 
 
 
@@ -2014,7 +2006,7 @@ console.log(url);
                 function(data){
                    // console.log(data);
                     $scope.response = data;
-                    //$scope.responseHeaders = data.headers();
+
 
                     var hx = {
                         anonQuery:$scope.anonQuery,
@@ -2051,7 +2043,7 @@ console.log(url);
 
 
     })
-    .controller('logicalModelCtrl',function($scope,resourceCreatorSvc,GetDataFromServer){
+    .controller('logicalModelCtrl',function($scope,$rootScope,resourceCreatorSvc,GetDataFromServer,appConfigSvc){
 
         $scope.logOfChanges = [];
         $scope.input = {dirty:false};
@@ -2059,8 +2051,10 @@ console.log(url);
         $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();      //all the known data types
 
         //$scope.editText = 'Edit';       //will change the text when a core profile...
+        //when there is a non-core profile - allow it to be edited...
         $scope.startEdit = function() {
             $scope.mode = 'edit';           //edit (current), new, view
+            $scope.input.profileName = $scope.frontPageProfile.name  //maintained by frontCtrl
         };
 
         //allows the user to view the contents of a valueSet. Note that the '$scope.showVSBrowserDialog.open' call is
@@ -2081,7 +2075,8 @@ console.log(url);
 
         //when a profile is selected, check if it is a core type
         $scope.$on('profileSelected',function(event,data){
-          console.log(data);
+           console.log(data);
+            console.log($scope.model)
             $scope.allowEdit = true;    //the profile being viewed can be altered
             var selectedProfile = data.profile;
             //is this a core profile? If it is, it cannot be edited.
@@ -2096,16 +2091,18 @@ console.log(url);
             $scope.input.multiplicity = 'opt';
             delete $scope.input.newElementPath;
             delete $scope.input.definition;
-            $scope.newNode = "";
+            delete $scope.input.newNode
             $scope.input.newDatatype =$scope.dataTypes[0];
         }
         resetInput();       //initial setting...
 
         //when the editor is closed. todo mightwant to check for dirty...
         $scope.close = function(){
+            //delete $scope.showProfileEditPage;
             delete $scope.model;
             delete $scope.selectedNode;
             delete $scope.edFromTreeNode;
+            $rootScope.$emit('closeProfileEditPage');
 
         };
 
@@ -2125,16 +2122,23 @@ console.log(url);
            // $scope.deleteAtPath(path);     //is a component property - will cause the element and all children to be removed...
             $scope.deleteAtPath = path;     //is a component property - will cause the element and all children to be removed...
 
+
             //now move through the model, marking the ED's that start with this path to be removed
             //ed.myMeta.remove = true;
 
             $scope.logOfChanges.push({type:'D',display:'Removed '+ path,path:path,ed:ed})
 
 
+            delete $scope.input.newNode;    //indicates whether a child or a sibling - will hide the new entry
+
+            delete $scope.edFromTreeNode;
+            delete $scope.selectedNode;
+
         };
 
+        //$scope.editProfile = function
        
-
+        //restore a deleted element
         $scope.restore = function(ed,inx){
            // $scope.restoreRemoved = path;
             console.log(ed)
@@ -2147,7 +2151,7 @@ console.log(url);
         $scope.save = function() {
             var name = $scope.input.profileName;
 
-            var name='devonly3';
+            //var name='devonly9';
 
             if (! name) {
                 alert('Please enter a name')
@@ -2155,8 +2159,14 @@ console.log(url);
             }
 
             resourceCreatorSvc.saveNewProfile(name,$scope.model).then(
-                function(log) {
-                    alert(angular.toJson(log))
+                function(vo) {
+                    alert(angular.toJson(vo.log))
+                    //now add to the list of profiles...
+                    console.log(vo)
+                    var clone = angular.copy(vo.profile);
+                    appConfigSvc.addToRecentProfile(clone);
+                    $scope.recent.profile = appConfigSvc.getRecentProfile();    //re-establish the recent profile list
+
                 },
                 function(log) {
                     alert(angular.toJson(log))
@@ -2214,7 +2224,7 @@ console.log(url);
         //when an element is selected in the tree....
         $scope.treeNodeSelected = function(item) {
            // console.log(item);
-            delete $scope.newNode;      //the var that displays the new node data
+            delete $scope.input.newNode;      //the var that displays the new node data
             delete $scope.edFromTreeNode;
             delete $scope.selectedNode;
 

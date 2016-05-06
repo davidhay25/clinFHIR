@@ -720,7 +720,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     },
                     function(err) {
-                        alert('Error retrieving '+ profileUrl + " "+ angular.toJson(err))
+                        alert('Error retrieving '+ url + " "+ angular.toJson(err))
                     }
                 ))
 
@@ -1874,7 +1874,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             return deferred.promise;
             
         },
-
         createProfileTreeDisplay : function(profile,showRemoved){
             //create a clone of the profile suitable for display...
             var simpleDT = ['string','instant','time','date','dateTime','decimal','boolean','integer','base6Binary','uri','unsignedInt','positiveInt','code','id','oid','markdown'];
@@ -2196,7 +2195,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             if (svr && svr.version == 2) {
                 typeName = 'constrainedType';
             }
-            console.log(svr,typeName);
+            //console.log(svr,typeName);
 
 
 
@@ -2225,17 +2224,17 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             var dt = ed.type[0].code;   //only a single dt per entry (right now)
                             //now change the datatype in the profile to be an extension, with a profile pointing to the ED
                             ed.type[0].code = "Extension";      // 'cause that's what it is...
-                            ed.type[0].profile = extensionUrl;      //and where to find it.
+                            ed.type[0].profile = [extensionUrl];      //and where to find it.
                             //and change the path to be 'Extension'
                             var ar = ed.path.split('.');
-                          
+
                             ar[ar.length-1] = 'extension';
                             ed.path = ar.join('.');
 
                             //ed.url = extensionUrl;  //the
 
                             var valueName = "Extension.value" + dt.capitalize();    //the value name in the extension definition
-                            console.log(ed);
+                            //console.log(ed);
 
                             //the extensionDefinition that describes this extension...
                             var extensionSD = {"resourceType": "StructureDefinition","url": extensionUrl,
@@ -2279,14 +2278,13 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             $q.all(SDsToSave).then(
                 function(){
-                    deferred.resolve(log);
+                    deferred.resolve({log:log,profile:sd});
                 },function(err) {
                     alert('Error saving profile and/or extension definitions '+ angular.toJson(err))
                     deferred.reject(log);
                 }
             );
-
-
+            
 
             return deferred.promise;
 
