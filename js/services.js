@@ -59,16 +59,37 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
     // to this arrray (like Encounter) so that they can be targets of other resources (eg when setting
     // Condition.encounter..
     var referenceResources = [];
-    function setUpReferenceResources() {
+
+    function setUpReferenceResources(fhirVersion) {
         referenceResources.length = 0;
-        referenceResources.push({resourceType:'Practitioner',name:{text:'Dr John Doe'},
-            identifier : [{value:'jd',system:identifierSystem}],text:{status:'generated',div:'<div>Dr John Doe</div>'}});
-        referenceResources.push({resourceType:'Practitioner',name:{text:'Dr Annette Jones'},
-            identifier : [{value:'aj',system:identifierSystem}],text:{status:'generated',div:'<div>Dr Annette Jones</div>'}});
-        referenceResources.push({resourceType:'Organization',name:'clinFHIR Sample creator',
-            identifier : [{value:'cf',system:identifierSystem}],text:{status:'generated',div:'<div>clinFhir</div>'}});
+
+        if (fhirVersion == 3) {
+            referenceResources.push({resourceType:'Practitioner',name:[{text:'Dr John Doe'}],
+                identifier : [{value:'jd',system:identifierSystem}],text:{status:'generated',div:"<div xmlns='http://www.w3.org/1999/xhtml'>Dr John Doe</div>"}});
+            referenceResources.push({resourceType:'Practitioner',name:[{text:'Dr Annette Jones'}],
+                identifier : [{value:'aj',system:identifierSystem}],text:{status:'generated',div:"<div xmlns='http://www.w3.org/1999/xhtml'>Dr Annette Jones</div>"}});
+            referenceResources.push({resourceType:'Organization',name:'clinFHIR Sample creator',
+                identifier : [{value:'cf',system:identifierSystem}],text:{status:'generated',div:"<div xmlns='http://www.w3.org/1999/xhtml'>clinFhir</div>"}});
+        } else {
+            referenceResources.push({resourceType:'Practitioner',name:{text:'Dr John Doe'},
+                identifier : [{value:'jd',system:identifierSystem}],text:{status:'generated',div:"<div>Dr John Doe</div>"}});
+            referenceResources.push({resourceType:'Practitioner',name:{text:'Dr Annette Jones'},
+                identifier : [{value:'aj',system:identifierSystem}],text:{status:'generated',div:"<div>Dr Annette Jones</div>"}});
+            referenceResources.push({resourceType:'Organization',name:'clinFHIR Sample creator',
+                identifier : [{value:'cf',system:identifierSystem}],text:{status:'generated',div:"<div>clinFhir</div>"}});
+        }
+
+
     }
-    setUpReferenceResources();
+
+    //when invoking the create, we need the fhir verson as Practioner.name chnaged multiplicity..
+    var serverBase = appConfigSvc.getCurrentDataServerBase();
+    var serverObject = appConfigSvc.getServerByUrl(serverBase);
+    var fhirVersion = 2
+    if (serverObject) {
+        fhirVersion = serverObject.version;
+    }
+    setUpReferenceResources(fhirVersion);
 
     return {
         resetResourceReferences : function() {
@@ -112,7 +133,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
             }
 
-            patient.text = {status:'generated',div:'<div>'+nameText+'</div>'};
+            patient.text = {status:'generated',div:"<div  xmlns='http://www.w3.org/1999/xhtml'>"+nameText+'</div>'};
 
 
             var uri = appConfigSvc.getCurrentDataServerBase() + "Patient";
@@ -149,21 +170,23 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
             var cnt = data.length;
 
-            data.forEach(function(item){
+            data.forEach(function(item,index){
+                var id = 't'+ new Date().getTime() + index;
                 var appt = {resourceType:'Appointment',status:item.status};
-                appt.type = {text : item.type.text};
+                appt.id = id;
+                //note that this is serviceType in STU-2 appt.type = {text : item.type.text};
                 appt.description = item.description;
                 appt.start = moment().add('days',item.delay).format();
                 appt.end = moment().add('days',item.delay).add('minutes',15).format();
                 appt.minutesDuration = 15;
 
                 appt.participant = [{actor:{display:item.who.text},status:'accepted'}];    //the perfromed
-                var txt ="<div><div>"+item.description + "</div><div>"+item.who.text+"</div></div>"
+                var txt ="<div xmlns='http://www.w3.org/1999/xhtml'><div>"+item.description + "</div><div>"+item.who.text+"</div></div>"
                 appt.text = {status:'generated',div:txt}
 
                 //the patient is modelled as a participant
                 appt.participant.push({actor:{reference:'Patient/'+patientId},status:'accepted'});
-                bundle.entry.push({resource:appt,request: {method:'POST',url: 'Appointment'}});
+                bundle.entry.push({fullUrl:id,resource:appt,request: {method:'POST',url: 'Appointment'}});
 
 
             });
@@ -199,13 +222,14 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 //decide if this set of observations will be linked to an encounter...
                 var encounter = this.getRandomReferenceResource('Encounter',buildConfig.encounterObservation);    //half the time it will be null
 
-                observations.forEach(function(item) {
-
+                observations.forEach(function(item,j) {
+                    var id = 't'+ new Date().getTime() + i + j;
                     var value = item.min + (item.max - item.min) * Math.random();   //to be improved...
                     value = Math.round(value * item.round) / item.round;
 
 
                     var obs = {resourceType:'Observation',status:'final'};
+                    obs.id = id;
                     obs.valueQuantity = {value:value,unit:item.unit};
                     obs.effectiveDateTime = date.format();
                     obs.code = {'text':item.display,coding:[{system:'http://loinc.org',code:item.code}]};
@@ -216,8 +240,8 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
                     //obs.text = {status:'generated',div:item.display + ", "+ value + " "+ item.unit + " "+ obs.effectiveDateTime}
                     var text = item.display + ", "+ value + " "+ item.unit;
-                    obs.text = {status:'generated',div: '<div>'+text+'</div>'};
-                    bundle.entry.push({resource:obs,request: {method:'POST',url: 'Observation'}});
+                    obs.text = {status:'generated',div: "<div  xmlns='http://www.w3.org/1999/xhtml'>"+text+'</div>'};
+                    bundle.entry.push({fullUrl:id,resource:obs,request: {method:'POST',url: 'Observation'}});
                     cnt ++;
                 })
             }
@@ -232,7 +256,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
 
         },
-        createConditions : function (id,options) {
+        createConditions : function (patientId,options) {
 
             //create a set of encounters for the patient and add them to the referenceResources (just for this session)
             var deferred = $q.defer();
@@ -243,8 +267,10 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             var bundle = {resourceType: 'Bundle', type: 'transaction', entry: []};
 
             for (var i = 0; i < options.count; i++) {
+                var id = 't'+ new Date().getTime() + i;
                 var cond = {resourceType: 'Condition'};
-                cond.patient = {reference:'Patient/'+id};
+                cond.id = id;
+                cond.patient = {reference:'Patient/'+patientId};
                 cond.verificationStatus = this.getRandomEntryFromOptions('conditionVerificationStatus');
                 cond.code = this.getRandomEntryFromOptions('conditionCode');
                 var encounter = this.getRandomReferenceResource('Encounter');   //there may not be an encounter (if they aren't being created)
@@ -254,8 +280,8 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 var practitioner = this.getRandomReferenceResource('Practitioner');     //there will always be a practitioner
                 cond.asserter = {reference: "Practitioner/"+ practitioner.id};
 
-                cond.text = {status:'generated',div:'<div>'+cond.code.text+'</div>'};
-                bundle.entry.push({resource:cond,request: {method:'POST',url: 'Condition'}});
+                cond.text = {status:'generated',div:"<div  xmlns='http://www.w3.org/1999/xhtml'>"+cond.code.text+'</div>'};
+                bundle.entry.push({fullUrl:id,resource:cond,request: {method:'POST',url: 'Condition'}});
             }
 
             this.postBundle(bundle,referenceResources).then(
@@ -272,7 +298,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                     //now to see if a problem list shuld be created
                     switch (buildConfig.createProblemList) {
                         case 'yes' :
-                            that.buildProblemList(id).then(
+                            that.buildProblemList(patientId).then(
                                 function(){
                                     if (options.logFn) {
                                         options.logFn('Added ProblemList')
@@ -340,7 +366,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             return deferred.promise;
 
         },
-        createEncounters : function (id,options) {
+        createEncounters : function (patientId,options) {
             //create a set of encounters for the patient and add them to the referenceResources (just for this session)
             var deferred = $q.defer();
             options = options || {}
@@ -349,8 +375,11 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             var bundle = {resourceType:'Bundle',type:'transaction',entry:[]};
 
             for (var i= 0; i< options.count;i++) {
+                var id = 't'+ new Date().getTime() + i;
                 var enc = {resourceType:'Encounter',status:'finished'};
-                enc.patient = {reference:'Patient/'+id};
+                enc.id = id;
+
+                enc.patient = {reference:'Patient/'+patientId};
                 enc.reason = [];
                 enc.reason.push(this.getRandomEntryFromOptions('encounterReason'));
                 enc.type = [(this.getRandomEntryFromOptions('encounterType'))];
@@ -361,7 +390,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 enc.participant.push({individual:{reference:'Practitioner/'+practitioner.id,display:practitioner.name.text}});  //safe 'cause I created the practitioner...
 
 
-                bundle.entry.push({resource:enc,request: {method:'POST',url: 'Encounter'}});
+                bundle.entry.push({fullUrl:id,resource:enc,request: {method:'POST',url: 'Encounter'}});
 
             }
 
@@ -372,7 +401,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                     deferred.resolve('Added ' + options.count + ' Encounters')
                 },
                 function(err) {
-                    deferred.reject("Error saving Encounters")
+                    deferred.reject(err)
                 }
             );
             return deferred.promise;
@@ -709,29 +738,38 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                             var resource = entry.resource;
                             if (resource && resource.id ) {
                                 //there is already a resource with an id, nothing else to be donr...
-                            } else if (resource && entry.response.location) {
+                            } else if (resource && entry.response && entry.response.location) {
                                 //if not a resource, ten is there a location
                                 var location = entry.response.location;
                                 var ar = location.split('/');
                                 var id = ar[1];
                                // var resource = bundle.entry[index].resource;
                                 resource.id = id;
+                            } else if (entry.response && entry.response.location){
+                                //no resource, but there is an id. The position in the response is the same as the request...
+                                var resource = bundle.entry[index].resource;
+                                resource.id = getId(entry.response.location)
                             } else {
                                 deferred.reject("a resource was added, but no id was supplied")
                             }
 
-
-
                             referenceResources.push(resource)
-
-
-
 
                         });
                     }
-
-
                     deferred.resolve(data)
+
+                    function getId(location) {
+                        var ar = location.split('/');
+                        console.log(ar);
+                        if (ar[ar.length-2] == '_history') {
+                            return ar[ar.length-3]
+                        } else {
+                            return ar[ar-1]
+                        }
+                    }
+
+
 
                 },
                 function(err) {

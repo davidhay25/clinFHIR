@@ -1368,7 +1368,9 @@ angular.module("sampleApp")
             delete $scope.error;
             delete $scope.input.testconformance;        //the test conformance state
             delete $scope.input.testdata;
-            
+
+            console.log(server);
+
             config.servers[serverType] = server.url;    //set the config to the new server...
             $localStorage.config = config;
             $rootScope.$emit('configUpdated',{serverType:serverType});  //tell the world which server...
@@ -1427,7 +1429,7 @@ angular.module("sampleApp")
                     $scope.input.dob = new Date(1982,9,31);     //will be replaced by name randomizer
                     $scope.outcome = {log:[]};
 
-                    $scope.input.createSamples = true;
+                    $scope.input.createSamples = false;
                     //when the 'Add new patient' is selected...
                     $scope.seletNewPatientOption = function(){
                         $scope.input.mode='new'
@@ -1463,26 +1465,32 @@ angular.module("sampleApp")
                     $scope.addNewPatient = function() {
                         $scope.showLog = true;
                         $scope.allowClose = false;
+                        $scope.waiting = true;
                         var nameText = $scope.input.fname + " " + $scope.input.lname;
                         addLog('Adding '+nameText);
                         supportSvc.createPatient($scope.input).then(
                             function(patient){
-                                var id = patient.id;
+                                var patientId = patient.id;
                                 console.log(patient)
-                                addLog('Added patient with the id : '+ id)
-
+                                addLog('Added patient with the id : '+ patientId)
+                                appConfigSvc.setCurrentPatient(patient);
+                                $rootScope.$emit('patientSelected',patient);
 
                                 if ($scope.input.createSamples) {
                                     addLog('Checking that the required reference resources exist');
                                     supportSvc.checkReferenceResources().then(
                                         function() {
-                                            supportSvc.createEncounters(id).then(
+                                            addLog('adding Encounters...');
+                                            supportSvc.createEncounters(patientId).then(
                                                 function(msg) {
                                                     addLog(msg);
                                                    var query = [];
-                                                    query.push(supportSvc.createConditions(id,{logFn:addLog}));
-                                                    query.push(supportSvc.createObservations(id,{logFn:addLog}));
-                                                    query.push(supportSvc.createAppointments(id,{logFn:addLog}));
+                                                    addLog('adding Conditions...');
+                                                    query.push(supportSvc.createConditions(patientId,{logFn:addLog}));
+                                                    addLog('adding Observations...');
+                                                    query.push(supportSvc.createObservations(patientId,{logFn:addLog}));
+                                                    addLog('adding Appointments...');
+                                                    query.push(supportSvc.createAppointments(patientId,{logFn:addLog}));
 
                                                     $q.all(query).then(
                                                         //regardless of success or failure, turn off the saving flag
@@ -1492,19 +1500,25 @@ angular.module("sampleApp")
                                                             // not yet.. $scope.$close();
                                                             appConfigSvc.setCurrentPatient(patient);
                                                             $rootScope.$emit('patientSelected',patient);
-
+                                                            $scope.loading = false;
                                                             $scope.allowClose = true;
                                                         },
                                                         function(err) {
                                                             alert('error creating sample resources\n'+angular.toJson(err))
-                                                            $scope.allowClose = true;;
+                                                            $scope.allowClose = true;
+                                                            $scope.loading = false;
                                                         }
 
                                                     )
+                                                },
+                                                function(err) {
+                                                    alert(angular.toJson(err))
+                                                    $scope.allowClose = true;
                                                 }
                                             )},
                                         function(err){
                                             //service will display error
+                                            $scope.allowClose = true;
                                         }
                                     )
 
@@ -1512,19 +1526,18 @@ angular.module("sampleApp")
 
                                 } else {
                                     //$scope.$close();
-                                    appConfigSvc.setCurrentPatient(patient);
-                                    $rootScope.$emit('patientSelected',patient);
-
+                                   // appConfigSvc.setCurrentPatient(patient);
+                                    //$rootScope.$emit('patientSelected',patient);
+                                    $scope.waiting = false;
                                     $scope.allowClose = true;
                                 }
 
-
-
-
-
+                                
                             },
                             function(err) {
                                 alert('error saving patient\n'+angular.toJson(err))
+                                $scope.waiting = false;
+                                $scope.allowClose = true;
                             }
                         );
 
@@ -1532,7 +1545,12 @@ angular.module("sampleApp")
                     }
 
                     $scope.searchForPatient = function(name) {
-                        $scope.nomatch=false;
+                        $scope.nomatch=false;   //if there were no matching patients
+                        delete $scope.matchingPatientsBundle;
+                        if (! name) {
+                            alert('Please enter a name');
+                            return true;
+                        }
                         $scope.waiting = true;
                         resourceCreatorSvc.findPatientsByName(name).then(
                             function(data){

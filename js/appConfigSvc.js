@@ -39,9 +39,14 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:"Grahame STU3 server",url:"http://fhir3.healthintersections.com.au/open/",version:3,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://fhir2.healthintersections.com.au/open/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"HealthConnex STU2 server",url:"http://sqlonfhir-dstu2.azurewebsites.net/fhir/",version:2,everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:"HealthConnex STU3 server",url:"http://sqlonfhir-may.azurewebsites.net/fhir/",version:2,everythingOperation:true});
+
+
+
+
         defaultConfig.allKnownServers.push({name:"Local HAPI server",url:"http://localhost:8080/baseDstu2/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Public HAPI server STU2 server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2,everythingOperation:true});
-        defaultConfig.allKnownServers.push({name:"Public HAPI server STU3 server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:3,everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:"Public HAPI server STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true});
 
         defaultConfig.allKnownServers.push({name:"HL7 New Zealand STU2 server",url:"http://fhir.hl7.org.nz/baseDstu2/",version:2});
 
