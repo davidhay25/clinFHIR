@@ -1520,7 +1520,9 @@ angular.module("sampleApp")
                                             //service will display error
                                             $scope.allowClose = true;
                                         }
-                                    )
+                                    ).finally(function(){
+                                        $scope.waiting = false;
+                                    })
 
 
 
@@ -2097,9 +2099,12 @@ console.log(url);
             $scope.allowEdit = true;    //the profile being viewed can be altered
             var selectedProfile = data.profile;
             //is this a core profile? If it is, it cannot be edited.
-            if (selectedProfile.base && selectedProfile.base.indexOf('DomainResource')> -1) {
+            console.log(selectedProfile);
+            var base = selectedProfile.base || selectedProfile.baseType;        //different in stu 2 & 3
+            if (base && base.indexOf('Resource') > -1) {    //was 'DomainResource
                 //yes, this is a base resource.
                 $scope.allowEdit = false;
+                
             }
         });
 
@@ -2168,14 +2173,14 @@ console.log(url);
         $scope.save = function() {
             var name = $scope.input.profileName;
 
-            //var name='devonly9';
+            var name='ct-1';
 
             if (! name) {
                 alert('Please enter a name')
                 return;
             }
 
-            resourceCreatorSvc.saveNewProfile(name,$scope.model).then(
+            resourceCreatorSvc.saveNewProfile(name,$scope.model,$scope.frontPageProfile).then(
                 function(vo) {
                     alert(angular.toJson(vo.log))
                     //now add to the list of profiles...
@@ -2209,11 +2214,11 @@ console.log(url);
                 newPath = parentId + '.' + $scope.input.newElementPath;
             }
 
-            //create a
+            //create a basic Extension definition with the core data required. When the profie is save
             ed = {path:newPath,name: $scope.input.newElementPath,myMeta : {isNew:true}};
             switch ($scope.input.multiplicity) {
                 case 'opt' :
-                    ed.min=0; ed.max = 1;
+                    ed.min=0; ed.max = "1";
                     break;
                 case 'req' :
                     ed.min=1; ed.max='1';
@@ -2222,7 +2227,7 @@ console.log(url);
                     ed.min=1; ed.max='*';
                     break;
             }
-            ed.definition = $scope.input.definition;
+            ed.definition = $scope.input.definition || newPath;
             ed.type = [{code:$scope.input.newDatatype.code}];
 
             $scope.logOfChanges.push({type:'A',display:'Added '+ newPath,ed:ed})

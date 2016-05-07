@@ -408,9 +408,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             });
 
             var sortOrder = 0;  //this wil be the order when the resource is built...
-
-            //console.log(elementHash)
-
+            
             //create a hash indexed by path. we'll use that to determine if a given child path is available (ie can be more than one)
             var dataHash = {};
             treeData.forEach(function(item){
@@ -1499,6 +1497,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     item.myMeta.path = ar.join('. ');     //create a path that doesn't include the type (so is shorter)
 
                     //make references look nicer. todo - what about references to profiles?
+                    /* - temp for now....
                     if (item.type) {
                         item.type.forEach(function (it) {
                             if (it.code == 'Reference') {
@@ -1510,6 +1509,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             }
                         })
                     }
+
+                    */
 
 
                     if (!disabled) {
@@ -1670,11 +1671,15 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             }
 
                             if (it.code == 'Reference') {
+
+                                /*
                                 if (it.profile) {
                                     var p = it.profile[0];      //todo  <<<<<<<<<<<<<<<<<<
                                     var ar = p.split('/');
                                     it.code = '->' + ar[ar.length - 1];
                                 }
+                                */
+
                             }
                         })
                     }
@@ -2177,27 +2182,46 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             return lst
 
         },
-        saveNewProfile : function(profileName,model) {
-            //save the newly created profile.
+        saveNewProfile : function(profileName,model,baseProfile) {
+            //save the newly created profile. The structure is different for STU 2 & 3. sigh.
             var deferred = $q.defer();
             var config = appConfigSvc.config();
             //model is the array of tree nodes...
             //iterate through the model to build the profile;
-            var sd = {resourceType:'StructureDefinition',name : profileName, kind:'resource',
-                status:'draft',experimental : true, snapshot : {element:[]}};
-            var profileId = profileName;       //todo - ensure not yet used (or this is an update)
-            var profileUrl = config.servers.conformance + "StructureDefinition/" +profileId;
-            sd.url = profileUrl;
 
-            //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
-            var typeName = 'baseType';
+            var fhirVersion = 2;
             var svr = appConfigSvc.getServerByUrl(config.servers.conformance);
-            if (svr && svr.version == 2) {
-                typeName = 'constrainedType';
+            if (svr)  {
+                fhirVersion = svr.version;
             }
-            //console.log(svr,typeName);
 
+            var sd;         //this is the StructureDefinition for the Profile
+            if (fhirVersion == 3) {
+                sd = {resourceType:'StructureDefinition',name : profileName, kind:'resource',
+                    status:'draft',experimental : true, snapshot : {element:[]}};
 
+                sd.abstract = false;
+                sd.baseType = baseProfile.name;         //assume that constariing a base resource
+                sd.baseDefinition = baseProfile.url;    //assume that constariing a base resource
+                sd.derivation = 'constraint';
+                sd.id = profileName;
+                var profileId = profileName;       //todo - ensure not yet used (or this is an update)
+                var profileUrl = config.servers.conformance + "StructureDefinition/" +profileId;
+
+                sd.url = profileUrl;
+
+                //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
+                var typeName = 'baseType';
+            } else {
+                sd = {resourceType:'StructureDefinition',name : profileName, kind:'resource',
+                    status:'draft',experimental : true, snapshot : {element:[]}};
+                var profileId = profileName;       //todo - ensure not yet used (or this is an update)
+                var profileUrl = config.servers.conformance + "StructureDefinition/" +profileId;
+                sd.url = profileUrl;
+
+                //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
+                var typeName = 'base';
+            }
 
             var log = [];
 
@@ -2211,7 +2235,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         sd[typeName] = ed.path;
                     }
 
-                    //console.log(item.data.ed)
                     var inProfile = true;       //true if this ed is to be included in the profile
                     if (ed.myMeta) {
                         if (ed.myMeta.remove) {
@@ -2219,33 +2242,48 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         } else if (ed.myMeta.isNew) {
                             //this is a new extension. we'll create a new extension for now - later will allow the user to select an existing one
                             //the extension will only have a single datatype (for now)
-                            var extensionId = profileName +  ed.path.replace(/./,'-');
+                            var extensionId = profileName +  ed.path.replace(/\./,'-');     //the  Id for
                             var extensionUrl = config.servers.conformance + "StructureDefinition/" +extensionId;
                             var dt = ed.type[0].code;   //only a single dt per entry (right now)
                             //now change the datatype in the profile to be an extension, with a profile pointing to the ED
                             ed.type[0].code = "Extension";      // 'cause that's what it is...
                             ed.type[0].profile = [extensionUrl];      //and where to find it.
+                            ed.min = 0;
+                            ed.max = '1';
+
                             //and change the path to be 'Extension'
                             var ar = ed.path.split('.');
-
+                            var extensionDefId = ar[ar.length-1];
                             ar[ar.length-1] = 'extension';
                             ed.path = ar.join('.');
-
-                            //ed.url = extensionUrl;  //the
-
-                            var valueName = "Extension.value" + dt.capitalize();    //the value name in the extension definition
+                             var valueName = "Extension.value" + dt.capitalize();    //the value name in the extension definition
                             //console.log(ed);
 
                             //the extensionDefinition that describes this extension...
                             var extensionSD = {"resourceType": "StructureDefinition","url": extensionUrl,
-                                "name": ed.path,"kind": "datatype","constrainedType": "Extension",
-                                "base": "http://hl7.org/fhir/StructureDefinition/Extension",
+                                "name": ed.path,"kind": "datatype",
                                 "snapshot" : {element:[]}
                             };
+//console.log(fhirVersion)
+                            //these are STU-3 - not sure about STU-2
+                            if (fhirVersion == 3) {
+                                extensionSD.abstract = false;
+                                extensionSD.baseType = "Extension";
+                                extensionSD.baseDefinition = "http://hl7.org/fhir/StructureDefinition/Extension";
+                                extensionSD.derivation = 'constraint';
+                                extensionSD.id = extensionId;
+                                extensionSD.status='draft';
+                                extensionSD.contextType = "datatype";
+                                extensionSD.context=["Element"];
+                            } else {
+                                extensionSD.constrainedType = "Extension";
+                                extensionSD.base = "http://hl7.org/fhir/StructureDefinition/Extension";
+                            }
 
-                            extensionSD.snapshot.element.push({path:'Extension',min:0,max:'1',type:[{code:'Extension'}]});
-                            extensionSD.snapshot.element.push({path:'Extension.url',min:1,max:'1',type:[{code:'Uri'}]});
-                            extensionSD.snapshot.element.push({path:valueName,min:0,max:'1',type:[{code:dt}]});
+
+                            extensionSD.snapshot.element.push({path:'Extension',definition:'ext',min:0,max:'1',type:[{code:'Extension'}]});
+                            extensionSD.snapshot.element.push({path:'Extension.url',definition:'Url',min:1,max:'1',type:[{code:'uri'}]});
+                            extensionSD.snapshot.element.push({path:valueName,definition:'value',min:0,max:'1',type:[{code:dt}]});
 
                             SDsToSave.push(saveStructureDefinition(extensionId,extensionSD).then(
                                 function() {
@@ -2266,12 +2304,14 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             });
 
+            console.log(sd)
             //now add the profile to the list of SD's to save
             SDsToSave.push(saveStructureDefinition(profileId,sd).then(
                 function() {
                     log.push('Saved '+sd.url);
                 },function(err){
-                    log.push('Error saving '+extensionSD.url+ ' ' + angular.toJson(err));
+                    //log.push('Error saving '+sd.url+ ' ' + angular.toJson(err));
+                    log.push(err.data);
                 }));
 
             console.log(SDsToSave);
@@ -2281,7 +2321,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     deferred.resolve({log:log,profile:sd});
                 },function(err) {
                     alert('Error saving profile and/or extension definitions '+ angular.toJson(err))
-                    deferred.reject(log);
+                    deferred.reject(err);
                 }
             );
             

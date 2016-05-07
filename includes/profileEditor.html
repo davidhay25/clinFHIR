@@ -44,9 +44,9 @@
                 <button  class="btn btn-link" ng-click="mode = 'new'">New Profile</button>
 
                 <button ng-show="input.profileName && (mode=='new'|| mode=='edit')  " class="btn btn-success" ng-click="save()">Save</button>
-<!--
+
                 <button  class="btn btn-warning" ng-click="save()">Dev-Save</button>
--->
+
                 <button class="btn btn-danger" ng-click="close()">Close</button>
 
 
@@ -76,68 +76,126 @@
                 <uib-tab heading="Details">
                     <br/>
                     <div class="row">
-                        <div class="col-md-3 col-sm-3">Path</div>
-                        <div class="col-md-9 col-sm-9">
-                            {{edFromTreeNode.path}}
-                            <!--
-                            <div ng-repeat="item in edFromTreeNode.type">{{edFromTreeNode.path}}</div>
-                            -->
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3 col-sm-3">DataType/s</div>
-                        <div class="col-md-9 col-sm-9">
-                            <div ng-repeat="item in edFromTreeNode.type">{{item.code}}</div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3 col-sm-3">Definition</div>
-                        <div class="col-md-9 col-sm-9">{{edFromTreeNode.definition}}</div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3">Path</div>
+                                <div class="col-md-9 col-sm-9">
+                                    {{edFromTreeNode.path}}
+                                    <!--
+                                    <div ng-repeat="item in edFromTreeNode.type">{{edFromTreeNode.path}}</div>
+                                    -->
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3">DataType/s</div>
+                                <div class="col-md-9 col-sm-9">
+                                    <div ng-repeat="item in edFromTreeNode.type">{{item.code}}</div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3">Definition</div>
+                                <div class="col-md-9 col-sm-9">{{edFromTreeNode.definition}}</div>
 
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3 col-sm-3">
-                            Multiplicity
-                        </div>
-                        <div class="col-md-9 col-sm-9">
-                            {{edFromTreeNode.min}}..{{edFromTreeNode.max}}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3 col-sm-3">
-                            Profiles
-                        </div>
-                        <div class="col-md-9 col-sm-9">
-                            <div ng-repeat="type in edFromTreeNode.type">
-                                <em ng-repeat="p in type.profile">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3">
+                                    Multiplicity
+                                </div>
+                                <div class="col-md-9 col-sm-9">
+                                    {{edFromTreeNode.min}}..{{edFromTreeNode.max}}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3">
+                                    Profiles
+                                </div>
+                                <div class="col-md-9 col-sm-9">
+                                    <div ng-repeat="type in edFromTreeNode.type">
+                                        <em ng-repeat="p in type.profile">
 
-                                    <a href="#" ng-click="showProfileByUrl(p)">{{p}}</a>
+                                            <a href="#" ng-click="showProfileByUrl(p)">{{p}}</a>
 
-                                </em>
+                                        </em>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3">
+                                    ValueSet
+                                </div>
+                                <div class="col-md-9 col-sm-9">
+                                    <a href="#" ng-click="showValueSetForProfile(edFromTreeNode.binding.valueSetReference.reference)">
+                                        {{edFromTreeNode.binding.valueSetReference.reference}}
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3">
+                                    MetaData
+                                </div>
+                                <div class="col-md-9 col-sm-9">
+
+                                    {{edFromTreeNode.myMeta}}
+
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3 col-sm-3">
-                            ValueSet
+                        <div class="col-md-6">
+                            <div ng-show="mode=='new' || mode=='edit'">
+                                <button class="btn btn-default" ng-click="removeNode()">Remove from profile</button>
+                                <span ng-show="edFromTreeNode && ! edFromTreeNode.myMeta.isExtension">
+
+
+                                    <button class="btn btn-default" ng-click="input.newNode = 'child'">Add Child Node</button>
+                                    <button class="btn btn-default" ng-click="input.newNode = 'sibling'">Add Sibling Node</button>
+                                </span>
+
+                                <div ng-show="input.newNode">
+
+                                    <h4>Add {{input.newNode}} node</h4>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <input placeholder="name (no spaces)" type="text" class="form-control mygap"
+                                                   ng-model="input.newElementPath"/>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <select class="form-control mygap" ng-model="input.newDatatype"
+                                                    ng-options="dt.description for dt in dataTypes"></select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <textarea placeholder="Definition" class="form-control mygap" ng-model="input.definition"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="btn-group pull-right">
+                                                <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'opt'">0..1</label>
+                                                <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'req'">1..1</label>
+                                                <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'mult'">0..*</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div>
+                                        <button class="btn btn-link pull-right" ng-click="input.newNode=''">Cancel</button>
+                                        <button class="btn btn-primary pull-right"
+                                                ng-show="input.newElementPath"
+                                                ng-click="addNewNode(input.newNode)">Add</button> </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-9 col-sm-9">
-                            <a href="#" ng-click="showValueSetForProfile(edFromTreeNode.binding.valueSetReference.reference)">
-                                {{edFromTreeNode.binding.valueSetReference.reference}}
-                            </a>
-                        </div>
+
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-3 col-sm-3">
-                            MetaData
-                        </div>
-                        <div class="col-md-9 col-sm-9">
 
-                                {{edFromTreeNode.myMeta}}
-
-                        </div>
-                    </div>
                     <hr/>
 
 
@@ -202,73 +260,6 @@
                     </div>
 
 -->
-
-                </uib-tab>
-                <uib-tab heading="Edit" ng-show="mode=='new' || mode=='edit' ">
-
-
-                    <br/>
-
-                    <button class="btn btn-default" ng-click="removeNode()">Remove from profile</button>
-                    <div ng-show="edFromTreeNode && ! edFromTreeNode.myMeta.isExtension">
-                        <br/>
-                        <button class="btn btn-default" ng-click="input.newNode = 'child'">Add Child Node</button>
-                        <button class="btn btn-default" ng-click="input.newNode = 'sibling'">Add Sibling Node</button>
-                    </div>
-
-                    <div ng-show="input.newNode">
-
-                        <h4>Add {{input.newNode}} node</h4>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <input placeholder="name (no spaces)" type="text" class="form-control mygap"
-                                       ng-model="input.newElementPath"/>
-                            </div>
-                            <div class="col-md-4">
-                                <select class="form-control mygap" ng-model="input.newDatatype"
-                                        ng-options="dt.description for dt in dataTypes"></select>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="btn-group pull-right">
-                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'opt'">0..1</label>
-                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'req'">1..1</label>
-                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'mult'">0..*</label>
-                                </div>
-                            </div>
-                        </div>
-
-
-
-
-
-
-
-
-                        <textarea placeholder="Definition" class="form-control mygap" ng-model="input.definition"></textarea>
-                        <!--<div class="row mygap">
-                            <div class="col-sm-6 col-md-6">
-                                Multiplicity
-                            </div>
-                            <div class="col-sm-6 col-md-6">
-                                <div class="btn-group">
-                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'opt'">0..1</label>
-                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'req'">1..1</label>
-                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'mult'">0..*</label>
-                                </div>
-                            </div>
-                        </div>
-                        -->
-
-
-
-
-                        <div>
-                            <button class="btn btn-link pull-right" ng-click="input.newNode=''">Cancel</button>
-                            <button class="btn btn-primary pull-right"
-                                    ng-show="input.newElementPath"
-                                    ng-click="addNewNode(input.newNode)">Add</button> </div>
-                    </div>
 
                 </uib-tab>
                 <uib-tab heading="Json">

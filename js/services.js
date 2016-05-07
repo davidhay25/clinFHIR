@@ -133,7 +133,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
             }
 
-            patient.text = {status:'generated',div:"<div  xmlns='http://www.w3.org/1999/xhtml'>"+nameText+'</div>'};
+            patient.text = {status:'generated',div:"<div xmlns='http://www.w3.org/1999/xhtml'>"+nameText+'</div>'};
 
 
             var uri = appConfigSvc.getCurrentDataServerBase() + "Patient";

@@ -218,15 +218,16 @@ angular.module("sampleApp")
             },
             addToRecentProfile : function(profile) {
                 //add to the list of recent profiles...
+                //replace any existing one - (changes may connectathon)
                 var conformanceServerUrl = $localStorage.config.servers.conformance;
-
-
+                
                 $localStorage.recentProfile = $localStorage.recentProfile || [];
                 var alreadyThere = false;
                 var url = profile.url;
                 for (var i=0; i < $localStorage.recentProfile.length; i++) {
                     var recent = $localStorage.recentProfile[i];
                     if (recent.profile.url == url && recent.serverUrl == conformanceServerUrl) {
+                        recent.profile = profile;       //<<<< here is where the replacement occurs...
                         alreadyThere = true;
                         break;
                     }
@@ -235,8 +236,7 @@ angular.module("sampleApp")
                 if (! alreadyThere) {
                     $localStorage.recentProfile.push({profile:profile,serverUrl:conformanceServerUrl});
                 }
-
-
+                
             },
             getRecentProfile : function(){
                 //get the list of recent profiles from the current conformance server
