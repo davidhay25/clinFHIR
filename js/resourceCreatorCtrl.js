@@ -65,7 +65,7 @@ angular.module("sampleApp")
     $scope.appConfigSvc = appConfigSvc;
     $scope.ResourceUtilsSvc = ResourceUtilsSvc;
     $scope.resourceCreatorSvc = resourceCreatorSvc;     //used to get the parked resources
-
+    $scope.translate = $translate;          //so the main page can display a 'use english' opt1on
 
     //config - in particular the servers defined. The samples will be going to the data server...
 
@@ -2075,8 +2075,7 @@ console.log(url);
 
         //when a profile is selected, check if it is a core type
         $scope.$on('profileSelected',function(event,data){
-           console.log(data);
-            console.log($scope.model)
+            $scope.logOfChanges = [];
             $scope.allowEdit = true;    //the profile being viewed can be altered
             var selectedProfile = data.profile;
             //is this a core profile? If it is, it cannot be edited.

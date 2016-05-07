@@ -108,7 +108,7 @@
                 suffix: '.json'
             });
             $translateProvider.preferredLanguage(preferredLanguage);
-
+/*
             return;
 
             var initInjector = angular.injector(['ng']);
@@ -122,75 +122,9 @@
                         $translateProvider.preferredLanguage('ru');
                     }
             )
-            /*
-*/
-           // $translateProvider.useUrlLoader('translate/ru.json');
-            //$translateProvider.preferredLanguage('ru');
-
-
-
-
-
-
-/*
-            $translateProvider.translations('ruX', {
-                TITLE: 'Создатель ресурсов',
-                MYRECENTPATIENTS : 'Мои недавние пациенты',
-                MYRECENTPROFILES : 'Мои недавние профили',
-                SYSTEMCONFIGURATION : 'Конфигурация системы',
-                TERMINOLOGYSERVER: 'Терминология Сервер',
-                PATIENT : 'Пациент',
-                PROFILE : 'Профиль',
-                SELECTPATIENT : 'Выбор пациента',
-                FINDPROFILE: 'Найти профиль',
-
-                NEWRESOURCE : 'Новый ресурс',
-                RESOURCENAVIGATOR : 'Ресурс Навигатор',
-                ELEMENTDETAILS : 'Элемент подробности',
-                CHILDELEMENTS : 'Дочерние элементы',
-                RESOURCE : 'Ресурс',
-                VALIDATE : 'утверждать',
-                PARK : 'Парк',
-                SAVE : 'Сохранить',
-                CLOSE : 'Закрыть',
-                DETAILS : 'Детали',
-                TEST : 'Контрольная работа',
-                'LANGUAGE.ENGLISH' : 'английский',
-                'LANGUAGE.RUSSIAN' : 'русский',
-                'LANGUAGE.DUTCH' : 'Голландский'
-            });
-
-
-            $translateProvider.translations('du', {
-                TITLE: 'schepper resource',
-                MYRECENTPATIENTS : 'Mijn recente patiënten',
-                MYRECENTPROFILES : 'Mijn recente profielen',
-                SYSTEMCONFIGURATION : 'Systeem configuratie',
-                TERMINOLOGYSERVER: 'terminologie Server',
-                PATIENT : 'Geduldig',
-                PROFILE : 'Profiel',
-                SELECTPATIENT : 'Kies een patiënt',
-                FINDPROFILE: 'Vind profiel',
-                NEWRESOURCE : 'nieuwe resource',
-                RESOURCENAVIGATOR : 'resource Navigator',
-                ELEMENTDETAILS : 'element Details',
-                CHILDELEMENTS : 'Child Elements',
-                RESOURCE : 'hulpbron',
-                VALIDATE : 'bevestigen',
-                PARK : 'Park',
-                SAVE : 'Save',
-                CLOSE : 'Dichtbij',
-                DETAILS : 'Details',
-                TEST : 'Proef',
-                'LANGUAGE.ENGLISH' : 'Engels',
-                'LANGUAGE.RUSSIAN' : 'Russisch',
-                'LANGUAGE.DUTCH' : 'Nederlands'
-            });
-*/
-            //var preferredLanguage = 'ru';// $localStorageProvider.get('preferredLanguage') || 'ru';
 
             $translateProvider.preferredLanguage(preferredLanguage);
-
+*/
 
 
             //console.log($translateProvider.translations())
@@ -397,6 +331,14 @@
                                         <li>
                                             <a href="#" ng-click="changeLanguage()">{{'MENU.CHANGELANGUAGE'|translate}}</a>
                                         </li>
+                                        <li>
+                                            <a href="#" ng-show="translate.use() !== 'en'"
+                                               ng-click="translate.use('en')">Reset to English</a>
+                                        </li>
+
+
+
+
 
                                     </ul>
                                 </li>
