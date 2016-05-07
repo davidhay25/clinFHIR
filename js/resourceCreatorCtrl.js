@@ -20,9 +20,6 @@ angular.module("sampleApp")
     resourceCreatorSvc.registerAccess();
 
 
-
-
-
     var profile;                    //the profile being used as the base
     var type;                       //base type
     $scope.treeData = [];           //populates the resource tree
@@ -665,8 +662,8 @@ angular.module("sampleApp")
         $scope.dataType = ed.type[inx].code;
         
         if ($scope.dataType == 'Reference') {
-
             //this is a reference to another resource. We need to get the exact type that was selected...
+            //this is used in the next code segment to retrieve the matching existing resources
             var type = ed.type[inx];
             var ar = type.profile[0].split('/');
             $scope.resourceType = ar[ar.length-1];         //the type name (eg 'Practitioner')
@@ -745,11 +742,19 @@ angular.module("sampleApp")
 
             //sets up the results variable ready for the data entry form
             //todo - also modifies some of the scope variables - this requries a good check...
-            resourceCreatorSvc.dataTypeSelected($scope.dataType,$scope.resourceProfile, $scope.results,ed,$scope,appConfigSvc.getAllResources());
+            resourceCreatorSvc.dataTypeSelected($scope.dataType,$scope.resourceProfile, 
+                $scope.results,ed,$scope,appConfigSvc.getAllResources());
 
         }
     };
 
+    //called when selecting from all resources, and a particular type has been selected
+    $scope.resourceTypeSelected = function(typeDef){
+        $scope.resourceList = RenderProfileSvc.getResourcesSelectListOfType(
+            appConfigSvc.getAllResources(),typeDef.key);
+
+        //alert(type)
+    };
 
     //when a new element has been populated. The 'find reference resource' function creates the fragment - the others don't
     $scope.saveNewDataType = function(fragment) {

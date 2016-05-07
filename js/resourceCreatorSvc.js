@@ -1120,15 +1120,14 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 case 'Reference' :
                     //todo - have a service that creates a full summary of a resource - and a 1 liner for the drop down
                    //todo - right now, we will assume the type being references is a base resource
-                    //var ar = resourceProfile.split('/');
-                    //var resourceType = ar[ar.length-1];
 
-
-                    //var referenceProfile = element.type[scope.index].profile[0];  //the profile of the resource being referenced...
-                   // if (! RenderProfileSvc.isUrlaBaseResource(referenceProfile)) {
                     if (! RenderProfileSvc.isUrlaBaseResource(resourceProfile)) {
                         //this is a reference to profile on a base resource. need to load the profile so we can figure out the base type
-                        scope.profileUrlInReference = referenceProfile;
+                        //todo **** not wrking ****
+                        alert('Sorry, referencing profiled resources is not yet supported...')
+                        return;
+                        
+                        scope.profileUrlInReference = resourceProfile;  // ??? changes may ct referenceProfile;
 
                         GetDataFromServer.findConformanceResourceByUri(referenceProfile).then(  //will go to the current conformance server
                             function(profile){
@@ -1161,22 +1160,23 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         //if any resource can be referenced here - ie not a specific type
                         if (resourceType== 'Resource') {
                             //scope.uniqueResources will be a collection of all the resource types for this patient
-                            //todo - it's not implemented yet...
+                            
                             scope.uniqueResources = RenderProfileSvc.getUniqueResources(allResources);
                         } else {
                             delete scope.uniqueResources;
                         }
 
                         //this defines the resource type - eg whether it is a reference resource rather than linked to a patient...
+                        //if the type is 'Resource' then it will be null...
                         scope.selectedReferenceResourceType = RenderProfileSvc.getResourceTypeDefinition(resourceType);
 
                         //scope.resourceType = resourceType;
 
 
                         //if the resource type is one that is a 'reference' - ie doesn't link to a patient then
-                        //the resurceList is empty. Otherwise populate it with the existing resources of that type for the patient
-
-                        if (scope.selectedReferenceResourceType.reference) {
+                        //the resourceList is empty. Otherwise populate it with the existing resources of that type for the patient
+                        //todo note that this means that a type of 'Resource' effectively means only existing non-reference resources - needs to be fixed
+                        if (! scope.selectedReferenceResourceType || scope.selectedReferenceResourceType.reference) {
                             // if (scope.allResourceTypesIndexedByType[resourceType].reference) {
                            // delete scope.resourceList;
                         } else {

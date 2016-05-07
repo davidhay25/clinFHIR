@@ -1402,6 +1402,11 @@ console.log(summary);
             var ar = profileTypeUrl.split('/');
             var resourceType = ar[ar.length-1];       //the actual type of resource being referenced...
 
+
+            //this is used when a resource can reference any other...
+            if (resourceType == 'Resource') {
+                return true;
+            }
             //standardResourceTypes is an array of objects {name: }. A hash might be more efficient...
 
 
@@ -1474,7 +1479,33 @@ console.log(summary);
 
         },
         getUniqueResources : function(allResources) {
-            alert('getUniqueResources stub not implemented yet');
+            // generate a list of all the resource types a patient has, and the count of each
+            // note that allResources is an object, keyed by type containing a bundle of the resources...
+            var ar = [];
+            angular.forEach(allResources,function(bundle,type){
+                 if (bundle.entry) {
+                     ar.push({key:type,display : type + ' (' + bundle.entry.length + ')'})
+                 }
+
+            });
+
+/*
+            var unique = {};
+            if (allResources && allResources.entry) {
+                allResources.entry.forEach(function (entry) {
+                    var typ = entry.resource.resourceType;
+                    unique[typ] = unique[typ] || 0;
+                    unique[typ]++;
+                });
+            }
+            var ar = [];
+            angular.forEach(unique,function(v,k){
+                ar.push({key:k,display : k + ' (' + v + ')'})
+            });
+*/
+            return ar;
+
+            //alert('getUniqueResources stub not implemented yet');
         },
         populateTimingList :function (){
             //common timings for medication
