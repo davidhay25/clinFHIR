@@ -12,11 +12,12 @@
 
 angular.module("sampleApp")
     .controller('resourceCreatorCtrl',
-        function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,$translate,
+        function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,$translate,$localStorage,
               RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location,resourceSvc,$window) {
 
     $scope.doDefault=false;         //whether to have default patient & profile <<<<< for debug only!
 
+    //register that the application has been started... (for reporting)
     resourceCreatorSvc.registerAccess();
 
 
@@ -176,77 +177,8 @@ angular.module("sampleApp")
         })
     };
 
-/*
 
-    if ($scope.doDefault) {
-        //sample patient data...
-        supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
-            //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
-            function (allResources) {
-
-                console.log(allResources)
-                //the order is significant - allResources must be set first...
-                appConfigSvc.setAllResources(allResources);
-
-
-                //todo - all this stuff should be in a service somewhere...
-                $scope.outcome.resourceTypes = [];
-                angular.forEach(allResources, function (bundle, type) {
-
-                    if (bundle && bundle.total > 0) {
-                        $scope.outcome.resourceTypes.push({type: type, bundle: bundle});
-                    }
-
-
-                });
-
-                $scope.outcome.resourceTypes.sort(function (a, b) {
-                    if (a.type > b.type) {
-                        return 1
-                    } else {
-                        return -1
-                    }
-                });
-
-
-                //for the reference navigator we need a plain list of resources...
-                $scope.allResourcesAsList = [];
-                $scope.allResourcesAsDict = {};
-                angular.forEach(allResources, function (bundle, type) {
-
-                    if (bundle.entry) {
-                        bundle.entry.forEach(function (entry) {
-                            $scope.allResourcesAsList.push(entry.resource);
-                            var hash = entry.resource.resourceType + "/" + entry.resource.id;
-                            $scope.allResourcesAsDict[hash] = entry.resource;
-
-                        })
-                    }
-                    //also need to add the reference resources to the dictionary (so thay can be found in outgoing references)
-                    supportSvc.getReferenceResources().forEach(function (resource) {
-                        var hash = resource.resourceType + "/" + resource.id;
-                        $scope.allResourcesAsDict[hash] = resource;
-                    });
-
-                    //and finally the patient!
-                    var patient = appConfigSvc.getCurrentPatient();
-                    var hash = "Patient/" + patient.id;
-                    $scope.allResourcesAsDict[hash] = patient;
-
-
-                })
-
-
-            }
-            )
-            .finally(function () {
-                $scope.loadingPatient = false;
-            });
-
-    }
-            */
-
-
+    //change the language
     $scope.changeLanguage = function() {
         var modalInstance = $uibModal.open({
             templateUrl: "/modalTemplates/selectLanguage.html",
@@ -262,6 +194,15 @@ angular.module("sampleApp")
             }
         })
     };
+            
+    $scope.resetLanguageToEnglish = function() {
+        $localStorage.preferredLanguage = 'en';     //save default language
+        // var url = 'translate/'+code+'.json';
+        // $translateProvider.useUrlLoader(url);
+        $translate.use('en')
+    }
+            
+            
 
     //load existing data for the current patient
     function loadPatientDetails(cb) {
@@ -665,9 +606,16 @@ angular.module("sampleApp")
             //this is a reference to another resource. We need to get the exact type that was selected...
             //this is used in the next code segment to retrieve the matching existing resources
             var type = ed.type[inx];
-            var ar = type.profile[0].split('/');
-            $scope.resourceType = ar[ar.length-1];         //the type name (eg 'Practitioner')
-            $scope.resourceProfile = type.profile[0];       //the profilefor this type. todo - could really lose $scope.resourceType...
+            if (type.profile)  {
+                var ar = type.profile[0].split('/');
+                $scope.resourceType = ar[ar.length-1];         //the type name (eg 'Practitioner')
+                $scope.resourceProfile = type.profile[0];       //the profilefor this type. todo - could really lose $scope.resourceType...
+            } else {
+                //if there's no profile, then the reference can be to any profile...
+                $scope.resourceType = 'Resource';
+                $scope.resourceProfile = 'Resource';
+            }
+
             //console.log($scope.resourceType);
 
         }
@@ -748,12 +696,12 @@ angular.module("sampleApp")
         }
     };
 
-    //called when selecting from all resources, and a particular type has been selected
+    //called when selecting from all resources, and a particular type has been selected. Note that an object
+            //is passed - not just the type as a string...
     $scope.resourceTypeSelected = function(typeDef){
         $scope.resourceList = RenderProfileSvc.getResourcesSelectListOfType(
             appConfigSvc.getAllResources(),typeDef.key);
-
-        //alert(type)
+        
     };
 
     //when a new element has been populated. The 'find reference resource' function creates the fragment - the others don't
@@ -1048,12 +996,22 @@ angular.module("sampleApp")
     //save the current resource and build another based on the profile in the currently selected child element...
     $scope.park = function() {
 
-        var profile = resourceCreatorSvc.getCurrentProfile();
+        var modalOptions = {
+            closeButtonText: "Don't park",
+            actionButtonText: 'Ok',
+            headerText: 'Park resource',
+            bodyText: 'The resource instance has been parked and can be retrieved later'
+        };
 
-        resourceCreatorSvc.parkResource({treeData:angular.copy($scope.treeData),
-            profile:profile,display:profile.name});
+        modalService.showModal({}, modalOptions).then(function (result) {
+            var profile = resourceCreatorSvc.getCurrentProfile();
 
-        alert('Resource parked.')
+            resourceCreatorSvc.parkResource({treeData:angular.copy($scope.treeData),
+                profile:profile,display:profile.name});
+
+            $scope.displayMode = 'front';
+        });
+
     };
 
     $scope.restoreFromParked = function(park,inx) {
@@ -1063,6 +1021,8 @@ angular.module("sampleApp")
         resourceCreatorSvc.setCurrentProfile(park.profile);
         resourceCreatorSvc.removeParkedResource(inx)
         drawTree();
+        $scope.displayMode = 'new';     //will cause the editing page to be displayed
+
     };
 
     $scope.parkAndBuildDEP = function() {
@@ -1277,12 +1237,7 @@ angular.module("sampleApp")
 
         //called when the config is reset...
         $rootScope.$on('resetConfigObject',function(event) {
-            //$scope.config = config;
-            //console.log($localStorage.config)
             setup();
-
-
-           
         });
 
         //when the cache of profiles for this browser is reset
@@ -1295,15 +1250,23 @@ angular.module("sampleApp")
             $scope.recent.patient = appConfigSvc.getRecentPatient();
         });
 
-        //when we want to view the profile in the tree
+        //when we want to view the profile in the tree - and potentially edit it
         $scope.showLocalProfile = function(event,profile) {
-            //console.log(event)
-            //event.stopPropagation();
+
             $scope.showProfileEditPage = true;
+
             $scope.frontPageProfile = profile;
             //broadcast an event so that the profile edit controller can determine if this is a core profile and can't be edited...
             $scope.$broadcast('profileSelected',{profile:profile});
+
+            //perform the setup for the new profile...
+            $rootScope.$broadcast('newProfileChosen');
+
+
         };
+
+
+        //when the page is closed in the profile editor. Needs to inform the parent page to close the editor...
         $rootScope.$on('closeProfileEditPage',function(){
             $scope.showProfileEditPage = false;
         });
@@ -1409,7 +1372,7 @@ angular.module("sampleApp")
             $rootScope.$emit('patientSelected',patient);
         };
 
-        //when a profile is selected in the list. It returns the profile (StructureDefinition resource)
+        //when a profile is selected in the list to build a resource from. It returns the profile (StructureDefinition resource)
         $scope.selectProfile = function(profile) {
             var clone = angular.copy(profile);
             $scope.localSelectedProfile = profile;
@@ -2068,12 +2031,38 @@ console.log(url);
 
 
     })
-    .controller('logicalModelCtrl',function($scope,$rootScope,resourceCreatorSvc,GetDataFromServer,appConfigSvc){
+    .controller('logicalModelCtrl',function($scope,$rootScope,resourceCreatorSvc,GetDataFromServer,appConfigSvc,modalService){
 
-        $scope.logOfChanges = [];
-        $scope.input = {dirty:false};
-        $scope.mode = 'view';       //can view or edit profiles
+
         $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();      //all the known data types
+
+
+        //when a new name is entered into the name box. 
+        $scope.checkExistingProfile = function(name) {
+
+            resourceCreatorSvc.getProfileFromConformanceServerById(name).then(
+                function(data) {
+                    //oops, the file exists
+                    alert('The profile already exists and will be replaced if the name is not chosen.')
+                },
+                function(err){
+                    //the resource does not exist - all ok. todo - should check for 404 really
+                }
+            )
+        }
+
+        //when a new profile is chosen from the frfor viewing and/or editing
+        function setUpDisplayNewProfile() {
+            $scope.logOfChanges = [];
+            $scope.input = {dirty:false};
+            $scope.mode = 'view';       //can view or edit profiles
+            console.log('setup')
+        }
+        setUpDisplayNewProfile();
+
+        $rootScope.$on('newProfileChosen',function() {
+            setUpDisplayNewProfile()
+        })
 
         //$scope.editText = 'Edit';       //will change the text when a core profile...
         //when there is a non-core profile - allow it to be edited...
@@ -2125,13 +2114,43 @@ console.log(url);
 
         //when the editor is closed. todo mightwant to check for dirty...
         $scope.close = function(){
-            //delete $scope.showProfileEditPage;
+
+            //if the resource has been edited, then confirm the cancel...
+            if ($scope.logOfChanges.length > 0) {
+                var modalOptions = {
+                    closeButtonText: 'No, stay here',
+                    actionButtonText: 'Yes, Abandon changes',
+                    headerText: 'Abandon profile',
+                    bodyText: 'Are you sure you want to abandon the changes you are making to this Profile?'
+                };
+
+                modalService.showModal({}, modalOptions).then(function (result) {
+                    //delete $scope.showProfileEditPage;
+                    closeTheProfileEditor();
+
+                  /*  delete $scope.model;
+                    delete $scope.selectedNode;
+                    delete $scope.edFromTreeNode;
+                    $rootScope.$emit('closeProfileEditPage');*/
+                })
+
+            } else {
+                //delete $scope.showProfileEditPage;
+                closeTheProfileEditor();
+                /*delete $scope.model;
+                delete $scope.selectedNode;
+                delete $scope.edFromTreeNode;
+                $rootScope.$emit('closeProfileEditPage');*/
+            }
+        };
+
+        //function to clear all the variables relating to the current profile and close the page
+        function closeTheProfileEditor() {
             delete $scope.model;
             delete $scope.selectedNode;
             delete $scope.edFromTreeNode;
             $rootScope.$emit('closeProfileEditPage');
-
-        };
+        }
 
         //when the tree is re-drawn. model is the array of tree nodes.
         $scope.onTreeDraw = function(item) {
@@ -2178,14 +2197,18 @@ console.log(url);
         $scope.save = function() {
             var name = $scope.input.profileName;
 
-            var name='ct-1';
+            //var name='ct-1';
 
             if (! name) {
                 alert('Please enter a name')
                 return;
             }
-
-            resourceCreatorSvc.saveNewProfile(name,$scope.model,$scope.frontPageProfile).then(
+            
+            //pass in the name of the profile, the model (with all the data), the profile that is being altered
+            //and whether this is a new profile, or updating an existing
+            var isEdit = false;
+            if ($scope.mode == 'edit') {isEdit = true;}
+            resourceCreatorSvc.saveNewProfile(name,$scope.model,$scope.frontPageProfile,isEdit).then(
                 function(vo) {
                     alert(angular.toJson(vo.log))
                     //now add to the list of profiles...
@@ -2193,6 +2216,7 @@ console.log(url);
                     var clone = angular.copy(vo.profile);
                     appConfigSvc.addToRecentProfile(clone);
                     $scope.recent.profile = appConfigSvc.getRecentProfile();    //re-establish the recent profile list
+                    closeTheProfileEditor();    //close the editor and re-display the front page
 
                 },
                 function(log) {
@@ -2261,7 +2285,7 @@ console.log(url);
             if (item.node && item.node.data && item.node.data.ed) {
                 $scope.edFromTreeNode = item.node.data.ed;
 
-                console.log(item.node.data.ed);
+
                 $scope.$digest();       //the event originated outside of angular...
             }
 

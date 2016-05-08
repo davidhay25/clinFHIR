@@ -226,7 +226,9 @@
                                         <strong>{{'PROFILE'|translate}}:</strong>
                                 </span>
 
-                            {{resourceCreatorSvc.getCurrentProfile().url}}
+                            <span popover-placement="right" popover-trigger='mouseenter'
+                                  uib-popover="{{resourceCreatorSvc.getCurrentProfile().url}}">
+                                {{resourceCreatorSvc.getCurrentProfile().url | shortUrl}}</span>
                         </div>
 
                         </p>
@@ -266,23 +268,13 @@
                             <button class="btn btn-success pull-right" ng-hide="buildState=='dirty'"
                                     ng-click="cancelNewResource('close')">{{'CLOSE'|translate}}</button>
 
-                            <!--
-                            <button class="btn btn-danger pull-right" ng-click="cancelNewResource()">
 
-                                <div ng-show="buildState=='dirty'">Cancel</div>
-                                <div ng-hide="buildState=='dirty'">Close</div>
-
-
-
-
-
-                            </button>
-                            -->
                         </form>
 
                         <form ng-show="displayMode == 'new'" class="navbar-form navbar-right">
                             <button class="btn btn-primary pull-right" ng-click="saveToServer()">{{'SAVE' | translate}}</button>
-                            <button style="margin-right: 8px" class="btn btn-info pull-right" ng-click="park()">{{'PARK' | translate}}</button>
+                            <button style="margin-right: 8px" class="btn btn-info pull-right"
+                                    ng-click="park()">{{'PARK' | translate}}</button>
 
                             <button
                                     popover-placement="left" popover-trigger='mouseenter'
@@ -333,7 +325,7 @@
                                         </li>
                                         <li>
                                             <a href="#" ng-show="translate.use() !== 'en'"
-                                               ng-click="translate.use('en')">Reset to English</a>
+                                               ng-click="resetLanguageToEnglish()">Reset to English</a>
                                         </li>
 
 
@@ -347,7 +339,8 @@
 
                         <form ng-hide="displayMode == 'new' || displayMode == 'query' " class="navbar-form navbar-right">
                             <div ng-show="appConfigSvc.getCurrentPatient() && resourceCreatorSvc.getCurrentProfile()">
-                                <button class="btn btn-info pull-right" ng-click="createNewResource()">{{'NEWRESOURCE' | translate}}</button>
+                                <button class="btn btn-info pull-right" ng-click="createNewResource()">
+                                    {{'NEWRESOURCE' | translate}}</button>
                             </div>
                         </form>
 
@@ -359,11 +352,13 @@
 
 
                         <form ng-hide="displayMode == 'front' || displayMode == 'new'" class="navbar-form navbar-right">
-                            <span class="navbar-text" popover-placement="left" popover-trigger='mouseenter'
+                            <span  popover-placement="left" popover-trigger='mouseenter'
                                   uib-popover="Load front screen">
-                                    <a href="#" ng-click="displayMode = 'front'">Front</a>
+                                    <a class="btn btn-success" href="#" ng-click="displayMode = 'front'">Front</a>
                                 </span>
                         </form>
+
+
 
                         <div class="pull-right navbar-form" ng-show="waiting">
                             <img src="css/ajax_loader_blue_32.gif"/>

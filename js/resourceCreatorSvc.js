@@ -570,7 +570,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                                 if (typ.profile) {
                                                     //so make up an elementDef to represent this extension and add it to the list...
                                                     var urlExt = typ.profile[0];
-                                                    console.log(extensionPath,urlExt)
+
                                                     var extensionED = {min:0,max:1,path:extensionPath,myData:{}};   //todo -fix cardinality..
                                                     //var extensionED = angular.copy(elementDef)      //todo - a copy is probably not best...
                                                     //extensionED.type = [{code:'string'}]
@@ -2182,8 +2182,13 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             return lst
 
         },
-        saveNewProfile : function(profileName,model,baseProfile) {
+        saveNewProfile : function(profileName,model,baseProfile,isEdit) {
             //save the newly created profile. The structure is different for STU 2 & 3. sigh.
+
+            if (!profileName) {
+                alert('The profile name is required');
+                return;
+            }
             var deferred = $q.defer();
             var config = appConfigSvc.config();
             //model is the array of tree nodes...
@@ -2197,18 +2202,25 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             var sd;         //this is the StructureDefinition for the Profile
             if (fhirVersion == 3) {
-                sd = {resourceType:'StructureDefinition',name : profileName, kind:'resource',
-                    status:'draft',experimental : true, snapshot : {element:[]}};
+                if (! isEdit) {
+                    sd = {resourceType:'StructureDefinition',name : profileName, kind:'resource',
+                        status:'draft',experimental : true, snapshot : {element:[]}};
 
-                sd.abstract = false;
-                sd.baseType = baseProfile.name;         //assume that constariing a base resource
-                sd.baseDefinition = baseProfile.url;    //assume that constariing a base resource
-                sd.derivation = 'constraint';
-                sd.id = profileName;
-                var profileId = profileName;       //todo - ensure not yet used (or this is an update)
-                var profileUrl = config.servers.conformance + "StructureDefinition/" +profileId;
+                    sd.abstract = false;
+                    sd.baseType = baseProfile.name;         //assume that constariing a base resource
+                    sd.baseDefinition = baseProfile.url;    //assume that constariing a base resource
+                    sd.derivation = 'constraint';
+                    sd.id = profileName;
+                    var profileId = profileName;       //todo - ensure not yet used (or this is an update)
+                    var profileUrl = config.servers.conformance + "StructureDefinition/" +profileId;
 
-                sd.url = profileUrl;
+                    sd.url = profileUrl;
+                } else {
+                    sd = baseProfile;
+                    sd.snapshot.element.length = 0;
+
+                }
+
 
                 //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
                 var typeName = 'baseType';
@@ -2336,6 +2348,12 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
             }
+        },
+        getProfileFromConformanceServerById : function(id) {
+            //get a profile from the current concormance server based on its id. Used by the profile creator to see if the new profile alreadt exists
+            var config = appConfigSvc.config();
+            var url = config.servers.conformance + "StructureDefinition/"+id;
+            return $http.get(url);
         }
 
     }

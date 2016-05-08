@@ -30,22 +30,24 @@
         <div class="col-md-3">
 
             <input ng-show="mode=='new' || mode=='edit'" type="text" placeholder="Enter profile name (no spaces)"
-                   ng-model="input.profileName" class="form-control"/>
+                   ng-readonly="mode=='edit'"
+                   ng-blur = "checkExistingProfile(input.profileName)" ng-model="input.profileName" class="form-control"/>
 
 
         </div>
         <div class="col-md-5">
 
-
-
             <div class="pull-right">
 
-                <button  ng-hide="mode=='edit' || !allowEdit" class="btn btn-link" ng-click="startEdit()">Edit this profile</button>
+                <button  ng-hide="mode=='edit' || !allowEdit"
+                         class="btn btn-link" ng-click="startEdit()">Edit this profile</button>
                 <button  class="btn btn-link" ng-click="mode = 'new'">New Profile</button>
 
-                <button ng-show="input.profileName && (mode=='new'|| mode=='edit')  " class="btn btn-success" ng-click="save()">Save</button>
-
+                <button ng-show="input.profileName && (mode=='new'|| mode=='edit')"
+                        class="btn btn-success" ng-click="save()">Save</button>
+<!--
                 <button  class="btn btn-warning" ng-click="save()">Dev-Save</button>
+                -->
 
                 <button class="btn btn-danger" ng-click="close()">Close</button>
 
@@ -143,7 +145,9 @@
                         </div>
                         <div class="col-md-6">
                             <div ng-show="mode=='new' || mode=='edit'">
-                                <button class="btn btn-default" ng-click="removeNode()">Remove from profile</button>
+                                <button ng-hide="edFromTreeNode.min !== 0" class="btn btn-default"
+                                        ng-click="removeNode()">Remove from profile</button>
+
                                 <span ng-show="edFromTreeNode && ! edFromTreeNode.myMeta.isExtension">
 
 
@@ -174,7 +178,7 @@
 
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <div class="btn-group pull-right">
+                                            <div class="btn-group">
                                                 <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'opt'">0..1</label>
                                                 <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'req'">1..1</label>
                                                 <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'mult'">0..*</label>
