@@ -2044,12 +2044,13 @@ console.log(url);
                 function(data) {
                     //oops, the file exists
                     alert('The profile already exists and will be replaced if the name is not chosen.')
+                    $scope.mode='new';      //as this is effectvely a new profile
                 },
                 function(err){
                     //the resource does not exist - all ok. todo - should check for 404 really
                 }
             )
-        }
+        };
 
         //when a new profile is chosen from the frfor viewing and/or editing
         function setUpDisplayNewProfile() {

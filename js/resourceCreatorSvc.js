@@ -171,10 +171,13 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     case 'Range' :
 
-                        var st = {value:results.range_amount_start,units:results.range_units};
-                        var en = {value:results.range_amount_end,units:results.range_units};
+                        var stValue = parseFloat(results.range_amount_start);
+                        var enValue = parseFloat(results.range_amount_end);
 
-                        var range = {low:st,end:en};
+                        var st = {value:stValue,unit:results.range_units};
+                        var en = {value:enValue,unit:results.range_units};
+
+                        var range = {low:st,high:en};
                         var text = "Between " + st.value + " and " + en.value + " " + st.units;
                         addValue(range,'Range',text,false);
 
