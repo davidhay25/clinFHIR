@@ -1511,14 +1511,14 @@ console.log(summary);
             //common timings for medication
             var lst = [];
 
-            lst.push({description:"Twice a day",timing :{freq:2,period:1,units:'d'}});
-            lst.push({description:"Three times a day",timing :{freq:3,period:1,units:'d'}});
+            lst.push({description:"Twice a day",timing :{freq:2,period:1,periodUnits:'d'}});
+            lst.push({description:"Three times a day",timing :{freq:3,period:1,periodUnits:'d'}});
 
-            lst.push({description:"Every 8 hours",timing:{freq:1,period:8,units:'h'}});
-            lst.push({description:"Every 7 days",timing:{freq:1,period:7,units:'d'}});
-            lst.push({description:"3-4 times a day",timing:{freq:3,freqMax:4,period:1,units:'d'}});
-            lst.push({description:"Every 4-6 hours",timing:{freq:1,periodMax:6,period:1,units:'h'}});
-            lst.push({description:"Every 21 days for 1 hour",timing:{duration:1,units:'h',freq:1,period:21,units:'d'}});
+            lst.push({description:"Every 8 hours",timing:{freq:1,period:8,periodUnits:'h'}});
+            lst.push({description:"Every 7 days",timing:{freq:1,period:7,periodUnits:'d'}});
+            lst.push({description:"3-4 times a day",timing:{freq:3,freqMax:4,period:1,periodUnits:'d'}});
+            lst.push({description:"Every 4-6 hours",timing:{freq:1,periodMax:6,period:1,periodUnits:'h'}});
+            lst.push({description:"Every 21 days for 1 hour",timing:{duration:1,units:'h',freq:1,period:21,periodUnits:'d'}});
 
 
             return lst;

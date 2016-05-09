@@ -58,8 +58,10 @@ angular.module("sampleApp").service('resourceCreatorSvc',
            
             return $http.get(qry);
         },
-        getJsonFragmentForDataType : function(dt,results) {
+        getJsonFragmentForDataType : function(dt,results,stuVersion) {
             //create a js object that represents a fragment of data for inclusion in a resource based on the datatype...
+
+            stuVersion = stuVersion || 3;   //some of the datatypes changes in v3..  :(
 
             var fragment;
 
@@ -75,19 +77,20 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         break;
 
                     case 'positiveInt':
-                        var qty = results.positiveint;
+
+                        var qty = parseInt(results.positiveint);
                         var text = results.positiveint;
                         addValue(qty,'positiveInt',text,true);
                         break;
 
                     case 'integer':
-                        var qty = results.integer;
+                        var qty = parseInt(results.integer);
                         var text = results.integer;
                         addValue(qty,'integer',text,true);
                         break;
 
                     case 'decimal':
-                        var qty = results.decimal;
+                        var qty = parseFloat(results.decimal);
                         var text = results.decimal;
                         addValue(qty,'decimal',text,true);
                         break;
@@ -128,19 +131,40 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         var timing = {repeat:{}};
 
                         timing.repeat.duration = results.timing.duration;
-                        timing.repeat.durationUnits = results.timing.units;
+                        if (stuVersion == 3) {
+                            timing.repeat.durationUnit = results.timing.units;
+                        } else {
+                            timing.repeat.durationUnits = results.timing.units;
+                        }
+
+
                         timing.repeat.frequency = results.timing.freq;
-                        timing.repeat.frequencyMax = results.timing.freq_max;
-                        timing.repeat.durationperiod =results.timing.period;
+
+                        if (results.timing.freq_max) {
+                            timing.repeat.frequencyMax = parseFloat(results.timing.freq_max);
+                        }
+
+                        if (results.timing.period) {
+                            timing.repeat.period =parseFloat(results.timing.period);
+                        }
+
                         timing.repeat.periodMax = results.timing.period_max;
-                        timing.repeat.periodUnits = results.timing.period_units;
-                        timing.repeat.when = results.timing.when
+
+
+                        if (stuVersion == 3) {
+                            timing.repeat.periodUnit = results.timing.period_units;
+                        } else {
+                            timing.repeat.periodUnits = results.timing.period_units;
+                        }
+
+
+                        timing.repeat.when = results.timing.when;
+
 
                         var daStart = moment(results.timing_start).format();
                         var daEnd = moment(results.timing_end).format();
 
-
-                        timing.bounds = {start: daStart,end: daEnd};
+                        timing.repeat.boundsPeriod = {start: daStart,end: daEnd};
 
                         var text = results.timingDescription;
                         addValue(timing,'Timing',text,false);
@@ -152,10 +176,13 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     case 'Ratio' :
 
-                        var num = {value:results.ratio_num_amount,units:results.ratio_num_units};
-                        var denom = {value:results.ratio_denom_amount,units:results.ratio_denom_units};
+                        var numValue = parseFloat(results.ratio_num_amount);
+                        var numDenom = parseFloat(results.ratio_denom_amount)
+
+                        var num = {value:numValue,unit:results.ratio_num_units};
+                        var denom = {value:numDenom,unit:results.ratio_denom_units};
                         var ratio = {numerator : num,denominator:denom};
-                        var text = num.value + " " + num.units+ " over " + denom.value + " " + denom.units;
+                        var text = num.value + " " + num.unit+ " over " + denom.value + " " + denom.unit;
                         addValue(ratio,'Ratio',text,false);
                         break;
 
@@ -178,7 +205,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         var range = {low:st,high:en};
                         var text = "Between " + st.value + " and " + en.value + " " + st.units;
                         addValue(range,'Range',text,false);
-                        
+
                         break;
 
                     case 'Annotation' :

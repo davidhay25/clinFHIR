@@ -145,14 +145,15 @@
                         </div>
                         <div class="col-md-6">
                             <div ng-show="mode=='new' || mode=='edit'">
-                                <button ng-hide="edFromTreeNode.min !== 0" class="btn btn-default"
+                                <button ng-hide="edFromTreeNode.min !== 0 || currentNodeIsParent" class="btn btn-default"
                                         ng-click="removeNode()">Remove from profile</button>
 
                                 <span ng-show="edFromTreeNode && ! edFromTreeNode.myMeta.isExtension">
 
 
                                     <button class="btn btn-default" ng-click="input.newNode = 'child'">Add Child Node</button>
-                                    <button class="btn btn-default" ng-click="input.newNode = 'sibling'">Add Sibling Node</button>
+                                    <button class="btn btn-default" ng-click="input.newNode = 'sibling'"
+                                            ng-hide="currentNodeIsParent">Add Sibling Node</button>
                                 </span>
 
                                 <div ng-show="input.newNode">
@@ -282,7 +283,7 @@
                         <td>{{item.display}}</td>
                         <td>
                             <button ng-show="item.type=='D'" class="btn btn-default" ng-click="restore(item.ed,$index)">Restore</button>
-                            <button ng-show="item.type=='A'" class="btn btn-default">Remove</button>
+                            <button ng-show="item.type=='A'" class="btn btn-default" ng-click="removeNewNode(item.ed,$index)">Remove</button>
                         </td>
                     </tr>
                 </table>

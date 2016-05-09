@@ -21,9 +21,9 @@ angular.module("sampleApp")
         defaultConfig.enableCache = false;  //whether caching is supported
         //defaultConfig.servers.terminology = "http://fhir2.healthintersections.com.au/open/";
         defaultConfig.servers.terminology = "http://fhir.hl7.org.nz/dstu2/";
-        defaultConfig.servers.data = "http://fhir2.healthintersections.com.au/open/";
+        defaultConfig.servers.data = "http://fhirtest.uhn.ca/baseDstu3/";
         //defaultConfig.servers.conformance = "http://fhir2.healthintersections.com.au/open/";
-        defaultConfig.servers.conformance = "http://fhir.hl7.org.nz/baseDstu2/";
+        defaultConfig.servers.conformance = "http://fhir3.healthintersections.com.au/open/";
 
         //default to Grahames DSTU2 server when data and conformance servers are inconsistent...
         //defaultConfig.defaultTerminologyServerUrl = "http://fhir2.healthintersections.com.au/open/";

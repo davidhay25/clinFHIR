@@ -26,6 +26,23 @@ angular.module('sampleApp').component('showProfile',
 
             this.$onChanges = function(obj) {
 
+                //remove a new node that was added
+                if (obj.removenewnode) {
+                    var edToRestore = obj.removenewnode.currentValue;
+
+                    //alert(edToRestore)
+                    console.log(edToRestore)
+                    that.selectedProfile.snapshot.element.forEach(function(ed){
+                        if (ed.path == edToRestore.path) {
+
+                            delete ed.myMeta.remove;
+                        }
+                    })
+
+
+                    this.getTable(treeDivId);
+                }
+                /*
                 //restore a path that was removed in this session.
                 if (obj.restoreremoved) {
                     var edToRestore = obj.restoreremoved.currentValue;
@@ -42,6 +59,7 @@ angular.module('sampleApp').component('showProfile',
 
                     this.getTable(treeDivId);
                 }
+                */
 
                 if (obj.deleteatpath) {
                     var pathToDelete = obj.deleteatpath.currentValue;
@@ -271,7 +289,7 @@ angular.module('sampleApp').component('showProfile',
                     $('#'+treeDivId).jstree(
                         {'core': {'multiple': false, 'data': buildView.treeData, 'themes': {name: 'proton', responsive: true}}}
                     ).on('changed.jstree', function (e, data) {
-                        
+
                         that.ontreenodeselected({item:data});
 
                     })

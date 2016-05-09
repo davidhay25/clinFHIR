@@ -2077,12 +2077,20 @@ console.log(url);
             $scope.logOfChanges = [];
             $scope.input = {dirty:false};
             $scope.mode = 'view';       //can view or edit profiles
+
+            if ($scope.model){
+                $scope.selectedNode = model[0];
+            }
+            $scope.currentNodeIsParent = true;
+            //
+
             console.log('setup')
         }
         setUpDisplayNewProfile();
 
         $rootScope.$on('newProfileChosen',function() {
             setUpDisplayNewProfile()
+
         })
 
         //$scope.editText = 'Edit';       //will change the text when a core profile...
@@ -2182,6 +2190,10 @@ console.log(url);
 
         //remove the current node (and all child nodes)
         $scope.removeNode = function(){
+            if ($scope.selectedNode.parent == '#' ) {
+                alert("You can't delete the root node!")
+                return;
+            }
             var ed = $scope.selectedNode.data.ed; //the ExtensionDefinition we want to remove
             var path = ed.path;     //the path of the element to be removed...
 
@@ -2207,11 +2219,15 @@ console.log(url);
        
         //restore a deleted element
         $scope.restore = function(ed,inx){
-           // $scope.restoreRemoved = path;
-            console.log(ed)
-            $scope.restoreRemoved = ed;
+            $scope.restoreRemoved = ed;     //this is a property on the component...
             $scope.logOfChanges.splice(inx,1)
             
+        };
+
+        //remove a new node that was added...
+        $scope.removeNewNode = function(ed,inx) {
+            $scope.deleteAtPath = ed;            //this is a property on the component...
+            $scope.logOfChanges.splice(inx,1)
         };
 
         //save the new resource
@@ -2244,7 +2260,6 @@ console.log(url);
                     alert(angular.toJson(log))
                 }
             );
-
         };
 
         $scope.addNewNode = function(type) {
@@ -2274,7 +2289,7 @@ console.log(url);
                     ed.min=1; ed.max='1';
                     break;
                 case 'mult' :
-                    ed.min=1; ed.max='*';
+                    ed.min=0; ed.max='*';
                     break;
             }
             ed.definition = $scope.input.definition || newPath;
@@ -2302,6 +2317,10 @@ console.log(url);
 
             $scope.selectedNode = item.node;    //the node in the tree view...
 
+            delete $scope.currentNodeIsParent;
+            if (item.node && item.node.parent == '#') {
+                $scope.currentNodeIsParent = true;
+            }
 
             if (item.node && item.node.data && item.node.data.ed) {
                 $scope.edFromTreeNode = item.node.data.ed;
