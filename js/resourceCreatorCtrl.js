@@ -71,8 +71,28 @@ angular.module("sampleApp")
     $scope.recent.patient = appConfigSvc.getRecentPatient();
     $scope.recent.profile = appConfigSvc.getRecentProfile();
 
+    //---- the array of standard timimg elements
+    $scope.timingArray = RenderProfileSvc.populateTimingList();
+    //--- code for timing
 
-    //when the user clicks the 'New Resource' button. They may not have selected a new patient or profile
+    $scope.updateTimingDetails = function(item) {
+
+        if (item && item.timing) {
+            $scope.results.timing.duration = item.timing.duration;
+            $scope.results.timing.units = item.timing.units;
+            $scope.results.timing.freq = item.timing.freq;
+            $scope.results.timing.freq_max = item.timing.freqMax;
+            $scope.results.timing.period = item.timing.period;
+            $scope.results.timing.period_max = item.timing.periodMax;
+            $scope.results.timing.period_units = item.timing.periodUnits;
+            $scope.results.timing.when = item.timing.when;
+        }
+
+
+
+    };
+
+            //when the user clicks the 'New Resource' button. They may not have selected a new patient or profile
     $scope.createNewResource = function() {
 
 

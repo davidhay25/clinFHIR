@@ -161,12 +161,10 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     case 'Quantity' :
 
-                        var qty = {value:results.quantity_amount,unit:results.quantity_units};
-
+                        var qtyValue = parseFloat(results.quantity_amount);
+                        var qty = {value:qtyValue,unit:results.quantity_units};
                         var text = qty.value  + " " + qty.units;
                         addValue(qty,'Quantity',text,false);
-
-
                         break;
 
                     case 'Range' :
@@ -180,9 +178,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         var range = {low:st,high:en};
                         var text = "Between " + st.value + " and " + en.value + " " + st.units;
                         addValue(range,'Range',text,false);
-
-
-
+                        
                         break;
 
                     case 'Annotation' :
