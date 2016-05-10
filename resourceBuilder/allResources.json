@@ -103,6 +103,7 @@
   {"name": "Measure","reference":true,"version":"2.1"},
   {"name": "DecisionSupportServiceModule","reference":true,"version":"2.1"},
   {"name": "ExpansionProfile","reference":true,"version":"2.1"},
-  {"name": "Sequence","reference":true,"version":"2.1"}
+  {"name": "Sequence","reference":true,"version":"2.1"},
+  {"name": "Linkage","reference":true,"version":"2.1"}
 ]
 

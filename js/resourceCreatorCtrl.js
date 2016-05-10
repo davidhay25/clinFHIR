@@ -2072,12 +2072,13 @@ console.log(url);
             )
         };
 
-        //when a new profile is chosen from the frfor viewing and/or editing
+        //when a new profile is chosen from the for viewing and/or editing
         function setUpDisplayNewProfile() {
             $scope.logOfChanges = [];
             $scope.input = {dirty:false};
             $scope.mode = 'view';       //can view or edit profiles
-
+            $scope.input.newDatatype = $scope.dataTypes[0];
+            $scope.input.multiplicity = 'opt';
             if ($scope.model){
                 $scope.selectedNode = model[0];
             }
@@ -2307,6 +2308,20 @@ console.log(url);
 
         };
 
+        $scope.changeBinding = function() {
+
+            var vsUrl = prompt("Enter the ValueSet Url");
+            if (vsUrl) {
+                try {
+                    $scope.edFromTreeNode.binding.valueSetReference.reference = vsUrl
+                } catch (ex) {
+                    alert('error changing ValueSet url')
+                }
+
+            }
+
+        };
+
 
         //when an element is selected in the tree....
         $scope.treeNodeSelected = function(item) {
@@ -2347,4 +2362,22 @@ console.log(url);
             }
 
         }
-});
+}
+    ).filter('showUrlId',function(){
+        //show the id component of a url
+        return function(input) {
+            //console.log(input);
+            if (input) {
+                var ar = input.split('/');
+                if (ar.length > 2) {
+                    return ar[ar.length-1]
+                } else {
+                    return input
+                }
+            } else {
+                return input
+            }
+
+        }
+    }
+);

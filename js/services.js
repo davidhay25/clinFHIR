@@ -586,7 +586,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             if (dataServer.everythingOperation) {
                 //The everything operation will return all patient related resources. not all servers recognize this, and
                 //some implement paging and small default sizes (hapi) and some don't (grahame)
-                var url = dataServer.url + "Patient/"+patientId + '/$everything'
+                var url = dataServer.url + "Patient/"+patientId + '/$everything?_count=100'
                 if (dataServer.everythingOperationCount) {
                     url += "?_count="+dataServer.everythingOperationCount;
                 }
@@ -619,9 +619,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                     }
                 );
 
-
-
-
+                
                 return deferred.promise;
             }
 

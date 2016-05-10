@@ -1591,7 +1591,8 @@ console.log(summary);
     }
 
     return {
-        getOneLineSummaryOfResource : function(resource) {
+        getOneLineSummaryOfResource : function(resource,fhirVersion) {
+            fhirVersion = fhirVersion || 3;
             if (resource) {
                 switch (resource.resourceType) {
                     case "DiagnosticOrder":
@@ -1605,7 +1606,12 @@ console.log(summary);
                         return getCCSummary(resource.substance);
                         break;
                     case "Practitioner" :
-                        return getHumanNameSummary(resource.name);
+                        if (fhirVersion == 3) {
+                            return getHumanNameSummary(resource.name[0]);
+                        } else {
+                            return getHumanNameSummary(resource.name);
+                        }
+
                         break;
                     case "Patient" :
                         return getHumanNameSummary(resource.name[0]);   //only the forst name
