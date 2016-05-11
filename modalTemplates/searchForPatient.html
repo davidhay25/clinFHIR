@@ -28,12 +28,15 @@
 
         <div ng-show="input.mode == 'find'">
             <div class="row">
-                <div class="col-md-11">
+                <div class="col-md-10">
                     <input type="text" ng-model="input.searchPatientName" class="form-control"
                            placeholder="Enter name for patient search">
                 </div>
-                <div class="col-md-1"style="margin-top:10px">
+                <div class="col-md-2">
+                    <button class="btn btn-primary" ng-click="searchForPatient(input.searchPatientName)">Search</button>
+                    <!--
                     <span><i class="glyphicon glyphicon-search" ng-click="searchForPatient(input.searchPatientName)"></i></span>
+                    -->
                 </div>
             </div>
             <br/>
@@ -123,9 +126,12 @@
                     <label class="col-md-3 control-label">Generate samples</label>
                     <div class="col-md-4">
 
-                        <span><input type="checkbox"  ng-model="input.createSamples"> </span>
+                        <checkbox ng-model="input.createSamples"></checkbox>
 
+<!--
+                        <span><input style="width: 50px; height: 50px;" type="checkbox"  ng-model="input.createSamples"> </span>
 
+-->
                     </div>
                     <div class="col-md-5">
                         <div href="#" ng-click="addNewPatient()" class="btn btn-primary pull-right">Save</div>

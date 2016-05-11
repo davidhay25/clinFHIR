@@ -131,6 +131,43 @@
 </div>
 
 -->
+
+
+<uib-alert type="warning" close="closeHelp()" ng-show="showHelp">
+    <strong>Getting Started</strong>
+    <p>To create a new resource you need to select both a patient and a profile to base the resource on. Once that has
+    been done, the 'New Resource' button will appear in top right corner, and clicking that will display the Resiurce Builder
+    page.</p>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 verticalLine">
+            <p>The Patient is selected by clicking the 'Select Patient' link in the "My recent Patients" column. The dialog
+                that appears will allow you to either select an existing patient or create a new one (optionally creating some
+                demo data for them). After selection, the patient will appear in the list below, from where it can be directly selected.</p>
+
+        </div>
+        <div class="col-md-5 verticalLine">
+            The 'Profile' is what the resource you create will be based on. This includes both 'core' results (like CarePlan)
+            and additional profiles that alter the base one. Select one by clicking the 'Find Profile' link in the 'My recent profiles'
+            column below. After selection, the profile will appear in the list below, from where it can be directly selected.
+
+        </div>
+        <div class="col-md-4">
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 verticalLine">
+            <div style="text-align: center"><i class="glyphicon glyphicon-arrow-down"/> </div>
+        </div>
+        <div class="col-md-5 col-sm-5 verticalLine">
+            <div style="text-align: center"><i class="glyphicon glyphicon-arrow-down"/> </div>
+        </div>
+    </div>
+
+
+
+</uib-alert>
+
 <!-- Hide the front page when the profile editor is being displayed-->
 <div class="row" ng-hide="showProfileEditPage">
 

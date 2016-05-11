@@ -102,11 +102,13 @@
                     <div class="row">
                         <div class="col-md-3 col-sm-3 col-md-offset-3">
                             <div ng-hide="showWaiting">
-                                <button class="btn btn-primary pull-right" ng-click="active=1;search()">Search</button>
+                                <button class="btn btn-primary pull-right"
+
+                                        ng-click="active=1;search()">Search</button>
                             </div>
                         </div>
                         <div class="col-md-6 col-sm-6" >
-                            <button ng-show="results.type=='profile' && results.profileType"
+                            <button ng-show="results.type=='profile' && results.profileType.name"
                                     class="btn btn-primary" ng-click="selectProfile(results.profileType.name)">
                                 Select {{results.profileType.name}}
                             </button>
@@ -171,6 +173,13 @@
         <div class="row">
             <div class="col-md-9 col-sm-9">
                 <div class="text-left">
+
+                    <p>Select the base resource type from the dropdown, then either:</p>
+                    <ul>
+                        <li>Click the '<em>Search</em>' button to find all profiles on this resource</li>
+                        <li>Clist the '<em>Select {{results.profileType.name}}</em>' button to load the base type profile directly</li>
+                    </ul>
+
                     <div>{{config.servers.conformance}}</div>
 
                     <div>{{query}}</div>

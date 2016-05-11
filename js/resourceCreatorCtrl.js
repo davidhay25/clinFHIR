@@ -814,6 +814,9 @@ angular.module("sampleApp")
 
 
 
+        
+
+
 
         var id = $scope.selectedNode.id;        //the node to delete
 
@@ -1183,7 +1186,18 @@ angular.module("sampleApp")
     };
     //--------------------------------
 
-
+    //---------options for date popup
+    $scope.dateOptions = {
+        formatYear: 'yy',
+        startingDay: 1
+    };
+    $scope.format = 'dd-MMMM-yyyy';
+    $scope.cal = {};
+    $scope.dateOpen1 = function($event,opened) {
+        $event.preventDefault();
+        $event.stopPropagation();
+        $scope.cal[opened] = ! $scope.cal[opened];
+    };
             
 
 })
@@ -1224,10 +1238,19 @@ angular.module("sampleApp")
     })
     .controller('frontCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,
                                      $translate,$interval,GetDataFromServer){
-        //
 
 
+        $scope.showHelp = true;
+        if ($localStorage.dontNeedHelp) {
+            $scope.showHelp = false;
+        }
 
+
+        $scope.closeHelp = function(){
+            $scope.showHelp = false;
+            $localStorage.dontNeedHelp = true;
+            
+        }
 
         $scope.input = {};
         $scope.input.showingLocalProfile = false;   //true when the currently selected profile is viewed...
@@ -1246,9 +1269,7 @@ angular.module("sampleApp")
             )
 
         };
-
-
-
+        
         var config;
         setup();        //will set config value - todo: this seems a bit clumsy...
 
@@ -1417,7 +1438,7 @@ angular.module("sampleApp")
                     $scope.input.dob = new Date(1982,9,31);     //will be replaced by name randomizer
                     $scope.outcome = {log:[]};
 
-                    $scope.input.createSamples = false;
+                    $scope.input.createSamples = true;
                     //when the 'Add new patient' is selected...
                     $scope.seletNewPatientOption = function(){
                         $scope.input.mode='new'

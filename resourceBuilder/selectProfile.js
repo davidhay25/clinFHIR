@@ -27,7 +27,7 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                     size:'lg',
                     controller: function($scope,type,profileSelectedFn,allResourceTypes,vo,recent,config) {
 
-                        $scope.heading = "Find Profile";
+                        $scope.heading = "Find Profile or Base Type";
 
                         if (vo) {
                             if (vo.heading) {
@@ -85,6 +85,7 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                                 //this will be a 'profile'
                                 if (! $scope.results.profileType) {
                                     alert("Please select the Base resource type");
+                                    $scope.showWaiting = false;
                                     return;
                                 } else {
                                     searchString += "kind=resource&type="+$scope.results.profileType.name
@@ -104,7 +105,7 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
 
                             searchString += "&_count=100";
                             
-                            config.log('Profile search string',searchString);
+                            //config.log('Profile search string',searchString);
 
 
                             $scope.query=   searchString;
