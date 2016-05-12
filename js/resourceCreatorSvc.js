@@ -505,47 +505,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
                                 updateFromProfileDefinition(queries, elementDef,profileUrl);    //will add to the list of async queries...
-      /*
-                                queries.push(GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
-                                    function(sdef) {
 
-
-                                        elementDef.myData.extensionDefinition = sdef;   //save the full definition for later...
-                                        elementDef.myData.isExtension = true;
-                                        elementDef.myData.extensionDefUrl = profileUrl[0];      //it's an array (not sure why)
-
-                                        //process the definition to get the datatype and url...
-
-                                        //analyse the extension definition - eg is it complex or not?
-                                        var analysis = Utilities.analyseExtensionDefinition(sdef);
-
-                                        if (analysis.complexExtension) {
-                                            //this is a complex extension...
-                                            elementDef.type = [{code:'Complex'}]
-                                            elementDef.analysis = analysis;
-                                        } else {
-                                            //this is a simple extension
-
-
-                                            if (sdef && sdef.snapshot && sdef.snapshot.element) {
-                                                sdef.snapshot.element.forEach(function(ed){
-                                                    var path = ed.path;
-                                                    if (path.indexOf('.value') > -1) {
-                                                        elementDef.type = ed.type;  //this is the type from the extension definition
-
-                                                    }
-                                                })
-                                            }
-
-                                        }
-
-                                    },
-                                    function(err) {
-                                        alert('Error retrieving '+ profileUrl + " "+ angular.toJson(err))
-                                    }
-                                ));
-
-    */
 
 
                                 elementDef.myData.sortOrder = sortOrder++;
@@ -1396,7 +1356,17 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         getParkedResources : function() {
             if ($localStorage.parkedResources) {
-                return $localStorage.parkedResources;
+                var patient = appConfigSvc.getCurrentPatient();
+                var lst = [];
+                $localStorage.parkedResources.forEach(function(park){
+                    if (park.patient && patient && park.patient.id == patient.id) {
+                        lst.push(park)
+                    }
+                })
+                return lst;
+
+
+                //return $localStorage.parkedResources;
             } else {
                 return []
             }
@@ -2210,7 +2180,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         saveNewProfile : function(profileName,model,baseProfile,isEdit) {
             //save the newly created profile. The structure is different for STU 2 & 3. sigh.
-
+            //baseProfile is the profile that is being constrained
+            //isEdit is when a profiled resource is being updated (it's not a new one, but an update to the current one
             if (!profileName) {
                 alert('The profile name is required');
                 return;
@@ -2229,6 +2200,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var sd;         //this is the StructureDefinition for the Profile
             if (fhirVersion == 3) {
                 if (! isEdit) {
+                    //this is a new profile on a base type...
                     sd = {resourceType:'StructureDefinition',name : profileName, kind:'resource',
                         status:'draft',experimental : true, snapshot : {element:[]}};
 
@@ -2242,11 +2214,11 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     sd.url = profileUrl;
                 } else {
-                    sd = baseProfile;
+                    //this is an edit. Remove all the existing ED's because we are going to update them...
+                    sd = angular.copy(baseProfile);
                     sd.snapshot.element.length = 0;
 
                 }
-
 
                 //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
                 var typeName = 'baseType';
@@ -2263,14 +2235,25 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             var log = [];
 
-            var SDsToSave = [];
-            model.forEach(function(item) {
+            var SDsToSave = [];     //this will be an array of extension SD's plus a single profile SD
+
+
+
+            //here is where we iterate through the tree model, pulling out the ElementDefinitions and adding them to the profile...
+
+            model.forEach(function(item,index) {
                 if (item.data && item.data.ed) {
                     var ed = item.data.ed;
 
                     //the first entry is always the root, which in this case will have the base type being extended...
                     if (! sd[typeName]) {
                         sd[typeName] = ed.path;
+                        //now add the meta element
+
+
+
+
+
                     }
 
                     var inProfile = true;       //true if this ed is to be included in the profile
@@ -2286,8 +2269,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             //now change the datatype in the profile to be an extension, with a profile pointing to the ED
                             ed.type[0].code = "Extension";      // 'cause that's what it is...
                             ed.type[0].profile = [extensionUrl];      //and where to find it.
-                            ed.min = 0;
-                            ed.max = '1';
+                            //ed.min = 0;
+                            //ed.max = '1';
 
                             //and change the path to be 'Extension'
                             var ar = ed.path.split('.');
@@ -2333,10 +2316,41 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         }
                     }
 
+                    //if this element is tobe included in the profile, we can add it now...
                     if (inProfile) {
                         delete ed.myMeta;
                         sd.snapshot.element.push(ed)
                     }
+
+                    if (index == 0) {
+                        //this is the first element - ie the one with the type name. we can add the meta element now...
+                        var resourceType = baseProfile.snapshot.element[0].path;
+                        var idElement = {definition:'Id',min:0,max:'1',type:[{code:'id'}]};
+                        idElement.base = {path:"Resource.id",min:0,max:'1'};
+                        idElement.path = resourceType+'.id';
+
+                        sd.snapshot.element.push(idElement)
+
+                        var metaElement = {}
+                        metaElement.path = resourceType +'.meta';    //the resource type is always the first emelent
+                        metaElement.definition = 'The meta element';
+                        metaElement.min=0;
+                        metaElement.max='1';
+                        metaElement.base = {path:"Resource.meta",min:0,max:'1'}
+                        metaElement.type=[{code:'Meta'}];
+
+                        sd.snapshot.element.push(metaElement);
+
+                        var textElement = {definition:'Narrative',min:0,max:'1',type:[{code:'Narrative'}]};
+                        textElement.base = {path:"DomainResource.text",min:0,max:'*'};
+                        textElement.path = resourceType+'.text';
+
+                        sd.snapshot.element.push(textElement)
+
+
+                    }
+
+
 
                 }
 

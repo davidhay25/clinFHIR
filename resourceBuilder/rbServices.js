@@ -1404,7 +1404,7 @@ console.log(summary);
 
 
             //this is used when a resource can reference any other...
-            if (resourceType == 'Resource') {
+            if (resourceType == 'Resource' || resourceType == 'Patient') {
                 return true;
             }
             //standardResourceTypes is an array of objects {name: }. A hash might be more efficient...

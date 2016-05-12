@@ -19,7 +19,9 @@
                 <div>{{entry.resource.effectiveDateTime | getAge}}</div>
             </div>
             <div class="col-md-7">
-                <p  ng-bind-html="entry.resource.text.div"></p>
+                <p>{{entry.resource.code.text}}</p>
+                <p ng-bind-html="entry.resource.text.div"></p>
+
             </div>
         </div>
 

@@ -175,9 +175,6 @@ angular.module("sampleApp")
 
     };
 
-
-
-
     //change the server & other config stuff
     $scope.showConfig = function() {
         $scope.configIsReadOnly = false;
@@ -221,8 +218,6 @@ angular.module("sampleApp")
         // $translateProvider.useUrlLoader(url);
         $translate.use('en')
     }
-            
-            
 
     //load existing data for the current patient
     function loadPatientDetails(cb) {
@@ -389,10 +384,10 @@ angular.module("sampleApp")
 
 
     //initialize everything for a newly loaded profile...
-    function setUpForNewProfile(profile) {
+    function setUpForNewProfile(profile,treeViewData) {
         $scope.selectedProfileForDisplay = profile;   //used for the profileDisplay component
         delete $scope.conformProfiles;      //profiles that this resource claims conformance to. Not for baseresources
-        $scope.treeData.length = 0;         //removes all the treedata from the array
+
         delete $scope.selectedChild;        //a child element off the current path (eg Condition.identifier
         delete $scope.children;             //all the direct children for the current path
         delete $scope.dataType ;            //the datatype selected for data entry
@@ -433,28 +428,44 @@ angular.module("sampleApp")
 
 
         type = baseType;
+        //when restore from parked, the treeViewData will already be restored. Otherwise craete a blank one
+        if (! treeViewData) {
+            $scope.treeData.length = 0;         //removes all the treedata from the array
+            //create the root node.
+            var rootEd = resourceCreatorSvc.getRootED(type);
+            $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true,selected:true},path:type,
+                ed:rootEd});
 
-        //create the root node.
-        var rootEd = resourceCreatorSvc.getRootED(type);
-        $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true,selected:true},path:type,
-            ed:rootEd});
-
-        navigatorNodeSelected('root',rootEd);   //this will display the child nodes of the root
-        
-        //used for the initial display
-        $scope.selectedNode = getNodeFromId('root');
+            //add the current patient
+            var ed = resourceCreatorSvc.getPatientOrSubjectReferenceED();
+            if (ed) {
+                resourceCreatorSvc.addPatientToTree(ed.path,appConfigSvc.getCurrentPatient(),$scope.treeData);
+            }
+        }
 
 
+
+
+        /*
+                //create the root node.
+                var rootEd = resourceCreatorSvc.getRootED(type);
+                $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true,selected:true},path:type,
+                    ed:rootEd});
+        */
+        if (! treeViewData) {
+            navigatorNodeSelected('root', rootEd);   //this will display the child nodes of the root
+
+            //used for the initial display
+            $scope.selectedNode = getNodeFromId('root');
+        }
+
+/*
         //add the current patient
         var ed = resourceCreatorSvc.getPatientOrSubjectReferenceED();
-
-        //not all resources have a reference to a patient or subject
-        //var ar = ed.path.split('.');
-        //var patientPropertyName = ar[1];    //some resources are 'patient', others are 'subject'
         if (ed) {
             resourceCreatorSvc.addPatientToTree(ed.path,appConfigSvc.getCurrentPatient(),$scope.treeData);
         }
-
+*/
 
 
         drawTree();
@@ -481,7 +492,7 @@ angular.module("sampleApp")
         $scope.treeData = cleanedData;
         $scope.savingResource = true;
 
-        drawTree(); //when the tree load is complete, the 'treebuild' event is raised. the handler looks at 'savingResource' and calls save...
+        drawTree(); //when the tree load is complete, the 'treebuilt' event is raised. the handler looks at 'savingResource' and calls save...
 
     };
 
@@ -812,12 +823,6 @@ angular.module("sampleApp")
 
     $scope.removeNode = function() {
 
-
-
-        
-
-
-
         var id = $scope.selectedNode.id;        //the node to delete
 
         //create list of nodes to delete
@@ -1018,32 +1023,33 @@ angular.module("sampleApp")
 
     //save the current resource and build another based on the profile in the currently selected child element...
     $scope.park = function() {
-
         var modalOptions = {
             closeButtonText: "Don't park",
             actionButtonText: 'Ok',
             headerText: 'Park resource',
             bodyText: 'The resource instance has been parked and can be retrieved later'
         };
-
         modalService.showModal({}, modalOptions).then(function (result) {
             var profile = resourceCreatorSvc.getCurrentProfile();
-
+            var patient = appConfigSvc.getCurrentPatient();
             resourceCreatorSvc.parkResource({treeData:angular.copy($scope.treeData),
-                profile:profile,display:profile.name});
+                profile:profile,display:profile.name, patient:patient});
 
             $scope.displayMode = 'front';
         });
-
     };
 
     $scope.restoreFromParked = function(park,inx) {
         delete $scope.treeData;
         $scope.treeData = park.treeData;
+        appConfigSvc.setCurrentPatient(park.patient);
+        setUpForNewProfile(park.profile,$scope.treeData)
 
-        resourceCreatorSvc.setCurrentProfile(park.profile);
+        //resourceCreatorSvc.setCurrentProfile(park.profile);
+
+
         resourceCreatorSvc.removeParkedResource(inx)
-        drawTree();
+        //drawTree();
         $scope.displayMode = 'new';     //will cause the editing page to be displayed
 
     };
@@ -1294,9 +1300,10 @@ angular.module("sampleApp")
         //when we want to view the profile in the tree - and potentially edit it
         $scope.showLocalProfile = function(event,profile) {
 
-            $scope.showProfileEditPage = true;
+            $scope.showProfileEditPage = true;      //displays the editor page (and hides the front page)
 
-            $scope.frontPageProfile = profile;
+            $scope.frontPageProfile = null;
+            $scope.frontPageProfile = profile;      //set the profile in the component
             //broadcast an event so that the profile edit controller can determine if this is a core profile and can't be edited...
             $scope.$broadcast('profileSelected',{profile:profile});
 
@@ -2274,6 +2281,7 @@ console.log(url);
                     console.log(vo)
                     var clone = angular.copy(vo.profile);
                     appConfigSvc.addToRecentProfile(clone);
+                    //resourceCreatorSvc.setCurrentProfile(clone);
                     $scope.recent.profile = appConfigSvc.getRecentProfile();    //re-establish the recent profile list
                     closeTheProfileEditor();    //close the editor and re-display the front page
 
@@ -2362,9 +2370,56 @@ console.log(url);
                 $scope.edFromTreeNode = item.node.data.ed;
 
 
+                //need to figure out what the possible multiplicity options are...
+                //todo - this will choke on multiplicities like 1..2
+                var min = $scope.edFromTreeNode.min;
+                var max = $scope.edFromTreeNode.max;
+                //if there's a base then use the min/max values on those...
+                if ($scope.edFromTreeNode.base) {
+                    min = $scope.edFromTreeNode.base.min;
+                    max = $scope.edFromTreeNode.base.max;
+                }
+
+
+
+                $scope.possibleMultiplicity = [];
+                console.log(item.node.data.ed)
+
+                if (min == 1) {
+                    //this is a required value - we have some limitations about what can be done...
+                    if (max == '*'){
+                        $scope.possibleMultiplicity.push({mult:'1..*',min:1,max:'1'});
+                        $scope.possibleMultiplicity.push({mult:'1..1',min:1,max:'1'});
+                    }
+                    //if both min and max are 1, then this is a required single field and cannot be altered...
+                } else {
+                    //this is an optional value (min ==0)...
+                    if (max == '*') {
+                        $scope.possibleMultiplicity.push({mult:'0..1',min:0,max:'1'});
+                        $scope.possibleMultiplicity.push({mult:'1..1',min:1,max:'1'});
+                        $scope.possibleMultiplicity.push({mult:'0..*',min:0,max:'*'});
+                        $scope.possibleMultiplicity.push({mult:'1..*',min:1,max:'1'});
+                    } else {
+                        //this is a 0..1
+                        $scope.possibleMultiplicity.push({mult:'0..1',min:0,max:'1'});
+                        $scope.possibleMultiplicity.push({mult:'1..1',min:1,max:'1'});
+
+                    }
+
+                }
+
+
+
+
                 $scope.$digest();       //the event originated outside of angular...
             }
 
+        }
+
+        $scope.changeMultiplicity = function(choice) {
+            $scope.edFromTreeNode.min = choice.min;
+            $scope.edFromTreeNode.max = choice.max;
+            console.log(choice)
         }
         
     })

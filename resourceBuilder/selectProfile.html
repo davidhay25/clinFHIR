@@ -1,4 +1,12 @@
 
+
+<style>
+    .myScroll {
+
+        height: 500px;
+        overflow-y: scroll;
+    }
+</style>
 <div>
     <!--<div ng-controller="newResourceCtrl">-->
     <div class="modal-header">
@@ -102,9 +110,10 @@
                     <div class="row">
                         <div class="col-md-3 col-sm-3 col-md-offset-3">
                             <div ng-hide="showWaiting">
-                                <button class="btn btn-primary pull-right"
-
-                                        ng-click="active=1;search()">Search</button>
+                                <button class="btn btn-success pull-right"
+                                        ng-click="active=1;search()">Search for Profiles
+                                        <span ng-show="results.profileType.name"> on {{results.profileType.name}}</span>
+                                </button>
                             </div>
                         </div>
                         <div class="col-md-6 col-sm-6" >
@@ -125,22 +134,27 @@
                 <div class="row">
                     <div class="col-md-4 col-sm-4">
                         <!-- The result list-->
-                        <div class="list-group">
-                            <div href="#" class="list-group-item" ng-repeat="ent in selectedProfiles.entry"
-                               ng-click="showProfile(ent)" style="cursor: pointer">
 
-                                <div><strong>{{ent.resource.name}}</strong></div>
-                                <div style="margin-left: 8px">{{ent.resource.description}}</div>
+                        <div class="myScroll">
+                            <div class="list-group">
+                                <div href="#" class="list-group-item" ng-repeat="ent in selectedProfiles.entry"
+                                   ng-click="showProfile(ent)" style="cursor: pointer">
 
+                                    <div><strong>{{ent.resource.name}}</strong></div>
+                                    <div style="margin-left: 8px">{{ent.resource.description}}</div>
+
+                                </div>
                             </div>
                         </div>
+
                     </div>
 
                     <div class="col-md-8 col-sm-8">
                         <!-- The selected profile-->
 
                         <!-- a component (1.5) todisplay a profile-->
-                        <show-profile profile="selectedProfile"></show-profile>
+                        <show-profile profile="selectedProfile"  treedivid="'selectProfileTree'"></show-profile>
+                        <div id="selectProfileTree"></div>
 
                     </div>
 
