@@ -2398,7 +2398,7 @@ console.log(url);
                         $scope.possibleMultiplicity.push({mult:'0..1',min:0,max:'1'});
                         $scope.possibleMultiplicity.push({mult:'1..1',min:1,max:'1'});
                         $scope.possibleMultiplicity.push({mult:'0..*',min:0,max:'*'});
-                        $scope.possibleMultiplicity.push({mult:'1..*',min:1,max:'1'});
+                        $scope.possibleMultiplicity.push({mult:'1..*',min:1,max:'*'});
                     } else {
                         //this is a 0..1
                         $scope.possibleMultiplicity.push({mult:'0..1',min:0,max:'1'});
