@@ -36,10 +36,12 @@ angular.module("sampleApp")
 
 
         defaultConfig.allKnownServers = [];
-        defaultConfig.allKnownServers.push({name:"Grahame STU3 server",url:"http://fhir3.healthintersections.com.au/open/",version:3,everythingOperation:true});
+
         defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://fhir2.healthintersections.com.au/open/",version:2,everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:"Grahame STU3 server",url:"http://fhir3.healthintersections.com.au/open/",version:3,everythingOperation:true});
+
         defaultConfig.allKnownServers.push({name:"HealthConnex STU2 server",url:"http://sqlonfhir-dstu2.azurewebsites.net/fhir/",version:2,everythingOperation:true});
-        defaultConfig.allKnownServers.push({name:"HealthConnex STU3 server",url:"http://sqlonfhir-may.azurewebsites.net/fhir/",version:2,everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:"HealthConnex STU3 server",url:"http://sqlonfhir-may.azurewebsites.net/fhir/",version:3,everythingOperation:true});
 
         defaultConfig.allKnownServers.push({name:"Local HAPI STU2",url:"http://localhost:8080/baseDstu2/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Local HAPI STU3",url:"http://localhost:8080/baseDstu3/",version:3,everythingOperation:true});

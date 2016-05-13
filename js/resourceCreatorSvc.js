@@ -472,7 +472,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     if (propertyName == 'extension') {
                         //if there is a profile against the type, it points to the defintion of the extension. Only include it if it does...
 
-                        //so this is an extension. have we already processed this node?
+                        //so this is a direct extension. have we already processed this node?
                         if (elementDef.myData && elementDef.myData.isExtension) {
                             //if we have already processed it, then we should check to see if there's already a value where max=1
                             //we can't use path ('cause that will always be 'extension') so we'll look on url + display
@@ -556,8 +556,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                                 if (typ.profile) {
                                                     //so make up an elementDef to represent this extension and add it to the list...
                                                     var urlExt = typ.profile[0];
-
-                                                    var extensionED = {min:0,max:1,path:extensionPath,myData:{}};   //todo -fix cardinality..
+                                                    //var extensionED = {min:0,max:1,path:extensionPath,myData:{}};   //todo -fix cardinality..
+                                                    var extensionED = {min:el.min,max:el.max,path:extensionPath,myData:{}};   //todo -fix cardinality..
                                                     //var extensionED = angular.copy(elementDef)      //todo - a copy is probably not best...
                                                     //extensionED.type = [{code:'string'}]
                                                     //extensionED.isExtension = true;
