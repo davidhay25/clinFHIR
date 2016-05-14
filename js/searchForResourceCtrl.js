@@ -93,7 +93,6 @@ angular.module("sampleApp")
                     }
                 }
 
-
             });
             searchString = searchString.substr(0,searchString.length-1);
             console.log(searchString);

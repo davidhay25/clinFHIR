@@ -23,7 +23,6 @@
     </div>
 
     <div class="row" ng-show="resourceList.length > 0">
-
         <div class="col-md-3 col-sm-3">
             Existing Resources
         </div>
@@ -37,9 +36,16 @@
         <div class="col-md-1 col-sm-1">
             <div class="badge">{{resourceList.length}}</div>
         </div>
-
     </div>
 
+    <div class="row" ng-show="resourceList.length > 0">
+        <div class="col-md-11 col-sm-11">
+            <div class="pull-right">
+                <button class="btn btn-link" ng-click="selectFromResourceList(resourceList)">
+                    show all {{resourceType}} Resources</button>
+            </div>
+        </div>
+    </div>
 
     <div class="row>">
         <div class="col-md-12 col-sm-12">
@@ -56,18 +62,13 @@
                     you need to park the current resource, create a new resource of the required type
                     for this patient, and then you can retrieve this parked resource, and the new resource will be in the list.
 
-   <!--
-                    <div>
-                        <div><a href="#" class="pull-right" ng-click="parkAndBuild()">Park and Build new resource</a></div>
-                    </div>
--->
                 </em>
             </div>
 
         </div>
 
     </div>
-
+<!--
 
     <div class="row>">
         <div class="col-md-12 col-sm-12 col-xs-12">
@@ -88,6 +89,8 @@
 
         </div>
     </div>
+
+    -->
 
 
     <div ng-show="selectedReferenceResourceType.reference" class="row>">

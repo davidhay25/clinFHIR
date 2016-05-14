@@ -84,7 +84,7 @@
   {"name": "Specimen","reference":true},
   {"name": "AuditEvent","reference":true},
   {"name": "EnrollmentResponse","reference":true},
-
+  {"name": "Patient","reference":true},
   {"name": "EligibilityResponse"},
   {"name": "Person"},
   {"name": "DiagnosticOrder"},

@@ -65,13 +65,19 @@ angular.module("sampleApp").
             var qry = config.servers.conformance + qry;
             return $http.get(qry);
         },
+        getXmlResource : function (url) {
+            var config = appConfigSvc.config();
+            var qry = config.servers.data + url;
+            console.log(qry)
+            return $http.get(qry);
+        },
         generalFhirQuery : function(qry) {
             //runs an ad-hoc query against the data server
             var deferred = $q.defer();
             var config = appConfigSvc.config();
 
             //var qry = appConfigSvc.getCurrentDataServerBase() + qry;
-            var qry = config.servers.data + "/"+qry;
+            var qry = config.servers.data + qry;
 
             $http.get(qry).then(
                 function(data){

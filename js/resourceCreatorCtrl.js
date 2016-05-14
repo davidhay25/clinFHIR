@@ -17,6 +17,9 @@ angular.module("sampleApp")
 
     $scope.doDefault=false;         //whether to have default patient & profile <<<<< for debug only!
 
+
+
+
     //register that the application has been started... (for reporting)
     resourceCreatorSvc.registerAccess();
 
@@ -99,6 +102,10 @@ angular.module("sampleApp")
         //setUpForNewProfile(resourceCreatorSvc.getCurrentProfile());
         $scope.displayMode = 'new';     //display the 'enter new resouce' screen..
     };
+
+
+    
+
 
 
 
@@ -735,6 +742,37 @@ angular.module("sampleApp")
         
     };
 
+    //select a single resource from a list of resources
+    $scope.selectFromResourceList = function(lst) {
+        $uibModal.open({
+            templateUrl: "/modalTemplates/selectResource.html",
+            size: 'lg',
+            controller: function($scope,lst) {
+                $scope.lst = lst;
+
+                $scope.showJson = function(item){
+                    $scope.selectedResource = item;
+                };
+
+                $scope.selectResource = function(item) {
+                    $scope.$close(item);
+
+                }
+            },resolve: {
+                lst : function() {
+                    return lst
+                }
+            }
+        }).result.then(
+            function(item){
+                console.log(item)
+                $scope.results.resourceItem = item;
+            }
+        )
+
+
+    };
+
     //when a new element has been populated. The 'find reference resource' function creates the fragment - the others don't
     $scope.saveNewDataType = function(fragment) {
         fragment = fragment || resourceCreatorSvc.getJsonFragmentForDataType($scope.dataType,$scope.results);
@@ -1135,7 +1173,7 @@ angular.module("sampleApp")
         };
 
 
-            //=========== selecting a new profile ============
+    //=========== selecting a new profile ============
 
     $scope.showFindProfileDialog = {};
 
@@ -1183,6 +1221,28 @@ angular.module("sampleApp")
         var resource = entry.resource;
         $scope.outcome.selectedResource = resource;     //for the json display
         $scope.resourceReferences = resourceSvc.getReference(resource,$scope.allResourcesAsList,$scope.allResourcesAsDict);
+        
+        $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(resource,true)], {type: "text/text"}));
+        $scope.downloadLinkJsonName = resource.resourceType+"-"+resource.id;
+
+    };
+
+    //when the user selects the 'view XML' option
+    $scope.xmlSelected = function(type,id) {
+        console.log(type,id)
+
+        GetDataFromServer.getXmlResource(type+"/"+id+"?_format=xml").then(
+            function(data){
+                $scope.xmlResource = data.data;
+                $scope.downloadLinkXmlContent = window.URL.createObjectURL(new Blob([data.data], {type: "text/xml"}));
+                $scope.downloadLinkXmlName = type+"-"+id+".xml";
+
+            },
+            function(err) {
+                alert(angular.toJson(err,true))
+            }
+        )
+
 
     };
 
@@ -2456,4 +2516,11 @@ console.log(url);
 
         }
     }
-);
+).config([ '$compileProvider',
+    //used for the download functionity - http://stackoverflow.com/questions/16342659/directive-to-create-adownload-button for download (bottom of page)
+    function($compileProvider) {
+        $compileProvider.aHrefSanitizationWhitelist(/^s*(https?|ftp|blob|mailto|chrome-extension):/);
+        // pre-Angularv1.2 use urlSanizationWhitelist()
+    }])
+
+;

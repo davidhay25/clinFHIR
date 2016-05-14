@@ -1,19 +1,6 @@
 <div>
 
-    <style>
 
-        .myScroll {
-
-            height: 100px;
-            overflow-y: scroll;
-        }
-
-
-
-
-    </style>
-
-    <!--<div ng-controller="newResourceCtrl">-->
     <div class="modal-header">
 
         <div class="row">
@@ -27,7 +14,6 @@
                     <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
                     <button class="btn btn-primary" ng-show="selectedResource" ng-click="ok(selected.item)">Select</button>
                 </div>
-
             </div>
         </div>
 
@@ -59,12 +45,16 @@
         <uib-tabset>
             <uib-tab heading="Query Parameters">
                 <br/>
-                <div ng-show="selectedResources" class="alert alert-success">
+                <div ng-show="selectedResources.total > 0" class="alert alert-success">
                     There were {{selectedResources.entry.length}} resources located. Please select the 'results' tab to select the one you want.
                     (There's a bug at the moment and I can't do it for you!)
                 </div>
+                <div ng-show="selectedResources.total == 0" class="alert alert-warning">
+                    Sorry, there were no resources that matched that query ({{searchString}}).
+                    Try again with a more general search (eg a smaller search string)
+                </div>
 
-                <div class="myScroll">
+                <div style="height: 200px; overflow-y: auto;">
                     <form class="form-horizontal" role="form">
                         <div ng-repeat = "srch in searchParams">
 
@@ -89,20 +79,6 @@
                                 </div>
                             </div>
 
-
-    <!--
-                            <div ng-if="srch.type=='reference' && srch.name.substr(0,1) != '_'">
-                                <div class="form-group">
-                                    <div class="col-md-2">{{srch.name}}</div>
-                                    <div class="col-md-1">==</div>
-                                    <div class="col-md-4">
-                                        <input type="text" class="form-control" ng-model="results[srch.name]"
-                                               placeholder="Only the id is required" /> </div>
-                                    <div class="col-md-5">{{srch.documentation}}</div>
-                                </div>
-                            </div>
-
-                                -->
 
 
                     </div>
@@ -133,10 +109,6 @@
                                ng-click="selectResource(ent)" style="cursor: pointer">
 
                                 {{ResourceUtilsSvc.getOneLineSummaryOfResource(ent.resource);}}
-                                <!--
-                                <p ng-bind-html="ent.resource.text.div"></p>
-                                <div ng-hide="ent.resource.text.div">No text element</div>
-                                -->
                             </div>
                         </div>
 
@@ -148,9 +120,6 @@
                     </div>
 
                 </div>
-
-
-
 
             </uib-tab>
         </uib-tabset>
@@ -164,15 +133,8 @@
         <div class="row">
             <div class="col-md-8">
                 <div class="text-left">
-                    {{config.servers.data}} {{searchString}}
+                    {{config.servers.data}}{{searchString}}
 
-
-                    <!--
- <div ng-show="searchString">
-
-                    </div>
-                    <em>Note that only a subset of the search parameters is available (those that are of type String or Token).
-                    Also, only equality searches (=) are currently supported</em>-->
                 </div>
 
             </div>
