@@ -18,6 +18,19 @@ angular.module("sampleApp")
     $scope.doDefault=false;         //whether to have default patient & profile <<<<< for debug only!
 
 
+            $scope.test = function(){
+                supportSvc.getAllResourcesFollowingPaging("http://fhirtest.uhn.ca/baseDstu3/Patient?name=eve",200,50).then(
+                    function(data) {
+                        console.log(data);
+                    },
+                    function(err) {
+                        console.log(err)
+                    }
+                ).finally(function(){
+                    console.log('done')
+                })
+            }
+
 
 
     //register that the application has been started... (for reporting)

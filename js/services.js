@@ -577,7 +577,220 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             return deferred.promise;
 
         },
+
+        
+        getAllResourcesFollowingPaging : function(url,limit){
+            //Get all the resurces specified by a query, following any paging...
+            //http://stackoverflow.com/questions/28549164/how-can-i-do-pagination-with-bluebird-promises
+
+            //add the count parameter
+            if (url.indexOf('?') > -1) {
+                url += "&_count=50"
+            } else {
+                url += "?_count=50"
+            }
+
+
+            var deferred = $q.defer();
+
+            limit = limit || 500;           //absolute max of 500
+
+
+            var allResources = [];
+
+            getPage(url);
+
+            //get a single page of data
+            function getPage(url) {
+                return $http.get(url).then(
+                    function(data) {
+                        var bundle = data.data;     //the response is a bundle...
+
+                        //copy all resources into the array..
+                        if (bundle && bundle.entry) {
+                            bundle.entry.forEach(function(e){
+                                allResources.push(e.resource);
+                            })
+                        }
+
+                        //is there a link
+                        if (bundle.link) {
+                            var moreToGet = false;
+                            for (var i=0; i < bundle.link.length; i++) {
+                                var lnk = bundle.link[i];
+
+                                //if there is a 'next' link and we're not at the limit then get the next page
+                                if (lnk.relation == 'next' && allResources.length < limit) {
+                                    moreToGet = true;
+                                    var url = lnk.url;
+                                    getPage(url);
+                                    break;
+                                }
+                            }
+                            
+                            //all done, return...
+                            if (! moreToGet) {
+                                deferred.resolve(allResources);
+                            }
+                        } else {
+                            deferred.resolve(allResources);
+                        }
+                    },
+                    function(err) {
+                        deferred.reject(err);
+                    }
+                )
+            }
+
+            return deferred.promise;
+
+        },
         getAllData : function(patientId) {
+            //get all the data for a patient. Follow paging to get them all...
+
+
+            var deferred = $q.defer();
+            var allResources = {};
+            //the currently selected data server object (not just the url)
+            var dataServer = appConfigSvc.getCurrentDataServer();
+
+            if (dataServer.everythingOperation) {
+                //The everything operation will return all patient related resources. not all servers recognize this, and
+                //some implement paging and small default sizes (hapi) and some don't (grahame)
+                //var url = dataServer.url + "Patient/"+patientId + '/$everything?_count=100'
+                var url = dataServer.url + "Patient/"+patientId + '/$everything';
+               // if (dataServer.everythingOperationCount) {
+                 //   url += "?_count="+dataServer.everythingOperationCount;
+               // }
+
+                //console.log(url);
+
+                this.getAllResourcesFollowingPaging(url).then(
+                    function(arrayOfResource){
+                        if (arrayOfResource) {
+                            arrayOfResource.forEach(function(resource){        //this is a bundle
+                                //var resource = entry.resource;
+                                var type = resource.resourceType;
+                                //Grahame returns AuditEvents in $everything...
+                                if (type !== 'AuditEvent') {
+                                    if (! allResources[type]) {
+                                        allResources[type] = {entry:[],total:0};        //this is also supposed to be a bundle
+                                    }
+                                    allResources[type].entry.push({resource:resource});
+                                    allResources[type].total ++;
+                                }
+
+                            })
+                        }
+
+                        deferred.resolve(allResources);
+                    },
+                    function(err){
+                        alert("error loading all patient data:\n\n"+ angular.toJson(err));
+                        deferred.reject(err);
+                    }
+                );
+
+
+                return deferred.promise;
+            }
+
+
+
+            //return all the data for the indicated patient. Doesn't use the 'everything' operation so there is a fixed set of resources...
+            //currently only get a max of 100 resources of each type. Need to implement paging to get more...
+
+            var resources = [];
+            resources.push({type:'Observation',patientReference:'subject'});
+            resources.push({type:'Encounter',patientReference:'patient'});
+            resources.push({type:'Appointment',patientReference:'patient'});
+            resources.push({type:'Condition',patientReference:'patient'});
+            resources.push({type:'List',patientReference:'subject'});
+            resources.push({type:'Basic',patientReference:'subject'});
+
+            var arQuery = [];
+
+
+            resources.forEach(function(item){
+
+                //if the reference is a subject (rather than a patient) then be explicit about the
+                //type that is being searched.
+                var uri;
+                if (item.patientReference == 'subject') {
+                    uri = appConfigSvc.getCurrentDataServerBase() + item.type + "?" + item.patientReference + "=Patient/" + patientId + "&_count=100";
+                } else {
+                    uri = appConfigSvc.getCurrentDataServerBase() + item.type + "?" + item.patientReference + "=" + patientId + "&_count=100";
+                }
+
+
+
+
+
+                arQuery.push(
+
+                    getAllResources(uri).then(
+                        function(bundle){
+                            allResources[item.type] = bundle;    //this will be a bundle
+                        }
+                    )
+                )
+            });
+
+            $q.all(arQuery).then(
+                function(data){
+                    deferred.resolve(allResources);
+                },
+                function(err){
+                    alert("error loading all patient data:\n\n"+ angular.toJson(err));
+                    deferred.reject(err);
+                });
+
+            return deferred.promise;
+
+            //get all the resources for a single type.
+            function getAllResources(uri) {
+                var deferred = $q.defer();
+                var bundle = {entry:[]}
+
+
+
+                //thereIsMore = true;
+                //while (thereIsMore) {
+                loadPage(uri).then(
+                    function(data){
+                        var pageBundle = data.data;     //the bundle representing this page...
+                        //thereIsMore = false
+                        if (pageBundle.link){
+                            //if there's a link, then need to check for a 'next' link...
+                        }
+
+
+                        deferred.resolve(pageBundle)
+                    }
+                );
+                //}
+
+
+                return deferred.promise;
+
+
+
+            }
+
+            function loadPage(uri,start) {
+                return $http.get(uri);
+
+
+
+            }
+
+
+        },
+
+        getAllDataDEP : function(patientId) {
+
+
+            
             var deferred = $q.defer();
             var allResources = {};
             //the currently selected data server object (not just the url)

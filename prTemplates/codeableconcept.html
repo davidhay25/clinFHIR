@@ -6,7 +6,6 @@
 
             <div class="col-md-12 col-sm-12">
 
-
                 <div ng-switch on="vsDetails.type">
 
                     <div ng-switch-when="list">
@@ -20,23 +19,73 @@
                     </div>
                     <div ng-switch-default>
 
-                        <div class="row">
-                            <div class="col-md-1 col-sm-1">
-                                Search Text
-                            </div>
-                            <div class="col-md-8 col-sm-8">
-                                <input type="text" ng-model="results.cc"
-                                       placeholder="{{vsDetails.id}} (minimum {{vsDetails.minLength}} characters)"
-                                       typeahead-min-length="3"
-                                       typeahead-wait-ms="1000"
-                                       uib-typeahead="opt as opt.display for opt in vsLookup($viewValue,vsDetails.id)"
-                                       class="form-control"/>
+                        <uib-tabset>
+                            <uib-tab heading="Select from Binding">
+                                <br/>
+                                <div class="row">
+                                    <div class="col-md-1 col-sm-1">
+                                        Search Text
+                                    </div>
+                                    <div class="col-md-8 col-sm-8">
+                                        <input type="text" ng-model="results.cc"
+                                               placeholder="{{vsDetails.id}} (minimum {{vsDetails.minLength}} characters)"
+                                               typeahead-min-length="3"
+                                               typeahead-wait-ms="1000"
+                                               uib-typeahead="opt as opt.display for opt in vsLookup($viewValue,vsDetails.id)"
+                                               class="form-control"/>
 
-                            </div>
-                            <div class="col-md-3 col-sm-3">
-                                <a class="btn btn-link pull-right" ng-click="showVSBrowserDlg()">Explore ValueSet</a>
-                            </div>
-                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-3">
+                                        <a class="btn btn-link pull-right" ng-click="showVSBrowserDlg()">Explore ValueSet</a>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-9 col-sm-9">
+                                        <input type="text" class="form-control" placeholder="Enter text if a suitable code cannot be found"
+                                               ng-model="results.ccText"/>
+                                    </div>
+                                    <div class="col-md-3 col-sm-3">
+
+                                    </div>
+                                </div>
+                            </uib-tab>
+                            <uib-tab heading="Enter directly">
+                                <br/>
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-2">
+                                        System
+                                    </div>
+                                    <div class="col-md-9 col-sm-9">
+                                        <input type="text" class="form-control" placeholder="Enter the uri of the system the code is drawn from"
+                                               ng-model="results.ccDirectSystem"/>
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-2">
+                                        Code
+                                    </div>
+                                    <div class="col-md-9 col-sm-9">
+                                        <input type="text" class="form-control" placeholder="Enter the code from the system"
+                                               ng-model="results.ccDirectCode"/>
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-2">
+                                        Display
+                                    </div>
+                                    <div class="col-md-9 col-sm-9">
+                                        <input type="text" class="form-control" placeholder="The display (text) of the code"
+                                               ng-model="results.ccDirectDisplay"/>
+                                    </div>
+                                </div>
+
+                            </uib-tab>
+                        </uib-tabset>
+
+
+
 
 
                     </div>
@@ -50,11 +99,20 @@
     </div>
 
 
-    <!-- If there's a list, then no text option...-->
+    <!-- If there's a list, then no text option...
     <div ng-hide="vsDetails.type=='list'">
-        <input type="text" class="form-control" placeholder="Enter text if a suitable code cannot be found"
-               ng-model="results.ccText"/>
+        <div class="row">
+            <div class="col-md-9 col-sm-9">
+                <input type="text" class="form-control" placeholder="Enter text if a suitable code cannot be found"
+                       ng-model="results.ccText"/>
+            </div>
+            <div class="col-md-3 col-sm-3">
+
+            </div>
+        </div>
+
     </div>
+    -->
 
 
     <div ng-hide="vsReference">
