@@ -18,19 +18,6 @@ angular.module("sampleApp")
     $scope.doDefault=false;         //whether to have default patient & profile <<<<< for debug only!
 
 
-            $scope.test = function(){
-                supportSvc.getAllResourcesFollowingPaging("http://fhirtest.uhn.ca/baseDstu3/Patient?name=eve",200,50).then(
-                    function(data) {
-                        console.log(data);
-                    },
-                    function(err) {
-                        console.log(err)
-                    }
-                ).finally(function(){
-                    console.log('done')
-                })
-            }
-
 
 
     //register that the application has been started... (for reporting)
@@ -376,31 +363,6 @@ angular.module("sampleApp")
         }
     );
 
-
-    //load the selected profile, and display the tree
-    //for now - use the ProfileUrl which directly points to the profile. Want to support uri as well later on..
-    function loadProfileDEP(profileUrl) {
-        /*delete $scope.conformProfiles;      //profiles that this resource claims conformance to. Not for baseresources
-        $scope.treeData.length = 0;
-        delete $scope.selectedChild;    //a child element off the current path (eg Condition.identifier
-        delete $scope.children;         //all the direct children for the current path
-        delete $scope.dataType ;        //the datatype selected for data entry
-        */
-
-        $scope.waiting = true;
-
-
-        GetDataFromServer.getConformanceResourceByUrl(profileUrl).then(
-            function(profile) {
-                setUpForNewProfile(profile);
-
-            }
-        ).finally(
-            function(){
-                $scope.waiting = false;
-            }
-        );
-    }
 
 
     //initialize everything for a newly loaded profile...

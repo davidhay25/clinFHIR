@@ -219,9 +219,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     case 'string' :
                         addValue(results.string,'String',results.string,true);
                         break;
-                    // case 'id' :
-                    //   addValue(results.id,'String',results.id);
-                    // break;
 
                     case 'uri' :
                         addValue(results.uri,'uri',results.uri,true);
@@ -276,20 +273,27 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                         }
 
-
-
                         //todo - the expansion is returning an extension with more info - may be useful later...
                         if (cc && cc.extension) {
                             delete cc.extension;
                         }
 
-                        var newCC;      //this will be teh cc that we are saving...
+                        var newCC;      //this will be the cc that we are saving...
+
+                        //if the user has selected a cc from the terminology, then use that
                         if (cc) {
                             //var ccText = cc.display;
                             newCC = {coding:[cc]};
 
                         } else {
                             newCC = {};
+                            //now check to see if the user has entered a code directly...
+                            if (results.ccDirectSystem && results.ccDirectCode) {
+                                newCC.coding = [];
+                                newCC.coding.push({system:results.ccDirectSystem,
+                                    code:results.ccDirectCode,display:results.ccDirectDisplay})
+                            }
+                            
                         }
 
                         if (!ccText) {  //the user didn't enter any text...
