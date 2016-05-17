@@ -809,6 +809,9 @@ console.log(summary);
 
             return deferred.promise;
         },
+        getCodeSystems : function() {
+            return $http.get('resourceBuilder/codeSystems.json')
+        },
         getValueSetsForProfileDEP : function(profile) {
             alert('getValueSetsForProfile stub not implemented yet');
         },

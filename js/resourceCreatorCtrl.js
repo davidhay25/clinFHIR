@@ -363,6 +363,13 @@ angular.module("sampleApp")
         }
     );
 
+    //get the codeSystems used as defaults when entering a terminology code manually
+    RenderProfileSvc.getCodeSystems().then(
+        function (data) {
+            $scope.codeSystems = data.data
+
+        }
+    );
 
 
     //initialize everything for a newly loaded profile...
@@ -969,6 +976,8 @@ angular.module("sampleApp")
         }
     };
 
+
+
     //variables for the vs browser dialog.
     //  <vs-browser trigger="showVSBrowserDialog"></vs-browser> is defined in renderProfile.html
     $scope.showVSBrowserDialog = {};
@@ -993,6 +1002,81 @@ angular.module("sampleApp")
 
     };
 
+
+    //when the user has selected an entry from the autocomplete...
+    $scope.selectCCfromList = function(item,model,label,event){
+        //get the full lookup for this code - parents, children etc.
+
+        $scope.results.ccDirectSystem = item.system;
+        $scope.results.ccDirectCode = item.code;
+        //console.log($scope.results.cc)
+        $scope.results.ccDirectDisplay = $scope.results.cc.display;
+        
+
+        resourceCreatorSvc.getLookupForCode(item.system,item.code).then(
+            function(data) {
+                console.log(data);
+                $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
+                console.log($scope.terminologyLookup);
+            },
+            function(err) {
+                alert(angular.toJson(err));
+            }
+        );
+
+//console.log(item,model,label)
+    };
+
+    function setTerminologyLookup(system,code) {
+        resourceCreatorSvc.getLookupForCode(system,code).then(
+            function(data) {
+                console.log(data);
+                $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
+                console.log($scope.terminologyLookup);
+            },
+            function(err) {
+                alert(angular.toJson(err));
+            }
+        );
+    }
+
+    $scope.selectChildTerm = function(code,description){
+        $scope.results.ccDirectDisplay = description;
+        $scope.results.ccDirectCode = code;
+        setTerminologyLookup($scope.results.ccDirectSystem,code)
+    }
+
+    //the user selects the parent...
+    $scope.selectParentCC = function() {
+        $scope.results.ccDirectDisplay = $scope.terminologyLookup.parent.description;
+        $scope.results.ccDirectCode = $scope.terminologyLookup.parent.value;
+        //look up the relations to this one...
+        setTerminologyLookup($scope.results.ccDirectSystem,$scope.results.ccDirectCode)
+
+
+        //$scope.results.cc = $scope.terminologyLookup.parent;
+        console.log('s')
+    };
+
+    //use the terminology operation CodeSystem/$lookup to get details of the code / system when manually entered
+    $scope.lookupCode = function(system,code) {
+
+
+        resourceCreatorSvc.getLookupForCode(system,code).then(
+            function(data) {
+                console.log(data);
+
+                $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
+                $scope.results.ccDirectDisplay = $scope.terminologyLookup.display;
+
+                console.log($scope.terminologyLookup);
+
+            },
+            function(err) {
+                alert(angular.toJson(err));
+            }
+        )
+    };
 
     //------- when the user wants to find a reference type resource - ie one that doesn't reference a patient...
     $scope.searchResource = function() {
@@ -1200,8 +1284,22 @@ angular.module("sampleApp")
         $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(resource,true)], {type: "text/text"}));
         $scope.downloadLinkJsonName = resource.resourceType+"-"+resource.id;
 
-    };
+        GetDataFromServer.getXmlResource(resource.resourceType+"/"+resource.id+"?_format=xml").then(
+            function(data){
+                $scope.xmlResource = data.data;
+                $scope.downloadLinkXmlContent = window.URL.createObjectURL(new Blob([data.data], {type: "text/xml"}));
+                $scope.downloadLinkXmlName = resource.resourceType+"-"+resource.id+".xml";
 
+            },
+            function(err) {
+                alert(angular.toJson(err,true))
+            }
+        )
+
+
+
+    };
+/*
     //when the user selects the 'view XML' option
     $scope.xmlSelected = function(type,id) {
         console.log(type,id)
@@ -1211,15 +1309,13 @@ angular.module("sampleApp")
                 $scope.xmlResource = data.data;
                 $scope.downloadLinkXmlContent = window.URL.createObjectURL(new Blob([data.data], {type: "text/xml"}));
                 $scope.downloadLinkXmlName = type+"-"+id+".xml";
-
             },
             function(err) {
                 alert(angular.toJson(err,true))
             }
         )
-
-
     };
+            */
 
     $scope.selectNewResource = function(reference) {
         $scope.resourceSelected({resource:reference.resource})

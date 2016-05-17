@@ -31,6 +31,7 @@
                                                placeholder="{{vsDetails.id}} (minimum {{vsDetails.minLength}} characters)"
                                                typeahead-min-length="3"
                                                typeahead-wait-ms="1000"
+                                               typeahead-on-select="selectCCfromList($item, $model, $label)"
                                                uib-typeahead="opt as opt.display for opt in vsLookup($viewValue,vsDetails.id)"
                                                class="form-control"/>
 
@@ -49,14 +50,53 @@
                                     </div>
                                 </div>
                             </uib-tab>
-                            <uib-tab heading="Enter directly">
+                            <uib-tab heading="Enter directly / Navigate in the hierarchy">
                                 <br/>
+
+
+                                <div class="row">
+
+                                    <div class="col-md-5 col-sm-5">
+
+                                        <input type="text" uib-typeahead = "system for system in codeSystems"
+                                               class="form-control" placeholder="System Uri"
+                                               ng-model="results.ccDirectSystem"/>
+                                    </div>
+                                    <div class="col-md-4 col-sm-4">
+                                        <input type="text" class="form-control" placeholder="Code"
+                                               ng-model="results.ccDirectCode"/>
+                                    </div>
+                                    <div class="col-md-2 col-sm-2">
+                                        <button class="btn btn-primary" ng-click="lookupCode(results.ccDirectSystem,results.ccDirectCode)"
+                                                ng-disabled="!results.ccDirectCode || !results.ccDirectSystem">Lookup</button>
+                                    </div>
+
+
+                                </div>
+
+<br/>
+                                <div class="row">
+
+                                    <div class="col-md-9 col-sm-9">
+
+                                        <input type="text" class="form-control" placeholder="The display (text) of the code"
+                                               ng-model="results.ccDirectDisplay"/>
+                                    </div>
+
+                                </div>
+
+
+<!--
+
+
                                 <div class="row">
                                     <div class="col-md-2 col-sm-2">
                                         System
                                     </div>
                                     <div class="col-md-9 col-sm-9">
-                                        <input type="text" class="form-control" placeholder="Enter the uri of the system the code is drawn from"
+
+                                        <input type="text" uib-typeahead = "system for system in codeSystems"
+                                               class="form-control" placeholder="Enter the uri of the system the code is drawn from"
                                                ng-model="results.ccDirectSystem"/>
                                     </div>
                                 </div>
@@ -65,10 +105,16 @@
                                     <div class="col-md-2 col-sm-2">
                                         Code
                                     </div>
-                                    <div class="col-md-9 col-sm-9">
+                                    <div class="col-md-7 col-sm-7">
                                         <input type="text" class="form-control" placeholder="Enter the code from the system"
                                                ng-model="results.ccDirectCode"/>
                                     </div>
+
+                                    <div class="col-md-2 col-sm-2">
+                                        <button class="btn btn-primary" ng-click="lookupCode(results.ccDirectSystem,results.ccDirectCode)"
+                                            ng-disabled="!results.ccDirectCode || !results.ccDirectSystem">Lookup</button>
+                                    </div>
+
                                 </div>
                                 <br/>
                                 <div class="row">
@@ -80,13 +126,36 @@
                                                ng-model="results.ccDirectDisplay"/>
                                     </div>
                                 </div>
+-->
+                                <hr/>
+                                <div ng-show="terminologyLookup">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            Parent
+                                        </div>
+                                        <div class="col-md-10">
+                                            <a href="#" ng-click="selectParentCC()">{{terminologyLookup.parent.description}} ({{terminologyLookup.parent.value}})</a>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            Children
+                                        </div>
+                                        <div class="col-md-10">
+                                            <ul class="list-unstyled">
+                                                <li ng-repeat="child in terminologyLookup.children">
+                                                    <a href="#" ng-click="selectChildTerm(child.value,child.description)">
+                                                        {{child.description}} ({{child.value}})</a>
+                                                </li>
+                                            </ul>
+
+                                        </div>
+                                    </div>
+                                </div>
+
 
                             </uib-tab>
                         </uib-tabset>
-
-
-
-
 
                     </div>
 
@@ -97,6 +166,9 @@
 
         </div>
     </div>
+
+
+
 
 
     <!-- If there's a list, then no text option...

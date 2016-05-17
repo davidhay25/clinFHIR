@@ -280,6 +280,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                         var newCC;      //this will be the cc that we are saving...
 
+
+                        cc=null; //<<<< just to se if this works...
+
                         //if the user has selected a cc from the terminology, then use that
                         if (cc) {
                             //var ccText = cc.display;
@@ -293,7 +296,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 newCC.coding.push({system:results.ccDirectSystem,
                                     code:results.ccDirectCode,display:results.ccDirectDisplay})
                             }
-                            
+
                         }
 
                         if (!ccText) {  //the user didn't enter any text...
@@ -750,7 +753,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             //create the sample resource...
             //console.log(treeData);
             //console.log(treeObject);
-            var resource = {resourceType:type};
+            var resource = {resourceType:type,text:""};
             if (config.profile) {
                 resource.meta = resource.meta || {};
                 resource.meta.profile = config.profile
@@ -982,6 +985,11 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             var text = {value:""};
             addChildrenToNode(resource,treeObject,text);
+
+            var txt ="<div xmlns='http://www.w3.org/1999/xhtml'><div>"+ResourceUtilsSvc.getOneLineSummaryOfResource(resource)+"</div></div>"
+
+            resource.text = {status:'generated',div:txt};
+
 
             return resource;
 
@@ -2398,6 +2406,62 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var config = appConfigSvc.config();
             var url = config.servers.conformance + "StructureDefinition/"+id;
             return $http.get(url);
+        },
+        getLookupForCode : function(system,code) {
+            //lookup the current terminology server for the given code and system
+            var config = appConfigSvc.config();
+            var svr = appConfigSvc.getServerByUrl(config.servers.terminology);
+            if (svr)  {
+                if (svr.version < 3) {
+                    alert("This functionality is only available in STU-3. Sorry about that");
+                    return;
+                }
+            }
+
+            var url = config.servers.terminology + 'CodeSystem/$lookup?code='+code+"&system="+system;
+            return $http.post(url);
+        },
+        parseCodeLookupResponse : function(resp) {
+            //parse the response from the codeSystem/$lookup operation. For now, assume SNOMED todo - check
+            var obj = {children:[]}
+            resp.parameter.forEach(function(param){
+                switch (param.name) {
+                    case 'name' :
+                        obj.name = param.valueString;
+                        break;
+                    case 'display' :
+                        obj.display = param.valueString;
+                        break;
+                    case 'property' :
+                        var code, value, description;
+                        param.part.forEach(function(part){
+
+                            if (part.name == 'code') {
+                                code = part.valueString;
+                            } else if (part.name == 'value') {
+                                value = part.valueString;
+                            } else if (part.name == 'description') {
+                                description = part.valueString;
+                            }
+                        })
+                        //now see what we've got in this parameter...
+
+                        switch (code) {
+                            case 'parent' :
+                                obj.parent = {value:value,description:description}
+                                break;
+                            case 'child' :
+                                obj.children.push({value:value,description:description});
+                                break;
+                        }
+
+
+
+                        break;
+                }
+
+            })
+            return obj;
         }
 
     }

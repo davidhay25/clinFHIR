@@ -8,7 +8,6 @@
   "PROFILE" : "Профиль",
   "SELECTPATIENT" : "Выбор пациента",
   "FINDPROFILE": "Найти профиль",
-
   "NEWRESOURCE" : "Новый ресурс",
   "RESOURCENAVIGATOR" : "Ресурс Навигатор",
   "ELEMENTDETAILS" : "Элемент подробности",
@@ -23,7 +22,6 @@
   "LANGUAGE.ENGLISH" : "английский",
   "LANGUAGE.RUSSIAN" : "русский",
   "LANGUAGE.DUTCH" : "Голландский",
-
   "MENU.QUERYSERVERS":"Серверы запросов",
   "MENU.RESETCONFIG" : "Reset Config",
   "MENU.CLEARPROFILECACHE":"Очистить кэш Профиль",
