@@ -428,6 +428,7 @@ angular.module("sampleApp")
             //add the current patient
             var ed = resourceCreatorSvc.getPatientOrSubjectReferenceED();
             if (ed) {
+
                 resourceCreatorSvc.addPatientToTree(ed.path,appConfigSvc.getCurrentPatient(),$scope.treeData);
             }
         }
@@ -642,9 +643,10 @@ angular.module("sampleApp")
 
         if ($scope.dataType == 'BackboneElement') {
             //if this is a BackboneElement, then add it to the tree and select it todo - may want to ask first
-            var treeNode = {id : 't' + new Date().getTime(),state:{opened:true,selected:true}};       //the new node is selected and opened...
+            //when selected in true - allbbe of that type are selected...
+            var treeNode = {id : 't' + new Date().getTime(),state:{opened:true,selected:false}};       //the new node is selected and opened...
             treeNode.parent =  $scope.selectedNodeId;
-            treeNode.ed = $scope.selectedChild;     //the ElementDefinition that we are adding
+            treeNode.ed =   $scope.selectedChild;     //the ElementDefinition that we are adding
             treeNode.text = $scope.selectedChild.myData.display;    //the property name
             treeNode.path = $scope.selectedChild.path;
             //treeNode.type = 'bbe';      //so we know it's a backboneelement, so should have elements referencing it...
@@ -1020,7 +1022,8 @@ angular.module("sampleApp")
                 console.log($scope.terminologyLookup);
             },
             function(err) {
-                alert(angular.toJson(err));
+                //this will generally occur when using stu-2 - so ignore...
+                //alert(angular.toJson(err));
             }
         );
 
@@ -1055,7 +1058,7 @@ angular.module("sampleApp")
 
 
         //$scope.results.cc = $scope.terminologyLookup.parent;
-        console.log('s')
+        //console.log('s')
     };
 
     //use the terminology operation CodeSystem/$lookup to get details of the code / system when manually entered
@@ -1064,12 +1067,12 @@ angular.module("sampleApp")
 
         resourceCreatorSvc.getLookupForCode(system,code).then(
             function(data) {
-                console.log(data);
+                //console.log(data);
 
                 $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
                 $scope.results.ccDirectDisplay = $scope.terminologyLookup.display;
 
-                console.log($scope.terminologyLookup);
+                //console.log($scope.terminologyLookup);
 
             },
             function(err) {
@@ -1145,7 +1148,19 @@ angular.module("sampleApp")
         //resourceCreatorSvc.setCurrentProfile(park.profile);
 
 
-        resourceCreatorSvc.removeParkedResource(inx)
+        var modalOptions = {
+            closeButtonText: "Don't remove",
+            actionButtonText: 'Ok',
+            headerText: 'UnPark resource',
+            bodyText: 'Do you want to remove the resource from the parked list'
+        };
+
+        modalService.showModal({}, modalOptions).then(function (result) {
+            resourceCreatorSvc.removeParkedResource(inx)
+        });
+
+
+
         //drawTree();
         $scope.displayMode = 'new';     //will cause the editing page to be displayed
 
@@ -1335,6 +1350,268 @@ angular.module("sampleApp")
         $event.stopPropagation();
         $scope.cal[opened] = ! $scope.cal[opened];
     };
+
+
+    $scope.showValidateInstance = function(){
+
+
+        $uibModal.open({
+            backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
+            keyboard: false,       //same as above.
+            templateUrl: 'modalTemplates/validateInstance.html',
+            size:'lg',
+
+            controller: function($scope,appConfigSvc,resourceCreatorSvc,$http){
+                $scope.config = appConfigSvc.config();
+                
+                $scope.input = {show:'raw',extValue:{}};      //options = raw, results, parsed
+
+                var url= $scope.config.servers.conformance;
+                for (var i=0; i < $scope.config.allKnownServers.length;i++){
+                    if ($scope.config.allKnownServers[i].url == url){
+                        $scope.input.server = $scope.config.allKnownServers[i];
+                        break;
+                    }
+                }
+                //
+
+                $scope.checkServerHasDefs = function(){
+                    //check that all of the ExtensionDefintions in the resource are on the server performing validation...
+                    $scope.waiting = true;
+                    resourceCreatorSvc.checkExtensionDefinitionsAreOnServer($scope.input.server.url,$scope.extensions).then(
+                        function(updatedExt) {
+                            console.log(updatedExt)
+                        },function(err){
+                            console.log(err)
+                        }
+                    ).finally(function(){
+                        $scope.waiting = false;
+                    })
+                };
+                
+                $scope.load = function() {
+                    //load a resource from a server...
+                    var url = "http://fhir.hl7.org.nz/dstu2/AllergyIntolerance/84651";
+                    GetDataFromServer.ahHocFHIRQuery(url).then(
+                        function(data) {
+                            $scope.instance = angular.toJson(data.data,true);
+                            parse($scope.instance);
+                        }
+                    )
+                };
+
+                $scope.parse = function () {
+                    parse($scope.instance);
+                    $scope.input.show='parse';
+                };
+
+                //parse the content to extract extension data
+                var parse = function(json) {
+                    try {
+                        $scope.resource = angular.fromJson(json);
+                    } catch (ex){
+                        alert('This is not valid Json!');
+                        return;
+                    }
+                    console.log($scope.resource);
+
+                    $scope.extensions = [];        //this will contain the extensions in this resource...
+
+                    function processExtensionArray(ar,path) {
+                        //process array. If they are extensions then add them to the list and return true.
+                        //if they are not, then return false and the caller will parse each element...
+                        //var isExtensionArray = false;
+                        ar.forEach(function(el){
+                            //console.log('ext==>',el)
+                            var vo = {};
+                            vo.path = path;
+                            //the extension will have 2 properties: 'url' and one starting with 'value'
+                            angular.forEach(el,function(v,k) {
+                                if (k == 'url') {
+                                    vo.url = v
+                                } else {
+                                    vo.value = v
+                                }
+                            })
+
+                            console.log(vo);
+                            $scope.extensions.push(vo);
+                        });
+                        //return isExtensionArray;
+                    }
+
+                    function parseBranch(branch,path) {
+                        angular.forEach(branch,function(v,k){
+                            //console.log(k,v);
+
+                            if (angular.isArray(v)){
+                                //an array could either be a set of extensions, or a 'multiple' element
+                                if (k == 'extension' || k.substr(0,1) == '_') {
+                                    processExtensionArray(v,path);
+                                } else {
+                                    //this is not an extension array - parse each element...
+                                    v.forEach(function(el){
+                                        parseBranch(el,path + '.' + k)
+                                    })
+                                }
+
+                                //processArray(v);
+                                //console.log('array')
+
+
+
+                            } else if (angular.isObject(v)){
+                                //if it's an object, then check the children as well. This could be a complex datattype or a backbone element
+                                //console.log('obj')
+                                parseBranch(v,path + '.' + k)
+                            } else {
+                                //console.log('strng')
+                            }
+                        })
+                    }
+
+                    parseBranch($scope.resource,$scope.resource.resourceType);       //kick off the parsing of the resource...
+
+                    //now get all the known profiles for this resource type from the currently selected server...
+                    //todo - chang
+                    getProfilesForResourceType($scope.resource.resourceType)
+
+
+                    //console.log($scope.extensions)
+                    //console.log($scope.input.show)
+
+                    //$scope.input.show='parsed'
+                };
+
+
+                //retrieve all the profiles based on this resource type on the server
+                function getProfilesForResourceType(resourceType) {
+                    $scope.profilesThisType = [];
+                    var url = $scope.input.server.url + "StructureDefinition?kind=resource&type="+resourceType;
+                    GetDataFromServer.ahHocFHIRQuery(url).then(
+                        function(data) {
+                            console.log(data)
+                            if (data.data && data.data.entry) {
+                                //this is a bundle
+                                data.data.entry.forEach(function(ent){
+                                    var url = ent.resource.url;     //the 'canonical' url for this profile...
+                                    $scope.profilesThisType.push(url);
+                                })
+                            }
+
+
+
+
+                        },
+                        function(err){
+                            console.log(err)
+                        }
+                    )
+                }
+
+                $scope.profile = resourceCreatorSvc.getCurrentProfile();
+
+                $scope.validate = function(){
+                    delete $scope.validateResults;
+                    delete $scope.error;
+
+                    try {
+                        var resource = angular.fromJson($scope.instance);
+                    } catch (ex){
+                        alert('This is not valid Json!');
+                        return;
+                    }
+
+                    //if there is a profile selected, then add that to the resource
+
+                    if ($scope.input.profile) {
+                        resource.meta = resource.meta || {}
+                        resource.meta.profile = [$scope.input.profile] ;
+                        $scope.instance = angular.toJson(resource,true);
+                    }
+
+                    //"http://fhir.hl7.org.nz/dstu2/StructureDefinition/ohAllergyIntolerance"
+
+                    $scope.waiting = true;
+                    var oo;
+                    $scope.url = $scope.input.server.url;       //just so we can display the url
+                    //console.log($scope.input.server);
+                    Utilities.validate(resource,$scope.url,$scope.input.profile).then(
+                        function(data){
+
+                            oo = data.data;
+                            if (oo.issue) {
+                                delete oo.text;
+                                $scope.validateResults = oo;
+                            } else {
+                                $scope.validateResults = {outcome:'The resource is valid!'};
+                            }
+
+
+                        },
+                        function(data) {
+                            console.log(data)
+
+
+                            if (angular.isString(data.data)){
+                                $scope.error = data.data;
+                                console.log(data)
+                                oo = {issue:['shoeme']}
+                            } else {
+                                 oo = data.data;
+
+                                if (oo.issue) {
+                                    delete oo.text;
+                                }
+                            }
+
+
+
+
+
+                            $scope.validateResults = oo;
+                        }
+                    ).finally(function(){
+                        $scope.input.show='results';
+                        $scope.waiting = false;
+                    });
+                        /*
+                    var url = $scope.config.servers.conformance+ "AllergyIntolerance/$validate?profile="+$scope.profile.url;
+                    console.log(url);
+                    //console.log($scope.instance)
+                    var config = {};
+
+
+
+                    config.headers = {'Content-type':'application/json+fhir'}
+                    $http.post(url,$scope.instance,config).then(
+                        function(data) {
+                            console.log(data);
+                        },
+                        function(err){
+                            console.log(err)
+                        }
+                    )
+
+*/
+                }
+
+                $scope.close = function () {
+                    $scope.$close();
+                }
+
+            },
+            resolve : {
+                configDefault: function () {          //the default config
+                    return "";
+
+                }
+            }
+        })
+
+
+
+    }
             
 
 })

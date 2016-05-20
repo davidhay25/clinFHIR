@@ -26,8 +26,10 @@
 
             <div ng-show="selectedNode">
                 <h4>{{'ELEMENTDETAILS' | translate}}: <em>{{selectedNode.ed.path}}</em></h4>
-
+<!--
                 {{selectedNode.display}}
+-->
+                <pre ng-show="selectedNode.fragment">{{selectedNode.fragment | json}}</pre>
 
                 <!-- Show the remove node for everything except the root...-->
                 <div class="row">

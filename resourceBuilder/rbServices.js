@@ -71,6 +71,10 @@ angular.module("sampleApp").
             console.log(qry)
             return $http.get(qry);
         },
+        ahHocFHIRQuery : function(url) {
+            //an ahhoc query - full url given - to avoid a v=controller using $http directly...
+            return $http.get(url);
+        },
         generalFhirQuery : function(qry) {
             //runs an ad-hoc query against the data server
             var deferred = $q.defer();
@@ -143,11 +147,15 @@ angular.module("sampleApp").
 
 
         },
-        findConformanceResourceByUri : function(url) {
+        findConformanceResourceByUri : function(url,serverUrl) {
             //find a StructureDefinition based on its Uri. ie we query the registry to find the required SD
+            //added serverUrl May21 so can specify the server to query in the call
             var deferred = $q.defer();
             var config = appConfigSvc.config();
-            var qry = config.servers.conformance + "\StructureDefinition?url="+url;
+
+            serverUrl = serverUrl || config.servers.conformance;
+
+            var qry = serverUrl + "\StructureDefinition?url="+url;
             config.log(qry,'findConformanceResourceByUri');
 
 
@@ -487,17 +495,26 @@ console.log(summary);
             
             return $http.get(url)
         },
-        validate : function(resource,cb) {
+        validate : function(resource,serverUrl,profile) {
+            //call the validate operation. If serverUrl is passed in then use that one, else use the data server...
+            //can also pass in a profile to validate against
             var clone = angular.copy(resource);
             delete clone.localMeta;
             clone.id = 'temp';      //hapi requires an id...
             //use the 'parameters' syntax
             var params = {'resourceType':'Parameters',parameter:[]};
             params.parameter.push({'name':'resource',resource:clone});
+            
+            if (profile){
+                params.parameter.push({'name':'profile',valueUri:profile});
+            }
 
 
             var config = appConfigSvc.config();
-            var qry = config.servers.data + resource.resourceType + "/$validate";
+            serverUrl = serverUrl || config.servers.data;
+
+
+            var qry = serverUrl + resource.resourceType + "/$validate";
 
             //var qry = appConfigSvc.getCurrentDataServerBase() + resource.resourceType + "/$validate";
 

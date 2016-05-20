@@ -16,8 +16,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
     };
 
 
-
-
     //get the extension type (single, complex) and data type from the ExtensionDefinition (StructureDefinition).
 
     //todo - for now, assume simple
@@ -38,7 +36,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
     return {
         getPatientOrSubjectReferenceED : function(){
             //locate an ED that is a reference to a patient - either 'patient' or 'subject' as the second element in the path
-            if (this.currentProfile) {
+            if (this.currentProfile && this.currentProfile.snapshot && this.currentProfile.snapshot.element) {
                 for (var i=0; i<this.currentProfile.snapshot.element.length; i++) {
                     var ed = this.currentProfile.snapshot.element[i];
                     var ar = ed.path.split('.')
@@ -429,6 +427,14 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             //it may need to resolve references to extension definitions...
             //also pass in the current treedata which represents the data captured thus far
 
+            var deferred = $q.defer();
+
+            if (!this.currentProfile || !this.currentProfile.snapshot || ! this.currentProfile.snapshot.element) {
+                alert('This profile is not valid!')
+                deferred.reject();
+                return deferred.promise;
+            }
+
             //create a hash indexed by path. We'll use this to find extensions of a given element...
             var elementHash = {};
             angular.forEach(this.currentProfile.snapshot.element,function(elementDef) {
@@ -453,7 +459,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             //console.log(dataHash);
 
-            var deferred = $q.defer();
+
             var that = this;
             //these are nodes whose path has one more '.' - eg if ed.path = Condition.stage, then Condition.stage.summary is included
             var exclusions=['id','meta','implicitRules','language','text','contained','modifierExtension'];
@@ -2413,8 +2419,11 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var svr = appConfigSvc.getServerByUrl(config.servers.terminology);
             if (svr)  {
                 if (svr.version < 3) {
-                    alert("This functionality is only available in STU-3. Sorry about that");
-                    return;
+                    //just don't do the lookupin an earlier version
+                   // alert("This functionality is only available in STU-3. Sorry about that");
+                    var deferred = $q.defer();
+                    deferred.reject('not version 3');
+                    return deferred.promise;
                 }
             }
 
@@ -2462,6 +2471,45 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             })
             return obj;
+        },
+        checkExtensionDefinitionsAreOnServer : function(serverUrl,arExtensions) {
+            //retrieve all the StructureDefinitions that describe the extensions in this resource
+            var queries = [];
+            var deferred = $q.defer();
+            if (arExtensions.length == 0) {
+                deferred.resolve(arExtensions);
+                return deferred.promise;
+            }
+
+
+            arExtensions.forEach(function(ext){
+
+                queries.push(GetDataFromServer.findConformanceResourceByUri(ext.url,serverUrl).then(
+                    function(sdef) {
+                        console.log(sdef)
+                        delete ext.noSdef;
+                        ext.sdef = sdef;
+
+                    },
+                    function(err) {
+                        ext.noSdef = true;
+                        delete ext.sdef;
+                        console.log('Error retrieving '+ ext.url + " "+ angular.toJson(err))
+                    }
+                ))
+            });
+
+            $q.all(queries).then(
+                function() {
+                    deferred.resolve(arExtensions);
+                },
+                function(err){
+                   // alert("error getting SD's for children "+angular.toJson(err))
+                    deferred.reject(err);
+                }
+            );
+
+            return deferred.promise;
         }
 
     }

@@ -132,8 +132,7 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                                     $scope.showWaiting = false;
                                     console.log('Error: ',err);
                                     alert("Unable to retrieve Profile from the server. It may be currently unresponsive." +
-                                        " You can use the 'show Servers' link at the top of the page to test it, or select " +
-                                        "another Conformance server./n The error returned was: " + angular.toJson(err,true))
+                                        "/n The error returned was: " + angular.toJson(err,true))
                                 }).finally(function(){
                                 $scope.showWaiting = false;
                             });
@@ -158,6 +157,11 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                                 //we get the profile based on the URI (ie SD.url)
                                 GetDataFromServer.findConformanceResourceByUri(uri).then(
                                     function(resource){
+
+                                        if (!resource.snapshot) {
+                                            alert("This resource does not have a 'snapshot' element, and cannot be used by clinFHIR");
+                                            return;
+                                        }
                                         console.log(resource)
                                         $scope.$close(resource);
                                         $scope.showWaiting = false;
