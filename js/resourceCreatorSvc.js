@@ -1717,10 +1717,16 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         }
 
                         var node = {id:id,parent:parent,text:text,state:{opened:false,selected:false},
-                            a_attr:{title: dataType}, path:path};
+                            a_attr:{style:'color:green'}, path:path};
+
+//title: dataType,
 
 
                         node.data = {ed : item};
+
+                       // if (item.myMeta.isExtension) {
+                           // node.a_attr.style='color:red'
+                      //  }
 
                         //set the icon to display. todo Would be better to use a class, but can't get that to work...
                         if (!item.myMeta.isParent) {

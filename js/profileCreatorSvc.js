@@ -55,6 +55,8 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                                 var analysis = Utilities.analyseExtensionDefinition2(sdef);
                                                 item.myMeta.analysis = analysis;
                                                 console.log(analysis)
+                                            }, function(err) {
+                                                alert('Error retrieving '+ t.profile + " "+ angular.toJson(err))
                                             }
                                         ));
 
@@ -84,11 +86,8 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             include = false;
                         }
 
-
-
                         //standard element names like 'text' or 'language'
                         if (ar.length == 2 && elementsToDisable.indexOf(ar[1]) > -1) {
-
                             include = false;
                         }
 
@@ -97,19 +96,11 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             include = false;
                         }
 
-
-                        //don't include removed elements
-                        if (item.myMeta.remove) {
-                            include = false;
-                        }
-
-
-
-
                         ar.shift();     //removes the type name at the beginning of the path
                         item.myMeta.path = ar.join('. ');     //create a path that doesn't include the type (so is shorter)
 
-                        //make references look nicer.
+
+                        //set various meta items based on the datatype
                         if (item.type) {
                             item.type.forEach(function (it) {
 
@@ -125,14 +116,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                                 if (it.code == 'Reference') {
                                     item.myMeta.isReference = true;
-                                    /*
-                                     if (it.profile) {
-                                     var p = it.profile[0];      //todo  <<<<<<<<<<<<<<<<<<
-                                     var ar = p.split('/');
-                                     it.code = '->' + ar[ar.length - 1];
-                                     }
-                                     */
-
                                 }
 
                                 //if the datatype starts with an uppercase letter, then it's a complex one...
@@ -142,11 +125,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                             })
                         }
-
-
-
-
-                        //console.log(path,disabled)
 
                         //add to tree only if include is still true...
                         if (include) {
@@ -174,9 +152,13 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             var node = {id:id,parent:parent,text:text,state:{opened:false,selected:false},
                                 a_attr:{title: dataType}, path:path};
 
+                            if (item.myMeta.isExtension) {
+                                //todo - a class would be better, but this doesn't seem to render in the tree...
+                                 node.a_attr.style='color:blueviolet'
+                              }
 
                             node.data = {ed : item};
-
+/*
                             //set the icon to display. todo Would be better to use a class, but can't get that to work...
                             if (!item.myMeta.isParent) {
                                 //if it's not a parent node, then set to a data type...
@@ -199,7 +181,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 node.icon='/icons/icon_extension_simple.png';
                             }
 
-
+*/
 
 
                             //so long as the parent is in the tree, it's safe to add...
@@ -237,6 +219,69 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
 
                             //here is where we set the icons - ie after all the extension definitions have been loaded & resolved...
+                            lstTree.forEach(function(node){
+                                console.log(node);
+
+                                //set the '[x]' for code elements
+                                if (node.data && node.data.ed && node.data.ed.type && node.data.ed.type.length > 1) {
+                                       node.text += '[x]'
+                                }
+
+                                //set the '[x]' for extensions (whew!)
+                                if (node.data && node.data.ed && node.data.ed.myMeta && node.data.ed.myMeta.analysis &&
+                                    node.data.ed.myMeta.analysis.dataTypes && node.data.ed.myMeta.analysis.dataTypes.length > 1) {
+                                    node.text += '[x]'
+                                }
+
+                                //set the display icon
+                                if (node.data && node.data.ed && node.data.ed.myMeta){
+
+
+
+
+                                    var myMeta = node.data.ed.myMeta;
+
+                                    if (!myMeta.isParent) {     //leave parent node as folder...
+
+                                        var r = myMeta;
+                                        if (myMeta.isExtension && myMeta.analysis) {
+                                            r = myMeta.analysis;
+                                        }
+                                        //var isComplex = myMeta.isComplex ||
+
+
+                                            if (r.isComplex) {
+                                                node.icon='/icons/icon_datatype.gif';
+                                            } else {
+                                                node.icon='/icons/icon_primitive.png';
+                                            }
+
+                                            if (r.isReference) {
+                                                node.icon='/icons/icon_reference.png';
+                                            }
+
+
+                                        //if it's not a parent node, then set to a data type...
+
+
+
+
+
+                                    }
+
+                                //    if (myMeta.isExtension) {
+
+                                       // node.icon='/icons/icon_extension_simple.png';
+                                   // }
+
+
+
+                                    console.log('-->',node.data.ed.myMeta)
+
+
+
+                                }
+                            })
 
 
 

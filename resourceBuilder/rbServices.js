@@ -423,6 +423,12 @@ angular.module("sampleApp").
                                     if (['CodeableConcept', 'code', 'coding'].indexOf(code) > -1) {
                                         vo.isCoded = true;
                                     }
+
+                                    //if the datatype starts with an uppercase letter, then it's a complex one...
+                                    if (/[A-Z]/.test( code)){
+                                        vo.isComplex = true;
+                                    }
+
                                     //is this a reference?
                                     if (code == 'Reference') {
 
