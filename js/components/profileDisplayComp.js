@@ -14,7 +14,7 @@ angular.module('sampleApp').component('showProfile',
             restoreremoved : '<'
         },
         templateUrl : 'js/components/profileDisplayTemplate.html',
-        controller: function (resourceCreatorSvc,GetDataFromServer,$uibModal,Utilities) {
+        controller: function (resourceCreatorSvc,profileCreatorSvc,GetDataFromServer,$uibModal,Utilities) {
             var that = this;
             //todo - issue with componnet timing. For now require all uses of tree specify the tree id externally
             var treeDivId = this.treedivid;// || 'pfTreeView';    //the div id is unique across the application, so if used multiple times, an external div must be supplied
@@ -280,19 +280,28 @@ angular.module('sampleApp').component('showProfile',
                 if (this.selectedProfile) {
 
                     //get the rows in the tree source table...
-                    var buildView = resourceCreatorSvc.makeProfileDisplayFromProfile(that.selectedProfile);
-                    that.ontreedraw({item:buildView.treeData});
+                    var buildView;
+                    //var buildView = resourceCreatorSvc.makeProfileDisplayFromProfile(that.selectedProfile);
+                    profileCreatorSvc.makeProfileDisplayFromProfile(that.selectedProfile).then(
+                        function(data){
+                            buildView = data;
 
-                    that.filteredProfile = buildView.lst
+                            that.ontreedraw({item:buildView.treeData});
 
-                    $('#'+treeDivId).jstree('destroy');
-                    $('#'+treeDivId).jstree(
-                        {'core': {'multiple': false, 'data': buildView.treeData, 'themes': {name: 'proton', responsive: true}}}
-                    ).on('changed.jstree', function (e, data) {
+                            that.filteredProfile = buildView.lst
 
-                        that.ontreenodeselected({item:data});
+                            $('#'+treeDivId).jstree('destroy');
+                            $('#'+treeDivId).jstree(
+                                {'core': {'multiple': false, 'data': buildView.treeData, 'themes': {name: 'proton', responsive: true}}}
+                            ).on('changed.jstree', function (e, data) {
 
-                    })
+                                that.ontreenodeselected({item:data});
+
+                            })
+                        }
+                    );
+
+
                     
                     
                 }

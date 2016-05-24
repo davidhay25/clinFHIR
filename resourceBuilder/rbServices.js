@@ -147,15 +147,20 @@ angular.module("sampleApp").
 
 
         },
-        findConformanceResourceByUri : function(url,serverUrl) {
+        findConformanceResourceByUri : function(url,serverUrl,typeOfConformanceResource) {
             //find a StructureDefinition based on its Uri. ie we query the registry to find the required SD
             //added serverUrl May21 so can specify the server to query in the call
             var deferred = $q.defer();
             var config = appConfigSvc.config();
 
+            //default to a StructureDefinition
+            typeOfConformanceResource = typeOfConformanceResource || 'StructureDefinition';
+
+
             serverUrl = serverUrl || config.servers.conformance;
 
-            var qry = serverUrl + "\StructureDefinition?url="+url;
+            var qry = serverUrl  + typeOfConformanceResource + "?url=" + url;
+
             config.log(qry,'findConformanceResourceByUri');
 
 
@@ -370,7 +375,117 @@ angular.module("sampleApp").
             vo.StructureDefinition = extension;
             return vo;
 
-        },processComplexExtension : function(extension,discriminator) {
+        },
+        analyseExtensionDefinition2 : function(SD) {
+            //return a simplified model of an Extension Definition
+            
+            //var extension = angular.copy(extensionDef);
+            //return a vo that contains an analysis of the extension
+            var that = this;
+
+
+            var vo = {dataTypes: [], multiple: false};
+            vo.display = SD.display; //will use this when displaying the element
+            vo.name = SD.name;       //or this one...
+            // vo.definition =extension.definition;
+
+            var discriminator;      //if this is sliced, then a discriminator will be set...
+            if (SD.snapshot) {
+                SD.snapshot.element.forEach(function (element) {
+
+                    //this is the root extension
+                    if (element.path.substr(0, 9) === 'Extension') {
+                        if (!vo.definition) {
+                            vo.definition = element.definition;
+                        }
+
+                        if (!vo.short) {
+                            //pick the first one...
+                            vo.short = element.short;   //the short name of the extension - whether simple or complex
+                        }
+
+                        if (element.max == '*') {
+                            vo.multiple = true;
+                        }
+                    }
+                    
+
+                    if (element.path.indexOf('Extension.value') > -1) {
+                        //this defines the value type for the extension
+
+                        //look at the 'type' property to see the supported data types
+                        if (element.type) {
+                            element.type.forEach(function (typ) {
+                                var code = typ.code;        //the datatype code
+                                if (code) {
+                                    vo.dataTypes.push(code);
+                                    //is this a codedd type?
+                                    if (['CodeableConcept', 'code', 'coding'].indexOf(code) > -1) {
+                                        vo.isCoded = true;
+                                    }
+                                    //is this a reference?
+                                    if (code == 'Reference') {
+
+                                    }
+                                }
+
+
+                            })
+                        }
+
+                        
+                        //vo.element = element;
+                        //var dt = element.path.replace('Extension.value', '');//.toLowerCase();
+
+
+/*
+
+                        if (dt == 'reference' || dt == '[x]') {   //eg cgif-guidancerequest
+                            //if this is a reference, then need the list of types
+                            vo.referenceTypes = [];
+                            if (element.type) {
+                                element.type.forEach(function (t) {
+                                    var p = t.profile;
+                                    if (p) {
+                                        var ar = p[0].split('/');       //only the first
+                                        var item = {display: ar[ar.length - 1], url: p[0]};
+                                        item.specification = "http://hl7.org/fhir/" + ar[ar.length - 1];   //really only works if this is a core resource...
+                                        //is this a core resource (or datatype)
+                                        ar.pop();   //remove the last entry - it will be the type name
+                                        var temp = ar.join('/');    //reconstruct the url...
+                                        if (temp == "http://hl7.org/fhir/") {
+                                            item.isCore = true; //this is a core resource (or datatype)
+                                        }
+
+                                        vo.referenceTypes.push(item);
+                                    }
+                                })
+                            }
+                        }
+
+
+                        if (element.binding) {
+
+                            vo.strength = element.binding.strength;
+                            if (element.binding.valueSetReference) {
+                                vo.valueSetReference = element.binding.valueSetReference.reference;
+                            } else {
+                                vo.errors = vo.errors || []
+                                vo.errors.push('value element has a binding with no valueSetReference')
+                            }
+
+                        }
+
+                        */
+
+                    }
+                })
+            }
+
+
+            return vo;
+        },
+        processComplexExtension : function(extension,discriminator) {
             //create a summary object for the extension. for extension designer & renderProfile
             //these are comples extensions where there is a single 'parent' and multiple child elements...
 
@@ -796,8 +911,7 @@ console.log(summary);
 
 
     return {
-
-
+        
         getAllStandardResourceTypes : function(){
             //the basic resources in FHIR. returns an object that also indicates if it is a reference resource or not...
             var deferred = $q.defer();
