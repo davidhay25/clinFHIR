@@ -118,7 +118,7 @@ angular.module("sampleApp")
         $scope.recent.patient = appConfigSvc.getRecentPatient();
         $scope.recent.profile = appConfigSvc.getRecentProfile();
 
-        console.log(data);
+
         if (data && data.serverType == 'data') {
             //if the data server changes, we need to remove the current patient..
             appConfigSvc.removeCurrentPatient();
@@ -1847,7 +1847,7 @@ angular.module("sampleApp")
             delete $scope.input.testconformance;        //the test conformance state
             delete $scope.input.testdata;
 
-            console.log(server);
+
 
             config.servers[serverType] = server.url;    //set the config to the new server...
             $localStorage.config = config;
@@ -2541,11 +2541,19 @@ console.log(url);
 
 
     })
-    .controller('logicalModelCtrl',function($scope,$rootScope,profileCreatorSvc,resourceCreatorSvc,GetDataFromServer,appConfigSvc,modalService){
+    .controller('logicalModelCtrl',function($scope,$rootScope,profileCreatorSvc,resourceCreatorSvc,GetDataFromServer,
+                                            appConfigSvc,modalService,RenderProfileSvc){
 
 
         $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();      //all the known data types
 
+        //all the known Resource types. Used when creating a reference
+        RenderProfileSvc.getAllStandardResourceTypes().then(
+            function(standardResourceTypes) {
+                $scope.standardResourceTypes = standardResourceTypes ;
+
+            }
+        );
 
         //when a new name is entered into the name box. 
         $scope.checkExistingProfile = function(name) {
@@ -2575,7 +2583,7 @@ console.log(url);
             $scope.currentNodeIsParent = true;
             //
 
-            console.log('setup')
+
         }
         setUpDisplayNewProfile();
 
@@ -2607,13 +2615,13 @@ console.log(url);
             });
         };
 
-        //when a profile is selected, check if it is a core type
+        //when a profile is selected from the front screen, check if it is a core type
         $scope.$on('profileSelected',function(event,data){
             $scope.logOfChanges = [];
             $scope.allowEdit = true;    //the profile being viewed can be altered
             var selectedProfile = data.profile;
             //is this a core profile? If it is, it cannot be edited.
-            console.log(selectedProfile);
+
             var base = selectedProfile.base || selectedProfile.baseType;        //different in stu 2 & 3
             if (base && base.indexOf('Resource') > -1) {    //was 'DomainResource
                 //yes, this is a base resource.
@@ -2673,31 +2681,82 @@ console.log(url);
         }
 
         //when the tree is re-drawn. model is the array of tree nodes.
+        //actually - this happens whenever an ED is changed. should really change the name...
         $scope.onTreeDraw = function(item) {
             //console.log(item);
             $scope.model = item;
+            console.log('modal=',$scope.model)
+
         };
+
+        $scope.changeDefinition = function() {
+
+            if ($scope.editDefinition){
+                //make the component update the model it is based on...
+                $scope.updateElementDefinitionInComponent = {ed:$scope.edFromTreeNode,item:$scope.treeNodeItemSelected};
+            }
+
+            $scope.editDefinition = ! $scope.editDefinition
+        }
+
+        //remove a datatype from the list of options...
+        $scope.removeDataType = function(index) {
+
+            var type;
+            if ($scope.edFromTreeNode.myMeta.isExtension) {
+                type = $scope.edFromTreeNode.myMeta.analysis.dataTypes;
+            } else {
+                type = $scope.edFromTreeNode.type;
+            }
+
+
+            if (type.length == 1) {
+                //in theory, should never be called if only 1 left...
+                alert("Sorry, you can't remove the last datatype")
+            } else {
+                type.splice(index,1);
+                $scope.edFromTreeNode.type = type;
+                $scope.edFromTreeNode.myMeta = $scope.edFromTreeNode.myMeta || {};
+                $scope.edFromTreeNode.myMeta.isDirty = true;
+                //make the component update the model it is based on...
+                $scope.updateElementDefinitionInComponent = {ed:$scope.edFromTreeNode,item:$scope.treeNodeItemSelected};
+                if ($scope.edFromTreeNode.myMeta.isExtension) {
+                    setIsCoded($scope.edFromTreeNode.myMeta.analysis);
+                }
+
+            }
+        };
+
+        //set the 'isCoded' flag for extensions
+        function setIsCoded(analysis) {
+            analysis.isCoded = false;
+            analysis.dataTypes.forEach(function(dt){
+                if (['code','Coding','CodeableConcept'].indexOf(dt.code) > -1) {
+                    analysis.isCoded = true;
+                }
+            })
+        }
 
 
         //remove the current node (and all child nodes)
         $scope.removeNode = function(){
             if ($scope.selectedNode.parent == '#' ) {
-                alert("You can't delete the root node!")
+                alert("You can't delete the root node!");
                 return;
             }
             var ed = $scope.selectedNode.data.ed; //the ExtensionDefinition we want to remove
-            var path = ed.path;     //the path of the element to be removed...
+           // var path = ed.path;     //the path of the element to be removed...
 
 
            // $scope.deleteAtPath(path);     //is a component property - will cause the element and all children to be removed...
-            $scope.deleteAtPath = path;     //is a component property - will cause the element and all children to be removed...
+            //pass in the ed, as the path alone is not enough - eg when this is an extension being deleted...
+            $scope.deleteAtPath = ed;     //is a component property - will cause the element and all children to be removed...
 
 
             //now move through the model, marking the ED's that start with this path to be removed
             //ed.myMeta.remove = true;
 
-            $scope.logOfChanges.push({type:'D',display:'Removed '+ path,path:path,ed:ed})
-
+            $scope.logOfChanges.push({type:'D',display:'Removed '+ ed.path,path:ed.path,ed:ed})
 
             delete $scope.input.newNode;    //indicates whether a child or a sibling - will hide the new entry
 
@@ -2734,9 +2793,13 @@ console.log(url);
             
             //pass in the name of the profile, the model (with all the data), the profile that is being altered
             //and whether this is a new profile, or updating an existing
+
+            console.log($scope.model)
+            //return;
+
             var isEdit = false;
             if ($scope.mode == 'edit') {isEdit = true;}
-            resourceCreatorSvc.saveNewProfile(name,$scope.model,$scope.frontPageProfile,isEdit).then(
+            profileCreatorSvc.saveNewProfile(name,$scope.model,$scope.frontPageProfile,isEdit).then(
                 function(vo) {
                     alert(angular.toJson(vo.log))
                     //now add to the list of profiles...
@@ -2772,7 +2835,7 @@ console.log(url);
             }
 
             //create a basic Extension definition with the core data required. When the profie is save
-            ed = {path:newPath,name: $scope.input.newElementPath,myMeta : {isNew:true}};
+            ed = {path:newPath,name: $scope.input.newElementPath,myMeta : {isNew:true, isExtension:true}};
             switch ($scope.input.multiplicity) {
                 case 'opt' :
                     ed.min=0; ed.max = "1";
@@ -2785,9 +2848,10 @@ console.log(url);
                     break;
             }
             ed.definition = $scope.input.definition || newPath;
-            ed.type = [{code:$scope.input.newDatatype.code}];
+            ed.type = [{code:$scope.input.newDatatype.code}];       //<!--- todo is this right?
+            ed.myMeta.analysis = {dataTypes:[$scope.input.newDatatype.code]};
 
-            $scope.logOfChanges.push({type:'A',display:'Added '+ newPath,ed:ed})
+            $scope.logOfChanges.push({type:'A',display:'Added '+ newPath,ed:ed});
 
             //this is a property against the component that will add the ed to the tree view
             $scope.newNodeToAdd = ed;
@@ -2799,12 +2863,48 @@ console.log(url);
 
         };
 
+        $scope.addDTToElement = function(dt) {
+            //console.log(dt)
+
+            var type = {code:dt.code}
+
+            if (dt.code == 'Reference') {
+                if ($scope.input.newRRForExtension) {
+                    //var resourceType = $scope.input.newRRForExtension.name;
+                    type.profile = 'http://hl7.fhir.org/'+$scope.input.newRRForExtension.name;
+                }
+
+
+            }
+            $scope.edFromTreeNode.myMeta.analysis.dataTypes.push(type);
+
+            if ($scope.edFromTreeNode.myMeta.isExtension) {
+                setIsCoded($scope.edFromTreeNode.myMeta.analysis);
+            }
+            
+            //make the component update the model it is based on...
+            $scope.updateElementDefinitionInComponent = {ed:$scope.edFromTreeNode,item:$scope.treeNodeItemSelected};
+
+            //$scope.edFromTreeNode.type.push({code:dt});
+            $scope.input.addNewDTToExtension = false;
+        };
+
         $scope.changeBinding = function() {
 
             var vsUrl = prompt("Enter the ValueSet Url");
             if (vsUrl) {
                 try {
-                    $scope.edFromTreeNode.binding.valueSetReference.reference = vsUrl
+                    //var binding = {valueSetReference : vsUrl};
+
+
+                   //$scope.edFromTreeNode.binding = edFromTreeNode.binding || {binding : { valueSetReference : {}}};
+
+                    $scope.edFromTreeNode.binding = {valueSetReference : {reference : vsUrl}};
+                    $scope.edFromTreeNode.myMeta = $scope.edFromTreeNode.myMeta || {};
+                    $scope.edFromTreeNode.myMeta.isDirty = true;
+
+                    //make the component update the model it is based on...
+                    $scope.updateElementDefinitionInComponent = {ed:$scope.edFromTreeNode,item:$scope.treeNodeItemSelected};
                 } catch (ex) {
                     alert('error changing ValueSet url')
                 }
@@ -2814,11 +2914,14 @@ console.log(url);
         };
 
 
+
+
         //when an element is selected in the tree....
         $scope.treeNodeSelected = function(item) {
            // console.log(item);
             delete $scope.input.newNode;      //the var that displays the new node data
             delete $scope.edFromTreeNode;
+            delete $scope.treeNodeItemSelected;
             delete $scope.selectedNode;
 
             $scope.selectedNode = item.node;    //the node in the tree view...
@@ -2830,6 +2933,7 @@ console.log(url);
 
             if (item.node && item.node.data && item.node.data.ed) {
                 $scope.edFromTreeNode = item.node.data.ed;
+                $scope.treeNodeItemSelected = item;     //the actual row in the base tree data
 
 
                 //need to figure out what the possible multiplicity options are...
@@ -2842,7 +2946,11 @@ console.log(url);
                     max = $scope.edFromTreeNode.base.max;
                 }
 
-
+                //if this is a extension, then always permit any change...
+                if ($scope.edFromTreeNode.myMeta && $scope.edFromTreeNode.myMeta.isExtension) {
+                    min=0;
+                    max= '*';
+                }
 
                 $scope.possibleMultiplicity = [];
                 console.log(item.node.data.ed)
@@ -2881,6 +2989,12 @@ console.log(url);
         $scope.changeMultiplicity = function(choice) {
             $scope.edFromTreeNode.min = choice.min;
             $scope.edFromTreeNode.max = choice.max;
+            $scope.edFromTreeNode.myMeta =  $scope.edFromTreeNode.myMeta || {}
+            $scope.edFromTreeNode.myMeta.isDirty = true;
+
+            //make the component update the model it is based on...
+            $scope.updateElementDefinitionInComponent = {ed:$scope.edFromTreeNode,item:$scope.treeNodeItemSelected};
+
             console.log(choice)
         }
         

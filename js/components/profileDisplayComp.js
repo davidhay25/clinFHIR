@@ -11,7 +11,8 @@ angular.module('sampleApp').component('showProfile',
             ontreedraw : '&',
             newnode :'<',
             deleteatpath : '<',
-            restoreremoved : '<'
+            restoreremoved : '<',
+            updateelementdefinition : '<'
         },
         templateUrl : 'js/components/profileDisplayTemplate.html',
         controller: function (resourceCreatorSvc,profileCreatorSvc,GetDataFromServer,$uibModal,Utilities) {
@@ -23,8 +24,27 @@ angular.module('sampleApp').component('showProfile',
             this.profileHistory = [];       //a history of all profiles viewed
 
 
-
             this.$onChanges = function(obj) {
+
+
+                //when an ED (ElementDefinition) is changed in the controller we need to update the model...
+                //we pass in a VO containing the updated ed and the treeview item...
+                if (obj.updateelementdefinition) {
+                    console.log(obj.updateelementdefinition.currentValue)
+                    var id = obj.updateelementdefinition.currentValue.item.node.id;
+                    //find the item in th etreeview data that has the id
+                    for (var i=0; i<that.buildView.treeData.length;i++) {
+                        var item = that.buildView.treeData[i];
+                        if (item.id == id) {
+                            //and update the ed
+                            item.data.ed = obj.updateelementdefinition.currentValue.ed;
+                        }
+                    }
+                    //then re-announce the model...
+                    that.ontreedraw({item:that.buildView.treeData});
+
+
+                }
 
                 //remove a new node that was added
                 if (obj.removenewnode) {
@@ -37,12 +57,12 @@ angular.module('sampleApp').component('showProfile',
 
                             delete ed.myMeta.remove;
                         }
-                    })
+                    });
 
 
                     this.getTable(treeDivId);
                 }
-                /*
+
                 //restore a path that was removed in this session.
                 if (obj.restoreremoved) {
                     var edToRestore = obj.restoreremoved.currentValue;
@@ -51,20 +71,73 @@ angular.module('sampleApp').component('showProfile',
                     console.log(edToRestore)
                     that.selectedProfile.snapshot.element.forEach(function(ed){
                         if (ed.path == edToRestore.path) {
+                            if (ed.path.indexOf('xtension') > -1) {
+                                //this is an extenstion = we need to find the ED with the same profile...
+                                //we assume that there is only a single type with a single profile...
+                                //first, find the profile in the currentValue...
+                                var urlOfTypeToDelete;
+                                if (edToRestore.type) {
+                                    urlOfTypeToRestore = edToRestore.type[0].profile[0];
+                                    if (ed.type) {
+                                        if (ed.type[0].profile[0] == urlOfTypeToRestore ) {
+                                            ed.myMeta = ed.myMeta || {}     //should be redundant...
+                                            delete ed.myMeta.remove;
+                                        }
+                                    }
 
-                            delete ed.myMeta.remove;
+                                }
+
+                            } else {
+                                delete ed.myMeta.remove;
+                            }
+
+
+
+
+
                         }
-                    })
+                    });
 
 
                     this.getTable(treeDivId);
                 }
-                */
+
 
                 if (obj.deleteatpath) {
-                    var pathToDelete = obj.deleteatpath.currentValue;
-                    //alert(pathToDelete)
+                    //actually, an ED is passed in as just a path is not enough
+                    var edToDelete = obj.deleteatpath.currentValue;
                     that.selectedProfile.snapshot.element.forEach(function(ed){
+                        if (ed.path == edToDelete.path) {
+                            //well, we have the same path....
+                            //now we need to find the profile url. We assume that the pr
+                            if (ed.path.indexOf('xtension') > -1) {
+                                //this is an extenstion = we need to find the ED with the same profile...
+                                //we assume that there is only a single type with a single profile...
+                                //first, find the profile in the currentValue...
+                                var urlOfTypeToDelete;
+                                if (edToDelete.type) {
+                                    urlOfTypeToDelete = edToDelete.type[0].profile[0];
+                                    if (ed.type) {
+                                        if (ed.type[0].profile[0] == urlOfTypeToDelete ) {
+                                            ed.myMeta = ed.myMeta || {}
+                                            ed.myMeta.remove = true;
+                                        }
+                                    }
+
+                                }
+
+                            } else {
+                                ed.myMeta = ed.myMeta || {}
+                                ed.myMeta.remove=true;
+                            }
+
+
+
+                        }
+
+                        //we need to find the matching ed to remove -
+
+                        /*
                         if (ed.path.indexOf('xtension') == -1 &&  ed.path.substring(0, pathToDelete.length) == pathToDelete) {
                             ed.myMeta = ed.myMeta || {}
                            // if (ed.myMeta) {
@@ -72,6 +145,7 @@ angular.module('sampleApp').component('showProfile',
                            // }
 
                         }
+                        */
                     });
                     this.getTable(treeDivId);
 
@@ -280,22 +354,23 @@ angular.module('sampleApp').component('showProfile',
                 if (this.selectedProfile) {
 
                     //get the rows in the tree source table...
-                    var buildView;
+                    //var buildView;
                     //var buildView = resourceCreatorSvc.makeProfileDisplayFromProfile(that.selectedProfile);
                     profileCreatorSvc.makeProfileDisplayFromProfile(that.selectedProfile).then(
                         function(data){
-                            buildView = data;
+                            that.buildView = data;
 
-                            that.ontreedraw({item:buildView.treeData});
+                            that.ontreedraw({item:that.buildView.treeData});
 
-                            that.filteredProfile = buildView.lst
+                            that.filteredProfile = that.buildView.lst
 
                             $('#'+treeDivId).jstree('destroy');
                             $('#'+treeDivId).jstree(
-                                {'core': {'multiple': false, 'data': buildView.treeData, 'themes': {name: 'proton', responsive: true}}}
+                                {'core': {'multiple': false, 'data': that.buildView.treeData, 'themes': {name: 'proton', responsive: true}}}
                             ).on('changed.jstree', function (e, data) {
 
                                 that.ontreenodeselected({item:data});
+                                //that.ontreedraw({item:buildView.treeData});     //thur 26
 
                             })
                         }

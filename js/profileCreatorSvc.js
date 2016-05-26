@@ -1,9 +1,50 @@
 angular.module("sampleApp").service('profileCreatorSvc',
     function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,GetDataFromServer,$localStorage,Utilities,$sce) {
-        
+
+
+        function makeExtensionSD(vo) {
+            //vo.ed             - the element definition that has been built
+            //vo.extensionUrl   - the cannonical url for this definition
+            //vo.extensionId    - the Id of the structuredefinition on the server
+            //vo.valueName      - the name for the 'value' element - eg valueCodeableConcept
+            //vo.fhirVersion    - the version of fhir we are targetting
+            //vo.dt             - the dataType of the extension
+
+            var fhirVersion = vo.fhirVersion || 3;      //default to version 3...
+
+            //the extensionDefinition that describes this extension...
+            var extensionSD = {"resourceType": "StructureDefinition","url": vo.extensionUrl,
+                "name": vo.ed.path,"kind": "datatype",
+                "snapshot" : {element:[]}
+            };
+
+            //these are STU-3 - not sure about STU-2
+            if (fhirVersion == 3) {
+                extensionSD.abstract = false;
+                extensionSD.baseType = "Extension";
+                extensionSD.baseDefinition = "http://hl7.org/fhir/StructureDefinition/Extension";
+                extensionSD.derivation = 'constraint';
+                extensionSD.id = vo.extensionId;
+                extensionSD.status='draft';
+                extensionSD.contextType = "datatype";
+                extensionSD.context=["Element"];
+            } else {
+                extensionSD.constrainedType = "Extension";
+                extensionSD.base = "http://hl7.org/fhir/StructureDefinition/Extension";
+            }
+
+
+            extensionSD.snapshot.element.push({path:'Extension',definition:'ext',min:0,max:'1',type:[{code:'Extension'}]});
+            extensionSD.snapshot.element.push({path:'Extension.url',definition:'Url',min:1,max:'1',type:[{code:'uri'}]});
+            extensionSD.snapshot.element.push({path:vo.valueName, definition:'value',min:0,max:'1',type:[{code:vo.dt}]});
+
+            return extensionSD;
+
+        }
         
         return  {
             makeProfileDisplayFromProfile : function(inProfile) {
+                //var that = this;
                 var deferred = $q.defer();
                 var lstTree = [];
 
@@ -54,7 +95,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                             function(sdef) {
                                                 var analysis = Utilities.analyseExtensionDefinition2(sdef);
                                                 item.myMeta.analysis = analysis;
-                                                console.log(analysis)
+                                                //console.log(analysis)
                                             }, function(err) {
                                                 alert('Error retrieving '+ t.profile + " "+ angular.toJson(err))
                                             }
@@ -86,6 +127,13 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             include = false;
                         }
 
+                        //don't include removed elements. This is actually used by the profile display component
+                        //to mark an element as removed. Todo - this does couple the compelent at this service
+                        //together - probably somethign that should be fxed at some point,,,,
+                        if (item.myMeta.remove) {
+                            include = false;
+                        }
+
                         //standard element names like 'text' or 'language'
                         if (ar.length == 2 && elementsToDisable.indexOf(ar[1]) > -1) {
                             include = false;
@@ -103,8 +151,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         //set various meta items based on the datatype
                         if (item.type) {
                             item.type.forEach(function (it) {
-
-                                console.log(it.code)
+                                
                                 //a node that has child nodes
                                 if (it.code == 'BackboneElement') {
                                     item.myMeta.isParent = true;
@@ -119,9 +166,14 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 }
 
                                 //if the datatype starts with an uppercase letter, then it's a complex one...
-                                if (/[A-Z]/.test( it.code[0])){
+                                if (/[A-Z]/.test( it.code)){
                                     item.myMeta.isComplex = true;
                                 }
+
+                                if (['code','Coding','CodeableConcept'].indexOf(it.code) > -1) {
+                                    item.myMeta.isCoded = true;
+                                }
+
 
                             })
                         }
@@ -216,8 +268,9 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 if (queries.length) {
                     $q.all(queries).then(
                         function() {
+                            setNodeIcons(lstTree)
 
-
+/*
                             //here is where we set the icons - ie after all the extension definitions have been loaded & resolved...
                             lstTree.forEach(function(node){
                                 console.log(node);
@@ -260,45 +313,319 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                                 node.icon='/icons/icon_reference.png';
                                             }
 
-
-                                        //if it's not a parent node, then set to a data type...
-
-
-
-
-
                                     }
-
-                                //    if (myMeta.isExtension) {
-
-                                       // node.icon='/icons/icon_extension_simple.png';
-                                   // }
-
-
-
-                                    console.log('-->',node.data.ed.myMeta)
-
-
 
                                 }
                             })
 
-
+*/
 
                             deferred.resolve({table:lst,treeData:lstTree})
                         }
                     )
 
                 } else {
+                    setNodeIcons(lstTree);
                     deferred.resolve({table:lst,treeData:lstTree})
                 }
 
 
 
+
+
+
                 return deferred.promise;
+
+
+                function setNodeIcons(treeData) {
+                    //here is where we set the icons - ie after all the extension definitions have been loaded & resolved...
+                    lstTree.forEach(function(node){
+
+
+                        //set the '[x]' for code elements
+                        if (node.data && node.data.ed && node.data.ed.type && node.data.ed.type.length > 1) {
+                            node.text += '[x]'
+                        }
+
+                        //set the '[x]' for extensions (whew!)
+                        if (node.data && node.data.ed && node.data.ed.myMeta && node.data.ed.myMeta.analysis &&
+                            node.data.ed.myMeta.analysis.dataTypes && node.data.ed.myMeta.analysis.dataTypes.length > 1) {
+                            node.text += '[x]'
+                        }
+
+                        //set the display icon
+                        if (node.data && node.data.ed && node.data.ed.myMeta){
+
+
+
+
+                            var myMeta = node.data.ed.myMeta;
+
+                            if (!myMeta.isParent) {     //leave parent node as folder...
+
+                                var r = myMeta;
+                                if (myMeta.isExtension && myMeta.analysis) {
+                                    r = myMeta.analysis;
+                                }
+                                //var isComplex = myMeta.isComplex ||
+
+
+                                if (r.isComplex) {
+                                    node.icon='/icons/icon_datatype.gif';
+                                } else {
+                                    node.icon='/icons/icon_primitive.png';
+                                }
+
+                                if (r.isReference) {
+                                    node.icon='/icons/icon_reference.png';
+                                }
+
+                            }
+
+                        }
+                    })
+                }
 
                 // return {table:lst,treeData:lstTree};
 
+            },
+            saveNewProfile : function(profileName,model,baseProfile,isEdit) {
+                //save the newly created profile. The structure is different for STU 2 & 3. sigh.
+                //baseProfile is the profile that is being constrained
+                //isEdit is when a profiled resource is being updated (it's not a new one, but an update to the current one
+                if (!profileName) {
+                    alert('The profile name is required');
+                    return;
+                }
+                var deferred = $q.defer();
+                var config = appConfigSvc.config();
+                //model is the array of tree nodes...
+                //iterate through the model to build the profile;
+
+                var fhirVersion = 2;
+                var svr = appConfigSvc.getServerByUrl(config.servers.conformance);
+                if (svr)  {
+                    fhirVersion = svr.version;
+                }
+
+                var sd;         //this is the StructureDefinition for the Profile
+                if (fhirVersion == 3) {
+                    if (! isEdit) {
+                        //this is a new profile on a base type...
+                        sd = {resourceType:'StructureDefinition',name : profileName, kind:'resource',
+                            status:'draft',experimental : true, snapshot : {element:[]}};
+
+                        sd.abstract = false;
+                        sd.baseType = baseProfile.name;         //assume that constariing a base resource
+                        sd.baseDefinition = baseProfile.url;    //assume that constariing a base resource
+                        sd.derivation = 'constraint';
+                        sd.id = profileName;
+                        var profileId = profileName;       //todo - ensure not yet used (or this is an update)
+                        var profileUrl = config.servers.conformance + "StructureDefinition/" +profileId;
+
+                        sd.url = profileUrl;
+                    } else {
+                        //this is an edit. Remove all the existing ED's because we are going to update them...
+                        sd = angular.copy(baseProfile);
+                        sd.snapshot.element.length = 0;
+
+                    }
+
+                    //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
+                    var typeName = 'baseType';
+                } else {
+                    sd = {resourceType:'StructureDefinition',name : profileName, kind:'resource',
+                        status:'draft',experimental : true, snapshot : {element:[]}};
+                    var profileId = profileName;       //todo - ensure not yet used (or this is an update)
+                    var profileUrl = config.servers.conformance + "StructureDefinition/" +profileId;
+                    sd.url = profileUrl;
+
+                    //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
+                    var typeName = 'base';
+                }
+
+                var log = [];
+
+                var SDsToSave = [];     //this will be an array of extension SD's plus a single profile SD
+
+
+
+                //here is where we iterate through the tree model, pulling out the ElementDefinitions and adding them to the profile...
+
+                model.forEach(function(item,index) {
+                    if (item.data && item.data.ed) {
+                        var ed = item.data.ed;
+
+                        //the first entry is always the root, which in this case will have the base type being extended...
+                        if (! sd[typeName]) {
+                            sd[typeName] = ed.path;
+                            //now add the meta element
+                        }
+
+                        var inProfile = true;       //true if this ed is to be included in the profile
+                        if (ed.myMeta) {
+                            if (ed.myMeta.remove) {
+                                inProfile = false;
+                            } else if (ed.myMeta.isNew || (ed.myMeta.isExtension && ed.myMeta.isDirty)) {
+                                //this is a new extension. we'll create a new extension for now - later will allow the user to select an existing one
+                                //the extension will only have a single datatype (for now)
+                                var extensionId = profileName +  ed.path.replace(/\./,'-');     //the  Id for
+                                var extensionUrl = config.servers.conformance + "StructureDefinition/" +extensionId;
+                                var dt = ed.type[0].code;   //only a single dt per entry (right now)
+                                //now change the datatype in the profile to be an extension, with a profile pointing to the ED
+                                ed.type[0].code = "Extension";      // 'cause that's what it is...
+                                ed.type[0].profile = [extensionUrl];      //and where to find it.
+
+
+                                //and change the path to be 'Extension'
+                                var ar = ed.path.split('.');
+                                var extensionDefId = ar[ar.length-1];
+                                ar[ar.length-1] = 'extension';
+                                ed.path = ar.join('.');
+                                var valueName = "Extension.value" + dt.capitalize();    //the value name in the extension definition
+                                //console.log(ed);
+
+                                var vo = {};
+                                vo.ed = ed;                         //  the element definition that has been built
+                                vo.extensionUrl = extensionUrl;     //  the cannonical url for this definition
+                                vo.extensionId = extensionId;       //  the Id of the structuredefinition on the server
+                                vo.valueName = valueName;           //  the name for the 'value' element - eg valueCodeableConcept
+                                vo.dt = dt;
+
+                                var extensionSD = makeExtensionSD(vo);
+
+
+/*
+
+                                //the extensionDefinition that describes this extension...
+                                var extensionSD = {"resourceType": "StructureDefinition","url": extensionUrl,
+                                    "name": ed.path,"kind": "datatype",
+                                    "snapshot" : {element:[]}
+                                };
+
+                                //these are STU-3 - not sure about STU-2
+                                if (fhirVersion == 3) {
+                                    extensionSD.abstract = false;
+                                    extensionSD.baseType = "Extension";
+                                    extensionSD.baseDefinition = "http://hl7.org/fhir/StructureDefinition/Extension";
+                                    extensionSD.derivation = 'constraint';
+                                    extensionSD.id = extensionId;
+                                    extensionSD.status='draft';
+                                    extensionSD.contextType = "datatype";
+                                    extensionSD.context=["Element"];
+                                } else {
+                                    extensionSD.constrainedType = "Extension";
+                                    extensionSD.base = "http://hl7.org/fhir/StructureDefinition/Extension";
+                                }
+
+
+                                extensionSD.snapshot.element.push({path:'Extension',definition:'ext',min:0,max:'1',type:[{code:'Extension'}]});
+                                extensionSD.snapshot.element.push({path:'Extension.url',definition:'Url',min:1,max:'1',type:[{code:'uri'}]});
+                                extensionSD.snapshot.element.push({path:valueName,definition:'value',min:0,max:'1',type:[{code:dt}]});
+
+*/
+
+                                SDsToSave.push(saveStructureDefinition(extensionId,extensionSD).then(
+                                    function() {
+                                        log.push('Saved '+extensionSD.url);
+                                    },function(err){
+                                        alert('Error saving '+extensionSD.url+ ' ' + angular.toJson(err))
+                                        log.push('Error saving '+extensionSD.url+ ' ' + angular.toJson(err));
+                                    }
+                                ));
+                            } else if (ed.myMeta.isDirty) {
+                                //this is an ED that has been modified
+
+
+
+
+
+
+  /*
+                                SDsToSave.push(saveStructureDefinition(extensionId,extensionSD).then(
+                                    function() {
+                                        log.push('Saved '+extensionSD.url);
+                                    },function(err){
+                                        log.push('Error saving '+extensionSD.url+ ' ' + angular.toJson(err));
+                                    }
+                                ));
+*/
+                            }
+                        }
+
+                        //if this element is tobe included in the profile, we can add it now...
+                        if (inProfile) {
+                            delete ed.myMeta;
+                            sd.snapshot.element.push(ed)
+                        }
+
+                        if (index == 0) {
+                            //this is the first element - ie the one with the type name. we can add the meta element now...
+                            //this is to the StructureDefinition resource - nothing to do with any extensions
+                            var resourceType = baseProfile.snapshot.element[0].path;
+                            var idElement = {definition:'Id',min:0,max:'1',type:[{code:'id'}]};
+                            idElement.base = {path:"Resource.id",min:0,max:'1'};
+                            idElement.path = resourceType+'.id';
+
+                            sd.snapshot.element.push(idElement)
+
+                            var metaElement = {}
+                            metaElement.path = resourceType +'.meta';    //the resource type is always the first emelent
+                            metaElement.definition = 'The meta element';
+                            metaElement.min=0;
+                            metaElement.max='1';
+                            metaElement.base = {path:"Resource.meta",min:0,max:'1'}
+                            metaElement.type=[{code:'Meta'}];
+
+                            sd.snapshot.element.push(metaElement);
+
+                            var textElement = {definition:'Narrative',min:0,max:'1',type:[{code:'Narrative'}]};
+                            textElement.base = {path:"DomainResource.text",min:0,max:'*'};
+                            textElement.path = resourceType+'.text';
+
+                            sd.snapshot.element.push(textElement)
+
+
+                        }
+
+
+
+                    }
+
+                });
+
+                console.log(sd)
+                //now add the profile to the list of SD's to save
+                SDsToSave.push(saveStructureDefinition(profileId,sd).then(
+                    function() {
+                        log.push('Saved '+sd.url);
+                    },function(err){
+                        //log.push('Error saving '+sd.url+ ' ' + angular.toJson(err));
+                        log.push(err.data);
+                    }));
+
+                console.log(SDsToSave);
+
+                $q.all(SDsToSave).then(
+                    function(){
+                        deferred.resolve({log:log,profile:sd});
+                    },function(err) {
+                        alert('Error saving profile and/or extension definitions '+ angular.toJson(err))
+                        deferred.reject(err);
+                    }
+                );
+
+
+                return deferred.promise;
+
+
+                function saveStructureDefinition(extensionId,extensionDefinition) {
+                    console.log(extensionId,extensionDefinition);
+                    return $http.put(extensionDefinition.url,extensionDefinition)
+
+
+
+                }
             }
         }
     }

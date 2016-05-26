@@ -15,6 +15,11 @@
         color: red;
     }
 
+    .greyBackground {
+        background-color: #f2f2f2;
+        margin-bottom: 4px;
+    }
+
 </style>
 
 <div ng-controller="logicalModelCtrl">
@@ -66,6 +71,7 @@
                           ontreenodeselected="treeNodeSelected(item)"
                           deleteatpath="deleteAtPath"
                           restoreremoved ="restoreRemoved"
+                          updateelementdefinition = "updateElementDefinitionInComponent"
                           ontreedraw="onTreeDraw(item)" newnode="newNodeToAdd"></show-profile>
             <div class="myScroll">
                 <div id="localTree"></div>
@@ -77,9 +83,9 @@
             <uib-tabset ng-show='edFromTreeNode'>
                 <uib-tab heading="Details">
                     <br/>
-                    <div class="row">
+                    <div class="row ">
                         <div class="col-md-6">
-                            <div class="row">
+                            <div class="row greyBackground">
                                 <div class="col-md-3 col-sm-3">Path</div>
                                 <div class="col-md-9 col-sm-8">
                                     {{edFromTreeNode.path}}
@@ -87,10 +93,12 @@
                                 </div>
                             </div>
 
-                            <div class="row" ng-show="edFromTreeNode.myMeta.isExtension">
+                            <div class="row greyBackground" ng-show="edFromTreeNode.myMeta.isExtension">
                                 <div class="col-md-3 col-sm-3">Extension</div>
                                 <div class="col-md-9 col-sm-8">
-                                    <div ng-repeat="item in edFromTreeNode.type">{{item.code}}
+                                    <div ng-repeat="item in edFromTreeNode.type">
+
+                                        {{item.code}}
 
                                         <span ng-repeat="profile in item.profile">
                                             --> <span class="popoverHint" popover-placement="right"
@@ -102,41 +110,116 @@
                                 </div>
                             </div>
 
-                            <!-- not for extensions... -->
-                            <div class="row" ng-hide="edFromTreeNode.myMeta.isExtension">
+                            <!-- Types not in extensions... -->
+                            <div class="row greyBackground" ng-hide="edFromTreeNode.myMeta.isExtension">
                                 <div class="col-md-3 col-sm-3">DataType/s</div>
-                                <div class="col-md-9 col-sm-8">
-                                    <div ng-repeat="item in edFromTreeNode.type">{{item.code}}
+                                <div class="col-md-8 col-sm-8">
+                                    <div ng-repeat="item in edFromTreeNode.type">
+                                        <span ng-hide="edFromTreeNode.type.length <2">
+                                            <i ng-show="mode=='new' || mode=='edit'" style="cursor: pointer"
+                                               ng-click="removeDataType($index)"
+                                               class="glyphicon glyphicon-minus-sign"></i>
+                                        </span>
 
-                                        <!-- show the profiles-->
+
+                                        {{item.code}}
+
+                                        <!-- show any profiles-->
                                         <span ng-repeat="profile in item.profile">
                                             --> <span class="popoverHint" popover-placement="right"
                                                       popover-trigger='mouseenter'
                                                        uib-popover="{{profile}}">{{profile | showUrlId}}</span>
                                         </span>
-                                    </div>
+
                                 </div>
+                                </div>
+                                    <!--
+                                <div class="col-md-1 col-sm-1">
+                                     <span><i ng-show="mode=='new' || mode=='edit'" class="glyphicon glyphicon-plus-sign"
+                                              ng-click="editDefinition = !editDefinition" style="cursor: pointer">
+
+                                     </i></span>
+                                </div>
+                                    -->
                             </div>
 
                             <!-- Extension datatypes are in the analysis element-->
-                            <div class="row" ng-show="edFromTreeNode.myMeta.isExtension">
+                            <div  class="row greyBackground" ng-show="edFromTreeNode.myMeta.isExtension">
                                 <div class="col-md-3 col-sm-3">DataType/s</div>
-                                <div class="col-md-9 col-sm-8">
+                                <div class="col-md-8 col-sm-8">
                                     <div ng-repeat="dt in edFromTreeNode.myMeta.analysis.dataTypes">
-                                        {{dt}}
+
+                                         <span ng-hide="edFromTreeNode.myMeta.analysis.dataTypes.length <2">
+                                            <i ng-show="mode=='new' || mode=='edit'" style="cursor: pointer"
+                                               ng-click="removeDataType($index)"
+                                               class="glyphicon glyphicon-minus-sign"></i>
+                                        </span>
+
+
+                                        {{dt.code}}
+
+                                        <span ng-show="dt.profile">
+                                        --> <span class="popoverHint" popover-placement="right"
+                                                  popover-trigger='mouseenter'
+                                                  uib-popover="{{dt.profile}}">{{dt.profile | showUrlId}}</span>
+                                        </span>
 
 
                                     </div>
+
+                                    <div class="row" ng-show="input.addNewDTToExtension">
+                                        <div class="col-md-10 col-sm-10">
+                                            <select class="form-control mygap" ng-model="input.newDatatypeForExtension"
+                                                    ng-options="dt.description for dt in dataTypes"></select>
+
+                                            <select class="form-control mygap" ng-model="input.newRRForExtension"
+                                                    ng-show="input.newDatatypeForExtension.description == 'Reference'"
+                                                    ng-options="typ.name for typ in standardResourceTypes"></select>
+
+
+
+                                        </div>
+                                        <div class="col-md-2 col-sm-2">
+                                            <button ng-click="addDTToElement(input.newDatatypeForExtension)"
+                                                    class="btn btn-link pull-right">Add</button>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                                <div class="col-md-1 col-sm-1">
+                                     <span><i ng-show="mode=='new' || mode=='edit'" class="glyphicon glyphicon-plus-sign"
+                                              ng-click="input.addNewDTToExtension = !input.addNewDTToExtension" style="cursor: pointer">
+
+                                     </i></span>
                                 </div>
                             </div>
 
 
-                            <div class="row">
+                            <!-- The definition of the element... -->
+                            <div class="row greyBackground">
                                 <div class="col-md-3 col-sm-3">Definition</div>
-                                <div class="col-md-9 col-sm-8">{{edFromTreeNode.definition}}</div>
+                                <div class="col-md-8 col-sm-8">
+                                    <div ng-hide="editDefinition">
+                                        {{edFromTreeNode.definition}}
+                                    </div>
+                                    <div ng-show="editDefinition">
+                                        <textarea rows="3" ng-model="edFromTreeNode.definition" class="form-control"></textarea>
+                                        <!--
+                                        <div><button class="btn btn-link pull-right" ng-click="saveNewDefinition()">Save</button> </div>
+                                        -->
+                                    </div>
+
+                                </div>
+                                <div class="col-md-1 col-sm-1">
+                                     <span><i ng-show="mode=='new' || mode=='edit'" class="glyphicon glyphicon-edit"
+                                              ng-click="changeDefinition()" style="cursor: pointer">
+
+                                     </i></span>
+                                </div>
 
                             </div>
-                            <div class="row">
+                            <div class="row greyBackground" >
                                 <div class="col-md-3 col-sm-3">
                                     Multiplicity
                                 </div>
@@ -175,7 +258,8 @@
                             </div>
 
 
-                            <div class="row">
+                            <div class="row greyBackground"
+                                 ng-show="edFromTreeNode.myMeta.isCoded || edFromTreeNode.myMeta.analysis.isCoded">
                                 <div class="col-md-3 col-sm-3">
 
                                     ValueSet

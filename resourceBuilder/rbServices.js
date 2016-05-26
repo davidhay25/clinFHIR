@@ -418,7 +418,8 @@ angular.module("sampleApp").
                             element.type.forEach(function (typ) {
                                 var code = typ.code;        //the datatype code
                                 if (code) {
-                                    vo.dataTypes.push(code);
+
+                                    vo.dataTypes.push({code:code});
                                     //is this a codedd type?
                                     if (['CodeableConcept', 'code', 'coding'].indexOf(code) > -1) {
                                         vo.isCoded = true;

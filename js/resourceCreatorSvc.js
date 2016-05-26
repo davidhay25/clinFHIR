@@ -2222,7 +2222,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             return lst
 
         },
-        saveNewProfile : function(profileName,model,baseProfile,isEdit) {
+        saveNewProfileDEP : function(profileName,model,baseProfile,isEdit) {
             //save the newly created profile. The structure is different for STU 2 & 3. sigh.
             //baseProfile is the profile that is being constrained
             //isEdit is when a profiled resource is being updated (it's not a new one, but an update to the current one
