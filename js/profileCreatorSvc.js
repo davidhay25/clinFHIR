@@ -8,7 +8,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
             //vo.extensionId    - the Id of the structuredefinition on the server
             //vo.valueName      - the name for the 'value' element - eg valueCodeableConcept
             //vo.fhirVersion    - the version of fhir we are targetting
-            //vo.dt             - the dataType of the extension
+            //vo.type             - the dataType of the extension
 
             var fhirVersion = vo.fhirVersion || 3;      //default to version 3...
 
@@ -28,15 +28,20 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 extensionSD.status='draft';
                 extensionSD.contextType = "datatype";
                 extensionSD.context=["Element"];
+                extensionSD.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
             } else {
                 extensionSD.constrainedType = "Extension";
                 extensionSD.base = "http://hl7.org/fhir/StructureDefinition/Extension";
             }
 
-
             extensionSD.snapshot.element.push({path:'Extension',definition:'ext',min:0,max:'1',type:[{code:'Extension'}]});
             extensionSD.snapshot.element.push({path:'Extension.url',definition:'Url',min:1,max:'1',type:[{code:'uri'}]});
-            extensionSD.snapshot.element.push({path:vo.valueName, definition:'value',min:0,max:'1',type:[{code:vo.dt}]});
+
+
+            //var type = ed.type;     //teh dataTypes
+           // var el = {path:vo.valueName, definition:'value',min:0,max:'1',type:[{code:vo.dt}]}
+            var el = {path:vo.valueName, definition:'value',min:0,max:'1',type:vo.type}
+            extensionSD.snapshot.element.push(el);
 
             return extensionSD;
 
@@ -210,30 +215,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
                               }
 
                             node.data = {ed : item};
-/*
-                            //set the icon to display. todo Would be better to use a class, but can't get that to work...
-                            if (!item.myMeta.isParent) {
-                                //if it's not a parent node, then set to a data type...
-                                if (item.myMeta.isComplex) {
-                                    node.icon='/icons/icon_datatype.gif';
-                                } else {
-                                    node.icon='/icons/icon_primitive.png';
-                                }
-
-
-                                if (item.myMeta.isReference) {
-                                    node.icon='/icons/icon_reference.png';
-                                }
-
-
-
-                            }
-
-                            if (item.myMeta.isExtension) {
-                                node.icon='/icons/icon_extension_simple.png';
-                            }
-
-*/
 
 
                             //so long as the parent is in the tree, it's safe to add...
@@ -256,9 +237,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 }
                             });
                         }
-
-
-
 
                     });
 
@@ -342,16 +320,20 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     lstTree.forEach(function(node){
 
 
-                        //set the '[x]' for code elements
-                        if (node.data && node.data.ed && node.data.ed.type && node.data.ed.type.length > 1) {
-                            node.text += '[x]'
+                        //set the '[x]' suffix unless already there...
+                        if (node.text && node.text.indexOf('[x]') == -1) {
+                            //set the '[x]' for code elements
+                            if (node.data && node.data.ed && node.data.ed.type && node.data.ed.type.length > 1) {
+                                node.text += '[x]'
+                            }
+
+                            //set the '[x]' for extensions (whew!)
+                            if (node.data && node.data.ed && node.data.ed.myMeta && node.data.ed.myMeta.analysis &&
+                                node.data.ed.myMeta.analysis.dataTypes && node.data.ed.myMeta.analysis.dataTypes.length > 1) {
+                                node.text += '[x]'
+                            }
                         }
 
-                        //set the '[x]' for extensions (whew!)
-                        if (node.data && node.data.ed && node.data.ed.myMeta && node.data.ed.myMeta.analysis &&
-                            node.data.ed.myMeta.analysis.dataTypes && node.data.ed.myMeta.analysis.dataTypes.length > 1) {
-                            node.text += '[x]'
-                        }
 
                         //set the display icon
                         if (node.data && node.data.ed && node.data.ed.myMeta){
@@ -409,27 +391,34 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 }
 
                 var sd;         //this is the StructureDefinition for the Profile
+
+
+
+                //create the StructureDefinition - tha same whether a new one. or editing a previous one...
                 if (fhirVersion == 3) {
-                    if (! isEdit) {
-                        //this is a new profile on a base type...
-                        sd = {resourceType:'StructureDefinition',name : profileName, kind:'resource',
-                            status:'draft',experimental : true, snapshot : {element:[]}};
 
-                        sd.abstract = false;
-                        sd.baseType = baseProfile.name;         //assume that constariing a base resource
-                        sd.baseDefinition = baseProfile.url;    //assume that constariing a base resource
-                        sd.derivation = 'constraint';
-                        sd.id = profileName;
-                        var profileId = profileName;       //todo - ensure not yet used (or this is an update)
-                        var profileUrl = config.servers.conformance + "StructureDefinition/" +profileId;
+                    sd = {resourceType:'StructureDefinition',name : profileName, kind:'resource',
+                        status:'draft',experimental : true};
 
-                        sd.url = profileUrl;
-                    } else {
-                        //this is an edit. Remove all the existing ED's because we are going to update them...
-                        sd = angular.copy(baseProfile);
-                        sd.snapshot.element.length = 0;
+                    sd.abstract = false;
+                    sd.baseType = baseProfile.name;         //assume that constariing a base resource
+                    sd.baseDefinition = baseProfile.url;    //assume that constariing a base resource
+                    sd.derivation = 'constraint';
+                    sd.id = profileName;
+                    sd.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
 
-                    }
+
+                    var profileId = profileName;       //todo - ensure not yet used (or this is an update)
+                    var profileUrl = config.servers.conformance + "StructureDefinition/" +profileId;
+
+                    sd.url = profileUrl;
+
+                    //populate the Profile SD 'header' elements from the base profile (this header info can be changed in the UI)
+                    //sd.name = baseProfile.name;
+                    sd.description = baseProfile.description;
+                    sd.requirements = baseProfile.requirements;
+                    sd.copyright = baseProfile.copyright;
+                    sd.snapshot = {element:[]};
 
                     //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
                     var typeName = 'baseType';
@@ -472,7 +461,14 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 var extensionId = profileName +  ed.path.replace(/\./,'-');     //the  Id for
                                 var extensionUrl = config.servers.conformance + "StructureDefinition/" +extensionId;
                                 var dt = ed.type[0].code;   //only a single dt per entry (right now)
+
                                 //now change the datatype in the profile to be an extension, with a profile pointing to the ED
+                                //removed friday...
+
+                                var typeForExtension = angular.copy(ed.type);       //we're using the ed to store this stuff
+
+                                console.log(typeForExtension)
+
                                 ed.type[0].code = "Extension";      // 'cause that's what it is...
                                 ed.type[0].profile = [extensionUrl];      //and where to find it.
 
@@ -490,7 +486,9 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 vo.extensionUrl = extensionUrl;     //  the cannonical url for this definition
                                 vo.extensionId = extensionId;       //  the Id of the structuredefinition on the server
                                 vo.valueName = valueName;           //  the name for the 'value' element - eg valueCodeableConcept
-                                vo.dt = dt;
+                                vo.type = ed.myMeta.analysis.dataTypes;     //the type for extensios
+                                //vo.dt = dt;
+
 
                                 var extensionSD = makeExtensionSD(vo);
 

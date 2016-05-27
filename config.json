@@ -1,0 +1,27 @@
+{
+  "baseSpecUrl":"http://hl7.org/fhir/",
+  "logLevel": 0,
+  "enableCache":false,
+  "defaultTerminologyServerUrl" :" http://fhir.hl7.org.nz/dstu2/",
+  "servers": {
+    "terminology": "http://fhir.hl7.org.nz/dstu2/",
+    "data": "http://fhirtest.uhn.ca/baseDstu3/",
+    "conformance": "http://fhir3.healthintersections.com.au/open/"
+  },
+  "terminologyServers" : [
+    {"version":2,"url":"http://fhir.hl7.org.nz/dstu2/"},
+    {"version":2,"url":"http://fhir2.healthintersections.com.au/open/"},
+    {"version":3,"url":"http://fhir3.healthintersections.com.au/open/"}
+  ],
+  "allKnownServers":[
+    {"name":"Grahames STU2 server","url":"http://fhir2.healthintersections.com.au/open/","version":2,"everythingOperation":true},
+    {"name":"Grahame STU3 server","url":"http://fhir3.healthintersections.com.au/open/","version":3,"everythingOperation":true},
+    {"name":"HealthConnex STU2 server","url":"http://sqlonfhir-dstu2.azurewebsites.net/fhir/","version":2,"everythingOperation":true},
+    {"name":"HealthConnex STU3 server","url":"http://sqlonfhir-may.azurewebsites.net/fhir/","version":3,"everythingOperation":true},
+    {"name":"Local HAPI STU2","url":"http://localhost:8080/baseDstu2/","version":2,"everythingOperation":true},
+    {"name":"Local HAPI STU3","url":"http://localhost:8080/baseDstu3/","version":3,"everythingOperation":true},
+    {"name":"Public HAPI server STU2 server","url":"http://fhirtest.uhn.ca/baseDstu2/","version":2,"everythingOperation":true},
+    {"name":"Public HAPI server STU3 server","url":"http://fhirtest.uhn.ca/baseDstu3/","version":3,"everythingOperation":true},
+    {"name":"HL7 New Zealand STU2 server","url":"http://fhir.hl7.org.nz/baseDstu2/","version":2}
+  ]
+}

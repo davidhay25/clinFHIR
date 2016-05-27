@@ -8,14 +8,27 @@ angular.module("sampleApp")
 //also holds the current patient and all their resources...
     //note that the current profile is maintained by resourceCreatorSvc
 
-    .service('appConfigSvc', function($localStorage) {
+    .service('appConfigSvc', function($localStorage,$http,$timeout) {
 
         var dataServer;     //the currently selected data server server
         var currentPatient;    //the currently selected patint
         var allResources;       //all resources for the current patient
 
         //the default config for a new browser...
-        var defaultConfig = {servers : {}};
+        var defaultConfig;
+
+        //todo - not currently being used as thre are synchronous uses of defaultConfig
+        $http.get("config.json").then(
+            function(data) {
+                console.log(data.data);
+                defaultConfig = data.data;
+            }
+        );
+
+
+        
+
+        defaultConfig = {servers : {}};
         defaultConfig.baseSpecUrl = "http://hl7.org/fhir/";     //the base for spec documentation
         defaultConfig.logLevel = 0;     //0 = no logging, 1 = log to console
         defaultConfig.enableCache = false;  //whether caching is supported
@@ -53,12 +66,15 @@ angular.module("sampleApp")
 
 
 
-        //config.allKnownServers.push({name:"Spark Server",url:"http://spark-dstu2.furore.com/fhir/"});
-
 
         return {
             getServerByUrl : function(url) {
               //return the server definition  for a given url. Wouldn't need this if I was saving the object rather than the string
+
+
+
+
+
                 for (var i=0; i < defaultConfig.allKnownServers.length;i++) {
                     if (defaultConfig.allKnownServers[i].url == url) {
                         return defaultConfig.allKnownServers[i];

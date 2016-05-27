@@ -103,12 +103,7 @@ angular.module("sampleApp")
         $scope.displayMode = 'new';     //display the 'enter new resouce' screen..
     };
 
-
-    
-
-
-
-
+            
     //============== event handlers ===================
 
     //the config (ie server) has been update. We need to abandon the resource being built...
@@ -155,9 +150,7 @@ angular.module("sampleApp")
         });
     });
 
-
-
-
+            
     //clears the current resource being buils and re-displays the front screen 
     $scope.cancelNewResource = function(state){
 
@@ -831,7 +824,11 @@ angular.module("sampleApp")
 
             drawTree();        //and redraw...
             delete  $scope.dataType;
+        } else {
+            alert('There was an error creating this element. Sorry, I cannot continue.')
+            delete  $scope.dataType;        //to clear the data entry screen...
         }
+
     };
 
 
@@ -2545,6 +2542,9 @@ console.log(url);
                                             appConfigSvc,modalService,RenderProfileSvc){
 
 
+
+
+
         $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();      //all the known data types
 
         //all the known Resource types. Used when creating a reference
@@ -2555,14 +2555,27 @@ console.log(url);
             }
         );
 
-        //when a new name is entered into the name box. 
+        //when a new name is entered into the name box, see if there is already a profile with that url. 
         $scope.checkExistingProfile = function(name) {
+
+
+
+
+
+
 
             resourceCreatorSvc.getProfileFromConformanceServerById(name).then(
                 function(data) {
                     //oops, the file exists
-                    alert('The profile already exists and will be replaced if the name is not chosen.')
-                    $scope.mode='new';      //as this is effectvely a new profile
+                    if (isAuthoredByClinFhir(data)) {
+                        modalService.showModal({}, {bodyText: 'The profile already exists and will be replaced if the name is not chosen.'})
+                        $scope.mode='new';      //as this is effectvely a new profile
+                    } else {
+                        modalService.showModal({}, {bodyText: 'This profile is not authored by clinFHIR. You need to choose another name'});
+                        $scope.input.profileName = "";
+                    }
+
+
                 },
                 function(err){
                     //the resource does not exist - all ok. todo - should check for 404 really
@@ -2590,14 +2603,35 @@ console.log(url);
         $rootScope.$on('newProfileChosen',function() {
             setUpDisplayNewProfile()
 
-        })
+        });
 
         //$scope.editText = 'Edit';       //will change the text when a core profile...
         //when there is a non-core profile - allow it to be edited...
         $scope.startEdit = function() {
-            $scope.mode = 'edit';           //edit (current), new, view
-            $scope.input.profileName = $scope.frontPageProfile.name  //maintained by frontCtrl
+
+            //console.log($scope.frontPageProfile.code);
+
+            // extensionSD.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
+            if (isAuthoredByClinFhir($scope.frontPageProfile)) {
+                $scope.mode = 'edit';           //edit (current), new, view
+                $scope.input.profileName = $scope.frontPageProfile.name  //maintained by frontCtrl
+            } else {
+                modalService.showModal({}, {bodyText: 'Only profiles authored by clinFHIR can be edited'});
+            }
         };
+
+        function isAuthoredByClinFhir(profile) {
+            var isAuthoredByClinFhir = false;
+            if ($scope.frontPageProfile.code) {
+                $scope.frontPageProfile.code.forEach(function(coding){
+                    if (coding.system == 'http://fhir.hl7.org.nz/NamingSystem/application' &&
+                        coding.code == 'clinfhir') {
+                        isAuthoredByClinFhir = true;
+                    }
+                })
+            }
+            return isAuthoredByClinFhir;
+        }
 
         //allows the user to view the contents of a valueSet. Note that the '$scope.showVSBrowserDialog.open' call is
         //actually implemented in the 'resourceCreatorCtrl' controller - it's the parent of this one...
@@ -2617,6 +2651,7 @@ console.log(url);
 
         //when a profile is selected from the front screen, check if it is a core type
         $scope.$on('profileSelected',function(event,data){
+            delete $scope.isBaseResource;
             $scope.logOfChanges = [];
             $scope.allowEdit = true;    //the profile being viewed can be altered
             var selectedProfile = data.profile;
@@ -2626,6 +2661,7 @@ console.log(url);
             if (base && base.indexOf('Resource') > -1) {    //was 'DomainResource
                 //yes, this is a base resource.
                 $scope.allowEdit = false;
+                $scope.isBaseResource = true;
                 
             }
         });
@@ -2654,6 +2690,7 @@ console.log(url);
 
                 modalService.showModal({}, modalOptions).then(function (result) {
                     //delete $scope.showProfileEditPage;
+                    //delete $scope.frontPageProfile;
                     closeTheProfileEditor();
 
                   /*  delete $scope.model;
@@ -2697,6 +2734,16 @@ console.log(url);
             }
 
             $scope.editDefinition = ! $scope.editDefinition
+        }
+
+        $scope.changeComments = function() {
+
+            if ($scope.editComments){
+                //make the component update the model it is based on...
+                $scope.updateElementDefinitionInComponent = {ed:$scope.edFromTreeNode,item:$scope.treeNodeItemSelected};
+            }
+
+            $scope.editComments = ! $scope.editComments
         }
 
         //remove a datatype from the list of options...
@@ -2817,8 +2864,9 @@ console.log(url);
             );
         };
 
+        //add a new child node to the current one
         $scope.addNewNode = function(type) {
-            //add a new child node to the current one
+
             console.log(type);
             var newPath,parentId,ed;
             var edParent = $scope.selectedNode.data.ed;       //the elementDefinition of the parent
@@ -2849,8 +2897,17 @@ console.log(url);
             }
             ed.definition = $scope.input.definition || newPath;
             ed.type = [{code:$scope.input.newDatatype.code}];       //<!--- todo is this right?
-            ed.myMeta.analysis = {dataTypes:[$scope.input.newDatatype.code]};
 
+            
+            //this is an extension - so we store the datatype in the analysis object...
+            var vo = {code:$scope.input.newDatatype.code};
+            //if this is a reference, and there is a type specifics then add the profile
+            if ($scope.input.newDatatype.code == 'Reference' && $scope.input.newRRForNode) {
+                vo.profile = ['http://hl7.org/fhir/StructureDefinition/'+$scope.input.newRRForNode.name];
+            }
+            ed.myMeta.analysis = {dataTypes:[vo]};
+
+            //update the log of chnages
             $scope.logOfChanges.push({type:'A',display:'Added '+ newPath,ed:ed});
 
             //this is a property against the component that will add the ed to the tree view
@@ -2858,22 +2915,16 @@ console.log(url);
             $scope.input.dirty = true;
             delete $scope.input.newNode;
             resetInput();
-
-           // buildTree();
-
         };
 
+        //add a datatype to an extension element...
         $scope.addDTToElement = function(dt) {
-            //console.log(dt)
-
             var type = {code:dt.code}
 
             if (dt.code == 'Reference') {
                 if ($scope.input.newRRForExtension) {
-                    //var resourceType = $scope.input.newRRForExtension.name;
-                    type.profile = 'http://hl7.fhir.org/'+$scope.input.newRRForExtension.name;
+                    type.profile = ['http://hl7.fhir.org/'+$scope.input.newRRForExtension.name];
                 }
-
 
             }
             $scope.edFromTreeNode.myMeta.analysis.dataTypes.push(type);
@@ -2881,7 +2932,7 @@ console.log(url);
             if ($scope.edFromTreeNode.myMeta.isExtension) {
                 setIsCoded($scope.edFromTreeNode.myMeta.analysis);
             }
-            
+
             //make the component update the model it is based on...
             $scope.updateElementDefinitionInComponent = {ed:$scope.edFromTreeNode,item:$scope.treeNodeItemSelected};
 

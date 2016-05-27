@@ -46,7 +46,8 @@
 
                 <button  ng-hide="mode=='edit' || !allowEdit"
                          class="btn btn-link" ng-click="startEdit()">Edit this profile</button>
-                <button ng-show="mode=='view' " class="btn btn-link" ng-click="mode = 'new'">New Profile</button>
+
+                <button ng-show="mode=='view' && isBaseResource" class="btn btn-link" ng-click="mode = 'new'">New Profile</button>
 
                 <button ng-show="input.profileName && (mode=='new'|| mode=='edit')"
                         class="btn btn-success" ng-click="save()">Save</button>
@@ -65,6 +66,13 @@
 
 
 
+    <uib-tabset ng-show="showProfileEditPage">
+        <uib-tab heading="Edit Profile contents">
+
+<br/>
+
+
+
     <div class="row animate-show" ng-show="showProfileEditPage" >
         <div class="col-md-3">
             <show-profile profile="frontPageProfile" treedivid="'localTree'"
@@ -80,11 +88,17 @@
         <div class="col-md-9">
 
 
+
+
+
             <uib-tabset ng-show='edFromTreeNode'>
-                <uib-tab heading="Details">
+
+
+                <uib-tab heading="Element Details">
                     <br/>
                     <div class="row ">
                         <div class="col-md-6">
+                            <!-- Path -->
                             <div class="row greyBackground">
                                 <div class="col-md-3 col-sm-3">Path</div>
                                 <div class="col-md-9 col-sm-8">
@@ -93,6 +107,7 @@
                                 </div>
                             </div>
 
+                            <!-- Extension specific -->
                             <div class="row greyBackground" ng-show="edFromTreeNode.myMeta.isExtension">
                                 <div class="col-md-3 col-sm-3">Extension</div>
                                 <div class="col-md-9 col-sm-8">
@@ -100,7 +115,7 @@
 
                                         {{item.code}}
 
-                                        <span ng-repeat="profile in item.profile">
+                                        <span ng-repeat="profile in item.profile track by $index">
                                             --> <span class="popoverHint" popover-placement="right"
                                                       popover-trigger='mouseenter'
                                                       uib-popover="{{profile}}">{{profile | showUrlId}}</span>
@@ -110,7 +125,7 @@
                                 </div>
                             </div>
 
-                            <!-- Types not in extensions... -->
+                            <!-- Data types for Types not in extensions... -->
                             <div class="row greyBackground" ng-hide="edFromTreeNode.myMeta.isExtension">
                                 <div class="col-md-3 col-sm-3">DataType/s</div>
                                 <div class="col-md-8 col-sm-8">
@@ -143,7 +158,7 @@
                                     -->
                             </div>
 
-                            <!-- Extension datatypes are in the analysis element-->
+                            <!-- Data types for extensions -  datatypes are in the analysis element-->
                             <div  class="row greyBackground" ng-show="edFromTreeNode.myMeta.isExtension">
                                 <div class="col-md-3 col-sm-3">DataType/s</div>
                                 <div class="col-md-8 col-sm-8">
@@ -159,10 +174,16 @@
                                         {{dt.code}}
 
                                         <span ng-show="dt.profile">
-                                        --> <span class="popoverHint" popover-placement="right"
-                                                  popover-trigger='mouseenter'
-                                                  uib-popover="{{dt.profile}}">{{dt.profile | showUrlId}}</span>
+                                            <span ng-repeat = "p in dt.profile">
+                                                --> <span class="popoverHint" popover-placement="right"
+                                                          popover-trigger='mouseenter'
+                                                          uib-popover="{{p}}">{{p | showUrlId}}
+                                                </span>
+
+                                            </span>
                                         </span>
+
+
 
 
                                     </div>
@@ -219,6 +240,31 @@
                                 </div>
 
                             </div>
+
+                            <!-- Comments... -->
+                            <div class="row greyBackground">
+                                <div class="col-md-3 col-sm-3">Comments</div>
+                                <div class="col-md-8 col-sm-8">
+                                    <div ng-hide="editComments">
+                                        {{edFromTreeNode.comments}}
+                                    </div>
+                                    <div ng-show="editComments">
+                                        <textarea rows="3" ng-model="edFromTreeNode.comments" class="form-control"></textarea>
+
+                                    </div>
+
+                                </div>
+                                <div class="col-md-1 col-sm-1">
+                                     <span><i ng-show="mode=='new' || mode=='edit'" class="glyphicon glyphicon-edit"
+                                              ng-click="changeComments()" style="cursor: pointer">
+
+                                     </i></span>
+                                </div>
+
+                            </div>
+
+
+                            <!-- Multiplicity -->
                             <div class="row greyBackground" >
                                 <div class="col-md-3 col-sm-3">
                                     Multiplicity
@@ -258,6 +304,7 @@
                             </div>
 
 
+                            <!-- ValueSet -->
                             <div class="row greyBackground"
                                  ng-show="edFromTreeNode.myMeta.isCoded || edFromTreeNode.myMeta.analysis.isCoded">
                                 <div class="col-md-3 col-sm-3">
@@ -275,35 +322,20 @@
 
                                     </i></span>
 
-
-
-
-                                </div>
-
-
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-3 col-sm-3">
-                                    MetaData
-                                </div>
-                                <div class="col-md-9 col-sm-9">
-
-                                    <pre>{{edFromTreeNode.myMeta | json}}</pre>
-
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Editing the node... -->
                         <div class="col-md-6">
                             <div ng-show="mode=='new' || mode=='edit'">
-                                <button ng-hide="edFromTreeNode.min !== 0 || currentNodeIsParent" class="btn btn-default"
+                                <h4>Node: {{treeNodeItemSelected.node.text}}</h4>
+                                <button ng-hide="edFromTreeNode.min !== 0 || currentNodeIsParent" class="btn btn-primary"
                                         ng-click="removeNode()">Remove from profile</button>
 
                                 <span ng-show="edFromTreeNode && ! edFromTreeNode.myMeta.isExtension">
-
-
-                                    <button class="btn btn-default" ng-click="input.newNode = 'child'">Add Child Node</button>
-                                    <button class="btn btn-default" ng-click="input.newNode = 'sibling'"
+                                    <button class="btn btn-primary" ng-click="input.newNode = 'child'">Add Child Node</button>
+                                    <button class="btn btn-primary" ng-click="input.newNode = 'sibling'"
                                             ng-hide="currentNodeIsParent">Add Sibling Node</button>
                                 </span>
 
@@ -319,6 +351,12 @@
                                         <div class="col-md-6">
                                             <select class="form-control mygap" ng-model="input.newDatatype"
                                                     ng-options="dt.description for dt in dataTypes"></select>
+
+                                            <!-- If a reference, then allow to select the type -->
+                                            <select class="form-control mygap" ng-model="input.newRRForNode"
+                                                    ng-show="input.newDatatype.description == 'Reference'"
+                                                    ng-options="typ.name for typ in standardResourceTypes"></select>
+
                                         </div>
                                     </div>
 
@@ -355,74 +393,19 @@
 
                     <hr/>
 
-
-
-
-
-
-
-
-                    <!--
-
-                    <div ng-show="edFromTreeNode && ! edFromTreeNode.myMeta.isExtension">
-                        <button class="btn btn-link" ng-click="newNode = 'child'">Add Child Node</button>
-
-                        <button class="btn btn-link" ng-click="newNode = 'sibling'">Add Sibling Node</button>
-                    </div>
-
-                    <button ng-show="selectedNode" class="btn btn-link"
-                            ng-click="newNode = 'child'">Add Child Node</button>
-
-                    <button ng-show="selectedNode" class="btn btn-link"
-                            ng-click="newNode = 'sibling'">Add Sibling Node</button>-->
-
-<!--
-
-                    <div ng-show="newNode">
-
-                        <h4>Add {{newNode}} node</h4>
-
-
-
-                        <input placeholder="path relative to parent" type="text" class="form-control mygap"
-                               ng-model="input.newElementPath"/>
-
-
-
-                        <select class="form-control mygap" ng-model="input.newDatatype"
-                                ng-options="dt.description for dt in dataTypes"></select>
-
-                        <textarea placeholder="Definition" class="form-control mygap" ng-model="input.definition"></textarea>
-                        <div class="row mygap">
-                            <div class="col-sm-6 col-md-6">
-                                Multiplicity
-                            </div>
-                            <div class="col-sm-6 col-md-6">
-                                <div class="btn-group">
-                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'opt'">0..1</label>
-                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'req'">1..1</label>
-                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'mult'">0..*</label>
-                                </div>
-                            </div>
-                        </div>
-
-
-
-
-                        <div>
-                            <button class="btn btn-link pull-right" ng-click="newNode=''">Cancel</button>
-                            <button class="btn btn-primary pull-right"
-                                    ng-show="input.newElementPath"
-                                    ng-click="addNewNode(newNode)">Add</button> </div>
-                    </div>
-
--->
-
                 </uib-tab>
                 <uib-tab heading="Json">
                     <br/>
                     <pre>{{edFromTreeNode | json}}</pre>
                 </uib-tab>
+
+                <uib-tab heading="Internal metadata">
+                    <br/>
+                    <pre>{{edFromTreeNode.myMeta | json}}</pre>
+                </uib-tab>
+
+
+
 
             </uib-tabset>
 
@@ -445,5 +428,159 @@
 
         </div>
     </div>
+
+
+
+        </uib-tab>
+
+
+        <uib-tab heading="Profile description">
+
+            <br/>
+
+
+
+            <div class="row">
+                <div class="col-md-6 col-sm-6">
+
+                    <form>
+                        <div class="form-group">
+                            <label>Name</label>
+                            <div ng-hide="editDescription"> {{frontPageProfile.name}}</div>
+                            <div ng-show="editDescription" >
+                                <input class="form-control" ng-model="frontPageProfile.name"}} >
+                            </div>
+
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description</label>
+                            <div ng-hide="editDescription"> {{frontPageProfile.description}}</div>
+                            <div ng-show="editDescription">
+                                <textarea class="form-control" ng-model="frontPageProfile.description"}} ></textarea>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group">
+                            <label>Requirements</label>
+                            <div ng-hide="editDescription"> {{frontPageProfile.requirements}}</div>
+                            <div ng-show="editDescription">
+                                <textarea class="form-control" ng-model="frontPageProfile.requirements"}} ></textarea>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group">
+                            <label>CopyRight</label>
+                            <div ng-hide="editDescription"> {{frontPageProfile.copyright}}</div>
+                            <div ng-show="editDescription">
+                                <textarea class="form-control" ng-model="frontPageProfile.copyright"}} ></textarea>
+                            </div>
+
+                        </div>
+
+
+                    </form>
+
+                </div>
+                <div class="col-md-5 col-sm-5">
+                    <form>
+                        <div class="form-group">
+                            <label>Url</label>
+                            <div ng-hide="editDescription"> {{frontPageProfile.url}}</div>
+                            <div ng-show="editDescription">
+                                <input class="form-control" ng-model="frontPageProfile.url"}} >
+                            </div>
+
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <div ng-hide="editDescription"> {{frontPageProfile.status}}</div>
+                            <div ng-show="editDescription">
+                                <input class="form-control" ng-model="frontPageProfile.status"}} >
+                            </div>
+
+                        </div>
+                        <div class="form-group">
+                            <label>Experimental</label>
+                            <div ng-hide="editDescription"> {{frontPageProfile.experimental}}</div>
+                            <div ng-show="editDescription">
+                                <input class="form-control" ng-model="frontPageProfile.experimental"}} >
+                            </div>
+
+                        </div>
+
+                        <div class="form-group">
+                            <label>Publisher</label>
+                            <div ng-hide="editDescription"> {{frontPageProfile.publisher}}</div>
+                            <div ng-show="editDescription">
+                                <input class="form-control" ng-model="frontPageProfile.publisher"}} >
+                            </div>
+
+
+                        </div>
+                        <div class="form-group">
+                            <label>Contact</label>
+                            <div ng-hide="editDescription"> {{frontPageProfile.contact.name}}</div>
+                            <div ng-show="editDescription">
+                                <input class="form-control" ng-model="frontPageProfile.contact.name"}} >
+                            </div>
+
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="col-md-1 col-sm-1">
+                    <div ng-show="mode=='edit' || mode=='new'">
+                        <button ng-show="editDescription" class="btn btn-link pull-right" ng-click="editDescription = false">Save</button>
+                        <button ng-hide="editDescription" class="btn btn-link pull-right" ng-click="editDescription = true">Edit</button>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </uib-tab>
+
+
+        <uib-tab heading="Table View">
+            <br/>
+            <table class="table table-condensed table-bordered">
+                <tr><th>Path</th><th>Name</th><th>DataType</th><th>Definition</th><th>Comments</th><th>Mult</th><th>ValueSet</th></tr>
+                <tr ng-repeat="row in model">
+                    <td>{{row.data.ed.path}}</td>
+                    <td>{{row.data.ed.name}}</td>
+                    <td>
+                        <ul>
+                            <li ng-repeat="dt in row.data.ed.type">
+                                {{dt.code}} <span ng-show="dt.profile"> --> </span> {{dt.profile[0] | shortUrl}}
+
+                            </li>
+                        </ul>
+                        <!--
+                        <div ng-repeat="dt in row.data.ed.type">
+                            {{dt.code}} {{dt.profile[0] | shortUrl}}
+
+                        </div>
+-->
+
+                    </td>
+                    <td>{{row.data.ed.definition}}</td>
+                    <td>{{row.data.ed.comments}}</td>
+                    <td>{{row.data.ed.min}}..{{row.data.ed.max}}</td>
+
+                    <td>
+                        {{row.data.ed.binding.valueSetReference.reference}}
+                        {{row.data.ed.binding.valueSetUri}}
+                    </td>
+                </tr>
+            </table>
+        </uib-tab>
+
+    </uib-tabset>
+
 
 </div>

@@ -377,12 +377,8 @@ angular.module("sampleApp").
 
         },
         analyseExtensionDefinition2 : function(SD) {
-            //return a simplified model of an Extension Definition
-            
-            //var extension = angular.copy(extensionDef);
             //return a vo that contains an analysis of the extension
             var that = this;
-
 
             var vo = {dataTypes: [], multiple: false};
             vo.display = SD.display; //will use this when displaying the element
@@ -419,7 +415,10 @@ angular.module("sampleApp").
                                 var code = typ.code;        //the datatype code
                                 if (code) {
 
-                                    vo.dataTypes.push({code:code});
+
+
+                                    vo.dataTypes.push(typ);
+                                    //vo.dataTypes.push({code:code});
                                     //is this a codedd type?
                                     if (['CodeableConcept', 'code', 'coding'].indexOf(code) > -1) {
                                         vo.isCoded = true;
@@ -686,8 +685,27 @@ console.log(summary);
             return issues;
 
         },
-        getUCUMUnits : function(unit) {
-            alert('getUcumUnits stub not implemented yet');
+        getUCUMUnits : function(category) {
+            //return a collection of UCUM units in various categories
+            var lst = [];
+            switch (category) {
+                case 'money' :
+                    lst.push({code:'nz','display':'NZ Dollars'});
+                    lst.push({code:'us','display':'US Dollars'});
+                    lst.push({code:'uk','display':'UK Pounds'});
+                    lst.push({code:'eu','display':'Euro'});
+                    break;
+                case 'age' :
+                    lst.push({code:'s','display':'seconds'});
+                    lst.push({code:'min','display':'minutes'});
+                    lst.push({code:'h','display':'hours'});
+                    lst.push({code:'d','display':'days'});
+                    lst.push({code:'wk','display':'weeks'});
+                    lst.push({code:'mo','display':'months'});
+                    lst.push({code:'y','display':'years'});
+                    break;
+            }
+            return lst;
         },
         getValueSetIdFromRegistry : function(uri,cb) {
             //return the id of the ValueSet on the terminology server. For now, assume at the VS is on the terminology.
@@ -1753,15 +1771,24 @@ console.log(summary);
                         return getCCSummary(resource.substance);
                         break;
                     case "Practitioner" :
-                        if (fhirVersion == 3) {
-                            return getHumanNameSummary(resource.name[0]);
+                        if (resource.name) {
+                            if (fhirVersion == 3) {
+                                return getHumanNameSummary(resource.name[0]);
+                            } else {
+                                return getHumanNameSummary(resource.name);
+                            }
                         } else {
-                            return getHumanNameSummary(resource.name);
+                            return 'Practitioner';
                         }
+
 
                         break;
                     case "Patient" :
-                        return getHumanNameSummary(resource.name[0]);   //only the forst name
+                        if (resource.name) {
+                            return getHumanNameSummary(resource.name[0]);   //only the forst name
+                        } else {
+                            return 'Patient';
+                        }
                         break;
                     case "List" :
                         if (resource.code) {

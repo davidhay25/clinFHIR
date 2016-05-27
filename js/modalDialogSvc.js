@@ -6,20 +6,20 @@ angular.module('sampleApp').service('modalService', ['$uibModal',
             backdrop: true,
             keyboard: true,
             modalFade: true,
-
             templateUrl: '/includes/modalDialogTemplate.html'
         };
 
         var modalOptions = {
-            closeButtonText: 'Close',
-            actionButtonText: 'OK',
-            headerText: 'Proceed?',
-            showAction:true,        //mine...
+            closeButtonText: 'Ok',
+          //  actionButtonText: 'OK',
+           // headerText: 'Proceed?',
+          //  showAction:true,        //mine...
             bodyText: 'Perform this action?'
         };
 
         this.showModal = function (customModalDefaults, customModalOptions) {
             if (!customModalDefaults) customModalDefaults = {};
+            
             customModalDefaults.backdrop = 'static';
             return this.show(customModalDefaults, customModalOptions);
         };
@@ -46,7 +46,6 @@ angular.module('sampleApp').service('modalService', ['$uibModal',
                     };
                 }
             }
-
             return $uibModal.open(tempModalDefaults).result;
         };
 
