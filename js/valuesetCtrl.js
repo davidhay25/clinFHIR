@@ -4,7 +4,10 @@ angular.module("sampleApp").controller('valuesetCtrl',
     $scope.hw = 'hw'
     $scope.results = {};
     $scope.input = {};
-        $scope.input.searchName = 'cond'
+    $scope.input.searchName = 'dhay'
+        
+    $scope.state = 'find';      // edit / new / find
+    $scope.input.conceptCache = {};        //hash to store the lookup details of a concept. todo We could cache this...
 
     var config = appConfigSvc.config();
     $scope.valueSetRoot = config.servers.terminology + "ValueSet/";
@@ -21,6 +24,19 @@ angular.module("sampleApp").controller('valuesetCtrl',
     $scope.arScopingValueSet = [];
     $scope.arScopingValueSet.push()
     $scope.showScopingValueSet = true;  //allows the scping valueset to be selected in the search...
+
+
+        $scope.vsReference = true;      //to show the included file
+
+        var reference = "http://hl7.org/fhir/ValueSet/condition-code";
+
+
+
+    $scope.newVs = function() {
+        delete $scope.vs;
+        delete $scope.searchResultBundle;
+        $scope.state='new';
+    };
 
     function createNewValueSet(id) {
         $scope.vs = {resourceType : "ValueSet", status:'draft',compose:{include:[]}};
@@ -50,8 +66,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
                     //console.log(concept)
                     if (conceptToRemove.code == concept.code) {
-                        console.log('de')
+
                         include.concept.splice(j,1)
+                        $scope.isDirty = true;
                         break;
                     }
                 }
@@ -73,8 +90,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
                     //console.log(concept)
                     if (filter.value == filtertToRemove.value) {
-                        console.log('de')
                         include.filter.splice(j,1)
+                        $scope.isDirty = true;
                         break;
                     }
                 }
@@ -88,11 +105,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
     //createNewValueSet("dhtest");
 
 
-    $scope.vsReference = true;      //to show the included file
-
-    var reference = "http://hl7.org/fhir/ValueSet/condition-code";
-
-
+    //find matching ValueSets based on name
     $scope.search = function(filter){
         $scope.showWaiting = true;
         var url = config.servers.terminology + "ValueSet?name="+filter;
@@ -107,26 +120,106 @@ angular.module("sampleApp").controller('valuesetCtrl',
             $scope.showWaiting = false;
         })
     };
-        
+
+
+
+    //select a ValueSet from the search set...
     $scope.selectVs = function(vs) {
+        delete $scope.input.hasSystem;
+        delete $scope.input.hasIsa;
+        delete $scope.input.hasConcept;
+        delete $scope.isDirty;
         delete $scope.canEdit;
         delete $scope.input.vspreview;
         $scope.vs = vs;
+        $scope.state='edit';
+
+
+        //get the details of any 'is-a' codes so we can display the name in th eUI
+        if (vs.compose && vs.compose.include) {
+            vs.compose.include.forEach(function (inc) {
+                if (inc.filter) {
+                    inc.filter.forEach(function (filter) {
+                        console.log(filter)
+                        if (! $scope.input.conceptCache[filter.value]) {
+
+                             resourceCreatorSvc.getLookupForCode("http://snomed.info/sct",filter.value).then(
+                                 function(data) {
+                                     console.log(data);
+                                     if (data.data.parameter) {
+                                         var parameter = data.data.parameter;
+                                         for (var i=0; i < parameter.length;i++) {
+                                             if (parameter[i].name == 'display') {
+                                                 $scope.input.conceptCache[filter.value] = parameter[i].valueString;
+                                                 console.log(parameter[i].valueString)
+                                                 break;
+                                             }
+                                         }
+                                     }
+
+
+                                     },
+                                     function(err) {
+                                        alert(angular.toJson(err));
+                                 }
+                             )
+
+
+                        }
+
+
+                    })
+                }
+
+            })
+
+        }
+
+
+
+
         if (isAuthoredByClinFhir(vs)){
             $scope.canEdit = true;
         }
     };
 
-    //add a new concept to the ValueSet
-    $scope.addConcept = function(){
-      
-        $scope.include.concept.push({code:$scope.results.cc.code,display:$scope.results.cc.display})
+    //retireve the name from a concept
+    $scope.getConceptName = function(concept) {
+      /*  resourceCreatorSvc.getLookupForCode("http://snomed.info/sct",concept).then(
+            function(data) {
+                console.log(data);
+
+
+            },
+            function(err) {
+                alert(angular.toJson(err));
+            }
+        )
+        */
+        //return concept;
+    }
+
+    //return to the selected list
+    $scope.backToList = function(){
+        if ($scope.dirty) {
+            alert('dirty')
+        }
+
+        delete $scope.vs;
+        $scope.state='find';
+
     };
 
+    //add a new concept to the ValueSet
+    $scope.addConcept = function(){
+        $scope.include.concept.push({code:$scope.results.cc.code,display:$scope.results.cc.display})
+        $scope.isDirty = true;
+    };
+
+    //add an 'is-a' concept
     $scope.isAConcept = function() {
-
         $scope.includeForFilter.filter.push({property:'concept',op:'is-a',value:$scope.results.cc.code})
-
+        $scope.isDirty = true;
     };
 
     $scope.expand = function(filter){
@@ -137,6 +230,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 function(data){
                     console.log(data)
                     $scope.expansion = data.expansion;
+                },
+                function(err){
+                    alert(angular.toJson(err))
                 }
             ).finally(function(){
                 $scope.showWaiting = false;
@@ -146,6 +242,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 function(data) {
                     console.log(data)
                     $scope.expansion = data.expansion;
+                },
+                function(err){
+                    alert(angular.toJson(err))
                 }
             ).finally(function(){
                 $scope.showWaiting = false;

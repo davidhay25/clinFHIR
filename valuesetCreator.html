@@ -30,7 +30,7 @@
     <script src="js/libs/ngStorage.min.js"></script>
     <script src="js/resourceCreatorSvc.js"></script>
     <script src="js/modalDialogSvc.js"></script>
-    <title>FHIR ValueSet Creator</title>
+    <title>FHIR ValueSet Manager</title>
 
 </head>
 
@@ -60,13 +60,63 @@
                 </div>
 
                 <div class="col-md-1">
-                    <form class="navbar-form navbar-right">
+                    <!-- Show save when a vs has been updated-->
+                    <form class="navbar-form navbar-right" ng-show="isDirty">
                          <button class="btn btn-danger" ng-click="save()">Save</button>
                     </form>
+
+                    <!-- Show 'back to list' when where's a list, anda valueset has been selected from that list-->
+                    <form class="navbar-form navbar-right" ng-show="(vs && searchResultBundle.entry.length >0) || state=='new' ">
+                        <button class="btn btn-success" ng-click="backToList()">Find</button>
+                    </form>
+
+                    <!-- Show 'New' button when there is no vs selected-->
+                    <form class="navbar-form navbar-right" ng-hide="vs || state=='new'">
+                        <button class="btn btn-primary" ng-click="newVs()">New</button>
+                    </form>
+
+
                 </div>
             </div>
         </nav>
-        <div class="row" ng-hide="vs">
+
+
+        <div class="row" ng-show="state == 'new'">
+            <div class="col-md-6 col-sm-6">
+
+                <form>
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="email" class="form-control" ng-model="input.newName">
+                    </div>
+                    <div class="form-group">
+                        <label>Publisher</label>
+                        <input type="email" class="form-control" ng-model="input.newPublisher">
+                    </div>
+                </form>
+
+            </div>
+            <div class="col-md-6 col-sm-6">
+
+                <form>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control"  newDescription"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Requirements</label>
+                        <textarea class="form-control" ng-model="input.newRequirements"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-default">Submit</button>
+                </form>
+
+            </div>
+
+
+        </div>
+        <div class="row" ng-show="state == 'find'">
             <div class="col-md-6 col-sm-6">
                 <div>Search</div>
                 <div class="row">
@@ -74,7 +124,7 @@
                         <input type="text" ng-model="input.searchName" class="form-control" placeholder="Enter search text"/>
                     </div>
                     <div class="col-md-3 col-sm-3">
-                        <button class="btn btn-link" ng-click="search(input.searchName)">Search</button>
+                        <button class="btn btn-link" ng-click="search(input.searchName)">Find</button>
                     </div>
                 </div>
 
@@ -116,12 +166,27 @@
                 <uib-tabset>
                     <uib-tab heading="Contents">
                         <br/>
-                        <h5>Specific included concepts</h5>
 
+                        <h5 ng-show="input.hasSystem">Systems</h5>
+
+                        <div ng-repeat="include in vs.compose.include">
+                            <div ng-hide="include.concept || include.filter">
+                                <div  ng-init = "input.hasSystem = true" class="row display-row">
+                                    <div class="col-md-1 col-sm-1">
+
+                                    </div>
+                                    <div class="col-md-10 col-sm-10">
+                                        {{include.system}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 ng-show="input.hasConcept">Specific included concepts</h5>
 
                         <div ng-repeat="include in vs.compose.include">
                             <div ng-repeat="concept in include.concept">
-                                <div class="row display-row">
+                                <div ng-init = "input.hasConcept = true" class="row display-row">
 
                                     <div class="col-md-2 col-sm-2">
                                         {{concept.code}}
@@ -142,22 +207,22 @@
                         </div>
 
 
-                        <h5>'is-a' included concepts</h5>
+                        <h5 ng-show="input.hasIsa">'is-a' included concepts</h5>
 
                         <div ng-repeat="include in vs.compose.include">
                             <div ng-repeat="filter in include.filter">
-                                <div class="row">
+                                <div ng-init = "input.hasIsa = true" class="row display-row">
                                     <div class="col-md-2 col-sm-2">
                                         {{filter.property}}
                                     </div>
                                     <div class="col-md-2 col-sm-2">
                                         {{filter.op}}
                                     </div>
-                                    <div class="col-md-6 col-sm-6">
+                                    <div class="col-md-3 col-sm-3">
                                         {{filter.value}}
                                     </div>
-                                    <div class="col-md-1 col-sm-3">
-
+                                    <div class="col-md-4 col-sm-4">
+                                        {{input.conceptCache[filter.value]}}
                                     </div>
                                     <div class="col-md-1 col-sm-1">
                                         <i style="cursor: pointer"
@@ -196,16 +261,18 @@
 
             </div>
             <div class="col-md-6 col-sm-6">
-                <h4>Add a new code</h4>
-                <ng-include src="'/prTemplates/codeableconcept.html'"></ng-include>
+                <div ng-show="canEdit"
+                    <h4>Add a new code</h4>
+                    <ng-include src="'/prTemplates/codeableconcept.html'"></ng-include>
 
-                <div ng-show="results.cc.code">
-                    <button class="btn btn-primary" ng-click="addConcept()">Add</button>
-                    <button class="btn btn-primary" ng-click="isAConcept()">Add as 'is a'</button>
+                    <div ng-show="results.cc.code">
+                        <button class="btn btn-primary" ng-click="addConcept()">Add</button>
+                        <button class="btn btn-primary" ng-click="isAConcept()">Add as 'is a'</button>
+                    </div>
+
+
+
                 </div>
-
-
-
             </div>
 
         </div>
