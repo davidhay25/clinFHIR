@@ -68,13 +68,18 @@ angular.module("sampleApp")
 
 
         return {
+            init : function(){
+                $http.get("config.json").then(
+                    function(data) {
+                        console.log(data.data);
+                        defaultConfig = data.data;
+                        return;
+                    }
+                );
+            },
             getServerByUrl : function(url) {
               //return the server definition  for a given url. Wouldn't need this if I was saving the object rather than the string
-
-
-
-
-
+                
                 for (var i=0; i < defaultConfig.allKnownServers.length;i++) {
                     if (defaultConfig.allKnownServers[i].url == url) {
                         return defaultConfig.allKnownServers[i];

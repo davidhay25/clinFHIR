@@ -1456,7 +1456,7 @@ angular.module("sampleApp")
                 $scope.load = function() {
                     //load a resource from a server...
                     var url = "http://fhir.hl7.org.nz/dstu2/AllergyIntolerance/84651";
-                    GetDataFromServer.ahHocFHIRQuery(url).then(
+                    GetDataFromServer.adHocFHIRQuery(url).then(
                         function(data) {
                             $scope.instance = angular.toJson(data.data,true);
                             parse($scope.instance);
@@ -1547,7 +1547,7 @@ angular.module("sampleApp")
                     $scope.profilesThisType = [];
                     //todo - add the standard profile for this type..
                     var url = $scope.input.server.url + "StructureDefinition?kind=resource&type="+resourceType;
-                    GetDataFromServer.ahHocFHIRQuery(url).then(
+                    GetDataFromServer.adHocFHIRQuery(url).then(
                         function(data) {
                             console.log(data)
                             if (data.data && data.data.entry) {
@@ -3081,7 +3081,7 @@ console.log(url);
         $scope.load = function() {
             //load a resource from a server...
             var url = "http://fhir.hl7.org.nz/dstu2/AllergyIntolerance/84651";
-            GetDataFromServer.ahHocFHIRQuery(url).then(
+            GetDataFromServer.adHocFHIRQuery(url).then(
                 function(data) {
                     $scope.instance = angular.toJson(data.data,true);
                     parse($scope.instance);
@@ -3177,7 +3177,7 @@ console.log(url);
         function getProfilesForResourceType(resourceType) {
             $scope.profilesThisType = [];
             var url = $scope.input.server.url + "StructureDefinition?kind=resource&type="+resourceType;
-            GetDataFromServer.ahHocFHIRQuery(url).then(
+            GetDataFromServer.adHocFHIRQuery(url).then(
                 function(data) {
                     console.log(data)
                     if (data.data && data.data.entry) {

@@ -22,11 +22,24 @@
                         <uib-tabset>
                             <uib-tab heading="Select from Binding">
                                 <br/>
+
+                                <div ng-show="showScopingValueSet">
+                                    <!-- Used by the ValueSet creator to allow the ValueSet that scopes the search to be selected-->
+
+                                </div>
+
                                 <div class="row">
-                                    <div class="col-md-1 col-sm-1">
-                                        Search Text
+                                    <div class="col-md-7 col-sm-7">
+                                        <strong>Search Text</strong>
                                     </div>
-                                    <div class="col-md-8 col-sm-8">
+                                    <div class="col-md-5 col-sm-5">
+                                        <a class="btn btn-link pull-right" ng-click="showVSBrowserDlg()">Explore ValueSet</a>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-bottom: 5px">
+
+                                    <div class="col-md-9 col-sm-9">
                                         <input type="text" ng-model="results.cc"
                                                placeholder="{{vsDetails.id}} (minimum {{vsDetails.minLength}} characters)"
                                                typeahead-min-length="3"
@@ -37,8 +50,10 @@
 
                                     </div>
                                     <div class="col-md-3 col-sm-3">
-                                        <a class="btn btn-link pull-right" ng-click="showVSBrowserDlg()">Explore ValueSet</a>
+                                        <input type="text" value="{{results.cc.code}}" disabled="disabled" class="form-control pull-right">
+
                                     </div>
+
                                 </div>
                                 <div class="row">
                                     <div class="col-md-9 col-sm-9">
@@ -74,7 +89,7 @@
 
                                 </div>
 
-<br/>
+                                <br/>
                                 <div class="row">
 
                                     <div class="col-md-9 col-sm-9">
@@ -85,48 +100,8 @@
 
                                 </div>
 
+                                <pre ng-show="lookupResult">{{lookupResult | json}}</pre>
 
-<!--
-
-
-                                <div class="row">
-                                    <div class="col-md-2 col-sm-2">
-                                        System
-                                    </div>
-                                    <div class="col-md-9 col-sm-9">
-
-                                        <input type="text" uib-typeahead = "system for system in codeSystems"
-                                               class="form-control" placeholder="Enter the uri of the system the code is drawn from"
-                                               ng-model="results.ccDirectSystem"/>
-                                    </div>
-                                </div>
-                                <br/>
-                                <div class="row">
-                                    <div class="col-md-2 col-sm-2">
-                                        Code
-                                    </div>
-                                    <div class="col-md-7 col-sm-7">
-                                        <input type="text" class="form-control" placeholder="Enter the code from the system"
-                                               ng-model="results.ccDirectCode"/>
-                                    </div>
-
-                                    <div class="col-md-2 col-sm-2">
-                                        <button class="btn btn-primary" ng-click="lookupCode(results.ccDirectSystem,results.ccDirectCode)"
-                                            ng-disabled="!results.ccDirectCode || !results.ccDirectSystem">Lookup</button>
-                                    </div>
-
-                                </div>
-                                <br/>
-                                <div class="row">
-                                    <div class="col-md-2 col-sm-2">
-                                        Display
-                                    </div>
-                                    <div class="col-md-9 col-sm-9">
-                                        <input type="text" class="form-control" placeholder="The display (text) of the code"
-                                               ng-model="results.ccDirectDisplay"/>
-                                    </div>
-                                </div>
--->
                                 <hr/>
                                 <div ng-show="terminologyLookup">
                                     <div class="row">
@@ -134,7 +109,8 @@
                                             Parent
                                         </div>
                                         <div class="col-md-10">
-                                            <a href="#" ng-click="selectParentCC()">{{terminologyLookup.parent.description}} ({{terminologyLookup.parent.value}})</a>
+                                            <div style="cursor:pointer" href="#" ng-click="selectParentCC()">
+                                                {{terminologyLookup.parent.description}} ({{terminologyLookup.parent.value}})</div>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -144,8 +120,8 @@
                                         <div class="col-md-10">
                                             <ul class="list-unstyled">
                                                 <li ng-repeat="child in terminologyLookup.children">
-                                                    <a href="#" ng-click="selectChildTerm(child.value,child.description)">
-                                                        {{child.description}} ({{child.value}})</a>
+                                                    <div style="cursor:pointer" href="#" ng-click="selectChildTerm(child.value,child.description)">
+                                                        {{child.description}} ({{child.value}})</div>
                                                 </li>
                                             </ul>
 
@@ -189,6 +165,10 @@
 
     <div ng-hide="vsReference">
         <br />
+
+        <input type="text" class="form-control" placeholder="Enter text if a suitable code cannot be found"
+               ng-model="results.ccText"/>
+
         <em>
             There was no ValueSet referenced by the profile (using a valueSetReference property in the Binding).
             You can enter a textual value, but not select a coded item from a list

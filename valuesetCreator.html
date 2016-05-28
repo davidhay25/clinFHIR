@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <base href="/" />
+    <meta charset="UTF-8">
+
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-1.2.5.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngStorage'])
+    </script>
+
+    <style>
+        .display-row {
+            background-color: #fafafa;
+            margin-bottom: 5px;
+        }
+    </style>
+
+    <!-- files needed for valuesetCreator -->
+    <script src="resourceBuilder/rbServices.js"></script>
+    <script src="js/appConfigSvc.js"></script>
+    <script src="js/valuesetCtrl.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/resourceCreatorSvc.js"></script>
+    <script src="js/modalDialogSvc.js"></script>
+    <title>FHIR ValueSet Creator</title>
+
+</head>
+
+
+<body style="padding: 8px;padding-top:80px" >
+
+    <div ng-app="sampleApp" ng-controller="valuesetCtrl" class="container-fluid">
+        <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+
+            <div class="container-fluid">
+                <div class="col-md-3">
+                    <a class="navbar-brand" href="#">
+                        clinFHIR ValueSet Creator
+                    </a>
+
+                </div>
+                <div class="col-md-7">
+                    <div class="navbar-text">
+                        Url: {{valueSetRoot}}{{vs.id}}
+                    </div>
+                </div>
+
+                <div class="col-md-1">
+                    <div class="pull-right navbar-form" ng-show="showWaiting">
+                        <img src="css/ajax_loader_blue_32.gif"/>
+                    </div>
+                </div>
+
+                <div class="col-md-1">
+                    <form class="navbar-form navbar-right">
+                         <button class="btn btn-danger" ng-click="save()">Save</button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+        <div class="row" ng-hide="vs">
+            <div class="col-md-6 col-sm-6">
+                <div>Search</div>
+                <div class="row">
+                    <div class="col-md-9 col-sm-9">
+                        <input type="text" ng-model="input.searchName" class="form-control" placeholder="Enter search text"/>
+                    </div>
+                    <div class="col-md-3 col-sm-3">
+                        <button class="btn btn-link" ng-click="search(input.searchName)">Search</button>
+                    </div>
+                </div>
+
+                <br/>
+
+                <div class="row" ng-repeat="entry in searchResultBundle.entry" style="margin-bottom: 5px">
+                    <div class="col-md-9 col-sm-9">
+                        {{entry.resource.name}}
+                        <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>
+                    </div>
+                    <div class="col-md-3 col-sm-3">
+                        <button class="btn btn-link" ng-click="input.vspreview=entry.resource">Preview</button>
+                        <button class="btn btn-link" ng-click="selectVs(entry.resource)">Select</button>
+                    </div>
+                </div>
+
+
+                <!-- <table class="table table-bordered table-condensed">
+                    <tr ng-repeat="entry in searchResultBundle.entry">
+                        <td>{{entry.resource.name}}
+                            <div><em>{{entry.resource.description}}</em></div>
+                        </td>
+                        <td>
+                            <button class="btn btn-link" ng-click="input.vspreview=entry.resource">Preview</button>
+                            <button class="btn btn-link" ng-click="selectVs(entry.resource)">Select</button>
+                        </td>
+                    </tr>
+                </table>
+                -->
+
+            </div>
+            <div class="col-md-6 col-sm-6">
+                <pre ng-show="input.vspreview">{{input.vspreview | json}}</pre>
+            </div>
+        </div>
+
+        <div class="row" ng-show="vs">
+            <div class="col-md-6 col-sm-6">
+                <uib-tabset>
+                    <uib-tab heading="Contents">
+                        <br/>
+                        <h5>Specific included concepts</h5>
+
+
+                        <div ng-repeat="include in vs.compose.include">
+                            <div ng-repeat="concept in include.concept">
+                                <div class="row display-row">
+
+                                    <div class="col-md-2 col-sm-2">
+                                        {{concept.code}}
+                                    </div>
+                                    <div class="col-md-8 col-sm-8">
+                                        {{concept.display}}
+                                    </div>
+                                    <div class="col-md-1 col-sm-1">
+
+                                    </div>
+                                    <div class="col-md-1 col-sm-1">
+                                        <i style="cursor: pointer"
+                                           ng-click="removeInclude(concept)"
+                                           class="glyphicon glyphicon-minus-sign pull-right"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <h5>'is-a' included concepts</h5>
+
+                        <div ng-repeat="include in vs.compose.include">
+                            <div ng-repeat="filter in include.filter">
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-2">
+                                        {{filter.property}}
+                                    </div>
+                                    <div class="col-md-2 col-sm-2">
+                                        {{filter.op}}
+                                    </div>
+                                    <div class="col-md-6 col-sm-6">
+                                        {{filter.value}}
+                                    </div>
+                                    <div class="col-md-1 col-sm-3">
+
+                                    </div>
+                                    <div class="col-md-1 col-sm-1">
+                                        <i style="cursor: pointer"
+                                           ng-click="removeIsa(filter)"
+                                           class="glyphicon glyphicon-minus-sign pull-right"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </uib-tab>
+                    <uib-tab heading="Expansion">
+                        <br/>
+                        <div class="row">
+                            <div class="col-md-8 col-sm-8">
+                                <input class="form-control" type="text" ng-model="input.filterText" placeholder="Filter text"/>
+                            </div>
+                            <div class="col-md-4 col-sm-4">
+                                <button class="btn btn-primary pull-right" ng-click="expand(input.filterText)">Expand</button>
+                            </div>
+                        </div>
+                        <br/>
+                        <table class="table table-bordered">
+                            <tr ng-repeat="item in expansion.contains">
+                                <td>{{item.code}}</td>
+                                <td>{{item.display}}</td>
+                            </tr>
+                        </table>
+
+                    </uib-tab>
+                    <uib-tab heading="Json">
+                        <br/>
+                        <pre>{{vs|json}}</pre>
+                    </uib-tab>
+                </uib-tabset>
+
+            </div>
+            <div class="col-md-6 col-sm-6">
+                <h4>Add a new code</h4>
+                <ng-include src="'/prTemplates/codeableconcept.html'"></ng-include>
+
+                <div ng-show="results.cc.code">
+                    <button class="btn btn-primary" ng-click="addConcept()">Add</button>
+                    <button class="btn btn-primary" ng-click="isAConcept()">Add as 'is a'</button>
+                </div>
+
+
+
+            </div>
+
+        </div>
+
+
+
+
+
+
+    </div>
+
+
+</body>
+</html>

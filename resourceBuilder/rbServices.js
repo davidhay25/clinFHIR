@@ -35,6 +35,15 @@ angular.module("sampleApp").
 
             return deferred.promise;
         },
+        saveValueSetToTerminologyServerById : function(id,valueSet) {
+            //save a ValueSet at a given location
+            var config = appConfigSvc.config();
+            var qry = config.servers.terminology + "ValueSet/"+id;
+            console.log(qry)
+            return $http.put(qry,valueSet);
+
+
+        },
         sendActivityObject : function(activity) {
 
         }
@@ -71,7 +80,7 @@ angular.module("sampleApp").
             console.log(qry)
             return $http.get(qry);
         },
-        ahHocFHIRQuery : function(url) {
+        adHocFHIRQuery : function(url) {
             //an ahhoc query - full url given - to avoid a v=controller using $http directly...
             return $http.get(url);
         },
