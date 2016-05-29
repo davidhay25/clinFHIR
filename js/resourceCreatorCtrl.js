@@ -1047,9 +1047,9 @@ angular.module("sampleApp")
     }
 
     //the user selects the parent...
-    $scope.selectParentCC = function() {
-        $scope.results.ccDirectDisplay = $scope.terminologyLookup.parent.description;
-        $scope.results.ccDirectCode = $scope.terminologyLookup.parent.value;
+    $scope.selectParentCC = function(parent) {
+        $scope.results.ccDirectDisplay = parent.description;
+        $scope.results.ccDirectCode = parent.value;
         //look up the relations to this one...
         setTerminologyLookup($scope.results.ccDirectSystem,$scope.results.ccDirectCode)
 
@@ -1848,6 +1848,7 @@ angular.module("sampleApp")
 
             config.servers[serverType] = server.url;    //set the config to the new server...
             $localStorage.config = config;
+            
             $rootScope.$emit('configUpdated',{serverType:serverType});  //tell the world which server...
             $scope.recent.patient = appConfigSvc.getRecentPatient();
             $scope.recent.profile = appConfigSvc.getRecentProfile();

@@ -43,13 +43,23 @@
             <div class="container-fluid">
                 <div class="col-md-3">
                     <a class="navbar-brand" href="#">
-                        clinFHIR ValueSet Creator
+                        clinFHIR ValueSet Manager
                     </a>
 
                 </div>
-                <div class="col-md-7">
+
+                <div class="col-md-2 col-sm-2">
                     <div class="navbar-text">
-                        Url: {{valueSetRoot}}{{vs.id}}
+                    <select class="form-control" ng-change="changeTerminologyServer(termServer)"
+                            ng-options="value.name for value in terminologyServers track by value.name"
+                            ng-model="termServer"></select>
+
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-3">
+                    <div class="navbar-text" ng-show="vs.id">
+                        {{valueSetRoot}}{{vs.id}}
                     </div>
                 </div>
 
@@ -59,7 +69,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-1">
+                <div class="col-md-3">
                     <!-- Show save when a vs has been updated-->
                     <form class="navbar-form navbar-right" ng-show="isDirty">
                          <button class="btn btn-danger" ng-click="save()">Save</button>
@@ -68,6 +78,11 @@
                     <!-- Show 'back to list' when where's a list, anda valueset has been selected from that list-->
                     <form class="navbar-form navbar-right" ng-show="(vs && searchResultBundle.entry.length >0) || state=='new' ">
                         <button class="btn btn-success" ng-click="backToList()">Find</button>
+                    </form>
+
+                    <!-- Show 'copy' when there is a vs that cannot be edited-->
+                    <form class="navbar-form navbar-right" ng-show="(vs && ! canEdit) ">
+                        <button class="btn btn-warning" ng-click="copyVs()">Copy</button>
                     </form>
 
                     <!-- Show 'New' button when there is no vs selected-->
@@ -80,7 +95,7 @@
             </div>
         </nav>
 
-
+<!--
         <div class="row" ng-show="state == 'new'">
             <div class="col-md-6 col-sm-6">
 
@@ -116,6 +131,8 @@
 
 
         </div>
+
+        -->
         <div class="row" ng-show="state == 'find'">
             <div class="col-md-6 col-sm-6">
                 <div>Search</div>
@@ -130,9 +147,9 @@
 
                 <br/>
 
-                <div class="row" ng-repeat="entry in searchResultBundle.entry" style="margin-bottom: 5px">
+                <div class="row display-row" ng-repeat="entry in searchResultBundle.entry" style="margin-bottom: 5px">
                     <div class="col-md-9 col-sm-9">
-                        {{entry.resource.name}}
+                        {{entry.resource.name}} ({{entry.resource.id}})
                         <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>
                     </div>
                     <div class="col-md-3 col-sm-3">
@@ -141,19 +158,6 @@
                     </div>
                 </div>
 
-
-                <!-- <table class="table table-bordered table-condensed">
-                    <tr ng-repeat="entry in searchResultBundle.entry">
-                        <td>{{entry.resource.name}}
-                            <div><em>{{entry.resource.description}}</em></div>
-                        </td>
-                        <td>
-                            <button class="btn btn-link" ng-click="input.vspreview=entry.resource">Preview</button>
-                            <button class="btn btn-link" ng-click="selectVs(entry.resource)">Select</button>
-                        </td>
-                    </tr>
-                </table>
-                -->
 
             </div>
             <div class="col-md-6 col-sm-6">
@@ -234,6 +238,37 @@
                         </div>
 
                     </uib-tab>
+                    <uib-tab heading="Description">
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+
+                                <form>
+                                    <div class="form-group">
+                                        <label>Name</label>
+                                        <input type="email" class="form-control" ng-model="input.newName">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Publisher</label>
+                                        <input type="email" class="form-control" ng-model="input.newPublisher">
+                                    </div>
+                                </form>
+
+                            </div>
+                            <div class="col-md-6 col-sm-6">
+                                <form>
+                                    <div class="form-group">
+                                        <label>Description</label>
+                                        <textarea class="form-control"  newDescription"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Requirements</label>
+                                        <textarea class="form-control" ng-model="input.newRequirements"></textarea>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </uib-tab>
+
                     <uib-tab heading="Expansion">
                         <br/>
                         <div class="row">
@@ -261,7 +296,17 @@
 
             </div>
             <div class="col-md-6 col-sm-6">
-                <div ng-show="canEdit"
+
+
+
+
+
+                <div ng-show="canEdit">
+
+
+
+
+
                     <h4>Add a new code</h4>
                     <ng-include src="'/prTemplates/codeableconcept.html'"></ng-include>
 

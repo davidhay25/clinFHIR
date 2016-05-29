@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig;
-
+/*
         //todo - not currently being used as thre are synchronous uses of defaultConfig
         $http.get("config.json").then(
             function(data) {
@@ -26,26 +26,28 @@ angular.module("sampleApp")
         );
 
 
-        
+        */
 
         defaultConfig = {servers : {}};
         defaultConfig.baseSpecUrl = "http://hl7.org/fhir/";     //the base for spec documentation
         defaultConfig.logLevel = 0;     //0 = no logging, 1 = log to console
         defaultConfig.enableCache = false;  //whether caching is supported
-        //defaultConfig.servers.terminology = "http://fhir2.healthintersections.com.au/open/";
-        defaultConfig.servers.terminology = "http://fhir.hl7.org.nz/dstu2/";
+        defaultConfig.servers.terminology = "http://fhir3.healthintersections.com.au/open/";
+        //defaultConfig.servers.terminology = "http://fhir.hl7.org.nz/dstu2/";
         defaultConfig.servers.data = "http://fhirtest.uhn.ca/baseDstu3/";
         //defaultConfig.servers.conformance = "http://fhir2.healthintersections.com.au/open/";
         defaultConfig.servers.conformance = "http://fhir3.healthintersections.com.au/open/";
 
         //default to Grahames DSTU2 server when data and conformance servers are inconsistent...
-        //defaultConfig.defaultTerminologyServerUrl = "http://fhir2.healthintersections.com.au/open/";
-        defaultConfig.defaultTerminologyServerUrl = "http://fhir.hl7.org.nz/dstu2/";
+        defaultConfig.defaultTerminologyServerUrl = "http://fhir3.healthintersections.com.au/open/";
+        //defaultConfig.defaultTerminologyServerUrl = "http://fhir.hl7.org.nz/dstu2/";
 
         defaultConfig.terminologyServers = [];
-        defaultConfig.terminologyServers.push({version:2,url:"http://fhir.hl7.org.nz/dstu2/"});
-        defaultConfig.terminologyServers.push({version:2,url:"http://fhir2.healthintersections.com.au/open/"});
-        defaultConfig.terminologyServers.push({version:3,url:"http://fhir3.healthintersections.com.au/open/"});
+        //defaultConfig.terminologyServers.push({name:'HL&version:2,url:"http://fhir.hl7.org.nz/dstu2/"});
+        defaultConfig.terminologyServers.push({name:'Grahames Server',version:2,url:"http://fhir2.healthintersections.com.au/open/"});
+        defaultConfig.terminologyServers.push({name:'Grahames Server',version:3,url:"http://fhir3.healthintersections.com.au/open/"});
+        // - not corsdefaultConfig.terminologyServers.push({name:'Patients First Server',version:3,url:"http://its.patientsfirst.org.nz/RestService.svc/Terminz/"});
+
 
 
         defaultConfig.allKnownServers = [];
@@ -62,12 +64,19 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:"Public HAPI server STU2 server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Public HAPI server STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true});
 
+
         defaultConfig.allKnownServers.push({name:"HL7 New Zealand STU2 server",url:"http://fhir.hl7.org.nz/baseDstu2/",version:2});
+       // defaultConfig.allKnownServers.push({name:'Patients First Server',version:3,url:"http://its.patientsfirst.org.nz/RestService.svc/Terminz/"});
 
 
 
 
         return {
+            setServerType : function(type,url) {
+                //set a default server type
+                defaultConfig.servers[type] = url;
+                $localStorage.config = defaultConfig;
+            },
             init : function(){
                 $http.get("config.json").then(
                     function(data) {

@@ -106,13 +106,17 @@
                                 <div ng-show="terminologyLookup">
                                     <div class="row">
                                         <div class="col-md-2">
-                                            Parent
+                                            Parents
                                         </div>
                                         <div class="col-md-10">
-                                            <div style="cursor:pointer" href="#" ng-click="selectParentCC()">
-                                                {{terminologyLookup.parent.description}} ({{terminologyLookup.parent.value}})</div>
+                                            <div ng-repeat = "parent in terminologyLookup.parent">
+                                                <div style="cursor:pointer" ng-click="selectParentCC(parent)">
+                                                    {{parent.description}} ({{parent.value}})
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
+
                                     <div class="row">
                                         <div class="col-md-2">
                                             Children

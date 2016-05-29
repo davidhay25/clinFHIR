@@ -1,56 +1,146 @@
 angular.module("sampleApp").controller('valuesetCtrl',
-    function ($scope, Utilities, appConfigSvc,SaveDataToServer,GetDataFromServer,resourceCreatorSvc,modalService) {
+    function ($scope, Utilities, appConfigSvc,SaveDataToServer,GetDataFromServer,resourceCreatorSvc,modalService,
+            $uibModal) {
 
-    $scope.hw = 'hw'
+    //$scope.hw = 'hw'
     $scope.results = {};
     $scope.input = {};
-    $scope.input.searchName = 'dhay'
+    $scope.input.searchName = 'dhay';
+
         
     $scope.state = 'find';      // edit / new / find
     $scope.input.conceptCache = {};        //hash to store the lookup details of a concept. todo We could cache this...
 
     var config = appConfigSvc.config();
+    var termServ = config.servers.terminology;      //the currently configured terminology server
+
+    //--------- terminology servers........
+
+    $scope.terminologyServers = [];
+    config.terminologyServers.forEach(function(svr){
+      
+        if (svr.version == 3) {
+            $scope.terminologyServers.push(svr);
+            if (svr.url == termServ) {
+                $scope.termServer = svr;
+            }
+        }
+    });
+
+
+    //----- changing the terminology server...
+    $scope.changeTerminologyServer = function(svr){
+        appConfigSvc.setServerType('terminology',svr.url)
+        $scope.valueSetRoot = config.servers.terminology + "ValueSet/";
+    };
+
+        
     $scope.valueSetRoot = config.servers.terminology + "ValueSet/";
         //var qry = config.servers.terminology + "ValueSet/"+name+"/$expand?filter="+filter;
+
+        //console.log(config.servers.terminology)
     var svr = appConfigSvc.getServerByUrl(config.servers.terminology);
-    if (svr.version <3) {
-        var config = {bodyText:"Warning: this application needs to work with a Terminology Server supporting version 3 of FHIR"}
-        modalService.showModal({}, config).then(function (result) {
-            //this is the 'yes'
-            $scope.displayMode = 'front';
-        })
-    }
+
+        if (svr){
+            if (svr.version <3) {
+                var config = {bodyText:"Warning: this application needs to work with a Terminology Server supporting version 3 of FHIR"}
+                modalService.showModal({}, config).then(function (result) {
+                    //this is the 'yes'
+                    $scope.displayMode = 'front';
+                })
+            }
+        } else {
+            alert("There was a unrecognized server url: "+ config.servers.terminology)
+        }
+
 
     $scope.arScopingValueSet = [];
     $scope.arScopingValueSet.push()
     $scope.showScopingValueSet = true;  //allows the scping valueset to be selected in the search...
 
 
-        $scope.vsReference = true;      //to show the included file
+    $scope.vsReference = true;      //to show the included file
 
-        var reference = "http://hl7.org/fhir/ValueSet/condition-code";
+    var reference = "http://hl7.org/fhir/ValueSet/condition-code";
 
 
+    //make a copy of the current vs
+    $scope.copyVs = function(){
+        $scope.newVs($scope.vs);
+        $scope.isDirty = true;
+    };
 
-    $scope.newVs = function() {
+    $scope.newVs = function(vs) {
         delete $scope.vs;
         delete $scope.searchResultBundle;
         $scope.state='new';
+
+        $uibModal.open({
+            backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
+            keyboard: false,       //same as above.
+            templateUrl: 'modalTemplates/inputValueSetName.html',
+            size:'lg',
+            controller: function($scope,GetDataFromServer,config,modalService){
+                $scope.checkName = function(name){
+                    var url = config.servers.terminology + "ValueSet/"+name;
+                    GetDataFromServer.adHocFHIRQuery(url).then(
+                        function(){
+                            //it found a valueset with that name
+                            modalService.showModal({}, {bodyText: 'Sorry, this valueSet already exists.'})
+                        },
+                        function(err){
+                            console.log(err);
+                            $scope.nameValid = true;
+                        }
+                    );
+
+
+                }
+            }, resolve : {
+                config: function () {          //the default config
+                    return config;
+
+                }
+            }
+        }).result.then(
+            function(name){
+                console.log(name)
+                createNewValueSet(name,vs)
+                $scope.canEdit = true;
+            },
+            function() {
+                //if the user cancels...
+            }
+        )
+    
+        
     };
 
-    function createNewValueSet(id) {
-        $scope.vs = {resourceType : "ValueSet", status:'draft',compose:{include:[]}};
-        $scope.url = $scope.valueSetRoot+id;
-        $scope.vs.id=id;       //the id of the vs on the terminology server
-        $scope.include = {system:'http://snomed.info/sct',concept:[]};
-        $scope.includeForFilter = {system:'http://snomed.info/sct',filter:[]};
+    //create a new ValueSet. If vs is passed in, then use that as the basis...
+    function createNewValueSet(id,vs) {
+
+        console.log(vs)
+        if (vs) {
+            $scope.vs = vs;
+            $scope.vs.id=id;       //the id of the vs on the terminology server
+        } else {
+            $scope.vs = {resourceType : "ValueSet", status:'draft',compose:{include:[]}};
+            $scope.url = $scope.valueSetRoot+id;
+            $scope.vs.id=id;       //the id of the vs on the terminology server
+            $scope.include = {system:'http://snomed.info/sct',concept:[]};
+            $scope.includeForFilter = {system:'http://snomed.info/sct',filter:[]};
 
 
-        $scope.vs.compose.include.push($scope.include);
-        $scope.vs.compose.include.push($scope.includeForFilter);
-        // $scope.vs.compose.filter.push(filter);
-        $scope.include.concept.push({code:"170631002",display:'Asthma disturbing sleep'})
-        $scope.include.concept.push({code:"280137006",display:'Diabetic foot'})
+/*
+            $scope.vs.compose.include.push($scope.include);
+            $scope.vs.compose.include.push($scope.includeForFilter);
+            // $scope.vs.compose.filter.push(filter);
+            $scope.include.concept.push({code:"170631002",display:'Asthma disturbing sleep'})
+            $scope.include.concept.push({code:"280137006",display:'Diabetic foot'})
+            */
+        }
+
+
     }
 
     //remove an 'included' concept
@@ -108,6 +198,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
     //find matching ValueSets based on name
     $scope.search = function(filter){
         $scope.showWaiting = true;
+        delete $scope.searchResultBundle;
         var url = config.servers.terminology + "ValueSet?name="+filter;
         GetDataFromServer.adHocFHIRQuery(url).then(
             function(data){
@@ -121,8 +212,6 @@ angular.module("sampleApp").controller('valuesetCtrl',
         })
     };
 
-
-
     //select a ValueSet from the search set...
     $scope.selectVs = function(vs) {
         delete $scope.input.hasSystem;
@@ -131,6 +220,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
         delete $scope.isDirty;
         delete $scope.canEdit;
         delete $scope.input.vspreview;
+        delete $scope.expansion;
         $scope.vs = vs;
         $scope.state='edit';
 
@@ -182,22 +272,6 @@ angular.module("sampleApp").controller('valuesetCtrl',
             $scope.canEdit = true;
         }
     };
-
-    //retireve the name from a concept
-    $scope.getConceptName = function(concept) {
-      /*  resourceCreatorSvc.getLookupForCode("http://snomed.info/sct",concept).then(
-            function(data) {
-                console.log(data);
-
-
-            },
-            function(err) {
-                alert(angular.toJson(err));
-            }
-        )
-        */
-        //return concept;
-    }
 
     //return to the selected list
     $scope.backToList = function(){
@@ -253,8 +327,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
     };
 
     $scope.save = function () {
-        $scope.vs.id = $scope.vsId
-        SaveDataToServer.saveValueSetToTerminologyServerById($scope.vsId,$scope.vs).then(
+      //  $scope.vs.id = $scope.vsId
+        SaveDataToServer.saveValueSetToTerminologyServerById($scope.vs.id,$scope.vs).then(
             function (data) {
                 console.log(data)
                 alert('ValueSet saved.')
@@ -351,7 +425,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
     function setTerminologyLookup(system,code) {
         resourceCreatorSvc.getLookupForCode(system,code).then(
             function(data) {
-               // console.log(data);
+                console.log(data);
                 $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
                // console.log($scope.terminologyLookup);
             },
@@ -373,15 +447,11 @@ angular.module("sampleApp").controller('valuesetCtrl',
     }
 
     //the user selects the parent...
-    $scope.selectParentCC = function() {
-        $scope.results.ccDirectDisplay = $scope.terminologyLookup.parent.description;
-        $scope.results.ccDirectCode = $scope.terminologyLookup.parent.value;
+    $scope.selectParentCC = function(parent) {
+        $scope.results.ccDirectDisplay = parent.description;
+        $scope.results.ccDirectCode = parent.value;
         //look up the relations to this one...
         setTerminologyLookup($scope.results.ccDirectSystem,$scope.results.ccDirectCode)
-
-
-        //$scope.results.cc = $scope.terminologyLookup.parent;
-        //console.log('s')
     };
 
     //use the terminology operation CodeSystem/$lookup to get details of the code / system when manually entered

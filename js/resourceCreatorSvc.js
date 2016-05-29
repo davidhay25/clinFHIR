@@ -2458,7 +2458,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         parseCodeLookupResponse : function(resp) {
             //parse the response from the codeSystem/$lookup operation. For now, assume SNOMED todo - check
-            var obj = {children:[]}
+            var obj = {parent:[],children:[]}
             resp.parameter.forEach(function(param){
                 switch (param.name) {
                     case 'name' :
@@ -2483,7 +2483,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                         switch (code) {
                             case 'parent' :
-                                obj.parent = {value:value,description:description}
+                                obj.parent.push({value:value,description:description});
                                 break;
                             case 'child' :
                                 obj.children.push({value:value,description:description});
@@ -2493,6 +2493,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
                         break;
+                    default :
+                        console.log('unrecgnised param',param)
                 }
 
             })
