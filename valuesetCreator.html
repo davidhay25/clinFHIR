@@ -30,7 +30,7 @@
     <script src="js/libs/ngStorage.min.js"></script>
     <script src="js/resourceCreatorSvc.js"></script>
     <script src="js/modalDialogSvc.js"></script>
-    <title>FHIR ValueSet Manager</title>
+    <title>FHIR ValueSet Editor</title>
 
 </head>
 
@@ -43,7 +43,7 @@
             <div class="container-fluid">
                 <div class="col-md-3">
                     <a class="navbar-brand" href="#">
-                        clinFHIR ValueSet Manager
+                        clinFHIR ValueSet Editor
                     </a>
 
                 </div>
@@ -71,7 +71,7 @@
 
                 <div class="col-md-3">
                     <!-- Show save when a vs has been updated-->
-                    <form class="navbar-form navbar-right" ng-show="isDirty">
+                    <form class="navbar-form navbar-right" ng-show="input.isDirty">
                          <button class="btn btn-danger" ng-click="save()">Save</button>
                     </form>
 
@@ -174,8 +174,10 @@
                         <h5 ng-show="input.hasSystem">Systems</h5>
 
                         <div ng-repeat="include in vs.compose.include">
-                            <div ng-hide="include.concept || include.filter">
-                                <div  ng-init = "input.hasSystem = true" class="row display-row">
+
+                            <div ng-if = "!include.concept && !include.filter ">
+
+                                <div ng-init = "input.hasSystem = true" class="row display-row">
                                     <div class="col-md-1 col-sm-1">
 
                                     </div>
@@ -183,7 +185,10 @@
                                         {{include.system}}
                                     </div>
                                 </div>
+
                             </div>
+
+
                         </div>
 
                         <h5 ng-show="input.hasConcept">Specific included concepts</h5>
@@ -245,11 +250,11 @@
                                 <form>
                                     <div class="form-group">
                                         <label>Name</label>
-                                        <input type="email" class="form-control" ng-model="input.newName">
+                                        <input type="text" class="form-control" ng-model="vs.name" ng-change="input.isDirty = true"/>
                                     </div>
                                     <div class="form-group">
                                         <label>Publisher</label>
-                                        <input type="email" class="form-control" ng-model="input.newPublisher">
+                                        <input type="text" class="form-control" ng-model="vs.publisher" ng-change="input.isDirty = true"/>
                                     </div>
                                 </form>
 
@@ -258,11 +263,11 @@
                                 <form>
                                     <div class="form-group">
                                         <label>Description</label>
-                                        <textarea class="form-control"  newDescription"></textarea>
+                                        <textarea class="form-control" ng-model="vs.description" ng-change="input.isDirty = true"></textarea>
                                     </div>
                                     <div class="form-group">
                                         <label>Requirements</label>
-                                        <textarea class="form-control" ng-model="input.newRequirements"></textarea>
+                                        <textarea class="form-control" ng-model="vs.requirements" ng-change="input.isDirty = true"></textarea>
                                     </div>
                                 </form>
                             </div>

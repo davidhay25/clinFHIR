@@ -18,7 +18,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
     $scope.terminologyServers = [];
     config.terminologyServers.forEach(function(svr){
-      
+
         if (svr.version == 3) {
             $scope.terminologyServers.push(svr);
             if (svr.url == termServ) {
@@ -63,11 +63,10 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
     var reference = "http://hl7.org/fhir/ValueSet/condition-code";
 
-
     //make a copy of the current vs
     $scope.copyVs = function(){
         $scope.newVs($scope.vs);
-        $scope.isDirty = true;
+        $scope.input.isDirty = true;
     };
 
     $scope.newVs = function(vs) {
@@ -124,21 +123,33 @@ angular.module("sampleApp").controller('valuesetCtrl',
             $scope.vs = vs;
             $scope.vs.id=id;       //the id of the vs on the terminology server
         } else {
-            $scope.vs = {resourceType : "ValueSet", status:'draft',compose:{include:[]}};
+            $scope.vs = {resourceType : "ValueSet", status:'draft', id: id,compose:{include:[]}};
+            $scope.vs.name = id;        //so the search will work on id
             $scope.url = $scope.valueSetRoot+id;
-            $scope.vs.id=id;       //the id of the vs on the terminology server
+
+
+
             $scope.include = {system:'http://snomed.info/sct',concept:[]};
             $scope.includeForFilter = {system:'http://snomed.info/sct',filter:[]};
 
 
-/*
-            $scope.vs.compose.include.push($scope.include);
-            $scope.vs.compose.include.push($scope.includeForFilter);
+
+           // $scope.vs.compose.include.push($scope.include);
+           // $scope.vs.compose.include.push($scope.includeForFilter);
+
+
+
+            /*
             // $scope.vs.compose.filter.push(filter);
             $scope.include.concept.push({code:"170631002",display:'Asthma disturbing sleep'})
             $scope.include.concept.push({code:"280137006",display:'Diabetic foot'})
             */
         }
+
+        $scope.vs.contact = $scope.vs.contact || []
+        $scope.vs.contact.push({name : 'clinfhir'})
+
+
 
 
     }
@@ -158,7 +169,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
                     if (conceptToRemove.code == concept.code) {
 
                         include.concept.splice(j,1)
-                        $scope.isDirty = true;
+                        $scope.input.isDirty = true;
                         break;
                     }
                 }
@@ -181,7 +192,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
                     //console.log(concept)
                     if (filter.value == filtertToRemove.value) {
                         include.filter.splice(j,1)
-                        $scope.isDirty = true;
+                        $scope.input.isDirty = true;
                         break;
                     }
                 }
@@ -217,7 +228,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
         delete $scope.input.hasSystem;
         delete $scope.input.hasIsa;
         delete $scope.input.hasConcept;
-        delete $scope.isDirty;
+        delete $scope.input.isDirty;
         delete $scope.canEdit;
         delete $scope.input.vspreview;
         delete $scope.expansion;
@@ -275,7 +286,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
     //return to the selected list
     $scope.backToList = function(){
-        if ($scope.dirty) {
+        if ($scope.input.dirty) {
             alert('dirty')
         }
 
@@ -286,14 +297,28 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
     //add a new concept to the ValueSet
     $scope.addConcept = function(){
+
+        //$scope.vs.compose.include.push($scope.include);
+        //$scope.vs.compose.include.push($scope.includeForFilter);
+
+
+        if ($scope.include.concept.length == 0) {
+            $scope.vs.compose.include.push($scope.include);
+        }
+
         $scope.include.concept.push({code:$scope.results.cc.code,display:$scope.results.cc.display})
-        $scope.isDirty = true;
+        $scope.input.isDirty = true;
     };
 
     //add an 'is-a' concept
     $scope.isAConcept = function() {
+
+        if ($scope.includeForFilter.filter.length == 0) {
+            $scope.vs.compose.include.push($scope.includeForFilter);
+        }
+
         $scope.includeForFilter.filter.push({property:'concept',op:'is-a',value:$scope.results.cc.code})
-        $scope.isDirty = true;
+        $scope.input.isDirty = true;
     };
 
     $scope.expand = function(filter){
@@ -341,10 +366,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
     function isAuthoredByClinFhir(vs) {
         var isAuthoredByClinFhir = false;
-        if (vs.code) {
-            vs.code.forEach(function(coding){
-                if (coding.system == 'http://fhir.hl7.org.nz/NamingSystem/application' &&
-                    coding.code == 'clinfhir') {
+        if (vs.contact) {
+            vs.contact.forEach(function(contact){
+                if (contact.name == 'clinfhir') {
                     isAuthoredByClinFhir = true;
                 }
             })
