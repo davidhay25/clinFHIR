@@ -173,6 +173,7 @@
     <script src="js/resourceSvc.js"></script>
     <script src="js/menuCtrl.js"></script>
     <script src="js/modalDialogSvc.js"></script>
+    <script src="js/newVSFinder.js"></script>
     <script src="js/components/profileDisplayComp.js"></script>
 
     <script src="js/components/resourceUploadComp.js"></script>
@@ -308,21 +309,30 @@
 
 
 
-
-
                                     <ul class="dropdown-menu" role="menu">
                                         <li>
                                             <a href="#" ng-click="showQuery()">{{'MENU.QUERYSERVERS'|translate}}</a>
                                         </li>
+
+                                        <li>
+                                            <a href="valuesetCreator.html" target="_blank">ValueSet Editor</a>
+                                        </li>
+
                                         <li class="divider"></li>
                                         <li>
                                             <a href="#" ng-click="resetConfig()">{{'MENU.RESETCONFIG'|translate}}</a>
                                         </li>
+
+
                                         <li>
                                             <a href="#" ng-click="clearProfileCache()">{{'MENU.CLEARPROFILECACHE'|translate}}</a>
                                         </li>
                                         <li>
                                             <a href="#" ng-click="clearPatientCache()">{{'MENU.CLEARPATIENTCACHE'|translate}}</a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        <li>
+                                            <a href="#" ng-click="showValidateInstance()">Validate Resource</a>
                                         </li>
                                         <li class="divider"></li>
 

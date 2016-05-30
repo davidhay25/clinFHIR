@@ -1,5 +1,6 @@
 angular.module("sampleApp").service('resourceCreatorSvc',
-    function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,GetDataFromServer,$localStorage,Utilities,$sce) {
+    function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,profileCreatorSvc,
+             GetDataFromServer,$localStorage,Utilities,$sce) {
 
 
     var currentProfileEl;     //the profile being used...

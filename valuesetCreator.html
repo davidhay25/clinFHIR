@@ -150,6 +150,16 @@
                 </div>
 
                 <br/>
+                <uib-alert type="warning" ng-show="message">
+                    {{message}}
+                </uib-alert>
+
+                <uib-alert type="info" ng-hide="searchResultBundle.entry">
+                    Enter a search string into the text box above and click 'Find'.
+                    The app will find all ValueSets where the string you enter is in the name of the ValueSet.
+
+                </uib-alert>
+
 
                 <div class="row display-row" ng-repeat="entry in searchResultBundle.entry" style="margin-bottom: 5px">
                     <div class="col-md-9 col-sm-9">

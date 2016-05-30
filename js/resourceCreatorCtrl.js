@@ -19,7 +19,6 @@ angular.module("sampleApp")
 
 
 
-
     //register that the application has been started... (for reporting)
     resourceCreatorSvc.registerAccess();
 
@@ -2540,7 +2539,7 @@ console.log(url);
 
     })
     .controller('logicalModelCtrl',function($scope,$rootScope,profileCreatorSvc,resourceCreatorSvc,GetDataFromServer,
-                                            appConfigSvc,modalService,RenderProfileSvc){
+                                            appConfigSvc,modalService,RenderProfileSvc,$uibModal){
 
 
 
@@ -2785,7 +2784,6 @@ console.log(url);
             })
         }
 
-
         //remove the current node (and all child nodes)
         $scope.removeNode = function(){
             if ($scope.selectedNode.parent == '#' ) {
@@ -2943,6 +2941,36 @@ console.log(url);
 
         $scope.changeBinding = function() {
 
+
+            $uibModal.open({
+                backdrop: 'static',      //means can't close by clicking on the backdrop.
+                keyboard: false,       //same as above.
+                templateUrl: 'modalTemplates/vsFinder.html',
+                size:'lg',
+                controller: 'vsFinderCtrl',
+                resolve : {
+                    currentBinding: function () {          //the default config
+                        return $scope.edFromTreeNode.binding;
+                    }
+                }
+            }).result.then(
+                function(vo) {
+                    console.log(vo)
+
+
+
+                    $scope.edFromTreeNode.binding = {strength:vo.strength,description: "test", valueSetReference : {reference : vo.vs.id}};
+                    $scope.edFromTreeNode.myMeta = $scope.edFromTreeNode.myMeta || {};
+                    $scope.edFromTreeNode.myMeta.isDirty = true;
+
+                    //make the component update the model it is based on...
+                    $scope.updateElementDefinitionInComponent = {ed:$scope.edFromTreeNode,item:$scope.treeNodeItemSelected};
+
+                }
+            );
+
+            /*
+
             var vsUrl = prompt("Enter the ValueSet Url");
             if (vsUrl) {
                 try {
@@ -2963,10 +2991,9 @@ console.log(url);
 
             }
 
+            */
+
         };
-
-
-
 
         //when an element is selected in the tree....
         $scope.treeNodeSelected = function(item) {

@@ -315,12 +315,15 @@
                                     <a href="#" ng-click="showValueSetForProfile(edFromTreeNode.binding.valueSetReference.reference)">
                                         {{edFromTreeNode.binding.valueSetReference.reference}}
                                     </a>
+                                    <div>Binding strength: {{edFromTreeNode.binding.strength}}</div>
                                 </div>
                                 <div class="col-md-1 col-sm-1">
-                                    <span><i ng-show="mode=='new' || mode=='edit'" class="glyphicon glyphicon-edit"
+                                    <span ng-hide="edFromTreeNode.binding.strength == 'required'">
+                                        <i ng-show="mode=='new' || mode=='edit'" class="glyphicon glyphicon-edit"
                                     ng-click="changeBinding()" style="cursor: pointer">
 
-                                    </i></span>
+                                        </i>
+                                    </span>
 
                                 </div>
                             </div>

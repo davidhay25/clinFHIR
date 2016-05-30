@@ -7,6 +7,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
     $scope.input = {};
     //$scope.input.searchName = 'dhay';
 
+        //register that the application has been started... (for reporting)
+        resourceCreatorSvc.registerAccess();
         
     $scope.state = 'find';      // edit / new / find
     $scope.input.conceptCache = {};        //hash to store the lookup details of a concept. todo We could cache this...
@@ -228,6 +230,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
     $scope.search = function(filter){
         $scope.showWaiting = true;
         delete $scope.searchResultBundle;
+        delete $scope.message;
         //var url = config.servers.terminology + "ValueSet?name="+filter;
 
         var url = $scope.valueSetRoot+"?name="+filter;
@@ -235,6 +238,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
         GetDataFromServer.adHocFHIRQuery(url).then(
             function(data){
                 $scope.searchResultBundle = data.data;
+                if (! data.data || ! data.data.entry || data.data.entry.length == 0) {
+                    $scope.message = 'No matching ValueSets found'
+                }
             },
             function(err){
                 alert(angular.toJson(err))

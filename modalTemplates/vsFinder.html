@@ -1,0 +1,88 @@
+<div>
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+
+                <h3>Bind ValueSet</h3>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <div class="pull-right">
+                    <img ng-show='showWaiting' src="css/ajax_loader_blue_32.gif"/>
+                    <button  ng-show="input.vspreview" class="btn btn-success" ng-click="select()">Select</button>
+                    <button class="btn btn-primary" ng-click="$dismiss()">Close</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+        <div class="row">
+            <div class="col-md-5 col-sm-5">
+                <div>Search</div>
+                <div class="row">
+                    <div class="col-md-9 col-sm-9">
+                        <input type="text" ng-model="input.searchName" class="form-control" placeholder="Enter search text"/>
+                    </div>
+                    <div class="col-md-3 col-sm-3">
+                        <button class="btn btn-link" ng-click="search(input.searchName)">Find</button>
+                    </div>
+                </div>
+
+                <br/>
+                <uib-alert type="warning" ng-show="message">
+                    {{message}}
+                </uib-alert>
+
+                <uib-alert type="info" ng-hide="searchResultBundle.entry">
+                    Enter a search string into the text box above and click 'Find'.
+                    The app will find all ValueSets where the string you enter is in the name of the ValueSet.
+
+                </uib-alert>
+
+
+                <div class="row display-row" ng-repeat="entry in searchResultBundle.entry" style="margin-bottom: 5px">
+                    <div class="col-md-9 col-sm-9">
+                        <div><strong>{{entry.resource.id}}</strong></div>
+                        {{entry.resource.name}}
+                        <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>
+                    </div>
+                    <div class="col-md-3 col-sm-3">
+                        <button class="btn btn-link" ng-click="input.vspreview=entry.resource">Select</button>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="col-md-7 col-sm-7">
+                <div ng-show="input.vspreview">
+                    <div class="row">
+                        <div class="col-sm-4 col-md-4">
+                            <strong>Binding Strength</strong>
+                        </div>
+                        <div class="col-sm-4 col-md-4">
+                            <select ng-model='input.strength' class="form-control"
+                                    ng-options="strength as strength for strength in input.arStrength"></select>
+
+                        </div>
+                    </div>
+
+                </div>
+                <pre ng-show="input.vspreview">{{input.vspreview | json}}</pre>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div class="modal-footer">
+
+        <em>{{termServer}}</em>
+
+    </div>
+</div>
