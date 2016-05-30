@@ -122,9 +122,10 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
         console.log(vs)
         if (vs) {
+            //passing in a copy of the ValueSet to copy...
             $scope.vs = vs;
             $scope.vs.id=id;       //the id of the vs on the terminology server
-
+            $scope.vs.name = id;
             $scope.vs.compose.include.forEach(function(inc){
                 if (inc.concept) {
                     $scope.include = inc;
@@ -139,34 +140,21 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
 
         } else {
+            //a new ValueSet
             $scope.vs = {resourceType : "ValueSet", status:'draft', id: id,compose:{include:[]}};
             $scope.vs.name = id;        //so the search will work on id
             $scope.url = $scope.valueSetRoot+id;
 
 
-
+            //establish the separate variables that reference the include.concept and include.filter
             $scope.include = {system:'http://snomed.info/sct',concept:[]};
             $scope.includeForFilter = {system:'http://snomed.info/sct',filter:[]};
 
-
-
-           // $scope.vs.compose.include.push($scope.include);
-           // $scope.vs.compose.include.push($scope.includeForFilter);
-
-
-
-            /*
-            // $scope.vs.compose.filter.push(filter);
-            $scope.include.concept.push({code:"170631002",display:'Asthma disturbing sleep'})
-            $scope.include.concept.push({code:"280137006",display:'Diabetic foot'})
-            */
         }
 
+        //the contact must include clinfhir to allow editing...
         $scope.vs.contact = $scope.vs.contact || []
         $scope.vs.contact.push({name : 'clinfhir'})
-
-
-
 
     }
 
@@ -234,9 +222,6 @@ angular.module("sampleApp").controller('valuesetCtrl',
             $scope.vs.compose.include.splice(includeToDelete,1)
         }
     };
-
-
-    //createNewValueSet("dhtest");
 
 
     //find matching ValueSets based on name
@@ -474,7 +459,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
         console.log(text,vs)
         if (vs) {
-            $scope.waiting = true;
+            $scope.showWaiting = true;
             return GetDataFromServer.getFilteredValueSet(vs,text).then(
                 function(data,statusCode){
                     if (data.expansion && data.expansion.contains) {
@@ -497,7 +482,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
                     ];
                 }
             ).finally(function(){
-                $scope.waiting = false;
+                $scope.showWaiting = false;
             });
 
         } else {
@@ -506,6 +491,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
     };
 
     function setTerminologyLookup(system,code) {
+        $scope.showWaiting = true;
         resourceCreatorSvc.getLookupForCode(system,code).then(
             function(data) {
                 console.log(data);
@@ -515,7 +501,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
             function(err) {
                 alert(angular.toJson(err));
             }
-        );
+        ).then(function(){
+            $scope.showWaiting = false;
+        });
     }
 
     $scope.selectChildTerm = function(code,display){

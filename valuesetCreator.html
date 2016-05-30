@@ -64,14 +64,15 @@
                 </div>
 
                 <div class="col-md-1">
+                    <div class="navbar-form pull-right" ng-show="showWaiting">
 
+                    </div>
                 </div>
 
                 <div class="col-md-3">
-
-                    <div class="navbar-form" ng-show="showWaiting">
-                        <img src="css/ajax_loader_blue_32.gif"/>
-                    </div>
+                    <form class="navbar-form navbar-left" ng-show="showWaiting">
+                     <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
+                    </form>
 
                     <!-- Show save when a vs has been updated-->
                     <form class="navbar-form navbar-right" ng-show="input.isDirty">
