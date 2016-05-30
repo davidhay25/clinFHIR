@@ -5,7 +5,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
     //$scope.hw = 'hw'
     $scope.results = {};
     $scope.input = {};
-    $scope.input.searchName = 'dhay';
+    //$scope.input.searchName = 'dhay';
 
         
     $scope.state = 'find';      // edit / new / find
@@ -41,17 +41,17 @@ angular.module("sampleApp").controller('valuesetCtrl',
         //console.log(config.servers.terminology)
     var svr = appConfigSvc.getServerByUrl(config.servers.terminology);
 
-        if (svr){
-            if (svr.version <3) {
-                var config = {bodyText:"Warning: this application needs to work with a Terminology Server supporting version 3 of FHIR"}
-                modalService.showModal({}, config).then(function (result) {
-                    //this is the 'yes'
-                    $scope.displayMode = 'front';
-                })
-            }
-        } else {
-            alert("There was a unrecognized server url: "+ config.servers.terminology)
+    if (svr){
+        if (svr.version <3) {
+            var config = {bodyText:"Warning: this application needs to work with a Terminology Server supporting version 3 of FHIR"}
+            modalService.showModal({}, config).then(function (result) {
+                //this is the 'yes'
+                $scope.displayMode = 'front';
+            })
         }
+    } else {
+        alert("There was a unrecognized server url: "+ config.servers.terminology)
+    }
 
 
     $scope.arScopingValueSet = [];
@@ -61,7 +61,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
     $scope.vsReference = true;      //to show the included file
 
-    var reference = "http://hl7.org/fhir/ValueSet/condition-code";
+    //var reference = "http://hl7.org/fhir/ValueSet/condition-code";
+    var reference = "http://hl7.org/fhir/ValueSet/condition-cause";
+                     //http://fhir3.healthintersections.com.au/open/ValueSet/condition-cause
 
     //make a copy of the current vs
     $scope.copyVs = function(){
@@ -122,6 +124,20 @@ angular.module("sampleApp").controller('valuesetCtrl',
         if (vs) {
             $scope.vs = vs;
             $scope.vs.id=id;       //the id of the vs on the terminology server
+
+            $scope.vs.compose.include.forEach(function(inc){
+                if (inc.concept) {
+                    $scope.include = inc;
+                } else if (inc.filter) {
+                    $scope.includeForFilter = inc;
+                }
+            });
+
+            //establish the separate variables that reference the include.concept and include.filter
+            $scope.include =  $scope.include || {system:'http://snomed.info/sct',concept:[]};
+            $scope.includeForFilter = $scope.includeForFilter || {system:'http://snomed.info/sct',filter:[]};
+
+
         } else {
             $scope.vs = {resourceType : "ValueSet", status:'draft', id: id,compose:{include:[]}};
             $scope.vs.name = id;        //so the search will work on id
@@ -157,7 +173,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
     //remove an 'included' concept
     $scope.removeInclude = function (conceptToRemove) {
         //console.log(conceptToRemove)
-
+        var includeToDelete = -1;
         for (var i=0; i < $scope.vs.compose.include.length; i++) {
             var include = $scope.vs.compose.include[i];
             //console.log(include)
@@ -168,8 +184,11 @@ angular.module("sampleApp").controller('valuesetCtrl',
                     //console.log(concept)
                     if (conceptToRemove.code == concept.code) {
 
-                        include.concept.splice(j,1)
+                        include.concept.splice(j,1);
                         $scope.input.isDirty = true;
+                        if (include.concept.length ==0 ){
+                            includeToDelete = i;
+                        }
                         break;
                     }
                 }
@@ -177,10 +196,16 @@ angular.module("sampleApp").controller('valuesetCtrl',
             }
 
         }
+
+        if (includeToDelete > -1) {
+            $scope.include.filter.length = 0;
+            $scope.vs.compose.include.splice(includeToDelete,1)
+        }
     };
 
     $scope.removeIsa = function (filtertToRemove) {
         //console.log(conceptToRemove)
+        var includeToDelete = -1;
 
         for (var i=0; i < $scope.vs.compose.include.length; i++) {
             var include = $scope.vs.compose.include[i];
@@ -193,12 +218,20 @@ angular.module("sampleApp").controller('valuesetCtrl',
                     if (filter.value == filtertToRemove.value) {
                         include.filter.splice(j,1)
                         $scope.input.isDirty = true;
+                        if (include.filter.length ==0 ){
+                            includeToDelete = i;
+                        }
                         break;
                     }
                 }
 
             }
 
+        }
+
+        if (includeToDelete > -1) {
+            $scope.includeForFilter.filter.length = 0;
+            $scope.vs.compose.include.splice(includeToDelete,1)
         }
     };
 
@@ -210,7 +243,10 @@ angular.module("sampleApp").controller('valuesetCtrl',
     $scope.search = function(filter){
         $scope.showWaiting = true;
         delete $scope.searchResultBundle;
-        var url = config.servers.terminology + "ValueSet?name="+filter;
+        //var url = config.servers.terminology + "ValueSet?name="+filter;
+
+        var url = $scope.valueSetRoot+"?name="+filter;
+
         GetDataFromServer.adHocFHIRQuery(url).then(
             function(data){
                 $scope.searchResultBundle = data.data;
@@ -239,6 +275,17 @@ angular.module("sampleApp").controller('valuesetCtrl',
         //get the details of any 'is-a' codes so we can display the name in th eUI
         if (vs.compose && vs.compose.include) {
             vs.compose.include.forEach(function (inc) {
+
+                //this initializes the separate variables pointing at the concept & filter elements...
+                if (inc.concept) {
+                    $scope.include = inc;
+                } else if (inc.filter) {
+                    $scope.includeForFilter = inc;
+                }
+
+
+
+
                 if (inc.filter) {
                     inc.filter.forEach(function (filter) {
                         console.log(filter)
@@ -276,7 +323,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
         }
 
-
+        //these are the 'pointer' variables,,,
+        $scope.include =  $scope.include || {system:'http://snomed.info/sct',concept:[]};
+        $scope.includeForFilter = $scope.includeForFilter || {system:'http://snomed.info/sct',filter:[]};
 
 
         if (isAuthoredByClinFhir(vs)){
@@ -313,9 +362,11 @@ angular.module("sampleApp").controller('valuesetCtrl',
     //add an 'is-a' concept
     $scope.isAConcept = function() {
 
-        if ($scope.includeForFilter.filter.length == 0) {
-            $scope.vs.compose.include.push($scope.includeForFilter);
-        }
+      //  var isaElement;
+
+    if ($scope.includeForFilter.filter.length == 0) {
+        $scope.vs.compose.include.push($scope.includeForFilter);
+    }
 
         $scope.includeForFilter.filter.push({property:'concept',op:'is-a',value:$scope.results.cc.code})
         $scope.input.isDirty = true;
@@ -353,15 +404,23 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
     $scope.save = function () {
       //  $scope.vs.id = $scope.vsId
+
+       // $scope.vs
+
+        $scope.showWaiting = true;
+
         SaveDataToServer.saveValueSetToTerminologyServerById($scope.vs.id,$scope.vs).then(
             function (data) {
                 console.log(data)
                 alert('ValueSet saved.')
+                $scope.input.isDirty = false;
             },
             function (err) {
                 alert(angular.toJson(err))
             }
-        )
+        ).finally(function(){
+            $scope.showWaiting = false;
+        })
     };
 
     function isAuthoredByClinFhir(vs) {

@@ -64,12 +64,15 @@
                 </div>
 
                 <div class="col-md-1">
-                    <div class="pull-right navbar-form" ng-show="showWaiting">
-                        <img src="css/ajax_loader_blue_32.gif"/>
-                    </div>
+
                 </div>
 
                 <div class="col-md-3">
+
+                    <div class="navbar-form" ng-show="showWaiting">
+                        <img src="css/ajax_loader_blue_32.gif"/>
+                    </div>
+
                     <!-- Show save when a vs has been updated-->
                     <form class="navbar-form navbar-right" ng-show="input.isDirty">
                          <button class="btn btn-danger" ng-click="save()">Save</button>
@@ -173,7 +176,7 @@
 
                         <h5 ng-show="input.hasSystem">Systems</h5>
 
-                        <div ng-repeat="include in vs.compose.include">
+                        <div ng-repeat="include in vs.compose.include track by $index">
 
                             <div ng-if = "!include.concept && !include.filter ">
 
@@ -193,7 +196,7 @@
 
                         <h5 ng-show="input.hasConcept">Specific included concepts</h5>
 
-                        <div ng-repeat="include in vs.compose.include">
+                        <div ng-repeat="include in vs.compose.include  track by $index">
                             <div ng-repeat="concept in include.concept">
                                 <div ng-init = "input.hasConcept = true" class="row display-row">
 
@@ -218,7 +221,7 @@
 
                         <h5 ng-show="input.hasIsa">'is-a' included concepts</h5>
 
-                        <div ng-repeat="include in vs.compose.include">
+                        <div ng-repeat="include in vs.compose.include track by $index">
                             <div ng-repeat="filter in include.filter">
                                 <div ng-init = "input.hasIsa = true" class="row display-row">
                                     <div class="col-md-2 col-sm-2">
@@ -276,6 +279,11 @@
 
                     <uib-tab heading="Expansion">
                         <br/>
+
+                        <uib-alert type="warning" ng-show="input.isDirty">
+                            This ValueSet has been altered, so Save it if you want the expansion to work against the most recent version
+                        </uib-alert>
+
                         <div class="row">
                             <div class="col-md-8 col-sm-8">
                                 <input class="form-control" type="text" ng-model="input.filterText" placeholder="Filter text"/>
