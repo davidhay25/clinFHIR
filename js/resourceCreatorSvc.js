@@ -2455,7 +2455,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             }
 
             var url = config.servers.terminology + 'CodeSystem/$lookup?code='+code+"&system="+system;
-            return $http.post(url);
+           // return $http.post(url);
+            return $http.get(url);
         },
         parseCodeLookupResponse : function(resp) {
             //parse the response from the codeSystem/$lookup operation. For now, assume SNOMED todo - check
@@ -2468,6 +2469,35 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     case 'display' :
                         obj.display = param.valueString;
                         break;
+
+                    case 'parent' :
+                        console.log(param)
+                        var code, value, description;
+                        param.part.forEach(function(part){
+
+                            if (part.name == 'code') {
+                                code = part.valueString;
+                            } else if (part.name == 'display') {
+                                description = part.valueString;
+                            }
+                        })
+
+                        obj.parent.push({value:code,description:description});
+                        break;
+
+                    case 'child' :      //ontoserver does this
+                        var code, value, description;
+                        param.part.forEach(function(part){
+
+                            if (part.name == 'code') {
+                                code = part.valueString;
+                            } else if (part.name == 'display') {
+                                description = part.valueString;
+                            }
+                        })
+                        obj.children.push({value:code,description:description});
+                        break;
+
                     case 'property' :
                         var code, value, description;
                         param.part.forEach(function(part){
@@ -2495,7 +2525,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                         break;
                     default :
-                        console.log('unrecgnised param',param)
+                        console.log('unrecognised param',param)
                 }
 
             })
