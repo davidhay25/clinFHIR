@@ -13,6 +13,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
     $scope.state = 'find';      // edit / new / find
     $scope.input.conceptCache = {};        //hash to store the lookup details of a concept. todo We could cache this...
 
+    $scope.results.ccDirectSystem = "http://snomed.info/sct";     //default the system name to snomed
+
+
     var config = appConfigSvc.config();
     var termServ = config.servers.terminology;      //the currently configured terminology server
 
@@ -30,10 +33,12 @@ angular.module("sampleApp").controller('valuesetCtrl',
     });
 
 
-    //----- changing the terminology server...
+    //----- changing the terminology server...  This will update the local preference store...
     $scope.changeTerminologyServer = function(svr){
         appConfigSvc.setServerType('terminology',svr.url)
         $scope.valueSetRoot = config.servers.terminology + "ValueSet/";
+        
+        
     };
 
         
@@ -52,7 +57,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
             })
         }
     } else {
-        alert("There was a unrecognized server url: "+ config.servers.terminology)
+        alert("There was a unrecognized server url in the config: "+ config.servers.terminology)
     }
 
 
@@ -83,7 +88,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
             keyboard: false,       //same as above.
             templateUrl: 'modalTemplates/inputValueSetName.html',
             size:'lg',
-            controller: function($scope,GetDataFromServer,config,modalService){
+            controller: function($scope,GetDataFromServer,config,modalService,profileCreatorSvc){
                 $scope.checkName = function(name){
                     var url = config.servers.terminology + "ValueSet/"+name;
                     GetDataFromServer.adHocFHIRQuery(url).then(
@@ -93,6 +98,12 @@ angular.module("sampleApp").controller('valuesetCtrl',
                         },
                         function(err){
                             console.log(err);
+
+                            if (! profileCreatorSvc.isSimpleString(name)){
+                                modalService.showModal({}, {bodyText: 'This name has characters that may cause problems. I suggest you try a simpler one.'})
+                            }
+
+
                             $scope.nameValid = true;
                         }
                     );
@@ -346,6 +357,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
             $scope.vs.compose.include.push($scope.include);
         }
 
+        
+        
         $scope.include.concept.push({code:$scope.results.cc.code,display:$scope.results.cc.display})
         $scope.input.isDirty = true;
     };
@@ -541,6 +554,11 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 $scope.lookupResult = data.data;
                 $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
                 $scope.results.ccDirectDisplay = $scope.terminologyLookup.display;
+
+
+                //set results.cc as that will enable the buttons - and will also be the code that is saved
+                $scope.results.cc = {code:code,system:system,display:$scope.terminologyLookup.display}
+                //$scope.results.cc.code,display:$scope.results.cc.display
 
                 //console.log($scope.terminologyLookup);
 

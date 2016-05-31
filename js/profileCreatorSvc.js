@@ -624,6 +624,18 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
 
                 }
+            },
+            isSimpleString : function(str) {
+                //function to check for a simple string...
+                if (str.indexOf(' ')> -1 ||  str.indexOf('"')> -1 || str.indexOf("'")> -1 ) {
+                    return false
+                } else {
+                    return true;
+                }
+
+
+
+
             }
         }
     }

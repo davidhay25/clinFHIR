@@ -335,12 +335,16 @@
                                 <h4>Node: {{treeNodeItemSelected.node.text}}</h4>
                                 <button ng-hide="edFromTreeNode.min !== 0 || currentNodeIsParent" class="btn btn-primary"
                                         ng-click="removeNode()">Remove from profile</button>
+<!-- temp
+                                 <span ng-show="edFromTreeNode">
+                                -->
+                                 <span ng-show="edFromTreeNode && ! edFromTreeNode.myMeta.isExtension">
 
-                                <span ng-show="edFromTreeNode && ! edFromTreeNode.myMeta.isExtension">
                                     <button class="btn btn-primary" ng-click="input.newNode = 'child'">Add Child Node</button>
                                     <button class="btn btn-primary" ng-click="input.newNode = 'sibling'"
                                             ng-hide="currentNodeIsParent">Add Sibling Node</button>
                                 </span>
+
 
                                 <div ng-show="input.newNode">
 

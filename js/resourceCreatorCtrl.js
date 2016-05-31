@@ -2863,7 +2863,8 @@ console.log(url);
             );
         };
 
-        //add a new child node to the current one
+        
+        //add a new child node to the current one (as an extension)
         $scope.addNewNode = function(type) {
 
             console.log(type);

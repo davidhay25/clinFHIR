@@ -158,6 +158,8 @@
                 <uib-alert type="info" ng-hide="searchResultBundle.entry">
                     Enter a search string into the text box above and click 'Find'.
                     The app will find all ValueSets where the string you enter is in the name of the ValueSet.
+                    <br /><br />
+                    Alternatively, click the 'New' button at the top right to create a new ValueSet.
 
                 </uib-alert>
 
@@ -327,17 +329,18 @@
 
 
                 <div ng-show="canEdit">
-
-
-
-
-
                     <h4>Add a new code</h4>
                     <ng-include src="'/prTemplates/codeableconcept.html'"></ng-include>
 
                     <div ng-show="results.cc.code">
-                        <button class="btn btn-primary" ng-click="addConcept()">Add</button>
-                        <button class="btn btn-primary" ng-click="isAConcept()">Add as 'is a'</button>
+                        <button class="btn btn-primary" ng-click="addConcept()"
+                                popover-placement="top" popover-trigger='mouseenter'
+                                uib-popover="Adds the code as a single option">Add</button>
+
+                        <button class="btn btn-primary" ng-click="isAConcept()"
+                                popover-placement="top" popover-trigger='mouseenter'
+                                uib-popover="Adds the code as an 'is-a' filter">
+                            Add as a branch</button>
                     </div>
 
 

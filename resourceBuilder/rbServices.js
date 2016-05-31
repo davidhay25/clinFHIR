@@ -81,7 +81,7 @@ angular.module("sampleApp").
             return $http.get(qry);
         },
         adHocFHIRQuery : function(url) {
-            //an ahhoc query - full url given - to avoid a v=controller using $http directly...
+            //an ahhoc query - full url given - to avoid a controller using $http directly...
             return $http.get(url);
         },
         generalFhirQuery : function(qry) {
