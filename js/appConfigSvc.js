@@ -46,6 +46,9 @@ angular.module("sampleApp")
         //defaultConfig.terminologyServers.push({name:'HL&version:2,url:"http://fhir.hl7.org.nz/dstu2/"});
         defaultConfig.terminologyServers.push({name:'Grahames Server',version:2,url:"http://fhir2.healthintersections.com.au/open/"});
         defaultConfig.terminologyServers.push({name:'Grahames Server',version:3,url:"http://fhir3.healthintersections.com.au/open/"});
+        defaultConfig.terminologyServers.push({name:'Ontoserver',version:3,url:"http://ontoserver.csiro.au/stu3/"});
+
+
 
 
         defaultConfig.terminologyServers.push({name:"Public HAPI server STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3});
