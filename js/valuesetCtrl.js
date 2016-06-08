@@ -2,13 +2,12 @@ angular.module("sampleApp").controller('valuesetCtrl',
     function ($scope, Utilities, appConfigSvc,SaveDataToServer,GetDataFromServer,resourceCreatorSvc,modalService,
             $uibModal) {
 
-    //$scope.hw = 'hw'
     $scope.results = {};
     $scope.input = {};
-    //$scope.input.searchName = 'dhay';
 
-        //register that the application has been started... (for reporting)
-        resourceCreatorSvc.registerAccess();
+
+    //register that the application has been started... (for reporting)
+    resourceCreatorSvc.registerAccess();
         
     $scope.state = 'find';      // edit / new / find
     $scope.input.conceptCache = {};        //hash to store the lookup details of a concept. todo We could cache this...
@@ -16,11 +15,12 @@ angular.module("sampleApp").controller('valuesetCtrl',
     $scope.results.ccDirectSystem = "http://snomed.info/sct";     //default the system name to snomed
 
 
+
+    //--------- terminology servers........
     var config = appConfigSvc.config();
     var termServ = config.servers.terminology;      //the currently configured terminology server
 
-    //--------- terminology servers........
-
+    //place all the v3 terminology servers into the array and set the default server ($scope.termServer)
     $scope.terminologyServers = [];
     config.terminologyServers.forEach(function(svr){
 
@@ -33,11 +33,19 @@ angular.module("sampleApp").controller('valuesetCtrl',
     });
 
 
+
+
     //----- changing the terminology server...  This will update the local preference store...
     $scope.changeTerminologyServer = function(svr){
-        appConfigSvc.setServerType('terminology',svr.url)
-        $scope.valueSetRoot = config.servers.terminology + "ValueSet/";
-        
+        appConfigSvc.setServerType('terminology',svr.url);  //set the new terminology server in $localStorage...
+
+        //$scope.valueSetRoot = config.servers.terminology + "ValueSet/";
+        $scope.valueSetRoot = svr.url + "ValueSet/";
+
+        //delete the results from seaching from the previous server...
+        delete $scope.searchResultBundle;
+        delete $scope.message;
+
         
     };
 
