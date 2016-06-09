@@ -16,6 +16,16 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
 
 
+    //delete all the $scope properties created during processing
+    function cleanUp() {
+        delete $scope.searchResultBundle;
+        delete $scope.message;
+        delete $scope.vs;
+        delete $scope.queryUrl;
+        delete $scope.queryError;
+    }
+
+
     //--------- terminology servers........
     var config = appConfigSvc.config();
     var termServ = config.servers.terminology;      //the currently configured terminology server
@@ -40,17 +50,16 @@ angular.module("sampleApp").controller('valuesetCtrl',
         appConfigSvc.setServerType('terminology',svr.url);  //set the new terminology server in $localStorage...
 
         //$scope.valueSetRoot = config.servers.terminology + "ValueSet/";
-        $scope.valueSetRoot = svr.url + "ValueSet/";
-
+       // $scope.valueSetRoot = svr.url + "ValueSet/";
+        $scope.serverRoot = svr.url;
         //delete the results from seaching from the previous server...
-        delete $scope.searchResultBundle;
-        delete $scope.message;
-
+        cleanUp();
+        $scope.state='find';
         
     };
 
-        
-    $scope.valueSetRoot = config.servers.terminology + "ValueSet/";
+    $scope.serverRoot = config.servers.terminology;
+    //$scope.valueSetRoot = config.servers.terminology + "ValueSet/";
         //var qry = config.servers.terminology + "ValueSet/"+name+"/$expand?filter="+filter;
 
         //console.log(config.servers.terminology)
@@ -87,8 +96,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
     };
 
     $scope.newVs = function(vs) {
-        delete $scope.vs;
-        delete $scope.searchResultBundle;
+        //delete $scope.vs;
+        //delete $scope.searchResultBundle;
+        cleanUp();
         $scope.state='new';
 
         $uibModal.open({
@@ -164,7 +174,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
             //a new ValueSet
             $scope.vs = {resourceType : "ValueSet", status:'draft', id: id,compose:{include:[]}};
             $scope.vs.name = id;        //so the search will work on id
-            $scope.url = $scope.valueSetRoot+id;
+            $scope.url = $scope.serverRoot+ "ValueSet/" + id;//  $scope.valueSetRoot+id;
 
 
             //establish the separate variables that reference the include.concept and include.filter
@@ -252,7 +262,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
         delete $scope.message;
         //var url = config.servers.terminology + "ValueSet?name="+filter;
 
-        var url = $scope.valueSetRoot+"?name="+filter;
+        var url =  $scope.serverRoot+"ValueSet?name="+filter;// $scope.valueSetRoot+"?name="+filter;
 
         GetDataFromServer.adHocFHIRQuery(url).then(
             function(data){
@@ -278,6 +288,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
         delete $scope.canEdit;
         delete $scope.input.vspreview;
         delete $scope.expansion;
+        delete $scope.queryError;
+        delete $scope.message;
+        delete $scope.queryUrl;
         $scope.vs = vs;
         $scope.state='edit';
 
@@ -293,15 +306,22 @@ angular.module("sampleApp").controller('valuesetCtrl',
                     $scope.includeForFilter = inc;
                 }
 
-
-
-
                 if (inc.filter) {
                     inc.filter.forEach(function (filter) {
                         console.log(filter)
                         if (! $scope.input.conceptCache[filter.value]) {
 
-                             resourceCreatorSvc.getLookupForCode("http://snomed.info/sct",filter.value).then(
+                            //var qry = $scope.valueSetRoot + 'CodeSystem/$lookup?code='+filter.value+"&system="+"http://snomed.info/sct";
+                            //var qry = $scope.serverRoot + 'CodeSystem/$lookup?code='+filter.value+"&system="+"http://snomed.info/sct";
+                            var qry = $scope.serverRoot + 'CodeSystem/$lookup?code='+filter.value+"&system="+inc.system;
+
+
+
+                            $scope.queryUrl = qry;
+
+
+                            //GetDataFromServer.adHocFHIRQuery(qry).then(
+                            resourceCreatorSvc.getLookupForCode("http://snomed.info/sct",filter.value).then(
                                  function(data) {
                                      console.log(data);
                                      if (data.data.parameter) {
@@ -318,7 +338,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
                                      },
                                      function(err) {
-                                        alert(angular.toJson(err));
+                                         $scope.queryError = err.data;  //most likely an oo
+                                        //alert(angular.toJson(err));
                                  }
                              )
 
@@ -345,11 +366,13 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
     //return to the selected list
     $scope.backToList = function(){
+        cleanUp();
+       // delete $scope.queryError;
         if ($scope.input.dirty) {
             alert('dirty')
         }
 
-        delete $scope.vs;
+       // delete $scope.vs;
         $scope.state='find';
 
     };
@@ -384,8 +407,60 @@ angular.module("sampleApp").controller('valuesetCtrl',
         $scope.input.isDirty = true;
     };
 
+
     $scope.expand = function(filter){
+            delete $scope.expansion;
+            delete $scope.queryError;
+            delete $scope.queryUrl;
+            $scope.showWaiting = true;
+            if (filter){
+                //var qry = $scope.valueSetRoot+$scope.vs.id + "/$expand?filter="+filter;
+                var qry = $scope.serverRoot+ "ValueSet/"+  $scope.vs.id + "/$expand?filter="+filter;
+
+
+
+
+                $scope.queryUrl = qry;
+
+                GetDataFromServer.adHocFHIRQuery(qry).then(
+                    function(data){
+                        console.log(data)
+                        $scope.expansion = data.expansion;
+                    },
+                    function(err){
+                        //alert(angular.toJson(err))
+                        $scope.queryError = err.data;
+                    }
+                ).finally(function(){
+                    $scope.showWaiting = false;
+                });
+            } else {
+                //var qry = $scope.valueSetRoot+$scope.vs.id + "/$expand";
+                var qry = $scope.serverRoot+"ValueSet/"+$scope.vs.id + "/$expand";
+                $scope.queryUrl = qry;
+                //var qry = config.servers.terminology + "ValueSet/"+id + "/$expand";
+
+                GetDataFromServer.adHocFHIRQuery(qry).then(
+                    function(data) {
+                        console.log(data)
+                        $scope.expansion = data.data.expansion;
+                    },
+                    function(err){
+                        //alert(angular.toJson(err))
+
+                        $scope.queryError = err.data;
+
+
+                    }
+                ).finally(function(){
+                    $scope.showWaiting = false;
+                });
+            }
+        };
+
+    $scope.expandDEP = function(filter){
         delete $scope.expansion;
+        delete $scope.queryError;
         $scope.showWaiting = true;
         if (filter){
             GetDataFromServer.getFilteredValueSet($scope.vs.id,filter).then(
@@ -407,6 +482,10 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 },
                 function(err){
                     alert(angular.toJson(err))
+
+                    $scope.queryError = err
+                    
+                    
                 }
             ).finally(function(){
                 $scope.showWaiting = false;

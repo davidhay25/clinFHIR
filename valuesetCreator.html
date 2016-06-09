@@ -60,7 +60,7 @@
 
                 <div class="col-md-3 col-sm-3">
                     <div class="navbar-text" ng-show="vs.id">
-                        {{valueSetRoot}}{{vs.id}}
+                        {{serverRoot}}ValueSet/{{vs.id}}
                     </div>
                 </div>
 
@@ -307,6 +307,7 @@
                             </div>
                         </div>
                         <br/>
+                        {{queryUrl}}
                         <table class="table table-bordered">
                             <tr ng-repeat="item in expansion.contains">
                                 <td>{{item.code}}</td>
@@ -320,6 +321,30 @@
                         <pre>{{vs|json}}</pre>
                     </uib-tab>
                 </uib-tabset>
+
+                <uib-alert type="info" ng-show="queryError">
+
+                    <div>Sorry, there were some issues:</div>
+                    <div>{{queryUrl}}</div>
+                    <br/>
+                    <table class="table table-bordered">
+                        <tr><th>Severity</th><th>Code</th><th>Details/Diagnostics</th><th>Location</th></tr>
+                        <tr ng-repeat = "iss in queryError.issue">
+                            <td>{{iss.severity}}</td>
+                            <td>{{iss.code}}</td>
+                            <td>{{iss.details.text}}
+                                <div>{{iss.diagnostics}}</div>
+                            </td>
+                            <td><div ng-repeat="loc in iss.location">{{loc}}</div></td>
+                        </tr>
+                    </table>
+
+<!--
+                    {{queryError | json}}
+                    -->
+                </uib-alert>
+
+
 
             </div>
             <div class="col-md-6 col-sm-6">
