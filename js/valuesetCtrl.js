@@ -106,7 +106,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
             keyboard: false,       //same as above.
             templateUrl: 'modalTemplates/inputValueSetName.html',
             size:'lg',
-            controller: function($scope,GetDataFromServer,config,modalService,profileCreatorSvc){
+            controller: function($scope,GetDataFromServer,config,modalService,profileCreatorSvc,terminologyServers){
+                $scope.terminologyServers = terminologyServers;
                 $scope.checkName = function(name){
                     var url = config.servers.terminology + "ValueSet/"+name;
                     GetDataFromServer.adHocFHIRQuery(url).then(
@@ -132,6 +133,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 config: function () {          //the default config
                     return config;
 
+                },terminologyServers : function(){
+                    console.log($scope.terminologyServers)
+                    return $scope.terminologyServers;
                 }
             }
         }).result.then(

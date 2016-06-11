@@ -77,6 +77,11 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:"HL7 New Zealand STU2 server",url:"http://fhir.hl7.org.nz/baseDstu2/",version:2});
 
         defaultConfig.allKnownServers.push({name:'Ontoserver',version:3,url:"http://52.63.0.196:8080/fhir/"});
+        defaultConfig.allKnownServers.push({name:'MiHIN',version:2,url:"http://52.72.172.54:8080/fhir/baseDstu2/"});
+
+
+
+
 
        // defaultConfig.allKnownServers.push({name:'Patients First Server',version:3,url:"http://its.patientsfirst.org.nz/RestService.svc/Terminz/"});
 
