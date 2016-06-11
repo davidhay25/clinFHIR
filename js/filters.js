@@ -22,6 +22,12 @@ angular.module("sampleApp")
         if (dob) {
             var diff = moment().diff(moment(dob),'days');
             var disp = "";
+
+            if (diff < 0) {
+                //this is a future date...
+                return "";
+            }
+
             if (diff < 14) {
                 disp = diff + " days";
             } else if (diff < 32) {

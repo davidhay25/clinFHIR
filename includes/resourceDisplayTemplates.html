@@ -20,9 +20,9 @@
             </div>
             <div class="col-md-7">
                 <div><codeable-concept cc="entry.resource.code"></codeable-concept></div>
-                <p>{{entry.resource.code.text}}</p>
+               <!-- <p>{{entry.resource.code.text}}</p>
                 <p ng-bind-html="entry.resource.text.div"></p>
-
+-->
             </div>
         </div>
 
@@ -37,18 +37,20 @@
         </div>
 
         <div class="row" ng-switch-when="Condition">
-            <div class="col-md-5">
-
+            <div class="col-md-12">
+                <codeable-concept cc="entry.resource.code"></codeable-concept>
             </div>
+            <!--
             <div class="col-md-7">
                 <p ng-bind-html="entry.resource.text.div"></p>
             </div>
+            -->
         </div>
 
         <div class="row" ng-switch-when="Encounter">
             <div class="col-md-5">
                 <div>{{entry.resource.period.start | date : 'yyyy-MM-dd hh:mm'}}</div>
-                <div>{{entry.resource.period.start | getAge}} ago</div>
+                <div>{{entry.resource.period.start | getAge}}</div>
             </div>
             <div class="col-md-7">
                 <p ng-bind-html="entry.resource.text.div"></p>

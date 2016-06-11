@@ -1,0 +1,73 @@
+
+<div class="row">
+    <div class="col-md-3 col-sm-3">
+        <strong>Patient</strong>
+    </div>
+    <div class="col-md-9 col-sm-9">
+        <reference reference="outcome.selectedResource.patient"></reference>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3">
+        <strong>Asserter</strong>
+    </div>
+    <div class="col-md-9 col-sm-9">
+        <reference reference="outcome.selectedResource.asserter"></reference>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3">
+        <strong>Date Recorded</strong>
+    </div>
+    <div class="col-md-9 col-sm-9">
+        {{outcome.selectedResource.dateRecorded}}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3">
+        <strong>Code</strong>
+    </div>
+    <div class="col-md-9 col-sm-9">
+        <codeable-concept cc="outcome.selectedResource.code"></codeable-concept>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-3 col-sm-3">
+        <strong>Clinical Status</strong>
+    </div>
+    <div class="col-md-9 col-sm-9">
+        {{outcome.selectedResource.clinicalStatus}}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3">
+        <strong>Verification Status</strong>
+    </div>
+    <div class="col-md-9 col-sm-9">
+        {{outcome.selectedResource.verificationStatus}}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3">
+        <strong>Severity</strong>
+    </div>
+    <div class="col-md-9 col-sm-9">
+        <codeable-concept cc="outcome.selectedResource.severity"></codeable-concept>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3">
+        <strong>Onset</strong>
+    </div>
+    <div class="col-md-9 col-sm-9">
+        <dateorperiod dateorperiod="outcome.selectedResource.onsetDateTime"></dateorperiod>
+    </div>
+</div>

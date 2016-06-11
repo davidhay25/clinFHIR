@@ -26,6 +26,12 @@ angular.module('sampleApp').component('coding',{
     template:"{{$ctrl.dateorperiod}}"
 })
 
+//period only
+.component('period',{
+    bindings: {period:'<'},
+    template:"{{$ctrl.period.start}} -> {{$ctrl.period.end}}"
+})
+
 //displays a polymorphic value -todo - currently hard coded to quandity...
 .component('value',{
     bindings: {value:'<'},

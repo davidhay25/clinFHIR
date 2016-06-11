@@ -66,7 +66,8 @@
                                             <h4>{{outcome.selectedResource.resourceType}}/{{outcome.selectedResource.id}}</h4>
                                         </div>
                                         <div class="col-md-2">
-                                            <a class="pull-right" download="{{downloadLinkJsonName}}.json" href="{{downloadLinkJsonContent}}">Download</a>
+                                            <a class="pull-right" download="{{downloadLinkJsonName}}.json"
+                                               href="{{downloadLinkJsonContent}}">Download</a>
                                         </div>
                                     </div>
                                     <pre>{{outcome.selectedResource | json:2}}</pre>
@@ -86,8 +87,20 @@
                                     <pre>{{xmlResource}}</pre>
                                 </uib-tab>
 
-                                <uib-tab heading="Display">
-                                    <ng-include src="'./displayTemplates/observation.html'"></ng-include>
+                                <uib-tab heading="Display"
+                                         ng-show="hasDetailedView.indexOf(outcome.selectedResource.resourceType) > -1">
+
+
+                                    <ng-include ng-show="outcome.selectedResource.resourceType=='Observation'"
+                                                src="'./displayTemplates/observation.html'"></ng-include>
+
+                                    <ng-include ng-show="outcome.selectedResource.resourceType=='Encounter'"
+                                                src="'./displayTemplates/encounter.html'"></ng-include>
+
+                                    <ng-include ng-show="outcome.selectedResource.resourceType=='Condition'"
+                                                src="'./displayTemplates/condition.html'"></ng-include>
+
+
                                 </uib-tab>
                             </uib-tabset>
 

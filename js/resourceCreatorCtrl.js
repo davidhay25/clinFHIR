@@ -34,6 +34,8 @@ angular.module("sampleApp")
 
     $scope.displayMode = 'front';    //'new' = resource builder, ''patient = patient
     $scope.selectedPatientResourceType = [];
+            
+    $scope.hasDetailedView = ['Observation','Encounter','Condition']
 
     $scope.config = appConfigSvc.config();  //the configuraton object - especially the data,terminology & conformance servers...
 
@@ -1288,26 +1290,36 @@ angular.module("sampleApp")
 
     //when an individual resource has been selected...
     $scope.resourceSelected = function(entry) {
-        var resource = entry.resource;
-        $scope.outcome.selectedResource = resource;     //for the json display
-        $scope.resourceReferences = resourceSvc.getReference(resource,$scope.allResourcesAsList,$scope.allResourcesAsDict);
-        
-        $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(resource,true)], {type: "text/text"}));
-        $scope.downloadLinkJsonName = resource.resourceType+"-"+resource.id;
+        delete $scope.outcome.selectedResource;
+        delete $scope.resourceReferences;
+        delete $scope.downloadLinkJsonContent;
+        delete $scope.downloadLinkJsonName;
+        delete $scope.xmlResource;
+        delete $scope.downloadLinkXmlContent;
+        delete $scope.downloadLinkXmlName;
 
-        GetDataFromServer.getXmlResource(resource.resourceType+"/"+resource.id+"?_format=xml").then(
-            function(data){
-                $scope.xmlResource = data.data;
-                $scope.downloadLinkXmlContent = window.URL.createObjectURL(new Blob([data.data], {type: "text/xml"}));
-                $scope.downloadLinkXmlName = resource.resourceType+"-"+resource.id+".xml";
+        if (entry && entry.resource) {
 
-            },
-            function(err) {
-                alert(angular.toJson(err,true))
-            }
-        )
+            var resource = entry.resource;
+            $scope.outcome.selectedResource = resource;     //for the json display
+            $scope.resourceReferences = resourceSvc.getReference(resource, $scope.allResourcesAsList, $scope.allResourcesAsDict);
 
+            $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(resource, true)], {type: "text/text"}));
+            $scope.downloadLinkJsonName = resource.resourceType + "-" + resource.id;
 
+            GetDataFromServer.getXmlResource(resource.resourceType + "/" + resource.id + "?_format=xml").then(
+                function (data) {
+                    $scope.xmlResource = data.data;
+                    $scope.downloadLinkXmlContent = window.URL.createObjectURL(new Blob([data.data], {type: "text/xml"}));
+                    $scope.downloadLinkXmlName = resource.resourceType + "-" + resource.id + ".xml";
+
+                },
+                function (err) {
+                    alert(angular.toJson(err, true))
+                }
+            )
+
+        }
 
     };
 /*
