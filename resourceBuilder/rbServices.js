@@ -77,7 +77,7 @@ angular.module("sampleApp").
         getXmlResource : function (url) {
             var config = appConfigSvc.config();
             var qry = config.servers.data + url;
-            console.log(qry)
+            //console.log(qry)
             return $http.get(qry);
         },
         adHocFHIRQuery : function(url) {
