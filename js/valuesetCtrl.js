@@ -421,15 +421,12 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 //var qry = $scope.valueSetRoot+$scope.vs.id + "/$expand?filter="+filter;
                 var qry = $scope.serverRoot+ "ValueSet/"+  $scope.vs.id + "/$expand?filter="+filter;
 
-
-
-
                 $scope.queryUrl = qry;
 
                 GetDataFromServer.adHocFHIRQuery(qry).then(
                     function(data){
                         console.log(data)
-                        $scope.expansion = data.expansion;
+                        $scope.expansion = data.data.expansion;
                     },
                     function(err){
                         //alert(angular.toJson(err))

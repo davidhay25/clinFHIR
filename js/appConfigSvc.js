@@ -50,14 +50,7 @@ angular.module("sampleApp")
         defaultConfig.terminologyServers.push({name:'Ontoserver',version:3,url:"http://52.63.0.196:8080/fhir/"});
 
 
-
-
-       // defaultConfig.terminologyServers.push({name:"Public HAPI server STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3});
-
-
-     //   defaultConfig.terminologyServers.push({name:'Patients First Server',version:3,url:"http://its.patientsfirst.org.nz/RestService.svc/Terminz/"});
-
-
+        
 
         defaultConfig.allKnownServers = [];
 
