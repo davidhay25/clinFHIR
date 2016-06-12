@@ -6,8 +6,17 @@ angular.module("sampleApp").service('resourceCreatorSvc',
     var currentProfileEl;     //the profile being used...
     var currentProfile;         //the profile in use
    // var objNodes = {};          //the nodes indexed
-        
-    //function to capitalize the first letter of a word...
+
+    //colours for graph
+    var objColours ={};
+    objColours.Encounter = '#93FF1A';
+    objColours.Condition = '#E89D0C';
+    objColours.Observation = '#FF0000';
+
+
+
+
+        //function to capitalize the first letter of a word...
     String.prototype.toProperCase = function () {
         return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
     };
@@ -2728,6 +2737,73 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
         },
+        createGraphAroundSingleResourceInstance : function(resource,references,graphData) {
+            var that = this;
+
+            //we might be addintto an existing graph...
+            //todo - id updating, then need to check if the node already exisit b4 adding it below...
+            if (! graphData) {graphData = {};}
+            graphData.nodes = graphData.nodes || new vis.DataSet([])
+            graphData.edges = graphData.edges || new vis.DataSet([])
+
+            var baseId = new Date().getTime();
+            var ctr = 0;
+
+            //add the cental resource to the nodes array
+            var baseNode = {id:baseId,label:that.createResourceLabel(resource)};
+            baseNode.resource =resource;
+            if (objColours[resource.resourceType]) {
+                baseNode.color = objColours[resource.resourceType];
+            }
+            baseNode.resource =resource;
+            graphData.nodes.add(baseNode);
+
+            //now add the nodes that this one references...
+            references.outwardLinks.forEach(function(ref){
+                if (ref.resource) {
+                    ctr ++;
+
+                    var node = {id:baseId + ctr,label:that.createResourceLabel(ref.resource)} //todo here is where we'll need to find if already added
+                    node.resource =ref.resource;
+                    if (objColours[ref.resource.resourceType]) {
+                        node.color = objColours[ref.resource.resourceType];
+                    }
+                    graphData.nodes.add(node);  //add the node
+
+
+
+                    var link = {from:baseId, to: baseId + ctr, arrows: {to:true}}
+                    graphData.edges.add(link);
+                }
+
+
+            });
+
+
+            //now add the nodes that reference this one...
+            references.inwardLinks.forEach(function(ref){
+                if (ref.resource) {
+                    ctr ++;
+
+                    var node = {id:baseId + ctr,label:that.createResourceLabel(ref.resource)} //todo here is where we'll need to find if already added
+                    node.resource =ref.resource;
+                    if (objColours[ref.resource.resourceType]) {
+                        node.color = objColours[ref.resource.resourceType];
+                    }
+                    graphData.nodes.add(node);  //add the node
+                    
+                    var link = {to:baseId, from: baseId + ctr, arrows: {to:true}}
+                    graphData.edges.add(link);
+                }
+
+
+            });
+
+
+
+            return graphData;
+
+        },
         createGraphOfInstances : function(allResources) {
             var that=this;
             //console.log(allResources)
@@ -2736,11 +2812,12 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             //create the array for the graph
             var arNodes = [];
             var objNodes = {};
+            /*
             var objColours ={};
             objColours.Encounter = '#93FF1A';
             objColours.Condition = '#E89D0C';
             objColours.Observation = '#FF0000';
-
+*/
             /*
             93FF1A
             E89D0C

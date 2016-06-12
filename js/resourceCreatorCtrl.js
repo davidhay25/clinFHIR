@@ -1316,23 +1316,30 @@ angular.module("sampleApp")
             $scope.resourceReferences = resourceSvc.getReference(resource, $scope.allResourcesAsList, $scope.allResourcesAsDict);
 
 
-            console.log($scope.resourceReferences)
+            //console.log($scope.resourceReferences)
 
             //create and draw the graph representation for this single resource...
-            var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList);
+
+            var graphData = resourceCreatorSvc.createGraphAroundSingleResourceInstance(resource,$scope.resourceReferences)
+            //var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList);
             var container = document.getElementById('resourcenetwork');
             var network = new vis.Network(container, graphData, {});
-            /*
+
             network.on("click", function (obj) {
-                // console.log(obj)
+                 //console.log(obj)
+
+                //$scope.resourceSelected({resource:reference.resource})
+
                 var nodeId = obj.nodes[0];  //get the first node
                 var node = graphData.nodes.get(nodeId);
                 //console.log(node);
-                $scope.selectedGraphNode = graphData.nodes.get(nodeId);
+                $scope.resourceSelected({resource:node.resource})
+
+                // $scope.selectedGraphNode = graphData.nodes.get(nodeId);
                 //console.log($scope.selectedGraphNode)
                 $scope.$digest();
             });
-            */
+
 
 
 
