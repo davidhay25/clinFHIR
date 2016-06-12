@@ -288,6 +288,16 @@ angular.module("sampleApp")
                 var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList);
                 var container = document.getElementById('mynetwork');
                 var network = new vis.Network(container, graphData, {});
+                network.on("click", function (obj) {
+                   // console.log(obj)
+                    var nodeId = obj.nodes[0];  //get the first node
+                    var node = graphData.nodes.get(nodeId);
+                    //console.log(node);
+                    $scope.selectedGraphNode = graphData.nodes.get(nodeId);
+                    //console.log($scope.selectedGraphNode)
+                    $scope.$digest();
+                });
+
 
             }
             )
@@ -1304,6 +1314,27 @@ angular.module("sampleApp")
             var resource = entry.resource;
             $scope.outcome.selectedResource = resource;     //for the json display
             $scope.resourceReferences = resourceSvc.getReference(resource, $scope.allResourcesAsList, $scope.allResourcesAsDict);
+
+
+            console.log($scope.resourceReferences)
+
+            //create and draw the graph representation for this single resource...
+            var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList);
+            var container = document.getElementById('resourcenetwork');
+            var network = new vis.Network(container, graphData, {});
+            /*
+            network.on("click", function (obj) {
+                // console.log(obj)
+                var nodeId = obj.nodes[0];  //get the first node
+                var node = graphData.nodes.get(nodeId);
+                //console.log(node);
+                $scope.selectedGraphNode = graphData.nodes.get(nodeId);
+                //console.log($scope.selectedGraphNode)
+                $scope.$digest();
+            });
+            */
+
+
 
             $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(resource, true)], {type: "text/text"}));
             $scope.downloadLinkJsonName = resource.resourceType + "-" + resource.id;

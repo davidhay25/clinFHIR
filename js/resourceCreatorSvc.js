@@ -5,6 +5,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
     var currentProfileEl;     //the profile being used...
     var currentProfile;         //the profile in use
+   // var objNodes = {};          //the nodes indexed
         
     //function to capitalize the first letter of a word...
     String.prototype.toProperCase = function () {
@@ -2686,17 +2687,80 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         saveConformanceResource : function() {
 
         },
+        createResourceLabel :function(resource){
+            var label;
+            switch (resource.resourceType) {
+                case 'Observation' :
+                    label = 'Observation\n'+ getCCLabel(resource.code);
+                    //console.log(label)
+                    break;
+
+                case 'Encounter' :
+                    label = 'Encounter\n' + getDateLabel(resource.period);
+                    break;
+                case 'Condition' :
+                    label = 'Condition\n'+ getCCLabel(resource.code);
+                    //console.log(label)
+                    break;
+            }
+
+
+            label = label || resource.resourceType;
+            return label;
+
+            function getCCLabel(cc) {
+                if (cc && cc.coding) {
+                    var label = cc.coding[0].display;
+                    if (label.length > 20) {
+                        label = label.substr(0,17)+'...'
+                    }
+
+                    return label;
+                }
+            }
+
+            function getDateLabel(date) {
+                //is this a period with a start?
+                if (date && date.start) {
+                    return date.start.substr(0,10);   //the date portion only...
+                }
+            }
+
+
+        },
         createGraphOfInstances : function(allResources) {
             var that=this;
             //console.log(allResources)
 
+
             //create the array for the graph
             var arNodes = [];
             var objNodes = {};
+            var objColours ={};
+            objColours.Encounter = '#93FF1A';
+            objColours.Condition = '#E89D0C';
+            objColours.Observation = '#FF0000';
+
+            /*
+            93FF1A
+            E89D0C
+            FF0000
+            430CE8
+            0DFFFE
+
+             https://color.adobe.com/create/color-wheel
+
+            */
 
             allResources.forEach(function(resource,inx){
                 objNodes[resource.resourceType + "/"+  resource.id] = inx;
-                arNodes.push({id:inx,label:resource.resourceType})
+                var node = {id:inx,label:that.createResourceLabel(resource)};
+                node.resource =resource;
+                if (objColours[resource.resourceType]) {
+                    node.color = objColours[resource.resourceType];
+                }
+
+                arNodes.push(node)
             });
             
             var nodes = new vis.DataSet(arNodes);
@@ -2711,36 +2775,19 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     var nodeId = objNodes[link.reference];
                     //console.log(link.reference,nodeId)
 
-                    //nodeId will only be set for resources in the 'allReference' object
+                    //nodeId will only be set for resources in the 'allReference' object - ie ones we've loaded...
                     if (nodeId) {
-                        arEdges.push({from:thisNodeId, to: nodeId})
+                        arEdges.push({from:thisNodeId, to: nodeId, arrows: {to:true}})
                     }
 
                 })
 
-                //console.log(resourceReferences)
+                
             })
 
 
             var edges = new vis.DataSet(arEdges);
-            /*
-            var nodes = new vis.DataSet([
-                {id: 1, label: 'Node 1'},
-                {id: 2, label: 'Node 2'},
-                {id: 3, label: 'Node 3'},
-                {id: 4, label: 'Node 4'},
-                {id: 5, label: 'Node 5'}
-            ]);
 
-            // create an array with edges
-            var edges = new vis.DataSet([
-                {from: 1, to: 3},
-                {from: 1, to: 2},
-                {from: 2, to: 4},
-                {from: 2, to: 5}
-            ]);
-
-*/
             // provide the data in the vis format
             var data = {
                 nodes: nodes,

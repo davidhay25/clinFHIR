@@ -2,11 +2,10 @@
 
 
 <uib-tabset>
-    <uib-tab heading="Detail">
-
-
+    <uib-tab heading="Resource Detail">
 
         <div class="row">
+
             <div class="col-md-2">
                 <h4>Resource Types</h4>
                 <div class="list-group">
@@ -106,6 +105,12 @@
 
 
                                         </uib-tab>
+
+                                        <uib-tab heading="References">
+                                            <h4>Under development...</h4>
+                                            <div id="resourcenetwork"></div>
+                                        </uib-tab>
+
                                     </uib-tabset>
 
 
@@ -163,44 +168,16 @@
 
     </uib-tab>
 
-    <uib-tab heading="Chart">
+    <uib-tab heading="References Graph">
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <div id="mynetwork"></div>
+            </div>
+            <div class="col-md-4 col-sm-4">
+                <pre>{{selectedGraphNode.resource | json}}</pre>
+            </div>
+        </div>
 
-
-            <div id="mynetwork"></div>
-
-<!--
-            <script type="text/javascript">
-                // create an array with nodes
-                var nodes = new vis.DataSet([
-                    {id: 1, label: 'Node 1'},
-                    {id: 2, label: 'Node 2'},
-                    {id: 3, label: 'Node 3'},
-                    {id: 4, label: 'Node 4'},
-                    {id: 5, label: 'Node 5'}
-                ]);
-
-                // create an array with edges
-                var edges = new vis.DataSet([
-                    {from: 1, to: 3},
-                    {from: 1, to: 2},
-                    {from: 2, to: 4},
-                    {from: 2, to: 5}
-                ]);
-
-                // create a network
-                var container = document.getElementById('mynetwork');
-
-                // provide the data in the vis format
-                var data = {
-                    nodes: nodes,
-                    edges: edges
-                };
-                var options = {};
-
-                // initialize your network!
-                var network = new vis.Network(container, data, options);
-            </script>
--->
 
     </uib-tab>
 
