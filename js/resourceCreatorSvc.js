@@ -1,6 +1,6 @@
 angular.module("sampleApp").service('resourceCreatorSvc',
     function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,profileCreatorSvc,
-             GetDataFromServer,$localStorage,Utilities,$sce) {
+             GetDataFromServer,$localStorage,Utilities,$sce,resourceSvc) {
 
 
     var currentProfileEl;     //the profile being used...
@@ -2685,8 +2685,71 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         saveConformanceResource : function() {
 
-        }
+        },
+        createGraphOfInstances : function(allResources) {
+            var that=this;
+            //console.log(allResources)
 
+            //create the array for the graph
+            var arNodes = [];
+            var objNodes = {};
+
+            allResources.forEach(function(resource,inx){
+                objNodes[resource.resourceType + "/"+  resource.id] = inx;
+                arNodes.push({id:inx,label:resource.resourceType})
+            });
+            
+            var nodes = new vis.DataSet(arNodes);
+
+            //now generate the edges for each resource
+            var arEdges = [];
+            allResources.forEach(function(resource,inx){
+                var thisNodeId = objNodes[resource.resourceType + "/"+  resource.id];
+                //console.log(thisNodeId)
+                var resourceReferences = resourceSvc.getReference(resource);    //get the outward links for this resource
+                resourceReferences.outwardLinks.forEach(function(link){
+                    var nodeId = objNodes[link.reference];
+                    //console.log(link.reference,nodeId)
+
+                    //nodeId will only be set for resources in the 'allReference' object
+                    if (nodeId) {
+                        arEdges.push({from:thisNodeId, to: nodeId})
+                    }
+
+                })
+
+                //console.log(resourceReferences)
+            })
+
+
+            var edges = new vis.DataSet(arEdges);
+            /*
+            var nodes = new vis.DataSet([
+                {id: 1, label: 'Node 1'},
+                {id: 2, label: 'Node 2'},
+                {id: 3, label: 'Node 3'},
+                {id: 4, label: 'Node 4'},
+                {id: 5, label: 'Node 5'}
+            ]);
+
+            // create an array with edges
+            var edges = new vis.DataSet([
+                {from: 1, to: 3},
+                {from: 1, to: 2},
+                {from: 2, to: 4},
+                {from: 2, to: 5}
+            ]);
+
+*/
+            // provide the data in the vis format
+            var data = {
+                nodes: nodes,
+                edges: edges
+            };
+            return data;
+        }
     }
+
+    
 
 });

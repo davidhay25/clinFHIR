@@ -1,158 +1,207 @@
 
 
 
+<uib-tabset>
+    <uib-tab heading="Detail">
 
-<div class="row">
-    <div class="col-md-2">
-        <h4>Resource Types</h4>
-        <div class="list-group">
-            <a href="#" class="list-group-item" ng-click="typeSelected(type)"
-               ng-repeat="type in outcome.resourceTypes ">
-                {{type.type}}
-                <span class="pull-right badge">{{type.bundle.total}}</span>
-            </a>
-        </div>
 
-        <!-- Show the vitals if there are any observations-->
-        <div class="list-group">
-            <a ng-show="hasVitals" href="#" class="list-group-item" ng-click="getVitals()">Vitals</a>
-        </div>
-    </div>
-
-    <div class="col-md-10">
-
-        <!-- The vitals table -->
-        <table class="table table-bordered" ng-show="vitalsTable">
-            <tr>
-                <td>Item</td>
-                <td ng-repeat="date in vitalsTable.dates track by $index">
-                    <div>{{date | date : 'dd-MMM-yy hh:mm'}}</div>
-                    <div>{{date | getAge}}</div>
-                </td>
-            </tr>
-
-            <tr ng-repeat="row in vitalsTable.rows track by $index" >
-                <td title="{{row.code}}">{{row.display}}  ({{row.unit}})</td>
-
-                <td ng-repeat="item in row.cols track by $index">
-                    {{item.value}}
-                </td>
-            </tr>
-        </table>
 
         <div class="row">
-            <div class="col-md-4">
-
-                <h4>{{outcome.selectedType}} resources</h4>
+            <div class="col-md-2">
+                <h4>Resource Types</h4>
                 <div class="list-group">
-                    <a href="#" class="list-group-item"
-                       ng-repeat="entry in outcome.allResourcesOfOneType.entry">
-                        <div style="cursor: pointer" ng-click="resourceSelected(entry)">
-                            <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
-                        </div>
+                    <a href="#" class="list-group-item" ng-click="typeSelected(type)"
+                       ng-repeat="type in outcome.resourceTypes ">
+                        {{type.type}}
+                        <span class="pull-right badge">{{type.bundle.total}}</span>
                     </a>
                 </div>
+
+                <!-- Show the vitals if there are any observations-->
+                <div class="list-group">
+                    <a ng-show="hasVitals" href="#" class="list-group-item" ng-click="getVitals()">Vitals</a>
+                </div>
             </div>
-            <div class="col-md-8">
 
-                <div ng-show="outcome.selectedResource">
+            <div class="col-md-10">
 
-                    <div class="row">
-                        <div class="col-md-8">
-                            <uib-tabset>
-                                <uib-tab heading="Json">
-                                    <div class="row">
-                                        <div class="col-md-10">
-                                            <h4>{{outcome.selectedResource.resourceType}}/{{outcome.selectedResource.id}}</h4>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <a class="pull-right" download="{{downloadLinkJsonName}}.json"
-                                               href="{{downloadLinkJsonContent}}">Download</a>
-                                        </div>
+                <!-- The vitals table -->
+                <table class="table table-bordered" ng-show="vitalsTable">
+                    <tr>
+                        <td>Item</td>
+                        <td ng-repeat="date in vitalsTable.dates track by $index">
+                            <div>{{date | date : 'dd-MMM-yy hh:mm'}}</div>
+                            <div>{{date | getAge}}</div>
+                        </td>
+                    </tr>
+
+                    <tr ng-repeat="row in vitalsTable.rows track by $index" >
+                        <td title="{{row.code}}">{{row.display}}  ({{row.unit}})</td>
+
+                        <td ng-repeat="item in row.cols track by $index">
+                            {{item.value}}
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="row">
+                    <div class="col-md-4">
+
+                        <h4>{{outcome.selectedType}} resources</h4>
+                        <div class="list-group">
+                            <a href="#" class="list-group-item"
+                               ng-repeat="entry in outcome.allResourcesOfOneType.entry">
+                                <div style="cursor: pointer" ng-click="resourceSelected(entry)">
+                                    <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+
+                        <div ng-show="outcome.selectedResource">
+
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <uib-tabset>
+                                        <uib-tab heading="Json">
+                                            <div class="row">
+                                                <div class="col-md-10">
+                                                    <h4>{{outcome.selectedResource.resourceType}}/{{outcome.selectedResource.id}}</h4>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <a class="pull-right" download="{{downloadLinkJsonName}}.json"
+                                                       href="{{downloadLinkJsonContent}}">Download</a>
+                                                </div>
+                                            </div>
+                                            <pre>{{outcome.selectedResource | json:2}}</pre>
+                                        </uib-tab>
+                                        <uib-tab heading="XML">
+
+                                            <div class="row">
+                                                <div class="col-md-10">
+                                                    <h4>{{outcome.selectedResource.resourceType}}/{{outcome.selectedResource.id}}</h4>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <a class="pull-right" download="{{downloadLinkXmlName}}" href="{{downloadLinkXmlContent}}">Download</a>
+                                                </div>
+                                            </div>
+
+
+                                            <pre>{{xmlResource}}</pre>
+                                        </uib-tab>
+
+                                        <uib-tab heading="Display"
+                                                 ng-show="hasDetailedView.indexOf(outcome.selectedResource.resourceType) > -1">
+
+
+                                            <ng-include ng-show="outcome.selectedResource.resourceType=='Observation'"
+                                                        src="'./displayTemplates/observation.html'"></ng-include>
+
+                                            <ng-include ng-show="outcome.selectedResource.resourceType=='Encounter'"
+                                                        src="'./displayTemplates/encounter.html'"></ng-include>
+
+                                            <ng-include ng-show="outcome.selectedResource.resourceType=='Condition'"
+                                                        src="'./displayTemplates/condition.html'"></ng-include>
+
+
+                                        </uib-tab>
+                                    </uib-tabset>
+
+
+
+
+
+                                </div>
+
+                                <div class="col-md-4">
+                                    <h4>Outward references</h4>
+
+                                    <div class="list-group">
+                                        <a href="#"class="list-group-item"
+                                           ng-repeat="reference in resourceReferences.outwardLinks"
+                                           ng-click="selectNewResource(reference,$event)">
+
+                                            <div>{{reference.element}} ==> {{reference.reference}}</div>
+                                            <div><p ng-bind-html="reference.resource.text.div"></p></div>
+
+                                        </a>
                                     </div>
-                                    <pre>{{outcome.selectedResource | json:2}}</pre>
-                                </uib-tab>
-                                <uib-tab heading="XML">
 
-                                    <div class="row">
-                                        <div class="col-md-10">
-                                            <h4>{{outcome.selectedResource.resourceType}}/{{outcome.selectedResource.id}}</h4>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <a class="pull-right" download="{{downloadLinkXmlName}}" href="{{downloadLinkXmlContent}}">Download</a>
-                                        </div>
+                                    <h4>Inward references</h4>
+
+                                    <div class="list-group">
+                                        <a href="#" class="list-group-item"
+                                           ng-repeat="reference in resourceReferences.inwardLinks"
+                                           ng-click="selectNewResource(reference,$event)">
+
+                                            <div>{{reference.resource.resourceType}}/{{reference.resource.id}}.
+                                                {{reference.name}}</div>
+                                            <div><p ng-bind-html="reference.resource.text.div"></p></div>
+
+                                        </a>
                                     </div>
-
-
-                                    <pre>{{xmlResource}}</pre>
-                                </uib-tab>
-
-                                <uib-tab heading="Display"
-                                         ng-show="hasDetailedView.indexOf(outcome.selectedResource.resourceType) > -1">
-
-
-                                    <ng-include ng-show="outcome.selectedResource.resourceType=='Observation'"
-                                                src="'./displayTemplates/observation.html'"></ng-include>
-
-                                    <ng-include ng-show="outcome.selectedResource.resourceType=='Encounter'"
-                                                src="'./displayTemplates/encounter.html'"></ng-include>
-
-                                    <ng-include ng-show="outcome.selectedResource.resourceType=='Condition'"
-                                                src="'./displayTemplates/condition.html'"></ng-include>
-
-
-                                </uib-tab>
-                            </uib-tabset>
-
-
-
-
-
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="col-md-4">
-                            <h4>Outward references</h4>
-
-                            <div class="list-group">
-                                <a href="#"class="list-group-item"
-                                   ng-repeat="reference in resourceReferences.outwardLinks"
-                                   ng-click="selectNewResource(reference,$event)">
-
-                                    <div>{{reference.element}} ==> {{reference.reference}}</div>
-                                    <div><p ng-bind-html="reference.resource.text.div"></p></div>
-
-                                </a>
-                            </div>
-
-                            <h4>Inward references</h4>
-
-                            <div class="list-group">
-                                <a href="#" class="list-group-item"
-                                   ng-repeat="reference in resourceReferences.inwardLinks"
-                                   ng-click="selectNewResource(reference,$event)">
-
-                                    <div>{{reference.resource.resourceType}}/{{reference.resource.id}}.
-                                        {{reference.name}}</div>
-                                    <div><p ng-bind-html="reference.resource.text.div"></p></div>
-
-                                </a>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
             </div>
+
+
+
+
         </div>
 
-    </div>
+        <a href='#' ng-show="showPatientJson" ng-click="showPatientJson=false">Hide Patient Json</a>
+        <a href="#" ng-hide="showPatientJson" ng-click="showPatientJson=true">Show Patient Json</a>
+        <div ng-show="showPatientJson">
+            <pre>{{appConfigSvc.getCurrentPatient() | json}}</pre>
+        </div>
+
+    </uib-tab>
+
+    <uib-tab heading="Chart">
 
 
+            <div id="mynetwork"></div>
 
+<!--
+            <script type="text/javascript">
+                // create an array with nodes
+                var nodes = new vis.DataSet([
+                    {id: 1, label: 'Node 1'},
+                    {id: 2, label: 'Node 2'},
+                    {id: 3, label: 'Node 3'},
+                    {id: 4, label: 'Node 4'},
+                    {id: 5, label: 'Node 5'}
+                ]);
 
-</div>
+                // create an array with edges
+                var edges = new vis.DataSet([
+                    {from: 1, to: 3},
+                    {from: 1, to: 2},
+                    {from: 2, to: 4},
+                    {from: 2, to: 5}
+                ]);
 
-<a href='#' ng-show="showPatientJson" ng-click="showPatientJson=false">Hide Patient Json</a>
-<a href="#" ng-hide="showPatientJson" ng-click="showPatientJson=true">Show Patient Json</a>
-<div ng-show="showPatientJson">
-    <pre>{{appConfigSvc.getCurrentPatient() | json}}</pre>
-</div>
+                // create a network
+                var container = document.getElementById('mynetwork');
+
+                // provide the data in the vis format
+                var data = {
+                    nodes: nodes,
+                    edges: edges
+                };
+                var options = {};
+
+                // initialize your network!
+                var network = new vis.Network(container, data, options);
+            </script>
+-->
+
+    </uib-tab>
+
+</uib-tabset>

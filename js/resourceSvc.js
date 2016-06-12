@@ -97,11 +97,20 @@ angular.module("sampleApp").service('resourceSvc', function() {
         getReference : function(resource,allResources,allResourcesDict){
             if (resource) {
                 getOutwardLinks(resource);
-                getInwardLinks(resource,allResources);
 
-                outwardLinks.forEach(function(item){
-                    item.resource = allResourcesDict[item.reference];
-                })
+                if (allResources) {
+                    getInwardLinks(resource,allResources);
+                }
+
+
+
+                //if the dictionary was passed in, then populate the actual resource as well. This is not needed by the graph generator...
+                if (allResourcesDict) {
+                    outwardLinks.forEach(function(item){
+                        item.resource = allResourcesDict[item.reference];
+                    })
+                }
+
 
                 return ({outwardLinks:outwardLinks,inwardLinks:inwardLinks})
             } else {

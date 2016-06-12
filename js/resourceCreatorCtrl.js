@@ -284,6 +284,11 @@ angular.module("sampleApp")
                 })
 
 
+                //create and draw the graph representation...
+                var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList);
+                var container = document.getElementById('mynetwork');
+                var network = new vis.Network(container, graphData, {});
+
             }
             )
             .finally(function () {
@@ -839,8 +844,6 @@ angular.module("sampleApp")
         delete $scope.dataType;
     };
 
-
-
     $scope.removeNode = function() {
 
         var id = $scope.selectedNode.id;        //the node to delete
@@ -935,8 +938,6 @@ angular.module("sampleApp")
         }
         return null;
     };
-
-
 
     //--------- code for CodeableConcept lookup
     $scope.vsLookup = function(text,vs) {

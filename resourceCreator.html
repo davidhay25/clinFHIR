@@ -15,6 +15,7 @@
     <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="css/main.css"/>
+    <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
 
     <script src="js/libs/angular-sanitize.js"></script>
     <script src="js/libs/toArrayFilter.js"></script>
@@ -178,7 +179,21 @@
     <script src="js/components/resourceUploadComp.js"></script>
     <script src="js/components/dataTypes.js"></script>
 
+    <script src="js/libs/vis.min.js"></script>
+
     <title>FHIR Resource Creator</title>
+
+
+    <style type="text/css">
+        #mynetwork {
+            width: 800px;
+            height: 400px;
+            border: 1px solid lightgray;
+        }
+    </style>
+
+
+
 
 </head>
 
@@ -390,6 +405,44 @@
 
             </nav>
 
+<!--
+
+            <div id="mynetwork"></div>
+
+
+            <script type="text/javascript">
+                // create an array with nodes
+                var nodes = new vis.DataSet([
+                    {id: 1, label: 'Node 1'},
+                    {id: 2, label: 'Node 2'},
+                    {id: 3, label: 'Node 3'},
+                    {id: 4, label: 'Node 4'},
+                    {id: 5, label: 'Node 5'}
+                ]);
+
+                // create an array with edges
+                var edges = new vis.DataSet([
+                    {from: 1, to: 3},
+                    {from: 1, to: 2},
+                    {from: 2, to: 4},
+                    {from: 2, to: 5}
+                ]);
+
+                // create a network
+                var container = document.getElementById('mynetwork');
+
+                // provide the data in the vis format
+                var data = {
+                    nodes: nodes,
+                    edges: edges
+                };
+                var options = {};
+
+                // initialize your network!
+                var network = new vis.Network(container, data, options);
+            </script>
+
+-->
 
             <div ng-show="displayMode == 'front'" ng-controller="frontCtrl">
                 <ng-include src="'/includes/frontPage.html'"></ng-include>
