@@ -13,7 +13,7 @@
 angular.module("sampleApp")
     .controller('resourceCreatorCtrl',
         function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,$translate,$localStorage,
-              RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location,resourceSvc,$window) {
+              RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location,resourceSvc,$window,$timeout) {
 
     //$scope.doDefault=false;         //whether to have default patient & profile <<<<< for debug only!
 
@@ -27,6 +27,9 @@ angular.module("sampleApp")
     var type;                       //base type
     $scope.treeData = [];           //populates the resource tree
     $scope.results = {};            //the variable for resource property values...
+
+    //need to place network graphs on the scope so that they can be 'fitted()' when the display container is shown (as in a tab)
+    $scope.graph = {};
 
     $scope.buildState;              //the current build state of the resource. 'new' = just created, 'dirty' = updated, 'saved' = has been saved
 
@@ -352,12 +355,14 @@ angular.module("sampleApp")
     };
 
 
+    //when a single timeline entry is selected
     var timeLineItemSelected = function(properties,items){
         console.log(properties);
         console.log(items)
         var node = items.get(properties.items[0]);
         console.log(node)
         $scope.outcome.selectedResource = node.resource;
+        createGraphOneResource(node.resource,'resourcenetworkgraphtl')
         $scope.$digest();
     }
 
@@ -1350,6 +1355,41 @@ angular.module("sampleApp")
     };
 
 
+
+     function createGraphOneResource(resource,containerId) {
+
+        //todo this is likely inefficient as may have already been done..
+         var resourceReferences = resourceSvc.getReference(resource, $scope.allResourcesAsList, $scope.allResourcesAsDict);
+
+         var graphData = resourceCreatorSvc.createGraphAroundSingleResourceInstance(resource,resourceReferences)
+         var container = document.getElementById(containerId);
+         
+         var network = new vis.Network(container, graphData, {});
+         $scope.graph[containerId] = network;
+
+         network.on("click", function (obj) {
+             var nodeId = obj.nodes[0];  //get the first node
+             var node = graphData.nodes.get(nodeId);
+             $scope.resourceSelected({resource:node.resource});
+             $scope.$digest();
+         });
+     }
+            
+    $scope.fitGraphInContainer = function(containerId) {
+        console.log(containerId,$scope.graph[containerId])
+
+        if ($scope.graph[containerId]) {
+
+            //this event is commonly called by tab.select() which I think is fired before the tab contents are shown.
+            //for the fit() to work, we wait a bit to be sure that the contents are displayed...
+            $timeout(function(){
+                $scope.graph[containerId].fit()
+                console.log('fitting...')
+            },500            )
+
+        }
+    }
+
     //when an individual resource has been selected...
     $scope.resourceSelected = function(entry) {
         delete $scope.outcome.selectedResource;
@@ -1371,6 +1411,8 @@ angular.module("sampleApp")
 
             //create and draw the graph representation for this single resource...
 
+            createGraphOneResource(resource,'resourcenetwork')
+/*
             var graphData = resourceCreatorSvc.createGraphAroundSingleResourceInstance(resource,$scope.resourceReferences)
             //var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList);
             var container = document.getElementById('resourcenetwork');
@@ -1391,7 +1433,7 @@ angular.module("sampleApp")
                 $scope.$digest();
             });
 
-
+*/
 
 
             $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(resource, true)], {type: "text/text"}));
