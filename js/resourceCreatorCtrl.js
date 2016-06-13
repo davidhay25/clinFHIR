@@ -15,7 +15,7 @@ angular.module("sampleApp")
         function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,$translate,$localStorage,
               RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location,resourceSvc,$window) {
 
-    $scope.doDefault=false;         //whether to have default patient & profile <<<<< for debug only!
+    //$scope.doDefault=false;         //whether to have default patient & profile <<<<< for debug only!
 
 
 
@@ -224,14 +224,18 @@ angular.module("sampleApp")
     function loadPatientDetails(cb) {
         $scope.hasVitals = false;
         delete $scope.vitalsTable;
+        delete $scope.outcome.selectedResource;
+        
         supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
             //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
             function (allResources) {
                 //the order is significant - allResources must be set first...
                 appConfigSvc.setAllResources(allResources);
 
-                //console.log(allResources)
-
+                console.log(allResources);
+                $scope.allResources = allResources;
+                //all conditions is used by the timeline display to
+                //var allConditions = allResources['Condition'];
                 //todo - all this stuff should be in a service somewhere...
                 $scope.outcome.resourceTypes = [];
                 angular.forEach(allResources, function (bundle, type) {
@@ -298,6 +302,22 @@ angular.module("sampleApp")
                     $scope.$digest();
                 });
 
+                //create and draw the timeline. The service will display the number of encounters for each condition
+                var timelineData =resourceCreatorSvc.createTimeLine($scope.allResourcesAsList,allResources['Condition']);
+
+                console.log(timelineData)
+                var tlContainer = document.getElementById('timeline');
+
+                var timeline = new vis.Timeline(tlContainer);
+                timeline.setOptions({});
+                timeline.setGroups(timelineData.groups);
+                timeline.setItems(timelineData.items);
+
+                timeline.on('select', function(properties){
+                    timeLineItemSelected(properties,timelineData.items)
+                });
+
+                $scope.conditions = timelineData.conditions;
 
             }
             )
@@ -309,6 +329,37 @@ angular.module("sampleApp")
             });
     }
 
+    $scope.filterTimeLineByCondition = function(reference) {
+        delete $scope.outcome.selectedResource;
+        console.log(reference);
+        //create and draw the timeline. The service will display the number of encounters for each condition
+        //todo - this code is (mostly) a copy from the function above - refactor..
+        var timelineData =resourceCreatorSvc.createTimeLine($scope.allResourcesAsList,$scope.allResources['Condition'],reference);
+
+        console.log(timelineData)
+        $('#timeline').empty();     //otherwise the new timeline is added below the first...
+        var tlContainer = document.getElementById('timeline');
+
+        var timeline = new vis.Timeline(tlContainer);
+        timeline.setOptions({});
+        timeline.setGroups(timelineData.groups);
+        timeline.setItems(timelineData.items);
+
+        timeline.on('select', function(properties){
+            timeLineItemSelected(properties,timelineData.items)
+        });
+
+    };
+
+
+    var timeLineItemSelected = function(properties,items){
+        console.log(properties);
+        console.log(items)
+        var node = items.get(properties.items[0]);
+        console.log(node)
+        $scope.outcome.selectedResource = node.resource;
+        $scope.$digest();
+    }
 
     //generate the table of vitals
     $scope.getVitals = function(){
@@ -2608,13 +2659,7 @@ console.log(url);
 
         //when a new name is entered into the name box, see if there is already a profile with that url. 
         $scope.checkExistingProfile = function(name) {
-
-
-
-
-
-
-
+            
             resourceCreatorSvc.getProfileFromConformanceServerById(name).then(
                 function(data) {
                     //oops, the file exists

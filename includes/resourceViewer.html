@@ -168,6 +168,7 @@
     </uib-tab>
 
     <uib-tab heading="All resource references Graph">
+        <br/>
         <div class="row">
             <div class="col-md-8 col-sm-8">
                 <div id="mynetwork"></div>
@@ -175,6 +176,41 @@
             <div class="col-md-4 col-sm-4">
                 <pre>{{selectedGraphNode.resource | json}}</pre>
             </div>
+        </div>
+
+
+    </uib-tab>
+
+    <uib-tab heading="Encounter timeline">
+        <br/>
+        <div class="row">
+            <div class="col-md-2 col-sm-2">
+                <div style="height: 500px; overflow-y: scroll;">
+                    <div class="list-group">
+                        <a href="#" class="list-group-item" ng-click="filterTimeLineByCondition()">All Conditions</a>
+                        <a href="#" class="list-group-item"
+                           ng-click="filterTimeLineByCondition(key)"
+                           ng-repeat="(key,item) in conditions">
+                            <!--{{item}}  {{key}}-->
+                            <span class="pull-right badge">{{item.count}}</span>
+                            <codeable-concept cc="item.resource.code"></codeable-concept>
+
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-10 col-sm-10">
+                <div id="timeline"></div>
+                <hr />
+                <div ng-show="outcome.selectedResource" class="banner">
+                    <strong>Encounter:</strong> {{outcome.selectedResource.id}}
+                </div>
+                <ng-include ng-show="outcome.selectedResource.resourceType=='Encounter'"
+                            src="'./displayTemplates/encounter.html'"></ng-include>
+            </div>
+
         </div>
 
 

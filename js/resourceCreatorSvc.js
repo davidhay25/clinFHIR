@@ -2812,22 +2812,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             //create the array for the graph
             var arNodes = [];
             var objNodes = {};
-            /*
-            var objColours ={};
-            objColours.Encounter = '#93FF1A';
-            objColours.Condition = '#E89D0C';
-            objColours.Observation = '#FF0000';
-*/
-            /*
-            93FF1A
-            E89D0C
-            FF0000
-            430CE8
-            0DFFFE
 
-             https://color.adobe.com/create/color-wheel
-
-            */
 
             allResources.forEach(function(resource,inx){
                 objNodes[resource.resourceType + "/"+  resource.id] = inx;
@@ -2871,6 +2856,83 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 edges: edges
             };
             return data;
+        },
+        createTimeLine : function(allResourcesAsList,conditionsBundle,filterCondition) {
+            //create a timeline of encounters
+            //if filterCondition is set, then only include encounters on the timeline with that condition as an indication...
+
+            //create the array of conditions. This is used to filter the list
+            var objCondition = {};
+            if (conditionsBundle && conditionsBundle.entry && conditionsBundle.entry.length > 0) {
+                conditionsBundle.entry.forEach(function(entry){
+                    var resource = entry.resource;
+                    objCondition['Condition/'+resource.id] = {resource:resource,count:0};
+                })
+
+            }
+
+            //now create the array of groups. This is the encounter class
+            var arGroups = [];
+            var objGroups = {};
+            allResourcesAsList.forEach(function(resource,inx){
+                if (resource.resourceType == 'Encounter') {
+                    var klass = resource.class || 'unknown';
+                    if (! objGroups[klass]) {
+                        var id = arGroups.length+1;
+                        arGroups.push({id:id,content:klass});
+                        objGroups[klass] = id;
+                    }
+                }
+            });
+
+            //console.log(arGroups)
+            //now create the items on the timeline
+            var ar = []
+            allResourcesAsList.forEach(function(resource,inx){
+                if (resource.resourceType == 'Encounter') {
+                    if (resource.period && resource.period.start) {
+
+                        //first update the condition count. This is the number of encounters that have this condition as an indication
+                        //this is completed regardless of any condition filter
+
+                        //if there is no conditionFilter, then default is to include - otherwise default is not
+                        var include = true;
+                        if (filterCondition) {include = false;}
+
+                        if (resource.indication) {
+                            resource.indication.forEach(function(ind){
+                                if (ind.reference && objCondition[ind.reference]) {
+                                    objCondition[ind.reference].count++;
+                                    if (filterCondition) {
+                                        if (ind.reference == filterCondition) {
+                                            include = true;
+                                        }
+                                    }
+
+                                } else {
+                                    //generally a procedure...
+                                    //console.log('there is a reference to a condition not in the patients list: ' + ind.reference)
+                                }
+                            })
+                        }
+
+                        if (include) {
+                            var node = {id:inx,start: resource.period.start,resource:resource};
+                            var klass = resource.class || 'unknown';
+                            node.group = objGroups[klass];
+                            ar.push(node);
+                        }
+
+                    }
+                }
+            });
+            
+            // Create a DataSet (allows two way data-binding)
+            var items = new vis.DataSet(ar);
+
+            return {items:items,groups:new vis.DataSet(arGroups),conditions:objCondition};
+            
+            
         }
     }
 
