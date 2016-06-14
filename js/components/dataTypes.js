@@ -11,7 +11,8 @@ angular.module('sampleApp').component('coding',{
 })
 
 .component('codeableConcept',{
-    template:"{{$ctrl.display}} <coding coding='$ctrl.cc.coding'></coding>",
+    //template:"{{$ctrl.display}} <coding coding='$ctrl.cc.coding'></coding>",
+    template:"{{$ctrl.cc.text}}  <coding coding='$ctrl.cc.coding'></coding>",
     bindings: {cc:'<'}
 })
 

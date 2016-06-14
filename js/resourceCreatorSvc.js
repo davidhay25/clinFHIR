@@ -2718,14 +2718,21 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             return label;
 
             function getCCLabel(cc) {
-                if (cc && cc.coding) {
-                    var label = cc.coding[0].display;
-                    if (label.length > 20) {
-                        label = label.substr(0,17)+'...'
-                    }
+                var label;
+                if (cc) {
+                    label = cc.text;
+                    if (cc.coding) {
+                        label = cc.coding[0].display || label
 
-                    return label;
+                        if (label && label.length > 20) {
+                            label = label.substr(0,17)+'...'
+                        }
+
+
+                    }
                 }
+
+                return label;
             }
 
             function getDateLabel(date) {
@@ -2822,7 +2829,11 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     node.color = objColours[resource.resourceType];
                 }
 
-                arNodes.push(node)
+                //don't include the patient - it completely skews the graph...
+                if (resource.resourceType !== 'Patient') {
+                    arNodes.push(node)
+                }
+
             });
             
             var nodes = new vis.DataSet(arNodes);

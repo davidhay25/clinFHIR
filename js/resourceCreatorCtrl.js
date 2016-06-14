@@ -295,6 +295,7 @@ angular.module("sampleApp")
                 var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList);
                 var container = document.getElementById('mynetwork');
                 var network = new vis.Network(container, graphData, {});
+                $scope.graph['mynetwork'] = network;
                 network.on("click", function (obj) {
                    // console.log(obj)
                     var nodeId = obj.nodes[0];  //get the first node
@@ -1447,7 +1448,8 @@ angular.module("sampleApp")
 
                 },
                 function (err) {
-                    alert(angular.toJson(err, true))
+                    $scope.xmlResource = "<error>Sorry, Unable to load Xml version</error>";
+                   // alert(angular.toJson(err, true))
                 }
             )
 

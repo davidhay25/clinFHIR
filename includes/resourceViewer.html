@@ -167,7 +167,7 @@
 
     </uib-tab>
 
-    <uib-tab heading="Resource references graph">
+    <uib-tab heading="Resource references graph"  select="fitGraphInContainer('mynetwork')">
         <br/>
         <div class="row">
             <div class="col-md-8 col-sm-8">
@@ -227,10 +227,6 @@
                                 </div>
 
                             </div>
-
-                            <pre>
-                                {{outcome.selectedResource | json}}
-                            </pre>
                         </uib-tab>
 
                     </uib-tabset>
