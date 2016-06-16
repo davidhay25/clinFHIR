@@ -2757,7 +2757,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var ctr = 0;
 
             //add the cental resource to the nodes array
-            var baseNode = {id:baseId,label:that.createResourceLabel(resource)};
+            var baseNode = {id:baseId,label:that.createResourceLabel(resource),shape:'box'};
+
             baseNode.resource =resource;
             if (objColours[resource.resourceType]) {
                 baseNode.color = objColours[resource.resourceType];
@@ -2770,7 +2771,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 if (ref.resource) {
                     ctr ++;
 
-                    var node = {id:baseId + ctr,label:that.createResourceLabel(ref.resource)} //todo here is where we'll need to find if already added
+                    var node = {id:baseId + ctr,label:that.createResourceLabel(ref.resource),shape:'box'} //todo here is where we'll need to find if already added
                     node.resource =ref.resource;
                     if (objColours[ref.resource.resourceType]) {
                         node.color = objColours[ref.resource.resourceType];
@@ -2792,7 +2793,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 if (ref.resource) {
                     ctr ++;
 
-                    var node = {id:baseId + ctr,label:that.createResourceLabel(ref.resource)} //todo here is where we'll need to find if already added
+                    var node = {id:baseId + ctr,label:that.createResourceLabel(ref.resource),shape:'box'} //todo here is where we'll need to find if already added
                     node.resource =ref.resource;
                     if (objColours[ref.resource.resourceType]) {
                         node.color = objColours[ref.resource.resourceType];
@@ -2823,7 +2824,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             allResources.forEach(function(resource,inx){
                 objNodes[resource.resourceType + "/"+  resource.id] = inx;
-                var node = {id:inx,label:that.createResourceLabel(resource)};
+                var node = {id:inx,label:that.createResourceLabel(resource),shape:'box'};
                 node.resource =resource;
                 if (objColours[resource.resourceType]) {
                     node.color = objColours[resource.resourceType];

@@ -310,6 +310,7 @@ angular.module("sampleApp")
                 var timelineData =resourceCreatorSvc.createTimeLine($scope.allResourcesAsList,allResources['Condition']);
 
                 console.log(timelineData)
+                $('#timeline').empty();     //otherwise the new timeline is added below the first...
                 var tlContainer = document.getElementById('timeline');
 
                 var timeline = new vis.Timeline(tlContainer);
@@ -2761,6 +2762,7 @@ console.log(url);
         };
 
         function isAuthoredByClinFhir(profile) {
+            return true
             var isAuthoredByClinFhir = false;
             if ($scope.frontPageProfile.code) {
                 $scope.frontPageProfile.code.forEach(function(coding){
