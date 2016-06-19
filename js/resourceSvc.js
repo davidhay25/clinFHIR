@@ -23,7 +23,7 @@ angular.module("sampleApp").service('resourceSvc', function() {
                         reference = reference.reference;
                     }
 
-                    outwardLinks.push({reference:reference,element: rootPath + " " +key})
+                    outwardLinks.push({reference:reference,element: rootPath + " " +key,key:key})
 
                 } else {
                     //going to assume that a reference will never have children...

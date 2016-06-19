@@ -67,9 +67,9 @@
 
 
     <uib-tabset ng-show="showProfileEditPage">
-        <uib-tab heading="Edit Profile contents">
+        <uib-tab heading="Profile editor">
 
-<br/>
+            <br/>
 
 
 
@@ -440,7 +440,6 @@
 
         </uib-tab>
 
-
         <uib-tab heading="Profile description">
 
             <br/>
@@ -552,8 +551,7 @@
 
         </uib-tab>
 
-
-        <uib-tab heading="Table View">
+        <uib-tab heading="Table view">
             <br/>
             <table class="table table-condensed table-bordered">
                 <tr><th>Path</th><th>Name</th><th>DataType</th><th>Definition</th><th>Comments</th><th>Mult</th><th>ValueSet</th></tr>
@@ -586,6 +584,23 @@
                 </tr>
             </table>
         </uib-tab>
+
+        <uib-tab heading="Hierarchy" select="redrawMindMap()">
+            <br/>
+            <div ng-controller="mmCtrl">
+                <div class="row">
+                    <div class="col-md-8 col-sm-8">
+                        <div id="mmDiv" ></div>
+                    </div>
+                    <div class="col-md-4 col-sm-4">
+                        <pre>{{selectedGraphNode | json}}</pre>
+                    </div>
+                </div>
+
+            </div>
+
+        </uib-tab>
+
 
     </uib-tabset>
 

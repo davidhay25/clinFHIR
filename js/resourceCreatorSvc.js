@@ -2703,6 +2703,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     label = 'Observation\n'+ getCCLabel(resource.code);
                     //console.log(label)
                     break;
+                case 'Practitioner':
+                    label = 'Practitioner\n' + getHumanNameLabel(resource.name[0]);
+                    break;
 
                 case 'Encounter' :
                     label = 'Encounter\n' + getDateLabel(resource.period);
@@ -2710,6 +2713,14 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 case 'Condition' :
                     label = 'Condition\n'+ getCCLabel(resource.code);
                     //console.log(label)
+                    break;
+                case 'List' :
+                    label = resource.title || getCCLabel(resource.code);
+                    label = 'List\n'+ label;
+                    break;
+                case 'Procedure' :
+                    label = resource.title || getCCLabel(resource.code);
+                    label = 'Procedure\n'+ label;
                     break;
             }
 
@@ -2740,6 +2751,23 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 if (date && date.start) {
                     return date.start.substr(0,10);   //the date portion only...
                 }
+            }
+
+            function getHumanNameLabel (hn) {
+                var label='';
+                if (hn){
+                    if (hn.given) {
+                        label += hn.given + ' ';
+                    }
+                    if (hn.family) {
+                        label += hn.family + ' ';
+                    }
+
+                    if (! label) {
+                        label = hn.text;
+                    }
+                }
+                return label;
             }
 
 
@@ -2847,11 +2875,12 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 var resourceReferences = resourceSvc.getReference(resource);    //get the outward links for this resource
                 resourceReferences.outwardLinks.forEach(function(link){
                     var nodeId = objNodes[link.reference];
-                    //console.log(link.reference,nodeId)
+                    console.log(link)
 
                     //nodeId will only be set for resources in the 'allReference' object - ie ones we've loaded...
                     if (nodeId) {
-                        arEdges.push({from:thisNodeId, to: nodeId, arrows: {to:true}})
+
+                        arEdges.push({from:thisNodeId, to: nodeId, arrows: {to:true},label:link.key})
                     }
 
                 })

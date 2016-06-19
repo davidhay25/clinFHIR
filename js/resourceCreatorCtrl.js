@@ -15,7 +15,6 @@ angular.module("sampleApp")
         function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,$translate,$localStorage,
               RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location,resourceSvc,$window,$timeout) {
 
-    //$scope.doDefault=false;         //whether to have default patient & profile <<<<< for debug only!
 
 
 
@@ -154,6 +153,10 @@ angular.module("sampleApp")
         });
     });
 
+            
+    $scope.redrawMindMap = function() {
+        $rootScope.$broadcast('redrawMindMap')
+    };
             
     //clears the current resource being buils and re-displays the front screen 
     $scope.cancelNewResource = function(state){
@@ -2864,7 +2867,7 @@ console.log(url);
         $scope.onTreeDraw = function(item) {
             //console.log(item);
             $scope.model = item;
-            console.log('modal=',$scope.model)
+            //console.log('modal=',$scope.model)
 
         };
 

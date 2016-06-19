@@ -12,7 +12,7 @@
             var mm = go.GraphObject.make;
 
             myDiagram =
-                    mm(go.Diagram, "myDiagramDiv",
+                    mm(go.Diagram, "mmDiv",
                             {
                                 // when the user drags a node, also move/copy/delete the whole subtree starting with that node
                                 "commandHandler.copiesTree": true,
@@ -22,25 +22,13 @@
                                 "undoManager.isEnabled": true
                             });
 
-            // when the document is modified, add a "*" to the title and enable the "Save" button
-            myDiagram.addDiagramListener("Modified", function(e) {
-                var button = document.getElementById("SaveButton");
-                if (button) button.disabled = !myDiagram.isModified;
-                var idx = document.title.indexOf("*");
-                if (myDiagram.isModified) {
-                    if (idx < 0) document.title += "*";
-                } else {
-                    if (idx >= 0) document.title = document.title.substr(0, idx);
-                }
-            });
-
 
             myDiagram.addDiagramListener("ObjectSingleClicked",
                     function(e) { console.log('select',e.subject)});
 
 
             myDiagram.addModelChangedListener(function(evt) {
-              console.log(evt)
+              //console.log(evt)
             })
 
 
@@ -76,51 +64,6 @@
                             new go.Binding("locationSpot", "dir", function(d) { return spotConverter(d, false); })
                     );
 
-            // selected nodes show a button for adding children
-            myDiagram.nodeTemplate.selectionAdornmentTemplate =
-                    mm(go.Adornment, "Spot",
-                            mm(go.Panel, "Auto",
-                                    // this Adornment has a rectangular blue Shape around the selected node
-                                    mm(go.Shape, { fill: null, stroke: "dodgerblue", strokeWidth: 3 }),
-                                    mm(go.Placeholder, { margin: new go.Margin(4, 4, 0, 4) })
-                            ),
-                            // and this Adornment has a Button to the right of the selected node
-                            mm("Button",
-                                    {
-                                        alignment: go.Spot.Right,
-                                        alignmentFocus: go.Spot.Left,
-                                        click: addNodeAndLink  // define click behavior for this Button in the Adornment
-                                    },
-                                    mm(go.TextBlock, "+",  // the Button content
-                                            { font: "bold 8pt sans-serif" })
-                            )
-                    );
-
-            // the context menu allows users to change the font size and weight,
-            // and to perform a limited tree layout starting at that node
-            myDiagram.nodeTemplate.contextMenu =
-                    mm(go.Adornment, "Vertical",
-                            mm("ContextMenuButton",
-                                    mm(go.TextBlock, "Bigger"),
-                                    { click: function(e, obj) { changeTextSize(obj, 1.1); } }),
-                            mm("ContextMenuButton",
-                                    mm(go.TextBlock, "Smaller"),
-                                    { click: function(e, obj) { changeTextSize(obj, 1/1.1); } }),
-                            mm("ContextMenuButton",
-                                    mm(go.TextBlock, "Bold/Normal"),
-                                    { click: function(e, obj) { toggleTextWeight(obj); } }),
-                            mm("ContextMenuButton",
-                                    mm(go.TextBlock, "Layout"),
-                                    {
-                                        click: function(e, obj) {
-                                            var adorn = obj.part;
-                                            adorn.diagram.startTransaction("Subtree Layout");
-                                            layoutTree(adorn.adornedPart);
-                                            adorn.diagram.commitTransaction("Subtree Layout");
-                                        }
-                                    }
-                            )
-                    );
 
             // a link is just a Bezier-curved line of the same color as the node to which it is connected
             myDiagram.linkTemplate =
@@ -138,26 +81,6 @@
                                         return "black";
                                     }).ofObject())
                     );
-
-            // the Diagram's context menu just displays commands for general functionality
-            myDiagram.contextMenu =
-                    mm(go.Adornment, "Vertical",
-                            mm("ContextMenuButton",
-                                    mm(go.TextBlock, "Undo"),
-                                    { click: function(e, obj) { e.diagram.commandHandler.undo(); } },
-                                    new go.Binding("visible", "", function(o) { return o.diagram.commandHandler.canUndo(); }).ofObject()),
-                            mm("ContextMenuButton",
-                                    mm(go.TextBlock, "Redo"),
-                                    { click: function(e, obj) { e.diagram.commandHandler.redo(); } },
-                                    new go.Binding("visible", "", function(o) { return o.diagram.commandHandler.canRedo(); }).ofObject()),
-                            mm("ContextMenuButton",
-                                    mm(go.TextBlock, "Save"),
-                                    { click: function(e, obj) { save(); } }),
-                            mm("ContextMenuButton",
-                                    mm(go.TextBlock, "Load"),
-                                    { click: function(e, obj) { load(); } })
-                    );
-
 
             myDiagram.addDiagramListener("SelectionMoved", function(e) {
                 var rootX = myDiagram.findNodeForKey(0).location.x;
@@ -188,45 +111,6 @@
             }
         }
 
-        function changeTextSize(obj, factor) {
-            var adorn = obj.part;
-            adorn.diagram.startTransaction("Change Text Size");
-            var node = adorn.adornedPart;
-            var tb = node.findObject("TEXT");
-            tb.scale *= factor;
-            adorn.diagram.commitTransaction("Change Text Size");
-        }
-
-        function toggleTextWeight(obj) {
-            var adorn = obj.part;
-            adorn.diagram.startTransaction("Change Text Weight");
-            var node = adorn.adornedPart;
-            var tb = node.findObject("TEXT");
-            // assume "bold" is at the start of the font specifier
-            var idx = tb.font.indexOf("bold");
-            if (idx < 0) {
-                tb.font = "bold " + tb.font;
-            } else {
-                tb.font = tb.font.substr(idx + 5);
-            }
-            adorn.diagram.commitTransaction("Change Text Weight");
-        }
-
-        function addNodeAndLink(e, obj) {
-
-            alert('add')
-
-            var adorn = obj.part;
-            var diagram = adorn.diagram;
-            diagram.startTransaction("Add Node");
-            var oldnode = adorn.adornedPart;
-            var olddata = oldnode.data;
-            // copy the brush and direction to the new node data
-            var newdata = { text: "idea", brush: olddata.brush, dir: olddata.dir, parent: olddata.key };
-            diagram.model.addNodeData(newdata);
-            layoutTree(oldnode);
-            diagram.commitTransaction("Add Node");
-        }
 
         function layoutTree(node) {
             if (node.data.key === 0) {  // adding to the root?
@@ -271,11 +155,7 @@
             myDiagram.commitTransaction("Layout");
         }
 
-        // Show the diagram's model in JSON format
-        function save() {
-            document.getElementById("mySavedModel").value = myDiagram.model.toJson();
-            myDiagram.isModified = false;
-        }
+
         function load() {
 
             var data ={ "class": "go.TreeModel",
@@ -310,6 +190,8 @@
 
 //            myDiagram.model = go.Model.fromJson(document.getElementById("mySavedModel").value);//
         }
+
+
     </script>
 </head>
 <body>
