@@ -320,6 +320,29 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     lstTree.forEach(function(node){
 
 
+
+                        if (node.data && node.data.ed) {
+                            if (node.data.ed.min == 1) {
+                                console.log('REQUIRED')
+                                node['li_attr'] = {class : 'elementRequired'};
+
+                            }
+
+                            if (node.data.ed.max == "*") {
+                                if (node.data.ed.path) {
+                                    var ar = node.data.ed.path.split('.')
+                                    if (ar.length > 1) {
+                                        node.text += " *"
+                                    }
+                                }
+
+
+                                console.log(node);
+                            }
+
+
+                        }
+
                         //set the '[x]' suffix unless already there...
                         if (node.text && node.text.indexOf('[x]') == -1) {
                             //set the '[x]' for code elements
@@ -361,6 +384,12 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 if (r.isReference) {
                                     node.icon='/icons/icon_reference.png';
                                 }
+
+
+                                /* if (elementDef.min !== 0) {
+                                 elementDef.myData.displayClass += 'elementRequired ';
+                                 }*/
+
 
                             }
 

@@ -110,10 +110,9 @@ angular.module("sampleApp")
         }})
     .filter('referenceType',function(){
             return function(ref) {
-                //console.log(ref)
-                //attach a reference to the real resource for all resource references
+                
                 if (ref) {
-                    //DSTU-2 - this is an array ?? why ??do I need to iterate through
+                    //DSTU-2 - this is an array - just grab the first
                     var ar = ref[0].split('/');
                     //console.log(ar)
                     return(ar[ar.length-1]);

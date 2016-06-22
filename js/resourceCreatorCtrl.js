@@ -3178,7 +3178,7 @@ console.log(url);
                 }
 
                 $scope.possibleMultiplicity = [];
-                console.log(item.node.data.ed)
+                //console.log(item.node.data.ed)
 
                 if (min == 1) {
                     //this is a required value - we have some limitations about what can be done...

@@ -104,6 +104,7 @@
   {"name": "DecisionSupportServiceModule","reference":true,"version":"2.1"},
   {"name": "ExpansionProfile","reference":true,"version":"2.1"},
   {"name": "Sequence","version":"2.1"},
-  {"name": "Linkage","reference":true,"version":"2.1"}
+  {"name": "Linkage","reference":true,"version":"2.1"},
+  {"name": "Consent","reference":false,"version":"2.1"}
 ]
 
