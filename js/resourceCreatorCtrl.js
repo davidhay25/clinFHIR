@@ -13,13 +13,32 @@
 angular.module("sampleApp")
     .controller('resourceCreatorCtrl',
         function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,$translate,$localStorage,
-              RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location,resourceSvc,$window,$timeout) {
+              RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location,resourceSvc,$window,$timeout,$http) {
 
 
 
 
     //register that the application has been started... (for reporting)
     resourceCreatorSvc.registerAccess();
+
+/*
+            $http.get('http://fhir.hl7.org.nz/dstu2/Media/93389').then(
+                function(data) {
+                    //console.log(data.data)
+                    var img = data.data.content.data;
+                    //console.log(img)
+                    
+
+                        document.getElementById('imgWaipu').setAttribute( 'src', 'data:image/jpg;base64,'+img);
+                    //$scope.$digest();
+                    var img1 = atob(img);
+                    console.log(img1)
+                    
+                }
+            )
+
+            */
+
 
 
     var profile;                    //the profile being used as the base
