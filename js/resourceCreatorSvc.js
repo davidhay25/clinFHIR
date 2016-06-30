@@ -2841,57 +2841,111 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
         },
         createGraphOfProfile: function(profile) {
+
+            var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained', 'modifierExtension'];
+
+
             var arNodes = [],arEdges=[];
             var objNodes = {};
             profile.snapshot.element.forEach(function(ed,inx){
 
+                var include = true;
+
                 objNodes[ed.path]=inx;
                 var ar = ed.path.split('.');
-                var label = ar[0];
-                if (ar.length > 1) {
-                    var arLabel = angular.copy(ar);
-                    arLabel.shift();
-                    label = arLabel.join('.');
 
+                //exclude the common elements...
+               // if (ar.length == 2 && elementsToDisable.indexOf(ar[1]) > -1) {
+                  //  include = false;
+              //  }
 
+                if (ar.length >1 && elementsToDisable.indexOf(ar[ar.length-1]) > -1) {
+                    include = false;
                 }
-                console.log(label)
-                var arParent = angular.copy(ar);
-                //var parentLabel =
-                arParent.pop();
-
-                var node = {id:inx,label:label,shape:'box',ed:ed};
-                arNodes.push(node);
-                arEdges.push({from:objNodes[arParent.join('.')], to: inx})
-
-                //if (ar.length > 0) {
-                    //create the parent array for the 'from' in the reference...
 
 
+                if (ar[ar.length - 1] == 'extension') {
+                    //if the extension has a profile type then include it, otherwise not...
+                    include = false;
 
-
-                    //var resourceType = ar.shift();
-                    //label = ar.join('.');
-
-                    //now figure out the parent
-                    //var parentNodeId = objNodes[resourceType + '.' +label];
-                    //console.log(label,parentNodeId)
-
-
-                    /*
-                    if (arParent.length == 1) {
-                        //the parent is the root
-                        arEdges.push({from:objNodes[arParent.join('.')], to: inx, arrows: {to:true}})
-                    } else {
-                        arEdges.push({from:objNodes[arParent.join('.')], to: inx, arrows: {to:true}})
+                    if (ed.type) {
+                        ed.type.forEach(function (it) {
+                            if (it.code == 'Extension' && it.profile) {
+                                include=true;
+                                /* may want to do this...
+                                //load the extension definition
+                                queries.push(GetDataFromServer.findConformanceResourceByUri(it.profile).then(
+                                    function(sdef) {
+                                        var analysis = Utilities.analyseExtensionDefinition2(sdef);
+                                        item.myMeta.analysis = analysis;
+                                        //console.log(analysis)
+                                    }, function(err) {
+                                        alert('Error retrieving '+ t.profile + " "+ angular.toJson(err))
+                                    }
+                                ));
+*/
+                                //use the name rather than 'Extension'...
+                                ar[ar.length - 1] = ed.name;
+                            }
+                        })
                     }
-                    */
-
-
-               // }
+                }
 
 
 
+                if (include) {
+                    var label = ar[0];
+                    if (ar.length > 1) {
+                        var arLabel = angular.copy(ar);
+                        arLabel.shift();
+                        label = arLabel.join('.');
+
+                        label = ar[ar.length-1];
+
+                    }
+                    console.log(label)
+                    var arParent = angular.copy(ar);
+                    arParent.pop();
+
+                    var node = {id:inx,label:label,shape:'box',ed:ed};
+                    if (ed.type) {
+                        ed.type.forEach(function(typ){
+                            switch (typ.code) {
+                                case 'Reference' :
+                                    node.shape = 'ellipse'
+                                    node.color = {background: 'yellow',border:'black'}
+                                    break;
+                                case 'BackboneElement' :
+                                    node.color = 'lightgreen';
+                                    break;
+                                case 'DomainResource' :
+                                    node.color = 'green';
+                                    node.font = {color:'white'}
+                                    break;
+                            }
+
+                        })
+                    }
+
+                    if (ed.path.indexOf('xtension') > -1) {
+                        node.color = '#ffccff'
+                    }
+
+
+/*
+                    node.shape =  'icon';
+                    node.icon= {
+                        face: 'FontAwesome',
+                            code: '\uf0c0',
+                            size: 50,
+                            color: '#57169a'
+                    }
+
+*/
+
+                    arNodes.push(node);
+                    arEdges.push({from:objNodes[arParent.join('.')], to: inx})
+                }
 
 
 

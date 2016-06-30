@@ -2767,17 +2767,17 @@ console.log(url);
 
             //the graph display for the current profile
             var graphData = resourceCreatorSvc.createGraphOfProfile($scope.frontPageProfile);
-            console.log(graphData)
+            //console.log(graphData)
             var container = document.getElementById('profileNetwork');
             $scope.profileNetwork = new vis.Network(container, graphData, {});
 
             $scope.profileNetwork.on("click", function (obj) {
-                console.log(obj)
+                //console.log(obj)
 
                 var nodeId = obj.nodes[0];  //get the first node
-                console.log(nodeId,graphData)
+                //console.log(nodeId,graphData)
                 var node = graphData.nodes.get(nodeId);
-                console.log(node)
+                //console.log(node)
                 $scope.selectedProfileNetworkED = node.ed;
                 $scope.$digest();
                 //selectedNetworkElement
