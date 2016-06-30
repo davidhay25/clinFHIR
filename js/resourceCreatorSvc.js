@@ -2844,7 +2844,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained', 'modifierExtension'];
 
-
             var arNodes = [],arEdges=[];
             var objNodes = {};
             profile.snapshot.element.forEach(function(ed,inx){
@@ -2893,6 +2892,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
 
+
+
                 if (include) {
                     var label = ar[0];
                     if (ar.length > 1) {
@@ -2912,15 +2913,15 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         ed.type.forEach(function(typ){
                             switch (typ.code) {
                                 case 'Reference' :
-                                    node.shape = 'ellipse'
-                                    node.color = {background: 'yellow',border:'black'}
+                                    node.shape = 'ellipse';
+                                    node.color = {background: 'yellow',border:'black'};
                                     break;
                                 case 'BackboneElement' :
                                     node.color = 'lightgreen';
                                     break;
                                 case 'DomainResource' :
                                     node.color = 'green';
-                                    node.font = {color:'white'}
+                                    node.font = {color:'white'};
                                     break;
                             }
 
@@ -2931,17 +2932,14 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         node.color = '#ffccff'
                     }
 
-
-/*
-                    node.shape =  'icon';
-                    node.icon= {
-                        face: 'FontAwesome',
-                            code: '\uf0c0',
-                            size: 50,
-                            color: '#57169a'
+                    if (ed.max == '*') {
+                        node.label += '*';
                     }
 
-*/
+                    if (ed.min !== 0) {
+                        node.font = {color:'red'};
+                    }
+
 
                     arNodes.push(node);
                     arEdges.push({from:objNodes[arParent.join('.')], to: inx})
@@ -2952,7 +2950,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             });
 
             var nodes = new vis.DataSet(arNodes);
-
             var edges = new vis.DataSet(arEdges);
 
             // provide the data in the vis format
