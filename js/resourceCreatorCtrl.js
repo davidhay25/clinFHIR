@@ -1156,7 +1156,7 @@ angular.module("sampleApp")
 
         resourceCreatorSvc.getLookupForCode(system,code).then(
             function(data) {
-                //console.log(data);
+                console.log(data);
 
                 $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
                 $scope.results.ccDirectDisplay = $scope.terminologyLookup.display;
@@ -2708,11 +2708,10 @@ console.log(url);
 
     })
     .controller('logicalModelCtrl',function($scope,$rootScope,profileCreatorSvc,resourceCreatorSvc,GetDataFromServer,
-                                            appConfigSvc,modalService,RenderProfileSvc,$uibModal){
+                                            appConfigSvc,modalService,RenderProfileSvc,$uibModal,$timeout){
 
 
-
-
+        
 
         $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();      //all the known data types
 
@@ -2763,10 +2762,43 @@ console.log(url);
         }
         setUpDisplayNewProfile();
 
+        //when a new profile is chosen...
         $rootScope.$on('newProfileChosen',function() {
+
+            //the graph display for the current profile
+            var graphData = resourceCreatorSvc.createGraphOfProfile($scope.frontPageProfile);
+            console.log(graphData)
+            var container = document.getElementById('profileNetwork');
+            $scope.profileNetwork = new vis.Network(container, graphData, {});
+
+            $scope.profileNetwork.on("click", function (obj) {
+                console.log(obj)
+
+                var nodeId = obj.nodes[0];  //get the first node
+                console.log(nodeId,graphData)
+                var node = graphData.nodes.get(nodeId);
+                console.log(node)
+                $scope.selectedProfileNetworkED = node.ed;
+                $scope.$digest();
+                //selectedNetworkElement
+                
+            });
+
             setUpDisplayNewProfile()
 
         });
+
+        //this is the event when the profileGraph tab is chosen. Should really move this to a separate controller...
+        $scope.redrawProfileGraph = function() {
+            console.log('click')
+
+            $timeout(function(){
+                $scope.profileNetwork.fit();
+                console.log('fitting...')
+            },500            )
+
+
+        }
 
         //$scope.editText = 'Edit';       //will change the text when a core profile...
         //when there is a non-core profile - allow it to be edited...

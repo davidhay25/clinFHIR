@@ -323,7 +323,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                         if (node.data && node.data.ed) {
                             if (node.data.ed.min == 1) {
-                                console.log('REQUIRED')
+                                //console.log('REQUIRED')
                                 node['li_attr'] = {class : 'elementRequired'};
 
                             }
@@ -337,7 +337,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 }
 
 
-                                console.log(node);
+                                //console.log(node);
                             }
 
 

@@ -590,6 +590,23 @@
             </table>
         </uib-tab>
 
+        <uib-tab heading="Profile Graph" select="redrawProfileGraph()">
+
+
+            <div class="row">
+                <div class="col-md-6 col-sm-6">
+                    <div id="profileNetwork"></div>
+                </div>
+                <div class="col-md-6 col-sm-6">
+                    <pre>{{selectedProfileNetworkED | json}}</pre>
+                </div>
+            </div>
+
+
+
+
+        </uib-tab>
+
         <uib-tab heading="Hierarchy" select="redrawMindMap()">
             <br/>
             <div ng-controller="mmCtrl">

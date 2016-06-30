@@ -8,7 +8,7 @@ angular.module("sampleApp")
                 var nodes,edges, arEdges=[];
                 profileCreatorSvc.makeProfileDisplayFromProfile(profile).then(
                     function(data) {
-                        console.log(data)
+                        //console.log(data)
                         //create the array for the graph
                         var arNodes = [];
                         var objNodes = {};
@@ -49,7 +49,7 @@ angular.module("sampleApp")
                             edges: edges
                         };
 
-                        console.log(graphData);
+                        //console.log(graphData);
 
                         var options = {
                             layout: {

@@ -2840,6 +2840,75 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             return graphData;
 
         },
+        createGraphOfProfile: function(profile) {
+            var arNodes = [],arEdges=[];
+            var objNodes = {};
+            profile.snapshot.element.forEach(function(ed,inx){
+
+                objNodes[ed.path]=inx;
+                var ar = ed.path.split('.');
+                var label = ar[0];
+                if (ar.length > 1) {
+                    var arLabel = angular.copy(ar);
+                    arLabel.shift();
+                    label = arLabel.join('.');
+
+
+                }
+                console.log(label)
+                var arParent = angular.copy(ar);
+                //var parentLabel =
+                arParent.pop();
+
+                var node = {id:inx,label:label,shape:'box',ed:ed};
+                arNodes.push(node);
+                arEdges.push({from:objNodes[arParent.join('.')], to: inx})
+
+                //if (ar.length > 0) {
+                    //create the parent array for the 'from' in the reference...
+
+
+
+
+                    //var resourceType = ar.shift();
+                    //label = ar.join('.');
+
+                    //now figure out the parent
+                    //var parentNodeId = objNodes[resourceType + '.' +label];
+                    //console.log(label,parentNodeId)
+
+
+                    /*
+                    if (arParent.length == 1) {
+                        //the parent is the root
+                        arEdges.push({from:objNodes[arParent.join('.')], to: inx, arrows: {to:true}})
+                    } else {
+                        arEdges.push({from:objNodes[arParent.join('.')], to: inx, arrows: {to:true}})
+                    }
+                    */
+
+
+               // }
+
+
+
+
+
+
+            });
+
+            var nodes = new vis.DataSet(arNodes);
+
+            var edges = new vis.DataSet(arEdges);
+
+            // provide the data in the vis format
+            var data = {
+                nodes: nodes,
+                edges: edges
+            };
+            return data;
+
+        },
         createGraphOfInstances : function(allResources) {
             var that=this;
             //console.log(allResources)
