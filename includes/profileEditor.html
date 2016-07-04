@@ -598,7 +598,35 @@
                     <div id="profileNetwork"></div>
                 </div>
                 <div class="col-md-6 col-sm-6">
-                    <pre>{{selectedProfileNetworkED | json}}</pre>
+                    <div ng-show = "selectedProfileNetworkED.binding">
+                        <div class='row' style="margin-bottom: 8px; margin-top: 6px">
+
+                            <div class="col-md-3 col-sm-3">
+                                <strong>ValueSet</strong>
+                            </div>
+                            <div class="col-md-3 col-sm-3">
+                                Binding strength: {{selectedProfileNetworkED.binding.strength}}
+                            </div>
+                            <div class="col-md-6 col-sm-6">
+                                <a href="#" ng-click="showValueSetForProfile(selectedProfileNetworkED.binding.valueSetReference.reference)">
+                                    {{selectedProfileNetworkED.binding.valueSetReference.reference}}
+                                </a>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class='row'>
+
+                        <div class="col-md-12 col-sm-12">
+                        <pre>{{selectedProfileNetworkED | json}}</pre>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 

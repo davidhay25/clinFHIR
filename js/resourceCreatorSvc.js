@@ -2841,7 +2841,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
         },
         createGraphOfProfile: function(profile) {
-
+            var deferred = $q.defer();
             var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained', 'modifierExtension'];
 
             var arNodes = [],arEdges=[];
@@ -2904,13 +2904,20 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         label = ar[ar.length-1];
 
                     }
-                    console.log(label)
+                    //console.log(label)
                     var arParent = angular.copy(ar);
                     arParent.pop();
 
                     var node = {id:inx,label:label,shape:'box',ed:ed};
+
+                    if (ed.max == '*') {
+                        node.label += '*';
+                    }
+
                     if (ed.type) {
+                        //var isCoded = false;
                         ed.type.forEach(function(typ){
+
                             switch (typ.code) {
                                 case 'Reference' :
                                     node.shape = 'ellipse';
@@ -2924,22 +2931,28 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                     node.font = {color:'white'};
                                     break;
                             }
+                            //now see if this is a coded item....
+                            if (['code','Coding','CodeableConcept'].indexOf(typ.code) > -1) {
+                                //isCoded = true;
+                                node.label += ' C';
+                            }
 
                         })
+
                     }
 
+                    //an extension...
                     if (ed.path.indexOf('xtension') > -1) {
                         node.color = '#ffccff'
                     }
 
-                    if (ed.max == '*') {
-                        node.label += '*';
-                    }
 
+                    //required...
                     if (ed.min !== 0) {
                         node.font = {color:'red'};
                     }
 
+                   
 
                     arNodes.push(node);
                     arEdges.push({from:objNodes[arParent.join('.')], to: inx})
@@ -2957,11 +2970,16 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 nodes: nodes,
                 edges: edges
             };
-            return data;
+
+            deferred.resolve(data)
+            return deferred.promise;
+
+            //return data;
 
         },
         createGraphOfInstances : function(allResources) {
             var that=this;
+            var deferred = $q.defer();
             //console.log(allResources)
 
 

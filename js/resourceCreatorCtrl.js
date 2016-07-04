@@ -2753,7 +2753,7 @@ console.log(url);
             $scope.input.newDatatype = $scope.dataTypes[0];
             $scope.input.multiplicity = 'opt';
             if ($scope.model){
-                $scope.selectedNode = model[0];
+                $scope.selectedNode = $scope.model[0];      //<<updated july...
             }
             $scope.currentNodeIsParent = true;
             //
@@ -2762,10 +2762,44 @@ console.log(url);
         }
         setUpDisplayNewProfile();
 
+
+        var createGraphOfProfile = function() {
+
+            //use a clone of the current profile. This will be updated as a profile is developed
+            if (!$scope.graphProfile) {
+                $scope.graphProfile = angular.copy($scope.frontPageProfile)
+
+            }
+
+            resourceCreatorSvc.createGraphOfProfile($scope.graphProfile).then(
+                function(graphData) {
+                    var container = document.getElementById('profileNetwork');
+                    $scope.profileNetwork = new vis.Network(container, graphData, {});
+
+                    $scope.profileNetwork.on("click", function (obj) {
+                        //console.log(obj)
+
+                        var nodeId = obj.nodes[0];  //get the first node
+                        //console.log(nodeId,graphData)
+                        var node = graphData.nodes.get(nodeId);
+                        //console.log(node)
+                        $scope.selectedProfileNetworkED = node.ed;
+                        $scope.$digest();
+                        //selectedNetworkElement
+
+                    });
+                }
+            );
+        }
+
         //when a new profile is chosen...
         $rootScope.$on('newProfileChosen',function() {
 
             //the graph display for the current profile
+            createGraphOfProfile();
+
+
+            /*
             var graphData = resourceCreatorSvc.createGraphOfProfile($scope.frontPageProfile);
             //console.log(graphData)
             var container = document.getElementById('profileNetwork');
@@ -2783,7 +2817,7 @@ console.log(url);
                 //selectedNetworkElement
                 
             });
-
+*/
             setUpDisplayNewProfile()
 
         });
@@ -3111,6 +3145,21 @@ console.log(url);
             $scope.input.dirty = true;
             delete $scope.input.newNode;
             resetInput();
+
+
+            //this is test added for the graph stuff...
+           // $scope.frontPageProfile.snapshot.element.push(ed); //  todo - not sure about the impact of this...
+            if (!$scope.graphProfile) {
+                $scope.graphProfile = angular.copy($scope.frontPageProfile)
+
+            }
+
+
+            $scope.graphProfile.snapshot.element.push(ed); //  todo - not sure about the impact of this...
+            createGraphOfProfile();
+
+            //$rootScope.$emit('newProfileChosen');
+
         };
 
         //add a datatype to an extension element...

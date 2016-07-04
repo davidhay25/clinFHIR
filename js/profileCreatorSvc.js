@@ -68,7 +68,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 var queries = [];       //a list of queries to get the details of extensions...
                 if (profile && profile.snapshot && profile.snapshot.element) {
 
-                    profile.snapshot.element.forEach(function (item) {
+                    profile.snapshot.element.forEach(function (item,inx) {
                         item.myMeta = item.myMeta || {};
 
                         var include = true;
@@ -186,6 +186,9 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         //add to tree only if include is still true...
                         if (include) {
                             var id = path;
+
+                            var id = inx;
+
                             var arText = path.split('.');
                             var text = arText[arText.length-1];
 
