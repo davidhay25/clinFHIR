@@ -173,7 +173,7 @@ angular.module("sampleApp")
     });
 
             
-    $scope.redrawMindMap = function() {
+    $scope.redrawMindMapDEP = function() {
         $rootScope.$broadcast('redrawMindMap')
     };
             
@@ -2790,12 +2790,14 @@ console.log(url);
                     });
                 }
             );
-        }
+        };
 
         //when a new profile is chosen...
         $rootScope.$on('newProfileChosen',function() {
 
             //the graph display for the current profile
+            delete $scope.graphProfile;     //delete any graphProfile currently created
+
             createGraphOfProfile();
 
 

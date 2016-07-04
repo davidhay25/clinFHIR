@@ -46,10 +46,18 @@ angular.module("sampleApp").service('profileCreatorSvc',
             return extensionSD;
 
         }
+
+        function getLastNameInPath(path) {
+            if (path) {
+                var ar = path.split('.');
+                return ar[ar.length-1]
+            }
+        }
         
         return  {
             makeProfileDisplayFromProfile : function(inProfile) {
                 //var that = this;
+                console.log('MAKEPROFILE')
                 var deferred = $q.defer();
                 var lstTree = [];
 
@@ -65,6 +73,8 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 //this occurs when the parent has a max of 0, but child nodes don't
                 var idsInTree = {};
                 var hashTree = {};
+
+                var sliceRootPath,parent,sliceGroupParent,parentForChildren;
                 var queries = [];       //a list of queries to get the details of extensions...
                 if (profile && profile.snapshot && profile.snapshot.element) {
 
@@ -102,7 +112,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                                 item.myMeta.analysis = analysis;
                                                 //console.log(analysis)
                                             }, function(err) {
-                                                alert('Error retrieving '+ t.profile + " "+ angular.toJson(err))
+                                                console.log('Error retrieving '+ it.profile + " "+ angular.toJson(err))
                                             }
                                         ));
 
@@ -184,11 +194,79 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         }
 
                         //add to tree only if include is still true...
+                        //this is the start of a sliced section.
+                        if (item.slicing && item.slicing.discriminator) {
+                            console.log('new slice:'+item.slicing.discriminator)
+                            sliceRootPath = item.path;  //the root path for BBE ?other sliced types or only BBE
+                            include = false; //It is not added to the tree...
+                            //but we do need to establish the parent for instances of this slice group...
+                            var arSliceGroupParent = path.split('.');
+                            arSliceGroupParent.pop();
+                            sliceGroupParent = arSliceGroupParent.join('.');
+                        }
+
+                        //a set of sliced elements. If the element being examined has the same path, then it will be attached
+                        //to the parent. Otherwise it gets attached to the slice...
+                        var id;
+                        if (sliceRootPath) {
+                            if (item.path == sliceRootPath) {
+                                console.log('new slice instance:'+sliceRootPath)
+                                //this is a new 'instance' of the sliced element.
+                                parent = sliceGroupParent;  //the parent will be that for the whole slice group
+
+                                id = item.path + '.' + inx; //to ensure unique. may need to look at the discriminator
+                                parentForChildren = id;     //this will be the parent for child elements in this slice group
+                                text = getLastNameInPath(item.path);// +inx;
+
+                            } else {
+                                //this is an 'ordinary' element (but still in the slice group) - attach it to the current slice root...
+                                //set the 'parent' variable to the currently active one...
+                                //if this is a child of the sliced element, then it will have the same path...
+                                var p = item.path;
+                                if (p.indexOf(sliceRootPath) > -1) {
+                                    parent = parentForChildren
+                                } else {
+                                    var ar1 = path.split('.');
+                                    ar1.pop();
+                                    parent = ar1.join('.')
+                                }
+
+
+
+                                id = item.path + '.' + inx;
+                                text = getLastNameInPath(item.path);// +inx;
+                            }
+
+
+                        } else {
+                            //there is no slicing in action - just add. todo - what if there's more than one slice???
+                            id = path;
+                            //var arText = path.split('.');
+                            //var text = arText[arText.length-1];
+                            //var text = getLastNameInPath(path);
+                            var arTree = path.split('.');
+                            if (arTree[arTree.length-1] == 'extension') {
+                                text = item.name;// +inx;
+                                id = id + cntExtension;
+                                cntExtension++;
+                            }
+
+                            arTree.pop();
+                            parent = arTree.join('.');
+                            text = getLastNameInPath(item.path);//  item.path +inx;
+                        }
+
+
+
+console.log(include)
+
+
                         if (include) {
-                            var id = path;
+                            //var id = path
+                            //var id = path + '-' + item.name;      //the path is not unique! (sliced elements)...
 
-                            var id = inx;
 
+/*
                             var arText = path.split('.');
                             var text = arText[arText.length-1];
 
@@ -201,6 +279,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                             arTree.pop();
                             var parent = arTree.join('.');
+                            */
 
                             var dataType = '';
                             if (item.type) {
@@ -210,7 +289,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             }
 
                             var node = {id:id,parent:parent,text:text,state:{opened:false,selected:false},
-                                a_attr:{title: dataType}, path:path};
+                                a_attr:{title: dataType + ' ' + id}, path:path};
 
                             if (item.myMeta.isExtension) {
                                 //todo - a class would be better, but this doesn't seem to render in the tree...
@@ -225,6 +304,11 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 lstTree.push(node);
                                 idsInTree[id] = 'x'
                                 lst.push(item);
+
+                               // console.log(parent,id);
+
+                            } else {
+                                console.log('missing parent: '+parent + ' id:'+id + ' path:'+item.path)
                             }
 
                         }
@@ -322,8 +406,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     //here is where we set the icons - ie after all the extension definitions have been loaded & resolved...
                     lstTree.forEach(function(node){
 
-
-
                         if (node.data && node.data.ed) {
                             if (node.data.ed.min == 1) {
                                 //console.log('REQUIRED')
@@ -338,9 +420,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                         node.text += " *"
                                     }
                                 }
-
-
-                                //console.log(node);
                             }
 
 

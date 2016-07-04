@@ -1,3 +1,5 @@
+/*has been deprectde - don't call make function - expensive! */
+
 angular.module("sampleApp")
     .controller('mmCtrl',
         function ($scope,$rootScope,$timeout,profileCreatorSvc) {

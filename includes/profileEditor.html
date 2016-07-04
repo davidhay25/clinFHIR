@@ -634,7 +634,12 @@
 
 
         </uib-tab>
-
+        <uib-tab heading="Json" >
+            <pre>
+                {{frontPageProfile | json}}
+            </pre>
+        </uib-tab>
+<!--
         <uib-tab heading="Hierarchy" select="redrawMindMap()">
             <br/>
             <div ng-controller="mmCtrl">
@@ -650,6 +655,7 @@
             </div>
 
         </uib-tab>
+        -->
 
 
     </uib-tabset>
