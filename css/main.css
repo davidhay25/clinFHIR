@@ -135,6 +135,10 @@
     color:red;
 }
 
+.elementOptional{
+    color:black;
+}
+
 .backboneElement {
     font-weight: bold;
 }

@@ -354,8 +354,7 @@ angular.module('sampleApp').component('showProfile',
                 if (this.selectedProfile) {
 
                     //get the rows in the tree source table...
-                    //var buildView;
-                    //var buildView = resourceCreatorSvc.makeProfileDisplayFromProfile(that.selectedProfile);
+                    
                     profileCreatorSvc.makeProfileDisplayFromProfile(that.selectedProfile).then(
                         function(data){
                             that.buildView = data;
@@ -370,7 +369,7 @@ angular.module('sampleApp').component('showProfile',
                             ).on('changed.jstree', function (e, data) {
 
                                 that.ontreenodeselected({item:data});
-                                //that.ontreedraw({item:buildView.treeData});     //thur 26
+                                
 
                             })
                         }

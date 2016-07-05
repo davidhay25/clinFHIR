@@ -117,10 +117,14 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                         ));
 
                                         //use the name rather than 'Extension'...
-                                        ar[ar.length - 1] = "*"+ item.name;
+                                        ar[ar.length - 1] = "*"+   item.name;
                                     }
                                 })
                             }
+                            if (!include) {
+                                addLog('extension with no profile excluded')
+                            }
+
                         }
 
                         //todo hide the modifier extension. Will need to figure out how to display 'real' extensions
@@ -140,17 +144,19 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         //obviously if the max is 0 then don't show  (might waant an option later to show
                         if (item.max == 0) {
                             include = false;
+                            addLog('excluding '+ item.path + ' as max == 0')
                         }
 
                         //don't include removed elements. This is actually used by the profile display component
                         //to mark an element as removed. Todo - this does couple the compelent at this service
                         //together - probably somethign that should be fxed at some point,,,,
-                        if (item.myMeta.remove) {
-                            include = false;
-                        }
+                       // if (item.myMeta.remove) {
+                         //   include = false;
+                       // }
 
                         //standard element names like 'text' or 'language'
                         if (ar.length == 2 && elementsToDisable.indexOf(ar[1]) > -1) {
+                            addLog('excluding '+ item.path + ' as in list of elementsToDisable');
                             include = false;
                         }
 
@@ -196,9 +202,10 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         //add to tree only if include is still true...
                         //this is the start of a sliced section.
                         if (item.slicing && item.slicing.discriminator) {
-                            console.log('new slice:'+item.slicing.discriminator)
+                            addLog('new slice:'+item.slicing.discriminator + ' not included')
                             sliceRootPath = item.path;  //the root path for BBE ?other sliced types or only BBE
                             include = false; //It is not added to the tree...
+                            addLog('excluding '+ item.path + ' as it defined a discriminator')
                             //but we do need to establish the parent for instances of this slice group...
                             var arSliceGroupParent = path.split('.');
                             arSliceGroupParent.pop();
@@ -216,7 +223,9 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                                 id = item.path + '.' + inx; //to ensure unique. may need to look at the discriminator
                                 parentForChildren = id;     //this will be the parent for child elements in this slice group
-                                text = getLastNameInPath(item.path);// +inx;
+                                //text = getLastNameInPath(item.path);// +inx;
+
+                                text = getDisplay(item);
 
                             } else {
                                 //this is an 'ordinary' element (but still in the slice group) - attach it to the current slice root...
@@ -233,7 +242,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
 
 
-                                id = item.path + '.' + inx;
+                                id = item.path;// + '.' + inx;
                                 text = getLastNameInPath(item.path);// +inx;
                             }
 
@@ -258,7 +267,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
 
 
-console.log(include)
+                        addLog(item.path + ' ' +include)
 
 
                         if (include) {
@@ -308,7 +317,7 @@ console.log(include)
                                // console.log(parent,id);
 
                             } else {
-                                console.log('missing parent: '+parent + ' id:'+id + ' path:'+item.path)
+                                addLog('missing parent: '+parent + ' id:'+id + ' path:'+item.path,true)
                             }
 
                         }
@@ -401,16 +410,34 @@ console.log(include)
 
                 return deferred.promise;
 
+                function addLog(msg,err) {
+                    console.log(msg)
+                }
+
+                //get the test display for the element
+                function getDisplay(ed) {
+                    var display = ed.path;
+                    if (ed.label) {
+                        display=ed.label
+                    } else if (ed.name) {
+                        display=ed.name;
+                    }
+                    return display;
+                }
+
 
                 function setNodeIcons(treeData) {
                     //here is where we set the icons - ie after all the extension definitions have been loaded & resolved...
                     lstTree.forEach(function(node){
 
+                        //set the 'required' colour
                         if (node.data && node.data.ed) {
                             if (node.data.ed.min == 1) {
                                 //console.log('REQUIRED')
                                 node['li_attr'] = {class : 'elementRequired'};
-
+                            } else {
+                                //have to formally add an 'optional' class else the required colour 'cascades' in the tree...
+                                node['li_attr'] = {class : 'elementOptional'};
                             }
 
                             if (node.data.ed.max == "*") {

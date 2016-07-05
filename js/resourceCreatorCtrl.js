@@ -17,6 +17,11 @@ angular.module("sampleApp")
 
 
 
+            //allow other controllers (like frontController) to turn the waiting icon on or off
+            $rootScope.$on('setWaitingFlag',function(event,showFlag){
+                $scope.waiting = showFlag;
+                console.log('flag',showFlag)
+            })
 
     //register that the application has been started... (for reporting)
     resourceCreatorSvc.registerAccess();
@@ -1909,6 +1914,9 @@ angular.module("sampleApp")
         $scope.input.selectedTS = config.servers.terminology;
         $scope.consistencyCheck = appConfigSvc.checkConsistency();  //perform the consistelyc check for fhir versions
 
+
+
+
         //called when the config is reset...
         $rootScope.$on('resetConfigObject',function(event) {
             setup();
@@ -1926,10 +1934,13 @@ angular.module("sampleApp")
 
         //when we want to view the profile in the tree - and potentially edit it
         $scope.showLocalProfile = function(event,profile) {
-
+            $scope.waiting=true;    //will be disabled by the ontreeredraw from the profile component
             $scope.showProfileEditPage = true;      //displays the editor page (and hides the front page)
 
             $scope.frontPageProfile = null;
+
+            $rootScope.$broadcast('setWaitingFlag',true);
+
             $scope.frontPageProfile = profile;      //set the profile in the component
             //broadcast an event so that the profile edit controller can determine if this is a core profile and can't be edited...
             $scope.$broadcast('profileSelected',{profile:profile});
@@ -2042,7 +2053,7 @@ angular.module("sampleApp")
             //note that the function $scope.selectedProfile in the parnt controller is invoked on successful selection...
         };
 
-        //when a profile is selected in the list...
+        //when a patient is selected in the list...
         $scope.selectPatient = function(patient) {
             appConfigSvc.setCurrentPatient(patient);
             $rootScope.$emit('patientSelected',patient);
@@ -2953,6 +2964,8 @@ console.log(url);
         //actually - this happens whenever an ED is changed. should really change the name...
         $scope.onTreeDraw = function(item) {
             //console.log(item);
+            $rootScope.$broadcast('setWaitingFlag',false)
+            $scope.waiting = false;     //turn off the waiting icon
             $scope.model = item;
             //console.log('modal=',$scope.model)
 

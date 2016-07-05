@@ -41,6 +41,11 @@
 
         </div>
         <div class="col-md-5">
+<!--
+            <div class="pull-right navbar-form" ng-show="waiting">
+                <img src="css/ajax_loader_blue_32.gif"/>
+            </div>
+            -->
 
             <div class="pull-right">
 
@@ -106,6 +111,25 @@
 
                                 </div>
                             </div>
+
+                            <div class="row greyBackground" ng-show="edFromTreeNode.name">
+                                <div class="col-md-3 col-sm-3">Name</div>
+                                <div class="col-md-9 col-sm-8">
+                                    {{edFromTreeNode.name}}
+
+                                </div>
+                            </div>
+
+                            <div class="row greyBackground" ng-show="edFromTreeNode.label">
+                                <div class="col-md-3 col-sm-3">Label</div>
+                                <div class="col-md-9 col-sm-8">
+                                    {{edFromTreeNode.label}}
+
+                                </div>
+                            </div>
+
+
+
 
                             <!-- Extension specific -->
                             <div class="row greyBackground" ng-show="edFromTreeNode.myMeta.isExtension">
