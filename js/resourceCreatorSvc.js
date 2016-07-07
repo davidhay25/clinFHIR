@@ -441,7 +441,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var deferred = $q.defer();
 
             if (!this.currentProfile || !this.currentProfile.snapshot || ! this.currentProfile.snapshot.element) {
-                alert('This profile is not valid!')
+                alert("This profile is not valid! It is either missing altogether, or doesn't have a valid snapshot element")
                 deferred.reject();
                 return deferred.promise;
             }
