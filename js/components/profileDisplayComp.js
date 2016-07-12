@@ -135,17 +135,7 @@ angular.module('sampleApp').component('showProfile',
 
                         }
 
-                        //we need to find the matching ed to remove -
 
-                        /*
-                        if (ed.path.indexOf('xtension') == -1 &&  ed.path.substring(0, pathToDelete.length) == pathToDelete) {
-                            ed.myMeta = ed.myMeta || {}
-                           // if (ed.myMeta) {
-                                ed.myMeta.remove=true;
-                           // }
-
-                        }
-                        */
                     });
                     this.getTable(treeDivId);
 
@@ -337,15 +327,7 @@ angular.module('sampleApp').component('showProfile',
 
             };
 
-            //build the tree view
-            this.getTreeDEP = function() {
-                delete that.treeDisplay;
-                if (this.selectedProfile) {
-                    that.treeDisplay = resourceCreatorSvc.createProfileTreeDisplay(that.selectedProfile, false);
-                }
-            };
-
-            //build the table
+            //build the table for the tree view...
             this.getTable = function(treeDivId){
 
 

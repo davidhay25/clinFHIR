@@ -580,11 +580,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                                 if (typ.profile) {
                                                     //so make up an elementDef to represent this extension and add it to the list...
                                                     var urlExt = typ.profile[0];
-                                                    //var extensionED = {min:0,max:1,path:extensionPath,myData:{}};   //todo -fix cardinality..
                                                     var extensionED = {min:el.min,max:el.max,path:extensionPath,myData:{}};   //todo -fix cardinality..
-                                                    //var extensionED = angular.copy(elementDef)      //todo - a copy is probably not best...
-                                                    //extensionED.type = [{code:'string'}]
-                                                    //extensionED.isExtension = true;
                                                     extensionED.name = el.name;
                                                     extensionED.myData.canAddChild = true;
                                                     extensionED.myData.displayClass = 'elementExtension';
@@ -726,7 +722,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     },
                     function(err) {
-                        alert('Error retrieving '+ url + " "+ angular.toJson(err))
+                        alert('function: updateFromProfileDefinition - error retrieving '+ url + " "+ angular.toJson(err))
                     }
                 ))
 

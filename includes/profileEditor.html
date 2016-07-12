@@ -31,7 +31,6 @@
             <strong ng-show="mode=='new'">Creating a new profile</strong>
         </div>
 
-
         <div class="col-md-3">
 
             <input ng-show="mode=='new' || mode=='edit'" type="text" placeholder="Enter profile name (no spaces)"
@@ -41,11 +40,7 @@
 
         </div>
         <div class="col-md-5">
-<!--
-            <div class="pull-right navbar-form" ng-show="waiting">
-                <img src="css/ajax_loader_blue_32.gif"/>
-            </div>
-            -->
+
 
             <div class="pull-right">
 
@@ -365,7 +360,7 @@
                                 <button ng-hide="edFromTreeNode.min !== 0 || currentNodeIsParent" class="btn btn-primary"
                                         ng-click="removeNode()">Remove from profile</button>
 <!-- temp
-                                 <span ng-show="edFromTreeNode">
+                                 <span ng-show="edFromTreeNode && ! edFromTreeNode.myMeta.isExtension">
                                 -->
                                  <span ng-show="edFromTreeNode && ! edFromTreeNode.myMeta.isExtension">
 
@@ -658,7 +653,7 @@
 
 
         </uib-tab>
-        <uib-tab heading="Json" >
+        <uib-tab heading="Profile resource (Json)" >
             <pre>
                 {{frontPageProfile | json}}
             </pre>

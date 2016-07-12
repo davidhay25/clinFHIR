@@ -182,11 +182,11 @@ angular.module("sampleApp").
                         config.log('resolvedId: '+bundle.entry[0].resource.id,'findConformanceResourceByUri');
                         deferred.resolve(bundle.entry[0].resource);
                     } else {
-                        deferred.reject({msg:"No matching profile found"})
+                        deferred.reject({msg:"No matching profile found on "+serverUrl  + typeOfConformanceResource +" (but not a server error)"})
                     }
 
                 },function(err){
-                    deferred.reject({msg:"No matching profile found: " + angular.toJson(err)})
+                    deferred.reject({msg:"Server error retrieving profile:" +url + " : " + angular.toJson(err)})
                 }
             );
 

@@ -14,7 +14,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
             //the extensionDefinition that describes this extension...
             var extensionSD = {"resourceType": "StructureDefinition","url": vo.extensionUrl,
-                "name": vo.ed.path,"kind": "datatype",
+                "name": vo.ed.path,"kind": "complex-type",
                 "snapshot" : {element:[]}
             };
 
@@ -55,6 +55,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
         }
         
         return  {
+            //generate the list used by the jsTree component to dsplay the tree view of the profile...
             makeProfileDisplayFromProfile : function(inProfile) {
                 //var that = this;
                 console.log('MAKEPROFILE')
@@ -117,7 +118,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                         ));
 
                                         //use the name rather than 'Extension'...
-                                        ar[ar.length - 1] = "*"+   item.name;
+                                       //not sure if this is doing anything... ar[ar.length - 1] = "*"+   item.name;
                                     }
                                 })
                             }
@@ -147,12 +148,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             addLog('excluding '+ item.path + ' as max == 0')
                         }
 
-                        //don't include removed elements. This is actually used by the profile display component
-                        //to mark an element as removed. Todo - this does couple the compelent at this service
-                        //together - probably somethign that should be fxed at some point,,,,
-                       // if (item.myMeta.remove) {
-                         //   include = false;
-                       // }
 
                         //standard element names like 'text' or 'language'
                         if (ar.length == 2 && elementsToDisable.indexOf(ar[1]) > -1) {
@@ -240,19 +235,14 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                     parent = ar1.join('.')
                                 }
 
-
-
-                                id = item.path;// + '.' + inx;
-                                text = getLastNameInPath(item.path);// +inx;
+                                id = item.path;
+                                text = getLastNameInPath(item.path);
                             }
 
 
                         } else {
                             //there is no slicing in action - just add. todo - what if there's more than one slice???
                             id = path;
-                            //var arText = path.split('.');
-                            //var text = arText[arText.length-1];
-                            //var text = getLastNameInPath(path);
                             var arTree = path.split('.');
                             if (arTree[arTree.length-1] == 'extension') {
                                 text = item.name;// +inx;
@@ -262,33 +252,24 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                             arTree.pop();
                             parent = arTree.join('.');
-                            text = getLastNameInPath(item.path);//  item.path +inx;
+                            text = getLastNameInPath(item.path);
                         }
-
-
 
                         addLog(item.path + ' ' +include)
 
+                        //the item has been marked for removal in the UI...
+                        if (item.myMeta.remove) {
+                            include = false;
+                        }
+
+                        item.myMeta.id = id;        //for when we add a child node it
 
                         if (include) {
-                            //var id = path
-                            //var id = path + '-' + item.name;      //the path is not unique! (sliced elements)...
 
-
-/*
-                            var arText = path.split('.');
-                            var text = arText[arText.length-1];
-
-                            var arTree = path.split('.');
-                            if (arTree[arTree.length-1] == 'extension') {
+                            //all the slicing stuff above has mucked up extension name. todo needs refinement...
+                            if (text == 'extension') {
                                 text = item.name;
-                                id = id + cntExtension;
-                                cntExtension++;
                             }
-
-                            arTree.pop();
-                            var parent = arTree.join('.');
-                            */
 
                             var dataType = '';
                             if (item.type) {
@@ -533,6 +514,8 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
 
                 //create the StructureDefinition - tha same whether a new one. or editing a previous one...
+                //as it's a PUT, updates will simply replace the previous...
+                var profileUrl;
                 if (fhirVersion == 3) {
 
                     sd = {resourceType:'StructureDefinition',name : profileName, kind:'resource',
@@ -547,7 +530,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
 
                     var profileId = profileName;       //todo - ensure not yet used (or this is an update)
-                    var profileUrl = config.servers.conformance + "StructureDefinition/" +profileId;
+                    profileUrl = config.servers.conformance + "StructureDefinition/" +profileId;
 
                     sd.url = profileUrl;
 
@@ -564,7 +547,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     sd = {resourceType:'StructureDefinition',name : profileName, kind:'resource',
                         status:'draft',experimental : true, snapshot : {element:[]}};
                     var profileId = profileName;       //todo - ensure not yet used (or this is an update)
-                    var profileUrl = config.servers.conformance + "StructureDefinition/" +profileId;
+                    profileUrl = config.servers.conformance + "StructureDefinition/" +profileId;
                     sd.url = profileUrl;
 
                     //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
@@ -592,9 +575,10 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         var inProfile = true;       //true if this ed is to be included in the profile
                         if (ed.myMeta) {
                             if (ed.myMeta.remove) {
+                                //flagged for removal therefore don't incldude in  teh new SD...
                                 inProfile = false;
                             } else if (ed.myMeta.isNew || (ed.myMeta.isExtension && ed.myMeta.isDirty)) {
-                                //this is a new extension. we'll create a new extension for now - later will allow the user to select an existing one
+                                //this is a new extension. we'll create a new extension definition for now - later will allow the user to select an existing one
                                 //the extension will only have a single datatype (for now)
                                 var extensionId = profileName +  ed.path.replace(/\./,'-');     //the  Id for
                                 var extensionUrl = config.servers.conformance + "StructureDefinition/" +extensionId;
