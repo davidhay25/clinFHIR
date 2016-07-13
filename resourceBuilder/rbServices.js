@@ -390,20 +390,23 @@ angular.module("sampleApp").
             //return a vo that contains an analysis of the extension
             var that = this;
 
-            var vo = {dataTypes: [], multiple: false};
+            var vo = {eds:[],dataTypes: [], multiple: false};
             vo.display = SD.display; //will use this when displaying the element
             vo.name = SD.name;       //or this one...
             // vo.definition =extension.definition;
 
+            //vo.eds = [];     //a suppary of element definitions - so I can see them in the UI
             var discriminator;      //if this is sliced, then a discriminator will be set...
             if (SD.snapshot) {
                 SD.snapshot.element.forEach(function (element) {
-
+                    var edSummary = {path:element.path,type:element.type,name:element.name}
+                    vo.eds.push(edSummary)
                     //this is the root extension
                     if (element.path.substr(0, 9) === 'Extension') {
                         if (!vo.definition) {
                             vo.definition = element.definition;
                         }
+
 
                         if (!vo.short) {
                             //pick the first one...
@@ -500,6 +503,171 @@ angular.module("sampleApp").
 
 
             return vo;
+        },
+        analyseExtensionDefinition3 : function(SD) {
+            //return a vo that contains an analysis of the extension. Used by the profile builder only (at this point)
+            var that = this;
+
+            //if this is a complex extension (2 level only) then the property 'complex' has the analysis...
+            var vo = {dataTypes: [], multiple: false};
+            vo.display = SD.display; //will use this when displaying the element
+            vo.name = SD.name;
+
+
+            //vo.eds = [];     //a suppary of element definitions - so I can see them in the UI
+            var discriminator;      //if this is sliced, then a discriminator will be set...
+            var complex = false;    //will be true if this is a
+
+            if (SD.snapshot) {
+                //first off, set the common data about the extension that is found in the first ED
+                var ed = SD.snapshot.element[0];
+                vo.definition = ed.definition;
+                vo.short = ed.short;   //the short name of the extension - whether simple or complex
+                if (ed.max == '*') {
+                    vo.multiple = true;
+                }
+
+                //next, let's figure out if this is a simple or a complex extension.
+                var arElements = [];
+                SD.snapshot.element.forEach(function (element,inx) {
+                    if (element.path) {
+                        var arPath = element.path.split('.')
+                        if (element.slicing) {
+                            vo.isComplexExtension = true;
+                        }
+                        //get rid of the id elements and the first one - just to simplify the code...
+                        var include = true;
+                        if (inx == 0 || arPath[arPath.length-1] == 'id' || element.slicing) {include = false}
+
+                        //get rid of the url and value that are part of the 'parent' rather than the children...
+                        if (arPath.length == 2) {
+                            if (arPath[1] == 'url' || arPath[1].indexOf('value')>-1) {include = false}
+                        }
+
+
+                        if (include) {
+                            arElements.push(element);
+                        }
+                    }
+
+                });
+
+                if (vo.isComplexExtension) {
+                    //process as if it was a simple extension
+                    processComplex(arElements,vo)
+                } else {
+                    //process as if it was a simple extension
+                    processSimple(arElements,vo)
+                }
+
+
+            }
+
+
+            return vo;
+
+            //process a complex extension. Will only handle a single level hierarchy - ie a list of child extensions
+            //probably not too had to make it recursive, but is it worth it? other stuff would need to change as well...
+            function processComplex(arElement,vo) {
+                vo.children = [];       //these will be the child extensions
+                var child = {};         //this is a single child element
+
+                arElement.forEach(function (element) {
+                    if (element.path) {
+                        var arPath = element.path.split('.');
+                        if (arPath.length == 2) {
+                            //this is defining the start of a new child. create a new object and add it to the choldren array
+                            child = {min: element.min, max: element.max};
+                            child.ed = element;     //Hopefully this is the representative ED
+                            child.ed.myMeta = {};
+
+                            vo.children.push(child);
+                        } else if (arPath.length > 2) {
+                            //this will be the definition of the child. we're only interested in the code and the datatype/s
+                            var e = arPath[2];
+                            if (e.indexOf('value') > -1) {
+                                //this is the value definition - ie what types
+                                child.ed.type = element.type
+
+
+                                //see if this is a complex dataType (so we can set the icon correctly)
+                                if (element.type) {
+                                    element.type.forEach(function (typ) {
+                                        var code = typ.code;        //the datatype code
+                                        if (code) {
+                                            if (/[A-Z]/.test(code)) {
+                                                child.ed.myMeta.isComplex = true;
+                                            }
+                                        }
+                                    })
+                                }
+
+                            }
+
+                            if (e.indexOf('url') > -1) {
+                                //this is the code of the child
+                                child.code = element.fixedUri
+                            }
+
+                        }
+                    }
+
+
+                });
+
+
+            }
+
+
+            //process this as if it were a simple extension
+            function processSimple(arElement,vo) {
+                arElement.forEach(function (element) {
+                    //we're only interested in finding the 'value' element to find out the datatypes it can assume...
+                    if (element.path.indexOf('Extension.value') > -1) {
+                        //this defines the value type for the extension
+
+                        //look at the 'type' property to see the supported data types
+                        if (element.type) {
+                            element.type.forEach(function (typ) {
+                                var code = typ.code;        //the datatype code
+                                if (code) {
+
+                                    vo.dataTypes.push(typ);
+                                    //vo.dataTypes.push({code:code});
+                                    //is this a codedd type?
+                                    if (['CodeableConcept', 'code', 'coding'].indexOf(code) > -1) {
+                                        vo.isCoded = true;
+                                    }
+
+                                    //if the datatype starts with an uppercase letter, then it's a complex one...
+                                    if (/[A-Z]/.test( code)){
+                                        vo.isComplex = true;    //this really should be 'isComplexDatatype'
+                                    }
+
+                                    //is this a reference?
+                                    if (code == 'Reference') {
+
+                                    }
+                                }
+
+
+                            })
+                        }
+
+
+
+
+                    }
+
+
+
+
+
+                })
+            }
+
+
+
         },
         processComplexExtension : function(extension,discriminator) {
             //create a summary object for the extension. for extension designer & renderProfile

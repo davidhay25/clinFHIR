@@ -1,0 +1,59 @@
+<div>
+
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                Extension definitions for {{$scope.resourceType}}
+            </div>
+            <div class="col-md-4">
+                <div class="pull-right">
+                    <button class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
+                    <button class="btn btn-primary" ng-show="selectedExtension" ng-click="$close(selectedExtension)">Select</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-body">
+        <div ng-show="loading" class="alert alert-info">
+            Querying server, please wait...
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                <div class="list-group">
+                    <div class="list-group-item" ng-repeat="ent in bundle.entry"
+                         ng-click="selectExtension(ent)" style="cursor: pointer">
+
+                        {{ent.resource.display}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8 col-sm-8">
+                <pre>{{selectedExtension | json}}</pre>
+            </div>
+        </div>
+
+
+
+    </div>
+
+    <div class="modal-footer">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="text-left">
+
+
+                </div>
+
+            </div>
+            <div class="col-md-4">
+
+            </div>
+        </div>
+
+
+
+    </div>
+</div>

@@ -1,7 +1,7 @@
 
 angular.module("sampleApp")
 .controller('logicalModelCtrl',function($scope,$rootScope,profileCreatorSvc,resourceCreatorSvc,GetDataFromServer,
-                                        appConfigSvc,modalService,RenderProfileSvc,$uibModal,$timeout){
+                                        appConfigSvc,modalService,RenderProfileSvc,$uibModal,Utilities,$timeout){
 
     $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();      //all the known data types
 
@@ -392,7 +392,7 @@ angular.module("sampleApp")
         if (type == 'child') {
             newPath = edParent.path + '.' + $scope.input.newElementPath;     //the full path of the new child node
             //parentId = edParent.path;
-            
+
         } else {
             parentId = $scope.selectedNode.parent;
             if (parentId == '#') {
@@ -533,7 +533,7 @@ angular.module("sampleApp")
 
     //when an element is selected in the tree....
     $scope.treeNodeSelected = function(item) {
-        // console.log(item);
+         console.log(item);
         delete $scope.input.newNode;      //the var that displays the new node data
         delete $scope.edFromTreeNode;
         delete $scope.treeNodeItemSelected;
@@ -596,8 +596,9 @@ angular.module("sampleApp")
 
 
 
-            $scope.$digest();       //the event originated outside of angular...
+            //$scope.$digest();       //the event originated outside of angular...
         }
+        $scope.$digest();       //the event originated outside of angular...
 
     }
 
@@ -611,6 +612,79 @@ angular.module("sampleApp")
         $scope.updateElementDefinitionInComponent = {ed:$scope.edFromTreeNode,item:$scope.treeNodeItemSelected};
 
         console.log(choice)
+    }
+
+    $scope.selectExistingExtension = function(){
+        try {
+            var resourceType = $scope.frontPageProfile.snapshot.element[0].path;
+        } catch (ex) {
+            alert("Oops - the profile is invalid, probably doesn't have a snapshot");
+            return;
+        }
+
+
+
+        $uibModal.open({
+
+            templateUrl: 'modalTemplates/searchForExtension.html',
+            size:'lg',
+            controller: function($scope,resourceType,GetDataFromServer){
+                $scope.resourceType = resourceType;
+                var qry = "StructureDefinition?url=http://hl7.org/fhir/StructureDefinition/patient-nationality"
+                GetDataFromServer.queryConformanceServer(qry).then(
+                    function(data) {
+                        $scope.bundle = data.data;
+                        console.log($scope.bundle);
+                    }
+                );
+
+                $scope.selectExtension = function(ent) {
+                    $scope.selectedExtension = ent.resource
+                }
+
+
+            },
+            resolve : {
+                resourceType: function () {          //the default config
+                    return resourceType;
+                }
+            }
+        }).result.then(
+            function(extensionDef) {
+                //an extension definition was selected
+                console.log(extensionDef)
+
+                var analysis = Utilities.analyseExtensionDefinition3(extensionDef);
+                console.log(analysis)
+
+                //--------  need to move this to a service or something! -------
+
+                var edParent = $scope.selectedNode.data.ed;       //the elementDefinition of the parent
+
+                newPath = edParent.path + '.extension';     //the full path of the new child node
+
+
+                //create a basic Extension definition with the core data required. When the profile is saved, the other stuff will be added
+                ed = {path:newPath,name: analysis.display,myMeta : {isNew:false, isExtension:true, isExistingExtension:true}};
+                ed.min=0; ed.max = "1";
+                ed.definition = "definition";
+                ed.type = [{code:'Extension',profile:[extensionDef.url]}];       //<!--- todo is this right?
+
+
+
+                //this is a property against the component that will add the ed to the tree view
+                $scope.newNodeToAdd = ed;       //<<<<<<  here is the add function... see the defintiion link  in profileEditor.html
+                
+                $scope.input.dirty = true;
+                delete $scope.input.newNode;
+                resetInput();
+
+                //------------------------
+
+
+            }
+        );
+
     }
 
 })

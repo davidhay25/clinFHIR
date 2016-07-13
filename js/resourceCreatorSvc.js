@@ -2169,7 +2169,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     //console.log(data);
                 },
                 function(err){
-                    console.log('error accessing clinfhir',err)
+                    console.log('error accessing clinfhir to register access',err)
                 }
             );
 

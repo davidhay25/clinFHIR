@@ -97,20 +97,21 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         //process extensions first as this can set the include true or false - all the others only se false
                         //process an extension. if it has a profile, then display it with a nicer name.
                         if (ar[ar.length - 1] == 'extension') {
-                            // disabled = true;    //by default extensions are disabled...
                             //if the extension has a profile type then include it, otherwise not...
                             include = false;
 
                             if (item.type) {
                                 item.type.forEach(function (it) {
                                     if (it.code == 'Extension' && it.profile) {
-                                        // disabled = false;
                                         include=true;
                                         //load the extension definition
                                         queries.push(GetDataFromServer.findConformanceResourceByUri(it.profile).then(
                                             function(sdef) {
-                                                var analysis = Utilities.analyseExtensionDefinition2(sdef);
+                                                var analysis = Utilities.analyseExtensionDefinition3(sdef);
                                                 item.myMeta.analysis = analysis;
+
+
+
                                                 //console.log(analysis)
                                             }, function(err) {
                                                 console.log('Error retrieving '+ it.profile + " "+ angular.toJson(err))
@@ -138,7 +139,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             //this is the root node
                             //note - added data friday pm montreal
                             lstTree.push({id:ar[0],parent:'#',text:ar[0],state:{opened:true,selected:true},path:path,data: {ed : item}});
-                            idsInTree[ar[0]] = 'x'
+                            idsInTree[ar[0]] = 'x';
                             include = false;
                         }
 
@@ -264,6 +265,9 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                         item.myMeta.id = id;        //for when we add a child node it
 
+
+                        //console.log(include,item)
+
                         if (include) {
 
                             //all the slicing stuff above has mucked up extension name. todo needs refinement...
@@ -323,57 +327,35 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 if (queries.length) {
                     $q.all(queries).then(
                         function() {
-                            setNodeIcons(lstTree)
-
-/*
-                            //here is where we set the icons - ie after all the extension definitions have been loaded & resolved...
+                            //add the child nodes for any complex extensions...  item.myMeta.analysis
+                            var newNodes = [];      //create a separate array to hold the new nodes...
                             lstTree.forEach(function(node){
-                                console.log(node);
+                                if (node.data && node.data.ed && node.data.ed.myMeta) {
+                                    var analysis = node.data.ed.myMeta.analysis;
+                                    if (analysis && analysis.isComplexExtension) {
+                                        //console.log(node)
+                                        //console.log(analysis.children)
+                                        if (analysis.children) {
+                                            //add the child nodes for the complex extension...
+                                            analysis.children.forEach(function(child){
+                                                var id = 'ce'+lstTree.length+newNodes.length;
+                                                var newNode = {id:id,parent:node.id,text:child.code,state:{opened:false,selected:false},
+                                                    a_attr:{title: + id}};
+                                                newNode.data = {ed : child.ed};
+                                                newNodes.push(newNode);
 
-                                //set the '[x]' for code elements
-                                if (node.data && node.data.ed && node.data.ed.type && node.data.ed.type.length > 1) {
-                                       node.text += '[x]'
-                                }
-
-                                //set the '[x]' for extensions (whew!)
-                                if (node.data && node.data.ed && node.data.ed.myMeta && node.data.ed.myMeta.analysis &&
-                                    node.data.ed.myMeta.analysis.dataTypes && node.data.ed.myMeta.analysis.dataTypes.length > 1) {
-                                    node.text += '[x]'
-                                }
-
-                                //set the display icon
-                                if (node.data && node.data.ed && node.data.ed.myMeta){
-
-
-
-
-                                    var myMeta = node.data.ed.myMeta;
-
-                                    if (!myMeta.isParent) {     //leave parent node as folder...
-
-                                        var r = myMeta;
-                                        if (myMeta.isExtension && myMeta.analysis) {
-                                            r = myMeta.analysis;
+                                            })
                                         }
-                                        //var isComplex = myMeta.isComplex ||
-
-
-                                            if (r.isComplex) {
-                                                node.icon='/icons/icon_datatype.gif';
-                                            } else {
-                                                node.icon='/icons/icon_primitive.png';
-                                            }
-
-                                            if (r.isReference) {
-                                                node.icon='/icons/icon_reference.png';
-                                            }
-
                                     }
-
                                 }
+
                             })
 
-*/
+
+                            lstTree = lstTree.concat(newNodes)
+
+                            setNodeIcons(lstTree);
+
 
                             deferred.resolve({table:lst,treeData:lstTree})
                         }
@@ -392,7 +374,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 return deferred.promise;
 
                 function addLog(msg,err) {
-                    console.log(msg)
+                    //console.log(msg)
                 }
 
                 //get the test display for the element
@@ -450,10 +432,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                         //set the display icon
                         if (node.data && node.data.ed && node.data.ed.myMeta){
-
-
-
-
+                            
                             var myMeta = node.data.ed.myMeta;
 
                             if (!myMeta.isParent) {     //leave parent node as folder...

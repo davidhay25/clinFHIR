@@ -355,6 +355,10 @@
 
                         <!-- Editing the node... -->
                         <div class="col-md-6">
+
+
+
+
                             <div ng-show="mode=='new' || mode=='edit'">
                                 <h4>Node: {{treeNodeItemSelected.node.text}}</h4>
                                 <button ng-hide="edFromTreeNode.min !== 0 || currentNodeIsParent" class="btn btn-primary"
@@ -371,8 +375,16 @@
 
 
                                 <div ng-show="input.newNode">
+                                    <div class="row">
+                                        <div class="col-md-8 col-sm-8">
+                                            <h4>Add {{input.newNode}} node</h4>
+                                        </div>
+                                        <div class="col-md-4 col-sm-4">
+                                            <button class="btn btn-link pull-right"
+                                                    ng-click="selectExistingExtension()">Select existing</button>
+                                        </div>
+                                    </div>
 
-                                    <h4>Add {{input.newNode}} node</h4>
 
                                     <div class="row">
                                         <div class="col-md-6">
@@ -421,6 +433,8 @@
 
                     </div>
 
+                    <button class="btn btn-link pull-right"
+                            ng-click="selectExistingExtension()">Select existing</button>
 
                     <hr/>
 
