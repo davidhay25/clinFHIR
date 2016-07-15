@@ -484,7 +484,7 @@ angular.module("sampleApp")
             templateUrl: 'modalTemplates/vsFinder.html',
             size:'lg',
             controller: 'vsFinderCtrl',
-            resolve : {
+            resolve  : {
                 currentBinding: function () {          //the default config
                     return $scope.edFromTreeNode.binding;
                 }
@@ -612,7 +612,19 @@ angular.module("sampleApp")
         $scope.updateElementDefinitionInComponent = {ed:$scope.edFromTreeNode,item:$scope.treeNodeItemSelected};
 
         console.log(choice)
-    }
+    };
+
+    $scope.newExtension = function() {
+        $uibModal.open({
+
+            templateUrl: 'modalTemplates/newExtension.html',
+            size: 'lg',
+            controller: "extensionDefCtrl"
+        }).result.then(
+            function(result) {
+                console.log(result)
+            })
+        };
 
     $scope.selectExistingExtension = function(){
         try {

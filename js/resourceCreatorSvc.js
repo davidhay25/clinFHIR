@@ -2189,11 +2189,11 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             lst.push({code:'Range'});
             lst.push({code:'Age'});
             lst.push({code:'boolean'});
-            lst.push({code:'Reference'});
+            lst.push({code:'Reference',isReference:true});
             lst.push({code:'Identifier'});
             lst.push({code:'uri'});
             lst.push({code:'Ratio'});
-            lst.push({code:'Humancode'});
+            lst.push({code:'HumanName'});
             lst.push({code:'Address'});
             lst.push({code:'ContactPoint'});
             lst.push({code:'code',isCoded:true});
