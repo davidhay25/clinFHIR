@@ -21,7 +21,7 @@ angular.module("sampleApp")
                 //oops, the file exists
                 if (isAuthoredByClinFhir(data)) {
                     modalService.showModal({}, {bodyText: 'The profile already exists and will be replaced if the name is not chosen.'})
-                    $scope.mode='new';      //as this is effectvely a new profile
+                    $scope.mode='edit';      //allow this profile to be changed...
                 } else {
                     modalService.showModal({}, {bodyText: 'This profile is not authored by clinFHIR. You need to choose another name'});
                     $scope.input.profileName = "";
@@ -126,7 +126,7 @@ angular.module("sampleApp")
     };
 
     function isAuthoredByClinFhir(profile) {
-        return true
+       // return true
         var isAuthoredByClinFhir = false;
         if ($scope.frontPageProfile.code) {
             $scope.frontPageProfile.code.forEach(function(coding){
@@ -141,18 +141,34 @@ angular.module("sampleApp")
 
     //allows the user to view the contents of a valueSet. Note that the '$scope.showVSBrowserDialog.open' call is
     //actually implemented in the 'resourceCreatorCtrl' controller - it's the parent of this one...
-    $scope.showValueSetForProfile = function(url) {
+    //if 'isUrl' is true then this is a cannonical profile.url that was passed in. Otherwise it's a direct url to the Valueset (this can be confusing!)
+    $scope.showValueSetForProfile = function(url,isUrl) {
 
+        console.log(isUrl)
         $scope.showWaiting = true;
-        GetDataFromServer.getValueSet(url).then(
-            function(vs) {
 
-                $scope.showVSBrowserDialog.open(vs);
+        if (isUrl) {
+            //this is a cannonical url - retrieve from the currently defined terminology server
+            //this is mal-named - it returns the actual valueset...
+            Utilities.getValueSetIdFromRegistry(url,function(vs){
+                console.log(vs)
+                $scope.showVSBrowserDialog.open(vs.resource);
+            })
+        } else {
+            //this is a direct url to the resource
+            GetDataFromServer.getValueSet(url).then(
+                function(vs) {
 
-            }
-        ).finally (function(){
-            $scope.showWaiting = false;
-        });
+                    $scope.showVSBrowserDialog.open(vs);
+
+                }
+            ).finally (function(){
+                $scope.showWaiting = false;
+            });
+        }
+
+
+
     };
 
     //when a profile is selected from the front screen, check if it is a core type
@@ -160,10 +176,42 @@ angular.module("sampleApp")
     $scope.$on('profileSelected',function(event,data){
         delete $scope.isBaseResource;
         $scope.logOfChanges = [];
-        $scope.allowEdit = true;    //the profile being viewed can be altered
+        $scope.allowEdit = false;    //the profile being viewed can be altered
         var selectedProfile = data.profile;
-        //is this a core profile? If it is, it cannot be edited.
 
+        //is this a core profile? If it is, it cannot be edited. todo - ?move this to a service??
+        //determine this if the url has the format 'http://hl7.org/fhir/StructureDefinition/{definedResourceName}
+        var urlOfProfile = selectedProfile.url;
+        if (! urlOfProfile) {
+            alert('This profile has no URL!');
+            return;
+        }
+
+        if (urlOfProfile.indexOf('http://hl7.org/fhir/StructureDefinition/')> -1) {
+            //this is a base resource...
+            $scope.isBaseResource = true;
+        } else {
+
+            if (isAuthoredByClinFhir) {
+                $scope.allowEdit = true;
+            }
+            /*
+            //this is not a base resource, but did clinFHIR author it?
+            if (profile.code) {
+                profile.code.forEach(function(code){
+                    if (code.system == 'http://fhir.hl7.org.nz/NamingSystem/application' && code.code == 'clinfhir') {
+                        $scope.allowEdit = true;
+                    }
+                })
+            }
+            */
+
+        }
+
+        //$scope.standardResourceTypes
+
+
+        /*
         var base = selectedProfile.base || selectedProfile.baseType;        //different in stu 2 & 3
         if (base && base.indexOf('Resource') > -1) {    //was 'DomainResource
             //yes, this is a base resource.
@@ -171,6 +219,8 @@ angular.module("sampleApp")
             $scope.isBaseResource = true;
 
         }
+
+        */
 
         //perform the local setup required...
         //the graph display for the current profile
@@ -475,6 +525,7 @@ angular.module("sampleApp")
         $scope.input.addNewDTToExtension = false;
     };
 
+    //change the binding for a coded element...
     $scope.changeBinding = function() {
 
 
@@ -494,8 +545,13 @@ angular.module("sampleApp")
                 console.log(vo)
 
 
+                //todo - there's an assumption here that
+               // $scope.edFromTreeNode.binding = {strength:vo.strength,description: "test",
+                   // valueSetReference : {reference : 'ValueSet/'+ vo.vs.id}};
 
-                $scope.edFromTreeNode.binding = {strength:vo.strength,description: "test", valueSetReference : {reference : vo.vs.id}};
+                $scope.edFromTreeNode.binding = {strength:vo.strength,description: "description should go here",
+                    valueSetUri : vo.vs.url};
+
                 $scope.edFromTreeNode.myMeta = $scope.edFromTreeNode.myMeta || {};
                 $scope.edFromTreeNode.myMeta.isDirty = true;
 

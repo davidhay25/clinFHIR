@@ -1,17 +1,60 @@
 /*has been deprectde - don't call make function - expensive! */
 
 angular.module("sampleApp").controller('extensionDefCtrl',
-        function ($scope,$uibModal,appConfigSvc) {
+        function ($scope,$uibModal,appConfigSvc,GetDataFromServer,Utilities,modalService) {
 
             $scope.childElements = [];      //array of child elements
             $scope.input ={};
             $scope.input.multiplicity = 'opt';
 
-            var config = appConfigSvc.config();
+            //var config = appConfigSvc.config();
+            //var conformanceSvr = appConfigSvc.getCurrentConformanceServer();
 
-            console.log(config);
+            $scope.conformanceSvr = appConfigSvc.getCurrentConformanceServer();
+            //console.log(conformanceSvr);
 
-//temp
+            $scope.save = function() {
+                delete $scope.validateResults;
+                $scope.showWaiting = true;
+                var sd = makeSD();
+                console.log(sd)
+                if (validate(sd)){
+
+                    /*
+                    var url = $scope.conformanceSvr.url+ "StructureDefinition/$validate"
+                    $http.post(url,sd).then(
+                        function(data){
+                            console.log(data)
+                        }, function(err){
+                            console.log(err)
+                            $scope.validateResults = err.data;
+                        }
+                    )
+
+
+*/
+
+                    Utilities.validate(sd,$scope.conformanceSvr.url).then(
+                        function(data){
+                            console.log(data)
+                            var config = {bodyText:''};
+                            modalService.showModal({}, config)
+
+                        },function(err){
+                            console.log(err)
+                            $scope.validateResults = err.data;
+                        }
+                    ).finally(function(){
+                        $scope.showWaiting = false;
+                    })
+
+
+                } else {
+                    $scope.showWaiting = false;
+                }
+
+            };
+            
             $scope.setBinding = function() {
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
@@ -26,7 +69,32 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 )
             }
 
+            //?? should do this when about to save as well
+            $scope.checkEDExists = function(name) {
+                var url = $scope.conformanceSvr.url + "StructureDefinition/"+name;
+                $scope.showWaiting = true;
+                GetDataFromServer.adHocFHIRQuery(url).then(
+                    function(data){
+                        console.log(data);
+                        //if there is already an SDef - see if it authored by clinFHIR - todo
+                        var config = {bodyText:'Sorry, that name is already used on the Conformance server'};
+                        modalService.showModal({}, config)
 
+                    },function(err){
+                        console.log(err);
+                        //as long as the status is 404, it's save to create a new one...
+                        if (err.status == 404) {
+                            $scope.canSaveEd = true;
+                            
+                        } else {
+                            var config = {bodyText:'Sorry, there was an unknown error: '+angular.toJson(err,true)};
+                            modalService.showModal({}, config)
+
+                        }
+                    }).finally(function(){
+                    $scope.showWaiting = false;
+                })
+            };
 
             //add a new child element...
             $scope.addChild = function () {
@@ -141,45 +209,96 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 };
 
 
+            var validate = function(sd) {
+                return true;
+                var err = "";
+                //a single element brings at least 3 entries in the element[] array...
+                if (sd.snapshot.element.length < 4) {
+                    err += 'There must be at least one element in the extension'
+                }
+
+                if (err) {
+                    var config = {bodyText:err}
+                    modalService.showModal({}, config).then(function (result) {
+                       return false;
+                    })
+                } else {
+                    return true;
+                }
+            }
+
+            //hide the outcome of the validate operation...
+            $scope.closeValidationOutcome = function(){
+                delete $scope.validateResults;
+            };
+
             //build the StructueDefinition that describes this extension
             makeSD = function() {
 
-                var extensionDefinition = {};
+                var extensionDefinition = {resourceType:'StructureDefinition'};
 
-                switch ($scope.input.multiplicity) {
-                    case 'opt' :
-                        extensionDefinition.min=0; extensionDefinition.max = "1";
-                        break;
-                    case 'req' :
-                        extensionDefinition.min=1; extensionDefinition.max='1';
-                        break;
-                    case 'mult' :
-                        extensionDefinition.min=0; extensionDefinition.max='*';
-                        break;
-                }
 
+                //the version of fhir that this SD is being deployed against...
+                var fhirVersion = $scope.conformanceSvr.version;        //get from the conformance server
                 var name = $scope.input.name;       //the name of the extension
                 var definition = $scope.input.name;       //the name of the extension
                 var comments = $scope.input.name;       //the name of the extension
                 var short = $scope.input.name;
 
-                extensionDefinition.name = name;
-                extensionDefinition.url = config.servers.conformance + name;
+                extensionDefinition.url = $scope.conformanceSvr.url + name;
 
+                //the format for a simple extensionDefinition SD is different to a complex one...
+                var extensionTypeIsMultiple = false;
+                if ($scope.childElements.length > 1) {
+                    extensionTypeIsMultiple = true;
+                }
+
+                //the code is used so clinfhir knows which SD resources it has authored - and can modify...
+                extensionDefinition.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
+                extensionDefinition.name = name;
+                extensionDefinition.status = 'draft';
+                extensionDefinition.abstract= false;
+
+
+                if (fhirVersion == 2) {
+                    extensionDefinition.kind='datatype';
+                    extensionDefinition.type = 'Extension';
+                } else if (fhirVersion ==3) {
+                    extensionDefinition.kind='complex-type';
+
+                    extensionDefinition.baseType = 'Extension';
+                    extensionDefinition.baseDefinition = 'http://hl7.org/fhir/StructureDefinition/Extension';
+                    extensionDefinition.derivation = 'constraint';
+                    extensionDefinition.contextType = "resource";// "datatype";
+                    extensionDefinition.context=["Element"];
+                }
+
+                var min,max;
+                switch ($scope.input.multiplicity) {
+                    case 'opt' :
+                        min=0; max = "1";
+                        break;
+                    case 'req' :
+                        min=1; max='1';
+                        break;
+                    case 'mult' :
+                        min=0; max='*';
+                        break;
+                }
 
                 extensionDefinition.snapshot = {element:[]};
 
-                var ed1 = {path : 'Extension',name: name,short:short,definition:definition,
-                    comments:comments,min:extensionDefinition.min,max:extensionDefinition.max,type:[{code:'Extension'}]};
-
-
-                extensionDefinition.snapshot.push(ed1);
+                if (extensionTypeIsMultiple) {
+                    var ed1 = {path : 'Extension',name: name,short:short,definition:definition,
+                        comments:comments,min:min,max:max,type:[{code:'Extension'}]};
+                    extensionDefinition.snapshot.element.push(ed1);
+                }
 
                 //for each defined child, add the component ElementDefinition elements...
-                $scope.childElements.forEach(function(ce){
+                $scope.childElements.forEach(function(ce,extensionTypeIsMultiple){
                     var vo = ce;
-                    vo.min = extensionDefinition.min;
-                    vo.max = extensionDefinition.max;
+                    vo.min = min;
+                    vo.max = max;
 
                     extensionDefinition.snapshot.element = extensionDefinition.snapshot.element.concat(makeChildED(vo))
 
@@ -191,17 +310,27 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
                 console.log(JSON.stringify(extensionDefinition));
 
+                return extensionDefinition;
 
             };
 
             //build the ElementDefinitions for a single child
-            function makeChildED(vo){
+            function makeChildED(vo,isComplex){
                 //vo.name, vo.short, vo.definition, vo.comments, vo.min, vo.max, vo.code, vo.dataTypes[code,description]
+                console.log(vo)
+
+                //if complex, then the root is '1 level down'. Remember we only support a single level of complexity...
+                var extensionRoot = 'Extension';
+                if (isComplex) {
+                    extensionRoot = 'Extension.extension';
+                }
+
                 var arED = [];
-                var ed1 = {path : 'Extension.extension',name: vo.name,short:vo.short,definition:vo.definition,
-                    comments:vo.comments,min:vo.min,max:vo.max,type:[{code:'Extension'}]};
-                var ed2 = {path : 'Extension.extension.url',name: 'The code for this child',representation:'xmlAttr',
-                    comments:vo.comments,min:1,max:1,type:[{code:'uri'}],fixedUri:vo.code};
+                var ed1 = {path : extensionRoot,name: vo.name,definition:"def",min:vo.min,max:vo.max,
+                    short:vo.short,definition:vo.definition,
+                    comments:vo.comments,definition:"def",min:vo.min,max:vo.max,type:[{code:'Extension'}]};
+                var ed2 = {path : extensionRoot + '.url',name: 'The code for this child',representation:['xmlAttr'],
+                    comments:vo.comments,definition:"def",min:1,max:"1",type:[{code:'uri'}],fixedUri:vo.code};
 
                 //the value name is 'value' + the code with the first letter capitalized, or value[x] if more than one...
                 var valueName = '[x]';
@@ -210,8 +339,8 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                     valueName = valueName[0].toUpperCase()+valueName.substr(1);
                 }
 
-                var ed3 = {path : 'Extension.value'+valueName,name: vo.name,short:vo.short,definition:vo.definition,
-                    comments:vo.comments,min:vo.min,max:vo.max,type:[]};
+                var ed3 = {path : extensionRoot + '.value'+valueName,name: vo.name,short:vo.short,definition:vo.definition,
+                    comments:vo.comments,definition:"def",min:vo.min,max:vo.max,type:[]};
                 vo.dataTypes.forEach(function(type){
                     ed3.type.push({code:type.code})
 

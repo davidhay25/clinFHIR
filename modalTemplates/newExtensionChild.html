@@ -8,8 +8,22 @@
     </style>
 
     <div class="modal-header">
+        <div class="row">
+            <div class="col-md-7 col-sm-7">
+                <h3>Add child element</h3>
+            </div>
+            <div class="col-md-5 col-sm-5">
+                <div class="pull-right">
+                    <button class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
+                    <button class="btn btn-primary" ng-click="save()">Select</button>
+                </div>
+            </div>
+        </div>
 
-        <h3>Add child element</h3>
+
+
+
+
     </div>
     <div class="modal-body">
 
@@ -18,29 +32,6 @@
             <div class="col-md-12 col-sm-12">
                 <form>
 
-                    <div class="row">
-                        <div class="col-md-4 col-sm-4">
-                            <div class="form-group">
-                                <label>Code</label>
-                                <input type="text" ng-model="code" class="form-control" placeholder="Child code">
-                            </div>
-
-                        </div>
-                        <div class="col-md-8 col-sm-8">
-                            <div class="form-group">
-                                <label>Short</label>
-                                <input type="text" ng-model="short" class="form-control" placeholder="Short description">
-                            </div>
-
-                        </div>
-                    </div>
-
-
-
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea rows="3" ng-model="description" class="form-control" placeholder="Description of the element"></textarea>
-                    </div>
                     <div class="form-group">
                         <label>DataTypes</label>
 
@@ -80,6 +71,23 @@
                         </div>
 
                     </div>
+
+                    <div class="row">
+                        <div class="col-md-4 col-sm-4">
+                            <div class="form-group">
+                                <label>Code</label>
+                                <input type="text" ng-model="code" class="form-control" placeholder="Child code">
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea rows="3" ng-model="description" class="form-control" placeholder="Description of the element"></textarea>
+                    </div>
+
                 </form>
 
             </div>
@@ -92,10 +100,12 @@
 
     </div>
 
-    <div class="modal-footer">
-        <button class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
-        <button class="btn btn-primary"  ng-click="save()">Select</button>
-
+    <div class="modal-header">
+        <hr/>
+        <p>If the extension only has a single element (ie is a simple extension) then only the datatype/s are needed.
+        The code element and description will be ignored. If the extension is complex (has more than one element) then
+            the code and description are required.
+        </p>
 
 
     </div>

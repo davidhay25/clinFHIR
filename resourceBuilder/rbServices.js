@@ -84,6 +84,7 @@ angular.module("sampleApp").
             //an ahhoc query - full url given - to avoid a controller using $http directly...
             return $http.get(url);
         },
+        
         generalFhirQuery : function(qry) {
             //runs an ad-hoc query against the data server
             var deferred = $q.defer();
@@ -818,6 +819,8 @@ console.log(summary);
             //var qry = appConfigSvc.getCurrentDataServerBase() + resource.resourceType + "/$validate";
 
             console.log(qry)
+            console.log(JSON.stringify(params))
+
 
             return $http.post(qry, params);      //returns a promise...
 

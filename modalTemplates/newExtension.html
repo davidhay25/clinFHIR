@@ -5,72 +5,118 @@
 
         <div class="row">
             <div class="col-md-8 col-sm-8">
-                <h3>Create new Extension Definition</h3>
+                <h3 class="modal-title">Create new Extension Definition</h3>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-1">
+                <div ng-show="showWaiting">
+                    <img src="css/ajax_loader_blue_32.gif"/>
+                </div>
+            </div>
+            <div class="col-md-3">
                 <div class="pull-right">
                     <button class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
-                    <button class="btn btn-primary"  ng-click="save()">Select</button>
+                    <button class="btn btn-success" ng-show="canSaveEd" ng-click="save()">Save</button>
                 </div>
             </div>
         </div>
     </div>
     <div class="modal-body">
-        <div ng-show="loading" class="alert alert-info">
-            Querying server, please wait...
-        </div>
+
+        <uib-alert close="closeValidationOutcome()" type="warning"
+                   ng-show="validateResults && validateResults.issue && validateResults.issue.length > 0">
+            <div>Sorry, there were some issues, and the definition has not been saved.</div>
+            <br/>
+            <table class="table table-bordered">
+                <tr><th>Severity</th><th>Code</th><th>Details/Diagnostics</th><th>Location</th></tr>
+                <tr ng-repeat = "iss in validateResults.issue">
+                    <td>{{iss.severity}}</td>
+                    <td>{{iss.code}}</td>
+                    <td>{{iss.details.text}}
+                        <div>{{iss.diagnostics}}</div>
+                    </td>
+                    <td><div ng-repeat="loc in iss.location">{{loc}}</div></td>
+                </tr>
+            </table>
+
+        </uib-alert>
 
 
         <uib-tabset>
             <uib-tab heading="Design">
+                <br />
+
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <form>
+                            <div class="row">
+                                <div class="col-md-8 col-sm-8">
+                                    <div class="form-group">
+                                        <!--<label>Name</label>-->
+                                        <input type="text" class="form-control" ng-model="input.name"
+                                               ng-disabled = "canSaveEd" placeholder="Name of extension">
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-sm-4">
+                                    <button class="btn btn-primary pull-right" ng-click="checkEDExists(input.name)">Check</button>
+                                </div>
+                            </div>
 
 
-        <div class="row">
-            <div class="col-md-6 col-sm-6">
-                <form>
-                    <div class="form-group">
-                        <!--<label>Name</label>-->
-                        <input type="text" class="form-control" ng-model="input.name" placeholder="Name of extension">
+
+
+                            <div class="form-group">
+                                <textarea class="form-control" rows="3" ng-model="input.description" placeholder="Description"></textarea>
+
+                            </div>
+
+                        </form>
+
                     </div>
-                    <div class="form-group">
-                        <textarea class="form-control" rows="5" ng-model="input.description" placeholder="Description"></textarea>
+                    <div class="col-md-6 col-sm-6">
 
+
+
+                            <div class="form-group">
+
+                                <input type="text" ng-model="short" class="form-control" placeholder="Short description">
+                            </div>
+
+
+
+                        <div class="form-group">
+                            <!--<label>Name</label>-->
+                            <input type="text" class="form-control" ng-model="input.publisher" placeholder="Publisher">
+                        </div>
+                        <div class="btn-group">
+                            <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'opt'">0..1</label>
+                            <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'req'">1..1</label>
+                            <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'mult'">0..*</label>
+                        </div>
                     </div>
-
-                </form>
-
-            </div>
-            <div class="col-md-6 col-sm-6">
-                <div class="btn-group">
-                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'opt'">0..1</label>
-                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'req'">1..1</label>
-                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'mult'">0..*</label>
                 </div>
-            </div>
-        </div>
 
 
-        <hr />
-        <div class="row">
-            <div class="col-md-6 col-sm-6">
-                <strong>Extension content</strong>
-            </div>
-            <div class="col-md-6 col-sm-6">
-                <button class="btn btn-link pull-right" class="btn btn-link" ng-click="addChild()">Add element</button>
-            </div>
-        </div>
+                <hr />
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <strong>Extension content</strong>
+                    </div>
+                    <div class="col-md-6 col-sm-6">
+                        <button class="btn btn-link pull-right" class="btn btn-link" ng-click="addChild()">Add element</button>
+                    </div>
+                </div>
 
-        <table class="table table-bordered">
-            <tr><th>Code</th><th>Description</th><th>DataTypes</th></tr>
-            <tr ng-repeat="child in childElements">
-                <td>{{child.code}}</td>
-                <td>{{child.description}}</td>
-                <td>
-                    <div ng-repeat="dt in child.dataTypes">{{dt.description}}</div>
-                </td>
-                <td><i class="glyphicon glyphicon-remove"></i> </td>
-            </tr>
-        </table>
+                <table class="table table-bordered">
+                    <tr><th>Code</th><th>Description</th><th>DataTypes</th></tr>
+                    <tr ng-repeat="child in childElements">
+                        <td>{{child.code}}</td>
+                        <td>{{child.description}}</td>
+                        <td>
+                            <div ng-repeat="dt in child.dataTypes">{{dt.description}}</div>
+                        </td>
+                        <td><i class="glyphicon glyphicon-remove"></i> </td>
+                    </tr>
+                </table>
 
 
 
@@ -87,16 +133,22 @@
 
     <div class="modal-footer">
         <div class="row">
-            <div class="col-md-8">
+            <div class="col-md-12">
                 <div class="text-left">
 
+                    <p ng-hide="canSaveEd">
+                        Enter a name for the extension. This must be new on the Conformance server ({{conformanceSvr.name}}), or one that has been
+                        previously created by clinFHIR (and will be replaced by this definition).
+                    </p>
+
+                    <p ng-show="canSaveEd">
+                        Now enter the remaining details. All fields are required. At least one element is required.
+                    </p>
 
                 </div>
 
             </div>
-            <div class="col-md-4">
 
-            </div>
         </div>
 
 

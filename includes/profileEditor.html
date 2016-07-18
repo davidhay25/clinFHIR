@@ -68,7 +68,6 @@
 
     <uib-tabset ng-show="showProfileEditPage">
         <uib-tab heading="Profile editor">
-
             <br/>
 
 
@@ -340,11 +339,19 @@
                                     ValueSet
                                 </div>
                                 <div class="col-md-8 col-sm-8">
-                                    <a href="#" ng-click="showValueSetForProfile(edFromTreeNode.binding.valueSetReference.reference)">
+                                    <a href="#" ng-show="edFromTreeNode.binding.valueSetReference.reference"
+                                       ng-click="showValueSetForProfile(edFromTreeNode.binding.valueSetReference.reference)">
                                         {{edFromTreeNode.binding.valueSetReference.reference}}
                                     </a>
+                                    <a href="#" ng-show="edFromTreeNode.binding.valueSetUri"
+                                       ng-click="showValueSetForProfile(edFromTreeNode.binding.valueSetUri,'true')">
+                                        {{edFromTreeNode.binding.valueSetUri}}
+                                    </a>
+
+
                                     <div>Binding strength: {{edFromTreeNode.binding.strength}}</div>
                                 </div>
+
                                 <div class="col-md-1 col-sm-1">
                                     <span ng-hide="edFromTreeNode.binding.strength == 'required'">
                                         <i ng-show="mode=='new' || mode=='edit'" class="glyphicon glyphicon-edit"
@@ -650,9 +657,23 @@
                                 Binding strength: {{selectedProfileNetworkED.binding.strength}}
                             </div>
                             <div class="col-md-6 col-sm-6">
+   <!--
                                 <a href="#" ng-click="showValueSetForProfile(selectedProfileNetworkED.binding.valueSetReference.reference)">
                                     {{selectedProfileNetworkED.binding.valueSetReference.reference}}
                                 </a>
+-->
+                                <a href="#" ng-show="selectedProfileNetworkED.binding.valueSetReference.reference"
+                                   ng-click="showValueSetForProfile(selectedProfileNetworkED.binding.valueSetReference.reference)">
+                                    {{selectedProfileNetworkED.binding.valueSetReference.reference}}
+                                </a>
+
+                                <a href="#" ng-show="selectedProfileNetworkED.binding.valueSetUri"
+                                   ng-click="showValueSetForProfile(selectedProfileNetworkED.binding.valueSetUri,'true')">
+                                    {{selectedProfileNetworkED.binding.valueSetUri}}
+                                </a>
+
+
+
                             </div>
 
 
