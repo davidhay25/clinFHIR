@@ -106,44 +106,9 @@
             </div>
         </nav>
 
-<!--
-        <div class="row" ng-show="state == 'new'">
-            <div class="col-md-6 col-sm-6">
 
-                <form>
-                    <div class="form-group">
-                        <label>Name</label>
-                        <input type="email" class="form-control" ng-model="input.newName">
-                    </div>
-                    <div class="form-group">
-                        <label>Publisher</label>
-                        <input type="email" class="form-control" ng-model="input.newPublisher">
-                    </div>
-                </form>
+        <button ng-click="createValueSet()">Create</button>
 
-            </div>
-            <div class="col-md-6 col-sm-6">
-
-                <form>
-
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea class="form-control"  newDescription"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Requirements</label>
-                        <textarea class="form-control" ng-model="input.newRequirements"></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-default">Submit</button>
-                </form>
-
-            </div>
-
-
-        </div>
-
-        -->
         <div class="row" ng-show="state == 'find'">
             <div class="col-md-6 col-sm-6">
                 <div>Search</div>
@@ -180,8 +145,12 @@
 
                 <div class="row display-row" ng-repeat="entry in searchResultBundle.entry" style="margin-bottom: 5px">
                     <div class="col-md-9 col-sm-9">
-                        {{entry.resource.name}} ({{entry.resource.id}})
-                        <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>
+                        <div ng-click="selectVs(entry.resource)">
+                            {{entry.resource.name}} ({{entry.resource.id}})
+                            <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>
+                        </div>
+
+
                     </div>
                     <div class="col-md-3 col-sm-3">
                         <button class="btn btn-link" ng-click="input.vspreview=entry.resource">Preview</button>
@@ -246,35 +215,6 @@
                         </div>
 
 
-<!--
-                        includeElement
-
-
-
-                        <div ng-repeat="include in vs.compose.include">
-
-                            <div ng-repeat="concept in include.concept">
-                                <div ng-init = "input.hasConcept = true" class="row display-row">
-
-                                    <div class="col-md-2 col-sm-2">
-                                        {{concept.code}}
-                                    </div>
-                                    <div class="col-md-8 col-sm-8">
-                                        {{concept.display}}
-                                    </div>
-                                    <div class="col-md-1 col-sm-1">
-
-                                    </div>
-                                    <div class="col-md-1 col-sm-1">
-                                        <i style="cursor: pointer"
-                                           ng-click="removeInclude(concept)"
-                                           class="glyphicon glyphicon-minus-sign pull-right"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
--->
-
                         <h5 ng-show="input.hasIsa">'is-a' included concepts (Branch)</h5>
 
                         <div ng-repeat="include in vs.compose.include">
@@ -305,31 +245,6 @@
 
                         </div>
 
-                        <!--
-                        <div ng-repeat="include in vs.compose.include track by $index">
-                            <div ng-repeat="filter in include.filter">
-                                <div ng-init = "input.hasIsa = true" class="row display-row">
-                                    <div class="col-md-2 col-sm-2">
-                                        {{filter.property}}
-                                    </div>
-                                    <div class="col-md-2 col-sm-2">
-                                        {{filter.op}}
-                                    </div>
-                                    <div class="col-md-3 col-sm-3">
-                                        {{filter.value}}
-                                    </div>
-                                    <div class="col-md-4 col-sm-4">
-                                        {{input.conceptCache[filter.value]}}
-                                    </div>
-                                    <div class="col-md-1 col-sm-1">
-                                        <i style="cursor: pointer"
-                                           ng-click="removeIsa(filter)"
-                                           class="glyphicon glyphicon-minus-sign pull-right"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        -->
 
                     </uib-tab>
                     <uib-tab heading="Description">
@@ -426,7 +341,24 @@
 
 
                 <div ng-show="canEdit">
-                    <h4>Add a new code</h4>
+                    <div class="row">
+                        <div class="col-md-4 col-sm-4">
+                            <h4>Add a new code</h4>
+                        </div>
+                        <div class="col-md-4 col-sm-4">
+                            <div class="pull-right">Search root</div>
+                        </div>
+                        <div class="col-md-4 col-sm-4">
+                            <select class="form-control" ng-model="input.rootConcept"
+                                    ng-options="root.display for root in rootConcepts"
+                                ng-change="setRootConcept(input.rootConcept)"
+                            ></select>
+                        </div>
+                    </div>
+
+
+
+
                     <ng-include src="'/prTemplates/codeableconcept.html'"></ng-include>
 
                     <div ng-show="results.cc.code">

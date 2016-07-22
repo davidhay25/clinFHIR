@@ -757,7 +757,31 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 }
 
                 return deferred.promise;
+            },
+            createISAValueSet : function(vo,terminologyServerRoot){
+                //create a valueset that is a 'is-a' of a given code. Used by the valueset creator to create the root valuesets
+                //vo = {display: name: concept: url:}
+                var snomedSystem = "http://snomed.info/sct";
+                //there's a slight risk that someone else has used this id - in which case it will be obliviated!
+                var urlOnTerminologyServer = terminologyServerRoot+ "ValueSet/clinFHIR-" + vo.name;//  $scope.valueSetRoot+id;
+
+                var vs = {resourceType : "ValueSet", status:'draft', name: vo.name,compose:{include:[]}};
+                vs.name = vo.name;        //so the search will work on id
+                vs.description = 'Root name ValueSet' + vo.name + 'automatically created by clinFHIR';
+                vs.url = vo.url;    //this is the url that references the clinfhir domain..
+                vs.compose.include.push({system:snomedSystem,
+                    filter:[{property:'concept',op:'is-a',value:vo.concept}]})
+
+                vs.contact = [{name : 'clinfhir'}]
+
+                console.log(vs)
+
+
+                return $http.put(urlOnTerminologyServer,vs)
+
+
             }
+
         }
     }
 );

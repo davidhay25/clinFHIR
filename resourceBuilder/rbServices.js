@@ -888,7 +888,8 @@ console.log(summary);
             }
             return lst;
         },
-        getValueSetIdFromRegistry : function(uri,cb) {
+
+        getValueSetIdFromRegistry : function(uri,cb,noError) {
             //return the id of the ValueSet on the terminology server. For now, assume at the VS is on the terminology.
             var config = appConfigSvc.config();
             var qry = config.servers.terminology + "ValueSet?url=" + uri;
@@ -917,7 +918,10 @@ console.log(summary);
                         }
                         cb(resp);
                     } else {
-                        alert('There is no ValueSet with a url of '+ uri + ' on the terminology server');
+                        if (!noError) {
+                            alert('There is no ValueSet with a url of '+ uri + ' on the terminology server');
+                        }
+                        //alert('There is no ValueSet with a url of '+ uri + ' on the terminology server');
                         cb(null);
                     }
                 },

@@ -1,15 +1,88 @@
 angular.module("sampleApp").controller('valuesetCtrl',
     function ($scope, Utilities, appConfigSvc,SaveDataToServer,GetDataFromServer,resourceCreatorSvc,modalService,
-            $uibModal) {
+            $uibModal,profileCreatorSvc) {
 
 
     var snomedSystem = "http://snomed.info/sct";
 
+        $scope.results = {};
+        $scope.input = {};
+
+     $scope.rootConcepts = [];
+        $scope.rootConcepts.push({display:'Clinical Finding',name:'cfClinfinding',concept:404684003});
+        $scope.rootConcepts.push({display:'Procedures',name:'cfProcedure',concept:71388002});
+
+        $scope.input.rootConcept = $scope.rootConcepts[0]   //the initial root concept
 
 
 
-    $scope.results = {};
-    $scope.input = {};
+        //create one of the root valuesets - used when looking up a concept using the concept selector
+        $scope.createValueSet = function() {
+            $scope.setRootConcept($scope.rootConcepts[0]);
+
+            /*
+            profileCreatorSvc.createISAValueSet($scope.rootConcepts[0],$scope.serverRoot).then(
+                function(data){
+                    console.log(data);
+                },function(err) {
+                    console.log(err)
+                }
+            )
+            */
+
+
+        };
+
+
+        
+        //set the root concept (used by the concept seector) - creating it if necessary
+        $scope.setRootConcept = function (item) {
+            console.log(item);
+            var url = 'http://clinfhir.com/fhir/ValueSet/'+item.name;
+            Utilities.getValueSetIdFromRegistry(url,function(vsDetails) {
+                    $scope.vsDetails = vsDetails;  //vsDetails = {id: type: resource: }
+                    console.log(vsDetails);
+
+                if (!vsDetails) {
+                    var modalOptions = {
+                        closeButtonText: "No, don't create valueSet",
+                        actionButtonText: 'Yes, create valueSet',
+                        headerText: 'Create new valueSet',
+                        bodyText: 'The valueset used for this root ('+item.display +') does not exist on the Terminology server. Shall I create it'
+                    };
+
+                    modalService.showModal({}, modalOptions).then(
+                        function (result) {
+                            //the user said yes
+                            item.url = url;     //the url of the valueset will reference the clinfhir domain - not the actual perminology server
+                            profileCreatorSvc.createISAValueSet(item,$scope.serverRoot).then(
+                                function(data){
+                                    console.log(data);
+                                    var idOnTerminologyServer = "clinFHIR-" + item.name;    //this is what the 'profileCreatorSvc.createISAValueSet' function will use as the local id...
+                                    $scope.vsDetails = {id:idOnTerminologyServer}
+
+
+                                },function(err) {
+
+                                    console.log(err)
+                                }
+                            )
+                        }
+                    )
+                }
+                
+
+                },true      //the 'true' will suppress any error message in the service...
+            );
+            
+        };
+
+        $scope.setRootConcept($scope.rootConcepts[0]);  //set to the first root concept in the array - chacking that it exists
+
+        //------------================----------
+        //var reference = "http://hl7.org/fhir/ValueSet/condition-cause";
+        //http://fhir3.healthintersections.com.au/open/ValueSet/condition-cause
+       // $scope.setRootConcept({url:reference});
 
 
     //register that the application has been started... (for reporting)
@@ -92,8 +165,6 @@ angular.module("sampleApp").controller('valuesetCtrl',
     $scope.vsReference = true;      //to show the included file
 
     //var reference = "http://hl7.org/fhir/ValueSet/condition-code";
-    var reference = "http://hl7.org/fhir/ValueSet/condition-cause";
-                     //http://fhir3.healthintersections.com.au/open/ValueSet/condition-cause
 
     //make a copy of the current vs
     $scope.copyVs = function(){
@@ -217,38 +288,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
         $scope.includeElement.concept.splice(inx,1);
         $scope.input.isDirty = true;
 
-        /*
-
-        //console.log(conceptToRemove)
-        var includeToDelete = -1;
-        for (var i=0; i < $scope.vs.compose.include.length; i++) {
-            var include = $scope.vs.compose.include[i];
-            //console.log(include)
-            if (include.concept) {
-                for (var j=0; j< include.concept.length; j++){
-                    var concept = include.concept[j];
-
-                    //console.log(concept)
-                    if (conceptToRemove.code == concept.code) {
-
-                        include.concept.splice(j,1);
-                        $scope.input.isDirty = true;
-                        if (include.concept.length ==0 ){
-                            includeToDelete = i;
-                        }
-                        break;
-                    }
-                }
-
-            }
-
-        }
-
-        if (includeToDelete > -1) {
-            $scope.includeElement.filter.length = 0;
-            $scope.vs.compose.include.splice(includeToDelete,1)
-        }
-        */
+        
     };
 
     $scope.removeIsa = function (inx) {
@@ -259,36 +299,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
         }
         $scope.input.isDirty = true;
 
-        /*
-        var includeToDelete = -1;
-
-        for (var i=0; i < $scope.vs.compose.include.length; i++) {
-            var include = $scope.vs.compose.include[i];
-            //console.log(include)
-            if (include.filter) {
-                for (var j=0; j< include.filter.length; j++){
-                    var filter = include.filter[j];
-
-                    //console.log(concept)
-                    if (filter.value == filtertToRemove.value) {
-                        include.filter.splice(j,1)
-                        $scope.input.isDirty = true;
-                        if (include.filter.length ==0 ){
-                            includeToDelete = i;
-                        }
-                        break;
-                    }
-                }
-
-            }
-
-        }
-
-        if (includeToDelete > -1) {
-            $scope.includeElementForFilter.filter.length = 0;
-            $scope.vs.compose.include.splice(includeToDelete,1)
-        }
-        */
+        
     };
 
 
@@ -577,11 +588,18 @@ angular.module("sampleApp").controller('valuesetCtrl',
         
         
     //=========== most of these functions are copied from resourceCreatorCtrl. Thre are better ways of reuse !....  ==========
+   /*
+
+   TEMP
+
     Utilities.getValueSetIdFromRegistry(reference,function(vsDetails) {
             $scope.vsDetails = vsDetails;
         console.log(vsDetails);
         }
     );
+
+
+        */
 
     //when the user has selected an entry from the autocomplete...
     $scope.selectCCfromList = function(item,model,label,event){
