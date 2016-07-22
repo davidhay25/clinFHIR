@@ -19,22 +19,32 @@
         background-color: #f2f2f2;
         margin-bottom: 4px;
     }
+    .myCentered {
+        padding-top: 6px;
+    }
 
 </style>
 
 <div ng-controller="logicalModelCtrl">
 
     <div ng-show="showProfileEditPage"  class="row rounded-box">
-        <div class="col-md-4">
+        <div class="col-md-2">
             <strong ng-show="mode=='view'">Viewing profile</strong>
             <strong ng-show="mode=='edit'">Editing profile</strong>
             <strong ng-show="mode=='new'">Creating a new profile</strong>
         </div>
 
+
+        <div class="col-md-2">
+            <div class="myCentered">
+                {{appConfigSvc.getCurrentConformanceServer().name}}
+            </div>
+
+        </div>
         <div class="col-md-3">
 
-            <input ng-show="mode=='new' || mode=='edit'" type="text" placeholder="Enter profile name (no spaces)"
-                   ng-readonly="mode=='edit'"
+            <input  type="text" placeholder="Enter profile name (no spaces)"
+                   ng-readonly="mode=='edit' || mode=='view'"
                    ng-blur = "checkExistingProfile(input.profileName)" ng-model="input.profileName" class="form-control"/>
 
 
@@ -125,7 +135,6 @@
 
                                 </div>
                             </div>
-
 
 
 
@@ -348,6 +357,8 @@
                                         {{edFromTreeNode.binding.valueSetUri}}
                                     </a>
 
+
+                                    <div>{{edFromTreeNode.binding.description}}</div>
 
                                     <div>Binding strength: {{edFromTreeNode.binding.strength}}</div>
                                 </div>
@@ -695,6 +706,25 @@
 
 
 
+
+        </uib-tab>
+
+        <uib-tab heading="Difference from base">
+            <br/>
+            <div><strong>Differences from the base resource: {{frontPageProfile.baseDefinition}}</strong></div>
+            <br/>
+            <div ng-hide="differences|| diffError">Creating difference, please wait...</div>
+            {{diffError}}
+
+            <div class="panel panel-default" ng-show="differences">
+                <table class="table table-condensed table-bordered">
+                    <tr ng-repeat ="diff in differences">
+                        <td>{{diff.type}}</td>
+                        <td>{{diff.ed.path}}</td>
+                        <td>{{diff.ed.definition}}</td>
+                    </tr>
+                </table>
+            </div>
 
         </uib-tab>
         <uib-tab heading="Profile resource (Json)" >

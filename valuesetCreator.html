@@ -60,6 +60,7 @@
                 </div>
 
                 <div class="col-md-3 col-sm-3">
+
                     <div class="navbar-text" ng-show="vs.id">
                         {{serverRoot}}ValueSet/{{vs.id}}
                     </div>
@@ -76,25 +77,29 @@
                      <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
                     </form>
 
-                    <!-- Show save when a vs has been updated-->
-                    <form class="navbar-form navbar-right" ng-show="input.isDirty">
-                         <button class="btn btn-danger" ng-click="save()">Save</button>
-                    </form>
+                    <!-- Only show the available commands when a server has been selected -->
+                    <div ng-show="serverRoot">
+                        <!-- Show save when a vs has been updated-->
+                        <form class="navbar-form navbar-right" ng-show="input.isDirty">
+                            <button class="btn btn-danger" ng-click="save()">Save</button>
+                        </form>
 
-                    <!-- Show 'back to list' when where's a list, anda valueset has been selected from that list-->
-                    <form class="navbar-form navbar-right" ng-show="(vs && searchResultBundle.entry.length >0) || state=='new' ">
-                        <button class="btn btn-success" ng-click="backToList()">Find</button>
-                    </form>
+                        <!-- Show 'back to list' when where's a list, anda valueset has been selected from that list-->
+                        <form class="navbar-form navbar-right" ng-show="(vs && searchResultBundle.entry.length >0) || state=='new' ">
+                            <button class="btn btn-success" ng-click="backToList()">Find</button>
+                        </form>
 
-                    <!-- Show 'copy' when there is a vs that cannot be edited-->
-                    <form class="navbar-form navbar-right" ng-show="(vs && ! canEdit) ">
-                        <button class="btn btn-warning" ng-click="copyVs()">Copy</button>
-                    </form>
+                        <!-- Show 'copy' when there is a vs that cannot be edited-->
+                        <form class="navbar-form navbar-right" ng-show="(vs && ! canEdit) ">
+                            <button class="btn btn-warning" ng-click="copyVs()">Copy</button>
+                        </form>
 
-                    <!-- Show 'New' button when there is no vs selected-->
-                    <form class="navbar-form navbar-right" ng-hide="vs || state=='new'">
-                        <button class="btn btn-primary" ng-click="newVs()">New</button>
-                    </form>
+                        <!-- Show 'New' button when there is no vs selected-->
+                        <form class="navbar-form navbar-right" ng-hide="vs || state=='new'">
+                            <button class="btn btn-primary" ng-click="newVs()">New</button>
+                        </form>
+                    </div>
+
 
 
                 </div>
@@ -162,7 +167,15 @@
                     <br /><br />
                     Alternatively, click the 'New' button at the top right to create a new ValueSet.
 
+
                 </uib-alert>
+
+                <uib-alert type="warning" ng-hide="searchResultBundle.entry">
+                    Right now, the tool will find and expand any valueset, but when creating a valueset will only
+                    work with SNOMED, and requires an STU-3 compatible Terminology server that stores the ValueSets.
+
+                </uib-alert>
+
 
 
                 <div class="row display-row" ng-repeat="entry in searchResultBundle.entry" style="margin-bottom: 5px">
@@ -209,9 +222,37 @@
 
                         </div>
 
-                        <h5 ng-show="input.hasConcept">Specific included concepts</h5>
+                        <h5 ng-show="includeElement.concept.length > 0">Specific included concepts</h5>
 
-                        <div ng-repeat="include in vs.compose.include  track by $index">
+
+                        <div ng-repeat="concept in includeElement.concept">
+                            <div class="row display-row">
+
+                                <div class="col-md-2 col-sm-2">
+                                    {{concept.code}}
+                                </div>
+                                <div class="col-md-8 col-sm-8">
+                                    {{concept.display}}
+                                </div>
+                                <div class="col-md-1 col-sm-1">
+
+                                </div>
+                                <div class="col-md-1 col-sm-1">
+                                    <i style="cursor: pointer"
+                                       ng-click="removeInclude($index)"
+                                       class="glyphicon glyphicon-minus-sign pull-right"></i>
+                                </div>
+                            </div>
+                        </div>
+
+
+<!--
+                        includeElement
+
+
+
+                        <div ng-repeat="include in vs.compose.include">
+
                             <div ng-repeat="concept in include.concept">
                                 <div ng-init = "input.hasConcept = true" class="row display-row">
 
@@ -232,10 +273,39 @@
                                 </div>
                             </div>
                         </div>
+-->
+
+                        <h5 ng-show="input.hasIsa">'is-a' included concepts (Branch)</h5>
+
+                        <div ng-repeat="include in vs.compose.include">
+                            <div ng-show = "include.filter">
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-2">
+                                        {{include.filter[0].property}}
+                                    </div>
+                                    <div class="col-md-2 col-sm-2">
+                                        {{include.filter[0].op}}
+                                    </div>
+                                    <div class="col-md-3 col-sm-3">
+                                        {{include.filter[0].value}}
+                                    </div>
+                                    <div class="col-md-4 col-sm-4">
+                                        {{input.conceptCache[include.filter[0].value]}}
+                                    </div>
+                                    <div class="col-md-1 col-sm-1">
+                                        <i style="cursor: pointer"
+                                           ng-click="removeIsa($index)"
+                                           class="glyphicon glyphicon-minus-sign pull-right"></i>
+                                    </div>
+                                </div>
+                            </div>
 
 
-                        <h5 ng-show="input.hasIsa">'is-a' included concepts</h5>
 
+
+                        </div>
+
+                        <!--
                         <div ng-repeat="include in vs.compose.include track by $index">
                             <div ng-repeat="filter in include.filter">
                                 <div ng-init = "input.hasIsa = true" class="row display-row">
@@ -259,6 +329,7 @@
                                 </div>
                             </div>
                         </div>
+                        -->
 
                     </uib-tab>
                     <uib-tab heading="Description">

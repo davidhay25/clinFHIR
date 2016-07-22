@@ -5,6 +5,10 @@ angular.module("sampleApp")
 
     $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();      //all the known data types
 
+    $scope.appConfigSvc = appConfigSvc;      //so we can display donfig stuff on the page
+
+    //appConfigSvc.getCurrentConformanceServer()
+
     //all the known Resource types. Used when creating a reference
     RenderProfileSvc.getAllStandardResourceTypes().then(
         function(standardResourceTypes) {
@@ -178,7 +182,7 @@ angular.module("sampleApp")
         $scope.logOfChanges = [];
         $scope.allowEdit = false;    //the profile being viewed can be altered
         var selectedProfile = data.profile;
-
+        $scope.input.profileName = selectedProfile.id;
         //is this a core profile? If it is, it cannot be edited. todo - ?move this to a service??
         //determine this if the url has the format 'http://hl7.org/fhir/StructureDefinition/{definedResourceName}
         var urlOfProfile = selectedProfile.url;
@@ -227,8 +231,21 @@ angular.module("sampleApp")
         delete $scope.graphProfile;     //delete any graphProfile currently created
 
         createGraphOfProfile();
-        setUpDisplayNewProfile()
+        setUpDisplayNewProfile();
 
+        //generate a differential view
+        delete $scope.differences;
+        delete $scope.error;
+
+        profileCreatorSvc.diffFromBase(selectedProfile,appConfigSvc).then(
+            function(differences) {
+                console.log(differences)
+                $scope.differences = differences;
+            },function(err) {
+                $scope.diffError = "Unable to create difference file - can't locate a base profile";
+                //alert(angular.toJson(err))
+            }
+        )
     });
 
     //set all the values for a new node to default...
@@ -372,6 +389,12 @@ angular.module("sampleApp")
 
         $scope.logOfChanges.push({type:'D',display:'Removed '+ ed.path,path:ed.path,ed:ed})
 
+        //add to the differences array - but make sure it's present as it is slow!
+        if ($scope.differences) {
+            $scope.differences.push({type:'removed',ed:ed})
+        }
+
+
         delete $scope.input.newNode;    //indicates whether a child or a sibling - will hide the new entry
 
         delete $scope.edFromTreeNode;
@@ -385,6 +408,22 @@ angular.module("sampleApp")
     $scope.restore = function(ed,inx){
         $scope.restoreRemoved = ed;     //this is a property on the component...
         $scope.logOfChanges.splice(inx,1)
+
+        //now remove it from the differences array...
+        if ($scope.differences) {
+            var inx1 = -1;
+            $scope.differences.forEach(function(diff,diffInx){
+                if (diff.ed.path == ed.path) {
+                    inx1 = diffInx;
+                }
+            })
+
+            if (inx1 > -1) {
+                $scope.differences.splice(inx1);
+            }
+        }
+
+
 
     };
 
@@ -549,7 +588,7 @@ angular.module("sampleApp")
                // $scope.edFromTreeNode.binding = {strength:vo.strength,description: "test",
                    // valueSetReference : {reference : 'ValueSet/'+ vo.vs.id}};
 
-                $scope.edFromTreeNode.binding = {strength:vo.strength,description: "description should go here",
+                $scope.edFromTreeNode.binding = {strength:vo.strength,description: vo.description,
                     valueSetUri : vo.vs.url};
 
                 $scope.edFromTreeNode.myMeta = $scope.edFromTreeNode.myMeta || {};
@@ -683,8 +722,9 @@ angular.module("sampleApp")
         };
 
     $scope.selectExistingExtension = function(){
+        var resourceType;
         try {
-            var resourceType = $scope.frontPageProfile.snapshot.element[0].path;
+            resourceType = $scope.frontPageProfile.snapshot.element[0].path;
         } catch (ex) {
             alert("Oops - the profile is invalid, probably doesn't have a snapshot");
             return;
@@ -696,15 +736,33 @@ angular.module("sampleApp")
 
             templateUrl: 'modalTemplates/searchForExtension.html',
             size:'lg',
-            controller: function($scope,resourceType,GetDataFromServer){
+            controller: function($scope,resourceType,GetDataFromServer,appConfigSvc){
                 $scope.resourceType = resourceType;
-                var qry = "StructureDefinition?url=http://hl7.org/fhir/StructureDefinition/patient-nationality"
+
+                //construct the query to retrene extension defintions...
+                var qry = "StructureDefinition?context-type=resource&ext-context=Patient";  //v3
+                var conformanceSvr = appConfigSvc.getCurrentConformanceServer();
+                if (conformanceSvr.version == 2) {
+                    qry = "StructureDefinition?kind=datatype&type=Extension&ext-context="+$scope.resourceType;
+                    console.log('v2')
+                }
+
+                $scope.conformanceServerUrl = conformanceSvr.url;
+
+
+                //http://fhir2.healthintersections.com.au/open/StructureDefinition?kind=datatype&type=Extension&ext-context=Patient
+                //var qry = "StructureDefinition?url=http://hl7.org/fhir/StructureDefinition/patient-nationality"
+                //var qry = "StructureDefinition?context-type=resource&ext-context=Patient"
+               // http://fhir3.healthintersections.com.au/open/StructureDefinition?context-type=resource&ext-context=Patient
+                $scope.showWaiting = true;
                 GetDataFromServer.queryConformanceServer(qry).then(
                     function(data) {
                         $scope.bundle = data.data;
                         console.log($scope.bundle);
                     }
-                );
+                ).finally(function(){
+                    $scope.showWaiting = false;
+                });
 
                 $scope.selectExtension = function(ent) {
                     $scope.selectedExtension = ent.resource

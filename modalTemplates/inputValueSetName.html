@@ -11,7 +11,7 @@
             <div class="col-md-4">
                 <div class="pull-right">
                     <button class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
-                    <button class="btn btn-success" ng-show = "nameValid" ng-click="$close(name)">Select</button>
+                    <button class="btn btn-success" ng-show = "nameValid" ng-click="select()">Select</button>
                 </div>
 
             </div>
@@ -26,15 +26,31 @@
                     Name
             </div>
             <div class="col-md-4 col-sm-4">
-                <input type="text" class="form-control" ng-model="name" placeholder="Enter name as a single word"/>
+                <input type="text" class="form-control" ng-model="input.name" placeholder="Enter name as a single word"/>
             </div>
 
             <div class="col-md-4 col-sm-4">
-                <button ng-show='name' class="btn btn-primary" ng-click="checkName(name)">Check name</button>
+                <button ng-show='input.name' class="btn btn-primary" ng-click="checkName(input.name)">Check name</button>
+            </div>
+
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-md-2 col-sm-2">
+                Description
+            </div>
+            <div class="col-md-4 col-sm-4">
+                <textarea class="form-control" ng-model="input.description" placeholder="What is the purpose of this ValueSet"></textarea>
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+
             </div>
 
         </div>
 
+
+<!--
         <div class="row">
             <div class="col-md-6 col-sm-6">
                 <select class="form-control"
@@ -43,6 +59,8 @@
             </div>
         </div>
 
+        -->
+
 
 
     </div>
@@ -50,16 +68,17 @@
     <div class="modal-header">
 
         <div class="row">
-            <div class="col-md-8">
-                <em>The name of the valueSet must be unique on this server. Click the 'Check Name' link
+            <div class="col-md-12">
+                <em ng-hide ="nameValid">The name of the valueSet must be unique on this server ({{terminologyServer}}. Click the 'Check Name' link
                 (that will appear after you have entered a name) to confirm. Spaces and quotes should be avoided.</em>
-            </div>
-            <div class="col-md-4">
-                <div class="pull-right">
 
-                </div>
+                <em ng-show ="nameValid">That is a valid name! Press the Select button to proceed...</em>
+
             </div>
+
         </div>
+
+
 
     </div>
 </div>

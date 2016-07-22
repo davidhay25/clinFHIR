@@ -4,9 +4,16 @@
     <div class="modal-header">
 
         <div class="row">
-            <div class="col-md-8 col-sm-8">
-                Extension definitions for {{$scope.resourceType}}
+            <div class="col-md-7 col-sm-7">
+                Extension definitions for {{resourceType}}
             </div>
+
+            <div class="col-md-1 col-sm-1">
+                <div class="pull-right navbar-form" ng-show="showWaiting">
+                    <img src="css/ajax_loader_blue_32.gif"/>
+                </div>
+            </div>
+
             <div class="col-md-4">
                 <div class="pull-right">
                     <button class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
@@ -35,8 +42,6 @@
             </div>
         </div>
 
-
-
     </div>
 
     <div class="modal-footer">
@@ -49,7 +54,7 @@
 
             </div>
             <div class="col-md-4">
-
+                {{conformanceServerUrl}}
             </div>
         </div>
 

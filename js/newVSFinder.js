@@ -10,11 +10,12 @@ angular.module("sampleApp").controller('vsFinderCtrl',
 
         $scope.input.arStrength = ['extensible','preferred','example'];
         $scope.input.strength = currentBinding.strength;
+        $scope.input.description = currentBinding.description;
 
 
         $scope.select = function() {
 
-            $scope.$close({vs: $scope.input.vspreview,strength:$scope.input.strength});
+            $scope.$close({vs: $scope.input.vspreview,strength:$scope.input.strength,description : $scope.input.description});
         };
 
         //find matching ValueSets based on name

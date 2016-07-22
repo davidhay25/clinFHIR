@@ -2,6 +2,12 @@ angular.module("sampleApp").controller('valuesetCtrl',
     function ($scope, Utilities, appConfigSvc,SaveDataToServer,GetDataFromServer,resourceCreatorSvc,modalService,
             $uibModal) {
 
+
+    var snomedSystem = "http://snomed.info/sct";
+
+
+
+
     $scope.results = {};
     $scope.input = {};
 
@@ -33,11 +39,10 @@ angular.module("sampleApp").controller('valuesetCtrl',
     //place all the v3 terminology servers into the array and set the default server ($scope.termServer)
     $scope.terminologyServers = [];
     config.terminologyServers.forEach(function(svr){
-
         if (svr.version == 3) {
             $scope.terminologyServers.push(svr);
             if (svr.url == termServ) {
-                $scope.termServer = svr;
+                $scope.termServer = svr;    //note that termServ and $scope.termServer are only used in setting the dropwown. $scope.serverRoot is used elsewhere
             }
         }
     });
@@ -49,8 +54,6 @@ angular.module("sampleApp").controller('valuesetCtrl',
     $scope.changeTerminologyServer = function(svr){
         appConfigSvc.setServerType('terminology',svr.url);  //set the new terminology server in $localStorage...
 
-        //$scope.valueSetRoot = config.servers.terminology + "ValueSet/";
-       // $scope.valueSetRoot = svr.url + "ValueSet/";
         $scope.serverRoot = svr.url;
         //delete the results from seaching from the previous server...
         cleanUp();
@@ -67,10 +70,13 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
     if (svr){
         if (svr.version <3) {
-            var config = {bodyText:"Warning: this application needs to work with a Terminology Server supporting version 3 of FHIR"}
-            modalService.showModal({}, config).then(function (result) {
+
+            modalService.showModal({},
+                {bodyText:"Warning: this application needs to work with a Terminology Server supporting version 3 of FHIR"}).
+                    then(function (result) {
                 //this is the 'yes'
                 $scope.displayMode = 'front';
+                delete $scope.serverRoot;       //will disable edit controls....
             })
         }
     } else {
@@ -107,7 +113,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
             templateUrl: 'modalTemplates/inputValueSetName.html',
             size:'lg',
             controller: function($scope,GetDataFromServer,config,modalService,profileCreatorSvc,terminologyServers){
-                $scope.terminologyServers = terminologyServers;
+                //$scope.terminologyServers = terminologyServers;
+                $scope.terminologyServer = config.servers.terminology;      //to display...
+                $scope.input = {};
                 $scope.checkName = function(name){
                     var url = config.servers.terminology + "ValueSet/"+name;
                     GetDataFromServer.adHocFHIRQuery(url).then(
@@ -129,6 +137,11 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
 
                 }
+                
+                $scope.select = function() {
+                    $scope.$close({name:$scope.input.name,description:$scope.input.description})
+                }
+                
             }, resolve : {
                 config: function () {          //the default config
                     return config;
@@ -139,9 +152,10 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 }
             }
         }).result.then(
-            function(name){
-                console.log(name)
-                createNewValueSet(name,vs)
+            function(vo){
+
+                console.log(vo.name,vo.description)
+                createNewValueSet(vo.name,vs,vo.description)
                 $scope.canEdit = true;
             },
             function() {
@@ -153,7 +167,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
     };
 
     //create a new ValueSet. If vs is passed in, then use that as the basis...
-    function createNewValueSet(id,vs) {
+    function createNewValueSet(id,vs,description) {
 
         console.log(vs)
         if (vs) {
@@ -163,38 +177,48 @@ angular.module("sampleApp").controller('valuesetCtrl',
             $scope.vs.name = id;
             $scope.vs.compose.include.forEach(function(inc){
                 if (inc.concept) {
-                    $scope.include = inc;
+                    $scope.includeElement = inc;
                 } else if (inc.filter) {
-                    $scope.includeForFilter = inc;
+                    $scope.includeElementForFilter = inc;
                 }
             });
 
             //establish the separate variables that reference the include.concept and include.filter
-            $scope.include =  $scope.include || {system:'http://snomed.info/sct',concept:[]};
-            $scope.includeForFilter = $scope.includeForFilter || {system:'http://snomed.info/sct',filter:[]};
+            $scope.includeElement =  $scope.includeElement || {system:'http://snomed.info/sct',concept:[]};
+            $scope.includeElementForFilter = $scope.includeElementForFilter || {system:'http://snomed.info/sct',filter:[]};
 
 
         } else {
             //a new ValueSet
             $scope.vs = {resourceType : "ValueSet", status:'draft', id: id,compose:{include:[]}};
             $scope.vs.name = id;        //so the search will work on id
+            $scope.vs.description = description || id;
             $scope.url = $scope.serverRoot+ "ValueSet/" + id;//  $scope.valueSetRoot+id;
+            $scope.vs.compose = {include : []};     //can have multiple includes
+
 
 
             //establish the separate variables that reference the include.concept and include.filter
-            $scope.include = {system:'http://snomed.info/sct',concept:[]};
-            $scope.includeForFilter = {system:'http://snomed.info/sct',filter:[]};
+            $scope.includeElement = {system:'http://snomed.info/sct',concept:[]};
+            $scope.includeElementForFilter = {system:'http://snomed.info/sct',filter:[]};
+
 
         }
 
         //the contact must include clinfhir to allow editing...
-        $scope.vs.contact = $scope.vs.contact || []
+        $scope.vs.contact = $scope.vs.contact || [];
         $scope.vs.contact.push({name : 'clinfhir'})
 
     }
 
     //remove an 'included' concept
-    $scope.removeInclude = function (conceptToRemove) {
+    $scope.removeInclude = function (inx) {
+
+        $scope.includeElement.concept.splice(inx,1);
+        $scope.input.isDirty = true;
+
+        /*
+
         //console.log(conceptToRemove)
         var includeToDelete = -1;
         for (var i=0; i < $scope.vs.compose.include.length; i++) {
@@ -221,13 +245,21 @@ angular.module("sampleApp").controller('valuesetCtrl',
         }
 
         if (includeToDelete > -1) {
-            $scope.include.filter.length = 0;
+            $scope.includeElement.filter.length = 0;
             $scope.vs.compose.include.splice(includeToDelete,1)
         }
+        */
     };
 
-    $scope.removeIsa = function (filtertToRemove) {
+    $scope.removeIsa = function (inx) {
         //console.log(conceptToRemove)
+        $scope.vs.compose.include.splice(inx,1);
+        if ($scope.vs.compose.include.length == 0) {
+            $scope.hasIsa = false;
+        }
+        $scope.input.isDirty = true;
+
+        /*
         var includeToDelete = -1;
 
         for (var i=0; i < $scope.vs.compose.include.length; i++) {
@@ -253,9 +285,10 @@ angular.module("sampleApp").controller('valuesetCtrl',
         }
 
         if (includeToDelete > -1) {
-            $scope.includeForFilter.filter.length = 0;
+            $scope.includeElementForFilter.filter.length = 0;
             $scope.vs.compose.include.splice(includeToDelete,1)
         }
+        */
     };
 
 
@@ -295,6 +328,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
         delete $scope.queryError;
         delete $scope.message;
         delete $scope.queryUrl;
+        delete $scope.includeElement;
+
         $scope.vs = vs;
         $scope.state='edit';
 
@@ -305,26 +340,25 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
                 //this initializes the separate variables pointing at the concept & filter elements...
                 if (inc.concept) {
-                    $scope.include = inc;
+                    //this is a fixed concept. They're all one a single node in this app...
+                    $scope.includeElement = inc;       //this is the single include node that has all the single included concepts
+                    $scope.hasConcept = true;   //for the display...
                 } else if (inc.filter) {
-                    $scope.includeForFilter = inc;
+                   // $scope.hasIsa = true;       //each 'include' with a filter is in a separate include
+                   // $scope.includeElementForFilter = inc;
                 }
 
                 if (inc.filter) {
+                    $scope.hasIsa = true;       //each 'include' with a filter is in a separate include
+                    //this is an 'as-is' element
                     inc.filter.forEach(function (filter) {
-                        console.log(filter)
+                        //console.log(filter)
+                        //get the description of this concept so we can display it. Assume it's a snomed code for now...
                         if (! $scope.input.conceptCache[filter.value]) {
 
-                            //var qry = $scope.valueSetRoot + 'CodeSystem/$lookup?code='+filter.value+"&system="+"http://snomed.info/sct";
-                            //var qry = $scope.serverRoot + 'CodeSystem/$lookup?code='+filter.value+"&system="+"http://snomed.info/sct";
                             var qry = $scope.serverRoot + 'CodeSystem/$lookup?code='+filter.value+"&system="+inc.system;
 
-
-
                             $scope.queryUrl = qry;
-
-
-                            //GetDataFromServer.adHocFHIRQuery(qry).then(
                             resourceCreatorSvc.getLookupForCode("http://snomed.info/sct",filter.value).then(
                                  function(data) {
                                      console.log(data);
@@ -341,7 +375,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
 
                                      },
-                                     function(err) {
+                                 function(err) {
                                          $scope.queryError = err.data;  //most likely an oo
                                         //alert(angular.toJson(err));
                                  }
@@ -359,8 +393,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
         }
 
         //these are the 'pointer' variables,,,
-        $scope.include =  $scope.include || {system:'http://snomed.info/sct',concept:[]};
-        $scope.includeForFilter = $scope.includeForFilter || {system:'http://snomed.info/sct',filter:[]};
+        $scope.includeElement =  $scope.includeElement || {system:'http://snomed.info/sct',concept:[]};
+        //$scope.includeElementForFilter = $scope.includeElementForFilter || {system:'http://snomed.info/sct',filter:[]};
 
 
         if (isAuthoredByClinFhir(vs)){
@@ -384,18 +418,19 @@ angular.module("sampleApp").controller('valuesetCtrl',
     //add a new concept to the ValueSet
     $scope.addConcept = function(){
 
-        //$scope.vs.compose.include.push($scope.include);
-        //$scope.vs.compose.include.push($scope.includeForFilter);
+        //$scope.vs.compose.include.push($scope.includeElement);
+        //$scope.vs.compose.include.push($scope.includeElementForFilter);
 
-
-        if ($scope.include.concept.length == 0) {
-            $scope.vs.compose.include.push($scope.include);
+        //right now, there is only a single incude node where we put all these concepts ('cause they're all from snomed at the moment)
+        //so if this is the first one, then we add the reference to the resource...
+        if ($scope.includeElement.concept.length == 0) {
+            $scope.vs.compose.include.push($scope.includeElement);
         }
 
-        
-        
-        $scope.include.concept.push({code:$scope.results.cc.code,display:$scope.results.cc.display})
+
+        $scope.includeElement.concept.push({code:$scope.results.cc.code,display:$scope.results.cc.display})
         $scope.input.isDirty = true;
+        $scope.hasConcept = true;
     };
 
     //add an 'is-a' concept
@@ -403,12 +438,22 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
       //  var isaElement;
 
-    if ($scope.includeForFilter.filter.length == 0) {
-        $scope.vs.compose.include.push($scope.includeForFilter);
+        $scope.vs.compose.include.push({system:snomedSystem,filter:[{property:'concept',op:'is-a',value:$scope.results.cc.code}]})
+
+/*
+    if ($scope.includeElementForFilter.filter.length == 0) {
+        $scope.vs.compose.include.push($scope.includeElementForFilter);
     }
 
-        $scope.includeForFilter.filter.push({property:'concept',op:'is-a',value:$scope.results.cc.code})
+        $scope.includeElementForFilter.filter.push({property:'concept',op:'is-a',value:$scope.results.cc.code})
+
+        */
+
         $scope.input.isDirty = true;
+        $scope.input.hasIsa = true;
+        delete $scope.results.cc;       //the name entered into the concept search feild in the included 'codeableconcept.html'
+
+
     };
 
 
@@ -504,7 +549,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
         SaveDataToServer.saveValueSetToTerminologyServerById($scope.vs.id,$scope.vs).then(
             function (data) {
                 console.log(data)
-                alert('ValueSet saved.')
+                modalService.showModal({}, {bodyText: 'ValueSet saved'});
+
                 $scope.input.isDirty = false;
             },
             function (err) {
@@ -527,9 +573,13 @@ angular.module("sampleApp").controller('valuesetCtrl',
         return isAuthoredByClinFhir;
     }
 
-    //=========== most of these finctions are copied from resourceCreatorCtrl. Thre are better ways of reuse !....  ==========
+        
+        
+        
+    //=========== most of these functions are copied from resourceCreatorCtrl. Thre are better ways of reuse !....  ==========
     Utilities.getValueSetIdFromRegistry(reference,function(vsDetails) {
             $scope.vsDetails = vsDetails;
+        console.log(vsDetails);
         }
     );
 

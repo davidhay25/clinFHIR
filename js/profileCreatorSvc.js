@@ -53,6 +53,8 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 return ar[ar.length-1]
             }
         }
+
+        var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained'];
         
         return  {
             //generate the list used by the jsTree component to dsplay the tree view of the profile...
@@ -66,7 +68,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 //console.log(profile);
                 var arIsDataType = [];          //this is a list of disabled items...
                 var lst = [];           //this will be a list of elements in the profile to show.
-                var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained'];
+                //var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained'];
                 var dataTypes = ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference','HumanName'];
 
                 var cntExtension = 0;
@@ -268,6 +270,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                         //console.log(include,item)
 
+                        //var show_removed = true; - just while working on diff from
                         if (include) {
 
                             //all the slicing stuff above has mucked up extension name. todo needs refinement...
@@ -284,6 +287,11 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                             var node = {id:id,parent:parent,text:text,state:{opened:false,selected:false},
                                 a_attr:{title: dataType + ' ' + id}, path:path};
+
+
+
+                            //node['a_attr'].style = 'text-decoration:line-through';
+
 
                             if (item.myMeta.isExtension) {
                                 //todo - a class would be better, but this doesn't seem to render in the tree...
@@ -397,7 +405,8 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         if (node.data && node.data.ed) {
                             if (node.data.ed.min == 1) {
                                 //console.log('REQUIRED')
-                                node['li_attr'] = {class : 'elementRequired'};
+                                node['li_attr'] = {class : 'elementRequired elementRemoved'};
+
                             } else {
                                 //have to formally add an 'optional' class else the required colour 'cascades' in the tree...
                                 node['li_attr'] = {class : 'elementOptional'};
@@ -454,10 +463,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                     node.icon='/icons/icon_reference.png';
                                 }
 
-
-                                /* if (elementDef.min !== 0) {
-                                 elementDef.myData.displayClass += 'elementRequired ';
-                                 }*/
 
 
                             }
@@ -540,7 +545,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
 
                 //here is where we iterate through the tree model, pulling out the ElementDefinitions and adding them to the profile...
-
                 model.forEach(function(item,index) {
                     if (item.data && item.data.ed) {
                         var ed = item.data.ed;
@@ -555,6 +559,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         if (ed.myMeta) {
                             if (ed.myMeta.remove) {
                                 //flagged for removal therefore don't incldude in  teh new SD...
+                                //actually, I don't think this will ever be the case as removed elements are not in the model
                                 inProfile = false;
                             } else if (ed.myMeta.isNew || (ed.myMeta.isExtension && ed.myMeta.isDirty)) {
                                 //this is a new extension. we'll create a new extension definition for now - later will allow the user to select an existing one
@@ -594,35 +599,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 var extensionSD = makeExtensionSD(vo);
 
 
-/*
-
-                                //the extensionDefinition that describes this extension...
-                                var extensionSD = {"resourceType": "StructureDefinition","url": extensionUrl,
-                                    "name": ed.path,"kind": "datatype",
-                                    "snapshot" : {element:[]}
-                                };
-
-                                //these are STU-3 - not sure about STU-2
-                                if (fhirVersion == 3) {
-                                    extensionSD.abstract = false;
-                                    extensionSD.baseType = "Extension";
-                                    extensionSD.baseDefinition = "http://hl7.org/fhir/StructureDefinition/Extension";
-                                    extensionSD.derivation = 'constraint';
-                                    extensionSD.id = extensionId;
-                                    extensionSD.status='draft';
-                                    extensionSD.contextType = "datatype";
-                                    extensionSD.context=["Element"];
-                                } else {
-                                    extensionSD.constrainedType = "Extension";
-                                    extensionSD.base = "http://hl7.org/fhir/StructureDefinition/Extension";
-                                }
-
-
-                                extensionSD.snapshot.element.push({path:'Extension',definition:'ext',min:0,max:'1',type:[{code:'Extension'}]});
-                                extensionSD.snapshot.element.push({path:'Extension.url',definition:'Url',min:1,max:'1',type:[{code:'uri'}]});
-                                extensionSD.snapshot.element.push({path:valueName,definition:'value',min:0,max:'1',type:[{code:dt}]});
-
-*/
 
                                 SDsToSave.push(saveStructureDefinition(extensionId,extensionSD).then(
                                     function() {
@@ -635,20 +611,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             } else if (ed.myMeta.isDirty) {
                                 //this is an ED that has been modified
 
-
-
-
-
-
-  /*
-                                SDsToSave.push(saveStructureDefinition(extensionId,extensionSD).then(
-                                    function() {
-                                        log.push('Saved '+extensionSD.url);
-                                    },function(err){
-                                        log.push('Error saving '+extensionSD.url+ ' ' + angular.toJson(err));
-                                    }
-                                ));
-*/
                             }
                         }
 
@@ -669,7 +631,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             sd.snapshot.element.push(idElement)
 
                             var metaElement = {}
-                            metaElement.path = resourceType +'.meta';    //the resource type is always the first emelent
+                            metaElement.path = resourceType +'.meta';    //the resource type is always the first element
                             metaElement.definition = 'The meta element';
                             metaElement.min=0;
                             metaElement.max='1';
@@ -737,6 +699,64 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
 
 
+            },
+            diffFromBase : function(profile,appConfigSvc) {
+                //generate a differential from the base resource
+                var deferred = $q.defer();
+                console.log(profile)
+                var profileHash = {};
+                var differences = [];    //an array of extensions
+                if (profile.baseDefinition && profile.snapshot && profile.snapshot.element) {
+                    //first create a hash for all elemente
+                    profile.snapshot.element.forEach(function(ed){
+                        if (ed.path && ed.path.indexOf('xtension') == -1) {
+                            profileHash[ed.path] = 'x'
+                        } else {
+                            differences.push({type:'extension', ed:ed})
+                        }
+                    });
+
+
+                    //now we need to determine the base resource. This is different in dstu2 & 3
+
+
+
+                    //now load the base resource and see what elements have been removed...
+                    GetDataFromServer.findConformanceResourceByUri(profile.baseDefinition).then(
+                        function(baseSD){
+                            console.log(baseSD);
+                            if (baseSD.snapshot && baseSD.snapshot.element) {
+                                baseSD.snapshot.element.forEach(function(ed){
+                                    var path = ed.path;
+                                    if (path && path.indexOf('xtension') == -1) {
+                                        if (! profileHash[path]) {
+                                            var ar = path.split('.');
+                                            //there are some elements (like id & contained) that we aren't showing
+                                            if (elementsToDisable.indexOf(ar[ar.length-1]) == -1) {
+                                                differences.push({type:'removed',ed:ed})
+                                            }
+                                        }
+                                    }
+                                })
+                            }
+
+                            deferred.resolve(differences);
+
+                        },function(err){
+                            console.log(err);
+                            deferred.reject(err);
+                        }
+                    )
+
+
+                    //console.log(profileHash);
+
+                } else {
+                    deferred.reject({err:"can't resolve the baseDefinition or some other profile issue",profile:profile})
+
+                }
+
+                return deferred.promise;
             }
         }
     }

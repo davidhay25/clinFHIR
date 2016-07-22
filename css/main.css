@@ -135,6 +135,10 @@
     color:red;
 }
 
+.elementRemoved {
+    text-decoration: line-through;
+}
+
 .elementOptional{
     color:black;
 }

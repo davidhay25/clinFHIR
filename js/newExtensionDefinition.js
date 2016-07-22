@@ -1,7 +1,7 @@
 /*has been deprectde - don't call make function - expensive! */
 
 angular.module("sampleApp").controller('extensionDefCtrl',
-        function ($scope,$uibModal,appConfigSvc,GetDataFromServer,Utilities,modalService) {
+        function ($scope,$uibModal,appConfigSvc,GetDataFromServer,Utilities,modalService,$http) {
 
             $scope.childElements = [];      //array of child elements
             $scope.input ={};
@@ -20,6 +20,19 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 console.log(sd)
                 if (validate(sd)){
 
+                    var url = $scope.conformanceSvr.url + 'StructureDefinition/'+sd.id;
+                    $http.put(url,sd).then(
+                        function(data){
+                            console.log(data)
+                            alert("saved")
+                        }, function(err){
+                            console.log(err)
+                            $scope.validateResults = err.data;
+                        }
+                    ).finally(function(){
+                        $scope.showWaiting = false;
+                    });
+
                     /*
                     var url = $scope.conformanceSvr.url+ "StructureDefinition/$validate"
                     $http.post(url,sd).then(
@@ -33,6 +46,11 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
 
 */
+
+
+
+
+                    /*  ---- this is a validate operation
 
                     Utilities.validate(sd,$scope.conformanceSvr.url).then(
                         function(data){
@@ -48,7 +66,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                         $scope.showWaiting = false;
                     })
 
-
+*/
                 } else {
                     $scope.showWaiting = false;
                 }
@@ -210,10 +228,10 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
 
             var validate = function(sd) {
-                return true;
+                //return true;
                 var err = "";
                 //a single element brings at least 3 entries in the element[] array...
-                if (sd.snapshot.element.length < 4) {
+                if (sd.snapshot.element.length < 3) {
                     err += 'There must be at least one element in the extension'
                 }
 
@@ -245,6 +263,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 var comments = $scope.input.name;       //the name of the extension
                 var short = $scope.input.name;
 
+                extensionDefinition.id = name;
                 extensionDefinition.url = $scope.conformanceSvr.url + name;
 
                 //the format for a simple extensionDefinition SD is different to a complex one...
