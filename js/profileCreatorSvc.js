@@ -510,7 +510,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     sd.baseDefinition = baseProfile.url;    //assume that constariing a base resource
                     sd.derivation = 'constraint';
                     sd.id = profileName;
-                    sd.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
+                    //sd.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
 
 
                     var profileId = profileName;       //todo - ensure not yet used (or this is an update)
@@ -527,6 +527,18 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                     //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
                     var typeName = 'baseType';
+                    
+
+                    //if baseProfile.base is populated then this is a profile being edited...
+                    if (baseProfile.baseType && baseProfile.baseType =="http://hl7.org/fhir/StructureDefinition/DomainResource") {
+                        //this is a base resource type being edited
+                        sd.baseType = "http://hl7.org/fhir/StructureDefinition/" + baseProfile.name
+                    } else {
+                        //this is editing a profile
+                        sd.baseType = baseProfile.baseType
+                    }
+
+
                 } else {
                     sd = {resourceType:'StructureDefinition',name : profileName, kind:'resource',
                         status:'draft',experimental : true, snapshot : {element:[]}};
@@ -536,7 +548,22 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                     //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
                     var typeName = 'base';
+
+                    //if baseProfile.base is populated then this is a profile being edited...
+                    if (baseProfile.base && baseProfile.base =="http://hl7.org/fhir/StructureDefinition/DomainResource") {
+                        //this is a base resource type being edited
+                        sd.base = "http://hl7.org/fhir/StructureDefinition/" + baseProfile.name
+                    } else {
+                        //this is editing a profile
+                        sd.base = baseProfile.base
+                    }
+
+
+
                 }
+
+                sd.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
+
 
                 var log = [];
 
@@ -550,11 +577,12 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         var ed = item.data.ed;
 
                         //the first entry is always the root, which in this case will have the base type being extended...
+                       /*
                         if (! sd[typeName]) {
-                            sd[typeName] = ed.path;
+                            sd[typeName] = baseProfile.url;//ed.path;
                             //now add the meta element
                         }
-
+*/
                         var inProfile = true;       //true if this ed is to be included in the profile
                         if (ed.myMeta) {
                             if (ed.myMeta.remove) {
@@ -706,7 +734,11 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 console.log(profile)
                 var profileHash = {};
                 var differences = [];    //an array of extensions
-                if (profile.baseDefinition && profile.snapshot && profile.snapshot.element) {
+
+                //different in stu2 & 3
+                var baseDefinition = profile.baseDefinition || profile.base;
+
+                if (baseDefinition && profile.snapshot && profile.snapshot.element) {
                     //first create a hash for all elemente
                     profile.snapshot.element.forEach(function(ed){
                         if (ed.path && ed.path.indexOf('xtension') == -1) {
@@ -721,8 +753,9 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
 
 
+
                     //now load the base resource and see what elements have been removed...
-                    GetDataFromServer.findConformanceResourceByUri(profile.baseDefinition).then(
+                    GetDataFromServer.findConformanceResourceByUri(baseDefinition).then(
                         function(baseSD){
                             console.log(baseSD);
                             if (baseSD.snapshot && baseSD.snapshot.element) {
@@ -749,8 +782,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     )
 
 
-                    //console.log(profileHash);
-
                 } else {
                     deferred.reject({err:"can't resolve the baseDefinition or some other profile issue",profile:profile})
 
@@ -763,9 +794,11 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 //vo = {display: name: concept: url:}
                 var snomedSystem = "http://snomed.info/sct";
                 //there's a slight risk that someone else has used this id - in which case it will be obliviated!
-                var urlOnTerminologyServer = terminologyServerRoot+ "ValueSet/clinFHIR-" + vo.name;//  $scope.valueSetRoot+id;
+                var id = "clinFHIR-" + vo.name;
+                var urlOnTerminologyServer = terminologyServerRoot+ "ValueSet/"+id;//  $scope.valueSetRoot+id;
 
-                var vs = {resourceType : "ValueSet", status:'draft', name: vo.name,compose:{include:[]}};
+                var vs = {resourceType : "ValueSet",id:id, status:'draft', name: vo.name,compose:{include:[]}};
+
                 vs.name = vo.name;        //so the search will work on id
                 vs.description = 'Root name ValueSet' + vo.name + 'automatically created by clinFHIR';
                 vs.url = vo.url;    //this is the url that references the clinfhir domain..

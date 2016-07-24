@@ -13,7 +13,12 @@
     <script src="js/libs/angular-sanitize.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage'])
+        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
     </script>
 
     <style>
@@ -66,11 +71,6 @@
                     </div>
                 </div>
 
-                <div class="col-md-1">
-                    <div class="navbar-form pull-right" ng-show="showWaiting">
-
-                    </div>
-                </div>
 
                 <div class="col-md-3">
                     <form class="navbar-form navbar-left" ng-show="showWaiting">
@@ -103,11 +103,30 @@
 
 
                 </div>
+
+                <div class="col-md-1 col-sm-1">
+
+                    <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
+                        <li uib-dropdown>
+                            <a href="#" uib-dropdown-toggle>
+                                <span style="font-size:2em; cursor: pointer">
+                                    <i class="glyphicon glyphicon-cog"></i>
+                                </span>
+                            </a>
+
+                            <ul class="dropdown-menu" role="menu">
+                                <li>
+                                    <a href="#" ng-click="showLink()">Show link</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                </div>
             </div>
         </nav>
 
 
-        <button ng-click="createValueSet()">Create</button>
 
         <div class="row" ng-show="state == 'find'">
             <div class="col-md-6 col-sm-6">
@@ -343,7 +362,7 @@
                 <div ng-show="canEdit">
                     <div class="row">
                         <div class="col-md-4 col-sm-4">
-                            <h4>Add a new code</h4>
+                            <h4>Add a new concept</h4>
                         </div>
                         <div class="col-md-4 col-sm-4">
                             <div class="pull-right">Search root</div>
