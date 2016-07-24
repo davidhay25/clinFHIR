@@ -1873,6 +1873,18 @@ console.log(summary);
 
             return lst;
         },
+        getValueSetUriFromBinding : function(element){
+            //find the reference to the valueset..
+            //todo - need to figure out what to do with uri
+            if (element && element.binding && element.binding.valueSetUri) {
+                return element.binding.valueSetUri;
+
+            } else {
+                return null;
+            }
+
+
+        },
         getValueSetReferenceFromBinding : function(element){
             //find the reference to the valueset..
             //todo - need to figure out what to do with uri

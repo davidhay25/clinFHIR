@@ -1225,54 +1225,64 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     scope.vsReference = null;
                     delete scope.valueSet;
                     if (element.binding) {
-
-                        //get the name of the referenced valueset in the profile - eg http://hl7.org/fhir/ValueSet/condition-code
-                        var valueSetReference = RenderProfileSvc.getValueSetReferenceFromBinding(element);
-
-                        //Assuming there is a valueset...
-                        if (valueSetReference) {
-                            scope.showWaiting = true;
-                            results.cc = "";
-
-                            Utilities.getValueSetIdFromRegistry(valueSetReference.reference,
-
-                                function(vsDetails){
+                        
+                        //if there's a uri (rather than a direct reference) then we need to fid teh reference on the local terminology server
+                        var valueSetUri = RenderProfileSvc.getValueSetUriFromBinding(element);
+                        if (valueSetUri) {
+                            Utilities.getValueSetIdFromRegistry(valueSetUri,function(vsDetails) {
+                                //{id: minLength: type}
+                                if (vsDetails && vsDetails.id) {
                                     scope.vsDetails = vsDetails;
+                                    scope.vsReference = "http://fhir2.healthintersections.com.au/open/"+vsDetails.id;
+                                }
+                            })
 
-                                    //if the current registry does have a copy of the valueset, and it's a small one, then render as
-                                    //a series of radio buttons.
-                                    if (scope.vsDetails && scope.vsDetails.type == 'list') {
-                                        //this is a list type - ie a small number, so retrieve the entire list (expanded
-                                        //but not filtered) and set the appropriate scope. This will be rendered as a set of
-                                        //radio buttons...
-                                        scope.showWaiting = true;
-                                        // delete scope.valueSet;
-                                        //scope.showWaiting = true;
-                                        GetDataFromServer.getExpandedValueSet(scope.vsDetails.id).then(   //get the expanded vs
-                                            function(data){
-                                                //get rid of the '(qualifier value)' that is in some codes...
-                                                angular.forEach(data.expansion.contains,function(item){
-                                                    if (item.display) {
-                                                        item.display = item.display.replace('(qualifier value)',"");
-                                                    }
+                        } else {
+                            //get the name of the referenced valueset in the profile - eg http://hl7.org/fhir/ValueSet/condition-code
+                            var valueSetReference = RenderProfileSvc.getValueSetReferenceFromBinding(element);
 
-                                                });
-                                                scope.valueSet = data;
-                                            }).finally(function() {
-                                                scope.showWaiting = false;
-                                            }
-                                        )
-                                    } else {
-                                        scope.showWaiting = false;
-                                    }
+                            //Assuming there is a valueset...
+                            if (valueSetReference) {
+                                scope.showWaiting = true;
+                                results.cc = "";
 
+                                Utilities.getValueSetIdFromRegistry(valueSetReference.reference,
 
-                                });
+                                    function(vsDetails){
+                                        scope.vsDetails = vsDetails;
 
-                            scope.vsReference = valueSetReference.reference;
+                                        //if the current registry does have a copy of the valueset, and it's a small one, then render as
+                                        //a series of radio buttons.
+                                        if (scope.vsDetails && scope.vsDetails.type == 'list') {
+                                            //this is a list type - ie a small number, so retrieve the entire list (expanded
+                                            //but not filtered) and set the appropriate scope. This will be rendered as a set of
+                                            //radio buttons...
+                                            scope.showWaiting = true;
+                                            // delete scope.valueSet;
+                                            //scope.showWaiting = true;
+                                            GetDataFromServer.getExpandedValueSet(scope.vsDetails.id).then(   //get the expanded vs
+                                                function(data){
+                                                    //get rid of the '(qualifier value)' that is in some codes...
+                                                    angular.forEach(data.expansion.contains,function(item){
+                                                        if (item.display) {
+                                                            item.display = item.display.replace('(qualifier value)',"");
+                                                        }
 
+                                                    });
+                                                    scope.valueSet = data;
+                                                }).finally(function() {
+                                                    scope.showWaiting = false;
+                                                }
+                                            )
+                                        } else {
+                                            scope.showWaiting = false;
+                                        }
 
+                                    });
 
+                                scope.vsReference = valueSetReference.reference;
+
+                            }
 
                         }
 
@@ -1283,40 +1293,69 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     delete scope.vsReference;
                     if (element.binding) {
                         //retrieve the reference to the ValueSet
-                        var valueSetReference = RenderProfileSvc.getValueSetReferenceFromBinding(element);
+
+
+                        //if there's a uri (rather than a direct reference) then we need to fid teh reference on the local terminology server
+                        var valueSetUri = RenderProfileSvc.getValueSetUriFromBinding(element);
+                        if (valueSetUri) {
+
+                            Utilities.getValueSetIdFromRegistry(valueSetUri,function(vsDetails){
+                                //{id: minLength: type}
+                                if (vsDetails && vsDetails.id) {
+                                    //scope.vsReference = valueSetReference.reference;
 
 
 
-                        if (valueSetReference) {
-
-                            //get the id of the valueset on the registry server
-                            Utilities.getValueSetIdFromRegistry(valueSetReference.reference,
-
-                                function(vsDetails){
-                                    scope.vsDetails = vsDetails;
-
-                                    if (vsDetails) {
-                                        scope.showWaiting = true;
-                                        //get the expansion...
-                                        GetDataFromServer.getExpandedValueSet(vsDetails.id).then(
-                                            function(vs){
-                                                //and if the expansion worked, we're in business...
-                                                if (vs.expansion) {
-                                                    scope.vsExpansion = vs.expansion.contains;
-                                                }
-
-
+                                    GetDataFromServer.getExpandedValueSet(vsDetails.id).then(
+                                        function (vs) {
+                                            //and if the expansion worked, we're in business...
+                                            if (vs.expansion) {
+                                                scope.vsExpansion = vs.expansion.contains;
                                             }
-                                        ).finally(function(){
-                                            scope.showWaiting = false;
-                                        });
-                                    }
 
-                                });
+                                        }
+                                    ).finally(function () {
+                                        scope.showWaiting = false;
+                                    });
 
 
-                            scope.vsReference = valueSetReference.reference;
+                                }
 
+                            })
+
+                        } else {
+                            var valueSetReference = RenderProfileSvc.getValueSetReferenceFromBinding(element);
+
+                            if (valueSetReference) {
+
+                                //get the id of the valueset on the registry server
+                                Utilities.getValueSetIdFromRegistry(valueSetReference.reference,
+
+                                    function (vsDetails) {
+                                        scope.vsDetails = vsDetails;
+
+                                        if (vsDetails) {
+                                            scope.showWaiting = true;
+                                            //get the expansion...
+                                            GetDataFromServer.getExpandedValueSet(vsDetails.id).then(
+                                                function (vs) {
+                                                    //and if the expansion worked, we're in business...
+                                                    if (vs.expansion) {
+                                                        scope.vsExpansion = vs.expansion.contains;
+                                                    }
+
+                                                }
+                                            ).finally(function () {
+                                                scope.showWaiting = false;
+                                            });
+                                        }
+
+                                    });
+
+
+                                scope.vsReference = valueSetReference.reference;
+
+                            }
                         }
                     }
                     break;
