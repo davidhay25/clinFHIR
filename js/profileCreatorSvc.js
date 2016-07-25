@@ -54,7 +54,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
             }
         }
 
-        var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained'];
+        var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained','DomainResource'];
         
         return  {
             //generate the list used by the jsTree component to dsplay the tree view of the profile...
@@ -731,7 +731,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
             diffFromBase : function(profile,appConfigSvc) {
                 //generate a differential from the base resource
                 var deferred = $q.defer();
-                console.log(profile)
+                //console.log(profile)
                 var profileHash = {};
                 var differences = [];    //an array of extensions
 
@@ -744,22 +744,19 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         if (ed.path && ed.path.indexOf('xtension') == -1) {
                             profileHash[ed.path] = 'x'
                         } else {
-                            differences.push({type:'extension', ed:ed})
+                            //this is an extension. if there's a profile associated with it, then add it to the list of differences
+                            if (ed.type && ed.type[0].profile && ed.type[0].profile.length > 0) {
+                                differences.push({type:'extension', ed:ed})
+                            }
                         }
                     });
-
-
-                    //now we need to determine the base resource. This is different in dstu2 & 3
-
-
-
 
                     //now load the base resource and see what elements have been removed...
                     GetDataFromServer.findConformanceResourceByUri(baseDefinition).then(
                         function(baseSD){
-                            console.log(baseSD);
+                            //console.log(baseSD);
                             if (baseSD.snapshot && baseSD.snapshot.element) {
-                                baseSD.snapshot.element.forEach(function(ed){
+                                baseSD.snapshot.element.forEach(function(ed,inx){
                                     var path = ed.path;
                                     if (path && path.indexOf('xtension') == -1) {
                                         if (! profileHash[path]) {
