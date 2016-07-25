@@ -527,7 +527,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                     //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
                     var typeName = 'baseType';
-                    
+
 
                     //if baseProfile.base is populated then this is a profile being edited...
                     if (baseProfile.baseType && baseProfile.baseType =="http://hl7.org/fhir/StructureDefinition/DomainResource") {
@@ -553,12 +553,12 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     if (baseProfile.base && baseProfile.base =="http://hl7.org/fhir/StructureDefinition/DomainResource") {
                         //this is a base resource type being edited
                         sd.base = "http://hl7.org/fhir/StructureDefinition/" + baseProfile.name
+                        sd.constrainedType = baseProfile.name;
                     } else {
                         //this is editing a profile
                         sd.base = baseProfile.base
+                        sd.constrainedType = baseProfile.constrainedType;
                     }
-
-
 
                 }
 

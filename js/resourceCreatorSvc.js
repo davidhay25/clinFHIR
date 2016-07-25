@@ -1225,15 +1225,16 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     scope.vsReference = null;
                     delete scope.valueSet;
                     if (element.binding) {
-                        
-                        //if there's a uri (rather than a direct reference) then we need to fid teh reference on the local terminology server
+
+                        //if there's a uri (rather than a direct reference) then we need to find the reference on the local terminology server
                         var valueSetUri = RenderProfileSvc.getValueSetUriFromBinding(element);
                         if (valueSetUri) {
+                            //this is a URL in the mapping
                             Utilities.getValueSetIdFromRegistry(valueSetUri,function(vsDetails) {
                                 //{id: minLength: type}
                                 if (vsDetails && vsDetails.id) {
                                     scope.vsDetails = vsDetails;
-                                    scope.vsReference = "http://fhir2.healthintersections.com.au/open/"+vsDetails.id;
+                                    scope.vsReference = vsDetails.resource.url; //used for the 'display valueset' function
                                 }
                             })
 
@@ -1243,6 +1244,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                             //Assuming there is a valueset...
                             if (valueSetReference) {
+                                //this is a direct reference
                                 scope.showWaiting = true;
                                 results.cc = "";
 
@@ -1305,7 +1307,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                     //scope.vsReference = valueSetReference.reference;
 
 
-
+                                    //if it's a code - always expand...
                                     GetDataFromServer.getExpandedValueSet(vsDetails.id).then(
                                         function (vs) {
                                             //and if the expansion worked, we're in business...

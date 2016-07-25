@@ -12,8 +12,9 @@
 
 angular.module("sampleApp")
     .controller('resourceCreatorCtrl',
-        function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,$translate,$localStorage,
-              RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,$location,resourceSvc,$window,$timeout) {
+        function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,$translate,
+                  $localStorage,RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,
+                  $location,resourceSvc,$window,$timeout) {
 
 
 
