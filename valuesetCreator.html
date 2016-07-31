@@ -73,6 +73,7 @@
 
 
                 <div class="col-md-3">
+                    {{state}}
                     <form class="navbar-form navbar-left" ng-show="showWaiting">
                      <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
                     </form>
@@ -86,17 +87,32 @@
 
                         <!-- Show 'back to list' when where's a list, anda valueset has been selected from that list-->
                         <form class="navbar-form navbar-right" ng-show="(vs && searchResultBundle.entry.length >0) || state=='new' ">
-                            <button class="btn btn-success" ng-click="backToList()">Find</button>
+                            <button popover-placement="bottom" popover-trigger='mouseenter'
+                                    uib-popover="Find a ValueSet"
+                                    class="btn btn-success" ng-click="backToList()">Find</button>
                         </form>
 
-                        <!-- Show 'copy' when there is a vs that cannot be edited-->
+                        <!-- Show 'clone' when there is a vs that cannot be edited (was copy(-->
                         <form class="navbar-form navbar-right" ng-show="(vs && ! canEdit) ">
-                            <button class="btn btn-warning" ng-click="copyVs()">Copy</button>
+                            <button popover-placement="bottom" popover-trigger='mouseenter'
+                                    uib-popover="Create a clone of this ValueSet that you can edit"
+                                    class="btn btn-warning" ng-click="cloneVs()">Clone</button>
                         </form>
+
+                        <!-- Show 'copy (to different server)' when there is a selected vs-->
+                        <!--
+                        <form class="navbar-form navbar-right" ng-show="(vs && (state=='new' || state=='edit')) ">
+                            <button popover-placement="bottom" popover-trigger='mouseenter'
+                                    uib-popover="Copy this ValueSet to another server"
+                                    class="btn btn-warning" ng-click="copyVs()">Copy</button>
+                        </form>
+                        -->
 
                         <!-- Show 'New' button when there is no vs selected-->
                         <form class="navbar-form navbar-right" ng-hide="vs || state=='new'">
-                            <button class="btn btn-primary" ng-click="newVs()">New</button>
+                            <button popover-placement="bottom" popover-trigger='mouseenter'
+                                    uib-popover="Create a new ValueSet"
+                                    class="btn btn-primary" ng-click="newVs()">New</button>
                         </form>
                     </div>
 
@@ -115,6 +131,14 @@
                             </a>
 
                             <ul class="dropdown-menu" role="menu">
+                                <li ng-show="(vs && (state=='new' || state=='edit')) ">
+                                    <a href="#" ng-click="copyVs()">Copy ValueSet to another Server</a>
+                                </li>
+                                <li class="divider"></li>
+                                <li >
+                                    <a href="#" ng-click="copyVs()">Copy ValueSet to another Server</a>
+                                </li>
+
                                 <li>
                                     <a href="#" ng-click="showLink()">Show link</a>
                                 </li>
@@ -155,8 +179,9 @@
                 </uib-alert>
 
                 <uib-alert type="warning" ng-hide="searchResultBundle.entry">
-                    Right now, the tool will find and expand any valueset, but when creating a valueset will only
-                    work with SNOMED, and requires an STU-3 compatible Terminology server that stores the ValueSets.
+                    <p>Right now, the tool will find and expand any valueset, but when creating a valueset will only
+                    work with SNOMED, and requires an STU-3 compatible Terminology server that stores the ValueSets.</p>
+                    <p>However, once a ValueSet has been created, it can be copied to any FHIR server.</p>
 
                 </uib-alert>
 

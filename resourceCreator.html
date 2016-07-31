@@ -192,7 +192,7 @@
     <script src="js/components/dataTypes.js"></script>
 
     <script src="js/libs/vis.min.js"></script>
-
+    <script src="js/listBuilder.js"></script>
     <title>FHIR Resource Creator</title>
 
     <style type="text/css">
@@ -448,10 +448,13 @@
                 </div>
 
 
-
-
             </nav>
 
+            <button class="btn btn-link" ng-click="displayMode = 'list'">ListBuilder</button>
+
+            <div ng-show="displayMode == 'list'" ng-controller="listbuilderCtrl">
+                <ng-include src="'/includes/listBuilder.html'"></ng-include>
+            </div>
 
             <div ng-show="displayMode == 'front'" ng-controller="frontCtrl">
                 <ng-include src="'/includes/frontPage.html'"></ng-include>
@@ -481,16 +484,10 @@
 
 
 
-<!--
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA
-AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO
-9TXL0Y4OHwAAAABJRU5ErkJggg==" alt="Red dot" />
--->
+
 
     </div>
-<!--
-<img id="imgWaipu"></div>
--->
+
 
 
 </body>

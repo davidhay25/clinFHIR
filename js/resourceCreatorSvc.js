@@ -3050,7 +3050,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 var resourceReferences = resourceSvc.getReference(resource);    //get the outward links for this resource
                 resourceReferences.outwardLinks.forEach(function(link){
                     var nodeId = objNodes[link.reference];
-                    console.log(link)
+                   // console.log(link)
 
                     //nodeId will only be set for resources in the 'allReference' object - ie ones we've loaded...
                     if (nodeId) {

@@ -262,8 +262,9 @@ angular.module("sampleApp")
             function (allResources) {
                 //the order is significant - allResources must be set first...
                 appConfigSvc.setAllResources(allResources);
+                $rootScope.$broadcast('resourcesLoadedForPatient')
 
-                console.log(allResources);
+                //console.log(allResources);
                 $scope.allResources = allResources;
                 //all conditions is used by the timeline display to
                 //var allConditions = allResources['Condition'];
@@ -337,7 +338,7 @@ angular.module("sampleApp")
                 //create and draw the timeline. The service will display the number of encounters for each condition
                 var timelineData =resourceCreatorSvc.createTimeLine($scope.allResourcesAsList,allResources['Condition']);
 
-                console.log(timelineData)
+                //console.log(timelineData)
                 $('#timeline').empty();     //otherwise the new timeline is added below the first...
                 var tlContainer = document.getElementById('timeline');
 
@@ -2059,6 +2060,7 @@ angular.module("sampleApp")
         //when the user selects a different terminology server...
         $scope.changeTerminologyServer = function(server) {
             $scope.config.servers.terminology = server.url;
+            appConfigSvc.setServerType('terminology',server.url);   //change the terminology server in the local storage...
         };
 
         //displays the 'select profile' dialog...

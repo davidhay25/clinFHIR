@@ -4,6 +4,12 @@
 
 
 angular.module("sampleApp")
+    .filter('oneLineResource', ['ResourceUtilsSvc', function(ResourceUtilsSvc) {
+        return function(resource) {
+            return ResourceUtilsSvc.getOneLineSummaryOfResource(resource);
+        }
+    }])
+
     .filter('getLogicalID',function(){
     return function(id) {
         //console.log(id);
@@ -17,7 +23,8 @@ angular.module("sampleApp")
 
     }
 
-}).filter('getAge',function(){
+})
+    .filter('getAge',function(){
     return function(dob,inBrackets){
         if (dob) {
             var diff = moment().diff(moment(dob),'days');

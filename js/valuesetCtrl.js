@@ -146,6 +146,10 @@ angular.module("sampleApp").controller('valuesetCtrl',
             cleanUp();
             $scope.state='find';
 
+            //check that the initial root concept actually exists on the defined terminal server
+            $scope.setRootConcept($scope.rootConcepts[0]);  //set to the first root concept in the array - chacking that it exists
+
+
         };
 
         //if there is a terminal server specified in the call, then check it exists then set the defaul ts to that one.
@@ -194,7 +198,6 @@ angular.module("sampleApp").controller('valuesetCtrl',
             var svr = appConfigSvc.getServerByUrl(config.servers.terminology);
             if (svr){
                 if (svr.version <3) {
-
                     modalService.showModal({},
                         {bodyText:"Warning: this application needs to work with a Terminology Server supporting version 3 of FHIR"}).
                     then(function (result) {
@@ -202,9 +205,10 @@ angular.module("sampleApp").controller('valuesetCtrl',
                         $scope.displayMode = 'front';
                         delete $scope.serverRoot;       //will disable edit controls....
                     })
+                } else {
+                    //check that the initial root concept actually exists on the defined terminal server
+                    $scope.setRootConcept($scope.rootConcepts[0]);  //set to the first root concept in the array - chacking that it exists
                 }
-                //check that the initial root concept actually exists on the defined terminal server
-                $scope.setRootConcept($scope.rootConcepts[0]);  //set to the first root concept in the array - chacking that it exists
 
             } else {
                 alert("There was a unrecognized server url in the config: "+ config.servers.terminology)
@@ -214,9 +218,6 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
         //check that the initial root concept actually exists on the defined terminal server
       //  $scope.setRootConcept($scope.rootConcepts[0]);  //set to the first root concept in the array - chacking that it exists
-
-
-
 
 
         $scope.state = 'find';      // edit / new / find
@@ -235,12 +236,6 @@ angular.module("sampleApp").controller('valuesetCtrl',
             delete $scope.expansion;
         }
 
-
-
-
-
-
-
         $scope.arScopingValueSet = [];
         $scope.arScopingValueSet.push()
         $scope.showScopingValueSet = true;  //allows the scping valueset to be selected in the search...
@@ -248,12 +243,44 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
         $scope.vsReference = true;      //to show the included file
 
-        //make a copy of the current vs
-        $scope.copyVs = function(){
-            $scope.newVs($scope.vs);
+        //make a copy of the current vs for editing
+        $scope.cloneVs = function(){
+            $scope.newVs($scope.vs);        //make a duplicate of the existing...
             $scope.input.isDirty = true;
         };
 
+        $scope.copyVs = function(){
+
+            $uibModal.open({
+                backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
+                keyboard: false,       //same as above.
+                templateUrl: 'modalTemplates/vsCopier.html',
+                controller: function($scope,vs,appConfigSvc){
+                    $scope.input = {};
+                    $scope.vs = vs;
+                    $scope.config = appConfigSvc.config()
+                    
+                }, resolve : {
+                    vs: function () {          //the default config
+                        return $scope.vs;
+
+                    }
+                }
+            }).result.then(
+                function(vo){
+
+
+                },
+                function() {
+                    //if the user cancels...
+                }
+            )
+
+
+        };
+
+
+        //create a new VS. If a vs is passed in, then it will be a copy of that one...
         $scope.newVs = function(vs) {
             //delete $scope.vs;
             //delete $scope.searchResultBundle;
@@ -622,9 +649,10 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
             $scope.showWaiting = true;
 
+            //saves the vs at a particular location (PUT)
             SaveDataToServer.saveValueSetToTerminologyServerById($scope.vs.id,$scope.vs).then(
                 function (data) {
-                    console.log(data)
+                   // console.log(data)
                     modalService.showModal({}, {bodyText: 'ValueSet saved'});
 
                     $scope.input.isDirty = false;
