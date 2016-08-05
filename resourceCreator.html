@@ -57,6 +57,7 @@
 */
         angular.module("sampleApp",['ui.checkbox','ngAnimate','ngCookies','ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage','pascalprecht.translate'])
 
+        angular.module("sampleApp").constant("moment", moment);
 
         angular.module("sampleApp").config(function($locationProvider,$translateProvider,$localStorageProvider){
             //console.log($localStorageProvider)
@@ -193,6 +194,7 @@
 
     <script src="js/libs/vis.min.js"></script>
     <script src="js/listBuilder.js"></script>
+    <script src="js/consultBuilder.js"></script>
     <title>FHIR Resource Creator</title>
 
     <style type="text/css">
@@ -450,11 +452,18 @@
 
             </nav>
 
+            <!-- The list builder -->
             <button class="btn btn-link" ng-click="displayMode = 'list'">ListBuilder</button>
-
             <div ng-show="displayMode == 'list'" ng-controller="listbuilderCtrl">
                 <ng-include src="'/includes/listBuilder.html'"></ng-include>
             </div>
+
+            <!-- The consult builder -->
+            <button class="btn btn-link" ng-click="displayMode = 'consult'">ConsultBuilder</button>
+            <div ng-show="displayMode == 'consult'" ng-controller="consultbuilderCtrl">
+                <ng-include src="'/includes/consultBuilder.html'"></ng-include>
+            </div>
+
 
             <div ng-show="displayMode == 'front'" ng-controller="frontCtrl">
                 <ng-include src="'/includes/frontPage.html'"></ng-include>

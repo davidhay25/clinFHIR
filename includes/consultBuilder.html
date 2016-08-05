@@ -1,0 +1,153 @@
+<div>
+
+    <style>
+        .Condition  {
+            background-color: #F4C2C2;
+        }
+        .Observation  {
+            background-color: #FFF8DC;
+        }
+    </style>
+
+    <div class="row">
+        <div class="col-md-9 col-sm-9">
+            <h3>Consult Builder</h3>
+        </div>
+        <div class="col-md-3 col-sm-3">
+            <button class="btn btn-danger pull-right" ng-show="dirty" ng-click="save()">Save</button>
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3">
+
+            <div class="btn-group" style="margin-bottom: 10px">
+                <label class="btn btn-warning" ng-model="input.soapModel" uib-btn-radio="'s'">Subjective</label>
+                <label class="btn btn-warning" ng-model="input.soapModel" uib-btn-radio="'o'">Objective</label>
+                <label class="btn btn-warning" ng-model="input.soapModel" uib-btn-radio="'a'">Assessment</label>
+                <label class="btn btn-warning" ng-model="input.soapModel" uib-btn-radio="'p'">Plan</label>
+            </div>
+
+
+
+            <div class="list-group">
+                <div class="list-group-item" ng-repeat="resource in resources" ng-click="newResource(resource)"
+                    style="cursor: pointer">
+                    {{resource.type}}
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-9 col-sm-9">
+            <div ng-show="addNewResource">
+
+                <div class="row">
+                    <div class="col-md-3 col-sm-3">
+                        <h4>Add new {{addNewResource.type}}</h4>
+                    </div>
+                    <div class="col-md-3 col-sm-3">
+                        <div class="pull-right">
+                            <button class="btn btn-warning">{{soapModelDetail[input.soapModel].display}}
+
+                            </button></div>
+                    </div>
+                </div>
+
+
+<!--
+                <div class="row">
+                    <div class="col-md-3 col-sm-3">
+                        Text
+                    </div>
+
+                    <div class="col-md-8 col-sm-8">
+                        Source
+                    </div>
+
+
+                    </div>
+                </div>
+                -->
+
+
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <textarea class="form-control" ng-model="input.text" placeholder="Text of resource"></textarea>
+                    </div>
+
+                    <div class="col-md-5 col-sm-5">
+
+                    </div>
+
+                    <div class="col-md-1 col-sm-1">
+
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3 col-sm-3">
+                        <button class="btn btn-primary" ng-click="addResource(resource)">Add</button>
+                    </div>
+                </div>
+
+
+
+
+                <hr />
+            </div>
+
+
+            <uib-tabset>
+
+                <uib-tab heading="Text">
+                    <div class="row">
+                        <div class="col-md-8 col-sm-8" >
+
+
+                            <div ng-repeat="key in ['s','o','a','p']">
+                                <div class="row">
+                                    <div class="col-md-3 col-sm-3">
+                                        <strong>{{soapModelDetail[key].display}}</strong>
+                                    </div>
+                                    <div class="col-md-9 col-sm-9" style="border-left: thin">
+                                        <span ng-repeat="resource in consult[key].content">
+                                            <button class = "btn btn-default {{resource.type}}"
+                                                    ng-click="showResource(resource)">{{resource.text}}</button>
+                                        </span>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+
+
+
+                        </div>
+                        <div class="col-md-4 col-sm-4">
+                            {{displayResource}}
+                        </div>
+
+                    </div>
+
+
+
+                </uib-tab>
+                <uib-tab heading="Contents">
+                    --> allow re-order
+                </uib-tab>
+                <uib-tab heading="Graph">
+                    --> add graph of resources
+                </uib-tab>
+
+            </uib-tabset>
+
+        </div>
+    </div>
+
+</div>

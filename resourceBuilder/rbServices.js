@@ -16,25 +16,46 @@ angular.module("sampleApp").
     }).
     service('SaveDataToServer', function($http,$q,appConfigSvc) {
     return {
+        //save a resource to the data server
         saveResource : function(resource) {
             var deferred = $q.defer();
             //alert('saving:\n'+angular.toJson(resource));
             //var config = appConfigSvc.config();
             var qry = appConfigSvc.getCurrentDataServerBase() + resource.resourceType;
-            console.log(qry)
-            $http.post(qry, resource).then(
-                function(data) {
-                    deferred.resolve(data);
-                },
-                function(err) {
-                    //alert("errr calling validate operation:\n"+angular.toJson(err))
-                    deferred.reject(err.data);
-                }
-            );
+            if (resource.id) {
+                //this is an update
+                qry += "/"+resource.id;
+                console.log(qry)
+                $http.put(qry, resource).then(
+                    function(data) {
+                        deferred.resolve(data);
+                    },
+                    function(err) {
+                        //alert("errr calling validate operation:\n"+angular.toJson(err))
+                        deferred.reject(err.data);
+                    }
+                );
+            } else {
+                //this is new
+                console.log(qry)
+                $http.post(qry, resource).then(
+                    function(data) {
+                        deferred.resolve(data);
+                    },
+                    function(err) {
+                        //alert("errr calling validate operation:\n"+angular.toJson(err))
+                        deferred.reject(err.data);
+                    }
+                );
+            }
+
+
+
 
 
             return deferred.promise;
         },
+
         saveValueSetToTerminologyServerById : function(id,valueSet) {
             //save a ValueSet at a given location
             var config = appConfigSvc.config();
@@ -64,6 +85,13 @@ angular.module("sampleApp").
 
             });
             return deferred.promise;
+        },
+        getVersionHistory : function(resource) {
+            //retrieve the version history for a resource in the data server
+            var qry = appConfigSvc.getCurrentDataServerBase() + resource.resourceType + "/"+resource.id + '/_history';
+            return $http.get(qry);
+
+
         },
         getProfile : function(profileName) {
             alert('getProfile stub not implemented yet');
@@ -1911,11 +1939,26 @@ console.log(summary);
         return txt;
     }
 
+        //updated when doing the list builder
     function getCCSummary(data) {
         if (!data) {
             return "";
         }
         var txt = "";
+
+        if (data.text) {
+            return data.text;
+        } else {
+            if (data.coding && data.coding.length > 0) {
+                if (data.text) {txt += data.text + " ";}
+                var c = data.coding[0];
+                var d = c.display || '';
+                txt += d + " ["+ c.code + "]";
+
+            }
+            return txt;
+        }
+        /*
         if (data.coding && data.coding.length > 0) {
             if (data.text) {txt += data.text + " ";}
             var c = data.coding[0];
@@ -1926,6 +1969,7 @@ console.log(summary);
             txt += data.text;
         }
         return txt;
+        */
     }
 
     function getHumanNameSummary(data){
@@ -1957,6 +2001,14 @@ console.log(summary);
             fhirVersion = fhirVersion || 3;
             if (resource) {
                 switch (resource.resourceType) {
+                    case "List" :
+                        if (resource.code) {
+                            return getCCSummary(resource.code);
+
+                        } else {
+                            return "List Id: "+resource.id;
+                        }
+                        break;
                     case "DiagnosticOrder":
                         if (resource.reason) {
                             return getCCSummary(resource.reason[0]);
