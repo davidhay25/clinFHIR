@@ -34,6 +34,7 @@
 
     <script src="js/libs/angular-translate-loader-static-files.min.js"></script>
     <script src="js/libs/angular-animate.min.js"></script>
+    <script src="js/libs/angular-drag-and-drop-lists.min.js"></script>
 
     <style>
         .applyPadding {
@@ -55,7 +56,7 @@
 
         }]);
 */
-        angular.module("sampleApp",['ui.checkbox','ngAnimate','ngCookies','ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage','pascalprecht.translate'])
+        angular.module("sampleApp",['ui.checkbox','ngAnimate','ngCookies','ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage','pascalprecht.translate','dndLists'])
 
         angular.module("sampleApp").constant("moment", moment);
 
@@ -158,6 +159,7 @@
 */
 
     </script>
+
 
 
 

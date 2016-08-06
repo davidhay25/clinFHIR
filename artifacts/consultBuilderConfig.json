@@ -1,0 +1,46 @@
+{"config": {
+  "resources": [
+    {
+      "type": "Condition",
+      "required": [
+        {"path": "Condition.code"},
+        {"path": "Condition.verificationStatus","default": "confirmed"
+        }
+      ],
+      "input": [
+        {"display":"Code","path": "Condition.code","dataType":"CodeableConcept","bindingUrl":"http://hl7.org/fhir/valueset-condition-code"},
+        {"display":"Note","path": "Condition.note","dataType":"string"}
+      ]
+    },
+    {
+      "type": "Observation",
+      "required": [
+        {"path": "Observation.code"},
+        {"path": "Observation.status","default": "final"
+        }
+      ],
+      "input": [
+        {"display":"Code","path": "Observation.code","dataType":"CodeableConcept","bindingUrl":"http://hl7.org/fhir/valueset-observation-codes"}
+      ]
+    },
+    {"type": "AllergyIntolerance"},
+    {"type": "Procedure"},
+    {"type": "ClinicalImpression"},
+    {"type": "CarePlan"},
+    {"type": "MedicationPrescription"},
+    {"type": "MedicationAdministration"},
+    {"type": "FamilyMemberHistory"},
+    {"type": "ReferralRequest"},
+    {"type": "ProcedureRequest"},
+    {"type": "NutritionRequest"},
+    {"type": "Immunization"},
+    {"type": "DiagnosticRequest"},
+    {"type": "Goal"}
+  ],
+  "noteType" :[
+    {"system":"http://clinfhir.com/fhir/NamingSystem/notetype","code":"prognote","display":"Progress Note"},
+    {"system":"http://clinfhir.com/fhir/NamingSystem/notetype","code":"fup","display":"Follow Up"}
+  ]
+}
+
+}
