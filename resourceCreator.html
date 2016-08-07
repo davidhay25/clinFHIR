@@ -455,16 +455,15 @@
             </nav>
 
             <!-- The list builder -->
+
+            <!--
             <button class="btn btn-link" ng-click="displayMode = 'list'">ListBuilder</button>
             <div ng-show="displayMode == 'list'" ng-controller="listbuilderCtrl">
                 <ng-include src="'/includes/listBuilder.html'"></ng-include>
             </div>
 
-            <!-- The consult builder -->
-            <button class="btn btn-link" ng-click="displayMode = 'consult'">ConsultBuilder</button>
-            <div ng-show="displayMode == 'consult'" ng-controller="consultbuilderCtrl">
-                <ng-include src="'/includes/consultBuilder.html'"></ng-include>
-            </div>
+            -->
+
 
 
             <div ng-show="displayMode == 'front'" ng-controller="frontCtrl">
@@ -486,6 +485,10 @@
                 <ng-include src="'/includes/resourceViewer.html'"></ng-include>
             </div>
 
+            <button class="btn btn-link" ng-click="displayMode = 'consult'">ConsultBuilder</button>
+            <div ng-show="displayMode == 'consult'" ng-controller="consultbuilderCtrl">
+                <ng-include src="'/includes/consultBuilder.html'"></ng-include>
+            </div>
 
 
             <!-- A directive for browsing value sets-->
