@@ -1,6 +1,17 @@
 {"config": {
   "resources": [
     {
+      "type": "Observation",
+      "required": [
+        {"path": "Observation.code"},
+        {"path": "Observation.status","default": "final"
+        }
+      ],
+      "input": [
+        {"display":"Code","path": "Observation.code","dataType":"CodeableConcept","bindingUrl":"http://hl7.org/fhir/valueset-observation-codes"}
+      ]
+    },
+    {
       "type": "Condition",
       "required": [
         {"path": "Condition.code"},
@@ -12,20 +23,10 @@
         {"display":"Note","path": "Condition.note","dataType":"string"}
       ]
     },
-    {
-      "type": "Observation",
-      "required": [
-        {"path": "Observation.code"},
-        {"path": "Observation.status","default": "final"
-        }
-      ],
-      "input": [
-        {"display":"Code","path": "Observation.code","dataType":"CodeableConcept","bindingUrl":"http://hl7.org/fhir/valueset-observation-codes"}
-      ]
-    },
+    {"type": "ClinicalImpression"},
     {"type": "AllergyIntolerance"},
     {"type": "Procedure"},
-    {"type": "ClinicalImpression"},
+
     {"type": "CarePlan"},
     {"type": "MedicationPrescription"},
     {"type": "MedicationAdministration"},
@@ -35,11 +36,20 @@
     {"type": "NutritionRequest"},
     {"type": "Immunization"},
     {"type": "DiagnosticRequest"},
-    {"type": "Goal"}
+    {"type": "Goal"},
+    {"type": "DiagnosticReport"}
   ],
   "noteType" :[
     {"system":"http://clinfhir.com/fhir/NamingSystem/notetype","code":"prognote","display":"Progress Note"},
     {"system":"http://clinfhir.com/fhir/NamingSystem/notetype","code":"fup","display":"Follow Up"}
+  ],
+  "templates" : [
+    {"display": "SOAP note","sections" : [
+      {"code":"s","display":"Subjective"},
+      {"code":"o","display":"Objective"},
+      {"code":"a","display":"Assessment"},
+      {"code":"p","display":"Plan"}
+    ]}
   ]
 }
 

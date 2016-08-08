@@ -1,8 +1,6 @@
 angular.module("sampleApp").controller('consultbuilderCtrl',
     function ($scope,$http,GetDataFromServer,modalService,appConfigSvc) {
 
-        
-        var testUrl = "http://fhirtest.uhn.ca/baseDstu2/Basic/cf"
 
         var config = appConfigSvc.config();
         var serverBase = config.servers.data;       //the url of the data server
@@ -13,29 +11,14 @@ angular.module("sampleApp").controller('consultbuilderCtrl',
         $scope.resources = [];      //list of all possible resourcs
         $scope.consult = {};        //the actual consultation
 
-        /*
-        //temp read current note
-        $http.get(testUrl).then(
-            function(data) {
-                var basic = data.data;
-                //console.log(basic);
-                var note = basic.extension[0].valueString;
-
-                $scope.consult = angular.fromJson(atob(note));
-            }
-        );
-        
-        */
-
-
-
-        
+/*
         $scope.consult.s = {content:[]};
         $scope.consult.o = {content:[]};
         $scope.consult.a = {content:[]};
         $scope.consult.p = {content:[]};
-
+*/
         $scope.input = {};
+        //$scope.input.active = '1'
 
         $http.get('artifacts/consultBuilderConfig.json').then(
             function(data) {
@@ -43,15 +26,31 @@ angular.module("sampleApp").controller('consultbuilderCtrl',
                 $scope.resources = data.data.config.resources;
                 $scope.noteType = data.data.config.noteType;
                 $scope.input.noteType = $scope.noteType[0];         //default to the first in the list
+                
+                var template = data.data.config.templates[0];
+                console.log(template)
+
+                $scope.consult = {};
+                $scope.template = {};
+
+                template.sections.forEach(function(section){
+                    $scope.consult[section.code] = {content:[]};
+                    $scope.template[section.code] = {display:section.display};
+                })
+
             }
         );
 
         $scope.input.soapModel = 's';
-        $scope.soapModelDetail = {};
-        $scope.soapModelDetail.s = {display:'Subjective'};
-        $scope.soapModelDetail.o = {display:'Objective'};
-        $scope.soapModelDetail.a = {display:'Assessment'};
-        $scope.soapModelDetail.p = {display:'Plan'};
+
+/*
+        $scope.template = {};
+        $scope.template.s = {display:'Subjective'};
+        $scope.template.o = {display:'Objective'};
+        $scope.template.a = {display:'Assessment'};
+        $scope.template.p = {display:'Plan'};
+        
+        */
 
         function load() {
             var url = serverBase + "Basic?code=http://clinfhir.com/fhir/NamingSystem/cf|note";      //todo add patient
@@ -59,12 +58,7 @@ angular.module("sampleApp").controller('consultbuilderCtrl',
                 function(data) {
                     //console.log(data);
                     $scope.allNotes = data.data;    //this is a bundle of Basic resources
-  /*
-                    console.log($scope.allNotes);
-                    var hx = $scope.allNotes.entry[0].resource;
-                    var note = atob(hx.extension[0].valueString);
-                    $scope.historicNote = angular.fromJson(note);
-*/
+
                 }
             );
         }
@@ -75,13 +69,13 @@ angular.module("sampleApp").controller('consultbuilderCtrl',
         $scope.showNote = function(basic) {
             var note = atob(basic.extension[0].valueString);
             $scope.historicNote = angular.fromJson(note);
-            //console.log($scope.historicNote)
-
-
-            //$scope.historicNoteType = basic.extension[1].valueCoding
             
         };
-        
+
+        $scope.editNote = function(){
+            $scope.input.active = "1";
+
+        };
 
 
         //save the note. Right now, we're saving is as a basic resource. Need to think about how to save real resources...

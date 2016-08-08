@@ -77,9 +77,11 @@
 
 
 
-    <uib-tabset>
 
-        <uib-tab heading="All records">
+
+    <uib-tabset active="active">
+
+        <uib-tab index="0" heading="All records">
             <br />
             <div class="row">
                 <div class="col-sm-3 col-md-3">
@@ -100,10 +102,15 @@
 
                 </div>
                 <div class="col-sm-9 col-md-9">
-                    <div ng-repeat="key in ['s','o','a','p']">
+   <!--
+                    <div>
+                        <button class="btn btn-link" ng-click="active=1">edit</button>
+                    </div>
+-->
+                    <div ng-repeat="(key,item) in template">
                         <div class="row" ng-show="historicNote[key].content.length > 0">
                             <div class="col-md-2 col-sm-2">
-                                <strong>{{soapModelDetail[key].display}}</strong>
+                                <strong>{{template[key].display}}</strong>
                             </div>
                             <div class="col-md-10 col-sm-10" style="border-left: thin">
                                 <span ng-repeat="resource in historicNote[key].content">
@@ -124,16 +131,17 @@
 
         </uib-tab>
 
-        <uib-tab heading="New Consult">
+        <uib-tab index="1" heading="New Consult">
             <br/>
 
             <div class="row">
                 <div class="col-md-3 col-sm-3">
                     <div class="btn-group" style="margin-bottom: 10px">
-                        <label class="btn btn-warning" ng-model="input.soapModel" uib-btn-radio="'s'">Subjective</label>
-                        <label class="btn btn-warning" ng-model="input.soapModel" uib-btn-radio="'o'">Objective</label>
-                        <label class="btn btn-warning" ng-model="input.soapModel" uib-btn-radio="'a'">Assessment</label>
-                        <label class="btn btn-warning" ng-model="input.soapModel" uib-btn-radio="'p'">Plan</label>
+
+                        <label ng-repeat = "(key,item) in template" uib-btn-radio="key"
+                               class="btn btn-warning" ng-model="input.soapModel">
+                            {{item.display}}
+                        </label>
                     </div>
 
                 </div>
@@ -192,7 +200,7 @@
                             </div>
                             <div class="col-md-2 col-sm-2">
                                 <div class="pull-right">
-                                    <button class="btn btn-warning">{{soapModelDetail[input.soapModel].display}}
+                                    <button class="btn btn-warning">{{template[input.soapModel].display}}
 
                                     </button></div>
                             </div>
@@ -256,10 +264,10 @@
                                 <div class="col-md-7 col-sm-7" >
 
 
-                                    <div ng-repeat="key in ['s','o','a','p']">
+                                    <div ng-repeat="(key,item) in template">
                                         <div class="row" ng-show="consult[key].content.length > 0">
                                             <div class="col-md-3 col-sm-3">
-                                                <strong>{{soapModelDetail[key].display}}</strong>
+                                                <strong>{{template[key].display}}</strong>
                                             </div>
                                             <div class="col-md-9 col-sm-9" style="border-left: thin">
                                                 <span ng-repeat="resource in consult[key].content">
@@ -324,8 +332,8 @@
 
 
 
-                                <div class="col-md-3 col-sm-3" ng-repeat="key in ['s','o','a','p']">
-                                    <h4>{{soapModelDetail[key].display}}</h4>
+                                <div class="col-md-3 col-sm-3" ng-repeat="(key,item) in template">
+                                    <h4>{{template[key].display}}</h4>
                                     <ul dnd-list="consult[key].content">
                                         <li ng-repeat="item in consult[key].content" class="Condition"
                                             dnd-draggable="item"
