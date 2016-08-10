@@ -11,12 +11,7 @@ angular.module("sampleApp").controller('consultbuilderCtrl',
         $scope.resources = [];      //list of all possible resourcs
         $scope.consult = {};        //the actual consultation
 
-/*
-        $scope.consult.s = {content:[]};
-        $scope.consult.o = {content:[]};
-        $scope.consult.a = {content:[]};
-        $scope.consult.p = {content:[]};
-*/
+
         $scope.input = {};
         //$scope.input.active = '1'
 
@@ -34,8 +29,8 @@ angular.module("sampleApp").controller('consultbuilderCtrl',
                 $scope.template = {};
 
                 template.sections.forEach(function(section){
-                    $scope.consult[section.code] = {content:[]};
-                    $scope.template[section.code] = {display:section.display};
+                    $scope.consult[section.code] = {content:[]};    //$scope.consult.s = {content:[]};
+                    $scope.template[section.code] = {display:section.display};  // $scope.template.s = {display:'Subjective'};
                 })
 
             }
@@ -43,14 +38,7 @@ angular.module("sampleApp").controller('consultbuilderCtrl',
 
         $scope.input.soapModel = 's';
 
-/*
-        $scope.template = {};
-        $scope.template.s = {display:'Subjective'};
-        $scope.template.o = {display:'Objective'};
-        $scope.template.a = {display:'Assessment'};
-        $scope.template.p = {display:'Plan'};
-        
-        */
+
 
         function load() {
             var url = serverBase + "Basic?code=http://clinfhir.com/fhir/NamingSystem/cf|note";      //todo add patient
@@ -91,10 +79,13 @@ angular.module("sampleApp").controller('consultbuilderCtrl',
 
             var extension = {url:'http://clinfhir.com/fhir/StructureDefinition/clinicalNote'};
             var json = angular.toJson($scope.consult);
-            //console.log(json);
-
             extension.valueString = btoa(json);
             basic.extension.push(extension);
+
+            var extensionTempl = {url:'http://clinfhir.com/fhir/StructureDefinition/clinicalTemplate'};
+            var jsonTempl = angular.toJson($scope.consult);
+            extensionTempl.valueString = btoa(jsonTempl);
+            basic.extension.push(extensionTempl);
 
             //the type of note
             basic.extension.push({url:"http://clinfhir.com/fhir/StructureDefinition/clinicalNoteType",valueCoding:$scope.input.noteType});

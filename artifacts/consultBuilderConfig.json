@@ -48,7 +48,7 @@
       {"code":"s","display":"Subjective"},
       {"code":"o","display":"Objective"},
       {"code":"a","display":"Assessment"},
-      {"code":"p","display":"Plan"}
+      {"code":"p","display":"MyPlan"}
     ]}
   ]
 }

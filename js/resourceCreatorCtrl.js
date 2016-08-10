@@ -2269,10 +2269,10 @@ angular.module("sampleApp")
 })
     .controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,
                                      profileCreatorSvc,GetDataFromServer){
-        
+
         $scope.config = $localStorage.config;
         $scope.operationsUrl = $scope.config.baseSpecUrl + "operations.html";
-        $scope.input = {};
+        $scope.input = {serverType:'known'};  //serverType allows select from known servers or enter ad-hoc
 
         $scope.queryHistory = $localStorage.queryHistory;
         $scope.makeUrl = function(type) {
@@ -2363,14 +2363,22 @@ console.log(url);
             );
         };
 
-        $scope.selectServer = function(server) {
+
+
+        //select a server. If 'server' is populated then we've selected a known server. If url is populated then an ad-hoc url has been entered
+        $scope.selectServer = function(server,url) {
+
+            if (url) {
+                server = {name:'Ad Hoc server',url:url}
+            }
+
+            console.log(server);
+
             $scope.input.parameters = "";
-            delete $scope.filteredProfile
+            delete $scope.filteredProfile;
             delete $scope.response;
             delete $scope.err;
             delete $scope.conformance;
-
-            
             delete $scope.input.selectedType;
 
             $scope.server =server;
@@ -2379,7 +2387,8 @@ console.log(url);
         };
 
         $scope.buildQuery = function() {
-
+            delete $scope.anonQuery;
+            delete $scope.query;
             var qry = '';//$scope.server.url;
 
             if ($scope.input.selectedType){
@@ -2402,17 +2411,15 @@ console.log(url);
 
         function setDefaultInput() {
             var type = angular.copy($scope.input.selectedType);
-            var server = angular.copy($scope.input.server);
-            $scope.input = {};
+           // var server = angular.copy($scope.input.server);
+            $scope.input = {serverType:'known'};
             $scope.input.localMode = 'serverquery'
-            //$scope.input.localMode = 'showconformance'
             $scope.input.verb = 'GET';
             $scope.input.category="parameters";
-            //$scope.input.loadConformanceId= "ohConformance";
             if (type) {
                 $scope.input.selectedType = type;       //remember the type
             }
-            $scope.input.server =server;
+          //  $scope.input.server =server;
         }
         
         $scope.selectFromHistory = function(hx){
@@ -2574,6 +2581,7 @@ console.log(url);
         };
 
         $scope.doit = function() {
+            $scope.buildQuery();        //always make sure the query is correct;
             delete $scope.response;
             delete $scope.err;
             $scope.waiting = true;
@@ -2593,7 +2601,8 @@ console.log(url);
                    
                     
                     $scope.queryHistory = resourceCreatorSvc.addToQueryHistory(hx)
-
+                    delete $scope.input.id;
+                    delete $scope.input.parameters;
                     
                 },
                 function(err) {
@@ -2624,6 +2633,7 @@ console.log(url);
 
         $scope.input = {show:'raw',extValue:{}};      //options = raw, results, parsed
 
+        //set the default server in the drop down to the current conformance server
         var url= $scope.config.servers.conformance;
         for (var i=0; i < $scope.config.allKnownServers.length;i++){
             if ($scope.config.allKnownServers[i].url == url){

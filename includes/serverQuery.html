@@ -15,26 +15,32 @@
 
     </div>
 
-    <div class="col-md-3 col-sm-3">
-        <select class="form-control"
-                ng-change="selectServer(input.server)"
-                ng-options="value.name for value in config.allKnownServers track by value.name"
-                ng-model="input.server">
-
-        </select>
+    <div class="col-md-1 col-sm-1">
+        <div><input type="radio" ng-model="input.serverType" value="known"> Known</div>
+        <input type="radio" ng-model="input.serverType" value="adhoc"> AdHoc
     </div>
 
+
     <div class="col-md-3 col-sm-3">
-        <button ng-show="input.server && input.localMode == 'serverquery'"
-                class="btn btn-primary pull-right" ng-click = "showConformance()">Read Conformance</button>
-        <div>
-            <button ng-show="input.server && input.localMode == 'serverquery' && conformance"
-                    class="btn btn-link pull-right" ng-click = "removeConformance()">Query</button>
+        <div ng-show="input.serverType == 'known'">
+            <select class="form-control"
+                    ng-change="selectServer(server)"
+                    ng-options="value.name for value in config.allKnownServers track by value.name"
+                    ng-model="server">
+
+            </select>
         </div>
+        <div ng-show="input.serverType == 'adhoc'">
+            <input type="text" ng-model="input.adHocServer" ng-blur="selectServer(null,input.adHocServer)"
+                   class="form-control" placeholder="Enter the base Url of the server"/>
+        </div>
+
     </div>
 
-    <div class="col-md-4 col-sm-4">
+    <div class="col-md-3 col-sm-3">
+        {{server.url}}
     </div>
+
 
     <div class="col-md-1 col-sm-1">
 
@@ -42,6 +48,19 @@
             <img src="css/ajax_loader_blue_32.gif"/>
         </div>
     </div>
+
+    <div class="col-md-3 col-sm-3">
+        <button ng-show="server && input.localMode == 'serverquery'"
+                class="btn btn-primary pull-right" ng-click = "showConformance()">Read Conformance</button>
+        <div>
+            <button ng-show="server && input.localMode == 'serverquery' && conformance"
+                    class="btn btn-link pull-right" ng-click = "removeConformance()">Query</button>
+        </div>
+    </div>
+
+
+
+
 </div>
 
 <hr ng-hide="startup"/>
@@ -90,7 +109,7 @@
             </div>
         </div>
 
-        <div ng-show="input.localMode == 'serverquery' && input.server && ! conformance">
+        <div ng-show="input.localMode == 'serverquery' && server && ! conformance">
 
             <h4>Previous Queries</h4>
 
@@ -116,15 +135,42 @@
             <uib-tabset>
                 <uib-tab heading="Description">
                     <br/>
+<!--
+                    <div class="row">
+                        <div class="col-sm-2 col-md-2">
+                            Name
+                        </div>
+                        <div class="col-sm-4 col-md-4">
+                            {{conformance.name}}
+                        </div>
+                        <div class="col-sm-2 col-md-2">
+                            FHIR version
+                        </div>
+                        <div class="col-sm-4 col-md-4">
+                            {{conformance.fhirVersion}}
+                        </div>
+
+                    </div> -->
+
                     <table class="table">
                         <tr>
-                            <td valign="top">Name</td><td>{{conformance.name}}</td>
+                            <td valign="top" width="15%"><strong>Name</strong></td><td width="35%">{{conformance.name}}</td>
+                            <td valign="top" width="15%"><strong>FHIR version</strong></td><td width="35%">{{conformance.fhirVersion}}</td>
                         </tr>
                         <tr>
-                            <td valign="top">Description</td><td>{{conformance.description}}</td>
+                            <td valign="top"><strong>Description</strong></td><td>{{conformance.description}}</td>
+                            <td valign="top"><strong>Publisher</strong></td><td>{{conformance.publisher}}</td>
                         </tr>
                         <tr>
-                            <td valign="top">Publisher</td><td>{{conformance.publisher}}</td>
+                            <td valign="top"><strong>Accept Unknown</strong></td><td>{{conformance.acceptUnknown}}</td>
+                            <td valign="top"><strong>Formats</strong></td>
+                            <td>
+                                <div ng-repeat="f in conformance.format">
+                                    {{f}}
+                                </div>
+
+                            </td>
+
                         </tr>
                     </table>
 
