@@ -1019,6 +1019,9 @@ console.log(summary);
 
             }
             return text;
+        }, 
+        getListOfDataTypes : function() {
+            return ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference','HumanName'];
         }
     }
 })

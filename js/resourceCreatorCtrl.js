@@ -134,10 +134,14 @@ angular.module("sampleApp")
 
     $scope.editExistingResource = function() {
         resourceCreatorSvc.loadResource().then(
-            function(treeData) {
+            function(vo) {
+                $scope.$emit('profileSelected',vo.profile);  //the resourcebuilder needs the profile...
+                var treeData = vo.treeData;
+                console.log(treeData)
                 $scope.treeData = treeData;
                 $scope.displayMode = 'new';     //display the 'enter new resouce' screen..
                 drawTree();
+
 
             },
             function(err){

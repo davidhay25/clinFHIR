@@ -1489,6 +1489,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             return deferred.promise;
         },
+
         makeProfileDisplayFromProfileDEP : function(profile) {
             console.log(profile);
             var arDisabled = [];          //this is a list of disabled items...
@@ -3153,30 +3154,34 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         loadResource : function() {
             var deferred = $q.defer();
             var idRoot = 0;
+            var edHash = {};
+            var dtList = Utilities.getListOfDataTypes();
             $http.get('http://fhirtest.uhn.ca/baseDstu2/CarePlan/14977').then(
                 function(data) {
                     var resource = data.data;
                     var tree = [];
-                    var edHash = {};
+
                     console.log(resource)
 
                     var resourceType = resource.resourceType;
                     var uri = "http://hl7.org/fhir/StructureDefinition/"+resourceType;
                     GetDataFromServer.findConformanceResourceByUri(uri).then(
-                        function(data){
-                            console.log(data)
-                            console.log(data.snapshot)
-                            if(! data.snapshot) {
+                        function(profile){
+                            console.log(profile)
+                            console.log(profile.snapshot)
+                            if(! profile.snapshot) {
                                 deferred.reject('Sorry, the profile definition for this resource on the Conformance server is missing the snapshot')
                             } else {
-                                //create a hash indexed by path. need this so the ED for a given path can be located
-                                angular.forEach(data.snapshot.element,function(item){
+                                //create a hash indexed by path. need this so the ED for a given path can be located using the function getED()
+                                angular.forEach(profile.snapshot.element,function(item){
                                     edHash[item.path] = item;
                                 });
+
 
                                 console.log(edHash);
 
                                 //process a single node
+                                /*
                                 function processNodeDEP(parentPath,tree,key,element,parentId) {
                                     //console.log(key,element);
 
@@ -3195,6 +3200,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
                                         var newNode = {id:nodeId,parent:parentId,text:nodePath,state:{opened:false,selected:false}};
+                                        //newNode.ed = edHash[]
+
+
                                         //newNode.data = {ed : child.ed};
                                         tree.push(newNode);
 
@@ -3224,28 +3232,21 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                     }
 
                                 }
-
+*/
                                 var parent = "CarePlan";
                                 var rootId = getId();
                                 var item = {};      //this will be the ed for the resource root...
-                                tree.push({id:rootId,parent:'#',text:parent,state:{opened:true,selected:true},
-                                    path:parent,data: {ed : edHash[resourceType]}});
+                                var rootItem = {id:rootId,parent:'#',text:parent,state:{opened:true,selected:true},
+                                    path:parent,data: {ed : edHash[resourceType]},ed:edHash[resourceType]}
+                                tree.push(rootItem);
 
                                 angular.forEach(resource,function(element,key){
                                     processNode(parent,tree,key,element,rootId)
                                 });
 
 
-
-                                deferred.resolve(tree);
+                                deferred.resolve({treeData:tree,profile:profile});
                             }
-
-
-
-
-
-
-
                         },function(err){
                             console.log(err)
                         }
@@ -3264,23 +3265,26 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             //a complex value. each element needs to be processed...
                             //but first, each node needs an id
                             var nodeId = getId();
-                            var nodePath =  parentPath + '.' +key;
-                            console.log(nodeId,parentId,nodePath,element);
+                            var nodePath =  parentPath + '.' + key;
+                            //console.log(nodeId,parentId,nodePath,element);
                             //and add to the tree here...
 
 
-                            var newNode = {id:nodeId,parent:parentId,text:nodePath,state:{opened:false,selected:false}};
-                            newNode.data = {ed : edHash[nodePath]};
+                            var newNode = {id:nodeId,parent:parentId,path:nodePath,text:nodePath,state:{opened:false,selected:false}};
+                            newNode.data = {ed : getED(nodePath)};
+                            newNode.ed = getED(nodePath);      //a duplicate of the ed for RB todo:fix
+
                             tree.push(newNode);
+                            console.log(newNode)
 
 
                             angular.forEach(element,function(elementC, keyC){
                                 //the path will depend on whether this is an object or an array
 
                                 var pathC = parentPath + '.' +key;// + '.' + keyC;
-                                if (angular.isArray(elementC)){
-                                    pathC = parentPath
-                                }
+                             //   if (angular.isArray(elementC)){
+                               //     pathC = parentPath
+                               // }
                                 var parentId = getId();
                                 processNode(pathC ,tree,keyC,elementC,nodeId); //
                             })
@@ -3289,13 +3293,34 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             //a simple value
                             var path = parentPath + '.' +key;
                             var id = getId();
-                            console.log(id,parentId,path,element);
-                            // now add to the tree...
+                            //console.log(id,parentId,path,element);
+                            // now add to the tree if there is an ...
 
-                            var newNode = {id:id,parent:parentId,text:path,state:{opened:false,selected:false}};
-                            newNode.data = {ed : edHash[path]};
-                            //newNode.data = {ed : child.ed};
-                            tree.push(newNode);
+//console.log(path);
+
+
+                            var pathInED = path;
+                            var ar = path.split('.');
+
+                            //todo - not sure this is correct...
+                            if (ar[ar.length-1].substr(0, 5) === 'value') {
+                                console.log(path);
+                                ar[ar.length-1] = 'value[x]';
+                                pathInED = ar.join('.')
+                                console.log(pathInED);
+                            }
+
+
+                            if (edHash[pathInED]) {
+                                var newNode = {id:id,parent:parentId,path:path,text:path,state:{opened:false,selected:false}};
+                                newNode.data = {ed : getED(pathInED)};
+                                newNode.ed = getED(pathInED);      //a duplicate of the ed for RB todo:fix
+                                console.log(newNode)
+                                //newNode.data = {ed : child.ed};
+                                tree.push(newNode);
+                            }
+
+
 
                         }
 
@@ -3312,6 +3337,38 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             );
 
+            //given a path in the resource, locate the ED from the profile
+            function getED(pathInResource) {
+                var ed = edHash[pathInResource];
+                if (!ed) {
+                    //the path does not corespond to a path in the profile. Generally, this will be a 'choice' element...
+                    //the path to the ED is the name of the datatype (which will be at the end of the pathInResource replaces by [x]
+                    var p1 = pathInResource.toLowerCase();      //need to search alllower case...
+                    var pl = p1.length;
+                    for (var i=0; i< dtList.length; i++){
+                        var dt = dtList[i];
+                        var d = dt.toLowerCase();
+                        var l = d.length;
+                        if (p1.indexOf(d,pl-l) != -1) {
+                            //this datatype is the value
+
+                            pathInResource = pathInResource.substr(0,pl-l)+'[x]';
+                            ed = edHash[pathInResource];
+                            console.log('>>>>>>>>',pathInResource,ed);
+                            return ed;
+
+                        }
+
+                    }
+                } else {
+                    return ed;
+                }
+
+
+
+            }
+
+            //generate a new ID for an element in the tree...
             function getId() {
                 idRoot++;
                 return idRoot;

@@ -58,11 +58,12 @@ angular.module("sampleApp")
     //setUpDisplayNewProfile();
 
 
-    var createGraphOfProfile = function() {
+    var createGraphOfProfile = function(profile) {
 
         //use a clone of the current profile. This will be updated as a profile is developed
         if (!$scope.graphProfile) {
-            $scope.graphProfile = angular.copy($scope.frontPageProfile)
+            //$scope.graphProfile = angular.copy($scope.frontPageProfile)
+            $scope.graphProfile = angular.copy(profile)
 
         }
 
@@ -230,7 +231,7 @@ angular.module("sampleApp")
         //the graph display for the current profile
         delete $scope.graphProfile;     //delete any graphProfile currently created
 
-        createGraphOfProfile();
+        createGraphOfProfile(selectedProfile);
         setUpDisplayNewProfile();
 
         //generate a differential view
@@ -535,7 +536,7 @@ angular.module("sampleApp")
 
 
         $scope.graphProfile.snapshot.element.push(ed); //  todo - not sure about the impact of this...
-        createGraphOfProfile();
+        createGraphOfProfile();     //note that $scope.GraphProfile does exist for the createGraphOfProfile function
 
         //$rootScope.$emit('newProfileChosen');
 
