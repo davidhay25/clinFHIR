@@ -131,6 +131,21 @@ angular.module("sampleApp")
         $scope.displayMode = 'new';     //display the 'enter new resouce' screen..
     };
 
+
+    $scope.editExistingResource = function() {
+        resourceCreatorSvc.loadResource().then(
+            function(treeData) {
+                $scope.treeData = treeData;
+                $scope.displayMode = 'new';     //display the 'enter new resouce' screen..
+                drawTree();
+
+            },
+            function(err){
+                console.log(err);
+            }
+        )
+    }
+            
             
     //============== event handlers ===================
 

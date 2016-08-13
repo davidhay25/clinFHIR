@@ -3149,6 +3149,176 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             return {items:items,groups:new vis.DataSet(arGroups),conditions:objCondition};
             
             
+        },
+        loadResource : function() {
+            var deferred = $q.defer();
+            var idRoot = 0;
+            $http.get('http://fhirtest.uhn.ca/baseDstu2/CarePlan/14977').then(
+                function(data) {
+                    var resource = data.data;
+                    var tree = [];
+                    var edHash = {};
+                    console.log(resource)
+
+                    var resourceType = resource.resourceType;
+                    var uri = "http://hl7.org/fhir/StructureDefinition/"+resourceType;
+                    GetDataFromServer.findConformanceResourceByUri(uri).then(
+                        function(data){
+                            console.log(data)
+                            console.log(data.snapshot)
+                            if(! data.snapshot) {
+                                deferred.reject('Sorry, the profile definition for this resource on the Conformance server is missing the snapshot')
+                            } else {
+                                //create a hash indexed by path. need this so the ED for a given path can be located
+                                angular.forEach(data.snapshot.element,function(item){
+                                    edHash[item.path] = item;
+                                });
+
+                                console.log(edHash);
+
+                                //process a single node
+                                function processNodeDEP(parentPath,tree,key,element,parentId) {
+                                    //console.log(key,element);
+
+                                    if (angular.isArray(element)) {
+                                        //an array - process each one using the same parent Path & id
+                                        element.forEach(function(elementC) {
+                                            processNode(parentPath,tree,key,elementC,parentId)
+                                        })
+                                    } else if (angular.isObject(element)) {
+                                        //a complex value. each element needs to be processed...
+                                        //but first, each node needs an id
+                                        var nodeId = getId();
+                                        var nodePath =  parentPath + '.' +key;
+                                        console.log(nodeId,parentId,nodePath,element);
+                                        //and add to the tree here...
+
+
+                                        var newNode = {id:nodeId,parent:parentId,text:nodePath,state:{opened:false,selected:false}};
+                                        //newNode.data = {ed : child.ed};
+                                        tree.push(newNode);
+
+
+                                        angular.forEach(element,function(elementC, keyC){
+                                            //the path will depend on whether this is an object or an array
+
+                                            var pathC = parentPath + '.' +key;// + '.' + keyC;
+                                            if (angular.isArray(elementC)){
+                                                pathC = parentPath
+                                            }
+                                            var parentId = getId();
+                                            processNode(pathC ,tree,keyC,elementC,nodeId); //
+                                        })
+
+                                    } else {
+                                        //a simple value
+                                        var path = parentPath + '.' +key;
+                                        var id = getId();
+                                        console.log(id,parentId,path,element);
+                                        // now add to the tree...
+
+                                        var newNode = {id:id,parent:parentId,text:path,state:{opened:false,selected:false}};
+                                        //newNode.data = {ed : child.ed};
+                                        tree.push(newNode);
+
+                                    }
+
+                                }
+
+                                var parent = "CarePlan";
+                                var rootId = getId();
+                                var item = {};      //this will be the ed for the resource root...
+                                tree.push({id:rootId,parent:'#',text:parent,state:{opened:true,selected:true},
+                                    path:parent,data: {ed : edHash[resourceType]}});
+
+                                angular.forEach(resource,function(element,key){
+                                    processNode(parent,tree,key,element,rootId)
+                                });
+
+
+
+                                deferred.resolve(tree);
+                            }
+
+
+
+
+
+
+
+                        },function(err){
+                            console.log(err)
+                        }
+                    );
+
+                    //process a single node
+                    function processNode(parentPath,tree,key,element,parentId) {
+                        //console.log(key,element);
+
+                        if (angular.isArray(element)) {
+                            //an array - process each one using the same parent Path & id
+                            element.forEach(function(elementC) {
+                                processNode(parentPath,tree,key,elementC,parentId)
+                            })
+                        } else if (angular.isObject(element)) {
+                            //a complex value. each element needs to be processed...
+                            //but first, each node needs an id
+                            var nodeId = getId();
+                            var nodePath =  parentPath + '.' +key;
+                            console.log(nodeId,parentId,nodePath,element);
+                            //and add to the tree here...
+
+
+                            var newNode = {id:nodeId,parent:parentId,text:nodePath,state:{opened:false,selected:false}};
+                            newNode.data = {ed : edHash[nodePath]};
+                            tree.push(newNode);
+
+
+                            angular.forEach(element,function(elementC, keyC){
+                                //the path will depend on whether this is an object or an array
+
+                                var pathC = parentPath + '.' +key;// + '.' + keyC;
+                                if (angular.isArray(elementC)){
+                                    pathC = parentPath
+                                }
+                                var parentId = getId();
+                                processNode(pathC ,tree,keyC,elementC,nodeId); //
+                            })
+
+                        } else {
+                            //a simple value
+                            var path = parentPath + '.' +key;
+                            var id = getId();
+                            console.log(id,parentId,path,element);
+                            // now add to the tree...
+
+                            var newNode = {id:id,parent:parentId,text:path,state:{opened:false,selected:false}};
+                            newNode.data = {ed : edHash[path]};
+                            //newNode.data = {ed : child.ed};
+                            tree.push(newNode);
+
+                        }
+
+                    }
+
+
+
+
+
+                },function(err) {
+                    console.log(err);
+                }
+
+
+            );
+
+            function getId() {
+                idRoot++;
+                return idRoot;
+                // return "id"+idRoot;//
+            }
+
+            return deferred.promise;
         }
     }
 

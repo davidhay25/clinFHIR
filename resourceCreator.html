@@ -421,6 +421,14 @@
                             </ul>
                         </div>
 
+
+
+
+                        <button class="btn btn-info pull-right" ng-click="editExistingResource()">
+                            edit</button>
+
+
+
                         <form ng-hide="displayMode == 'new' || displayMode == 'query' " class="navbar-form navbar-right">
                             <div ng-show="appConfigSvc.getCurrentPatient() && resourceCreatorSvc.getCurrentProfile()">
                                 <button class="btn btn-info pull-right" ng-click="createNewResource()">
@@ -487,12 +495,12 @@
                 <ng-include src="'/includes/resourceViewer.html'"></ng-include>
             </div>
 
-   <!-- temp
+
             <button class="btn btn-link" ng-click="displayMode = 'consult'">ConsultBuilder</button>
             <div ng-show="displayMode == 'consult'" ng-controller="consultbuilderCtrl">
                 <ng-include src="'/includes/consultBuilder.html'"></ng-include>
             </div>
--->
+
 
             <!-- A directive for browsing value sets-->
             <vs-browser trigger="showVSBrowserDialog"></vs-browser>

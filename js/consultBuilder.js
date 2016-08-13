@@ -1,5 +1,5 @@
 angular.module("sampleApp").controller('consultbuilderCtrl',
-    function ($scope,$http,GetDataFromServer,modalService,appConfigSvc) {
+    function ($scope,$http,GetDataFromServer,modalService,appConfigSvc,resourceCreatorSvc) {
 
 
         var config = appConfigSvc.config();
@@ -13,7 +13,116 @@ angular.module("sampleApp").controller('consultbuilderCtrl',
 
 
         $scope.input = {};
-        //$scope.input.active = '1'
+
+
+
+        $scope.loadResource = function() {
+
+            resourceCreatorSvc.loadResource().then(
+                function(treeData) {
+                    $('#loadTree').jstree(
+                        {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+                    )
+                },
+                function(err){
+                    console.log(err);
+                }
+            )
+/*
+            return;
+
+            var idRoot = 0;
+            $http.get('http://fhirtest.uhn.ca/baseDstu2/CarePlan/14977').then(
+                function(data) {
+                    var resource = data.data;
+                    var tree = [];
+                    console.log(resource)
+
+
+
+
+
+
+                    //process a single note
+                    function processNode(parentPath,tree,key,element,parentId) {
+                        //console.log(key,element);
+
+                        if (angular.isArray(element)) {
+                            //an array - process each one using the same parent Path & id
+                            element.forEach(function(elementC) {
+                                processNode(parentPath,tree,key,elementC,parentId)
+                            })
+                        } else if (angular.isObject(element)) {
+                            //a complex value. each element needs to be processed...
+                            //but first, each node needs an id
+                            var nodeId = getId();
+                            var nodePath =  parentPath + '.' +key;
+                            console.log(nodeId,parentId,nodePath,element);
+                            //and add to the tree here...
+
+
+                            var newNode = {id:nodeId,parent:parentId,text:nodePath,state:{opened:false,selected:false}};
+                            //newNode.data = {ed : child.ed};
+                            tree.push(newNode);
+
+
+                            angular.forEach(element,function(elementC, keyC){
+                                //the path will depend on whether this is an object or an array
+
+                                var pathC = parentPath + '.' +key;// + '.' + keyC;
+                                if (angular.isArray(elementC)){
+                                    pathC = parentPath
+                                }
+                                var parentId = getId();
+                                processNode(pathC ,tree,keyC,elementC,nodeId); //
+                            })
+
+                        } else {
+                            //a simple value
+                            var path = parentPath + '.' +key;
+                            var id = getId();
+                            console.log(id,parentId,path,element);
+                            // now add to the tree...
+
+                            var newNode = {id:id,parent:parentId,text:path,state:{opened:false,selected:false}};
+                            //newNode.data = {ed : child.ed};
+                            tree.push(newNode);
+
+                        }
+
+                    }
+
+                    var parent = "CarePlan";
+                    var rootId = getId();
+                    var item = {};      //this will be the ed for the resource root...
+                    tree.push({id:rootId,parent:'#',text:parent,state:{opened:true,selected:true},path:parent,data: {ed : item}});
+
+                    angular.forEach(resource,function(element,key){
+                        processNode(parent,tree,key,element,rootId)
+                    })
+
+
+
+                    $('#loadTree').jstree(
+                        {'core': {'multiple': false, 'data': tree, 'themes': {name: 'proton', responsive: true}}}
+                    )
+
+
+                },function(err) {
+                    console.log(err);
+                }
+            );
+
+            function getId() {
+                idRoot++;
+                return idRoot;
+               // return "id"+idRoot;//
+            }
+
+
+*/
+        };
+
 
         $http.get('artifacts/consultBuilderConfig.json').then(
             function(data) {
