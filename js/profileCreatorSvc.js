@@ -741,7 +741,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 if (baseDefinition && profile.snapshot && profile.snapshot.element) {
                     //first create a hash for all elemente
                     profile.snapshot.element.forEach(function(ed){
-                        if (ed.path && ed.path.indexOf('xtension') == -1) {
+                        if (ed.path && ed.path.indexOf('xtension') == -1 && ed.max !=="0") {
                             profileHash[ed.path] = 'x'
                         } else {
                             //this is an extension. if there's a profile associated with it, then add it to the list of differences
