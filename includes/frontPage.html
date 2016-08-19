@@ -86,6 +86,14 @@
 
 </uib-alert>
 
+<div ng-show="currentProject">
+    <div class="banner">
+        {{currentProject.name}}
+    </div>
+
+</div>
+
+
 <!-- Hide the front page when the profile editor is being displayed-->
 <div class="row" ng-hide="showProfileEditPage">
 
@@ -247,5 +255,6 @@
 <!--
 <a href="#" ng-click="showValidateInstance()">Validate</a>
 
--->
+
 <a href="#" ng-click="setProject()">Set Project</a>
+-->

@@ -357,6 +357,13 @@
                             <a class="navbar-form navbar-right" href="#" ng-click="showQuery()">Query Servers</a>
 -->
 
+
+
+
+
+
+
+                            <!-- The main menu-->
                             <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
                                 <li uib-dropdown>
 
@@ -419,6 +426,42 @@
                                     </ul>
                                 </li>
                             </ul>
+
+
+                            <!-- The user / projects menu-->
+                            <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
+                                <li uib-dropdown>
+
+                                    <a href="#" uib-dropdown-toggle>
+                                        <span style="font-size:2em; cursor: pointer">
+                                            <i class="glyphicon glyphicon-bookmark"></i>
+                                        </span>
+                                    </a>
+
+
+
+                                    <ul class="dropdown-menu" role="menu">
+
+                                        <li>
+                                            <a href="projectEditor.html" target="_blank">Project editor</a>
+                                        </li>
+
+                                        <li class="divider"></li>
+
+                                        <li ng-repeat="project in userConfig.projects">
+                                            <a href="#" ng-click="loadProject($index)">{{project.name}}</a>
+                                        </li>
+
+                                        <li ng-show="currentProject" class="divider"></li>
+                                        <li ng-show="currentProject">
+                                            <a href="#" ng-click="closeProject()">Close project</a>
+                                        </li>
+
+                                    </ul>
+                                </li>
+                            </ul>
+
+
                         </div>
 
 

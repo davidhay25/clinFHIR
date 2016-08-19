@@ -200,25 +200,16 @@ angular.module("sampleApp")
 
 
     //load the user config
-    $scope.setProjectDEP = function() {
 
 
-        appConfigSvc.loadUserConfig().then(
-            function(data) {
-                $scope.userConfig = data;
-                console.log($scope.userConfig)
-                appConfigSvc.setProject(data.projects[0]).then(
-                    function(profiles) {
-                        console.log(profiles)
 
-                        $scope.input.conformanceServer = appConfigSvc.getCurrentConformanceServer();
+    appConfigSvc.loadUserConfig().then(
+        function(data) {
+            $rootScope.userConfig = data;
 
-                    }
-                )   //set uo for a specific project
+        }
+    )
 
-            }
-        )
-    }
 
             
             
@@ -1991,6 +1982,37 @@ angular.module("sampleApp")
             $scope.recent.patient = appConfigSvc.getRecentPatient();
         });
 
+
+
+        //called when the user selects a project from the project menu
+        $rootScope.loadProject = function(inx){
+//          console.log(inx)
+            $rootScope.currentProject = $rootScope.userConfig.projects[inx];
+
+
+            appConfigSvc.setProject($rootScope.currentProject).then(
+                function(profiles) {
+                    console.log(profiles)
+
+                    //set the current servers on the scope - will update the displays as well...
+                    $scope.input.conformanceServer = appConfigSvc.getCurrentConformanceServer();
+                    $scope.input.dataServer = appConfigSvc.getCurrentDataServer();
+                    $scope.recent.profile = profiles;  //set the profiles display
+
+                    appConfigSvc.checkConsistency();    //will set the terminology server...
+
+
+                }
+            )   //set uo for a specific project
+
+            //alert('yes!')
+        }
+
+        //close the current project.
+        $rootScope.closeProject = function(){
+            delete $rootScope.currentProject;
+        }
+
         //when the 'eye' icon is clicked in the list. we want to view the profile in the tree - and potentially edit it
         //the actual profile has been loaded, and is passed into the function
         $scope.showLocalProfile = function(event,profile) {
@@ -2033,9 +2055,8 @@ angular.module("sampleApp")
         }
 
         //loads the configuration for a project. Actually loads the user config as I have plans to extend...
-        $scope.setProject = function() {
-
-
+        $scope.setProjectDEP = function() {
+            
             appConfigSvc.loadUserConfig().then(
                 function(data) {
                     $scope.userConfig = data;
@@ -2047,7 +2068,6 @@ angular.module("sampleApp")
                             //set the current servers on the scope - will update the displays as well...
                             $scope.input.conformanceServer = appConfigSvc.getCurrentConformanceServer();
                             $scope.input.dataServer = appConfigSvc.getCurrentDataServer();
-
                             $scope.recent.profile = profiles;  //set the profiles display
 
                             appConfigSvc.checkConsistency();    //will set the terminology server...

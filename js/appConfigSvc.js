@@ -69,6 +69,10 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:"HL7 New Zealand STU2 server",url:"http://fhir.hl7.org.nz/baseDstu2/",version:2});
         defaultConfig.allKnownServers.push({name:'Ontoserver',version:3,url:"http://52.63.0.196:8080/fhir/"});
         defaultConfig.allKnownServers.push({name:'MiHIN',version:2,url:"http://52.72.172.54:8080/fhir/baseDstu2/"});
+        defaultConfig.allKnownServers.push({name:'Simplifier',version:2,url:"https://simplifier.net/api/fhir/"});
+
+
+
 
 
         //place all the servers in a hash indexed by url. THis is used for the userConfig
@@ -307,17 +311,33 @@ angular.module("sampleApp")
                 //set the 'recent profiles to a specific set. Used when setting up a 'project'...
                 //note that the actual profile is not inclded - just the url
 
-                //set the servers for the project...
-                this.setServerType('conformance',project.servers.conformance.url) ;
-                this.setServerType('data',project.servers.data.url) ;
-                this.setServerType('terminology',project.servers.terminology.url) ;
+                //set the servers for the project (if specified)...
+                if (project.servers.conformance) {
+                    this.setServerType('conformance',project.servers.conformance.url) ;
+                }
+
+                if (project.servers.data) {
+                    this.setServerType('data',project.servers.data.url) ;
+                }
+
+
+                //this.setServerType('terminology',project.servers.terminology.url) ;
 
                 //set up the profiles in this project. First, set up the queries to load the profiles from the conformance server
                 var recentProfile = [];
                 var query = [];
+                var conformanceSvr = this.getCurrentConformanceServer();    //this may heve been set by the project above...
                 project.profiles.forEach(function(profile){
-                    //assume that the profile.id is a direct reference to the profile on the conformance server
-                    var url = project.servers.conformance.url + "StructureDefinition/"+profile.id
+
+                    //if the profile entry in the project has a conformance server, then use that. Otherwise use the system default
+                    
+
+                    var url = conformanceSvr.url + "StructureDefinition/"+profile.id
+                    //var url = project.servers.conformance.url + "StructureDefinition/"+profile.id
+                    if (profile.conformance) {
+                        url = profile.conformance + "StructureDefinition/"+profile.id
+                    }
+
                     query.push (
                         $http.get(url).then(
                             function(data) {
@@ -371,7 +391,7 @@ angular.module("sampleApp")
                         userConfig.projects.forEach(function(project){
                             //set the servers to the server objects based on the url. Right now, the possible servers are hard coded...
                             project.servers.conformance.server = allServersHash[project.servers.conformance.url];
-                            project.servers.terminology.server = allServersHash[project.servers.terminology.url];
+                            //project.servers.terminology.server = allServersHash[project.servers.terminology.url];
                             project.servers.data.server = allServersHash[project.servers.data.url];
                         })
 
