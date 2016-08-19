@@ -12,20 +12,58 @@ angular.module('sampleApp').component('showProfile',
             newnode :'<',
             deleteatpath : '<',
             restoreremoved : '<',
-            updateelementdefinition : '<'
+            updateelementdefinition : '<',
+            restoreatpath : '<'
         },
         templateUrl : 'js/components/profileDisplayTemplate.html',
         controller: function (resourceCreatorSvc,profileCreatorSvc,GetDataFromServer,$uibModal,Utilities) {
             var that = this;
-            //todo - issue with componnet timing. For now require all uses of tree specify the tree id externally
+            //todo - issue with component timing. For now require all uses of tree specify the tree id externally
             var treeDivId = this.treedivid;// || 'pfTreeView';    //the div id is unique across the application, so if used multiple times, an external div must be supplied
 
             this.follow = true;
             this.profileHistory = [];       //a history of all profiles viewed
 
-
             this.$onChanges = function(obj) {
 
+                //restore a path in the profile that has been disabled
+                if (obj.restoreatpath) {
+                    console.log(obj.restoreatpath.currentValue);
+                    if (that.baseSD && that.baseSD.snapshot && that.baseSD.snapshot.element) {
+                        //first, get the SD to restore from the base (for now just the one)
+                        var edToRestore;
+                        var pathToInsert = obj.restoreatpath.currentValue.path;
+                        for (var i=0; i<that.baseSD.snapshot.element.length; i++) {
+                            var e = that.baseSD.snapshot.element[i];
+                            if (e.path == pathToInsert){
+                                edToRestore = e;
+                                break;
+                            }
+
+                        }
+                        console.log(edToRestore)
+
+                        //so we have the ed we want to insert. Move through the profile until we have found the
+                        //the base, and insert it after that. It won't necessarily be in the exact position
+                        // - it will always be at the 'top' of the group but should be OK for the moment...
+                        if (edToRestore) {
+                            var ar = pathToInsert.split('.');
+                            ar.pop();
+                            var root = ar.join('.');        //this will be the direct parent of this element
+
+
+                            for (var i=0; i< that.selectedProfile.snapshot.element.length; i++) {
+                                var edProfile = that.selectedProfile.snapshot.element[i];
+                                if (edProfile.path == root) {
+                                    that.selectedProfile.snapshot.element.splice(i+1,0,edToRestore)
+                                    console.log(edProfile.path)
+                                    this.getTable(treeDivId);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
 
                 //when an ED (ElementDefinition) is changed in the controller we need to update the model...
                 //we pass in a VO containing the updated ed and the treeview item...
@@ -123,9 +161,7 @@ angular.module('sampleApp').component('showProfile',
                                             ed.myMeta.remove = true;
                                         }
                                     }
-
                                 }
-
                             } else {
                                 ed.myMeta = ed.myMeta || {}
                                 ed.myMeta.remove=true;
@@ -147,6 +183,14 @@ angular.module('sampleApp').component('showProfile',
                     //be in the wrong place. Won't upset the tree display, but does mean we need to sort
                     //by path before saving. todo - posisbly just insert in the right place to start with??
                     that.selectedProfile.snapshot.element.push(obj.newnode.currentValue);
+
+
+                   // that.selectedProfile.snapshot.element.sort(function(a,b){
+                     //   return a.path > b.path;
+                    //})
+
+
+
                     this.getTable(treeDivId);
                 }
                 //console.log(obj);
@@ -155,8 +199,17 @@ angular.module('sampleApp').component('showProfile',
                 if (obj.profile && obj.profile.currentValue) {
                     that.selectedProfile = angular.copy(obj.profile.currentValue);
                     if (that.selectedProfile) {
-                        //console.log(that.selectedProfile)
-                      //  this.profileHistory = [];
+
+                        //load the base definition for this profile. We'll use this to restore
+                        var baseDefinition = that.selectedProfile.baseDefinition || that.selectedProfile.base;
+                        GetDataFromServer.findConformanceResourceByUri(baseDefinition).then(
+                            function(baseSD){
+                                console.log(baseSD);
+                                that.baseSD = angular.copy(baseSD)
+                            }
+                        )
+
+
                         this.profileHistory.push(this.selectedProfile.url)
 
                         this.getTable(treeDivId);

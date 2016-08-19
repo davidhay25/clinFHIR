@@ -7,6 +7,8 @@ angular.module("sampleApp")
 
     $scope.appConfigSvc = appConfigSvc;      //so we can display donfig stuff on the page
 
+    //$scope.tabIndexActive = '0'
+   // $scope.showTab = {tabIndexActive:'1'};    //to allow the tabs to be selected programmatically...
     //appConfigSvc.getCurrentConformanceServer()
 
     //all the known Resource types. Used when creating a reference
@@ -213,19 +215,6 @@ angular.module("sampleApp")
 
         }
 
-        //$scope.standardResourceTypes
-
-
-        /*
-        var base = selectedProfile.base || selectedProfile.baseType;        //different in stu 2 & 3
-        if (base && base.indexOf('Resource') > -1) {    //was 'DomainResource
-            //yes, this is a base resource.
-            $scope.allowEdit = false;
-            $scope.isBaseResource = true;
-
-        }
-
-        */
 
         //perform the local setup required...
         //the graph display for the current profile
@@ -239,14 +228,18 @@ angular.module("sampleApp")
         delete $scope.error;
 
         profileCreatorSvc.diffFromBase(selectedProfile,appConfigSvc).then(
-            function(differences) {
-                console.log(differences)
-                $scope.differences = differences;
+            function(vo) {
+               // console.log(differences)
+                $scope.differences = vo.differences;
+                $scope.baseDefinition = vo.baseDefinition;
             },function(err) {
                 $scope.diffError = "Unable to create difference file - can't locate a base profile";
                 //alert(angular.toJson(err))
             }
         )
+        
+        
+        
     });
 
     //set all the values for a new node to default...
@@ -378,26 +371,19 @@ angular.module("sampleApp")
         var ed = $scope.selectedNode.data.ed; //the ExtensionDefinition we want to remove
         // var path = ed.path;     //the path of the element to be removed...
 
-//console.log(ed);
-
-        // $scope.deleteAtPath(path);     //is a component property - will cause the element and all children to be removed...
         //pass in the ed, as the path alone is not enough - eg when this is an extension being deleted...
         $scope.deleteAtPath = ed;     //is a component property - will cause the element and all children to be removed...
-
-
-        //now move through the model, marking the ED's that start with this path to be removed
-        //ed.myMeta.remove = true;
-
+        
         $scope.logOfChanges.push({type:'D',display:'Removed '+ ed.path,path:ed.path,ed:ed})
 
-        //add to the differences array - but make sure it's present as it is slow!
+        //add to the differences array - but make sure it's present as it can be slow to load!
+        //todo should really wait until present...
         if ($scope.differences) {
             $scope.differences.push({type:'removed',ed:ed})
         }
 
 
         delete $scope.input.newNode;    //indicates whether a child or a sibling - will hide the new entry
-
         delete $scope.edFromTreeNode;
         delete $scope.selectedNode;
 
@@ -405,7 +391,8 @@ angular.module("sampleApp")
 
     //$scope.editProfile = function
 
-    //restore a deleted element
+    //restore a deleted element - one that was deleted in this session
+    //todo - is this appropriate now that we can restore from the difference?
     $scope.restore = function(ed,inx){
         $scope.restoreRemoved = ed;     //this is a property on the component...
         $scope.logOfChanges.splice(inx,1)
@@ -629,7 +616,7 @@ angular.module("sampleApp")
 
     //when an element is selected in the tree....
     $scope.treeNodeSelected = function(item) {
-         console.log(item);
+        // console.log(item);
         delete $scope.input.newNode;      //the var that displays the new node data
         delete $scope.edFromTreeNode;
         delete $scope.treeNodeItemSelected;
@@ -812,6 +799,18 @@ angular.module("sampleApp")
             }
         );
 
+    }
+
+    //the user wants to restore an element that was removed from the base type
+    $scope.RestoreFromDiff = function(inx) {
+        //console.log(diff);
+        var diff = $scope.differences[inx];
+        $scope.restoreAtPath = null;
+        $scope.restoreAtPath = diff.ed;      //component property
+        $scope.differences.splice(inx,1);       //remove it from the differences array
+      //  $scope.showTab.tabIndexActive='0';
+
+      //  $scope.tabIndexActive = '0'
     }
 
 })

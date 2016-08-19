@@ -177,16 +177,7 @@
 
         <br />
 
-<!--
-        <div ng-show="input.showingLocalProfile">
-            <div>
-                <strong>{{frontPageProfile.url}}</strong>
-                <button class="btn btn-link pull-right" ng-click="input.showingLocalProfile = false">Return to list</button>
-            </div>
 
-            <show-profile profile="frontPageProfile" onvaluesetselected="testVsSel(uri)"></show-profile>
-        </div>
-        -->
 
         <ul ng-hide = "input.showingLocalProfile" class="list-group ">
             <li href="#" ng-class="{'list-group-item':true,myactive:profile.url == resourceCreatorSvc.getCurrentProfile().url}"
@@ -257,4 +248,4 @@
 <a href="#" ng-click="showValidateInstance()">Validate</a>
 
 -->
-
+<a href="#" ng-click="setProject()">Set Project</a>

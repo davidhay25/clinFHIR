@@ -132,7 +132,7 @@ angular.module("sampleApp").controller('consultbuilderCtrl',
                 $scope.input.noteType = $scope.noteType[0];         //default to the first in the list
                 
                 var template = data.data.config.templates[0];
-                console.log(template)
+                //console.log(template)
 
                 $scope.consult = {};
                 $scope.template = {};

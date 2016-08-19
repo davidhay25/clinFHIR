@@ -577,16 +577,11 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         var ed = item.data.ed;
 
                         //the first entry is always the root, which in this case will have the base type being extended...
-                       /*
-                        if (! sd[typeName]) {
-                            sd[typeName] = baseProfile.url;//ed.path;
-                            //now add the meta element
-                        }
-*/
+
                         var inProfile = true;       //true if this ed is to be included in the profile
                         if (ed.myMeta) {
                             if (ed.myMeta.remove) {
-                                //flagged for removal therefore don't incldude in  teh new SD...
+                                //flagged for removal therefore don't incldude in teh new SD...
                                 //actually, I don't think this will ever be the case as removed elements are not in the model
                                 inProfile = false;
                             } else if (ed.myMeta.isNew || (ed.myMeta.isExtension && ed.myMeta.isDirty)) {
@@ -622,11 +617,8 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 vo.valueName = valueName;           //  the name for the 'value' element - eg valueCodeableConcept
                                 vo.type = ed.myMeta.analysis.dataTypes;     //the type for extensios
                                 //vo.dt = dt;
-
-
+                                
                                 var extensionSD = makeExtensionSD(vo);
-
-
 
                                 SDsToSave.push(saveStructureDefinition(extensionId,extensionSD).then(
                                     function() {
@@ -770,7 +762,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 })
                             }
 
-                            deferred.resolve(differences);
+                            deferred.resolve({differences:differences,baseDefinition:baseDefinition});
 
                         },function(err){
                             console.log(err);
@@ -786,6 +778,14 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                 return deferred.promise;
             },
+
+
+            performDiff : function(profile1,profile2) {
+
+
+
+            },
+
             createISAValueSet : function(vo,terminologyServerRoot){
                 //create a valueset that is a 'is-a' of a given code. Used by the valueset creator to create the root valuesets
                 //vo = {display: name: concept: url:}

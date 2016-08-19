@@ -8,7 +8,7 @@ angular.module("sampleApp")
 //also holds the current patient and all their resources...
     //note that the current profile is maintained by resourceCreatorSvc
 
-    .service('appConfigSvc', function($localStorage,$http,$timeout) {
+    .service('appConfigSvc', function($localStorage,$http,$timeout,$q) {
 
         var dataServer;     //the currently selected data server server
         var currentPatient;    //the currently selected patint
@@ -66,15 +66,16 @@ angular.module("sampleApp")
 
         defaultConfig.allKnownServers.push({name:"Public HAPI server STU2 server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Public HAPI server STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true});
-
-
         defaultConfig.allKnownServers.push({name:"HL7 New Zealand STU2 server",url:"http://fhir.hl7.org.nz/baseDstu2/",version:2});
-
         defaultConfig.allKnownServers.push({name:'Ontoserver',version:3,url:"http://52.63.0.196:8080/fhir/"});
         defaultConfig.allKnownServers.push({name:'MiHIN',version:2,url:"http://52.72.172.54:8080/fhir/baseDstu2/"});
 
 
-
+        //place all the servers in a hash indexed by url. THis is used for the userConfig
+        var allServersHash = {};
+        defaultConfig.allKnownServers.forEach(function(server){
+            allServersHash[server.url] = server;
+        })
 
 
        // defaultConfig.allKnownServers.push({name:'Patients First Server',version:3,url:"http://its.patientsfirst.org.nz/RestService.svc/Terminz/"});
@@ -143,7 +144,7 @@ angular.module("sampleApp")
                     if (s.version == version) {
                         rtn.terminologyServers.push(s)
                         $localStorage.config.servers.terminology = s.url;
-                        config.log('setting  terminology server to '+s.url,'appConfig:config')
+                        console.log('setting  terminology server to '+s.url,'appConfig:config')
                     }
                 }
                 return rtn;
@@ -190,7 +191,7 @@ angular.module("sampleApp")
 
                 //return dataServer.url;
             },
-            getCurrentDataServer : function(sb) {
+            getCurrentDataServer : function() {
                 //return the currently selected data server
 
                 //need to get the definition for the data server. This is not pretty...
@@ -301,11 +302,86 @@ angular.module("sampleApp")
 
                 return lst;
             },
+            setProject : function(project) {
+                var deferred = $q.defer();
+                //set the 'recent profiles to a specific set. Used when setting up a 'project'...
+                //note that the actual profile is not inclded - just the url
+
+                //set the servers for the project...
+                this.setServerType('conformance',project.servers.conformance.url) ;
+                this.setServerType('data',project.servers.data.url) ;
+                this.setServerType('terminology',project.servers.terminology.url) ;
+
+                //set up the profiles in this project. First, set up the queries to load the profiles from the conformance server
+                var recentProfile = [];
+                var query = [];
+                project.profiles.forEach(function(profile){
+                    //assume that the profile.id is a direct reference to the profile on the conformance server
+                    var url = project.servers.conformance.url + "StructureDefinition/"+profile.id
+                    query.push (
+                        $http.get(url).then(
+                            function(data) {
+                                //add the profile to the 'recent profiles' list
+                                var profile = data.data;
+                                recentProfile.push({serverUrl:project.servers.conformance.url,profile:profile})
+
+                            },
+                            function(err){
+                                console.log('error loading profile ' +url+' from project')
+                            })
+                    )
+                    
+                    
+                });
+
+                //load all the profiles references in the project...
+                $q.all(query).then(
+                    function() {
+                        //recentProfile will be the list of profiles - set by the individual GET's above...
+                        console.log(recentProfile);
+                        $localStorage.recentProfile = recentProfile;
+                        var lst = [];
+                        recentProfile.forEach(function(p){
+                            lst.push(p.profile);
+                        })
+
+
+                        deferred.resolve(lst)     //return the list of profiles...
+                    }
+                );
+
+
+
+                return deferred.promise;
+            },
             clearProfileCache : function() {
                 delete $localStorage.recentProfile;
             },
             clearPatientCache : function() {
                 delete $localStorage.recentPatient;
+            },
+            loadUserConfig : function() {
+                //load the config for the current user. Right now, there are no users to it's all the same config
+                var deferred = $q.defer();
+                //load all the project. Eventually this could be user specific...
+                $http.get('artifacts/config.json').then(
+                    function(data) {
+                        var userConfig  = data.data;
+
+                        userConfig.projects.forEach(function(project){
+                            //set the servers to the server objects based on the url. Right now, the possible servers are hard coded...
+                            project.servers.conformance.server = allServersHash[project.servers.conformance.url];
+                            project.servers.terminology.server = allServersHash[project.servers.terminology.url];
+                            project.servers.data.server = allServersHash[project.servers.data.url];
+                        })
+
+                        deferred.resolve(userConfig)
+
+
+                    }
+                )
+                return deferred.promise;
+                
             }
         }
     });

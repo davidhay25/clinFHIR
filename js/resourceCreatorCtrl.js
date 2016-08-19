@@ -197,6 +197,30 @@ angular.module("sampleApp")
         });
     });
 
+
+
+    //load the user config
+    $scope.setProjectDEP = function() {
+
+
+        appConfigSvc.loadUserConfig().then(
+            function(data) {
+                $scope.userConfig = data;
+                console.log($scope.userConfig)
+                appConfigSvc.setProject(data.projects[0]).then(
+                    function(profiles) {
+                        console.log(profiles)
+
+                        $scope.input.conformanceServer = appConfigSvc.getCurrentConformanceServer();
+
+                    }
+                )   //set uo for a specific project
+
+            }
+        )
+    }
+
+            
             
     $scope.redrawMindMapDEP = function() {
         $rootScope.$broadcast('redrawMindMap')
@@ -2008,6 +2032,34 @@ angular.module("sampleApp")
 
         }
 
+        //loads the configuration for a project. Actually loads the user config as I have plans to extend...
+        $scope.setProject = function() {
+
+
+            appConfigSvc.loadUserConfig().then(
+                function(data) {
+                    $scope.userConfig = data;
+                    console.log($scope.userConfig)
+                    appConfigSvc.setProject(data.projects[0]).then(
+                        function(profiles) {
+                            console.log(profiles)
+
+                            //set the current servers on the scope - will update the displays as well...
+                            $scope.input.conformanceServer = appConfigSvc.getCurrentConformanceServer();
+                            $scope.input.dataServer = appConfigSvc.getCurrentDataServer();
+
+                            $scope.recent.profile = profiles;  //set the profiles display
+
+                            appConfigSvc.checkConsistency();    //will set the terminology server...
+
+
+                        }
+                    )   //set uo for a specific project
+
+                }
+            )
+        }
+
 
         //tests that the server is available by retrieving the conformance resource
         $scope.testServer = function(server,type) {
@@ -2097,6 +2149,9 @@ angular.module("sampleApp")
 
         //when a profile is selected in the list to build a resource from. It returns the profile (StructureDefinition resource)
         $scope.selectProfile = function(profile) {
+
+            console.log(profile)
+
             var clone = angular.copy(profile);
             $scope.localSelectedProfile = profile;
 
