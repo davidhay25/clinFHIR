@@ -93,6 +93,9 @@
 
 </div>
 
+<!--
+{{fbProjects}}
+-->
 
 <!-- Hide the front page when the profile editor is being displayed-->
 <div class="row" ng-hide="showProfileEditPage">
@@ -201,7 +204,7 @@
 
                 {{profile.url}}
 
-
+                <i class="glyphicon glyphicon-remove pull-right" ng-click="removeSavedProfile($event,$index)"></i>
 
             </li>
 

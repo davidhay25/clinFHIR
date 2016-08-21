@@ -1,106 +1,75 @@
 /*has been deprectde - don't call make function - expensive! */
 
 angular.module("sampleApp")
-    .controller('mmCtrl',
-        function ($scope,$rootScope,$timeout,profileCreatorSvc) {
+    .controller('projectCtrl',
+        function ($scope,$firebaseArray,appConfigSvc,modalService) {
 
+            //NOTE: assume the the rootScope.fbProjects has been bound in resourceCreator...
 
-            $rootScope.$on('profileSelected',function(event,profile){
-                //console.log(profile)
-                var nodes,edges, arEdges=[];
-                profileCreatorSvc.makeProfileDisplayFromProfile(profile).then(
-                    function(data) {
-                        //console.log(data)
-                        //create the array for the graph
-                        var arNodes = [];
-                        var objNodes = {};
+          //  var ref = firebase.database().ref().child("projects");
+            //console.log(ref)
+            // create a synchronized array
+          //  $scope.fbProjects = $firebaseArray(ref);
 
-                        //create the nodes
-                        data.treeData.forEach(function (item,inx) {
-                            objNodes[item.id] = inx;
+            $scope.projectMode = 'view';
+            $scope.input={};
+            
+            $scope.showProject = function(inx){
 
-                            //var ar = item.path.split('.');
+                $scope.projectMode = 'view';
+                $scope.currentProject = $scope.fbProjects[inx];
+                $scope.input.name =  $scope.currentProject.name;
+                $scope.input.description =  $scope.currentProject.description;
 
-                            //var node = {id:inx,label:item.path,shape:'box'};
-                            var node = {id:item.id,label:item.text,shape:'box',color:'#FFFCCF'};
-                            if (item.data) {
-                                node.ed = item.data.ed;
-                            }
-
-                            arNodes.push(node)
-                        });
-                        
-                        nodes = new vis.DataSet(arNodes);
-                        
-                        //create the edges
-                        data.treeData.forEach(function (item,inx) {
-                            var parentId = item.parent;
-                            if (parentId !== '#') {
-
-
-                                arEdges.push({from:item.id, to: parentId})
-                            }
-
-                           // var node = {id:inx,label:item.path,shape:'box'};
-                           // arNodes.push(node)
-                        });
-
-                        edges = new vis.DataSet(arEdges);
-                        var graphData = {
-                            nodes: nodes,
-                            edges: edges
-                        };
-
-                        //console.log(graphData);
-
-                        var options = {
-                            layout: {
-                                hierarchical: {
-                                    direction: "UD",
-                                    sortMethod: "hubsize"
-                                }
-                            },
-                            interaction: {dragNodes :false},
-                            physics: {
-                                enabled: false
-                            }
-                        };
-                        var optionsDP = {
-                            layout: {
-                                hierarchical: {
-                                    direction: "UD",
-                                    sortMethod: "directed"
-                                }
-                            }
-                        };
-
-                        var container = document.getElementById('mmDiv');
-                        $scope.network = new vis.Network(container, graphData, options);
-
-                        $scope.network.on("click", function (obj) {
-                            // console.log(obj)
-                            var nodeId = obj.nodes[0];  //get the first node
-                            console.log(nodeId,graphData)
-                            var node = graphData.nodes.get(nodeId);
-                            //console.log(node);
-                            $scope.selectedGraphNode = graphData.nodes.get(nodeId);
-                            console.log($scope.selectedGraphNode)
-                            $scope.$digest();
-                        });
-
-                    }
-                );
                 
-            });
+            };
 
-            $rootScope.$on('redrawMindMap',function(event,profile){
-                //console.log('redraw')
-                $timeout(function(){
-                    $scope.network.fit();
-                },500            )
+            $scope.removeProject = function(inx) {
+                $scope.fbProjects.$remove($scope.currentProject).then(function(ref){
+                    console.log('removed from server')
+                    delete $scope.currentProject;
+                })
+            };
+
+            $scope.updateProject = function(inx) {
+                $scope.currentProject.name = $scope.input.name;
+
+                $scope.currentProject.description = $scope.input.description;
+                $scope.fbProjects.$save($scope.currentProject).then(
+                    function(ref){
+                        modalService.showModal({}, {bodyText: 'Project has been updated'})
+                    },
+                    function(err){
+                        modalService.showModal({}, {bodyText: 'There was an error: '+err})
+                    }
+                )}
+            ;
 
 
-            });
+            $scope.newProject = function(){
+                delete $scope.input.name;
+                delete $scope.input.description;
+                $scope.input.servers = {};
+                $scope.projectMode='new';
+                $scope.input.servers.data = appConfigSvc.getCurrentDataServer();
+                $scope.input.servers.conformance = appConfigSvc.getCurrentConformanceServer();
+               // $scope.input.servers.terminology
+                
+            };
+            
+            $scope.addProject = function(){
+                var project = {name:$scope.input.name,description:$scope.input.description,profiles:[]};
+                project.servers = {};
+
+                project.servers.data = $scope.input.servers.data ;
+                project.servers.conformance = $scope.input.servers.conformance;
+
+                $scope.fbProjects.$add(project).then(function(ref){
+                    console.log('added to server')
+                },function(err){
+                    alert('There was an error:'  + err)
+                })
+            }
 
 
         });

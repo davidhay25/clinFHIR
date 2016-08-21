@@ -44,6 +44,13 @@
         }
     </style>
 
+
+
+    <script src="https://www.gstatic.com/firebasejs/3.3.0/firebase.js"></script>
+
+    <!-- AngularFire -->
+    <script src="https://cdn.firebase.com/libs/angularfire/2.0.1/angularfire.min.js"></script>
+
     <script>
         //http://stackoverflow.com/questions/18214835/angularjs-how-to-enable-locationprovider-html5mode-with-deeplinking
         //http://www.ng-newsletter.com/posts/angular-translate.html
@@ -58,7 +65,18 @@
 
         }]);
 */
-        angular.module("sampleApp",['ui.checkbox','ngAnimate','ngCookies','ui.bootstrap','ngSanitize','angular-toArrayFilter','ngStorage','pascalprecht.translate','dndLists'])
+
+
+        var config = {
+            apiKey: "AIzaSyBNMohLbPiSKwpGwfARopdeW_6LLXujcUo",
+            authDomain: "clinfhir.firebaseapp.com",
+            databaseURL: "https://clinfhir.firebaseio.com",
+            storageBucket: ""
+        };
+        firebase.initializeApp(config);
+
+        angular.module("sampleApp",['ui.checkbox','ngAnimate','ngCookies','ui.bootstrap','ngSanitize',
+            'angular-toArrayFilter','ngStorage','pascalprecht.translate','dndLists',"firebase"])
 
         angular.module("sampleApp").constant("moment", moment);
 
@@ -186,6 +204,7 @@
     <script src="js/searchForResourceCtrl.js"></script>
     <script src="js/resourceSvc.js"></script>
     <script src="js/menuCtrl.js"></script>
+    <script src="js/projectCtrl.js"></script>
     <script src="js/modalDialogSvc.js"></script>
     <script src="js/autoFocus.js"></script>
 
@@ -235,6 +254,36 @@
 
 
     </style>
+
+
+
+
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyBNMohLbPiSKwpGwfARopdeW_6LLXujcUo",
+            authDomain: "clinfhir.firebaseapp.com",
+            databaseURL: "https://clinfhir.firebaseio.com",
+            storageBucket: ""
+        };
+     //   firebase.initializeApp(config);
+
+/*
+        firebase.database().ref('project/list').set({
+            names: [
+                {name:'test'}
+            ]
+        });
+*/
+        /*
+        firebase.database().ref('project/list').once('value').then(function(snapshot) {
+            console.log(snapshot.val())
+        });
+
+        */
+
+    </script>
+
 
 </head>
 
@@ -432,7 +481,9 @@
                             <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
                                 <li uib-dropdown>
 
-                                    <a href="#" uib-dropdown-toggle>
+                                    <a href="#" uib-dropdown-toggle
+                                       uib-popover="Edit projects & create new ones. Select servers first." popover-trigger="'mouseenter'"
+                                       popover-placement="left">
                                         <span style="font-size:2em; cursor: pointer">
                                             <i class="glyphicon glyphicon-bookmark"></i>
                                         </span>
@@ -443,13 +494,31 @@
                                     <ul class="dropdown-menu" role="menu">
 
                                         <li>
-                                            <a href="projectEditor.html" target="_blank">Project editor</a>
+
+                                            <a href="#" ng-click="showProjectEditor()"
+                                               uib-popover="Edit projects & create new ones. Select servers first." popover-trigger="'mouseenter'"
+                                               popover-placement="left">
+
+                                                    Project editor
+                                            </a>
+
+
+
                                         </li>
 
                                         <li class="divider"></li>
 
-                                        <li ng-repeat="project in userConfig.projects">
-                                            <a href="#" ng-click="loadProject($index)">{{project.name}}</a>
+
+
+                                        <!-- <li ng-repeat="project in userConfig.projects">-->
+                                        <li ng-repeat="project in fbProjects">
+                                            <a href="#" ng-click="loadProject($index)"
+                                               uib-popover="{{project.description}}"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">
+
+                                                {{project.name}}
+                                            </a>
                                         </li>
 
                                         <li ng-show="currentProject" class="divider"></li>
@@ -518,6 +587,15 @@
             -->
 
 
+            <div ng-show="displayMode == 'project'" ng-controller="projectCtrl">
+           <!-- <div  ng-controller="projectCtrl">-->
+
+                <ng-include src="'/includes/projectEditor.html'"></ng-include>
+
+                <hr/>
+            </div>
+
+
 
             <div ng-show="displayMode == 'front'" ng-controller="frontCtrl">
                 <ng-include src="'/includes/frontPage.html'"></ng-include>
@@ -537,6 +615,7 @@
             <div ng-show="displayMode == 'view'">
                 <ng-include src="'/includes/resourceViewer.html'"></ng-include>
             </div>
+
 
 
             <button class="btn btn-link" ng-click="displayMode = 'consult'">ConsultBuilder</button>

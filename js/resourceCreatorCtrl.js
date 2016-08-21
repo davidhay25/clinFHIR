@@ -14,7 +14,7 @@ angular.module("sampleApp")
     .controller('resourceCreatorCtrl',
         function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,$translate,
                   $localStorage,RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,
-                  $location,resourceSvc,$window,$timeout) {
+                  $location,resourceSvc,$window,$timeout,$firebaseArray) {
 
 
 
@@ -45,6 +45,11 @@ angular.module("sampleApp")
 
             */
 
+
+    var ref = firebase.database().ref().child("projects");
+    console.log(ref)
+    // create a synchronized array
+    $rootScope.fbProjects = $firebaseArray(ref);
 
 
     var profile;                    //the profile being used as the base
@@ -200,16 +205,32 @@ angular.module("sampleApp")
 
 
     //load the user config
+/*
+    function loadAllProjects() {
+        var url = serverBase + "Basic?code=http://clinfhir.com/fhir/NamingSystem/cf|project";      //todo add patient
+        $http.get(url).then(
+            function(data) {
+                //console.log(data);
+                $rootScope.allP = data.data;    //this is a bundle of Basic resources
 
+            }
+        );
+    }
+    load();
 
-
+            */
+/*
     appConfigSvc.loadUserConfig().then(
         function(data) {
             $rootScope.userConfig = data;
 
         }
-    )
-
+    );
+*/
+    //from the project menu, show the editor
+    $scope.showProjectEditor = function(){
+        $scope.displayMode = 'project';
+    }
 
             
             
@@ -1386,9 +1407,14 @@ angular.module("sampleApp")
     $scope.selectedProfileFromDialog = function(profile) {
 
 
-        //console.log(clone)
-
         resourceCreatorSvc.setCurrentProfile(profile);
+
+        //if there's a profile active, then update it. todo need tothink about security for this...
+        if ($rootScope.currentProject) {
+            appConfigSvc.addProfileToProject(profile,$rootScope.currentProject,$rootScope.fbProjects)
+            
+        }
+
 
         $scope.dirty=false;     //a new form is loaded
         $scope.parkedHx = false;
@@ -1925,7 +1951,24 @@ angular.module("sampleApp")
         
     })
     .controller('frontCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,
-                                     $translate,$interval,GetDataFromServer){
+                                     $translate,$interval,GetDataFromServer,$firebaseArray){
+
+
+
+        //var ref = firebase.database().ref().child("projects");
+        //console.log(ref)
+        // create a synchronized array
+        //$scope.fbProjects = $firebaseArray(ref);
+
+        //var ref = firebase.database().ref().child("projects");
+
+        // create a synchronized array
+       // $scope.fbProjects = firebase.database().ref().child("projects"); //$firebaseArray(ref);
+      //  console.log($scope.fbProjects)
+        //$scope.fbProjects.$add({'test':'test'})
+
+
+        //console.log($scope.fbProjects)
 
 
         $scope.showHelp = true;
@@ -1984,10 +2027,16 @@ angular.module("sampleApp")
 
 
 
+
         //called when the user selects a project from the project menu
         $rootScope.loadProject = function(inx){
-//          console.log(inx)
-            $rootScope.currentProject = $rootScope.userConfig.projects[inx];
+            $rootScope.$broadcast('setWaitingFlag',true);
+
+            $rootScope.currentProject = $rootScope.fbProjects[inx];
+
+
+          console.log($rootScope.currentProject)
+            //$rootScope.currentProject = $rootScope.userConfig.projects[inx];
 
 
             appConfigSvc.setProject($rootScope.currentProject).then(
@@ -2000,7 +2049,7 @@ angular.module("sampleApp")
                     $scope.recent.profile = profiles;  //set the profiles display
 
                     appConfigSvc.checkConsistency();    //will set the terminology server...
-
+                    $rootScope.$broadcast('setWaitingFlag',false);
 
                 }
             )   //set uo for a specific project
@@ -2032,6 +2081,23 @@ angular.module("sampleApp")
 
         };
 
+
+        //removing a profile from the list
+        $scope.removeSavedProfile = function(event,inx){
+            event.stopPropagation();        //prevevnt trying to select the profile..
+            var profile = $scope.recent.profile[inx]
+            appConfigSvc.removeRecentProfile(inx);
+            $scope.recent.profile = appConfigSvc.getRecentProfile();
+            
+            
+            
+             if ($rootScope.currentProject) {
+                appConfigSvc.removeProfileFromProject(profile,$rootScope.currentProject,$rootScope.fbProjects)
+
+             }
+
+            
+        };
 
         //when the page is closed in the profile editor. Needs to inform the parent page to close the editor...
         $rootScope.$on('closeProfileEditPage',function(){

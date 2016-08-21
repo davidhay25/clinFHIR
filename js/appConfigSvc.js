@@ -291,6 +291,11 @@ angular.module("sampleApp")
                 }
                 
             },
+            removeRecentProfile : function(inx) {
+                //remove the profile from the 'recents'list. If a project is active and in edit mode, then remove from the project as well
+                $localStorage.recentProfile.splice(inx,1);
+                //return $localStorage.recentProfile;
+            },
             getRecentProfile : function(){
                 //get the list of recent profiles from the current conformance server
                 var conformanceServerUrl = $localStorage.config.servers.conformance;
@@ -327,32 +332,36 @@ angular.module("sampleApp")
                 var recentProfile = [];
                 var query = [];
                 var conformanceSvr = this.getCurrentConformanceServer();    //this may heve been set by the project above...
-                project.profiles.forEach(function(profile){
+                
+                if (project.profiles) {
+                    project.profiles.forEach(function(profile){
 
-                    //if the profile entry in the project has a conformance server, then use that. Otherwise use the system default
-                    
+                        //if the profile entry in the project has a conformance server, then use that. Otherwise use the system default
 
-                    var url = conformanceSvr.url + "StructureDefinition/"+profile.id
-                    //var url = project.servers.conformance.url + "StructureDefinition/"+profile.id
-                    if (profile.conformance) {
-                        url = profile.conformance + "StructureDefinition/"+profile.id
-                    }
 
-                    query.push (
-                        $http.get(url).then(
-                            function(data) {
-                                //add the profile to the 'recent profiles' list
-                                var profile = data.data;
-                                recentProfile.push({serverUrl:project.servers.conformance.url,profile:profile})
+                        var url = conformanceSvr.url + "StructureDefinition/"+profile.id
+                        //var url = project.servers.conformance.url + "StructureDefinition/"+profile.id
+                        if (profile.conformance) {
+                            url = profile.conformance + "StructureDefinition/"+profile.id
+                        }
 
-                            },
-                            function(err){
-                                console.log('error loading profile ' +url+' from project')
-                            })
-                    )
-                    
-                    
-                });
+                        query.push (
+                            $http.get(url).then(
+                                function(data) {
+                                    //add the profile to the 'recent profiles' list
+                                    var profile = data.data;
+                                    recentProfile.push({serverUrl:project.servers.conformance.url,profile:profile})
+
+                                },
+                                function(err){
+                                    console.log('error loading profile ' +url+' from project')
+                                })
+                        )
+
+
+                    });
+                }
+
 
                 //load all the profiles references in the project...
                 $q.all(query).then(
@@ -373,6 +382,42 @@ angular.module("sampleApp")
 
 
                 return deferred.promise;
+            },
+            addProfileToProject : function (profile,project,fireBase) {
+                //adds the profile to the current project (if not already present)
+                project.profiles = project.profiles || []
+                var isInProject = false;
+                project.profiles.forEach(function(p){
+                    if (p.url == profile.url) {
+                        isInProject = true;
+                    }
+                })
+
+                if (!isInProject) {
+                    project.profiles.push({"name" :"profile","id" : profile.id,url:profile.url});
+                    fireBase.$save(project)
+                }
+
+                
+                
+            },
+            removeProfileFromProject : function (profile,project,fireBase) {
+                //adds the profile to the current project (if not already present)
+                project.profiles = project.profiles || []
+                var index = -1;
+                project.profiles.forEach(function(p,inx){
+                    if (p.url == profile.url) {
+                        index = inx
+                    }
+                })
+
+                if (index > -1) {
+                    project.profiles.splice(index,1);
+                    fireBase.$save(project)
+                }
+
+
+
             },
             clearProfileCache : function() {
                 delete $localStorage.recentProfile;
