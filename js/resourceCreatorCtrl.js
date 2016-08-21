@@ -188,6 +188,13 @@ angular.module("sampleApp")
     $rootScope.$on('patientSelected',function(event,patient){
 
         appConfigSvc.addToRecentPatient(patient);
+
+        //if there's a project active, then update it. todo need tothink about security for this...
+        if ($rootScope.currentProject) {
+           appConfigSvc.addPatientToProject(patient,$rootScope.currentProject,$rootScope.fbProjects)
+
+        }
+
         $scope.recent.patient = appConfigSvc.getRecentPatient();
 
         loadPatientDetails(function(patient){
@@ -1409,7 +1416,7 @@ angular.module("sampleApp")
 
         resourceCreatorSvc.setCurrentProfile(profile);
 
-        //if there's a profile active, then update it. todo need tothink about security for this...
+        //if there's a project active, then update it. todo need tothink about security for this...
         if ($rootScope.currentProject) {
             appConfigSvc.addProfileToProject(profile,$rootScope.currentProject,$rootScope.fbProjects)
             
@@ -2018,11 +2025,13 @@ angular.module("sampleApp")
         //when the cache of profiles for this browser is reset
         $rootScope.$on('clearProfileCache',function(event){
             $scope.recent.profile = appConfigSvc.getRecentProfile();
+            delete $rootScope.currentProject;
         });
 
         //when the cache of patients for this browser is reset
         $rootScope.$on('clearPatientCache',function(event){
             $scope.recent.patient = appConfigSvc.getRecentPatient();
+            delete $rootScope.currentProject;
         });
 
 
@@ -2040,13 +2049,17 @@ angular.module("sampleApp")
 
 
             appConfigSvc.setProject($rootScope.currentProject).then(
-                function(profiles) {
+                function(vo) {
+                    var profiles = vo.profiles;
                     console.log(profiles)
 
                     //set the current servers on the scope - will update the displays as well...
                     $scope.input.conformanceServer = appConfigSvc.getCurrentConformanceServer();
                     $scope.input.dataServer = appConfigSvc.getCurrentDataServer();
                     $scope.recent.profile = profiles;  //set the profiles display
+
+
+                    $scope.recent.patient = vo.patients;
 
                     appConfigSvc.checkConsistency();    //will set the terminology server...
                     $rootScope.$broadcast('setWaitingFlag',false);
@@ -2084,19 +2097,26 @@ angular.module("sampleApp")
 
         //removing a profile from the list
         $scope.removeSavedProfile = function(event,inx){
-            event.stopPropagation();        //prevevnt trying to select the profile..
+            event.stopPropagation();        //prevent trying to select the profile..
             var profile = $scope.recent.profile[inx]
             appConfigSvc.removeRecentProfile(inx);
             $scope.recent.profile = appConfigSvc.getRecentProfile();
-            
-            
-            
              if ($rootScope.currentProject) {
                 appConfigSvc.removeProfileFromProject(profile,$rootScope.currentProject,$rootScope.fbProjects)
 
              }
+        };
 
-            
+        //removing a patient from the list
+        $scope.removeSavedPatient = function(event,inx){
+            event.stopPropagation();        //prevent trying to select the profile..
+            var patient = $scope.recent.patient[inx]
+            appConfigSvc.removeRecentPatient(inx);
+            $scope.recent.patient = appConfigSvc.getRecentPatient();
+            if ($rootScope.currentProject) {
+                appConfigSvc.removePatientFromProject(patient,$rootScope.currentProject,$rootScope.fbProjects)
+
+            }
         };
 
         //when the page is closed in the profile editor. Needs to inform the parent page to close the editor...

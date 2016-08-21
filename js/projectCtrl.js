@@ -33,7 +33,7 @@ angular.module("sampleApp")
 
             $scope.updateProject = function(inx) {
                 $scope.currentProject.name = $scope.input.name;
-
+                $scope.currentProject.updated = moment().format();
                 $scope.currentProject.description = $scope.input.description;
                 $scope.fbProjects.$save($scope.currentProject).then(
                     function(ref){
@@ -59,6 +59,7 @@ angular.module("sampleApp")
             
             $scope.addProject = function(){
                 var project = {name:$scope.input.name,description:$scope.input.description,profiles:[]};
+                project.created = moment().format();
                 project.servers = {};
 
                 project.servers.data = $scope.input.servers.data ;

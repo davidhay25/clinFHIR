@@ -21,51 +21,57 @@
                     <uib-tab heading="Form">
 
                         <div class="row">
-                            <div class="col-md-6 col-sm-6">
+                            <div class="col-md-4 col-sm-4">
 
                                 <form>
-                            <div class="row">
-                                <div class="col-md-4 col-sm-4">
-                                    <div class="form-group">
-                                        <label>Name</label>
-                                        <input type="text" ng-model="input.name" class="form-control">
+                                    <div class="row">
+                                        <div class="col-md-12 col-sm-12">
+                                            <div class="form-group">
+                                                <label>Name</label>
+                                                <input type="text" ng-model="input.name" class="form-control">
+                                            </div>
+
+                                        </div>
                                     </div>
 
-                                </div>
-                            </div>
 
+                                    <div class="row">
+                                        <div class="col-md-12 col-sm-12">
+                                            <label>Description</label>
+                                            <textarea rows="3" ng-model="input.description" class="form-control"
+                                                      placeholder="Description of the project"></textarea>
+                                        </div>
 
-                            <div class="row">
-                                <div class="col-md-4 col-sm-4">
-                                    <label>Description</label>
-                                    <textarea rows="3" ng-model="input.description" class="form-control"
-                                              placeholder="Description of the project"></textarea>
-                                </div>
-
-                                <div class="col-md-4 col-sm-4">
-
-                                </div>
-
-                            </div>
+                                    </div>
 
                                     <br />
-                            <div class="row">
-                                <div class="col-md-4 col-sm-4">
-                                    <button class="btn btn-danger pull-right" ng-click="updateProject()">Update Project</button>
-                                </div>
+                                    <div class="row">
+                                        <div class="col-md-12 col-sm-12">
+                                            <button class="btn btn-danger pull-right" ng-click="updateProject()">Update Project</button>
+                                        </div>
+                                    </div>
+
+
+
+
+                                </form>
                             </div>
-
-
-
-
-                        </form>
-                            </div>
-                            <div class="col-md-6 col-sm-6">
+                            <div class="col-md-4 col-sm-4">
                                 <h4>Profiles in project</h4>
                                 <div class="list-group">
                                     <div class="list-group-item" ng-repeat="profile in currentProject.profiles"
                                          style="cursor: pointer">
                                         {{profile.url}}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 col-sm-4">
+                                <h4>Patients in project</h4>
+                                <div class="list-group">
+                                    <div class="list-group-item" ng-repeat="patient in currentProject.patients"
+                                         style="cursor: pointer">
+                                        {{patient.name}}
                                     </div>
                                 </div>
                             </div>

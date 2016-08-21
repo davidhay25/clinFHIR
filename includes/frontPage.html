@@ -88,7 +88,7 @@
 
 <div ng-show="currentProject">
     <div class="banner">
-        {{currentProject.name}}
+        Project: {{currentProject.name}}
     </div>
 
 </div>
@@ -115,6 +115,7 @@
         <div class="row">
             <div class="col-md-8 col-sm-8">
                 <select class="form-control"
+                        ng-disabled = "currentProject"
                         ng-change="selectServer('data',input.dataServer)"
                         ng-options="value.name for value in config.allKnownServers track by value.name"
                         ng-model="input.dataServer">
@@ -136,16 +137,17 @@
 
         <br />
 
-        <div class="list-group">
-            <a href="#" ng-class="{'list-group-item':true,active:patient.id == appConfigSvc.getCurrentPatient().id}"
+        <ul class="list-group">
+            <li href="#" ng-class="{'list-group-item':true,myactive:patient.id == appConfigSvc.getCurrentPatient().id}"
                ng-repeat="patient in recent.patient"
-               ng-model="input.recentProfile" ng-click = "selectPatient(patient)">
+               ng-model="input.recentProfile" ng-click = "selectPatient(patient)"
+                style="cursor: pointer">
                 {{ResourceUtilsSvc.getOneLineSummaryOfResource(patient)}}
 
+                <i class="glyphicon glyphicon-remove pull-right" ng-click="removeSavedPatient($event,$index)"></i>
 
-
-            </a>
-        </div>
+            </li>
+        </ul>
 
     </div>
 
@@ -170,6 +172,7 @@
         <div class="row">
             <div class="col-md-10 col-sm-10">
                 <select class="form-control"
+                        ng-disabled = "currentProject"
                         ng-change="selectServer('conformance',input.conformanceServer)"
                         ng-options="value.name for value in config.allKnownServers track by value.name"
                         ng-model="input.conformanceServer">

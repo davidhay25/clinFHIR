@@ -8,7 +8,7 @@ angular.module("sampleApp")
 //also holds the current patient and all their resources...
     //note that the current profile is maintained by resourceCreatorSvc
 
-    .service('appConfigSvc', function($localStorage,$http,$timeout,$q) {
+    .service('appConfigSvc', function($localStorage,$http,$timeout,$q,ResourceUtilsSvc) {
 
         var dataServer;     //the currently selected data server server
         var currentPatient;    //the currently selected patint
@@ -296,6 +296,11 @@ angular.module("sampleApp")
                 $localStorage.recentProfile.splice(inx,1);
                 //return $localStorage.recentProfile;
             },
+            removeRecentPatient : function(inx) {
+                //remove the profile from the 'recents'list. If a project is active and in edit mode, then remove from the project as well
+                $localStorage.recentPatient.splice(inx,1);
+                //return $localStorage.recentProfile;
+            },
             getRecentProfile : function(){
                 //get the list of recent profiles from the current conformance server
                 var conformanceServerUrl = $localStorage.config.servers.conformance;
@@ -326,10 +331,9 @@ angular.module("sampleApp")
                 }
 
 
-                //this.setServerType('terminology',project.servers.terminology.url) ;
-
                 //set up the profiles in this project. First, set up the queries to load the profiles from the conformance server
                 var recentProfile = [];
+                var recentPatient = [];
                 var query = [];
                 var conformanceSvr = this.getCurrentConformanceServer();    //this may heve been set by the project above...
                 
@@ -337,8 +341,6 @@ angular.module("sampleApp")
                     project.profiles.forEach(function(profile){
 
                         //if the profile entry in the project has a conformance server, then use that. Otherwise use the system default
-
-
                         var url = conformanceSvr.url + "StructureDefinition/"+profile.id
                         //var url = project.servers.conformance.url + "StructureDefinition/"+profile.id
                         if (profile.conformance) {
@@ -362,6 +364,23 @@ angular.module("sampleApp")
                     });
                 }
 
+                if (project.patients) {
+                    project.patients.forEach(function(patient){
+                        var url = project.servers.data.url + "Patient/"+patient.id
+                        query.push (
+                            $http.get(url).then(
+                                function(data) {
+
+                                    recentPatient.push(data.data)
+
+                                },
+                                function(err){
+                                    console.log('error loading patient ' +url+' from project')
+                                })
+                        )
+                    });
+                }
+
 
                 //load all the profiles references in the project...
                 $q.all(query).then(
@@ -375,7 +394,7 @@ angular.module("sampleApp")
                         })
 
 
-                        deferred.resolve(lst)     //return the list of profiles...
+                        deferred.resolve({profiles:lst,patients:recentPatient})     //return the list of profiles...
                     }
                 );
 
@@ -394,12 +413,29 @@ angular.module("sampleApp")
                 })
 
                 if (!isInProject) {
-                    project.profiles.push({"name" :"profile","id" : profile.id,url:profile.url});
+                    project.profiles.push({"name" :"profile","id" : profile.id,url:profile.url,added: moment().format()});
                     fireBase.$save(project)
                 }
 
-                
-                
+            },
+            addPatientToProject : function (patient,project,fireBase) {
+                //adds the patient to the current project (if not already present)
+                project.patients = project.patients || [];
+                var isInProject = false;
+                project.patients.forEach(function(p){
+                    if (p.id == patient.id) {
+                        isInProject = true;
+                    }
+                });
+
+                if (!isInProject) {
+                    var patientDisplay = ResourceUtilsSvc.getOneLineSummaryOfResource(patient);
+                    project.patients.push({"name" :patientDisplay,"id" : patient.id,added: moment().format()});
+                    fireBase.$save(project)
+                }
+
+
+
             },
             removeProfileFromProject : function (profile,project,fireBase) {
                 //adds the profile to the current project (if not already present)
@@ -413,6 +449,24 @@ angular.module("sampleApp")
 
                 if (index > -1) {
                     project.profiles.splice(index,1);
+                    fireBase.$save(project)
+                }
+
+
+
+            },
+            removePatientFromProject : function (patient,project,fireBase) {
+                //adds the profile to the current project (if not already present)
+                project.patients = project.patients || []
+                var index = -1;
+                project.patients.forEach(function(p,inx){
+                    if (p.id == patient.id) {
+                        index = inx
+                    }
+                })
+
+                if (index > -1) {
+                    project.patients.splice(index,1);
                     fireBase.$save(project)
                 }
 
