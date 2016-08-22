@@ -52,6 +52,8 @@ angular.module("sampleApp")
     $rootScope.fbProjects = $firebaseArray(ref);
 
 
+
+
     var profile;                    //the profile being used as the base
     var type;                       //base type
     $scope.treeData = [];           //populates the resource tree
@@ -1413,12 +1415,20 @@ angular.module("sampleApp")
     //when a profile is selected...  This is configured in the directive...  Now called from the front page
     $scope.selectedProfileFromDialog = function(profile) {
 
+        var adhocServer;
+        if (profile.adhocServer) {
+            //if profile.adhocServer is set, then this is an adhoc selection...
+
+            adhocServer = profile.adhocServer;
+            delete profile.adhocServer;
+            
+        }
 
         resourceCreatorSvc.setCurrentProfile(profile);
 
         //if there's a project active, then update it. todo need tothink about security for this...
         if ($rootScope.currentProject) {
-            appConfigSvc.addProfileToProject(profile,$rootScope.currentProject,$rootScope.fbProjects)
+            appConfigSvc.addProfileToProject(profile,$rootScope.currentProject,$rootScope.fbProjects,adhocServer)
             
         }
 
@@ -1962,20 +1972,7 @@ angular.module("sampleApp")
 
 
 
-        //var ref = firebase.database().ref().child("projects");
-        //console.log(ref)
-        // create a synchronized array
-        //$scope.fbProjects = $firebaseArray(ref);
 
-        //var ref = firebase.database().ref().child("projects");
-
-        // create a synchronized array
-       // $scope.fbProjects = firebase.database().ref().child("projects"); //$firebaseArray(ref);
-      //  console.log($scope.fbProjects)
-        //$scope.fbProjects.$add({'test':'test'})
-
-
-        //console.log($scope.fbProjects)
 
 
         $scope.showHelp = true;
@@ -2042,6 +2039,7 @@ angular.module("sampleApp")
             $rootScope.$broadcast('setWaitingFlag',true);
 
             $rootScope.currentProject = $rootScope.fbProjects[inx];
+            delete $rootScope.currentProject.canEdit;       //start out not editing
 
 
           console.log($rootScope.currentProject)
@@ -2060,6 +2058,7 @@ angular.module("sampleApp")
 
 
                     $scope.recent.patient = vo.patients;
+                    
 
                     appConfigSvc.checkConsistency();    //will set the terminology server...
                     $rootScope.$broadcast('setWaitingFlag',false);
@@ -2244,7 +2243,7 @@ angular.module("sampleApp")
         //<select-profile on the resourceCreator page...
         $scope.findProfile = function() {
             $scope.showFindProfileDialog.open();    //note that this is defined in the parent controller...
-            //note that the function $scope.selectedProfile in the parnt controller is invoked on successful selection...
+            //note that the function $scope.selectedProfile in the parent (resourceCreator) controller is invoked on successful selection...
         };
 
         //when a patient is selected in the list...

@@ -127,7 +127,7 @@
 
                 </form>
             </uib-tab>
-            <uib-tab index="1" >
+            <uib-tab index="1">
                 <uib-tab-heading>Results <span class="badge">{{selectedProfiles.entry.length}}</span> </uib-tab-heading>
                 <!-- after resources have been selected...-->
                 <br/>
@@ -162,8 +162,47 @@
 
 
             </uib-tab>
+            <uib-tab index="2" heading="Select directly" >
 
-            <uib-tab index="2" ng-show="recent.length > 0">
+                <br/>
+                <div class="row">
+                    <div class="col-md-4 col-sm-4">
+                        <select class="form-control"
+                                ng-change="selectServer('data',input.dataServer)"
+                                ng-options="value.name for value in config.allKnownServers track by value.name"
+                                ng-model="input.adhocServer">
+
+                        </select>
+                        <br/>
+                        <form>
+                            <div class="row">
+                                <div class="col-md-12 col-sm-12">
+                                    <div class="form-group">
+                                        <label>Id</label>
+                                        <input type="text" ng-model="input.adhocId" class="form-control"
+                                               placeholder="Enter the id of the profile">
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 col-sm-12">
+                                    <button ng-show="input.adhocServer && input.adhocId"
+                                            class="btn btn-primary" ng-click="adhocProfile()">Select Profile</button>
+
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                    <div class="col-md-4 col-sm-4">
+                    </div>
+                </div>
+
+
+
+            </uib-tab>
+            <uib-tab index="3" ng-show="recent.length > 0">
                 <uib-tab-heading>Recent <span class="badge">{{recent.length}}</span> </uib-tab-heading>
                 <div class="list-group">
                     <div href="#" class="list-group-item" ng-repeat="profile in recent track by $index"
@@ -201,8 +240,10 @@
 
             </div>
             <div class="col-md-3 col-sm-3">
+                <!--
                 <button class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
                 <button ng-show="selectedProfile" class="btn btn-primary" ng-click="$close()">Select</button>
+                -->
             </div>
         </div>
 

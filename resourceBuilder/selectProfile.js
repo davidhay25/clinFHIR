@@ -25,8 +25,11 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                 $uibModal.open({
                     templateUrl: 'resourceBuilder/selectProfile.html',
                     size:'lg',
-                    controller: function($scope,type,profileSelectedFn,allResourceTypes,vo,recent,config) {
+                    controller: function($scope,type,profileSelectedFn,allResourceTypes,vo,recent,config,appConfigSvc,modalService) {
 
+
+                        $scope.config = appConfigSvc.config();
+                        $scope.input = {};
                         $scope.heading = "Find Profile or Base Type";
 
                         if (vo) {
@@ -51,6 +54,26 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                         $scope.profileSelectedFn = profileSelectedFn;
 
 
+                        //load a profile by selecting directly
+                        $scope.adhocProfile = function(){
+                            var server = $scope.input.adhocServer;
+                            var id = $scope.input.adhocId;
+                            var url = server.url + 'StructureDefinition/'+id;
+                            $scope.showWaiting = true;
+                            GetDataFromServer.adHocFHIRQuery(url).then(
+                                function(data){
+                                    var profile = data.data;
+                                    profile.adhocServer = server;
+                                    $scope.$close(profile);
+                                },
+                                function(err){
+                                    modalService.showModal({}, {bodyText: 'Sorry, that profile was not found:\n '+url})
+                                }
+                            ).finally(function(){
+                                $scope.showWaiting = false;
+                            })
+
+                        };
 
 
                         //the display for the list of core resources - adds the (reference) label...
@@ -108,7 +131,7 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                             //config.log('Profile search string',searchString);
 
 
-                            $scope.query=   searchString;
+                            $scope.query = searchString;
 
 
 

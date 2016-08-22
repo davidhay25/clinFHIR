@@ -88,7 +88,23 @@
 
 <div ng-show="currentProject">
     <div class="banner">
-        Project: {{currentProject.name}}
+        Project: {{currentProject.name}}.
+        <span ng-show="currentProject.canEdit"> Changes WILL be synced.</span>
+        <span ng-hide="currentProject.canEdit"> Changes will NOT be synced.</span>
+
+
+            <button style="padding-top: 0px"  ng-hide="currentProject.canEdit"
+                    ng-click = "currentProject.canEdit = true"
+                    class="btn btn-link pull-right">Click to enable editing</button>
+
+            <button style="padding-top: 0px"  ng-show="currentProject.canEdit"
+                    ng-click = "currentProject.canEdit = false"
+                    class="btn btn-link pull-right">Click to stop editing</button>
+
+
+
+
+
     </div>
 
 </div>
@@ -140,7 +156,7 @@
         <ul class="list-group">
             <li href="#" ng-class="{'list-group-item':true,myactive:patient.id == appConfigSvc.getCurrentPatient().id}"
                ng-repeat="patient in recent.patient"
-               ng-model="input.recentProfile" ng-click = "selectPatient(patient)"
+               ng-model="input.recentPatient" ng-click = "selectPatient(patient)"
                 style="cursor: pointer">
                 {{ResourceUtilsSvc.getOneLineSummaryOfResource(patient)}}
 

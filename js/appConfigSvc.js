@@ -269,6 +269,26 @@ angular.module("sampleApp")
 
                 return lst;
             },
+            setRecentPatientForServer : function(patients,serverUrl){
+                //used when selecting a project
+                $localStorage.recentPatient = $localStorage.recentPatient || []
+
+                var newList = [];
+                //copy all the existing entries for another server to this one...
+                $localStorage.recentPatient.forEach(function(recentP){
+                    if (recentP.serverUrl != serverUrl) {
+                        newList.push({serverUrl:serverUrl,patient:recentP.patient});
+                    }
+                });
+
+                //now add the ones from the project...
+                patients.forEach(function(patient){
+                    newList.push({serverUrl:serverUrl, patient:patient});
+                });
+
+                $localStorage.recentPatient =newList;
+
+            },
             addToRecentProfile : function(profile) {
                 //add to the list of recent profiles...
                 //replace any existing one - (changes may connectathon)
@@ -318,6 +338,7 @@ angular.module("sampleApp")
             },
             setProject : function(project) {
                 var deferred = $q.defer();
+                var that = this;
                 //set the 'recent profiles to a specific set. Used when setting up a 'project'...
                 //note that the actual profile is not inclded - just the url
 
@@ -388,10 +409,14 @@ angular.module("sampleApp")
                         //recentProfile will be the list of profiles - set by the individual GET's above...
                         console.log(recentProfile);
                         $localStorage.recentProfile = recentProfile;
+
+
                         var lst = [];
                         recentProfile.forEach(function(p){
                             lst.push(p.profile);
                         })
+
+                        that.setRecentPatientForServer(recentPatient,project.servers.data.url);
 
 
                         deferred.resolve({profiles:lst,patients:recentPatient})     //return the list of profiles...
@@ -400,9 +425,11 @@ angular.module("sampleApp")
 
 
 
+
                 return deferred.promise;
             },
-            addProfileToProject : function (profile,project,fireBase) {
+            addProfileToProject : function (profile,project,fireBase,adhocServer) {
+                if (! project.canEdit) {return;}
                 //adds the profile to the current project (if not already present)
                 project.profiles = project.profiles || []
                 var isInProject = false;
@@ -410,15 +437,21 @@ angular.module("sampleApp")
                     if (p.url == profile.url) {
                         isInProject = true;
                     }
-                })
+                });
 
                 if (!isInProject) {
-                    project.profiles.push({"name" :"profile","id" : profile.id,url:profile.url,added: moment().format()});
+                    var entry = {name :"profile",id : profile.id,url:profile.url,added: moment().format()};
+                    if (adhocServer) {
+                        //if adhocserver is present, then the profile is on a (potentially) different server to the one in the projecy
+                        entry.conformance = adhocServer.url;
+                    }
+                    project.profiles.push(entry);
                     fireBase.$save(project)
                 }
 
             },
             addPatientToProject : function (patient,project,fireBase) {
+                if (! project.canEdit) {return;}
                 //adds the patient to the current project (if not already present)
                 project.patients = project.patients || [];
                 var isInProject = false;
@@ -438,6 +471,7 @@ angular.module("sampleApp")
 
             },
             removeProfileFromProject : function (profile,project,fireBase) {
+                if (! project.canEdit) {return;}
                 //adds the profile to the current project (if not already present)
                 project.profiles = project.profiles || []
                 var index = -1;
@@ -456,6 +490,7 @@ angular.module("sampleApp")
 
             },
             removePatientFromProject : function (patient,project,fireBase) {
+                if (! project.canEdit) {return;}
                 //adds the profile to the current project (if not already present)
                 project.patients = project.patients || []
                 var index = -1;

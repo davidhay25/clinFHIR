@@ -20,6 +20,7 @@ angular.module("sampleApp")
                 $scope.currentProject = $scope.fbProjects[inx];
                 $scope.input.name =  $scope.currentProject.name;
                 $scope.input.description =  $scope.currentProject.description;
+                $scope.input.password =  $scope.currentProject.password;
 
                 
             };
@@ -35,6 +36,13 @@ angular.module("sampleApp")
                 $scope.currentProject.name = $scope.input.name;
                 $scope.currentProject.updated = moment().format();
                 $scope.currentProject.description = $scope.input.description;
+
+                //password is optional...
+                delete $scope.currentProject.password;
+                if ($scope.input.password) {
+                    $scope.currentProject.password = $scope.input.password;
+                }
+
                 $scope.fbProjects.$save($scope.currentProject).then(
                     function(ref){
                         modalService.showModal({}, {bodyText: 'Project has been updated'})
@@ -42,13 +50,13 @@ angular.module("sampleApp")
                     function(err){
                         modalService.showModal({}, {bodyText: 'There was an error: '+err})
                     }
-                )}
-            ;
+                )};
 
 
             $scope.newProject = function(){
                 delete $scope.input.name;
                 delete $scope.input.description;
+                delete $scope.input.password;
                 $scope.input.servers = {};
                 $scope.projectMode='new';
                 $scope.input.servers.data = appConfigSvc.getCurrentDataServer();
