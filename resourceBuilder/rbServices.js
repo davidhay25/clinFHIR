@@ -1022,6 +1022,20 @@ console.log(summary);
         }, 
         getListOfDataTypes : function() {
             return ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference','HumanName'];
+        },
+        getProfileFromType : function(type){
+            //returns the profile url from a type entry. In stu2 this is an array - in stu3 is is single
+            if (type.code == 'Reference') {
+                p = type.profile;
+                if (p){
+                    if (angular.isArray(p)) {
+                        return p[0]
+                    } else {
+                        return p;
+                    }
+                }
+            }
+
         }
     }
 })

@@ -175,14 +175,32 @@
                                             </span>
 
 
-                                            {{item.code}}
+                                            {{item.code}} 
+
+
+
+
+                                            --> <span class="popoverHint" popover-placement="right"
+                                                      popover-trigger='mouseenter'
+                                                      uib-popover="{{profile}}">{{Utilities.getProfileFromType(item) | showUrlId}}</span>
+
 
                                             <!-- show any profiles-->
-                                            <span ng-repeat="profile in item.profile">
-                                                --> <span class="popoverHint" popover-placement="right"
+                                            <!--stu3
+                                            <span  ng-hide = "item.profile[0].length > 0">
+                                                 -> <span class="popoverHint" popover-placement="right"
+                                                           popover-trigger='mouseenter'
+                                                           uib-popover="{{item.profile}}">{{item.profile | showUrlId}}</span>
+                                            </span>
+                                            -->
+
+                                            <!--stu2 -->
+                                            <!--<span  ng-show="item.profile.length > 0" ng-repeat="profile in item.profile">
+                                                 <span class="popoverHint" popover-placement="right"
                                                           popover-trigger='mouseenter'
                                                            uib-popover="{{profile}}">{{profile | showUrlId}}</span>
                                             </span>
+                                            -->
 
                                     </div>
                                     </div>
