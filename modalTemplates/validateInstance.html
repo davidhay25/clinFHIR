@@ -166,12 +166,12 @@
 -->
 
 
-                    <uib-alert type="success"
+                    <div uib-alert class="alert-success"
                                ng-show="validateResults.outcome">
                         {{validateResults.outcome}}
-                    </uib-alert>
+                    </div>
 
-                    <uib-alert  type="warning"
+                    <div uib-alert  class="alert-warning"
                                 ng-show="validateResults && validateResults.issue && validateResults.issue.length > 0">
                         <div>Sorry, there were some issues:</div>
                         <br/>
@@ -189,7 +189,7 @@
                             </tr>
                         </table>
 
-                    </uib-alert>
+                    </div>
 
 
 

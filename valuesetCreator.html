@@ -165,25 +165,25 @@
                 </div>
 
                 <br/>
-                <uib-alert type="warning" ng-show="message">
+                <div uib-alert class="alert-warning" ng-show="message">
                     {{message}}
-                </uib-alert>
+                </div>
 
-                <uib-alert type="info" ng-hide="searchResultBundle.entry">
+                <div uib-alert class="alert-info" ng-hide="searchResultBundle.entry">
                     Enter a search string into the text box above and click 'Find'.
                     The app will find all ValueSets where the string you enter is in the name of the ValueSet.
                     <br /><br />
                     Alternatively, click the 'New' button at the top right to create a new ValueSet.
 
 
-                </uib-alert>
+                </div>
 
-                <uib-alert type="warning" ng-hide="searchResultBundle.entry">
+                <div uib-alert class="alert-warning" ng-hide="searchResultBundle.entry">
                     <p>Right now, the tool will find and expand any valueset, but when creating a valueset will only
                     work with SNOMED, and requires an STU-3 compatible Terminology server that stores the ValueSets.</p>
                     <p>However, once a ValueSet has been created, it can be copied to any FHIR server.</p>
 
-                </uib-alert>
+                </div>
 
 
 
@@ -325,9 +325,9 @@
                     <uib-tab heading="Expansion">
                         <br/>
 
-                        <uib-alert type="warning" ng-show="input.isDirty">
+                        <div uib-alert class="alert-warning" ng-show="input.isDirty">
                             This ValueSet has been altered, so Save it if you want the expansion to work against the most recent version
-                        </uib-alert>
+                        </div>
 
                         <div class="row">
                             <div class="col-md-8 col-sm-8">
@@ -353,7 +353,7 @@
                     </uib-tab>
                 </uib-tabset>
 
-                <uib-alert type="info" ng-show="queryError">
+                <div uib-alert class="alert-info" ng-show="queryError">
 
                     <div>Sorry, there were some issues:</div>
                     <div>{{queryUrl}}</div>
@@ -373,7 +373,7 @@
 <!--
                     {{queryError | json}}
                     -->
-                </uib-alert>
+                </div>
 
 
 

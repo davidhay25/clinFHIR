@@ -117,10 +117,16 @@ angular.module("sampleApp")
         }})
     .filter('referenceType',function(){
             return function(ref) {
-                
+                //return the last part of a url - allowing for stu2 (array) or stu3 (single)
                 if (ref) {
+
+                    var profile = ref;
+                    if (angular.isArray(profile)){
+                        profile = ref[0]
+                    }
+
                     //DSTU-2 - this is an array - just grab the first
-                    var ar = ref[0].split('/');
+                    var ar = profile.split('/');
                     //console.log(ar)
                     return(ar[ar.length-1]);
                 } else {

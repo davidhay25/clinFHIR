@@ -524,9 +524,10 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                     elementDef.myData.displayClass += 'elementRequired ';
                                 }
 
-                                //get the first one (we know it is populated..)
-                                var profileUrl = elementDef.type[0].profile[0];     //the Url of the profile
 
+                                var profileUrl = Utilities.getProfileFromType(elementDef.type[0]);     //the Url of the profile
+                                
+                                
 
                                 updateFromProfileDefinition(queries, elementDef,profileUrl);    //will add to the list of async queries...
 
@@ -579,7 +580,11 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                             el.type.forEach(function (typ) {
                                                 if (typ.profile) {
                                                     //so make up an elementDef to represent this extension and add it to the list...
-                                                    var urlExt = typ.profile[0];
+                                                    //var urlExt = typ.profile[0];
+                                                    var urlExt = Utilities.getProfileFromType(typ);
+
+                                                    
+                                                        
                                                     var extensionED = {min:el.min,max:el.max,path:extensionPath,myData:{}};   //todo -fix cardinality..
                                                     extensionED.name = el.name;
                                                     extensionED.myData.canAddChild = true;
@@ -702,8 +707,12 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                         if (analysis.complexExtension) {
                             //this is a complex extension...
-                            elementDef.type = [{code:'Complex'}]
-                            elementDef.analysis = analysis;
+                            //elementDef.type = [{code:'Complex'}]
+                            elementDef.analysis = analysis;     //todo - is this correct????
+                            elementDef.myData.isComplexExtension = true;
+                            elementDef.myData.analysis = analysis;
+                            console.log(analysis)
+
                         } else {
                             //this is a simple extension
 
@@ -799,7 +808,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     //capitilize the first letter - leave the rest as-is        //todo - need proper dt handling - name & primative ? object like resourcetype
                     var dtx = lnode.dataType.code;   //the selected datatype
                     dtx = dtx.charAt(0).toUpperCase() + dtx.substr(1);
-                  //  console.log()
                     propertyName = propertyName.slice(0, -3) + dtx;
                    
                 }
@@ -942,6 +950,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 }
 
 
+                
 
                 //now process any chldren of this node...
                 if (node.children && node.children.length > 0) {
@@ -2037,7 +2046,11 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 if (typ.profile) {
                                     //only use the first profilefor now
                                     //var profile = typ.profile[0].replace("http://hl7.org/fhir/StructureDefinition/","");
-                                    var profileUrl = typ.profile[0];
+                                    //var profileUrl = typ.profile[0];
+                                    var profileUrl = Utilities.getProfileFromType(typ);
+
+                                    
+                                        
 
                                     //console.log(profileUrl)
                                     //process Extension

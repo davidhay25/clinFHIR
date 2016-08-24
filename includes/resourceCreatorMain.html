@@ -66,6 +66,8 @@
                     <div class="col-md-6">
                         <div ng-repeat="type in child.type">
 
+                            <!-- Complex extensions have a different renderer-->
+                            <div ng-hide="child.myData.isComplexExtension">
                                 <span ng-hide="type.profile">
                                     <a href="#" ng-click="childSelected(child,$index)">{{type.code}} </a>
                                 </span>
@@ -75,8 +77,33 @@
                                        ng-click="childSelected(child,$index)">-> {{type.profile | referenceType}} </a>
 
                                 </span>
+                            </div>
+
+                            <div ng-show="child.myData.isComplexExtension">
+                                <div ng-repeat="extChild in child.myData.analysis.complexExtension.contents">
+                                    {{extChild.name}}
+                                    <div ng-repeat="dtc in extChild.dt">
+                                        <a href="#" ng-click="complexChildSelected(child,extChild,dtc)">
+                                            &nbsp;&nbsp;
+                                            <span ng-hide="dtc.profile">
+                                                {{dtc.code}}
+                                            </span>
+                                            <span ng-show="dtc.profile">
+                                                <a href="#" class="clickableResourceReference"
+                                                   ng-click="complexChildSelected(child,extChild,dtc)">-> {{dtc.profile | referenceType}} </a>
+                                            </span>
+
+                                        </a>
+                                    </div>
+
+
+                                </div>
+                            </div>
 
                         </div>
+
+
+
 
                     </div>
 <!-- disabling this at the moment as the delete is *still* flaky
@@ -96,13 +123,13 @@
 
             <h4>{{'RESOURCE' | translate}}: Json</h4>
 
-            <uib-alert close="closeValidationOutcome()" type="success"
+            <div uib-alert close="closeValidationOutcome()" class="alert-success"
                        ng-show="validateResults.outcome">
                 {{validateResults.outcome}}
-            </uib-alert>
+            </div>
 
 
-            <uib-alert close="closeValidationOutcome()" type="warning"
+            <div uib-alert close="closeValidationOutcome()" class="alert-warning"
                        ng-show="validateResults && validateResults.issue && validateResults.issue.length > 0">
                 <div>Sorry, there were some issues:</div>
                 <br/>
@@ -118,7 +145,7 @@
                         </tr>
                     </table>
 
-            </uib-alert>
+            </div>
 
             <uib-tabset>
                 <uib-tab heading="Data Entry">

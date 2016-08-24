@@ -34,14 +34,14 @@
 
 
     <div class="col-md-8 col-sm-8">
-        <uib-alert ng-show="error" type="danger">
+        <div uib-alert ng-show="error" class="alert-danger">
             {{error}}
-        </uib-alert>
+        </div>
 
-        <uib-alert ng-show="message" type="info">
+        <div uib-alert ng-show="message" class="alert-info">
             {{message}}
             {{elapsed}}
-        </uib-alert>
+        </div>
     </div>
 </div>
 
@@ -51,7 +51,7 @@
 
 
 
-<uib-alert type="warning" close="closeHelp()" ng-show="showHelp">
+<div uib-alert class="alert-warning" close="closeHelp()" ng-show="showHelp">
     <strong>Getting Started</strong>
     <p>To create a new resource you need to select both a patient and a profile to base the resource on. Once that has
     been done, the 'New Resource' button will appear in top right corner, and clicking that will display the Resiurce Builder
@@ -84,7 +84,7 @@
 
 
 
-</uib-alert>
+</div>
 
 <div ng-show="currentProject">
     <div class="banner">

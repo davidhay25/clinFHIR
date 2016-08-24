@@ -596,12 +596,7 @@ angular.module("sampleApp")
 
 
 
-        /*
-                //create the root node.
-                var rootEd = resourceCreatorSvc.getRootED(type);
-                $scope.treeData.push({id:'root',parent:'#',text:type,state:{opened:true,selected:true},path:type,
-                    ed:rootEd});
-        */
+
         if (! treeViewData) {
             navigatorNodeSelected('root', rootEd);   //this will display the child nodes of the root
 
@@ -609,13 +604,7 @@ angular.module("sampleApp")
             $scope.selectedNode = getNodeFromId('root');
         }
 
-/*
-        //add the current patient
-        var ed = resourceCreatorSvc.getPatientOrSubjectReferenceED();
-        if (ed) {
-            resourceCreatorSvc.addPatientToTree(ed.path,appConfigSvc.getCurrentPatient(),$scope.treeData);
-        }
-*/
+
 
 
         drawTree();
@@ -772,13 +761,25 @@ angular.module("sampleApp")
         );
     } ;
 
+    $scope.complexChildSelected = function(element,child,dt) {
+        //when a child of a complex extension is selected. We only support a single level
+        //child.name is the name of the 'child' extension that has been selected
+        console.log(element,child,dt)
+        $scope.dataType = dt.code;   //will show the appropriate data entry form...
+        $scope.selectedChild = element;     //this has to be the extension root (I think)
+        $scope.complexExtensionRoot = element;
+        $scope.complexExtensionChild = child;
+
+
+    };
 
     //when one of the datatypes of the child nodes of the currently selected element in the tree is selected...
     $scope.childSelected = function(ed,inx) {
 
+        delete $scope.complexExtensionRoot;
+        delete $scope.complexExtensionChild;
+
         $scope.selectedChild = ed;
-
-
 
         //the datatype of the selected element. This will display the data entry form.
         $scope.dataType = ed.type[inx].code;
@@ -788,16 +789,23 @@ angular.module("sampleApp")
             //this is used in the next code segment to retrieve the matching existing resources
             var type = ed.type[inx];
             if (type.profile)  {
-                var ar = type.profile[0].split('/');
+                //var ar = type.profile[0].split('/');
+                var ar = Utilities.getProfileFromType(type).split('/');
+
+                
+                
                 $scope.resourceType = ar[ar.length-1];         //the type name (eg 'Practitioner')
-                $scope.resourceProfile = type.profile[0];       //the profilefor this type. todo - could really lose $scope.resourceType...
+                //$scope.resourceProfile = type.profile[0];       //the profilefor this type. todo - could really lose $scope.resourceType...
+                $scope.resourceProfile = Utilities.getProfileFromType(type);       //the profilefor this type. todo - could really lose $scope.resourceType...
+
+                
+                
             } else {
                 //if there's no profile, then the reference can be to any profile...
                 $scope.resourceType = 'Resource';
                 $scope.resourceProfile = 'Resource';
             }
 
-            //console.log($scope.resourceType);
 
         }
 
@@ -878,6 +886,8 @@ angular.module("sampleApp")
         }
     };
 
+
+
     //called when selecting from all resources, and a particular type has been selected. Note that an object
             //is passed - not just the type as a string...
     $scope.resourceTypeSelected = function(typeDef){
@@ -922,8 +932,73 @@ angular.module("sampleApp")
         fragment = fragment || resourceCreatorSvc.getJsonFragmentForDataType($scope.dataType,$scope.results);
        
         //now add the new property to the tree...
-
         if (fragment) {
+
+            //processing of complex extensions is special. Probably need to work on this...
+            if ($scope.complexExtensionRoot) {
+
+                //save the tree node in the Element definition so we can always return to it...
+                var complexExtensionParentNode = $scope.complexExtensionRoot.myData.treeNode;
+                if (! complexExtensionParentNode) {
+
+                    var complexExtensionParentNode =  {
+                        id: 't'+new Date().getTime(),
+                        state: {opened: true},
+                        //fragment: fragment.value, - don't think the parent has a fragment...
+                        //display: 'complexExtension', //fragment.text,
+                        text : 'complexExtension',
+                        parent : $scope.selectedNodeId,
+                        isComplexExtension : true,
+                        path : $scope.selectedChild.path,
+                        ed : angular.copy($scope.selectedChild),
+                        childValues : {}
+                    };
+
+                    $scope.complexExtensionRoot.myData.treeNode = complexExtensionParentNode;
+                    $scope.treeData.push(complexExtensionParentNode);    //todo - may need to insert at the right place...
+
+                }
+
+                //so at this point we have the parent tree node. Need to add the child node to represent the child value just entered...
+                var childName = $scope.complexExtensionChild.name;      //the name (url) of the extesion child...
+                if (! complexExtensionParentNode.childValues[childName]) {
+                    //there isn't already a value...
+                    complexExtensionParentNode.childValues[childName] = fragment //todo - is this enough?
+                    //now add a tree node to represent the new value...
+                    var childTreeNode = {
+                        id: 't'+new Date().getTime(),
+                        state: {opened: true},
+                        fragment: fragment.value,
+                        display: fragment.text,
+                        path:'Extension',
+                        text : childName
+                    };
+                    childTreeNode.parent = complexExtensionParentNode.id;   //the reference to the parent...
+                    childTreeNode.ed = {myData : {},path:'Path'};     //hmmm we don;t have an ed for the child...
+                    $scope.treeData.push(childTreeNode)
+
+                }
+
+                //sorting is critical for the resourc ebuilder to work - as well as aligning the resource element order with the definition. Don't remove!
+                    $scope.treeData.sort(function(a,b){
+
+                        if (a.ed.myData.sortOrder > b.ed.myData.sortOrder ){
+                            return 1;
+                        } else {
+                            return -1;
+                        }
+                    });
+
+
+
+
+
+                console.log(fragment,$scope.complexExtensionRoot.myData.treeNode);
+                delete  $scope.dataType;        //to clear the data entry screen...
+
+                drawTree();        //and redraw...
+                return;
+            }
             
             var treeNode = {
                 id: 't'+new Date().getTime(),
@@ -1330,7 +1405,9 @@ angular.module("sampleApp")
 
         var ed = $scope.selectedChild;  //the ED describing the current element
         if (ed && ed.type && ed.type[0].profile) {
-            var profileName =ed.type[0].profile[0];
+            
+            var profileName =Utilities.getProfileFromType(ed.type[0]);
+            //var profileName =ed.type[0].profile[0];
             alert(profileUrl)
         }
     };

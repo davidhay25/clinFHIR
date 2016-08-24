@@ -701,7 +701,7 @@ angular.module("sampleApp").
         processComplexExtension : function(extension,discriminator) {
             //create a summary object for the extension. for extension designer & renderProfile
             //these are comples extensions where there is a single 'parent' and multiple child elements...
-
+            var that = this;
             var summary = {contents:[]}
             //var contents = [];
             var ele = {}
@@ -755,7 +755,9 @@ angular.module("sampleApp").
                                     if (ele.dt) {
                                         ele.dt.forEach(function(dt){
                                             if (dt.profile) {
-                                                var p = dt.profile[0];     //only take the first one...
+                                                //var p = dt.profile[0];     //only take the first one...
+                                                var p = that.getProfileFromType(dt);
+
 
                                                 var ar = p.split('/');
                                                 dt.displayType =ar[ar.length-1];
@@ -1025,7 +1027,7 @@ console.log(summary);
         },
         getProfileFromType : function(type){
             //returns the profile url from a type entry. In stu2 this is an array - in stu3 is is single
-            if (type.code == 'Reference') {
+           // if (type.code == 'Reference') {
                 p = type.profile;
                 if (p){
                     if (angular.isArray(p)) {
@@ -1034,7 +1036,7 @@ console.log(summary);
                         return p;
                     }
                 }
-            }
+           // }
 
         }
     }
@@ -1219,7 +1221,11 @@ console.log(summary);
                     if (arPath[arPath.length - 1] == 'extension') {
                         if (element.type[0].profile) {
                             //add a call to the 'get profile' service...
-                            var urlToExtensionDefinition = element.type[0].profile[0];
+
+
+
+                            //var urlToExtensionDefinition = element.type[0].profile[0];
+                            var urlToExtensionDefinition = Utilities.getProfileFromType(element.type[0]);
                             //only read each definition once (even if referenced multiple timee
                             //todo - could look at more efficeint caches...
                             if (!extensionObj[urlToExtensionDefinition]) {
@@ -1296,7 +1302,11 @@ console.log(summary);
 
                                     if (element.type && element.type[0].profile) {
                                         //retrieve the definition from the cache we just creatd...
-                                        var urlToExtensionDefinition = element.type[0].profile[0];
+
+                                        
+                                        
+                                        var urlToExtensionDefinition = Utilities.getProfileFromType(element.type[0]);
+                                        //var urlToExtensionDefinition = element.type[0].profile[0];
                                         var extensionDefinition = extensionObj[urlToExtensionDefinition];
                                         if (extensionDefinition) {
                                             if (debug) {
@@ -1359,7 +1369,15 @@ console.log(summary);
                                                     newEl.path =  element.path
 
                                                     newEl.min = element.min;        //the minimum  in the profile...
-                                                    newEl.extensionUrl = element.type[0].profile[0];   //save the url...
+
+
+
+                                                    //
+                                                        newEl.extensionUrl = Utilities.getProfileFromType(element.type[0]);   //save the url...
+                                                    
+                                                    //newEl.extensionUrl = Utilities.getProfileFromType(element.type[0]);   //save the url...
+                                                    //newEl.extensionText = newEl.short || newEl.definition || newEl.path;
+                                                    //newEl.extensionUrl = element.type[0].profile[0];   //save the url...
                                                     //newEl.extensionText = newEl.short || newEl.definition || newEl.path;
                                                     newEl.myMeta.extensionText = key;
                                                     parsedList.push(newEl);

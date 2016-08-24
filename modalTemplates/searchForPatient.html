@@ -42,9 +42,9 @@
             <br/>
 
             <div ng-show="matchingPatientsBundle">
-                <uib-alert type="warning" ng-show="nomatch">
+                <div uib-alert class="alert-warning" ng-show="nomatch">
                     Sorry, there were no patients matching that name
-                </uib-alert>
+                </div>
                 <ul class="list-group">
                     <li class="list-group-item" ng-repeat="entry in matchingPatientsBundle.entry">
 

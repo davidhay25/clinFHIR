@@ -175,7 +175,7 @@
                                             </span>
 
 
-                                            {{item.code}} 
+                                            {{item.code}}
 
 
 
@@ -653,7 +653,7 @@
                     <td>
                         <ul>
                             <li ng-repeat="dt in row.data.ed.type">
-                                {{dt.code}} <span ng-show="dt.profile"> --> </span> {{dt.profile[0] | shortUrl}}
+                                {{dt.code}} <span ng-show="dt.profile"> --> </span> {{Utilities.getProfileFromType(dt) | shortUrl}}
 
                             </li>
                         </ul>

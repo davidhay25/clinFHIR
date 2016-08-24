@@ -115,9 +115,15 @@ angular.module('sampleApp').component('showProfile',
                                 //first, find the profile in the currentValue...
                                 var urlOfTypeToDelete;
                                 if (edToRestore.type) {
-                                    urlOfTypeToRestore = edToRestore.type[0].profile[0];
+                                    //urlOfTypeToRestore = edToRestore.type[0].profile[0];
+                                    urlOfTypeToRestore = Utilities.getProfileFromType(edToRestore.type[0]);
+
+                                    
+                                    
                                     if (ed.type) {
-                                        if (ed.type[0].profile[0] == urlOfTypeToRestore ) {
+                                        if (Utilities.getProfileFromType(ed.type[0]) == urlOfTypeToRestore ) {
+                                            //if (ed.type[0].profile[0] == urlOfTypeToRestore ) {
+                                            
                                             ed.myMeta = ed.myMeta || {}     //should be redundant...
                                             delete ed.myMeta.remove;
                                         }
@@ -154,9 +160,14 @@ angular.module('sampleApp').component('showProfile',
                                 //first, find the profile in the currentValue...
                                 var urlOfTypeToDelete;
                                 if (edToDelete.type) {
-                                    urlOfTypeToDelete = edToDelete.type[0].profile[0];
+
+                                    
+
+                                    urlOfTypeToDelete = Utilities.getProfileFromType(edToDelete.type[0]);
+                                    //urlOfTypeToDelete = edToDelete.type[0].profile[0];
                                     if (ed.type) {
-                                        if (ed.type[0].profile[0] == urlOfTypeToDelete ) {
+                                        if (Utilities.getProfileFromType(ed.type[0]) == urlOfTypeToDelete ) {
+                                            //if (ed.type[0].profile[0] == urlOfTypeToDelete ) {
                                             ed.myMeta = ed.myMeta || {}
                                             ed.myMeta.remove = true;
                                         }

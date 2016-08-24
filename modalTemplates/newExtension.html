@@ -22,7 +22,7 @@
     </div>
     <div class="modal-body">
 
-        <uib-alert close="closeValidationOutcome()" type="warning"
+        <div uib-alert close="closeValidationOutcome()" class="alert-warning"
                    ng-show="validateResults && validateResults.issue && validateResults.issue.length > 0">
             <div>Sorry, there were some issues, and the definition has not been saved.</div>
             <br/>
@@ -38,7 +38,7 @@
                 </tr>
             </table>
 
-        </uib-alert>
+        </div>
 
 
         <uib-tabset>
