@@ -14,7 +14,7 @@ angular.module("sampleApp")
     .controller('resourceCreatorCtrl',
         function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,$translate,
                   $localStorage,RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,
-                  $location,resourceSvc,$window,$timeout,$firebaseArray) {
+                  $location,resourceSvc,$window,$timeout,$firebaseArray,$filter) {
 
 
 
@@ -557,6 +557,28 @@ angular.module("sampleApp")
         //now set the base type. If a Core profile then it will be the profile name. Otherwise, it is the constarinedType
         //changed in STU-3 !
         var baseType;
+
+
+        if (profile.constrainedType) {
+            //this is an STU-2 profile
+            baseType = profile.constrainedType;
+            $scope.conformProfiles = [profile.url]       //the profile/s that this resource claims conformance to
+        } else {
+            if (profile.baseDefinition) {
+                //STU-3 base resource
+
+                //getLogicalID
+                baseType = $filter('getLogicalID')(profile.baseDefinition);
+                //baseType = profile.name;
+
+
+            }  else {
+                //STU-2 base resource
+                baseType = profile.name;
+            }
+        }
+/*
+
         if (profile.constrainedType) {
             //this is an STU-2 profile
             baseType = profile.constrainedType;
@@ -575,6 +597,7 @@ angular.module("sampleApp")
             }
         }
 
+        */
 
         type = baseType;
         //when restore from parked, the treeViewData will already be restored. Otherwise craete a blank one
@@ -669,7 +692,7 @@ angular.module("sampleApp")
                 function(data) {
                     var oo = data.data;
 
-                    if (oo.issue) {
+                    if (oo && oo.issue) {
                         delete oo.text;
                     }
                     $scope.validateResults = oo;

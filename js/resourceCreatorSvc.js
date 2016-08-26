@@ -977,7 +977,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                         console.log(childNodeHash, ed, treeData);
                                         resource.extension = resource.extension || [];
                                         //add the 'parent'
-                                        var complexExt = {url:'http://theurl...',extension:[]}
+                                        var analysis = ed.cfAnalysis;
+
+                                        var complexExt = {url:analysis.complexExtension.url,extension:[]};
 
                                         treeData.forEach(function (tNode) {
                                             if (tNode.parent == childNodeHash.id) {
@@ -3443,16 +3445,15 @@ console.log(element)
                             var ar = ext.rootPath.split('.');
                             ar.pop();
                             var pathForBB = ar.join('.') + '.'+ ext.extPath;
-                            var bb = {path:pathForBB,min:0,max:'*',type:[{code:'BackboneElement'}]};
-                            bb.cfIsComplexExtension = true;     //todo - not sure this is wise, but we're never updating this profil...
-                            profile.snapshot.element.splice(ext.inx,0,bb)   //insert the root
+                            var bbED = {path:pathForBB,min:0,max:'*',type:[{code:'BackboneElement'}]};
+                            bbED.cfIsComplexExtension = true;     //todo - not sure this is wise, but we're never updating this profil...
+                            bbED.cfAnalysis = ext.analysis;   //ditto...
+                            profile.snapshot.element.splice(ext.inx,0,bbED)   //insert the root
                             //now add the child elements
                             ext.analysis.complexExtension.contents.forEach(function(item,inx){
                                 var childPath = pathForBB + '.'+item.name;
                                 var child = {path:childPath,min:item.min,max:item.max,type:item.dt}
                                 profile.snapshot.element.splice(ext.inx+inx+1,0,child)
-
-
                             })
 
                             console.log(ext);
