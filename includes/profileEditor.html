@@ -153,11 +153,17 @@
 
                                             {{item.code}}
 
+                                            --> <span class="popoverHint" popover-placement="right"
+                                                      popover-trigger='mouseenter'
+                                                      uib-popover="{{profile}}">{{Utilities.getProfileFromType(item) | showUrlId}}</span>
+
+<!--
                                             <span ng-repeat="profile in item.profile track by $index">
-                                                --> <span class="popoverHint" popover-placement="right"
+                                                -- <span class="popoverHint" popover-placement="right"
                                                           popover-trigger='mouseenter'
                                                           uib-popover="{{profile}}">{{profile | showUrlId}}</span>
                                             </span>
+                                            -->
                                         </div>
 
                                     </div>

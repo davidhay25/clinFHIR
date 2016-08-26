@@ -600,6 +600,9 @@ angular.module("sampleApp")
         if (! treeViewData) {
             navigatorNodeSelected('root', rootEd);   //this will display the child nodes of the root
 
+
+
+
             //used for the initial display
             $scope.selectedNode = getNodeFromId('root');
         }
@@ -746,7 +749,7 @@ angular.module("sampleApp")
     }
 
     //when the user has selected a node in the navigator tree (or called externally). Display the value of the node or possible child nodes
-    var navigatorNodeSelected = function(nodeId,ed){
+    var navigatorNodeSelected = function(nodeId,ed,cb){
       //  $scope.selectedNode = node;
         delete $scope.children;     //the node may not have children (only BackboneElement datatypes do...
         $scope.selectedNodeId = nodeId;   //the currently selected element. This is the one we'll add the new data to...
@@ -754,6 +757,7 @@ angular.module("sampleApp")
         resourceCreatorSvc.getPossibleChildNodes(ed,$scope.treeData).then(
             function(data){
                 $scope.children = data;    //the child nodes...
+
             },
             function(err){
 
@@ -761,7 +765,7 @@ angular.module("sampleApp")
         );
     } ;
 
-    $scope.complexChildSelected = function(element,child,dt) {
+    $scope.complexChildSelectedDEP = function(element,child,dt) {
         //when a child of a complex extension is selected. We only support a single level
         //child.name is the name of the 'child' extension that has been selected
         console.log(element,child,dt)
@@ -776,8 +780,8 @@ angular.module("sampleApp")
     //when one of the datatypes of the child nodes of the currently selected element in the tree is selected...
     $scope.childSelected = function(ed,inx) {
 
-        delete $scope.complexExtensionRoot;
-        delete $scope.complexExtensionChild;
+        //delete $scope.complexExtensionRoot;
+        //delete $scope.complexExtensionChild;
 
         $scope.selectedChild = ed;
 
@@ -819,6 +823,12 @@ angular.module("sampleApp")
             treeNode.path = $scope.selectedChild.path;
             //treeNode.type = 'bbe';      //so we know it's a backboneelement, so should have elements referencing it...
             treeNode.isBbe = true;      //so we know it's a backboneelement, so should have elements referencing it...
+
+            if ($scope.selectedChild.cfIsComplexExtension) {
+                treeNode.isComplexExtension = true;
+                treeNode.path='extension'
+
+            }
 
             //add the new node to the tree...
             $scope.lastTreeData = angular.copy($scope.treeData);        //to support limited undo...
@@ -933,7 +943,7 @@ angular.module("sampleApp")
        
         //now add the new property to the tree...
         if (fragment) {
-
+/*
             //processing of complex extensions is special. Probably need to work on this...
             if ($scope.complexExtensionRoot) {
 
@@ -999,6 +1009,7 @@ angular.module("sampleApp")
                 drawTree();        //and redraw...
                 return;
             }
+            */
             
             var treeNode = {
                 id: 't'+new Date().getTime(),
@@ -1492,32 +1503,41 @@ angular.module("sampleApp")
     //when a profile is selected...  This is configured in the directive...  Now called from the front page
     $scope.selectedProfileFromDialog = function(profile) {
 
-        var adhocServer;
-        if (profile.adhocServer) {
-            //if profile.adhocServer is set, then this is an adhoc selection...
 
-            adhocServer = profile.adhocServer;
-            delete profile.adhocServer;
-            
-        }
+        resourceCreatorSvc.insertComplexExtensionED(profile).then(
+            function(profile) {
+                var adhocServer;
+                if (profile.adhocServer) {
+                    //if profile.adhocServer is set, then this is an adhoc selection...
 
-        resourceCreatorSvc.setCurrentProfile(profile);
+                    adhocServer = profile.adhocServer;
+                    delete profile.adhocServer;
 
-        //if there's a project active, then update it. todo need tothink about security for this...
-        if ($rootScope.currentProject) {
-            appConfigSvc.addProfileToProject(profile,$rootScope.currentProject,$rootScope.fbProjects,adhocServer)
-            
-        }
+                }
+
+                console.log(profile);
+
+                resourceCreatorSvc.setCurrentProfile(profile);
+
+                //if there's a project active, then update it. todo need tothink about security for this...
+                if ($rootScope.currentProject) {
+                    appConfigSvc.addProfileToProject(profile,$rootScope.currentProject,$rootScope.fbProjects,adhocServer)
+
+                }
 
 
-        $scope.dirty=false;     //a new form is loaded
-        $scope.parkedHx = false;
-        //create aclone to store in the history, as we'll hack the profile as part of the builder (ehgwhen finding child nodes)
-        var clone = angular.copy(profile);
-        appConfigSvc.addToRecentProfile(clone);
+                $scope.dirty=false;     //a new form is loaded
+                $scope.parkedHx = false;
+                //create aclone to store in the history, as we'll hack the profile as part of the builder (ehgwhen finding child nodes)
+                var clone = angular.copy(profile);
+                appConfigSvc.addToRecentProfile(clone);
 
-        $scope.recent.profile = appConfigSvc.getRecentProfile();    //re-establish the recent profile list
-        setUpForNewProfile(profile);
+                $scope.recent.profile = appConfigSvc.getRecentProfile();    //re-establish the recent profile list
+                setUpForNewProfile(profile);
+            }
+        );
+
+
 
     };
 

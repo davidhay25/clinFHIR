@@ -10,8 +10,8 @@ angular.module("sampleApp")
 
     .service('appConfigSvc', function($localStorage,$http,$timeout,$q,ResourceUtilsSvc) {
 
-        var dataServer;     //the currently selected data server server
-        var currentPatient;    //the currently selected patint
+        var dataServer;         //the currently selected data server server
+        var currentPatient;     //the currently selected patint
         var allResources;       //all resources for the current patient
 
         //the default config for a new browser...

@@ -52,7 +52,7 @@
 
                 <div ng-repeat="child in children track by $index">
                 <div class="row">
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         <div class="{{child.myData.displayClass}}">
                             <span  popover-placement="top" popover-trigger='mouseenter'
                                    uib-popover="{{child.definition}}">{{child.myData.display}}</span>
@@ -63,7 +63,7 @@
                         {{child.min}}..{{child.max}}
                     </div>
                     <!--<div class="col-md-6" ng-show="child.myData.canAddChild">-->
-                    <div class="col-md-6">
+                    <div class="col-md-7">
                         <div ng-repeat="type in child.type">
 
                             <!-- Complex extensions have a different renderer-->
@@ -78,7 +78,7 @@
 
                                 </span>
                             </div>
-
+<!--
                             <div ng-show="child.myData.isComplexExtension">
                                 <div ng-repeat="extChild in child.myData.analysis.complexExtension.contents">
                                     {{extChild.name}}
@@ -99,6 +99,8 @@
 
                                 </div>
                             </div>
+
+                            -->
 
                         </div>
 

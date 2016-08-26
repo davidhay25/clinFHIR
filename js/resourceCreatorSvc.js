@@ -711,7 +711,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             elementDef.analysis = analysis;     //todo - is this correct????
                             elementDef.myData.isComplexExtension = true;
                             elementDef.myData.analysis = analysis;
-                            console.log(analysis)
+                            //console.log(analysis)
 
                         } else {
                             //this is a simple extension
@@ -790,215 +790,247 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var canRepeat = this.canRepeat;     //allows functions in this block to access the canRepeat function outside...
 
 
-
             function addChildrenToNode(resource,node,text) {
                 //add the node to the resource. If it has children, then recursively call
                 //note that the 'resource' might be better termed a 'branch' as it effectively represents a BackBone element. It's the resource we're building..
 
 
                 var lnode = treeHash[node.id];
-
                 var path = lnode.path;
                 var ar = path.split('.');
-                var propertyName = ar[ar.length-1];
-
-                if (propertyName.indexOf('[x]') > -1) {
-                    //this is a polymorphic field...
-
-                    //capitilize the first letter - leave the rest as-is        //todo - need proper dt handling - name & primative ? object like resourcetype
-                    var dtx = lnode.dataType.code;   //the selected datatype
-                    dtx = dtx.charAt(0).toUpperCase() + dtx.substr(1);
-                    propertyName = propertyName.slice(0, -3) + dtx;
-                   
-                }
-
-                //a value of false is valid for boolean - hence the simple check is not enough...
-                if (typeof lnode.fragment != 'undefined'&& lnode.fragment != null ) {
-                    //if the 'resource' is an array, then there can be multiple elements...
-
-                    //this should never occur..
-                    if (angular.isArray(resource)) {
-                        alert('array passed  - This is an error, please tell the author of clinFHIR!')
-                        //var o = {};
-                        //o[propertyName] = lnode.fragment;
-                        //resource.push(o)
-
-                    } else {
-
-                        //is this is repeating element?
-                        var cr = canRepeat(lnode.ed);
-
-                        if (propertyName == 'extension') {
-                            var url = lnode.ed.myData.extensionDefUrl;      //the Url to the profile
-                            var dt = 'value'+lnode.dataType.code.capitalize();
-                            
-                            var extensionFragment = {url:url};
-                            extensionFragment[dt] = angular.copy(lnode.fragment);   //we don't want to change the object in the tree view...
+                var propertyName = ar[ar.length - 1];
 /*
-                            //now to determine if this is a primitive or complex datatype. The 'case' of the first letter will tell us...
-                            var complexDataType = false;
-                            var fl = lnode.dataType.code.charAt(0);
-                            if (fl == fl.toUpperCase()) {
-                                complexDataType = true;
-                            }*/
-                            
-                            var processed = false;
-                            //if lnode.ed.myData.extendedElement exists then it's actually an extension on a value within this 'branch'
-                            //what we really want to do is to add it to the element - not to the extension array of this branch
-                            //the 'extendedElement' value is set by the getPossibleChildNodes function above...
-                            if (lnode.ed.myData.extendedElement) {
-                                console.log('>> extended element')
-                                var parentName = lnode.ed.myData.extendedElement.parentName; //the name of the element in this branch
-                                //is there an element of this name on the current branch?
+                if (lnode.isComplexExtension) {
+                    //alert('complex bld')
+                    console.log(propertyName, node, path, treeData);
+                    resource.Extension = {}
 
-                                //this routine will add the extension to the element if the element being extended has a value...
-                                angular.forEach(resource,function(value,key){
-                                    console.log(value,key)
-                                    if (key ==parentName)  {
-                                        console.log('parent found')
-
-                                        if (lnode.ed.myData.extendedElement.isComplex) {
-                                            //the parent is a complex datatype
-                                            value.extension = value.extension || [];
-                                            value.extension.push(extensionFragment);
-                                        } else {
-                                            //this is a primitive datatype. We actually add a new element to represent the extension
-                                            var elementName = '_' + parentName;
-                                            resource[elementName] = {extension:[]};
-                                            resource[elementName].extension.push(extensionFragment);
-
-                                        }
-
-                                        processed = true;
-                                    }
-                                });
-
-                                if (! processed) {
-                                    //if not processed, then the 'parent' element is not (?yet) present. This is legal in FHIR
-                                    //so need to create an 'empty' element to add the extension to.
-
-                                    //first we need to find out if the parent would be a repeating one (CanRepeat)...
-                                    var parentCR = lnode.ed.myData.extendedElement.isParentMultiple;
-                                    if (parentCR) {
-                                        //can repeat
-                                        //todo - does a primitive ever repeat? I'm going to assume not, but be prepared to fix here if if can...
-                                        resource[parentName] = [];  //parent is an array of properties...
-                                        var extToAdd = {extension:[extensionFragment]}
+                    treeData.forEach(function(tNode){
+                        if (tNode.parent == lnode.id) {
+                            console.log('Child',tNode)
+                        }
+                    })
 
 
-                                        resource[parentName].push({extension:[extensionFragment]});
-                                        processed = true;
+                } else {
 
-                                    } else {
-                                        //single only
+*/
 
-                                        if (lnode.ed.myData.extendedElement.isComplex) {
-                                            //resource.extension = resource.extension || [];
-                                            //resource.extension.push(extensionFragment);
-                                            resource[parentName] = {extension:[]};
-                                            resource[parentName].extension.push(extensionFragment);
-                                        } else {
-                                            var elementName = '_' + parentName;
-                                            resource[elementName] = {extension:[]};
-                                            resource[elementName].extension.push(extensionFragment);
-                                        }
+                    if (propertyName.indexOf('[x]') > -1) {
+                        //this is a polymorphic field...
 
+                        //capitilize the first letter - leave the rest as-is        //todo - need proper dt handling - name & primative ? object like resourcetype
+                        var dtx = lnode.dataType.code;   //the selected datatype
+                        dtx = dtx.charAt(0).toUpperCase() + dtx.substr(1);
+                        propertyName = propertyName.slice(0, -3) + dtx;         //chop off the [x]
 
-                                        processed = true;
-                                    }
-                                }
-                            }       //marks the end of an extended alement (rather than an extension to the resource root)
+                    }
 
-                            //the extension may have been added to al element. If not, then add to the main extensions array
-                            if (! processed) {
-                                resource.extension = resource.extension || [];
-                                resource.extension.push(extensionFragment);
+                    //a value of false is valid for boolean - hence the simple check is not enough...
+                    if (typeof lnode.fragment != 'undefined' && lnode.fragment != null) {
+                        //if the 'resource' is an array, then there can be multiple elements...
 
-                                /* - don't think this is needed...
-                                if (lnode.ed.myData.extendedElement) {
-                                   //this is still an extenstion to add to an element
-                                    if (lnode.ed.myData.extendedElement.isComplex) {
-                                        resource.extension = resource.extension || [];
-                                        resource.extension.push(extensionFragment);
-                                    } else {
-                                        var elementName = '_' + parentName;
-                                        resource[elementName] = {extension: []};
-                                        resource[elementName].extension.push(extensionFragment);
-                                    }
-                                }
-                                */
+                        //this should never occur..
+                        if (angular.isArray(resource)) {
+                            alert('array passed  - This is an error, please tell the author of clinFHIR!')
 
-                            }
 
                         } else {
-                            //this is an 'ordinary' element - not an extension...
-                            //if a repeating elment then it is in an array...
-                            if (cr) {
-                                resource[propertyName] = resource[propertyName] || []
-                                resource[propertyName].push(lnode.fragment)
+
+                            //is this is repeating element?
+                            var cr = canRepeat(lnode.ed);
+
+                            if (propertyName == 'extension') {
+                                var url = lnode.ed.myData.extensionDefUrl;      //the Url to the profile
+                                var dt = 'value' + lnode.dataType.code.capitalize();
+
+                                var extensionFragment = {url: url};
+                                extensionFragment[dt] = angular.copy(lnode.fragment);   //we don't want to change the object in the tree view...
+                                /*
+                                 //now to determine if this is a primitive or complex datatype. The 'case' of the first letter will tell us...
+                                 var complexDataType = false;
+                                 var fl = lnode.dataType.code.charAt(0);
+                                 if (fl == fl.toUpperCase()) {
+                                 complexDataType = true;
+                                 }*/
+
+                                var processed = false;
+                                //if lnode.ed.myData.extendedElement exists then it's actually an extension on a value within this 'branch'
+                                //what we really want to do is to add it to the element - not to the extension array of this branch
+                                //the 'extendedElement' value is set by the getPossibleChildNodes function above...
+                                if (lnode.ed.myData.extendedElement) {
+                                    console.log('>> extended element')
+                                    var parentName = lnode.ed.myData.extendedElement.parentName; //the name of the element in this branch
+                                    //is there an element of this name on the current branch?
+
+                                    //this routine will add the extension to the element if the element being extended has a value...
+                                    angular.forEach(resource, function (value, key) {
+                                        console.log(value, key)
+                                        if (key == parentName) {
+                                            console.log('parent found')
+
+                                            if (lnode.ed.myData.extendedElement.isComplex) {
+                                                //the parent is a complex datatype
+                                                value.extension = value.extension || [];
+                                                value.extension.push(extensionFragment);
+                                            } else {
+                                                //this is a primitive datatype. We actually add a new element to represent the extension
+                                                var elementName = '_' + parentName;
+                                                resource[elementName] = {extension: []};
+                                                resource[elementName].extension.push(extensionFragment);
+
+                                            }
+
+                                            processed = true;
+                                        }
+                                    });
+
+                                    if (!processed) {
+                                        //if not processed, then the 'parent' element is not (?yet) present. This is legal in FHIR
+                                        //so need to create an 'empty' element to add the extension to.
+
+                                        //first we need to find out if the parent would be a repeating one (CanRepeat)...
+                                        var parentCR = lnode.ed.myData.extendedElement.isParentMultiple;
+                                        if (parentCR) {
+                                            //can repeat
+                                            //todo - does a primitive ever repeat? I'm going to assume not, but be prepared to fix here if if can...
+                                            resource[parentName] = [];  //parent is an array of properties...
+                                            var extToAdd = {extension: [extensionFragment]}
+
+
+                                            resource[parentName].push({extension: [extensionFragment]});
+                                            processed = true;
+
+                                        } else {
+                                            //single only
+
+                                            if (lnode.ed.myData.extendedElement.isComplex) {
+                                                //resource.extension = resource.extension || [];
+                                                //resource.extension.push(extensionFragment);
+                                                resource[parentName] = {extension: []};
+                                                resource[parentName].extension.push(extensionFragment);
+                                            } else {
+                                                var elementName = '_' + parentName;
+                                                resource[elementName] = {extension: []};
+                                                resource[elementName].extension.push(extensionFragment);
+                                            }
+
+
+                                            processed = true;
+                                        }
+                                    }
+                                }       //marks the end of an extended alement (rather than an extension to the resource root)
+
+                                //the extension may have been added to al element. If not, then add to the main extensions array
+                                if (!processed) {
+                                    resource.extension = resource.extension || [];
+                                    resource.extension.push(extensionFragment);
+
+                                    /* - don't think this is needed...
+                                     if (lnode.ed.myData.extendedElement) {
+                                     //this is still an extenstion to add to an element
+                                     if (lnode.ed.myData.extendedElement.isComplex) {
+                                     resource.extension = resource.extension || [];
+                                     resource.extension.push(extensionFragment);
+                                     } else {
+                                     var elementName = '_' + parentName;
+                                     resource[elementName] = {extension: []};
+                                     resource[elementName].extension.push(extensionFragment);
+                                     }
+                                     }
+                                     */
+
+                                }
+
                             } else {
-                                resource[propertyName] = lnode.fragment;
-                                text.value += lnode.display + ' ';
+                                //this is an 'ordinary' element - not an extension...
+                                //if a repeating elment then it is in an array...
+                                if (cr) {
+                                    resource[propertyName] = resource[propertyName] || []
+                                    resource[propertyName].push(lnode.fragment)
+                                } else {
+                                    resource[propertyName] = lnode.fragment;
+                                    text.value += lnode.display + ' ';
+                                }
+
                             }
+
 
                         }
 
 
                     }
 
-
-                }
-
-
-                
-
-                //now process any chldren of this node...
-                if (node.children && node.children.length > 0) {
-                    node.children.forEach(function(child){
-                        var childNodeHash = treeHash[child.id];
-                        var ed = childNodeHash.ed;      //the element definition describing this element
-                        //is this a backbone
-                        if (ed && ed.type) {
-                            if (ed.type[0].code == 'BackboneElement') {
-                                //yes! a backbone element. we need to create a new object to act as the resource
-                                var ar1 = ed.path.split('.');
-                                var pName = ar1[ar1.length-1];
+                    //now process any chldren of this node...
+                    if (node.children && node.children.length > 0) {
+                        node.children.forEach(function (child) {
+                            var childNodeHash = treeHash[child.id];
+                            var ed = childNodeHash.ed;      //the element definition describing this element
+                            //is this a backbone
+                            if (ed && ed.type) {
+                                if (ed.type[0].code == 'BackboneElement') {
+                                    //yes! a backbone element. we need to create a new object to act as the resource
 
 
-                                var obj;
-                                //is this a repeating node? - ie an array...
-                                var cr = canRepeat(ed);
-                                obj = {};
-                                if (cr) {
-                                    //this is a repeating element. Is there already an array for this element?
-                                    if (! resource[pName]) {
-                                        resource[pName] = [];
+                                    if (childNodeHash.isComplexExtension) {
+                                        //alert('complex bld')
+                                        console.log(childNodeHash, ed, treeData);
+                                        resource.extension = resource.extension || [];
+                                        //add the 'parent'
+                                        var complexExt = {url:'http://theurl...',extension:[]}
+
+                                        treeData.forEach(function (tNode) {
+                                            if (tNode.parent == childNodeHash.id) {
+                                                console.log('Child', tNode)
+                                                var child = {url:tNode.text};
+                                                child['value'+tNode.dataType.code] = tNode.fragment
+                                                complexExt.extension.push(child)
+
+                                            }
+                                        })
+                                        resource.extension.push(complexExt)
+                                    } else {
+
+
+                                        var ar1 = ed.path.split('.');
+                                        var pName = ar1[ar1.length - 1];
+
+
+                                        var obj;
+                                        //is this a repeating node? - ie an array...
+                                        var cr = canRepeat(ed);
+                                        obj = {};
+                                        if (cr) {
+                                            //this is a repeating element. Is there already an array for this element?
+                                            if (!resource[pName]) {
+                                                resource[pName] = [];
+                                            }
+                                            resource[pName].push(obj);
+
+
+                                        } else {
+                                            //this is a singleton...
+                                            resource[pName] = obj;
+                                        }
+
+
+                                        addChildrenToNode(obj, child, text)
                                     }
-                                    resource[pName].push(obj);
-
-
                                 } else {
-                                    //this is a singleton...
-                                    resource[pName] = obj;
+
+                                    addChildrenToNode(resource, child, text)
                                 }
 
 
-                                addChildrenToNode(obj,child,text)
                             } else {
-
-                                addChildrenToNode(resource,child,text)
+                                //no, just add to the resource
+                                addChildrenToNode(resource, child, text)
                             }
 
 
-                        } else {
-                            //no, just add to the resource
-                            addChildrenToNode(resource,child,text)
-                        }
-
-
-
-                    })
-                }
+                        })
+                    }
+               // }
 
             }
 
@@ -3362,6 +3394,83 @@ console.log(element)
             }
 
             return deferred.promise;
+        },
+        insertComplexExtensionED : function(profile){
+            var deferred = $q.defer();
+            var insertPoint = [];   //location to insert the ED's representing
+            var queries = []
+            angular.forEach(profile.snapshot.element,function(elementDef,inx) {
+                var elPath = elementDef.path;
+                var ar = elPath.split('.');
+
+
+                if (elementDef.type && elementDef.type[0].profile) {
+                    var url = Utilities.getProfileFromType(elementDef.type[0])
+                        queries.push(
+
+                        GetDataFromServer.findConformanceResourceByUri(url).then(
+                            function(sdef) {
+                                var analysis = Utilities.analyseExtensionDefinition(sdef);
+
+                                if (analysis.complexExtension) {
+                                    console.log(sdef,analysis);
+                                    console.log(elementDef)
+                                    var extPath = analysis.complexExtension.url;    //make up a path from the extension
+                                    var ar = extPath.split('.');
+                                    var id = ar.pop();
+
+                                    insertPoint.push({rootPath:elementDef.path,extPath:elementDef.name,inx:inx,analysis:analysis});       //where to insert the branch
+
+
+
+
+                                }
+                            }
+                        )
+                    )
+
+
+
+                }
+            })
+
+
+            if (queries.length > 0) {
+                //yes - execute all the queries and resolve when all have been completed...
+                $q.all(queries).then(
+                    function() {
+                        angular.forEach(insertPoint,function(ext){
+                            var ar = ext.rootPath.split('.');
+                            ar.pop();
+                            var pathForBB = ar.join('.') + '.'+ ext.extPath;
+                            var bb = {path:pathForBB,min:0,max:'*',type:[{code:'BackboneElement'}]};
+                            bb.cfIsComplexExtension = true;     //todo - not sure this is wise, but we're never updating this profil...
+                            profile.snapshot.element.splice(ext.inx,0,bb)   //insert the root
+                            //now add the child elements
+                            ext.analysis.complexExtension.contents.forEach(function(item,inx){
+                                var childPath = pathForBB + '.'+item.name;
+                                var child = {path:childPath,min:item.min,max:item.max,type:item.dt}
+                                profile.snapshot.element.splice(ext.inx+inx+1,0,child)
+
+
+                            })
+
+                            console.log(ext);
+
+
+
+                        })
+                        deferred.resolve(profile);
+                    },
+                    function(err){
+                        alert("error getting SD's for children "+angular.toJson(err))
+                    }
+                )
+
+            }
+
+            return deferred.promise;
+
         }
     }
 
