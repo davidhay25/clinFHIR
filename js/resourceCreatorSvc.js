@@ -1,6 +1,6 @@
 angular.module("sampleApp").service('resourceCreatorSvc',
     function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,profileCreatorSvc,
-             GetDataFromServer,$localStorage,Utilities,$sce,resourceSvc) {
+             GetDataFromServer,$localStorage,Utilities,$sce,resourceSvc,supportSvc) {
 
 
     var currentProfileEl;     //the profile being used...
@@ -61,11 +61,21 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             }
         },
         findPatientsByName : function(name) {
-
+            var deferred = $q.defer();
 
             var qry = appConfigSvc.getCurrentDataServer().url + "\Patient?name="+name;
+            
+            
+            
+            supportSvc.getAllResourcesFollowingPaging(qry).then(
+                function(data){
+                    console.log(data)
+                    deferred.resolve(data);
+                }
+            )
+            return deferred.promise;
            
-            return $http.get(qry);
+            //return $http.get(qry);
         },
         getJsonFragmentForDataType : function(dt,results,stuVersion) {
             //create a js object that represents a fragment of data for inclusion in a resource based on the datatype...

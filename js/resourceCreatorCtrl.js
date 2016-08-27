@@ -2519,7 +2519,7 @@ angular.module("sampleApp")
 
                     $scope.searchForPatient = function(name) {
                         $scope.nomatch=false;   //if there were no matching patients
-                        delete $scope.matchingPatientsBundle;
+                        delete $scope.matchingPatientsList;
                         if (! name) {
                             alert('Please enter a name');
                             return true;
@@ -2528,8 +2528,8 @@ angular.module("sampleApp")
                         resourceCreatorSvc.findPatientsByName(name).then(
                             function(data){
                                 // ResourceUtilsSvc.getOneLineSummaryOfResource(patient);
-                                $scope.matchingPatientsBundle = data.data;
-                                if (! data.data.entry || data.data.entry.length == 0) {
+                                $scope.matchingPatientsList = data;
+                                if (! data || data.length == 0) {
                                     $scope.nomatch=true;
                                 }
 

@@ -41,15 +41,15 @@
             </div>
             <br/>
 
-            <div ng-show="matchingPatientsBundle">
+            <div ng-show="matchingPatientsList">
                 <div uib-alert class="alert-warning" ng-show="nomatch">
                     Sorry, there were no patients matching that name
                 </div>
                 <ul class="list-group">
-                    <li class="list-group-item" ng-repeat="entry in matchingPatientsBundle.entry">
+                    <li class="list-group-item" ng-repeat="resource in matchingPatientsList">
 
-                        <div ng-click="selectNewPatient(entry.resource)">
-                            {{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}
+                        <div ng-click="selectNewPatient(resource)">
+                            {{ResourceUtilsSvc.getOneLineSummaryOfResource(resource)}}
                         </div>
 
                     </li>
