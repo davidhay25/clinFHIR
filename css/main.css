@@ -4,17 +4,12 @@
     background-image: url('/icons/icon_reference.png');
 }
 
-
-
-
 .popoverHint {
     border-bottom: 1px dotted #000;
     text-decoration: none;
 }
 
-
 .myScroll {
-
     height: 100px;
     overflow-y: scroll;
 }

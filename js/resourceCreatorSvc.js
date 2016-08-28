@@ -560,6 +560,12 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                             if (elementDef.type && elementDef.type[0].code == 'BackboneElement') {
                                 elementDef.myData.displayClass += "backboneElement";
+
+                                //this is a backbone element added by insertComplexExtensionED so we can view complex extensions...
+                                if (elementDef.cfIsComplexExtension) {
+                                    elementDef.myData.displayClass += " elementExtension";
+                                }
+
                             }
 
                             //check the max value - forge leaves these elements in the snapshot...
@@ -3408,9 +3414,10 @@ console.log(element)
             return deferred.promise;
         },
         insertComplexExtensionED : function(profile){
+            //for all complex extensions, insert ED's to mimic this as a backbone element...
             var deferred = $q.defer();
             var insertPoint = [];   //location to insert the ED's representing
-            var queries = []
+            var queries = [];
             angular.forEach(profile.snapshot.element,function(elementDef,inx) {
                 var elPath = elementDef.path;
                 var ar = elPath.split('.');
@@ -3432,8 +3439,6 @@ console.log(element)
                                     var id = ar.pop();
 
                                     insertPoint.push({rootPath:elementDef.path,extPath:elementDef.name,inx:inx,analysis:analysis});       //where to insert the branch
-
-
 
 
                                 }
@@ -3458,11 +3463,16 @@ console.log(element)
                             var bbED = {path:pathForBB,min:0,max:'*',type:[{code:'BackboneElement'}]};
                             bbED.cfIsComplexExtension = true;     //todo - not sure this is wise, but we're never updating this profil...
                             bbED.cfAnalysis = ext.analysis;   //ditto...
+
+
+                            bbED.myData = {displayClass:'elementExtension'}
+
                             profile.snapshot.element.splice(ext.inx,0,bbED)   //insert the root
                             //now add the child elements
                             ext.analysis.complexExtension.contents.forEach(function(item,inx){
                                 var childPath = pathForBB + '.'+item.name;
                                 var child = {path:childPath,min:item.min,max:item.max,type:item.dt}
+                                child.cfIsComplexExtension = true;     //todo - not sure this is wise, but we're never updating this profil...
                                 profile.snapshot.element.splice(ext.inx+inx+1,0,child)
                             })
 

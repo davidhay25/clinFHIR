@@ -2036,6 +2036,14 @@ console.log(summary);
             fhirVersion = fhirVersion || 3;
             if (resource) {
                 switch (resource.resourceType) {
+                    case "FamilyMemberHistory" :
+                        if (resource.relationship) {
+                            return getCCSummary(resource.relationship);
+
+                        } else {
+                            return "FamilyMemberHistory Id: "+resource.id;
+                        }
+                        break;
                     case "List" :
                         if (resource.code) {
                             return getCCSummary(resource.code);

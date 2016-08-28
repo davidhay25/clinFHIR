@@ -42,6 +42,7 @@ angular.module("sampleApp")
         defaultConfig.defaultTerminologyServerUrl = "http://fhir3.healthintersections.com.au/open/";
         //defaultConfig.defaultTerminologyServerUrl = "http://fhir.hl7.org.nz/dstu2/";
 
+        //terminology servers. Order is significant as the first one will be selected by default...
         defaultConfig.terminologyServers = [];
         //defaultConfig.terminologyServers.push({name:'HL&version:2,url:"http://fhir.hl7.org.nz/dstu2/"});
         defaultConfig.terminologyServers.push({name:'Grahames Server',version:2,url:"http://fhir2.healthintersections.com.au/open/"});
@@ -140,12 +141,15 @@ angular.module("sampleApp")
 
                 //now make sure the terminology server is the correct version..
                 //todo - need to think about how to handle where there is more than one terminology server, or Grahames is down...
+                //if there's more than one terminology server for this version, use the first...
                 rtn.terminologyServers = [];    //this will be all terminlogy servers for this version...
+                var foundServer = false;
                 var version = tmp[0].version;       //the FHIR version
                 for (var i=0; i <config.terminologyServers.length;i++) {
                     var s = config.terminologyServers[i];
 
-                    if (s.version == version) {
+                    if (s.version == version && !foundServer) {
+                        foundServer = true;
                         rtn.terminologyServers.push(s)
                         $localStorage.config.servers.terminology = s.url;
                         console.log('setting  terminology server to '+s.url,'appConfig:config')

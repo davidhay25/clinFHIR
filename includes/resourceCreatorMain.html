@@ -46,78 +46,40 @@
 
             <h4 ng-show="children.length > 0">{{'CHILDELEMENTS' | translate}}</h4>
 
-
-            <div >
-
-
-                <div ng-repeat="child in children track by $index">
-                <div class="row">
+            <div ng-repeat="child in children track by $index">
+                <!-- Complex extensions have have ED's inserted - see resourceCreatorSvc.insertComplexExtensionED - so don't display -->
+                <div class="row" ng-hide="child.myData.analysis.complexExtension" >
                     <div class="col-md-4">
                         <div class="{{child.myData.displayClass}}">
-                            <span  popover-placement="top" popover-trigger='mouseenter'
+                            <span popover-trigger="'mouseenter'"
                                    uib-popover="{{child.definition}}">{{child.myData.display}}</span>
                         </div>
                     </div>
-                    <!--<div class="col-md-1" ng-show="child.myData.canAddChild">-->
+
                     <div class="col-md-1">
                         {{child.min}}..{{child.max}}
                     </div>
-                    <!--<div class="col-md-6" ng-show="child.myData.canAddChild">-->
+
                     <div class="col-md-7">
                         <div ng-repeat="type in child.type">
+                            <span ng-hide="type.profile">
+                                <a href="#" ng-click="childSelected(child,$index)">{{type.code}} </a>
+                            </span>
 
-                            <!-- Complex extensions have a different renderer-->
-                            <div ng-hide="child.myData.isComplexExtension">
-                                <span ng-hide="type.profile">
-                                    <a href="#" ng-click="childSelected(child,$index)">{{type.code}} </a>
-                                </span>
+                            <span ng-show="type.profile">
+                                <a href="#" class="clickableResourceReference"
+                                   ng-click="childSelected(child,$index)">-> {{type.profile | referenceType}} </a>
 
-                                <span ng-show="type.profile">
-                                    <a href="#" class="clickableResourceReference"
-                                       ng-click="childSelected(child,$index)">-> {{type.profile | referenceType}} </a>
-
-                                </span>
-                            </div>
-<!--
-                            <div ng-show="child.myData.isComplexExtension">
-                                <div ng-repeat="extChild in child.myData.analysis.complexExtension.contents">
-                                    {{extChild.name}}
-                                    <div ng-repeat="dtc in extChild.dt">
-                                        <a href="#" ng-click="complexChildSelected(child,extChild,dtc)">
-                                            &nbsp;&nbsp;
-                                            <span ng-hide="dtc.profile">
-                                                {{dtc.code}}
-                                            </span>
-                                            <span ng-show="dtc.profile">
-                                                <a href="#" class="clickableResourceReference"
-                                                   ng-click="complexChildSelected(child,extChild,dtc)">-> {{dtc.profile | referenceType}} </a>
-                                            </span>
-
-                                        </a>
-                                    </div>
-
-
-                                </div>
-                            </div>
-
-                            -->
+                            </span>
 
                         </div>
 
-
-
-
                     </div>
-<!-- disabling this at the moment as the delete is *still* flaky
-                    <div class="col-md-7" ng-hide="child.myData.canAddChild">
-                        Only 1 allowed
-                    </div>
-                    -->
 
                 </div>
             </div>
 
-            </div>
+
 
         </div>
 

@@ -270,6 +270,13 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                         //console.log(include,item)
 
+
+                        //this is an element inserted by resourceCreatorSvc.insertComplexExtensionED so it can be displayed in the resource creator...
+                        if (item.cfIsComplexExtension) {
+                            include = false;
+                        }
+
+
                         //var show_removed = true; - just while working on diff from
                         if (include) {
 
