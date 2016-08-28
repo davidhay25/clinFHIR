@@ -3465,13 +3465,16 @@ console.log(element)
                             bbED.cfAnalysis = ext.analysis;   //ditto...
 
 
-                            bbED.myData = {displayClass:'elementExtension'}
+                            //bbED.myData = {displayClass:'elementExtension'}
 
                             profile.snapshot.element.splice(ext.inx,0,bbED)   //insert the root
                             //now add the child elements
                             ext.analysis.complexExtension.contents.forEach(function(item,inx){
                                 var childPath = pathForBB + '.'+item.name;
                                 var child = {path:childPath,min:item.min,max:item.max,type:item.dt}
+                                child.definition = item.definition;
+
+
                                 child.cfIsComplexExtension = true;     //todo - not sure this is wise, but we're never updating this profil...
                                 profile.snapshot.element.splice(ext.inx+inx+1,0,child)
                             })
