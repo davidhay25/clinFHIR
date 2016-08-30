@@ -1,6 +1,6 @@
 angular.module("sampleApp").service('resourceCreatorSvc',
     function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,profileCreatorSvc,
-             GetDataFromServer,$localStorage,Utilities,$sce,resourceSvc,supportSvc) {
+             GetDataFromServer,$localStorage,Utilities,$sce,resourceSvc,supportSvc,modalService) {
 
 
     var currentProfileEl;     //the profile being used...
@@ -12,8 +12,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
     objColours.Encounter = '#93FF1A';
     objColours.Condition = '#E89D0C';
     objColours.Observation = '#FF0000';
-
-
 
 
         //function to capitalize the first letter of a word...
@@ -661,6 +659,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         deferred.resolve(children);
                     },
                     function(err){
+
+
+
                         alert("error getting SD's for children "+angular.toJson(err))
                     }
                 )
@@ -747,7 +748,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     },
                     function(err) {
-                        alert('function: updateFromProfileDefinition - error retrieving '+ url + " "+ angular.toJson(err))
+                        modalService.showModal({}, {bodyText: 'function: updateFromProfileDefinition - error retrieving '+ url + " "+ angular.toJson(err)})
+
+                        //alert('function: updateFromProfileDefinition - error retrieving '+ url + " "+ angular.toJson(err))
                     }
                 ))
 
@@ -1549,371 +1552,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             return deferred.promise;
         },
 
-        makeProfileDisplayFromProfileDEP : function(profile) {
-            console.log(profile);
-            var arDisabled = [];          //this is a list of disabled items...
-            var lst = [];           //this will be a list of elements in the profile to show.
-            var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained'];
-            var dataTypes = ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference','HumanName'];
-            if (profile && profile.snapshot && profile.snapshot.element) {
 
-                profile.snapshot.element.forEach(function (item) {
-                    item.myMeta = {};
-
-                    var el = {path: item.path};
-                    var path = item.path;
-
-                    //if max is 0, this path - and all children - are disabled in this profile...
-                    if (item.max == 0) {
-                        arDisabled.push(path)
-                    }
-
-
-
-                    //now see if this path has been disabled. There will be more elegant ways of doing this
-                    var disabled = false;
-                    for (var i = 0; i < arDisabled.length; i++) {
-                        var d = arDisabled[i];
-                        if (path.substr(0, d.length) == d) {
-                            disabled = true;
-                            break;
-                        }
-                    }
-
-                    var ar = path.split('.');
-                    if (ar.length == 1) {
-                        disabled = true;
-                    }      //don't include the domain resource
-
-                    //standard element names like 'text' or 'language'
-                    if (ar.length == 2 && elementsToDisable.indexOf(ar[1]) > -1) {
-                        disabled = true;
-                    }
-
-
-                    //hide the extension. Will need to figure out how to display 'real' extensions
-                    if (ar[ar.length - 1] == 'modifierExtension') {
-                        disabled = true;
-                    }
-
-                    if (!disabled && ar[ar.length - 1] == 'extension') {
-                        disabled = true;    //by default extensions are disabled...
-                        //if the extension has a profile type then include it, otherwise not...
-                        if (item.type) {
-                            item.type.forEach(function (it) {
-                                if (it.code == 'Extension' && it.profile) {
-                                    disabled = false;
-                                    //load the extension definition to
-
-                                    //use the name rather than 'Extension'...
-                                    ar[ar.length - 1] = "*"+ item.name;
-                                }
-                            })
-                        }
-                    }
-
-                    ar.shift();     //removes the type name at the beginning of the path
-
-                    item.myMeta.path = ar.join('. ');     //create a path that doesn't include the type (so is shorter)
-
-                    //make references look nicer. todo - what about references to profiles?
-                    /* - temp for now....
-                    if (item.type) {
-                        item.type.forEach(function (it) {
-                            if (it.code == 'Reference') {
-                                if (it.profile) {
-                                    var p = it.profile[0];      //todo  <<<<<<<<<<<<<<<<<<
-                                    var ar = p.split('/');
-                                    it.code = '->' + ar[ar.length - 1];
-                                }
-                            }
-                        })
-                    }
-
-                    */
-
-
-                    if (!disabled) {
-                        lst.push(item);
-                    }
-
-
-                    //if the type is a recognized datatype, then hide all child nodes todo - won't show profiled datatyoes
-                    //note that this check is after it has been added to the list...
-                    if (item.type) {
-                        item.type.forEach(function (type) {
-                            if (dataTypes.indexOf(type.code) > -1) {
-                                arDisabled.push(path)
-                            }
-                        });
-                    }
-
-
-                });
-
-            }
-
-            return lst;
-
-        },
-        makeProfileDisplayFromProfileALSODEP : function(inProfile) {
-            var deferred = $q.defer();
-            var lstTree = [];
-
-            var profile = angular.copy(inProfile);      //w emuck around a bit with the profile, so use a copy
-            //console.log(profile);
-            var arIsDataType = [];          //this is a list of disabled items...
-            var lst = [];           //this will be a list of elements in the profile to show.
-            var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained'];
-            var dataTypes = ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference','HumanName'];
-
-            var cntExtension = 0;
-            //a hash of the id's in the tree. used to ensure we don't add an element to a non-esixtant parent.
-            //this occurs when the parent has a max of 0, but child nodes don't
-            var idsInTree = {};
-            var hashTree = {};
-            var queries = [];       //a list of queries to get the details of extensions...
-            if (profile && profile.snapshot && profile.snapshot.element) {
-
-                profile.snapshot.element.forEach(function (item) {
-                    item.myMeta = item.myMeta || {};
-
-                    var include = true;
-                    var el = {path: item.path};
-
-                    var path = item.path;
-
-                    if (! path) {
-                        alert('empty path in Element Definition\n'+angular.toJson(item))
-                        return;
-                    }
-
-                    var ar = path.split('.');
-
-                    //process extensions first as this can set the include true or false - all the others only se false
-                    //process an extension. if it has a profile, then display it with a nicer name.
-                    if (ar[ar.length - 1] == 'extension') {
-                       // disabled = true;    //by default extensions are disabled...
-                        //if the extension has a profile type then include it, otherwise not...
-                        include = false;
-
-                        if (item.type) {
-                            item.type.forEach(function (it) {
-                                if (it.code == 'Extension' && it.profile) {
-                                   // disabled = false;
-                                    include=true;
-                                    //load the extension definition
-                                    queries.push(GetDataFromServer.findConformanceResourceByUri(it.profile).then(
-                                        function(sdef) {
-                                            var analysis = Utilities.analyseExtensionDefinition2(sdef);
-                                            item.myMeta.analysis = analysis;
-                                            console.log(analysis)
-                                        }
-                                    ));
-
-                                    //use the name rather than 'Extension'...
-                                    ar[ar.length - 1] = "*"+ item.name;
-                                }
-                            })
-                        }
-                    }
-
-                    //todo hide the modifier extension. Will need to figure out how to display 'real' extensions
-                    if (ar[ar.length - 1] == 'modifierExtension') {
-                        //disabled = true;
-                        include = false;
-                    }
-
-                    if (ar.length == 1) {
-                        //this is the root node
-                        //note - added data friday pm montreal
-                        lstTree.push({id:ar[0],parent:'#',text:ar[0],state:{opened:true,selected:true},path:path,data: {ed : item}});
-                        idsInTree[ar[0]] = 'x'
-                        include = false;
-                    }
-
-                    //obviously if the max is 0 then don't show  (might waant an option later to show
-                    if (item.max == 0) {
-                        include = false;
-                    }
-
-
-
-                    //standard element names like 'text' or 'language'
-                    if (ar.length == 2 && elementsToDisable.indexOf(ar[1]) > -1) {
-
-                        include = false;
-                    }
-
-                    //don't include id elements...
-                    if (ar[ar.length-1] == 'id') {
-                        include = false;
-                    }
-
-
-                    //don't include removed elements
-                    if (item.myMeta.remove) {
-                        include = false;
-                    }
-
-
-
-
-                    ar.shift();     //removes the type name at the beginning of the path
-                    item.myMeta.path = ar.join('. ');     //create a path that doesn't include the type (so is shorter)
-
-                    //make references look nicer.
-                    if (item.type) {
-                        item.type.forEach(function (it) {
-
-                            console.log(it.code)
-                            //a node that has child nodes
-                            if (it.code == 'BackboneElement') {
-                                item.myMeta.isParent = true;
-                            }
-
-                            if (it.code == 'Extension') {
-                                item.myMeta.isExtension = true;
-                            }
-
-                            if (it.code == 'Reference') {
-                                item.myMeta.isReference = true;
-                                /*
-                                if (it.profile) {
-                                    var p = it.profile[0];      //todo  <<<<<<<<<<<<<<<<<<
-                                    var ar = p.split('/');
-                                    it.code = '->' + ar[ar.length - 1];
-                                }
-                                */
-
-                            }
-
-                            //if the datatype starts with an uppercase letter, then it's a complex one...
-                            if (/[A-Z]/.test( it.code[0])){
-                                item.myMeta.isComplex = true;
-                            }
-
-                        })
-                    }
-
-
-
-
-                    //console.log(path,disabled)
-
-                    //add to tree only if include is still true...
-                    if (include) {
-                        var id = path;
-                        var arText = path.split('.');
-                        var text = arText[arText.length-1];
-
-                        var arTree = path.split('.');
-                        if (arTree[arTree.length-1] == 'extension') {
-                            text = item.name;
-                            id = id + cntExtension;
-                            cntExtension++;
-                        }
-
-                        arTree.pop();
-                        var parent = arTree.join('.');
-
-                        var dataType = '';
-                        if (item.type) {
-                            item.type.forEach(function (it){
-                                dataType += " " + it.code;
-                            })
-                        }
-
-                        var node = {id:id,parent:parent,text:text,state:{opened:false,selected:false},
-                            a_attr:{style:'color:green'}, path:path};
-
-//title: dataType,
-
-
-                        node.data = {ed : item};
-
-                       // if (item.myMeta.isExtension) {
-                           // node.a_attr.style='color:red'
-                      //  }
-
-                        //set the icon to display. todo Would be better to use a class, but can't get that to work...
-                        if (!item.myMeta.isParent) {
-                            //if it's not a parent node, then set to a data type...
-                            if (item.myMeta.isComplex) {
-                                node.icon='/icons/icon_datatype.gif';
-                            } else {
-                                node.icon='/icons/icon_primitive.png';
-                            }
-
-
-                            if (item.myMeta.isReference) {
-                                node.icon='/icons/icon_reference.png';
-                            }
-
-
-
-                        }
-
-                        if (item.myMeta.isExtension) {
-                            node.icon='/icons/icon_extension_simple.png';
-                        }
-
-
-
-
-                        //so long as the parent is in the tree, it's safe to add...
-                        if (idsInTree[parent]) {
-                            lstTree.push(node);
-                            idsInTree[id] = 'x'
-                            lst.push(item);
-                        }
-
-                    }
-
-
-                    //if the type is a recognized datatype, then hide all child nodes todo - won't show profiled datatyoes
-                    //note that this check is after it has been added to the list...
-
-                    if (item.type) {
-                        item.type.forEach(function (type) {
-                            if (dataTypes.indexOf(type.code) > -1) {
-                                arIsDataType.push(path)
-                            }
-                        });
-                    }
-
-
-
-
-                });
-
-            }
-
-
-            if (queries.length) {
-                $q.all(queries).then(
-                    function() {
-
-
-                        //here is where we set the icons - ie after all the extension definitions have been loaded & resolved...
-
-
-
-                        deferred.resolve({table:lst,treeData:lstTree})
-                    }
-                )
-
-            } else {
-                deferred.resolve({table:lst,treeData:lstTree})
-            }
-
-
-
-            return deferred.promise;
-
-           // return {table:lst,treeData:lstTree};
-
-        },
         createConformanceQualityReport : function(conf){
             //create a quality report (list of issues) for a conformance resource
             var lstIssue = [];
@@ -3215,6 +2854,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             
         },
         loadResource : function() {
+            //load an existing resource into a tree view for editing.
+            //todo Limitations: drop meta, text, extensions, contained
             var deferred = $q.defer();
             var idRoot = 0;
             var edHash = {};
@@ -3226,6 +2867,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     //console.log(resource)
 
+                    //load the profile for this resource. Assume a base resource at the moment...
                     var resourceType = resource.resourceType;
                     var uri = "http://hl7.org/fhir/StructureDefinition/"+resourceType;
                     GetDataFromServer.findConformanceResourceByUri(uri).then(
@@ -3236,21 +2878,34 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 deferred.reject('Sorry, the profile definition for this resource on the Conformance server is missing the snapshot')
                             } else {
                                 //create a hash indexed by path. need this so the ED for a given path can be located using the function getED()
+                                //this won't handle extensions (I think)
+                                var parent;
                                 angular.forEach(profile.snapshot.element,function(item){
+                                    if (! parent) {
+                                        parent = item.path;
+                                    }
                                     edHash[item.path] = angular.copy(item);
                                 });
 
-                                var parent = "CarePlan";
-                                var rootId = getId();
+
+                                var rootId = 'root'; //getId();
+                                var edRoot = getED(resourceType);
+
                                 var item = {};      //this will be the ed for the resource root...
                                 var rootItem = {id:rootId,parent:'#',text:parent,state:{opened:true,selected:true},
-                                    path:parent,data: {ed : edHash[resourceType]},ed:edHash[resourceType]}
+                                    path:parent,data: {ed : edRoot},ed:edRoot}
+
+                                //var rootItem = {id:rootId,parent:'#',text:parent,state:{opened:true,selected:true},
+                                 //   path:parent,data: {ed : edHash[resourceType]},ed:edHash[resourceType]}
+
                                 tree.push(rootItem);
 
                                 angular.forEach(resource,function(element,key){
                                     processNode(parent,tree,key,element,rootId)
                                 });
 
+
+                                console.log(tree)
 
                                 deferred.resolve({treeData:tree,profile:profile});
                             }
@@ -3259,12 +2914,20 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         }
                     );
 
-                    //process a single node
+                    //process a single node. If it's a backbone element, then recurse into it...
                     function processNode(parentPath,tree,key,element,parentId) {
                         //console.log(key,element);
 
-                        if (angular.isArray(element)) {
+
+                        if (['id','meta','text','contained'].indexOf(key) > -1) {
+                            //ignore these elements
+                        } else if (key == 'extension') {
+                            //need to add the datatype to the node so it can work out the name of the value[x]
+
+
+                        } else if (angular.isArray(element)) {
                             //an array - process each one using the same parent Path & id
+
                             element.forEach(function(elementC) {
                                 processNode(parentPath,tree,key,elementC,parentId)
                             })
@@ -3273,32 +2936,65 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             //but first, each node needs an id
                             var nodeId = getId();
                             var nodePath =  parentPath + '.' + key;
-                            //console.log(nodeId,parentId,nodePath,element);
                             //and add to the tree here...
 
 
                             var newNode = {id:nodeId,parent:parentId,path:nodePath,text:nodePath,state:{opened:false,selected:false}};
                             newNode.data = {ed : getED(nodePath)};
-                            newNode.ed = getED(nodePath);      //a duplicate of the ed for RB todo:fix
+                            newNode.ed = getED(nodePath);      //a duplicate of the ed for RB todo: why is this??  fix
 
-                            //newNode.dataType = getDataType(path,element);
-                           // newNode.fragment =  element;// {test:'testValue'}
-console.log(element)
-                          //  tree.push(newNode);
-                            //console.log(newNode)
+
+//console.log(element)
+
+                            tree.push(newNode);
 
                             if (isBackBoneElement(nodePath)) {
+                                //this is a BBE, but is it multiple or singular (CarePlan.activity.detail)
+                                var edBbe = getED(nodePath);
+                                console.log(edBbe);
+
+
+
+
                                 angular.forEach(element,function(elementC, keyC){
                                     var pathC = parentPath + '.' +key;
                                     var parentId = getId();
                                     processNode(pathC ,tree,keyC,elementC,nodeId);
                                 })
                             } else {
-                                newNode.dataType = getDataType(nodePath,element);
-                                
-                                newNode.fragment =  element;// {test:'testValue'}
+                                //this is a complex object, but not a backbone element...
+                                angular.forEach(element,function(elementD, keyD){
+
+                                    var pathC = parentPath + '.' +keyD;
+                                    //var pathC = nodePath = '.' +keyD;
+
+                                    var ED = getED(pathC);
+                                    if (ED) {
+                                        //if there's an ED for this path, then it is a node that required further procesing
+                                        processNode(nodePath ,tree,keyD,elementD,nodeId);
+                                    } else {
+                                        //if there is no ED, then we're into the child elements of a datatype (like Period.start)
+                                        //so add the whole element as the fragment to the node we just created and don't process any further...
+                                        newNode.fragment=elementD
+                                    }
+
+                                    //console.log(elementD,keyD,nodePath)
+
+                                    //var parentId = getId();
+
+
+
+                                })
+                               // newNode.dataType = getDataType(nodePath,element);
+                               // console.log(element)
+                               // var pathD = parentPath;// + '.' +key;
+                               // var parentId = getId();
+
+
+                                //tue newNode.fragment =  element;// {test:'testValue'}
                             }
-                            tree.push(newNode);
+
+                            //tue tree.push(newNode);
 
 
 
@@ -3307,13 +3003,8 @@ console.log(element)
                             var path = parentPath + '.' +key;
                             var id = getId();
                             // now add to the tree if there is an ...
-
-//console.log(path);
-
-
                             var pathInED = path;
                             var ar = path.split('.');
-
 
                             var ED = getED(pathInED);
                             if (ED) {
@@ -3326,6 +3017,10 @@ console.log(element)
 
                                 tree.push(newNode);
                             } else {
+                                //actually, is this a leaf datatype???
+
+
+
                                 console.log('---> ERROR, no ed found for ',path)
                             }
 
@@ -3348,7 +3043,7 @@ console.log(element)
                 var ed = getED(pathInResource);
 
                 if (ed) {
-                    console.log(pathInResource,value,ed.type);
+                    //console.log(pathInResource,value,ed.type);
                     return ed.type[0]
                 } else {
                     console.log('NO ED',pathInResource,value);
@@ -3362,14 +3057,15 @@ console.log(element)
             //determine if this is a backbone element...  (so will need to recurse into children)...
             function isBackBoneElement(pathInResource) {
                 var ed = getED(pathInResource);
+                var isBbe = false;
                 if (ed && ed.type) {
                     ed.type.forEach(function(typ){
                         if (typ.code == 'BackboneElement') {
-                            return true;
+                            isBbe =  true;
                         }
                     })
                 }
-                return false;
+                return isBbe;
 
             }
 
@@ -3391,12 +3087,19 @@ console.log(element)
                             pathInResource = pathInResource.substr(0,pl-l)+'[x]';
                             ed = edHash[pathInResource];
                             //console.log('>>>>>>>>',pathInResource,ed);
+                            if (ed) {
+                                ed.myData = {};     //used by the resource builder
+                            }
+
                             return ed;
 
                         }
 
                     }
                 } else {
+                    if (ed) {
+                        ed.myData = {};     //used by the resource builder
+                    }
                     return ed;
                 }
 

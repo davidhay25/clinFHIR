@@ -211,6 +211,7 @@ angular.module("sampleApp").
                         config.log('resolvedId: '+bundle.entry[0].resource.id,'findConformanceResourceByUri');
                         deferred.resolve(bundle.entry[0].resource);
                     } else {
+                        
                         deferred.reject({msg:"No matching profile found on "+serverUrl  + typeOfConformanceResource +" (but not a server error)"})
                     }
 
@@ -624,9 +625,9 @@ angular.module("sampleApp").
                                     element.type.forEach(function (typ) {
                                         var code = typ.code;        //the datatype code
                                         if (code) {
-                                            if (/[A-Z]/.test(code)) {
+                                            //if (/[A-Z]/.test(code)) {  aug2017 - don't know why there is a caps check here...
                                                 child.ed.myMeta.isComplex = true;
-                                            }
+                                           // }
                                         }
                                     })
                                 }

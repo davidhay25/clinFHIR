@@ -559,16 +559,26 @@ angular.module("sampleApp")
         var baseType;
 
 
+
+
+
+
         if (profile.constrainedType) {
             //this is an STU-2 profile
             baseType = profile.constrainedType;
             $scope.conformProfiles = [profile.url]       //the profile/s that this resource claims conformance to
         } else {
+
             if (profile.baseDefinition) {
+                //montreal version
+                baseType = $filter('getLogicalID')(profile.baseDefinition);
+            } else if (profile.type) {
+                //baltimore version
                 //STU-3 base resource
+                //if (profile.baseDefinition) {
 
                 //getLogicalID
-                baseType = $filter('getLogicalID')(profile.baseDefinition);
+                baseType = profile.type;//$filter('getLogicalID')(profile.baseDefinition);
                 //baseType = profile.name;
 
 

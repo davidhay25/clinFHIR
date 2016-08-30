@@ -7,24 +7,32 @@ angular.module("sampleApp").controller('extensionDefCtrl',
             $scope.input ={};
             $scope.input.multiplicity = 'opt';
 
-            //var config = appConfigSvc.config();
-            //var conformanceSvr = appConfigSvc.getCurrentConformanceServer();
-
             $scope.conformanceSvr = appConfigSvc.getCurrentConformanceServer();
-            //console.log(conformanceSvr);
+
 
             $scope.save = function() {
                 delete $scope.validateResults;
                 $scope.showWaiting = true;
                 var sd = makeSD();
-                console.log(sd)
+
                 if (validate(sd)){
 
                     var url = $scope.conformanceSvr.url + 'StructureDefinition/'+sd.id;
                     $http.put(url,sd).then(
                         function(data){
-                            console.log(data)
-                            alert("saved")
+                            //console.log(data)
+
+
+                            modalService.showModal({}, {bodyText:"Extension has been saved."}).then(function (result) {
+
+                            },function(){
+                                //this is the 'cancel' option - but it's the one fired when there's only a single button...
+                                $scope.$close({url:url,sd:sd});
+                                console.log('close')
+                            })
+
+
+
                         }, function(err){
                             console.log(err)
                             $scope.validateResults = err.data;
@@ -227,6 +235,11 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 };
 
 
+            $scope.removeChild = function(inx){
+                $scope.childElements.splice(inx,1)
+
+            };
+
             var validate = function(sd) {
                 //return true;
                 var err = "";
@@ -243,7 +256,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 } else {
                     return true;
                 }
-            }
+            };
 
             //hide the outcome of the validate operation...
             $scope.closeValidationOutcome = function(){
@@ -311,23 +324,37 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                     var ed1 = {path : 'Extension',name: name,short:short,definition:definition,
                         comments:comments,min:min,max:max,type:[{code:'Extension'}]};
                     extensionDefinition.snapshot.element.push(ed1);
+
+                    var edSlicing = {path : 'Extension.extension',name: name,short:short,definition:definition,
+                        comments:comments,min:min,max:max,type:[{code:'Extension'}]};
+                    edSlicing.slicing = {discriminator:'url',ordered:false,rules:'open'}
+                    extensionDefinition.snapshot.element.push(edSlicing);
+
+
                 }
 
                 //for each defined child, add the component ElementDefinition elements...
-                $scope.childElements.forEach(function(ce,extensionTypeIsMultiple){
+                $scope.childElements.forEach(function(ce){
                     var vo = ce;
                     vo.min = min;
                     vo.max = max;
 
-                    extensionDefinition.snapshot.element = extensionDefinition.snapshot.element.concat(makeChildED(vo))
+                    extensionDefinition.snapshot.element = extensionDefinition.snapshot.element.concat(makeChildED(vo,extensionTypeIsMultiple))
 
 
-                })
+                });
+
+                //the url of this extension. It's at the bottom (not sure why)..
+                var edUrl = {path : 'Extension.url',name: name,short:short,definition:definition,
+                    min:1,max:"1",type:[{code:'uri'}],fixedUri:$scope.conformanceSvr.url + name};
+                extensionDefinition.snapshot.element.push(edUrl);
 
 
                 $scope.jsonED = extensionDefinition;    //just for display
 
                 console.log(JSON.stringify(extensionDefinition));
+
+                console.log(Utilities.analyseExtensionDefinition(extensionDefinition))
 
                 return extensionDefinition;
 
@@ -338,6 +365,8 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 //vo.name, vo.short, vo.definition, vo.comments, vo.min, vo.max, vo.code, vo.dataTypes[code,description]
                 console.log(vo)
 
+                vo.description = vo.description || 'No Description'
+
                 //if complex, then the root is '1 level down'. Remember we only support a single level of complexity...
                 var extensionRoot = 'Extension';
                 if (isComplex) {
@@ -345,11 +374,11 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 }
 
                 var arED = [];
-                var ed1 = {path : extensionRoot,name: vo.name,definition:"def",min:vo.min,max:vo.max,
-                    short:vo.short,definition:vo.definition,
-                    comments:vo.comments,definition:"def",min:vo.min,max:vo.max,type:[{code:'Extension'}]};
-                var ed2 = {path : extensionRoot + '.url',name: 'The code for this child',representation:['xmlAttr'],
-                    comments:vo.comments,definition:"def",min:1,max:"1",type:[{code:'uri'}],fixedUri:vo.code};
+                var ed1 = {path : extensionRoot,name: vo.code,min:vo.min,max:vo.max,
+                    short:vo.short,definition:vo.description,
+                    comments:vo.comments,min:vo.min,max:vo.max,type:[{code:'Extension'}]};
+                var ed2 = {path : extensionRoot + '.url',name: vo.code,representation:['xmlAttr'],
+                    comments:vo.comments,definition:vo.description,min:1,max:"1",type:[{code:'uri'}],fixedUri:vo.code};
 
                 //the value name is 'value' + the code with the first letter capitalized, or value[x] if more than one...
                 var valueName = '[x]';
@@ -359,7 +388,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 }
 
                 var ed3 = {path : extensionRoot + '.value'+valueName,name: vo.name,short:vo.short,definition:vo.definition,
-                    comments:vo.comments,definition:"def",min:vo.min,max:vo.max,type:[]};
+                    comments:vo.comments,definition:vo.description,min:vo.min,max:vo.max,type:[]};
                 vo.dataTypes.forEach(function(type){
                     ed3.type.push({code:type.code})
 
@@ -370,7 +399,6 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
                 });
 
-
                 arED.push(ed1);
                 arED.push(ed2);
                 arED.push(ed3);
@@ -380,4 +408,27 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
 
     }
+
+    /*
+order in patient.nationality...
+     Extension
+     Extension.id
+     Extension.extension (slicing)
+
+     Extension.extension (name= nat code)
+     Extension.extension.id
+     Extension.extension.extension
+     Extension.extension.url
+     Extension.extension.valueCC
+
+     Extension.extension (name = period)
+     Extension.extension.id
+     Extension.extension.extension
+     Extension.extension.url
+     Extension.extension.valuePeriod
+
+     Extension.url
+     Extension.value[x]
+     */
+
 );

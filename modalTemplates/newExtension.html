@@ -114,7 +114,7 @@
                         <td>
                             <div ng-repeat="dt in child.dataTypes">{{dt.description}}</div>
                         </td>
-                        <td><i class="glyphicon glyphicon-remove"></i> </td>
+                        <td><i class="glyphicon glyphicon-remove" ng-click="removeChild($index)"></i> </td>
                     </tr>
                 </table>
 
@@ -145,6 +145,10 @@
                         Now enter the remaining details. All fields are required. At least one element is required.
                     </p>
 
+                </div>
+
+                <div>
+                    {{conformanceSvr.url}}
                 </div>
 
             </div>

@@ -707,8 +707,32 @@ angular.module("sampleApp")
             size: 'lg',
             controller: "extensionDefCtrl"
         }).result.then(
-            function(result) {
-                console.log(result)
+            function(vo) {
+                console.log(vo)
+
+                //this is copied from $scope.addNewNode todo - refactor out common code...
+
+                var newPath = $scope.selectedNode.data.ed.path + '.' + vo.sd.id;  //get from ectensio
+
+//create a basic Extension definition with the core data required. When the profile is saved, the other stuff will be added
+                var ed = {path:newPath,name: vo.sd.id, myMeta : {isNew:false, isExtension:true}};
+                switch ($scope.input.multiplicity) {
+                    case 'opt' :
+                        ed.min=0; ed.max = "1";
+                        break;
+                    case 'req' :
+                        ed.min=1; ed.max='1';
+                        break;
+                    case 'mult' :
+                        ed.min=0; ed.max='*';
+                        break;
+                }
+                ed.definition = 'definition from profile';
+                ed.type = [{code:"Extension",profile:[vo.url]}]; //todo <<<<<<<<<<<  note that the profile is an array - fix!!!
+
+                $scope.newNodeToAdd = ed;       //<<<<<<  here is the add function... see it in profileEditor.html
+                $scope.input.dirty = true;
+
             })
         };
 

@@ -1,5 +1,5 @@
 angular.module("sampleApp").service('profileCreatorSvc',
-    function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,GetDataFromServer,$localStorage,Utilities,$sce) {
+    function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,GetDataFromServer,$localStorage,Utilities,$sce,modalService) {
 
 
         function makeExtensionSD(vo) {
@@ -116,7 +116,8 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                                                 //console.log(analysis)
                                             }, function(err) {
-                                                console.log('Error retrieving '+ it.profile + " "+ angular.toJson(err))
+                                                modalService.showModal({}, {bodyText: 'makeProfileDisplayFromProfile: Error retrieving '+ it.profile + " "+ angular.toJson(err)})
+                                                //console.log('Error retrieving '+ it.profile + " "+ angular.toJson(err))
                                             }
                                         ));
 
@@ -500,6 +501,8 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     fhirVersion = svr.version;
                 }
 
+                console.log(fhirVersion);
+
                 var sd;         //this is the StructureDefinition for the Profile
 
 
@@ -513,8 +516,15 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         status:'draft',experimental : true};
 
                     sd.abstract = false;
-                    sd.baseType = baseProfile.name;         //assume that constariing a base resource
+                    //sd.baseType = baseProfile.name;         //assume that constariing a base resource
+                    sd.type = baseProfile.type;// baseProfile.name;         //assume that constariing a base resource
+
+
+                    //if ()
+
                     sd.baseDefinition = baseProfile.url;    //assume that constariing a base resource
+                    //sd.baseDefinition = baseProfile.baseDefinition;    //assume that constariing a base resource
+
                     sd.derivation = 'constraint';
                     sd.id = profileName;
                     //sd.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
@@ -533,7 +543,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     sd.snapshot = {element:[]};
 
                     //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
-                    var typeName = 'baseType';
+                    //var typeName = 'baseType';
 
 
                     //if baseProfile.base is populated then this is a profile being edited...
@@ -554,7 +564,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     sd.url = profileUrl;
 
                     //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
-                    var typeName = 'base';
+                    //var typeName = 'base';
 
                     //if baseProfile.base is populated then this is a profile being edited...
                     if (baseProfile.base && baseProfile.base =="http://hl7.org/fhir/StructureDefinition/DomainResource") {
