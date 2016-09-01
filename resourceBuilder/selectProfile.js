@@ -106,12 +106,25 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                                 $scope.showWaiting = true;
                             } else {
                                 //this will be a 'profile'
+
+                                //http://hl7.org/fhir/StructureDefinition/
+
+
                                 if (! $scope.results.profileType) {
                                     alert("Please select the Base resource type");
                                     $scope.showWaiting = false;
                                     return;
                                 } else {
-                                    searchString += "kind=resource&type="+$scope.results.profileType.name
+
+                                    var svr =  appConfigSvc.getCurrentConformanceServer();
+                                    if (svr.version == 3) {
+                                        searchString += "kind=resource&base=http://hl7.org/fhir/StructureDefinition/"+$scope.results.profileType.name
+                                    } else {
+                                        searchString += "kind=resource&type="+$scope.results.profileType.name
+                                    }
+
+
+
                                     //searchString += "constrainedType="+$scope.results.profileType.name
                                     $scope.showWaiting = true;
                                 }
@@ -126,7 +139,7 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
 
 
 
-                            searchString += "&_count=100";
+                            searchString += "&_count=100&_sort=_id";
                             
                             //config.log('Profile search string',searchString);
 

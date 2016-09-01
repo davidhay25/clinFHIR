@@ -27,7 +27,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 extensionSD.id = vo.extensionId;
                 extensionSD.status='draft';
                 extensionSD.contextType = "datatype";
-                extensionSD.context=["Element"];
+                extensionSD.context=["*"];
                 extensionSD.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
             } else {
                 extensionSD.constrainedType = "Extension";
@@ -516,14 +516,11 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         status:'draft',experimental : true};
 
                     sd.abstract = false;
-                    //sd.baseType = baseProfile.name;         //assume that constariing a base resource
-                    sd.type = baseProfile.type;// baseProfile.name;         //assume that constariing a base resource
+                    sd.type = baseProfile.type;  // type is unchanged
 
 
-                    //if ()
-
-                    sd.baseDefinition = baseProfile.url;    //assume that constariing a base resource
-                    //sd.baseDefinition = baseProfile.baseDefinition;    //assume that constariing a base resource
+                    //assume that constraining a base resource
+                    sd.baseDefinition = baseProfile.baseDefinition;    //assume that constraining a base resource
 
                     sd.derivation = 'constraint';
                     sd.id = profileName;
@@ -541,10 +538,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     sd.requirements = baseProfile.requirements;
                     sd.copyright = baseProfile.copyright;
                     sd.snapshot = {element:[]};
-
-                    //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
-                    //var typeName = 'baseType';
-
 
                     //if baseProfile.base is populated then this is a profile being edited...
                     if (baseProfile.baseType && baseProfile.baseType =="http://hl7.org/fhir/StructureDefinition/DomainResource") {
@@ -585,8 +578,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 var log = [];
 
                 var SDsToSave = [];     //this will be an array of extension SD's plus a single profile SD
-
-
 
                 //here is where we iterate through the tree model, pulling out the ElementDefinitions and adding them to the profile...
                 model.forEach(function(item,index) {

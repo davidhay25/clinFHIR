@@ -717,7 +717,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
             resourceCreatorSvc.getLookupForCode(item.system,item.code).then(
                 function(data) {
                     console.log(data);
-                    $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
+                    $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data);
                     console.log($scope.terminologyLookup);
                 },
                 function(err) {

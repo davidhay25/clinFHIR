@@ -317,7 +317,7 @@
 
                             <div>
 
-                                <span uib-dropdown  popover-placement="right" popover-trigger='mouseenter'
+                                <span uib-dropdown  popover-placement="right" popover-trigger="'mouseenter'"
                                       uib-popover="Data Server: {{appConfigSvc.getCurrentDataServer().url}}">
                                     <strong>{{'PATIENT' | translate}}: </strong>
 
@@ -335,12 +335,12 @@
                             </div>
 
                         <div>
-                                <span uib-dropdown  popover-placement="right" popover-trigger='mouseenter'
+                                <span uib-dropdown  popover-placement="right" popover-trigger="'mouseenter'"
                                       uib-popover="Conformance Server: {{appConfigSvc.getCurrentConformanceServer().url}}">
                                         <strong>{{'PROFILE'|translate}}:</strong>
                                 </span>
 
-                            <span popover-placement="right" popover-trigger='mouseenter'
+                            <span popover-placement="right" popover-trigger="'mouseenter'"
                                   uib-popover="{{resourceCreatorSvc.getCurrentProfile().url}}">
                                 {{resourceCreatorSvc.getCurrentProfile().url | shortUrl}}</span>
                             <span ng-hide="resourceCreatorSvc.getCurrentProfile()">Use Find Profile link to load a profile</span>
@@ -392,7 +392,7 @@
                                     ng-click="park()">{{'PARK' | translate}}</button>
 
                             <button
-                                    popover-placement="left" popover-trigger='mouseenter'
+                                    popover-placement="left" popover-trigger="'mouseenter'"
                                     uib-popover="Validate against Data Server:{{config.servers.data}}"
                                     class="btn btn-link pull-right" ng-click="validate()">{{'VALIDATE' | translate}}</button>
                         </form>
@@ -554,7 +554,7 @@
 
 
                         <form ng-hide="displayMode == 'front' || displayMode == 'new'" class="navbar-form navbar-right">
-                            <span  popover-placement="left" popover-trigger='mouseenter'
+                            <span  popover-placement="left" popover-trigger="'mouseenter'"
                                   uib-popover="Load front screen">
                                     <a class="btn btn-success" href="#" ng-click="displayMode = 'front'">Front</a>
                                 </span>
