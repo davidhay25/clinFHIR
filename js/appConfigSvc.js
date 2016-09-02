@@ -44,7 +44,6 @@ angular.module("sampleApp")
 
         //terminology servers. Order is significant as the first one will be selected by default...
         defaultConfig.terminologyServers = [];
-        //defaultConfig.terminologyServers.push({name:'HL&version:2,url:"http://fhir.hl7.org.nz/dstu2/"});
         defaultConfig.terminologyServers.push({name:'Grahames Server',version:2,url:"http://fhir2.healthintersections.com.au/open/"});
         defaultConfig.terminologyServers.push({name:'Grahames Server',version:3,url:"http://fhir3.healthintersections.com.au/open/"});
         //defaultConfig.terminologyServers.push({name:'Ontoserver',version:3,url:"http://ontoserver.csiro.au/stu3/"});
@@ -89,6 +88,12 @@ angular.module("sampleApp")
 
 
         return {
+            addServer : function(svr,isTerminology) {
+                $localStorage.config.allKnownServers.push(svr)
+                if (isTerminology) {
+                    $localStorage.config.terminologyServers.push(svr);
+                }
+            },
             setServerType : function(type,url) {
                 //set a default server type
                 defaultConfig.servers[type] = url;
@@ -147,18 +152,24 @@ angular.module("sampleApp")
                 var version = tmp[0].version;       //the FHIR version
                 for (var i=0; i <config.terminologyServers.length;i++) {
                     var s = config.terminologyServers[i];
+                    //if (s.version == version && !foundServer) {
+                    if (s.version == version) {
 
-                    if (s.version == version && !foundServer) {
-                        foundServer = true;
-                        rtn.terminologyServers.push(s)
-                        $localStorage.config.servers.terminology = s.url;
-                        console.log('setting  terminology server to '+s.url,'appConfig:config')
+                        rtn.terminologyServers.push(s);
+                        //make the first server the default...
+                        if (!foundServer) {
+                            foundServer = true;
+                            $localStorage.config.servers.terminology = s.url;
+                            console.log('setting  terminology server to '+s.url,'appConfig:config')
+                        }
+
                     }
                 }
                 return rtn;
             },
             config : function() {
 
+                //note that a local browser can add to $localStorage.config
                 if (! $localStorage.config) {
                     $localStorage.config = defaultConfig;
                 }

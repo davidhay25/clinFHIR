@@ -123,9 +123,6 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                                         searchString += "kind=resource&type="+$scope.results.profileType.name
                                     }
 
-
-
-                                    //searchString += "constrainedType="+$scope.results.profileType.name
                                     $scope.showWaiting = true;
                                 }
                             }
@@ -141,24 +138,18 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
 
                             searchString += "&_count=100&_sort=_id";
                             
-                            //config.log('Profile search string',searchString);
-
-
                             $scope.query = searchString;
 
 
 
                             GetDataFromServer.queryConformanceServer(searchString).then(
-                            //GetDataFromServer.queryFHIRServer(searchString,true).then(
                                 function(data){
                                     var bundle = data.data;
                                     if (bundle.entry && bundle.entry.length > 0) {
                                         $scope.showMessage = true;  //the message that I can't change tabs
                                         $scope.selectedProfiles = bundle;
                                         $scope.results.activeTab = "1";
-                                        //$scope.tab.tabQuery = false;
-                                        //$scope.tab.tabResults = true;
-                                        //   console.log(bundle)
+
                                     } else {
                                         $scope.showNone = true;
                                     }

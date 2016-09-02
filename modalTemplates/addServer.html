@@ -1,0 +1,107 @@
+
+<div>
+    <!--<div ng-controller="newResourceCtrl">-->
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-6 col-sm-6 col-xs-6">
+                <h3 class="modal-title">Add new server</h3>
+
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-6">
+                <div class="pull-right navbar-form" ng-show="waiting">
+                    <img src="css/ajax_loader_blue_32.gif"/>
+                </div>
+
+            </div>
+
+
+
+
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+
+        <div class="row" style="margin-bottom: 8px">
+            <div class="col-md-2 col-sm-2 col-xs-2">
+                <div>Name</div>
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-6">
+                <input class='form-control' type="text" ng-model="input.name"/>
+            </div>
+            <div class="col-md-4 col-sm-4 col-xs-4">
+                The name of the server (will be displayed in server selection dialogs)
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 8px">
+            <div class="col-md-2 col-sm-2 col-xs-2">
+                <div>Url</div>
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-6">
+                <input class='form-control' type="text"
+                       placeholder="http://fhirtest.uhn.ca/baseDstu3/"
+                       ng-model="input.url"/>
+            </div>
+            <div class="col-md-4 col-sm-4 col-xs-4">
+                The full url to the server (including port). Include a trailing /
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2 col-sm-2 col-xs-2">
+                <div>FHIR Version</div>
+            </div>
+            <div class="col-md-4 col-sm-4 col-xs-4">
+                <select class='form-control' ng-model="input.version">
+                    <option value="2">STU-2</option>
+                    <option value="3">STU-3</option>
+                </select>
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-6">
+                The version of FHIR that the server supports
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-md-2 col-sm-2 col-xs-2">
+                <div>Is Terminology Server</div>
+            </div>
+            <div class="col-md-1 col-sm-1">
+
+                <input type="checkbox" class="form-control" ng-model="input.terminology"/>
+            </div>
+            <div class="col-md-offset-3 col-sm-offset-3 col-md-6 col-sm-6">
+                Check if this server supports Terminology services
+            </div>
+
+        </div>
+
+
+    <div class="modal-header">
+        <div class="row">
+        <div class="col-md-6 col-sm-6 col-xs-6">
+
+
+        </div>
+        <div class="col-md-6 col-sm-6 col-xs-6">
+            <div class="pull-right"  >
+
+                <div>
+                    <button ng-hide="input.valid || ! input.url" class="btn btn-primary" ng-click="test()">Test</button>
+                    <button ng-show="input.valid && input.name && input.version" class="btn btn-success" ng-click="add()">Add</button>
+                    <button class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+        </div>
+    </div>
+
+</div>

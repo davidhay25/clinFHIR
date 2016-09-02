@@ -33,7 +33,7 @@
                     <div class="list-group-item" ng-repeat="ent in bundle.entry"
                          ng-click="selectExtension(ent)" style="cursor: pointer">
 
-                        {{ent.resource.display}}
+                        {{ent.resource.name}}
                     </div>
                 </div>
             </div>
@@ -54,7 +54,7 @@
 
             </div>
             <div class="col-md-4">
-                {{conformanceServerUrl}}
+                {{conformanceServerUrl}} {{qry}}
             </div>
         </div>
 

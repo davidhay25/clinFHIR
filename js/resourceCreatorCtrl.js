@@ -156,7 +156,50 @@ angular.module("sampleApp")
             }
         )
     }
-            
+
+
+            //add new server
+
+            $scope.addServer = function(){
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop.
+                    keyboard: false,       //same as above.
+                    templateUrl: 'modalTemplates/addServer.html',
+                    size:'lg',
+                    controller: function($scope,appConfigSvc,modalService){
+                        $scope.input={version:"2"}
+                        $scope.input.valid = false;
+                        
+                        $scope.add = function() {
+                            var svr = {name:$scope.input.name,url:$scope.input.url,version:parseInt($scope.input.version,10)}
+                            console.log(svr);
+                            appConfigSvc.addServer(svr,$scope.input.terminology);
+                            $scope.$close();
+                            
+                        }
+                        
+                        $scope.test = function() {
+                            var qry = $scope.input.url + "metadata";
+                            $scope.waiting=true;
+                            GetDataFromServer.adHocFHIRQuery(qry).then(
+                                function(){
+                                    modalService.showModal({}, {bodyText: 'Conformance resource returned. Server can be added'})
+                                    $scope.input.valid = true;
+                                },
+                                function(err){
+                                    modalService.showModal({}, {bodyText: 'There is no valid FHIR server at this URL:'+qry})
+
+                                }
+                            ).finally(function(){
+                                $scope.waiting=false;
+                            })
+                            
+                        }
+
+                    }
+
+                })
+            }
             
     //============== event handlers ===================
 

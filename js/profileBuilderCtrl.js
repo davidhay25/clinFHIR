@@ -14,6 +14,10 @@ angular.module("sampleApp")
    // $scope.showTab = {tabIndexActive:'1'};    //to allow the tabs to be selected programmatically...
     //appConfigSvc.getCurrentConformanceServer()
 
+    
+
+
+    
     //all the known Resource types. Used when creating a reference
     RenderProfileSvc.getAllStandardResourceTypes().then(
         function(standardResourceTypes) {
@@ -755,13 +759,26 @@ angular.module("sampleApp")
                 $scope.resourceType = resourceType;
 
                 //construct the query to retrene extension defintions...
+
+
+                var qry = "StructureDefinition?";
+                var conformanceSvr = appConfigSvc.getCurrentConformanceServer();
+                if (conformanceSvr.version == 3) {
+                    qry += "kind=complex-type&base=http://hl7.org/fhir/StructureDefinition/Extension";
+                } else {
+                    qry = "StructureDefinition?kind=datatype&type=Extension"; //&ext-context="+$scope.resourceType;
+                    console.log('v2')
+                }
+                $scope.qry = qry;
+                
+  /*              
                 var qry = "StructureDefinition?context-type=resource&ext-context=Patient";  //v3
                 var conformanceSvr = appConfigSvc.getCurrentConformanceServer();
                 if (conformanceSvr.version == 2) {
                     qry = "StructureDefinition?kind=datatype&type=Extension&ext-context="+$scope.resourceType;
                     console.log('v2')
                 }
-
+*/
                 $scope.conformanceServerUrl = conformanceSvr.url;
 
 

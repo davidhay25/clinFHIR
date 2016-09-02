@@ -447,6 +447,11 @@
                                             <a href="#" ng-click="resetConfig()">{{'MENU.RESETCONFIG'|translate}}</a>
                                         </li>
 
+                                        <li>
+                                            <a href="#" ng-click="addServer()">Add server</a>
+                                        </li>
+
+
 
                                         <li>
                                             <a href="#" ng-click="clearProfileCache()">{{'MENU.CLEARPROFILECACHE'|translate}}</a>
@@ -533,11 +538,11 @@
 
 
 
-
+<!--
                         <button class="btn btn-info pull-right" ng-click="editExistingResource()">
                             edit</button>
 
-
+-->
 
                         <form ng-hide="displayMode == 'new' || displayMode == 'query' " class="navbar-form navbar-right">
                             <div ng-show="appConfigSvc.getCurrentPatient() && resourceCreatorSvc.getCurrentProfile()">
