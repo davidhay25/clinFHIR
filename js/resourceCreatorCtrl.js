@@ -46,10 +46,17 @@ angular.module("sampleApp")
             */
 
 
-    var ref = firebase.database().ref().child("projects");
-    console.log(ref)
+    var refProjects = firebase.database().ref().child("projects");
+    console.log(refProjects)
     // create a synchronized array
-    $rootScope.fbProjects = $firebaseArray(ref);
+    $rootScope.fbProjects = $firebaseArray(refProjects);
+
+    var refLoad = firebase.database().ref().child("loadResource");
+    console.log(refLoad)
+    // create a synchronized array
+    $rootScope.fbLoadResource = $firebaseArray(refLoad);
+
+
 
 
 
@@ -144,6 +151,15 @@ angular.module("sampleApp")
             function(vo) {
                 $scope.$emit('profileSelected',vo.profile);  //the resourcebuilder needs the profile...
                 var treeData = vo.treeData;
+
+                var load = {url:vo.profile.url,tree:vo.treeData,conf:appConfigSvc.getCurrentConformanceServer().url}
+                $scope.fbLoadResource.$add(load).then(function(ref){
+                    console.log('added to server')
+                },function(err){
+                    alert('There was an error:'  + err)
+                })
+
+
                 console.log(treeData)
                 $scope.treeData = treeData;
                 $scope.displayMode = 'new';     //display the 'enter new resouce' screen..

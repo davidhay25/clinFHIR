@@ -1908,7 +1908,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         registerAccess : function(){
             //register access for the logs...
-            $http.post('http://clinfhir.com/stats/login',{}).then(
+            $http.post('/stats/login',{}).then(
                 function(data){
                     //console.log(data);
                 },

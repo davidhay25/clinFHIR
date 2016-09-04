@@ -16,6 +16,10 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig;
+
+
+        var version = {current:'2.0.0',versionHistory:[]}
+        
 /*
         //todo - not currently being used as thre are synchronous uses of defaultConfig
         $http.get("config.json").then(
