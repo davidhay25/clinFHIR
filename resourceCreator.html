@@ -330,8 +330,7 @@
                                 {{ResourceUtilsSvc.getOneLineSummaryOfResource(appConfigSvc.getCurrentPatient())}}
 
                                  <span ng-show="appConfigSvc.getCurrentPatient()"> ({{appConfigSvc.getCurrentPatient().id}})</span>
-                                <!--<a ng-show="appConfigSvc.getCurrentPatient()" href="#" ng-click="displayMode = 'patient'">Details</a> -->
-
+                                
                         <a ng-show="appConfigSvc.getCurrentPatient()" href="#" ng-click="displayMode = 'view'">{{'DETAILS'| translate}}</a>
 
                             </div>
@@ -358,8 +357,12 @@
 
                         <div class="navbar-text">
 
-                            <div ng-show="editExistingResource">
-                                <div class="btn btn-default">Editing</div>
+                            <div ng-show="isEditingResource">
+                                <div class="btn btn-default"
+                                     popover-placement="left" popover-trigger="'mouseenter'"
+                                     uib-popover="ID: {{isEditingResource.resourceType}}/{{isEditingResource.id}}">
+                                    Editing Resource
+                                </div>
                             </div>
 
 
