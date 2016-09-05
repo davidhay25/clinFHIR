@@ -18,7 +18,7 @@ var http = require('http');
 
 process.on('uncaughtException', function(err) {
     console.log('>>>>>>>>>>>>>>> Caught exception: ' + err);
-    
+
 
 });
 
@@ -184,7 +184,7 @@ app.use('/',function(req,res){
             console.error("Error serving " + req.url + " - " + err.message);
 
             // Respond to the client
-            res.writeHead(err.status, err.headers);
+            //res.writeHead(err.status, err.headers);
             res.end();
         } else {
 
