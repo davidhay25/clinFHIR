@@ -166,6 +166,11 @@ app.get('/stats/summary',function(req,res){
 });
 
 
+//old clients trying to access server...
+app.use('/socket.io',function(req,res){
+    res.end();
+})
+
 //try to serve static file for any request not yet handled...
 app.use('/',function(req,res){
 
