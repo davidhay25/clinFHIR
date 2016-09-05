@@ -70,23 +70,24 @@ app.post('/stats/login',function(req,res){
 //get a summary of the access stats. This code is rather crude - mongo has better ways of doing this...
 //probably want to be able to specify a date range and number of detailed items  as well...
 app.get('/stats/summary',function(req,res){
-    db.collection("accessAudit").find({$query: {},$orderby: { date : 1 }}).toArray(function(err,doc){
+    db.collection("accessAudit").find({$query: {}}).toArray(function(err,doc){
+    //db.collection("accessAudit").find({$query: {},$orderby: { date : 1 }}).toArray(function(err,doc){
         if (err) {
             res.status(500);
             res.json({err:err});
         } else {
             var rtn = {cnt:doc.length,item:[],country:{}};
-            if (doc && doc.length > 0) {
-                rtn.lastAccess = doc[doc.length-2];
-            }
+          //  if (doc && doc.length > 0) {
+            //    rtn.lastAccess = doc[doc.length-2];
+           // }
 
             var daySum = {};
 
             doc.forEach(function(d,inx){
-                if (inx > (doc.length - 30)) {
-                    rtn.item.push(d);
+              //  if (inx > (doc.length - 30)) {
+                //    rtn.item.push(d);
                     //rtn.item.splice(0,0,d);   //last 30 accessss
-                }
+               // }
 
                 if (d.location) {
                     var c = d.location['country_code'];
