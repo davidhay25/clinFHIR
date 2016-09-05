@@ -118,6 +118,29 @@ angular.module("sampleApp")
 
     //---- the array of standard timimg elements
     $scope.timingArray = RenderProfileSvc.populateTimingList();
+
+
+
+    //data for the chart
+    GetDataFromServer.getAccessAudit().then(
+        function(log){
+            $scope.accessAudit = log;
+            console.log(log)
+
+        },
+        function(err) {
+
+        }
+    );
+
+    $scope.showChart = function() {
+        if ($scope.displayMode == 'access') {
+            $scope.displayMode = 'front'
+        } else {
+            $scope.displayMode = 'access'
+        }
+    }
+
     //--- code for timing
 
     $scope.updateTimingDetails = function(item) {

@@ -265,6 +265,83 @@ angular.module("sampleApp").
 
 
 
+        },
+        getAccessAudit : function() {
+            var url = "/stats/summary";
+            var deferred = $q.defer();
+            $http.get(url)
+                .success(function(data) {
+
+                    //todo - create a list by country that is sorted...
+
+                    //generate the data for the pie chart
+
+                    var chart = {
+                        options: {
+                            chart: {
+                                type: 'pie'
+                            },
+                            tooltip: {
+                                style: {
+                                    padding: 10,
+                                    fontWeight: 'bold'
+                                }
+                            }
+                        },
+                        series: [{
+                            name:'Count',
+                            colorByPoint: true,
+                            data: []
+                        }],
+                        title: {
+                            text: 'Profiles'
+                        },
+                        //size (optional) if left out the chart will default to size of the div or something sensible.
+                        size: {
+                            width: 300,
+                            height: 300
+                        }
+                    };
+
+/*
+                    data.profileAccess.forEach(function(p){
+                        chart.series[0].data.push({name: p.profile,y: p.cnt})
+                    });
+
+                    data.pieChartData = chart;
+*/
+
+                    var chart1 = {
+
+
+
+                        series: [
+                            { name: 'Count',
+                                data:[],
+                                type : 'areaspline'
+                            }
+                        ],
+                        titleX: {
+                            text: 'Daily Access'
+                        },
+                        useHighStocks: true
+
+                    };
+
+                    chart1.series[0].data = data.daySum;
+
+
+
+                    data.accessDays = chart1;
+
+
+
+
+                    deferred.resolve(data);
+                }).error(function(oo, statusCode) {
+                deferred.reject({msg:Utilities.getOOText(oo),statusCode:statusCode});
+            });
+            return deferred.promise;
         }
     }
 

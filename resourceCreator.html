@@ -37,6 +37,8 @@
     <script src="js/libs/angular-translate-loader-static-files.min.js"></script>
     <script src="js/libs/angular-animate.min.js"></script>
     <script src="js/libs/angular-drag-and-drop-lists.min.js"></script>
+    <script src="js/libs/highstock.js"></script>
+    <script src="js/libs/highcharts-ng.min.js"></script>
 
     <style>
         .applyPadding {
@@ -76,7 +78,7 @@
         firebase.initializeApp(config);
 
         angular.module("sampleApp",['ui.checkbox','ngAnimate','ngCookies','ui.bootstrap','ngSanitize',
-            'angular-toArrayFilter','ngStorage','pascalprecht.translate','dndLists',"firebase"])
+            'angular-toArrayFilter','ngStorage','pascalprecht.translate','dndLists',"firebase",'highcharts-ng'])
 
         angular.module("sampleApp").constant("moment", moment);
 
@@ -460,6 +462,12 @@
                                             <a href="#" ng-click="clearPatientCache()">{{'MENU.CLEARPATIENTCACHE'|translate}}</a>
                                         </li>
                                         <li class="divider"></li>
+
+                                        <li>
+                                            <a href="#" ng-click="showChart()">Access statistics</a>
+                                        </li>
+
+
                                         <li>
                                             <a href="#" ng-click="showValidateInstance()">Validate Resource</a>
                                         </li>
@@ -588,6 +596,16 @@
             </div>
 
             -->
+
+            <div ng-show="displayMode == 'access'">
+                <div>
+                    Last access from {{accessAudit.lastAccess.location['country_name']}} on
+                    {{accessAudit.lastAccess.date | date:'yyyy-MM-dd HH:mm'}} ({{accessAudit.lastAccess.date | getAgeSeconds}} ago.)
+                </div>
+                <div style="height: 200px; min-width: 310px">
+                    <highchart config="accessAudit.accessDays"></highchart>
+                </div>
+            </div>
 
 
             <div ng-show="displayMode == 'project'" ng-controller="projectCtrl">
