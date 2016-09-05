@@ -76,7 +76,7 @@ app.get('/stats/summary',function(req,res){
             res.status(500);
             res.json({err:err});
         } else {
-            var rtn = {cnt:doc.length,item:[],country:{}};
+            var rtn = {cnt:doc.length,item:[],country:{},lastAccess : {date:0}};
           //  if (doc && doc.length > 0) {
             //    rtn.lastAccess = doc[doc.length-2];
            // }
@@ -84,6 +84,12 @@ app.get('/stats/summary',function(req,res){
             var daySum = {};
 
             doc.forEach(function(d,inx){
+
+                //console.log(d.date,rtn.lastAccess.date)
+
+                if (d.date > rtn.lastAccess.date) {
+                    rtn.lastAccess = d;
+                }
               //  if (inx > (doc.length - 30)) {
                 //    rtn.item.push(d);
                     //rtn.item.splice(0,0,d);   //last 30 accessss
@@ -108,16 +114,25 @@ app.get('/stats/summary',function(req,res){
 
             });
 
-            rtn.item = rtn.item.reverse();
+            //rtn.item = rtn.item.reverse();
 
 
             rtn.daySum = [];
 
 
 
+
             for (var day in daySum) {
                 rtn.daySum.push([parseInt(day),daySum[day]]);
             }
+
+            rtn.daySum.sort(function(a,b){
+                if (a[0] < b[0]){
+                    return 1
+                } else {
+                    return -1;
+                }
+            })
 
 
 
@@ -129,6 +144,7 @@ app.get('/stats/summary',function(req,res){
             }
 
             //and sort it...
+
 
 
 
