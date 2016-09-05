@@ -1906,7 +1906,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             });
             return isConsistent;
         },
-        registerAccess : function(){
+        registerAccessDEP : function(){
             //register access for the logs...
             $http.post('/stats/login',{}).then(
                 function(data){
@@ -2853,14 +2853,24 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             
             
         },
-        loadResource : function() {
+        loadResource : function(resource) {
             //load an existing resource into a tree view for editing.
             //todo Limitations: drop meta, text, extensions, contained
             var deferred = $q.defer();
             var idRoot = 0;
             var edHash = {};
             var dtList = Utilities.getListOfDataTypes();
-            $http.get('http://fhirtest.uhn.ca/baseDstu2/CarePlan/14977').then(
+            
+            var url = 'http://fhirtest.uhn.ca/baseDstu2/CarePlan/14977';    //todo - during dev...
+            if (resource) {
+                var svr = appConfigSvc.getCurrentDataServer();
+                if (svr){
+                    url = svr.url + resource.resourceType + '/'+resource.id;
+                }
+            }
+            
+            
+            $http.get(url).then(
                 function(data) {
                     var resource = data.data;
                     var tree = [];
@@ -2905,7 +2915,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 });
 
 
-                                console.log(tree)
+                                //console.log(tree)
 
                                 deferred.resolve({treeData:tree,profile:profile});
                             }
@@ -2951,7 +2961,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             if (isBackBoneElement(nodePath)) {
                                 //this is a BBE, but is it multiple or singular (CarePlan.activity.detail)
                                 var edBbe = getED(nodePath);
-                                console.log(edBbe);
+                               // console.log(edBbe);
 
 
 

@@ -17,6 +17,9 @@ angular.module("sampleApp")
                   $location,resourceSvc,$window,$timeout,$firebaseArray,$filter) {
 
 
+            if (window.location.href.indexOf('localhost') > -1) {
+                $scope.runningLocally = true;
+            }
 
             //allow other controllers (like frontController) to turn the waiting icon on or off
             $rootScope.$on('setWaitingFlag',function(event,showFlag){
@@ -25,7 +28,7 @@ angular.module("sampleApp")
             })
 
     //register that the application has been started... (for reporting)
-    resourceCreatorSvc.registerAccess();
+    //resourceCreatorSvc.registerAccess();
 
 /*
             $http.get('http://fhir.hl7.org.nz/dstu2/Media/93389').then(
@@ -168,17 +171,21 @@ angular.module("sampleApp")
 
     };
 
-            //when the user clicks the 'New Resource' button. They may not have selected a new patient or profile
+    //when the user clicks the 'New Resource' button. They will have selected a patient and profile
     $scope.createNewResource = function() {
-
+        delete $scope.isEditingResource;        //todo ?is this the correct place to delete this
 
         //setUpForNewProfile(resourceCreatorSvc.getCurrentProfile());
         $scope.displayMode = 'new';     //display the 'enter new resouce' screen..
     };
 
+    //when the user selects 'edit resource' from the resource display
+    $scope.editExistingResource = function(resource) {
+        console.log(resource)
+        $scope.isEditingResource = resource;        //so we know to PUT an update when saving...
 
-    $scope.editExistingResource = function() {
-        resourceCreatorSvc.loadResource().then(
+        $rootScope.$broadcast('setWaitingFlag',true);
+        resourceCreatorSvc.loadResource(resource).then(
             function(vo) {
                 $scope.$emit('profileSelected',vo.profile);  //the resourcebuilder needs the profile...
                 var treeData = vo.treeData;
@@ -188,10 +195,10 @@ angular.module("sampleApp")
                     console.log('added to server')
                 },function(err){
                     alert('There was an error:'  + err)
-                })
+                });
 
 
-                console.log(treeData)
+                //console.log(treeData)
                 $scope.treeData = treeData;
                 $scope.displayMode = 'new';     //display the 'enter new resouce' screen..
                 drawTree();
@@ -201,7 +208,9 @@ angular.module("sampleApp")
             function(err){
                 console.log(err);
             }
-        )
+        ).finally(function(){
+            $rootScope.$broadcast('setWaitingFlag',false);
+        })
     }
 
 
@@ -2200,6 +2209,7 @@ angular.module("sampleApp")
             $scope.showHelp = false;
         }
 
+      
 
         $scope.closeHelp = function(){
             $scope.showHelp = false;

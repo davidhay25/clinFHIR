@@ -266,11 +266,25 @@ angular.module("sampleApp").
 
 
         },
+        registerAccess : function(){
+            //register access for the logs...
+            $http.post('/stats/login',{}).then(
+                function(data){
+                    //console.log(data);
+                },
+                function(err){
+                    console.log('error accessing clinfhir to register access',err)
+                }
+            );
+
+        },
         getAccessAudit : function() {
+            var that = this;
             var url = "/stats/summary";
             var deferred = $q.defer();
             $http.get(url)
                 .success(function(data) {
+                    that.registerAccess();      //register access AFTER reading history to lastAcess is accurate...
 
                     //todo - create a list by country that is sorted...
 

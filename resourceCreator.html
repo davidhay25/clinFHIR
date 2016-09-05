@@ -358,6 +358,10 @@
 
                         <div class="navbar-text">
 
+                            <div ng-show="editExistingResource">
+                                <div class="btn btn-default">Editing</div>
+                            </div>
+
 
                             <span uib-dropdown ng-hide="resourceCreatorSvc.getParkedResources().length==0">
                                   <a href  uib-dropdown-toggle>
@@ -547,8 +551,7 @@
 
 
 
-                        <button class="btn btn-info pull-right" ng-click="editExistingResource()">
-                            edit</button>
+
 
 
 
@@ -655,8 +658,18 @@
             </div>
 
 
+            <div ng-show="runningLocally">
+                <button class="btn btn-link" ng-click="displayMode = 'consult'">ConsultBuilder</button>
 
-            <button class="btn btn-link" ng-click="displayMode = 'consult'">ConsultBuilder</button>
+                <button class="btn btn-info" ng-click="editExistingResource()">
+                    edit</button>
+
+            </div>
+
+
+
+
+
             <div ng-show="displayMode == 'consult'" ng-controller="consultbuilderCtrl">
                 <ng-include src="'/includes/consultBuilder.html'"></ng-include>
             </div>

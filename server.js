@@ -186,7 +186,7 @@ app.use('/',function(req,res){
             // Respond to the client
             //res.writeHead(err.status, err.headers);
 
-            res.status(404).send();
+           // res.status(404).send();
         } else {
 
         }
