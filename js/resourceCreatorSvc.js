@@ -2884,13 +2884,17 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         function(profile){
                             console.log(profile)
                             console.log(profile.snapshot)
-                            if(! profile.snapshot) {
+
+                            //todo - is this legit ????
+                            var edList = profile.snapshot || profile.differential;
+
+                            if(! edList) {
                                 deferred.reject('Sorry, the profile definition for this resource on the Conformance server is missing the snapshot')
                             } else {
                                 //create a hash indexed by path. need this so the ED for a given path can be located using the function getED()
                                 //this won't handle extensions (I think)
                                 var parent;
-                                angular.forEach(profile.snapshot.element,function(item){
+                                angular.forEach(edList.element,function(item){
                                     if (! parent) {
                                         parent = item.path;
                                     }
@@ -2954,17 +2958,13 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             newNode.ed = getED(nodePath);      //a duplicate of the ed for RB todo: why is this??  fix
 
 
-//console.log(element)
+
 
                             tree.push(newNode);
 
                             if (isBackBoneElement(nodePath)) {
                                 //this is a BBE, but is it multiple or singular (CarePlan.activity.detail)
                                 var edBbe = getED(nodePath);
-                               // console.log(edBbe);
-
-
-
 
                                 angular.forEach(element,function(elementC, keyC){
                                     var pathC = parentPath + '.' +key;
@@ -2973,38 +2973,51 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 })
                             } else {
                                 //this is a complex object, but not a backbone element...
+
                                 angular.forEach(element,function(elementD, keyD){
 
-                                    var pathC = parentPath + '.' +keyD;
+
+
+                                    //var pathC = parentPath + '.' +keyD;
+                                    var pathC = nodePath + '.' +keyD;
                                     //var pathC = nodePath = '.' +keyD;
 
                                     var ED = getED(pathC);
+
+
                                     if (ED) {
                                         //if there's an ED for this path, then it is a node that required further procesing
                                         processNode(nodePath ,tree,keyD,elementD,nodeId);
                                     } else {
                                         //if there is no ED, then we're into the child elements of a datatype (like Period.start)
                                         //so add the whole element as the fragment to the node we just created and don't process any further...
-                                        newNode.fragment=elementD
+
+                                        //not sure about this....
+                                        //newNode.fragment=elementD
+
+                                        //var insrt = {};
+                                        //insrt[keyD] = elementD;
+                                        //newNode.fragment = insrt;
+
+                                        if (newNode.fragment) {
+                                            newNode.fragment[keyD] = elementD;
+                                        } else {
+                                            var insrt = {};
+                                            insrt[keyD] = elementD;
+                                            newNode.fragment = insrt;
+                                        }
+
+
                                     }
 
-                                    //console.log(elementD,keyD,nodePath)
 
-                                    //var parentId = getId();
 
 
 
                                 })
-                               // newNode.dataType = getDataType(nodePath,element);
-                               // console.log(element)
-                               // var pathD = parentPath;// + '.' +key;
-                               // var parentId = getId();
-
-
-                                //tue newNode.fragment =  element;// {test:'testValue'}
                             }
 
-                            //tue tree.push(newNode);
+
 
 
 

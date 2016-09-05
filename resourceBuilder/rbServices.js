@@ -1116,7 +1116,7 @@ console.log(summary);
             return text;
         }, 
         getListOfDataTypes : function() {
-            return ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference','HumanName'];
+            return ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference','HumanName','Annotation','String'];
         },
         getProfileFromType : function(type){
             //returns the profile url from a type entry. In stu2 this is an array - in stu3 is is single
