@@ -16,6 +16,11 @@ var http = require('http');
 //var app = connect();
 
 
+process.on('uncaughtException', function(err) {
+    console.log('>>>>>>>>>>>>>>> Caught exception: ' + err);
+    
+
+});
 
 var db;
 var port = process.env.port;
