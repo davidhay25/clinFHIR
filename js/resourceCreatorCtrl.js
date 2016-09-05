@@ -127,6 +127,7 @@ angular.module("sampleApp")
             $scope.accessAudit = log;
             console.log(log)
 
+
         },
         function(err) {
 
@@ -137,7 +138,14 @@ angular.module("sampleApp")
         if ($scope.displayMode == 'access') {
             $scope.displayMode = 'front'
         } else {
-            $scope.displayMode = 'access'
+            $scope.displayMode = 'access';
+            //otherwise the chart is not full screen
+            $timeout(function(){
+               // $scope.accessAudit.tmp='s';
+                $('#hcAccessAudit').highcharts().reflow();
+            }, 0);
+
+
         }
     }
 

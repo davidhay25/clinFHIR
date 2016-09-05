@@ -71,7 +71,7 @@ angular.module("sampleApp").
     }
 
 }).
-    service('GetDataFromServer', function($http,$q,appConfigSvc,Utilities,$localStorage) {
+    service('GetDataFromServer', function($http,$q,appConfigSvc,Utilities,$localStorage,$timeout) {
     return {
         getValueSet : function(ref,cb) {
             var deferred = $q.defer();
@@ -303,13 +303,13 @@ angular.module("sampleApp").
                         }
                     };
 
-/*
-                    data.profileAccess.forEach(function(p){
-                        chart.series[0].data.push({name: p.profile,y: p.cnt})
-                    });
+
+                //    data.profileAccess.forEach(function(p){
+                  //      chart.series[0].data.push({name: p.profile,y: p.cnt})
+                   // });
 
                     data.pieChartData = chart;
-*/
+
 
                     var chart1 = {
 
@@ -325,6 +325,7 @@ angular.module("sampleApp").
                             text: 'Daily Access'
                         },
                         useHighStocks: true
+                        
 
                     };
 
