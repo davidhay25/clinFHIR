@@ -778,9 +778,13 @@ angular.module("sampleApp")
         var config = {};
         config.profile = $scope.conformProfiles;
 
+        var resourceType = resourceCreatorSvc.getResourceTypeForCurrentProfile();
+        
+        
         //builds the resource. Parameters base type, hierarchical tree view, raw tree data, other config stuff
         //todo note that it should be possible to generate the hierarchical view without depending on tree view which will tidy things up a bit
-        $scope.resource = resourceCreatorSvc.buildResource(type,treeObject[0],$scope.treeData,config)
+        $scope.resource = resourceCreatorSvc.buildResource(resourceType,treeObject[0],$scope.treeData,config)
+        //$scope.resource = resourceCreatorSvc.buildResource(type,treeObject[0],$scope.treeData,config)
     };
 
 
@@ -1231,7 +1235,7 @@ angular.module("sampleApp")
         var arDelete = [];
         arDelete.push(id);
 
-        //so go through  the data. if an item has any antry in arDelete as a parent, then add it to the list
+        //so go through  the data. if an item has any entry in arDelete as a parent, then add it to the list
         //not sure if there's an issue with ordering...
 
         var foundElementToDelete = true
@@ -1267,7 +1271,8 @@ angular.module("sampleApp")
         }
         console.log(newTreeArray)
 
-        $scope.treeData = newTreeArray;
+        $scope.treeData = newTreeArray
+        delete $scope.selectedNode;
         drawTree();
 
 

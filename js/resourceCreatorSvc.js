@@ -1091,6 +1091,15 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         getCurrentProfile : function(){
             return this.currentProfile;
         },
+        getResourceTypeForCurrentProfile : function() {
+            //get the resource type for the current profile...
+            if (this.currentProfile && this.currentProfile.snapshot) {
+                return this.currentProfile.snapshot.element[0].path;
+            } else {
+                alert("This profile is missing the snapsnot. I cannot continue.")
+            }
+
+        },
         getProfileDEP : function(type){
                 var deferred = $q.defer();
                 var that=this;
@@ -2879,7 +2888,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     //load the profile for this resource. Assume a base resource at the moment...
                     var resourceType = resource.resourceType;
-                    
+
                     var uri = "http://hl7.org/fhir/StructureDefinition/"+resourceType;
                     GetDataFromServer.findConformanceResourceByUri(uri).then(
                         function(profile){
