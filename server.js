@@ -181,11 +181,12 @@ app.use('/',function(req,res){
 
     fileServer.serve(req, res, function (err, result) {
         if (err) { // There was an error serving the file
-            console.error("Error serving " + req.url + " - " + err.message);
+            //console.error("Error serving " + req.url + " - " + err.message);
 
             // Respond to the client
             //res.writeHead(err.status, err.headers);
-            res.end();
+
+            res.status(404).send();
         } else {
 
         }
