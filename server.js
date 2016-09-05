@@ -127,7 +127,7 @@ app.get('/stats/summary',function(req,res){
             }
 
             rtn.daySum.sort(function(a,b){
-                if (a[0] < b[0]){
+                if (a[0] > b[0]){
                     return 1
                 } else {
                     return -1;
