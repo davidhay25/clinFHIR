@@ -212,7 +212,7 @@ angular.module("sampleApp").
                         deferred.resolve(bundle.entry[0].resource);
                     } else {
                         
-                        deferred.reject({msg:"No matching profile found on "+serverUrl  + typeOfConformanceResource +" (but not a server error)"})
+                        deferred.reject({msg:"No matching profile ("+url+") found on "+serverUrl  + typeOfConformanceResource +" (but not a server error)"})
                     }
 
                 },function(err){

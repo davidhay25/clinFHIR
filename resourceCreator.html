@@ -357,13 +357,6 @@
 
                         <div class="navbar-text">
 
-                            <div ng-show="isEditingResource">
-                                <div class="btn btn-default"
-                                     popover-placement="left" popover-trigger="'mouseenter'"
-                                     uib-popover="ID: {{isEditingResource.resourceType}}/{{isEditingResource.id}}">
-                                    Editing Resource
-                                </div>
-                            </div>
 
 
                             <span uib-dropdown ng-hide="resourceCreatorSvc.getParkedResources().length==0">

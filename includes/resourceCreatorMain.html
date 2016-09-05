@@ -10,6 +10,16 @@
     }
 </style>
 
+    <div class="row"  ng-show="isEditingResource">
+        <div class="col-md-12">
+
+            <div uib-alert class="alert-info">
+                Editing Resource: {{appConfigSvc.getCurrentDataServer().url}}{{isEditingResource.resourceType}}/{{isEditingResource.id}}
+
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-md-3">
             <h4  popover-placement="bottom" popover-trigger='mouseenter'

@@ -2868,7 +2868,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     url = svr.url + resource.resourceType + '/'+resource.id;
                 }
             }
-            
+            console.log(url)
             
             $http.get(url).then(
                 function(data) {
@@ -2879,6 +2879,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     //load the profile for this resource. Assume a base resource at the moment...
                     var resourceType = resource.resourceType;
+                    
                     var uri = "http://hl7.org/fhir/StructureDefinition/"+resourceType;
                     GetDataFromServer.findConformanceResourceByUri(uri).then(
                         function(profile){
@@ -2924,7 +2925,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 deferred.resolve({treeData:tree,profile:profile});
                             }
                         },function(err){
-                            console.log(err)
+                            alert(angular.toJson(err))
                         }
                     );
 
