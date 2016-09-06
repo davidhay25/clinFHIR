@@ -2458,7 +2458,11 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     //console.log(label)
                     break;
                 case 'Practitioner':
-                    label = 'Practitioner\n' + getHumanNameLabel(resource.name[0]);
+                    label = 'Practitioner\n'
+                    if (resource.name) {
+                        label += getHumanNameLabel(resource.name[0]);
+                    }
+
                     break;
 
                 case 'Encounter' :
@@ -3221,24 +3225,78 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         buildResourceTree : function(resource) {
             var tree = [];
-            var nodeId = 0;
+            var idRoot = 0;
             console.log(resource)
-            function processNode(tree,parentId,element) {
-                nodeId++;
-                var newNode = {id:nodeId,parent:parentId,text:'test',state:{opened:false,selected:false}};
+            function processNode(tree,parentId,element,key) {
+                console.log(key,element);
+                if (angular.isArray(element)){
+/*
+                    aNodeId = getId()
+                    var newNode = {id:aNodeId,parent:parentId,text:key,state:{opened:true,selected:false}};
+                    tree.push(newNode);
+                    */
+
+                    element.forEach(function(child,inx){
+                        processNode(tree,parentId,child,key);
+                        //processNode(tree,aNodeId,child,'['+inx+']');
+                    })
+
+                } else if (angular.isObject(element)) {
+
+                    oNodeId = getId();
+                    var newNode = {id:oNodeId,parent:parentId,text:key,state:{opened:true,selected:false}};
+                    tree.push(newNode);
+
+                    angular.forEach(element,function (child,key) {
+                        processNode(tree,oNodeId,child,key);
+                        //processNode(tree,parentId,child,key);
+                    })
+                } else {
+                    //a simple element
+
+                    //nodeId++;
+
+                    if (key == 'div') {
+
+                    } else {
+                        var display = key + " " + '<strong>'+element+'</strong>'
+                        var newNode = {id:getId(),parent:parentId,text:display,state:{opened:true,selected:false}};
+                        tree.push(newNode);
+                    }
 
 
-                tree.push(newNode);
+
+
+                }
+
+
+
+
+
             }
 
+
+            var rootId = getId();
+            var rootItem = {id:rootId,parent:'#',text:resource.resourceType,state:{opened:true,selected:true}}
+            tree.push(rootItem);
+
+            angular.forEach(resource,function(element,key){
+                processNode(tree,rootId,element,key);
+            });
+
             var parentId = '#';
-            processNode(tree,parentId,resource);
-            
+
+
             console.log(tree);
 
             return tree;
 
-
+            //generate a new ID for an element in the tree...
+            function getId() {
+                idRoot++;
+                return idRoot;
+                // return "id"+idRoot;//
+            }
 
 
         }

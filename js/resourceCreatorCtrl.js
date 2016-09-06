@@ -443,7 +443,6 @@ angular.module("sampleApp")
                         }
                     }
 
-
                 });
 
                 $scope.outcome.resourceTypes.sort(function (a, b) {
@@ -480,7 +479,7 @@ angular.module("sampleApp")
                     $scope.allResourcesAsDict[hash] = patient;
 
 
-                })
+                });
 
 
                 //create and draw the graph representation...
@@ -625,14 +624,18 @@ console.log($scope.resourceVersions);
     $scope.selectVersion = function(resource) {
         $scope.outcome.selectedResource = resource;     //todo - any side effects of a version rather than the latest?
 
+        drawResourceTree(resource)
+
+    };
+
+    function drawResourceTree(resource) {
         var treeData = resourceCreatorSvc.buildResourceTree(resource);
-        
+
         //show the tree of this version
         $('#resourceTree').jstree('destroy');
         $('#resourceTree').jstree(
             {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
         )
-
 
     }
 
@@ -1777,6 +1780,7 @@ console.log($scope.resourceVersions);
         if (entry && entry.resource) {
 
             var resource = entry.resource;
+            drawResourceTree(resource);         //display the resource tree
             $scope.outcome.selectedResource = resource;     //for the json display
             $scope.resourceReferences = resourceSvc.getReference(resource, $scope.allResourcesAsList, $scope.allResourcesAsDict);
 
