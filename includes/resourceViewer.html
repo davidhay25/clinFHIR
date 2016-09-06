@@ -58,17 +58,49 @@
                     </div>
                     <div class="col-md-8">
 
+
+
+
                         <div ng-show="outcome.selectedResource">
+
+                            <div class="alert alert-warning" style="margin-top: 8px">
+                                <div class="row">
+                                    <div class="col-md-10">
+                                        <button class="btn btn-link" ng-hide="resourceVersions"
+                                                ng-click="loadVersions(outcome.selectedResource)">Show versions - if any. (only Json updated)</button>
+
+                                        <ul class="pagination" style="margin-top:1px;margin-bottom:1px" ng-show="resourceVersions">
+                                            <li ng-repeat="ent in resourceVersions.entry">
+                                                <a href="#" ng-click="selectVersion(ent.resource)">{{resourceVersions.entry.length - $index}}</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="pull-right">
+                                            <button class="btn btn-link"
+                                                    ng-click="editExistingResource(outcome.selectedResource)">Edit Resource
+                                            </button>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+
+
+                            </div>
 
                             <div class="row">
                                 <div class="col-md-8">
-
+<!--
                                     <div class="pull-right">
                                         <button class="btn btn-link"
                                             ng-click="editExistingResource(outcome.selectedResource)">Edit Resource
                                         </button>
 
                                     </div>
+                                    -->
 
                                     <uib-tabset>
                                         <uib-tab heading="Json">
@@ -82,6 +114,10 @@
                                                 </div>
                                             </div>
                                             <pre>{{outcome.selectedResource | json:2}}</pre>
+                                        </uib-tab>
+                                        <uib-tab heading="Tree">
+                                            <div id="resourceTree"></div>
+
                                         </uib-tab>
                                         <uib-tab heading="XML">
 

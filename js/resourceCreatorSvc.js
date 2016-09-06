@@ -24,6 +24,11 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         return txt.charAt(0).toUpperCase() + txt.substr(1);
     };
 
+    var getDisplay = function(path){
+        var ar = path.split('.');
+        ar.shift();
+        return ar.join('.');
+    }
 
     //get the extension type (single, complex) and data type from the ExtensionDefinition (StructureDefinition).
 
@@ -2877,7 +2882,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     url = svr.url + resource.resourceType + '/'+resource.id;
                 }
             }
-            console.log(url)
+            //console.log(url)
             
             $http.get(url).then(
                 function(data) {
@@ -2892,8 +2897,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     var uri = "http://hl7.org/fhir/StructureDefinition/"+resourceType;
                     GetDataFromServer.findConformanceResourceByUri(uri).then(
                         function(profile){
-                            console.log(profile)
-                            console.log(profile.snapshot)
+                            //console.log(profile)
+                            //console.log(profile.snapshot)
 
                             //todo - is this legit ????
                             var edList = profile.snapshot || profile.differential;
@@ -2919,8 +2924,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 var rootItem = {id:rootId,parent:'#',text:parent,state:{opened:true,selected:true},
                                     path:parent,data: {ed : edRoot},ed:edRoot}
 
-                                //var rootItem = {id:rootId,parent:'#',text:parent,state:{opened:true,selected:true},
-                                 //   path:parent,data: {ed : edHash[resourceType]},ed:edHash[resourceType]}
 
                                 tree.push(rootItem);
 
@@ -2928,8 +2931,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                     processNode(parent,tree,key,element,rootId)
                                 });
 
-
-                                //console.log(tree)
 
                                 deferred.resolve({treeData:tree,profile:profile});
                             }
@@ -2963,12 +2964,11 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             //and add to the tree here...
 
 
-                            var newNode = {id:nodeId,parent:parentId,path:nodePath,text:nodePath,state:{opened:false,selected:false}};
+
+
+                            var newNode = {id:nodeId,parent:parentId,path:nodePath,text:getDisplay(nodePath),state:{opened:false,selected:false}};
                             newNode.data = {ed : getED(nodePath)};
                             newNode.ed = getED(nodePath);      //a duplicate of the ed for RB todo: why is this??  fix
-
-
-
 
                             tree.push(newNode);
 
@@ -2986,11 +2986,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                                 angular.forEach(element,function(elementD, keyD){
 
-
-
-                                    //var pathC = parentPath + '.' +keyD;
                                     var pathC = nodePath + '.' +keyD;
-                                    //var pathC = nodePath = '.' +keyD;
+
 
                                     var ED = getED(pathC);
 
@@ -3002,13 +2999,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                         //if there is no ED, then we're into the child elements of a datatype (like Period.start)
                                         //so add the whole element as the fragment to the node we just created and don't process any further...
 
-                                        //not sure about this....
-                                        //newNode.fragment=elementD
-
-                                        //var insrt = {};
-                                        //insrt[keyD] = elementD;
-                                        //newNode.fragment = insrt;
-
                                         if (newNode.fragment) {
                                             newNode.fragment[keyD] = elementD;
                                         } else {
@@ -3016,14 +3006,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                             insrt[keyD] = elementD;
                                             newNode.fragment = insrt;
                                         }
-
-
                                     }
-
-
-
-
-
                                 })
                             }
 
@@ -3041,7 +3024,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                             var ED = getED(pathInED);
                             if (ED) {
-                                var newNode = {id:id,parent:parentId,path:path,text:path,state:{opened:false,selected:false}};
+                                var newNode = {id:id,parent:parentId,path:path,text:getDisplay(path),state:{opened:false,selected:false}};
                                 newNode.data = {ed : ED};
                                 newNode.ed = ED;      //a duplicate of the ed for RB todo:fix
 
@@ -3230,6 +3213,33 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             }
 
             return deferred.promise;
+
+        },
+        loadVersions : function(resource) {
+            var url = appConfigSvc.getCurrentDataServer().url + resource.resourceType + "/" + resource.id + "/_history";
+            return $http.get(url);
+        },
+        buildResourceTree : function(resource) {
+            var tree = [];
+            var nodeId = 0;
+            console.log(resource)
+            function processNode(tree,parentId,element) {
+                nodeId++;
+                var newNode = {id:nodeId,parent:parentId,text:'test',state:{opened:false,selected:false}};
+
+
+                tree.push(newNode);
+            }
+
+            var parentId = '#';
+            processNode(tree,parentId,resource);
+            
+            console.log(tree);
+
+            return tree;
+
+
+
 
         }
     }

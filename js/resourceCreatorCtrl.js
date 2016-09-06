@@ -50,12 +50,12 @@ angular.module("sampleApp")
 
 
     var refProjects = firebase.database().ref().child("projects");
-    console.log(refProjects)
+    //console.log(refProjects)
     // create a synchronized array
     $rootScope.fbProjects = $firebaseArray(refProjects);
 
     var refLoad = firebase.database().ref().child("loadResource");
-    console.log(refLoad)
+    //console.log(refLoad)
     // create a synchronized array
     $rootScope.fbLoadResource = $firebaseArray(refLoad);
 
@@ -128,7 +128,7 @@ angular.module("sampleApp")
     GetDataFromServer.getAccessAudit().then(
         function(log){
             $scope.accessAudit = log;
-            console.log(log)
+            //console.log(log)
 
 
         },
@@ -287,7 +287,7 @@ angular.module("sampleApp")
 
     //when a patient is selected from the front page... Want to load the patient details and create a new starter resource for the current profile
     $rootScope.$on('patientSelected',function(event,patient){
-
+        delete $scope.resourceVersions;         //remove any versions. todo - should centralize all this clearing stuff...
         appConfigSvc.addToRecentPatient(patient);
 
         //if there's a project active, then update it. todo need tothink about security for this...
@@ -613,6 +613,28 @@ angular.module("sampleApp")
         )
     };
 
+            
+    $scope.loadVersions = function(resource) {
+        resourceCreatorSvc.loadVersions(resource).then(
+            function(data) {
+                $scope.resourceVersions = data.data;    //a bundle of all the versions for this resource...
+console.log($scope.resourceVersions);
+            }
+        )
+    };
+    $scope.selectVersion = function(resource) {
+        $scope.outcome.selectedResource = resource;     //todo - any side effects of a version rather than the latest?
+
+        var treeData = resourceCreatorSvc.buildResourceTree(resource);
+        
+        //show the tree of this version
+        $('#resourceTree').jstree('destroy');
+        $('#resourceTree').jstree(
+            {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+        )
+
+
+    }
 
     //get all the standard resource types - the one defined in the fhir spec. Used for the select profile modal...
     RenderProfileSvc.getAllStandardResourceTypes().then(
@@ -1750,6 +1772,7 @@ angular.module("sampleApp")
         delete $scope.xmlResource;
         delete $scope.downloadLinkXmlContent;
         delete $scope.downloadLinkXmlName;
+        delete $scope.resourceVersions;
 
         if (entry && entry.resource) {
 
