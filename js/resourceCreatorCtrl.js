@@ -137,6 +137,47 @@ angular.module("sampleApp")
         }
     );
 
+    //--------------- related to local activity
+    $scope.showLocalActivity = function(){
+        delete $scope.laItem;
+        delete $scope.laAllowEdit;
+        $scope.localActivity = resourceCreatorSvc.getResourcesCreated();
+        $scope.displayMode = 'localActivity';
+    }
+
+    $scope.laShowResource = function(item){
+        var url = item.resourceUrl;   //has the full path to the server
+        delete $scope.laAllowEdit;
+        $rootScope.$broadcast('setWaitingFlag',true);
+        GetDataFromServer.adHocFHIRQuery(url).then(
+            function(data) {
+                $scope.laItem = {resource: data.data,item:item};
+                if (item.server == appConfigSvc.getCurrentDataServer().url) {
+                    $scope.laAllowEdit = true;
+                }
+            }).finally(function(){
+            $rootScope.$broadcast('setWaitingFlag',false);
+        })
+
+    };
+
+    $scope.laEditResource =function(item) {
+        console.log(item);
+        $rootScope.$broadcast('setWaitingFlag',true);
+        var url = appConfigSvc.getCurrentDataServer().url+ 'Patient/'+item.item.patientId;
+        GetDataFromServer.adHocFHIRQuery(url).then(
+            function(data) {
+                appConfigSvc.setCurrentPatient(data.data);
+                loadPatientDetails(function(patient){
+                    $scope.editExistingResource(item.resource);
+                })
+            }
+        ).finally(function(){
+            $rootScope.$broadcast('setWaitingFlag',false);
+        });
+    };
+            
+
     $scope.showChart = function() {
         if ($scope.displayMode == 'access') {
             $scope.displayMode = 'front'
@@ -216,7 +257,7 @@ angular.module("sampleApp")
 
             //add new server
 
-            $scope.addServer = function(){
+     $scope.addServer = function(){
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
                     keyboard: false,       //same as above.
@@ -312,29 +353,7 @@ angular.module("sampleApp")
 
 
 
-    //load the user config
-/*
-    function loadAllProjects() {
-        var url = serverBase + "Basic?code=http://clinfhir.com/fhir/NamingSystem/cf|project";      //todo add patient
-        $http.get(url).then(
-            function(data) {
-                //console.log(data);
-                $rootScope.allP = data.data;    //this is a bundle of Basic resources
 
-            }
-        );
-    }
-    load();
-
-            */
-/*
-    appConfigSvc.loadUserConfig().then(
-        function(data) {
-            $rootScope.userConfig = data;
-
-        }
-    );
-*/
     //from the project menu, show the editor
     $scope.showProjectEditor = function(){
         $scope.displayMode = 'project';
@@ -342,9 +361,7 @@ angular.module("sampleApp")
 
             
             
-    $scope.redrawMindMapDEP = function() {
-        $rootScope.$broadcast('redrawMindMap')
-    };
+
             
     //clears the current resource being buils and re-displays the front screen 
     $scope.cancelNewResource = function(state){
@@ -834,6 +851,17 @@ console.log($scope.resourceVersions);
                         delete oo.text;
                     }
                     $scope.validateResults = oo;
+
+
+                    var errorLog = {};
+                    errorLog.resource = $scope.resource;
+                    errorLog.original = $scope.isEditingResource;
+                    errorLog.oo = oo;
+                    errorLog.server = appConfigSvc.getCurrentDataServer();
+                    errorLog.action= 'validate';
+                    SaveDataToServer.submitErrorReport(errorLog);
+
+
                 }
             ).finally(function(){
                 $scope.waiting = false;
@@ -1553,9 +1581,7 @@ console.log($scope.resourceVersions);
         appConfigSvc.setCurrentPatient(park.patient);
         setUpForNewProfile(park.profile,$scope.treeData)
 
-        //resourceCreatorSvc.setCurrentProfile(park.profile);
-
-
+   
         var modalOptions = {
             closeButtonText: "Don't remove",
             actionButtonText: 'Ok',
@@ -1566,10 +1592,7 @@ console.log($scope.resourceVersions);
         modalService.showModal({}, modalOptions).then(function (result) {
             resourceCreatorSvc.removeParkedResource(inx)
         });
-
-
-
-        //drawTree();
+        
         $scope.displayMode = 'new';     //will cause the editing page to be displayed
 
     };
@@ -1590,7 +1613,7 @@ console.log($scope.resourceVersions);
         var modalInstance = $uibModal.open({
             templateUrl: 'modalTemplates/confirmNewResource.html',
             size:'lg',
-            controller: function($scope,resource,showWaiting,existingResource) {
+            controller: function($scope,resource,showWaiting,existingResource,appConfigSvc) {
                 $scope.showWaiting = showWaiting;
                 $scope.resource = resource;
                 $scope.outcome="";       //not saved yet...
@@ -1598,7 +1621,6 @@ console.log($scope.resourceVersions);
                 $scope.input ={};
 
                 $scope.showWaiting = true;
-                //var existingId = null;
                 if (existingResource) {
                     $scope.resource.id = existingResource.id;
                 }
@@ -1624,14 +1646,26 @@ console.log($scope.resourceVersions);
 
                             $scope.outcome += serverId;
 
+                            resourceCreatorSvc.registerSuccessfulResourceCreated(serverId,$scope.resource,
+                                appConfigSvc.getCurrentPatient());
+
                         },
                         function(oo) {
+
+                            var errorLog = {};
+                            errorLog.resource = resource;
+                            errorLog.original = existingResource;
+                            errorLog.oo = oo;
+                            errorLog.server = appConfigSvc.getCurrentDataServer();
+                            errorLog.action= 'save';
+                            SaveDataToServer.submitErrorReport(errorLog);
 
 
                             $scope.saveState='fail';
                             $scope.saving = false;
                             $scope.outcome = "There was an error saving the resource: " ;
                             $scope.oo = oo;
+
 
                         }
                     ).finally(function(){

@@ -67,6 +67,11 @@ angular.module("sampleApp").
         },
         sendActivityObject : function(activity) {
 
+        },
+        submitErrorReport : function(error) {
+           // var url = "errorReport"
+            console.log(error)
+            return $http.post("/errorReport",error);
         }
     }
 

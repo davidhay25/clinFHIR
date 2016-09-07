@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <base href="/" />
+    <meta charset="UTF-8">
+
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-1.2.5.min.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+        angular.module("sampleApp").constant("moment", moment);
+    </script>
+
+    <script src="js/reporterCtrl.js"></script>
+
+    <title>Reporter</title>
+
+</head>
+
+
+<body style="padding: 8px;padding-top:80px" >
+
+<div ng-app="sampleApp" ng-controller="reporterCtrl" class="container-fluid">
+
+    <div class="row">
+        <div class="col-md-2 col-sm-2">
+            <div class="list-group">
+                <div class="list-group-item"
+                   ng-repeat="error in errors">
+                    <div style="cursor: pointer" ng-click="errorSelected(error)">
+                        {{error.resource.resourceType}}
+                        <div>{{error.date | date:'medium'}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-10 col-sm-10">
+            <pre>{{selectedError | json}}</pre>
+        </div>
+    </div>
+
+
+</div>
+</body>
+</html>

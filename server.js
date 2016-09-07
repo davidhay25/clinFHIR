@@ -5,10 +5,13 @@ var fileServer = new static.Server({ indexFile: "resourceCreator.html" });
 var request  = require('request');
 var moment = require('moment');
 
+var myParser = require("body-parser");
+
+
 
 var express = require('express');
 var app = express();
-
+app.use(myParser.json({extended : true}));
 
 //var connect = require('connect');
 var http = require('http');
@@ -66,7 +69,7 @@ function recordAccess(req) {
 
 //when a user navigates to cf
 app.post('/stats/login',function(req,res){
-    console.log('access')
+    //console.log('access')
     recordAccess(req);
     res.end();
 });
@@ -174,10 +177,87 @@ app.get('/stats/summary',function(req,res){
 //old clients trying to access server...
 app.use('/socket.io',function(req,res){
     res.end();
-})
+});
+
+
+app.post('/errorReport',function(req,res){
+    console.log(req.body);
+    var clientIp = req.headers['x-forwarded-for'] ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        req.connection.socket.remoteAddress;
+    var body = req.body;
+    body.ip = clientIp;
+    body.date = new Date().getTime();
+    db.collection("errorLog").insert(body, function (err, result) {
+        if (err) {
+            console.log('Error logging error ',audit)
+            res.end();
+        } else {
+
+            res.end();
+
+        }
+    });
+});
+
+
+//distinct resourceTypes: db.getCollection('errorLog').distinct("resource.resourceType")
+
+//return all results
+app.get('/errorReport/distinct',function(req,res){
+    db.collection("errorLog").distinct("resource.resourceType",function(err,doc){
+        if (err) {
+            console.log('Error logging error ',audit)
+            res.end();
+        } else {
+            res.json(doc)
+
+        }
+    });
+});
+
+
+//for a resourc etype: db.getCollection('errorLog').find({"resource.resourceType":"FamilyMemberHistory"})
+
+
+
+//return all results
+app.get('/errorReport/:type?',function(req,res){
+
+    console.log(req.params.type);
+    var qry = {};
+    if (req.params.type) {
+        qry = {"resource.resourceType":req.params.type}
+    }
+
+    db.collection("errorLog").find(qry).toArray(function(err,doc){
+        if (err) {
+            console.log('Error logging error ',audit)
+            res.end();
+        } else {
+            res.json(doc)
+
+        }
+    });
+});
+
+app.get('/',function(req,res){
+    //console.log('d')
+    res.sendFile(__dirname+'/resourceCreator.html');
+});
+
+
+
+app.use('/', express.static(__dirname));
+
+/*
 
 //try to serve static file for any request not yet handled...
 app.use('/',function(req,res){
+
+
+
 
     fileServer.serve(req, res, function (err, result) {
         if (err) { // There was an error serving the file
@@ -194,7 +274,7 @@ app.use('/',function(req,res){
     });
 });
 
-
+*/
 app.listen(port);
 
 

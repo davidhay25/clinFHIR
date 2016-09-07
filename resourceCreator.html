@@ -433,15 +433,13 @@
 
 
                                         <li>
-                                            <a href="#" ng-click="newExtension()">Extension editor<img src="icons/external.png"/></a>
+                                            <a href="#" ng-click="newExtension()">Extension editor <img class="pull-right" src="icons/external.png"/></a>
                                         </li>
 
 
 
-
-
                                         <li>
-                                            <a href="valuesetCreator.html" target="_blank">ValueSet editor <img src="icons/external.png"/> </a>
+                                            <a href="valuesetCreator.html" target="_blank">ValueSet editor <img class="pull-right" src="icons/external.png"/> </a>
                                         </li>
 
                                         <li class="divider"></li>
@@ -467,6 +465,16 @@
                                             <a href="#" ng-click="showChart()">Access statistics</a>
                                         </li>
 
+
+                                        <li>
+                                            <a href="#" ng-click="showLocalActivity()">Local Activity</a>
+                                        </li>
+
+
+
+                                        <li>
+                                            <a href="reporter.html" target="_blank">Error log <img class="pull-right"  src="icons/external.png"/> </a>
+                                        </li>
 
                                         <li>
                                             <a href="#" ng-click="showValidateInstance()">Validate Resource</a>
@@ -623,6 +631,10 @@
 
             </div>
 
+
+            <div ng-show="displayMode == 'localActivity'">
+                <ng-include src="'/includes/localActivity.html'"></ng-include>
+            </div>
 
             <div ng-show="displayMode == 'project'" ng-controller="projectCtrl">
            <!-- <div  ng-controller="projectCtrl">-->

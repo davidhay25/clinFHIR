@@ -1,0 +1,40 @@
+<div>
+    Local activity
+
+    <div class="row">
+        <div class="col-md-4 col-sm-4">
+            <div class="list-group">
+                <div href="#" class="list-group-item" ng-repeat="item in localActivity"
+                     ng-click="laShowResource(item)" style="cursor: pointer">
+
+                    <div class="pull-right">{{item.date | date:'yyyy-MM-dd HH:mm'}}</div>
+
+                    <div><strong>{{item.patientName}}</strong> ({{item.resourceType}})</div>
+                    <div>{{item.resourceUrl}}</div>
+
+
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8 col-sm-8">
+            <div class="alert alert-warning" ng-show="laItem.item">
+                <div ng-show="laAllowEdit" ><a href="#" class="pull-right" ng-click="laEditResource(laItem)">Edit</a></div>
+                <div>{{laItem.item.resourceUrl}}</div>
+            </div>
+
+
+            <pre  ng-show="laItem.item">
+                {{laItem.resource | json}}
+            </pre>
+
+        </div>
+    </div>
+
+<!--
+    <pre>
+        {{localActivity | json}}
+    </pre>
+
+    -->
+</div>
