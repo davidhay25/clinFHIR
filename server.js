@@ -78,17 +78,18 @@ app.post('/stats/login',function(req,res){
 //get a summary of the access stats. This code is rather crude - mongo has better ways of doing this...
 //probably want to be able to specify a date range and number of detailed items  as well...
 app.get('/stats/summary',function(req,res){
+    if(! db) {
+        //check that the mongo server is running...
+        res.json({});
+        return;
+    }
+
     db.collection("accessAudit").find({$query: {}}).toArray(function(err,doc){
-    //db.collection("accessAudit").find({$query: {},$orderby: { date : 1 }}).toArray(function(err,doc){
         if (err) {
             res.status(500);
             res.json({err:err});
         } else {
             var rtn = {cnt:doc.length,item:[],country:{},lastAccess : {date:0}};
-          //  if (doc && doc.length > 0) {
-            //    rtn.lastAccess = doc[doc.length-2];
-           // }
-
             var daySum = {};
 
             doc.forEach(function(d,inx){
@@ -98,10 +99,7 @@ app.get('/stats/summary',function(req,res){
                 if (d.date > rtn.lastAccess.date) {
                     rtn.lastAccess = d;
                 }
-              //  if (inx > (doc.length - 30)) {
-                //    rtn.item.push(d);
-                    //rtn.item.splice(0,0,d);   //last 30 accessss
-               // }
+
 
                 if (d.location) {
                     var c = d.location['country_code'];
@@ -122,9 +120,6 @@ app.get('/stats/summary',function(req,res){
 
             });
 
-            //rtn.item = rtn.item.reverse();
-
-
             rtn.daySum = [];
 
 
@@ -140,7 +135,7 @@ app.get('/stats/summary',function(req,res){
                 } else {
                     return -1;
                 }
-            })
+            });
 
 
 
@@ -181,7 +176,13 @@ app.use('/socket.io',function(req,res){
 
 
 app.post('/errorReport',function(req,res){
-    console.log(req.body);
+    if(! db) {
+        //check that the mongo server is running...
+        res.json({});
+        return;
+    }
+
+    //console.log(req.body);
     var clientIp = req.headers['x-forwarded-for'] ||
         req.connection.remoteAddress ||
         req.socket.remoteAddress ||
@@ -206,6 +207,12 @@ app.post('/errorReport',function(req,res){
 
 //return all results
 app.get('/errorReport/distinct',function(req,res){
+    if(! db) {
+        //check that the mongo server is running...
+        res.json({});
+        return;
+    }
+    
     db.collection("errorLog").distinct("resource.resourceType",function(err,doc){
         if (err) {
             console.log('Error logging error ',audit)

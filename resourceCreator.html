@@ -118,6 +118,7 @@
                 VALIDATE : 'Validate',
                 PARK : 'Park',
                 SAVE : 'Save',
+                UPDATE : 'Update',
                 CLOSE : 'Close',
                 DETAILS : 'Details',
                 TEST : 'Test',
@@ -389,7 +390,16 @@
                         </form>
 
                         <form ng-show="displayMode == 'new'" class="navbar-form navbar-right">
-                            <button class="btn btn-primary pull-right" ng-click="saveToServer()">{{'SAVE' | translate}}</button>
+
+
+                            <button ng-hide='isEditingResource' class="btn btn-primary pull-right" ng-click="saveToServer()">
+                                {{'SAVE' | translate}}</button>
+                            <button ng-show='isEditingResource'  class="btn btn-primary pull-right" ng-click="saveToServer()">
+                                {{'UPDATE' | translate}}</button>
+
+
+
+
                             <button style="margin-right: 8px" class="btn btn-info pull-right"
                                     ng-click="park()">{{'PARK' | translate}}</button>
 
