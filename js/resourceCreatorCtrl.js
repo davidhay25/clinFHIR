@@ -14,7 +14,7 @@ angular.module("sampleApp")
     .controller('resourceCreatorCtrl',
         function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,$translate,
                   $localStorage,RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,
-                  $location,resourceSvc,$window,$timeout,$firebaseArray,$filter) {
+                  $location,resourceSvc,$window,$timeout,$firebaseArray,$filter,$firebaseAuth) {
 
 
             if (window.location.href.indexOf('localhost') > -1) {
@@ -60,8 +60,27 @@ angular.module("sampleApp")
     $rootScope.fbLoadResource = $firebaseArray(refLoad);
 
 
+    $scope.firebase = firebase;     //place on scope so can adjust dispaly
 
+    $scope.logout=function(){
+        firebase.auth().signOut().then(function() {
+            modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
+        }, function(error) {
+            modalService.showModal({}, {bodyText: 'Sorry, there was an error lgging out - please try again'})
+        });
 
+    }
+            
+    $scope.login=function(){
+        $uibModal.open({
+            backdrop: 'static',      //means can't close by clicking on the backdrop.
+            keyboard: false,       //same as above.
+            templateUrl: 'modalTemplates/login.html',
+            controller: 'loginCtrl'
+
+        })
+
+    };
 
 
     var profile;                    //the profile being used as the base
@@ -698,9 +717,6 @@ console.log($scope.resourceVersions);
         //now set the base type. If a Core profile then it will be the profile name. Otherwise, it is the constarinedType
         //changed in STU-3 !
         var baseType;
-
-
-
 
 
 

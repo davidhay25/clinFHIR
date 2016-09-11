@@ -367,7 +367,7 @@ angular.module("sampleApp").
 
 
 }).
-    service('Utilities', function($http,$q,$localStorage,appConfigSvc) {
+    service('Utilities', function($http,$q,$localStorage,appConfigSvc,modalService) {
     return {
         getConformanceResourceDEP : function(callback) {
             //return the conformance resource  (cached the first time ) in a simple callback for the current data server
@@ -1030,7 +1030,9 @@ console.log(summary);
                     if (bundle && bundle.entry && bundle.entry.length > 0) {
 
                         if (bundle.entry.length >1) {
-                            alert('The terminology server has multiple ValueSets with a URL property (in the resource) of '+uri +". I'll use the first one, but you might want to contact the registry owner and let them know.");
+                            var alrt = 'The terminology server has multiple ValueSets with a URL property (in the resource) of '+uri +". I'll use the first one, but you might want to contact the registry owner and let them know.";
+                            modalService.showModal({}, {bodyText: alrt})
+                           // alert('The terminology server has multiple ValueSets with a URL property (in the resource) of '+uri +". I'll use the first one, but you might want to contact the registry owner and let them know.");
                         }
 
                         var id = bundle.entry[0].resource.id;   //the id of the velueset in the registry

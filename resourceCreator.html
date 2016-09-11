@@ -202,7 +202,7 @@
     <script src="resourceBuilder/vsBrowser.js"></script>
     <script src="resourceBuilder/selectProfile.js"></script>
     <script src="js/services.js"></script>
-
+    <script src="js/loginCtrl.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/searchForResourceCtrl.js"></script>
     <script src="js/resourceSvc.js"></script>
@@ -419,7 +419,24 @@
 -->
 
 
+                            <div class="nav navbar-form navbar-right" ng-hide="firebase.auth().currentUser">
+                                <span style="font-size:1.8em; cursor: pointer">
 
+
+
+                                    <a href="#" ng-click="login()"> <i class="glyphicon glyphicon-log-in"></i></a>
+                                </span>
+                            </div>
+
+                            <div class="nav navbar-form navbar-right" ng-show="firebase.auth().currentUser">
+                                <span style="font-size:1.8em; cursor: pointer"
+                                    uib-popover="{{firebase.auth().currentUser.email}}"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">
+
+                                    <a href="#" ng-click="logout()"> <i class="glyphicon glyphicon-log-out"></i></a>
+                                </span>
+                            </div>
 
 
 
@@ -477,7 +494,9 @@
 
 
                                         <li>
-                                            <a href="#" ng-click="showLocalActivity()">Local Activity</a>
+                                            <a href="#" ng-click="showLocalActivity()">Local Activity
+                                            <span class="badge pull-right">{{resourceCreatorSvc.getResourcesCreated().length}}</span>
+                                            </a>
                                         </li>
 
 
@@ -595,6 +614,10 @@
                         <div class="pull-right navbar-form" ng-show="waiting">
                             <img src="css/ajax_loader_blue_32.gif"/>
                         </div>
+
+
+
+
 
 
                     </div>

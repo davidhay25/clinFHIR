@@ -225,9 +225,6 @@ app.get('/errorReport/distinct',function(req,res){
 });
 
 
-//for a resourc etype: db.getCollection('errorLog').find({"resource.resourceType":"FamilyMemberHistory"})
-
-
 
 //return all results
 app.get('/errorReport/:type?',function(req,res){
@@ -238,7 +235,7 @@ app.get('/errorReport/:type?',function(req,res){
         qry = {"resource.resourceType":req.params.type}
     }
 
-    db.collection("errorLog").find(qry).toArray(function(err,doc){
+    db.collection("errorLog").find(qry).sort({date:-1}).toArray(function(err,doc){
         if (err) {
             console.log('Error logging error ',audit)
             res.end();
@@ -258,30 +255,7 @@ app.get('/',function(req,res){
 
 app.use('/', express.static(__dirname));
 
-/*
 
-//try to serve static file for any request not yet handled...
-app.use('/',function(req,res){
-
-
-
-
-    fileServer.serve(req, res, function (err, result) {
-        if (err) { // There was an error serving the file
-            //console.error("Error serving " + req.url + " - " + err.message);
-
-            // Respond to the client
-            //res.writeHead(err.status, err.headers);
-
-           // res.status(404).send();
-        } else {
-
-        }
-
-    });
-});
-
-*/
 app.listen(port);
 
 
