@@ -874,6 +874,10 @@ console.log($scope.resourceVersions);
                     errorLog.original = $scope.isEditingResource;
                     errorLog.oo = oo;
                     errorLog.server = appConfigSvc.getCurrentDataServer();
+                    if ($scope.firebase.auth().currentUser) {
+                        errorLog.userId = $scope.firebase.auth().currentUser.uid;
+                    }
+
                     errorLog.action= 'validate';
                     SaveDataToServer.submitErrorReport(errorLog);
 
@@ -1663,7 +1667,7 @@ console.log($scope.resourceVersions);
                             $scope.outcome += serverId;
 
                             resourceCreatorSvc.registerSuccessfulResourceCreated(serverId,$scope.resource,
-                                appConfigSvc.getCurrentPatient());
+                                appConfigSvc.getCurrentPatient(),$scope.firebase.auth().currentUser);
 
                         },
                         function(oo) {
@@ -1674,6 +1678,9 @@ console.log($scope.resourceVersions);
                             errorLog.oo = oo;
                             errorLog.server = appConfigSvc.getCurrentDataServer();
                             errorLog.action= 'save';
+                            if ($scope.firebase.auth().currentUser) {
+                                errorLog.userId = $scope.firebase.auth().currentUser.uid;
+                            }
                             SaveDataToServer.submitErrorReport(errorLog);
 
 
@@ -1755,6 +1762,9 @@ console.log($scope.resourceVersions);
 
                 $scope.recent.profile = appConfigSvc.getRecentProfile();    //re-establish the recent profile list
                 setUpForNewProfile(profile);
+            },
+            function(profile) {
+                alert('error inserting complex extension ED')
             }
         );
 

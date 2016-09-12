@@ -118,6 +118,9 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                             }, function(err) {
                                                 modalService.showModal({}, {bodyText: 'makeProfileDisplayFromProfile: Error retrieving '+ it.profile + " "+ angular.toJson(err)})
                                                 //console.log('Error retrieving '+ it.profile + " "+ angular.toJson(err))
+
+                                                //13 sep - not adding to list?
+                                                item.myMeta.analysis = {}
                                             }
                                         ));
 

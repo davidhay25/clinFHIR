@@ -673,6 +673,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
                         alert("error getting SD's for children " + angular.toJson(err))
+                        //sep 13  - return with what we have...
+                        deferred.resolve(children);
+
                     }
                 )
 
@@ -3241,6 +3244,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     },
                     function (err) {
                         alert("error getting SD's for children " + angular.toJson(err))
+                        deferred.resolve(profile);  //resolve anyway so they can see the profile fo sar...
                     }
                 )
 
@@ -3331,7 +3335,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
         },
-        registerSuccessfulResourceCreated: function (resourceId,resource,patient) {
+        registerSuccessfulResourceCreated: function (resourceId,resource,patient,user) {
             $localStorage.createdResources = $localStorage.createdResources || [];
             var date = new moment().format();
             var patientName = ResourceUtilsSvc.getOneLineSummaryOfResource(patient)
@@ -3342,6 +3346,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 patientId:patient.id
             };
             vo.patientName = patientName;
+            if (user) {
+                vo.userId = user.uid;
+            }
             $localStorage.createdResources.push(vo)
         },
         getResourcesCreated: function () {

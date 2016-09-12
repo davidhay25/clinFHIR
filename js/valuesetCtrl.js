@@ -4,7 +4,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
 
         //register that the application has been started... (for reporting)
-        resourceCreatorSvc.registerAccess();
+        GetDataFromServer.registerAccess();
 
         var snomedSystem = "http://snomed.info/sct";
 
