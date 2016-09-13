@@ -874,9 +874,14 @@ console.log($scope.resourceVersions);
                     errorLog.original = $scope.isEditingResource;
                     errorLog.oo = oo;
                     errorLog.server = appConfigSvc.getCurrentDataServer();
-                    if ($scope.firebase.auth().currentUser) {
-                        errorLog.userId = $scope.firebase.auth().currentUser.uid;
+                    try {
+                        if ($scope.firebase.auth().currentUser) {
+                            errorLog.userId = $scope.firebase.auth().currentUser.uid;
+                        }
+                    } catch (ex) {
+
                     }
+
 
                     errorLog.action= 'validate';
                     SaveDataToServer.submitErrorReport(errorLog);
@@ -1666,8 +1671,13 @@ console.log($scope.resourceVersions);
 
                             $scope.outcome += serverId;
 
+                            var user = {}
+                            if ($scope.firebase && $scope.firebase.auth()) {
+                                user = $scope.firebase.auth().currentUser;
+                            }
+
                             resourceCreatorSvc.registerSuccessfulResourceCreated(serverId,$scope.resource,
-                                appConfigSvc.getCurrentPatient(),$scope.firebase.auth().currentUser);
+                                appConfigSvc.getCurrentPatient(),user);
 
                         },
                         function(oo) {
@@ -1678,9 +1688,14 @@ console.log($scope.resourceVersions);
                             errorLog.oo = oo;
                             errorLog.server = appConfigSvc.getCurrentDataServer();
                             errorLog.action= 'save';
-                            if ($scope.firebase.auth().currentUser) {
-                                errorLog.userId = $scope.firebase.auth().currentUser.uid;
+                            try {
+                                if ($scope.firebase.auth().currentUser) {
+                                    errorLog.userId = $scope.firebase.auth().currentUser.uid;
+                                }
+                            } catch (ex) {
+
                             }
+
                             SaveDataToServer.submitErrorReport(errorLog);
 
 
