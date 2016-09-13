@@ -26,8 +26,7 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                     templateUrl: 'resourceBuilder/selectProfile.html',
                     size:'lg',
                     controller: function($scope,type,profileSelectedFn,allResourceTypes,vo,recent,config,appConfigSvc,modalService) {
-
-
+                        
                         $scope.config = appConfigSvc.config();
                         $scope.input = {};
                         $scope.heading = "Find Profile or Base Type";

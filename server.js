@@ -67,6 +67,11 @@ function recordAccess(req) {
     }
 }
 
+
+
+app.use('/', express.static(__dirname,{index:'/resourceCreator.html'}));
+
+
 //when a user navigates to cf
 app.post('/stats/login',function(req,res){
     //console.log('access')
@@ -246,14 +251,15 @@ app.get('/errorReport/:type?',function(req,res){
     });
 });
 
+/*
 app.get('/',function(req,res){
     //console.log('d')
     res.sendFile(__dirname+'/resourceCreator.html');
 });
+*/
 
 
-
-app.use('/', express.static(__dirname));
+//app.use('/', express.static(__dirname,{index:'/resourceCreator.html'}));
 
 
 app.listen(port);
