@@ -209,16 +209,7 @@ angular.module("sampleApp")
             if (isAuthoredByClinFhir) {
                 $scope.allowEdit = true;
             }
-            /*
-            //this is not a base resource, but did clinFHIR author it?
-            if (profile.code) {
-                profile.code.forEach(function(code){
-                    if (code.system == 'http://fhir.hl7.org.nz/NamingSystem/application' && code.code == 'clinfhir') {
-                        $scope.allowEdit = true;
-                    }
-                })
-            }
-            */
+            
 
         }
 

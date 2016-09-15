@@ -830,22 +830,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 var path = lnode.path;
                 var ar = path.split('.');
                 var propertyName = ar[ar.length - 1];
-                /*
-                 if (lnode.isComplexExtension) {
-                 //alert('complex bld')
-                 console.log(propertyName, node, path, treeData);
-                 resource.Extension = {}
 
-                 treeData.forEach(function(tNode){
-                 if (tNode.parent == lnode.id) {
-                 console.log('Child',tNode)
-                 }
-                 })
-
-
-                 } else {
-
-                 */
 
                 if (propertyName.indexOf('[x]') > -1) {
                     //this is a polymorphic field...
@@ -970,6 +955,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                  }
                                  }
                                  */
+
+                                processed = true;       //sf november
+
 
                             }
 
@@ -2634,24 +2622,42 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var deferred = $q.defer();
             var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained', 'modifierExtension'];
 
+            if (! profile || !profile.snapshot || !profile.snapshot.element) {
+                alert('This profile has no snapshot')
+                return deferred.promise;
+                deferred.resolve({})
+            }
+
+            var rootNode = profile.snapshot.element[0].path;        //eg 'Condition'
+
+            var pathsToDisable = [];        //disabled paths - need to hide all their children...
+            pathsToDisable.push(rootNode + '.meta');
+            pathsToDisable.push(rootNode + '.contained');
+            pathsToDisable.push(rootNode + '.text');
+
+
+
             var arNodes = [], arEdges = [];
             var objNodes = {};
             profile.snapshot.element.forEach(function (ed, inx) {
 
                 var include = true;
+                var path = ed.path;
 
                 objNodes[ed.path] = inx;
-                var ar = ed.path.split('.');
+                var ar = path.split('.');
 
-                //exclude the common elements...
-                // if (ar.length == 2 && elementsToDisable.indexOf(ar[1]) > -1) {
-                //  include = false;
-                //  }
 
+                //excluding elements that I don;t want to show (like meta)
                 if (ar.length > 1 && elementsToDisable.indexOf(ar[ar.length - 1]) > -1) {
                     include = false;
                 }
 
+                //some profiles seem to have excluded element in the snapshot (eg care connect)
+                if (ed.max == '0') {
+                    include = false;
+                    pathsToDisable.push(path);       //add to the list of paths to disable...
+                }
 
                 if (ar[ar.length - 1] == 'extension') {
                     //if the extension has a profile type then include it, otherwise not...
@@ -2679,6 +2685,17 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         })
                     }
                 }
+
+
+                //finally, make sure the path is not a child of one that has been deleted...
+
+                pathsToDisable.forEach(function(disablePath){
+                    if (path.substr(0,disablePath.length) == disablePath) {
+                        include = false;
+                    }
+                });
+
+
 
 
                 if (include) {
@@ -2983,6 +3000,36 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             //ignore these elements
                         } else if (key == 'extension') {
                             //need to add the datatype to the node so it can work out the name of the value[x]
+console.log(element)
+
+
+                            var path = parentPath + '.' + key;
+
+
+                            var ED = getED(path);
+                            console.log(path,ED);
+// lnode.ed.myData.extensionDefUrl;
+                            if (ED) {
+                                var id = getId();
+                                var newNode = {
+                                    id: id,
+                                    parent: parentId,
+                                    path: path,
+                                    text: getDisplay(path),
+                                    state: {opened: false, selected: false}
+                                };
+                                newNode.data = {ed: ED};
+                                newNode.ed = ED;      //a duplicate of the ed for RB todo:fix
+                                newNode.dataType = {code:'string'}; //tmp getDataType(path, element);
+                                newNode.fragment = element[0];// {test:'testValue'}
+
+                                console.log(newNode)
+
+                                tree.push(newNode);
+                            }
+
+
+
 
 
                         } else if (angular.isArray(element)) {
@@ -3352,7 +3399,42 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             $localStorage.createdResources.push(vo)
         },
         getResourcesCreated: function () {
+            //get the unique accounts that have been creating resources
+            var lst = $localStorage.createdResources;
+
+            if (lst) {
+                lst.sort(function(a,b){
+                    if (a.date > b.date) {
+                        return -1
+                    } else {
+                        return 1
+                    }
+                })
+
+            }
+
+
+
             return $localStorage.createdResources || []
+        },
+        clearResourcesCreatedList : function() {
+            if ($localStorage.createdResources) {
+                //keep the most recent 5
+                if ($localStorage.createdResources.length > 5) {
+                    var ar = [],len = $localStorage.createdResources.length;
+                    for (var i=0; i<5; i++) {
+                        ar.push($localStorage.createdResources[len-i-1]);
+                    }
+
+                    $localStorage.createdResources = ar;
+
+                    return ar;
+                } else {
+                    return $localStorage.createdResources;
+                }
+
+            }
+
         }
     }
 

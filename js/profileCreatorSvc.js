@@ -61,6 +61,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
             makeProfileDisplayFromProfile : function(inProfile) {
                 //var that = this;
                 console.log('MAKEPROFILE')
+                var loadErrors = [];        //any errors during loading
                 var deferred = $q.defer();
                 var lstTree = [];
 
@@ -69,7 +70,9 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 var arIsDataType = [];          //this is a list of disabled items...
                 var lst = [];           //this will be a list of elements in the profile to show.
                 //var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained'];
-                var dataTypes = ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference','HumanName'];
+                //var dataTypes = ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference','HumanName'];
+                
+                var dataTypes = Utilities.getListOfDataTypes();
 
                 var cntExtension = 0;
                 //a hash of the id's in the tree. used to ensure we don't add an element to a non-esixtant parent.
@@ -118,7 +121,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                             }, function(err) {
                                                 modalService.showModal({}, {bodyText: 'makeProfileDisplayFromProfile: Error retrieving '+ it.profile + " "+ angular.toJson(err)})
                                                 //console.log('Error retrieving '+ it.profile + " "+ angular.toJson(err))
-
+                                                loadErrors.push({type:'missing StructureDefinition',value:it.profile})
                                                 //13 sep - not adding to list?
                                                 item.myMeta.analysis = {}
                                             }
@@ -129,6 +132,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                     }
                                 })
                             }
+
                             if (!include) {
                                 addLog('extension with no profile excluded')
                             }
@@ -376,13 +380,13 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             setNodeIcons(lstTree);
 
 
-                            deferred.resolve({table:lst,treeData:lstTree})
+                            deferred.resolve({table:lst,treeData:lstTree,errors: loadErrors})
                         }
                     )
 
                 } else {
                     setNodeIcons(lstTree);
-                    deferred.resolve({table:lst,treeData:lstTree})
+                    deferred.resolve({table:lst,treeData:lstTree,errors: loadErrors})
                 }
 
 
@@ -536,7 +540,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     sd.url = profileUrl;
 
                     //populate the Profile SD 'header' elements from the base profile (this header info can be changed in the UI)
-                    //sd.name = baseProfile.name;
+
                     sd.description = baseProfile.description;
                     sd.requirements = baseProfile.requirements;
                     sd.copyright = baseProfile.copyright;
@@ -742,16 +746,24 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 var baseDefinition = profile.baseDefinition || profile.base;
 
                 if (baseDefinition && profile.snapshot && profile.snapshot.element) {
-                    //first create a hash for all elemente
+                    //first create a hash for all elements
+
                     profile.snapshot.element.forEach(function(ed){
-                        if (ed.path && ed.path.indexOf('xtension') == -1 && ed.max !=="0") {
-                            profileHash[ed.path] = 'x'
-                        } else {
-                            //this is an extension. if there's a profile associated with it, then add it to the list of differences
-                            if (ed.type && ed.type[0].profile && ed.type[0].profile.length > 0) {
-                                differences.push({type:'extension', ed:ed})
+
+                        if (ed && ed.path && ed.max !=="0") {
+                            if (ed.path.indexOf('xtension') == -1) {
+                                profileHash[ed.path] = 'x'
+                            } else {
+                                //this is an extension. if there's a profile associated with it, then add it to the list of differences
+                                if (ed.type && ed.type[0].profile && ed.type[0].profile.length > 0) {
+                                    differences.push({type:'extension', ed:ed})
+                                }
                             }
                         }
+
+
+
+
                     });
 
                     //now load the base resource and see what elements have been removed...
@@ -761,12 +773,17 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             if (baseSD.snapshot && baseSD.snapshot.element) {
                                 baseSD.snapshot.element.forEach(function(ed,inx){
                                     var path = ed.path;
-                                    if (path && path.indexOf('xtension') == -1) {
+                                    if (path && path.indexOf('xtension') == -1) {   //so not an extension...
                                         if (! profileHash[path]) {
                                             var ar = path.split('.');
                                             //there are some elements (like id & contained) that we aren't showing
                                             if (elementsToDisable.indexOf(ar[ar.length-1]) == -1) {
-                                                differences.push({type:'removed',ed:ed})
+                                                if (ed.max !== '0') {
+                                                    //sems to be in the snapshot of the careconnect profile...
+                                                    differences.push({type:'removed',ed:ed})
+                                                }
+
+
                                             }
                                         }
                                     }

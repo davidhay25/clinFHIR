@@ -24,7 +24,7 @@ angular.module("sampleApp")
             //allow other controllers (like frontController) to turn the waiting icon on or off
             $rootScope.$on('setWaitingFlag',function(event,showFlag){
                 $scope.waiting = showFlag;
-                console.log('flag',showFlag)
+
             })
 
     //register that the application has been started... (for reporting)
@@ -163,6 +163,10 @@ angular.module("sampleApp")
         $scope.localActivity = resourceCreatorSvc.getResourcesCreated();
         $scope.displayMode = 'localActivity';
     }
+            
+    $scope.clearLAlist = function() {
+        $scope.localActivity = resourceCreatorSvc.clearResourcesCreatedList()
+    }
 
     $scope.laShowResource = function(item){
         var url = item.resourceUrl;   //has the full path to the server
@@ -181,7 +185,7 @@ angular.module("sampleApp")
     };
 
     $scope.laEditResource =function(item) {
-        console.log(item);
+        
         $rootScope.$broadcast('setWaitingFlag',true);
         var url = appConfigSvc.getCurrentDataServer().url+ 'Patient/'+item.item.patientId;
         GetDataFromServer.adHocFHIRQuery(url).then(
@@ -979,17 +983,7 @@ console.log($scope.resourceVersions);
         );
     } ;
 
-    $scope.complexChildSelectedDEP = function(element,child,dt) {
-        //when a child of a complex extension is selected. We only support a single level
-        //child.name is the name of the 'child' extension that has been selected
-        console.log(element,child,dt)
-        $scope.dataType = dt.code;   //will show the appropriate data entry form...
-        $scope.selectedChild = element;     //this has to be the extension root (I think)
-        $scope.complexExtensionRoot = element;
-        $scope.complexExtensionChild = child;
 
-
-    };
 
     //when one of the datatypes of the child nodes of the currently selected element in the tree is selected...
     $scope.childSelected = function(ed,inx) {
@@ -1956,7 +1950,7 @@ console.log($scope.resourceVersions);
             size:'lg',
 
 
-            constrollerDEP: 'validateInstanceCtrl',
+            
 
             controller: function($scope,appConfigSvc,resourceCreatorSvc){
                 $scope.config = appConfigSvc.config();
@@ -2433,8 +2427,7 @@ console.log($scope.resourceVersions);
             $scope.frontPageProfile = profile;      //set the profile in the component
             //broadcast an event so that the profile edit controller (logicalModelCtrl) can determine if this is a core profile and can't be edited...
             $scope.$broadcast('profileSelected',{profile:profile});
-            //perform the setup for the new profile... (
-            //$rootScope.$broadcast('newProfileChosen');
+           
 
 
         };
