@@ -15,7 +15,9 @@
             <div class="col-md-4">
                 <div class="pull-right">
                     <button class="btn btn-warning" ng-hide = "outcome" ng-click="cancel()">Cancel</button>
-                    <button class="btn btn-primary" ng-hide = "outcome" ng-click="saveResource()">Save</button>
+                    <button class="btn btn-primary" ng-hide = "outcome" ng-click="saveResource()">
+                        <span ng-show="resource.id">Update</span> <span ng-hide="resource.id">Save</span>
+                    </button>
                     <button class="btn btn-primary" ng-show = "outcome" ng-click="close()">Close</button>
                 </div>
 

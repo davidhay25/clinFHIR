@@ -807,7 +807,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var resource = {resourceType: type, text: ""};
             if (config.profile) {
                 resource.meta = resource.meta || {};
-                resource.meta.profile = config.profile
+                resource.meta.profile = config.profile      //assume this is an array...
             }
 
             //resource.extension=[]
@@ -2925,30 +2925,48 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var edHash = {};
             var dtList = Utilities.getListOfDataTypes();
 
-            var url = 'http://fhirtest.uhn.ca/baseDstu2/CarePlan/14977';    //todo - during dev...
+            var url;// = 'http://fhirtest.uhn.ca/baseDstu2/CarePlan/14977';    //todo - during dev...
             if (resource) {
                 var svr = appConfigSvc.getCurrentDataServer();
                 if (svr) {
                     url = svr.url + resource.resourceType + '/' + resource.id;
                 }
+            } else {
+                deferred.reject("No resource supplied to Load");
+                return deferred.promise;
             }
-            //console.log(url)
+
 
             $http.get(url).then(
                 function (data) {
                     var resource = data.data;
                     var tree = [];
 
-                    //console.log(resource)
 
-                    //load the profile for this resource. Assume a base resource at the moment...
-                    var resourceType = resource.resourceType;
+                    var resourceType = resource.resourceType;   //base type for this resource...
 
-                    var uri = "http://hl7.org/fhir/StructureDefinition/" + resourceType;
-                    GetDataFromServer.findConformanceResourceByUri(uri).then(
+                    //find any profile declared by this resource
+                    var profileUriForThisResource;
+                    if (resource.meta && resource.meta.profile) {
+                        //todo - just grab the first one for now
+                        profileUriForThisResource = resource.meta.profile[0]
+                    }
+
+                    console.log(profileUriForThisResource);
+
+                    if (!profileUriForThisResource) {
+                        //load the base profile for this resource if unable to get one from the meta element...
+
+                        profileUriForThisResource = "http://hl7.org/fhir/StructureDefinition/" + resourceType;
+                    }
+
+
+
+
+
+                    GetDataFromServer.findConformanceResourceByUri(profileUriForThisResource).then(
                         function (profile) {
-                            //console.log(profile)
-                            //console.log(profile.snapshot)
+
 
                             //todo - is this legit ????
                             var edList = profile.snapshot || profile.differential;
@@ -2957,7 +2975,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 deferred.reject('Sorry, the profile definition for this resource on the Conformance server is missing the snapshot')
                             } else {
                                 //create a hash indexed by path. need this so the ED for a given path can be located using the function getED()
-                                //this won't handle extensions (I think)
+
                                 var parent;
                                 angular.forEach(edList.element, function (item) {
                                     if (!parent) {
@@ -2966,16 +2984,14 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                     edHash[item.path] = angular.copy(item);
                                 });
 
-
-                                var rootId = 'root'; //getId();
+                                var rootId = 'root';
                                 var edRoot = getED(resourceType);
 
                                 var item = {};      //this will be the ed for the resource root...
                                 var rootItem = {
                                     id: rootId, parent: '#', text: parent, state: {opened: true, selected: true},
                                     path: parent, data: {ed: edRoot}, ed: edRoot
-                                }
-
+                                };
 
                                 tree.push(rootItem);
 
@@ -2983,8 +2999,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                     processNode(parent, tree, key, element, rootId)
                                 });
 
-
                                 deferred.resolve({treeData: tree, profile: profile});
+
+
                             }
                         }, function (err) {
                             alert(angular.toJson(err))
@@ -3000,35 +3017,52 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             //ignore these elements
                         } else if (key == 'extension') {
                             //need to add the datatype to the node so it can work out the name of the value[x]
-console.log(element)
+
+                            //this element is an array of extensions...
+                            element.forEach(function(ext){
+
+                                var fragment = "";
+                                //need to find the resource fragment. This will be the property beginning with 'value'
+                                angular.forEach(ext,function(value,key){
+                                    if (key.substr(0,5) == 'value') {
+                                        fragment = value;
+                                    }
+                                });
+
+                                console.log(ext)
 
 
-                            var path = parentPath + '.' + key;
+                                var path = parentPath + '.' + key;
 
 
-                            var ED = getED(path);
-                            console.log(path,ED);
-// lnode.ed.myData.extensionDefUrl;
-                            if (ED) {
-                                var id = getId();
-                                var newNode = {
-                                    id: id,
-                                    parent: parentId,
-                                    path: path,
-                                    text: getDisplay(path),
-                                    state: {opened: false, selected: false}
-                                };
-                                newNode.data = {ed: ED};
-                                newNode.ed = ED;      //a duplicate of the ed for RB todo:fix
-                                newNode.dataType = {code:'string'}; //tmp getDataType(path, element);
-                                newNode.fragment = element[0];// {test:'testValue'}
+                                var ED = getED(path);
+                                console.log(path,ED);
+    // lnode.ed.myData.extensionDefUrl;
+                                if (ED) {
+                                    ED.myData.extensionDefUrl = ext.url;
+                                    var id = getId();
 
-                                console.log(newNode)
+                                    var newNode = {
+                                        id: id,
+                                        parent: parentId,
+                                        path: path,
+                                        text: getDisplay(path),
+                                        state: {opened: false, selected: false}
+                                    };
+                                    newNode.data = {ed: ED};
+                                    newNode.ed = ED;      //a duplicate of the ed for RB todo:fix
+                                    newNode.dataType = {code:'string'}; //tmp getDataType(path, element);
+                                    newNode.fragment = fragment;
 
-                                tree.push(newNode);
-                            }
+                                    //lnode.ed.myData.extensionDefUrl;
 
 
+                                    console.log(newNode)
+
+                                    tree.push(newNode);
+                                }
+
+                            })
 
 
 
@@ -3132,8 +3166,11 @@ console.log(element)
                     }
 
 
-                }, function (err) {
-                    console.log(err);
+                },
+                function(err) {
+                    alert("can't load "+url)
+                    deferred.reject("can't load "+url);
+                    return deferred.promise;
                 }
             );
 

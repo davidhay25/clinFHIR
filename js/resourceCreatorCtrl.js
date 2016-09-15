@@ -730,10 +730,7 @@ console.log($scope.resourceVersions);
             $scope.conformProfiles = [profile.url]       //the profile/s that this resource claims conformance to
         } else {
 
-            if (profile.baseDefinition) {
-                //montreal version
-                baseType = $filter('getLogicalID')(profile.baseDefinition);
-            } else if (profile.type) {
+            if (profile.type) {
                 //baltimore version
                 //STU-3 base resource
                 //if (profile.baseDefinition) {
@@ -741,9 +738,14 @@ console.log($scope.resourceVersions);
                 //getLogicalID
                 baseType = profile.type;//$filter('getLogicalID')(profile.baseDefinition);
                 //baseType = profile.name;
+                $scope.conformProfiles = [profile.url]       //the profile/s that this resource claims conformance to
 
 
-            }  else {
+            } else if (profile.baseDefinition) {
+                //montreal version
+                baseType = $filter('getLogicalID')(profile.baseDefinition);
+                $scope.conformProfiles = [profile.url]
+            } else {
                 //STU-2 base resource
                 baseType = profile.name;
             }
@@ -838,7 +840,7 @@ console.log($scope.resourceVersions);
         var treeObject = $('#treeView').jstree().get_json();    //creates a hierarchical view of the resource
 
         var config = {};
-        config.profile = $scope.conformProfiles;
+        config.profile = $scope.conformProfiles;    //profiles that this resource claims conformance to...
 
         var resourceType = resourceCreatorSvc.getResourceTypeForCurrentProfile();
         

@@ -34,6 +34,9 @@
         <div class="col-md-6 col-sm-6">
             <div class="alert alert-warning" ng-show="laItem.item">
                 <div ng-show="laAllowEdit" ><a href="#" class="pull-right" ng-click="laEditResource(laItem)">Edit</a></div>
+
+                <div ng-hide="laAllowEdit" class="pull-right">Change Data Server to edit</div>
+
                 <div>{{laItem.item.resourceUrl}}</div>
             </div>
 
