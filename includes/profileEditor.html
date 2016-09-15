@@ -84,8 +84,8 @@
             <br/>
 
 
-
-    <div class="row animate-show" ng-show="showProfileEditPage" >
+<!-- <div class="row animate-show" ng-show="showProfileEditPage" >-->
+    <div class="row animate-show">
         <div class="col-md-3">
             <show-profile profile="frontPageProfile" treedivid="'localTree'"
                           restoreatpath="restoreAtPath"
@@ -687,25 +687,24 @@
 
 
             <div class="row">
-                <div class="col-md-6 col-sm-6">
+                <div class="col-md-8 col-sm-8">
                     <div id="profileNetwork"></div>
                 </div>
-                <div class="col-md-6 col-sm-6">
-                    <div ng-show = "selectedProfileNetworkED.binding">
-                        <div class='row' style="margin-bottom: 8px; margin-top: 6px">
+                <div class="col-md-4 col-sm-4">
+                    <!--
+                                        <div ng-show = "selectedProfileNetworkED.binding">
+                                            <div class='row' style="margin-bottom: 8px; margin-top: 6px">
 
-                            <div class="col-md-3 col-sm-3">
-                                <strong>ValueSet</strong>
-                            </div>
-                            <div class="col-md-3 col-sm-3">
-                                Binding strength: {{selectedProfileNetworkED.binding.strength}}
-                            </div>
-                            <div class="col-md-6 col-sm-6">
-   <!--
-                                <a href="#" ng-click="showValueSetForProfile(selectedProfileNetworkED.binding.valueSetReference.reference)">
-                                    {{selectedProfileNetworkED.binding.valueSetReference.reference}}
-                                </a>
--->
+                                                <div class="col-md-3 col-sm-3">
+                                                    <strong>ValueSet</strong>
+                                                </div>
+                                                <div class="col-md-3 col-sm-3">
+                                                    Binding strength: {{selectedProfileNetworkED.binding.strength}}
+                                                </div>
+                                                <div class="col-md-6 col-sm-6">
+
+
+
                                 <a href="#" ng-show="selectedProfileNetworkED.binding.valueSetReference.reference"
                                    ng-click="showValueSetForProfile(selectedProfileNetworkED.binding.valueSetReference.reference)">
                                     {{selectedProfileNetworkED.binding.valueSetReference.reference}}
@@ -725,12 +724,114 @@
 
                     </div>
 
-
+ -->
 
                     <div class='row'>
-
                         <div class="col-md-12 col-sm-12">
-                        <pre>{{selectedProfileNetworkED | json}}</pre>
+                            <uib-tabset>
+                                <uib-tab heading="Clinician Friendly (for Philip)">
+                                    <br/>
+                                    <div class="row greyBackground">
+                                        <div class="col-md-3 col-sm-3">Path</div>
+                                        <div class="col-md-9 col-sm-8">
+                                            {{selectedProfileNetworkED.path}}
+
+                                        </div>
+                                    </div>
+
+                                    <div class="row greyBackground" ng-show="selectedProfileNetworkED.name">
+                                        <div class="col-md-3 col-sm-3">Name</div>
+                                        <div class="col-md-9 col-sm-8">
+                                            {{selectedProfileNetworkED.name}}
+                                        </div>
+                                    </div>
+
+                                    <div class="row greyBackground" ng-show="selectedProfileNetworkED.label">
+                                        <div class="col-md-3 col-sm-3">Label</div>
+                                        <div class="col-md-9 col-sm-8">
+                                            {{selectedProfileNetworkED.label}}
+
+                                        </div>
+                                    </div>
+
+                                    <!-- Data types for Types not in extensions... -->
+                                    <div class="row greyBackground" ng-hide="selectedProfileNetworkED.myMeta.isExtension">
+                                        <div class="col-md-3 col-sm-3">DataType/s</div>
+                                        <div class="col-md-8 col-sm-8">
+                                            <div ng-repeat="item in selectedProfileNetworkED.type">
+                                                {{item.code}}
+                                                 <span ng-show="item.profile">
+                                                     --> {{Utilities.getProfileFromType(item) | showUrlId}}
+                                                 </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row greyBackground" ng-show="selectedProfileNetworkED.definition">
+                                        <div class="col-md-3 col-sm-3">Definition</div>
+                                        <div class="col-md-8 col-sm-8">
+                                            <div ng-hide="editDefinition">
+                                                {{selectedProfileNetworkED.definition}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+
+                                    <div class="row greyBackground"  ng-show="selectedProfileNetworkED.comments">
+                                        <div class="col-md-3 col-sm-3">Comments</div>
+                                        <div class="col-md-8 col-sm-8">
+                                            <div ng-hide="editComments">
+                                                {{selectedProfileNetworkED.comments}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="row greyBackground" ng-show="selectedProfileNetworkED.min" >
+                                        <div class="col-md-3 col-sm-3">
+                                            Multiplicity
+                                        </div>
+                                        <div class="col-md-8 col-sm-8">
+                                            {{selectedProfileNetworkED.min}}..{{selectedProfileNetworkED.max}}
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="row greyBackground"
+                                         ng-show="selectedProfileNetworkED.binding">
+                                        <div class="col-md-3 col-sm-3">
+                                            ValueSet
+                                        </div>
+                                        <div class="col-md-8 col-sm-8">
+                                            <div>{{selectedProfileNetworkED.binding.description}}</div>
+
+                                            <a href="#" ng-show="selectedProfileNetworkED.binding.valueSetReference.reference"
+                                               ng-click="showValueSetForProfile(selectedProfileNetworkED.binding.valueSetReference.reference)">
+                                                {{selectedProfileNetworkED.binding.valueSetReference.reference}}
+                                            </a>
+                                            <a href="#" ng-show="selectedProfileNetworkED.binding.valueSetUri"
+                                               ng-click="showValueSetForProfile(selectedProfileNetworkED.binding.valueSetUri,'true')">
+                                                {{selectedProfileNetworkED.binding.valueSetUri}}
+                                            </a>
+
+                                            <div>Binding strength: {{selectedProfileNetworkED.binding.strength}}</div>
+                                        </div>
+
+
+                                    </div>
+
+
+
+                                </uib-tab>
+                                <uib-tab heading="Geeky">
+                                    <br/>
+                                    <pre>{{selectedProfileNetworkED | json}}</pre>
+                                </uib-tab>
+                            </uib-tabset>
                         </div>
                     </div>
 
