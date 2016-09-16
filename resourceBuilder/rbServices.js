@@ -2209,8 +2209,16 @@ console.log(summary);
                             }
                         }
 
+                        if (resource.effectiveDateTime) {
+                            summary = resource.effectiveDateTime.substr(0, 10) + " " + summary;
+                        }
+
                         if (resource.valueString) {
                             summary += ": " + resource.valueString.substr(0, 50);
+                        }
+
+                        if (resource.valueQuantity) {
+                            summary += ": " + resource.valueQuantity.value + " " +resource.valueQuantity.unit;
                         }
 
                         if (resource.appliesDateTime) {

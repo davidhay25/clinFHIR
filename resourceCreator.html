@@ -75,10 +75,15 @@
             databaseURL: "https://clinfhir.firebaseio.com",
             storageBucket: ""
         };
-        firebase.initializeApp(config);
+        console.log(firebase)
+        if (firebase) {
+            firebase.initializeApp(config);
+        }
 
         angular.module("sampleApp",['ui.checkbox','ngAnimate','ngCookies','ui.bootstrap','ngSanitize',
             'angular-toArrayFilter','ngStorage','pascalprecht.translate','dndLists',"firebase",'highcharts-ng'])
+
+
 
         angular.module("sampleApp").constant("moment", moment);
 
@@ -221,6 +226,7 @@
     <script src="js/libs/vis.min.js"></script>
     <script src="js/listBuilder.js"></script>
     <script src="js/consultBuilder.js"></script>
+    <script src="js/documentBuilder.js"></script>
     <title>FHIR Resource Creator</title>
 
     <style type="text/css">
@@ -634,6 +640,12 @@
             </div>
 
             -->
+
+            <div ng-controller="documentBuilderCtrl">
+                <ng-include src="'/includes/documentBuilder.html'"></ng-include>
+            </div>
+
+
 
             <div ng-show="displayMode == 'access'">
                 <div>

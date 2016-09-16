@@ -1,0 +1,104 @@
+<div>
+    <h3>Document Builder</h3>
+    <div class="row">
+        <div class="col-md-2 col-sm-2">
+            <h5>Select Section</h5>
+            <div class="list-group">
+                <a href="#" class="list-group-item" ng-click="sectionSelected(section)"
+                   ng-repeat="section in config.sections ">
+                    {{section.display}}
+                    <span class="pull-right badge">{{type.bundle.total}}</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-sm-6">
+
+            <div class="row">
+                <div class="col-md-12 col-sm-12">
+                    <div class="banner">{{selectedSection.display}}</div>
+                </div>
+            </div>
+
+            <div class="row">
+
+
+
+                <div class="col-md-6 col-sm-6">
+                    <h5>Current contents</h5>
+                    <div class="list-group">
+                        <a href="#" class="list-group-item"
+                           ng-repeat="res in selectedSection.resources">
+                            {{ResourceUtilsSvc.getOneLineSummaryOfResource(res)}}
+                            <span ng-click="removeResource($index)" class="pull-right badge">X</span>
+                        </a>
+                    </div>
+
+                    <div ng-show="selectedSection.resources.length==0 || selectedSection.emptyReason ">
+                        <div class="row">
+                            <div class="col-sm-6 col-md-6">
+                                <i>Empty Reason</i>
+                            </div>
+                            <div class="col-sm-6 col-md-6">
+                                <select class="form-control" ng-model="input.emptyReason" ng-change="setEmptyReason()">
+                                    <option value="nilknown">Nil Known</option>
+                                    <option value="notasked">Not asked</option>
+                                    <option value="withheld">Withheld</option>
+                                    <option value="unavailable">Unavailable</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-md-6 col-sm-6">
+                    <h5>Add Resource</h5>
+                    <select class="form-control" ng-model="input.type" ng-change="typeSelected(typ)"
+                            ng-options = "typ for typ in selectedSection.types" ></select>
+
+                    <div class="list-group">
+                        <a href="#" class="list-group-item" ng-click="resourceSelected(res)"
+                           ng-repeat="res in oneResourceType ">
+
+                            {{ResourceUtilsSvc.getOneLineSummaryOfResource(res)}}
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4 col-sm-4">
+
+            <div class="row">
+                <div class="col-md-12 col-sm-12">
+                    <div class="banner">Current Document Structure</div>
+                </div>
+            </div>
+
+            <div ng-repeat="section in config.sections ">
+
+                <h4 ng-show="section.resources.length > 0">{{section.display}}</h4>
+
+                <div class="list-group">
+                    <a href="#" class="list-group-item"
+                       ng-repeat="res in section.resources ">
+
+                        {{ResourceUtilsSvc.getOneLineSummaryOfResource(res)}}
+                    </a>
+                </div>
+
+            </div>
+
+            <pre>
+                {{document | json:2}}
+            </pre>
+
+        </div>
+    </div>
+
+    <hr/>
+</div>

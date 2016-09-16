@@ -22,8 +22,10 @@
             $locationProvider.hashPrefix('!');
         });
         angular.module("sampleApp").constant("moment", moment);
-    </script>
 
+    </script>
+    <script src="js/documentBuilder.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
     <script src="js/reporterCtrl.js"></script>
 
     <title>Reporter</title>
@@ -34,6 +36,11 @@
 <body style="padding: 8px" >
 
 <div ng-app="sampleApp" ng-controller="reporterCtrl" class="container-fluid">
+
+
+    <div ng-controller="documentBuilderCtrl">
+        <ng-include src="'/includes/documentBuilder.html'"></ng-include>
+    </div>
 
 
     <h3>Failed operations - Validate or Save</h3>

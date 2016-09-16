@@ -1,0 +1,7 @@
+{
+  "sections": [
+    {"display":"Presenting Complaint","sectionCode":"1098-1","types":["Observation","Condition"]},
+    {"display":"Hospital Course","sectionCode":"1098-1","types":["Encounter"]},
+    {"display":"Medications on Discharge","sectionCode":"1098-1","types":["Appointment"],"isList":true}
+  ]
+}
