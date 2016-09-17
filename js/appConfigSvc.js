@@ -53,10 +53,7 @@ angular.module("sampleApp")
         //defaultConfig.terminologyServers.push({name:'Ontoserver',version:3,url:"http://ontoserver.csiro.au/stu3/"});
         defaultConfig.terminologyServers.push({name:'Ontoserver',version:3,url:"http://52.63.0.196:8080/fhir/"});
         defaultConfig.terminologyServers.push({name:'Public HAPI STU3',version:3,url:"http://fhirtest.uhn.ca/baseDstu3/"});
-
-
         
-
         defaultConfig.allKnownServers = [];
 
         defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://fhir2.healthintersections.com.au/open/",version:2,everythingOperation:true});
@@ -74,6 +71,8 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'Ontoserver',version:3,url:"http://52.63.0.196:8080/fhir/"});
         defaultConfig.allKnownServers.push({name:'MiHIN',version:2,url:"http://52.72.172.54:8080/fhir/baseDstu2/"});
         defaultConfig.allKnownServers.push({name:'Simplifier',version:2,url:"https://simplifier.net/api/fhir/"});
+
+        defaultConfig.allKnownServers.push({name:'T-system',version:3,url:"https://fhirsandbox1.tsysinteropsvcs.net:8100/sites/123/"});
 
 
 

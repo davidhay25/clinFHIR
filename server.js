@@ -6,7 +6,7 @@ var request  = require('request');
 var moment = require('moment');
 
 var myParser = require("body-parser");
-
+var Cookies = require( "cookies" )
 
 
 var express = require('express');
@@ -73,12 +73,13 @@ function recordAccess(req) {
 app.use('/', express.static(__dirname,{index:'/resourceCreator.html'}));
 
 
+//this is used for the re-direct from simplifier
 app.get('/createExample',function(req,res){
-    //console.log('access')
-    var profile = req.parama['profile'];
-    res.json({profile:profile});
-
-    res.end();
+    var cookies = new Cookies( req, res )
+    var profile = req.query['profile'];
+    cookies.set('myProfile',profile,{httpOnly:false});
+    //res.sendFile("builder.html", { root: __dirname  })
+    res.sendFile("resourceCreator.html", { root: __dirname  })
 });
 
 //when a user navigates to cf
@@ -249,15 +250,20 @@ app.get('/errorReport/:type?',function(req,res){
         qry = {"resource.resourceType":req.params.type}
     }
 
-    db.collection("errorLog").find(qry).sort({date:-1}).toArray(function(err,doc){
-        if (err) {
-            console.log('Error logging error ',audit)
-            res.end();
-        } else {
-            res.json(doc)
+    if (db) {
+        db.collection("errorLog").find(qry).sort({date:-1}).toArray(function(err,doc){
+            if (err) {
+                console.log('Error logging error ',audit)
+                res.end();
+            } else {
+                res.json(doc)
 
-        }
-    });
+            }
+        });
+    } else {
+        res.json({})
+    }
+
 });
 
 /*

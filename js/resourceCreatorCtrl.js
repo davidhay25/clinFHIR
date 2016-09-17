@@ -14,7 +14,7 @@ angular.module("sampleApp")
     .controller('resourceCreatorCtrl',
         function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,$translate,
                   $localStorage,RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,
-                  $location,resourceSvc,$window,$timeout,$firebaseArray,$filter,$firebaseAuth) {
+                  $location,resourceSvc,$window,$timeout,$firebaseArray,$filter,$cookies) {
 
 
             if (window.location.href.indexOf('localhost') > -1) {
@@ -49,6 +49,59 @@ angular.module("sampleApp")
             */
 
 
+    $scope.cookies = $cookies.getAll();
+    if ($scope.cookies) {
+        //alert(angular.toJson($scope.cookies))
+        var profileUrl = $scope.cookies.myProfile;
+        //alert(profileUrl);
+
+        if (profileUrl) {
+
+            $rootScope.$broadcast('setWaitingFlag',true);
+
+            //assume that the caller is simplifier and that the profile is a resource Id that we can retrieve directly
+            GetDataFromServer.adHocFHIRQuery(profileUrl).then(
+                function(profileData) {
+
+                    //todo - set the patient, conformance & terminology servers...
+
+                    //set the patient - this will only work if the server is HAPI1 with that patient!!!
+                    var url = appConfigSvc.getCurrentDataServer().url+ 'Patient/69649';
+                    GetDataFromServer.adHocFHIRQuery(url).then(
+                        function(data) {
+                            appConfigSvc.setCurrentPatient(data.data);
+                            loadPatientDetails(function(patient){
+                                //so we have the patient, now set the profile...
+                                $scope.$emit('profileSelected',angular.copy(profileData.data));
+
+                                $timeout(function(){
+                                    $scope.displayMode = 'new';
+                                },2000)
+
+
+
+
+                            })
+                        }
+                    )
+
+
+                },
+                function(err) {
+                    alert(angular.toJson(err))
+                }
+            ).finally(function(){
+                $rootScope.$broadcast('setWaitingFlag',false);
+            });
+
+
+        }
+
+        console.log(profile)
+
+
+    }
+
     var refProjects = firebase.database().ref().child("projects");
     //console.log(refProjects)
     // create a synchronized array
@@ -69,7 +122,7 @@ angular.module("sampleApp")
             modalService.showModal({}, {bodyText: 'Sorry, there was an error lgging out - please try again'})
         });
 
-    }
+    };
             
     $scope.login=function(){
         $uibModal.open({
