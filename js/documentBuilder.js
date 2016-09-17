@@ -7,6 +7,15 @@ angular.module("sampleApp").controller('documentBuilderCtrl',
         $scope.possibleResources = [];
         $scope.oneResourceType = [];
         $scope.input = {};
+
+        $scope.emptyReasons = {}
+        $scope.emptyReasons.nilknown = "Nil known";
+        $scope.emptyReasons.notasked = "Not asked";
+        $scope.emptyReasons.withheld = "Withheld";
+        $scope.emptyReasons.unavailable = "Unavailable";
+
+        
+        
         $http.get('http://localhost:8080/baseDstu3/Patient/1211/$everything?_count=100').then(
             function(data){
                 $scope.allResourcesBundle = data.data;
@@ -76,13 +85,21 @@ angular.module("sampleApp").controller('documentBuilderCtrl',
             } else {
                 delete $scope.selectedSection.emptyReason
             }
+            buildDocument();
         };
+
+        $scope.setText = function(){
+            $scope.selectedSection.text = $scope.input.text;
+            buildDocument();
+        }
 
         //when a single section has been selected
         $scope.sectionSelected = function(section) {
             section.resources = section.resources ||[];     //list of resources in this section
             $scope.selectedSection = section;
             $scope.possibleResources.length = 0;
+
+            $scope.input.text = $scope.selectedSection.text ;
 
             //if an empty reason as been selected, then enable the emptyreason dialog and set the value...
             if ($scope.selectedSection.emptyReason) {
@@ -118,16 +135,18 @@ angular.module("sampleApp").controller('documentBuilderCtrl',
 
             $scope.config.sections.forEach(function(section){
 
+
+                var compSection = {title:'',text:''};
                 if (section.emptyReason) {
                     //if the section is marked as empty, then create a section with the reason...
-                    var compSection = {};       //the section element in the composition
+                    //var compSection = {};       //the section element in the composition
                     comp.section.push(compSection);     //add to the composition
                     compSection.title = section.display;
                     compSection.code = {coding:[{code:section.code}]};
                     compSection.emptyReason = {coding:[{code:section.emptyReason,system:"http://hl7.org/fhir/ValueSet/list-empty-reason"}]}
                 } else if (section.resources && section.resources.length > 0) {
 
-                    var compSection = {};       //the section element in the composition
+                    //var compSection = {};       //the section element in the composition
                     comp.section.push(compSection);     //add to the composition
                     compSection.title = section.display;
                     compSection.code = {coding:[{code:section.code}]};
@@ -138,7 +157,19 @@ angular.module("sampleApp").controller('documentBuilderCtrl',
                         entry.display = ResourceUtilsSvc.getOneLineSummaryOfResource(res);
                         compSection.entry.push(entry);      //add a reference from the section to the resource
                     })
+                } else if (section.text) {
+                    //text only - ie no resources...
+                    comp.section.push(compSection);     //add to the composition
+                    compSection.title = section.display;
                 }
+
+
+                if (section.text) {
+                    compSection.text = section.text
+                } else {
+                    delete compSection.text;
+                }
+
             });
 
 

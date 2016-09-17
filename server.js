@@ -69,8 +69,17 @@ function recordAccess(req) {
 
 
 
+//return status pages, index is resourceCeator.html
 app.use('/', express.static(__dirname,{index:'/resourceCreator.html'}));
 
+
+app.get('/createExample',function(req,res){
+    //console.log('access')
+    var profile = req.parama['profile'];
+    res.json({profile:profile});
+
+    res.end();
+});
 
 //when a user navigates to cf
 app.post('/stats/login',function(req,res){

@@ -2,7 +2,7 @@
     <h3>Document Builder</h3>
     <div class="row">
         <div class="col-md-2 col-sm-2">
-            <h5>Select Section</h5>
+            <h4 style="text-align: center">Select Section</h4>
             <div class="list-group">
                 <a href="#" class="list-group-item" ng-click="sectionSelected(section)"
                    ng-repeat="section in config.sections ">
@@ -16,7 +16,7 @@
 
             <div class="row">
                 <div class="col-md-12 col-sm-12">
-                    <div class="banner">{{selectedSection.display}}</div>
+                    <div class="banner" ng-show="selectedSection">{{selectedSection.display}}</div>
                 </div>
             </div>
 
@@ -26,6 +26,11 @@
 
                 <div class="col-md-6 col-sm-6">
                     <h5>Current contents</h5>
+
+                    <textarea class="form-control" ng-model="input.text"
+                              ng-change="setText()" ng-show="selectedSection"
+                              placeholder="Enter text here. Can have text and resources."></textarea>
+
                     <div class="list-group">
                         <a href="#" class="list-group-item"
                            ng-repeat="res in selectedSection.resources">
@@ -54,6 +59,7 @@
                 <div class="col-md-6 col-sm-6">
                     <h5>Add Resource</h5>
                     <select class="form-control" ng-model="input.type" ng-change="typeSelected(typ)"
+                            ng-show="selectedSection"
                             ng-options = "typ for typ in selectedSection.types" ></select>
 
                     <div class="list-group">
@@ -75,16 +81,21 @@
 
             <div class="row">
                 <div class="col-md-12 col-sm-12">
-                    <div class="banner">Current Document Structure</div>
+                    <div class="banner" ng-show="document">Current Document Structure</div>
                 </div>
             </div>
 
             <div ng-repeat="section in config.sections ">
 
-                <h4 ng-show="section.resources.length > 0">{{section.display}}</h4>
+                <h4 ng-show="section.resources.length > 0 || section.text || section.emptyReason">{{section.display}}</h4>
+
+                <div style="padding-left: 5px; margin: 5px; border-left: darkgrey solid 2px">{{section.text}}</div>
+
+                <div ng-show="section.emptyReason">Empty because: {{emptyReasons[section.emptyReason]}}</div>
 
                 <div class="list-group">
                     <a href="#" class="list-group-item"
+                       style="margin-left: 5px"
                        ng-repeat="res in section.resources ">
 
                         {{ResourceUtilsSvc.getOneLineSummaryOfResource(res)}}
@@ -93,7 +104,7 @@
 
             </div>
 
-            <pre>
+            <pre  ng-show="document">
                 {{document | json:2}}
             </pre>
 
