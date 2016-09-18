@@ -48,10 +48,11 @@ angular.module("sampleApp")
 
             */
 
+    var enabled = false;
 
     $scope.cookies = $cookies.getAll();
-    if ($scope.cookies) {
-        //alert(angular.toJson($scope.cookies))
+    if ($scope.cookies && enabled) {        //disablefor now
+        
         var profileUrl = $scope.cookies.myProfile;
         //alert(profileUrl);
 
