@@ -246,10 +246,13 @@
 
 
         <ul class="list-group">
-            <li class="list-group-item" ng-repeat = "server in consistencyCheck.terminologyServers">
+            <li class="list-group-item" ng-repeat = "server in consistencyCheck.terminologyServers"
+                popover-placement="top" popover-trigger="'mouseenter'"
+                uib-popover="{{server.url}}">
                 <input type="radio" name="terminologyServer" ng-model="input.selectedTS"
+
                        ng-click="changeTerminologyServer(server)" value="{{server.url}}"/>
-                {{server.url}}
+                <!-- {{server.url}} --> {{server.name}} (v{{server.version}})
             </li>
         </ul>
 

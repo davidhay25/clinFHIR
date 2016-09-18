@@ -101,9 +101,11 @@ angular.module("sampleApp")
                 }
             },
             setServerType : function(type,url) {
-                //set a default server type
-                defaultConfig.servers[type] = url;
-                $localStorage.config = defaultConfig;
+                //set a default server type for this instance!
+
+                $localStorage.config.servers[type] = url;
+                //defaultConfig.servers[type] = url;
+                //$localStorage.config = defaultConfig;
             },
             init : function(){
                 $http.get("config.json").then(
