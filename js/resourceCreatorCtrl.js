@@ -1156,6 +1156,11 @@ console.log($scope.resourceVersions);
             //todo - also modifies some of the scope variables - this requries a good check...
             resourceCreatorSvc.dataTypeSelected($scope.dataType,$scope.resourceProfile, 
                 $scope.results,ed,$scope,appConfigSvc.getAllResources());
+            
+            //now see of there were any errors. This is modifying a scope variable - todo should tidy this...
+            if ($scope.dtSelectError) {
+                alert($scope.dtSelectError)
+            }
 
         }
     };

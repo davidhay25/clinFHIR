@@ -1298,7 +1298,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             function (vsDetails) {
 
                                 scope.vsDetails = vsDetails;
-                            });
+                                scope.dtSelectError = vsDetails.error;
+                            },true);
                         scope.vsReference = valueSetReference.reference;
                     }
                     break;
@@ -1316,8 +1317,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 if (vsDetails && vsDetails.id) {
                                     scope.vsDetails = vsDetails;
                                     scope.vsReference = vsDetails.resource.url; //used for the 'display valueset' function
+                                    scope.dtSelectError = vsDetails.error;
                                 }
-                            })
+                            },true)
 
                         } else {
                             //get the name of the referenced valueset in the profile - eg http://hl7.org/fhir/ValueSet/condition-code
@@ -1332,6 +1334,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 Utilities.getValueSetIdFromRegistry(valueSetReference.reference,
 
                                     function (vsDetails) {
+                                        scope.dtSelectError = vsDetails.error;
                                         scope.vsDetails = vsDetails;
 
                                         //if the current registry does have a copy of the valueset, and it's a small one, then render as
@@ -1361,7 +1364,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                             scope.showWaiting = false;
                                         }
 
-                                    });
+                                    },true);
 
                                 scope.vsReference = valueSetReference.reference;
 
@@ -1384,6 +1387,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                             Utilities.getValueSetIdFromRegistry(valueSetUri, function (vsDetails) {
                                 //{id: minLength: type}
+                                scope.dtSelectError = vsDetails.error;
                                 if (vsDetails && vsDetails.id) {
                                     //scope.vsReference = valueSetReference.reference;
 
@@ -1404,7 +1408,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                                 }
 
-                            })
+                            },true)
 
                         } else {
                             var valueSetReference = RenderProfileSvc.getValueSetReferenceFromBinding(element);
@@ -1415,6 +1419,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 Utilities.getValueSetIdFromRegistry(valueSetReference.reference,
 
                                     function (vsDetails) {
+                                        scope.dtSelectError = vsDetails.error;
                                         scope.vsDetails = vsDetails;
 
                                         if (vsDetails) {
@@ -1433,7 +1438,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                             });
                                         }
 
-                                    });
+                                    },true);
 
 
                                 scope.vsReference = valueSetReference.reference;

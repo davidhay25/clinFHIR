@@ -1018,7 +1018,7 @@ console.log(summary);
         },
 
         getValueSetIdFromRegistry : function(uri,cb,noError) {
-            //return the id of the ValueSet on the terminology server. For now, assume at the VS is on the terminology.
+            //return the id of the ValueSet on the terminology server so we can call $expand on it. For now, assume at the VS is on the terminology.
             var config = appConfigSvc.config();
             var qry = config.servers.terminology + "ValueSet?url=" + uri;
             config.log(qry,'rbServices:getValueSetIdFromRegistry')
@@ -1026,18 +1026,25 @@ console.log(summary);
 
             $http.get(qry).then(
                 function(data) {
+                    var resp ={};
                     var bundle = data.data;
                     if (bundle && bundle.entry && bundle.entry.length > 0) {
 
-                        if (bundle.entry.length >1) {
+                        if (bundle.entry.length >1 ) {
                             var alrt = 'The terminology server has multiple ValueSets with a URL property (in the resource) of '+uri +". I'll use the first one, but you might want to contact the registry owner and let them know.";
-                            modalService.showModal({}, {bodyText: alrt})
+                           resp.error = alrt;
+                            if (!noError) {
+                                modalService.showModal({}, {bodyText: alrt})
+                            }
+
                            // alert('The terminology server has multiple ValueSets with a URL property (in the resource) of '+uri +". I'll use the first one, but you might want to contact the registry owner and let them know.");
                         }
 
                         var id = bundle.entry[0].resource.id;   //the id of the velueset in the registry
                         config.log('resolvedId: '+id,'rbServices:getValueSetIdFromRegistry');
-                        var resp = {id: id,minLength:3}         //response object
+                       //  resp = {id: id,minLength:3}         //response object
+                        resp.id = id;
+                        resp.minLength = 3;         //response object
                         resp.resource = bundle.entry[0].resource;
 
                         //ValueSets with a small size that can be rendered in a set of radio buttons.
