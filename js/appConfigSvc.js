@@ -49,10 +49,10 @@ angular.module("sampleApp")
         //terminology servers. Order is significant as the first one will be selected by default...
         defaultConfig.terminologyServers = [];
         defaultConfig.terminologyServers.push({name:'Grahames STU2 Server',version:2,url:"http://fhir2.healthintersections.com.au/open/"});
-
+        defaultConfig.terminologyServers.push({name:'Grahames STU3 Server',version:3,url:"http://fhir3.healthintersections.com.au/open/"});
         defaultConfig.terminologyServers.push({name:'Public HAPI server STU3 server',version:3,url:"http://fhirtest.uhn.ca/baseDstu3/"});
 
-        defaultConfig.terminologyServers.push({name:'Grahames STU3 Server',version:3,url:"http://fhir3.healthintersections.com.au/open/"});
+
         //defaultConfig.terminologyServers.push({name:'Ontoserver',version:3,url:"http://ontoserver.csiro.au/stu3/"});
         defaultConfig.terminologyServers.push({name:'Ontoserver',version:3,url:"http://52.63.0.196:8080/fhir/"});
         defaultConfig.terminologyServers.push({name:"Local HAPI STU3",url:"http://localhost:8080/baseDstu3/",version:3});

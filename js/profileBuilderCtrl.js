@@ -8,14 +8,14 @@ angular.module("sampleApp")
     $scope.appConfigSvc = appConfigSvc;      //so we can display donfig stuff on the page
     $scope.Utilities = Utilities;           //for the get profile from url which is different in stu2 & 3
 
-    
+    $scope.setNew = function(){
 
-    //$scope.tabIndexActive = '0'
-   // $scope.showTab = {tabIndexActive:'1'};    //to allow the tabs to be selected programmatically...
-    //appConfigSvc.getCurrentConformanceServer()
-
-    
-
+        if (!$scope.profileInEditor.type) {
+            modalService.showModal({}, {bodyText: "This base profile does not have a 'type' property so can't be used as the basis for a custom profile."})
+        } else {
+            $scope.mode = 'new';
+        }
+    };
 
     
     //all the known Resource types. Used when creating a reference
@@ -192,6 +192,9 @@ angular.module("sampleApp")
         $scope.logOfChanges = [];
         $scope.allowEdit = false;    //the profile being viewed can be altered
         var selectedProfile = data.profile;
+
+        $scope.profileInEditor = selectedProfile;
+
         $scope.input.profileName = selectedProfile.id;
         //is this a core profile? If it is, it cannot be edited. todo - ?move this to a service??
         //determine this if the url has the format 'http://hl7.org/fhir/StructureDefinition/{definedResourceName}

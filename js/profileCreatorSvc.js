@@ -523,11 +523,16 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         status:'draft',experimental : true};
 
                     sd.abstract = false;
+
+                   
+
                     sd.type = baseProfile.type;  // type is unchanged
 
 
                     //assume that constraining a base resource
                     sd.baseDefinition = baseProfile.baseDefinition;    //assume that constraining a base resource
+
+
 
                     sd.derivation = 'constraint';
                     sd.id = profileName;

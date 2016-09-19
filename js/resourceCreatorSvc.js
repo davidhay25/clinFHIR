@@ -3290,14 +3290,15 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 var elPath = elementDef.path;
                 var ar = elPath.split('.');
 
-
+                //does the element have a profiled type?
                 if (elementDef.type && elementDef.type[0].profile) {
-                    var url = Utilities.getProfileFromType(elementDef.type[0])
+                    var url = Utilities.getProfileFromType(elementDef.type[0]);
                     queries.push(
+                        //retrieve the definition...
                         GetDataFromServer.findConformanceResourceByUri(url).then(
                             function (sdef) {
                                 var analysis = Utilities.analyseExtensionDefinition(sdef);
-
+                                //is this a complex extension? if so then create a vo so we can insert the child elements after getting the definition...
                                 if (analysis.complexExtension) {
                                     console.log(sdef, analysis);
                                     console.log(elementDef)
@@ -3327,6 +3328,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 //yes - execute all the queries and resolve when all have been completed...
                 $q.all(queries).then(
                     function () {
+                        //for each complex element, insert the 'backbone' and the 'child' elements
                         angular.forEach(insertPoint, function (ext) {
                             var ar = ext.rootPath.split('.');
                             ar.pop();
@@ -3362,6 +3364,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     }
                 )
 
+            } else {
+                deferred.resolve(profile);
             }
 
             return deferred.promise;

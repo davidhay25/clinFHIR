@@ -1806,7 +1806,7 @@ console.log($scope.resourceVersions);
     //when a profile is selected...  This is configured in the directive...  Now called from the front page
     $scope.selectedProfileFromDialog = function(profile) {
 
-
+console.log(profile)
         resourceCreatorSvc.insertComplexExtensionED(profile).then(
             function(profile) {
                 var adhocServer;
@@ -2657,10 +2657,10 @@ console.log($scope.resourceVersions);
             $rootScope.$emit('patientSelected',patient);
         };
 
-        //when a profile is selected in the list to build a resource from. It returns the profile (StructureDefinition resource)
+        //when a profile is selected from the list (not the dialog) to build a resource from. It returns the profile (StructureDefinition resource)
         $scope.selectProfile = function(profile) {
 
-            console.log(profile)
+            //console.log(profile)
 
             var clone = angular.copy(profile);
             $scope.localSelectedProfile = profile;

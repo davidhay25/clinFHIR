@@ -58,8 +58,13 @@
 
                 <button  ng-hide="mode=='edit' || !allowEdit"
                          class="btn btn-link" ng-click="startEdit()">Edit this profile</button>
-
+<!--
                 <button ng-show="mode=='view' && isBaseResource" class="btn btn-link" ng-click="mode = 'new'">New Profile</button>
+-->
+                <button ng-show="mode=='view' && isBaseResource" class="btn btn-link" ng-click="setNew()">New Profile</button>
+
+
+
 
                 <button ng-show="input.profileName && (mode=='new'|| mode=='edit')"
                         class="btn btn-success" ng-click="save()">Save</button>
