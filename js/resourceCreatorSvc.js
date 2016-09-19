@@ -91,8 +91,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             switch (dt) {
 
                 case 'Money':
-                    var qty = {value: results.money_amount, units: results.money_units};
-                    var text = qty.value + " " + qty.units;
+                    var qty = {value: results.money_amount, unit: results.money_units};     //sep2017 - was units
+                    var text = qty.value + " " + qty.unit;
                     addValue(qty, 'Money', text, false);
                     break;
 
@@ -223,7 +223,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     var en = {value: enValue, unit: results.range_units};
 
                     var range = {low: st, high: en};
-                    var text = "Between " + st.value + " and " + en.value + " " + st.units;
+                    var text = "Between " + st.value + " and " + en.value + " " + st.unit;
                     addValue(range, 'Range', text, false);
 
                     break;
@@ -394,7 +394,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     var units = JSON.parse(results.ageunits);
                     var v = {
                         value: results.age.value,
-                        units: units.display,
+                        unit: units.display,        //changes sep 2016
                         system: 'http://ucum.org',
                         code: units.code
                     };

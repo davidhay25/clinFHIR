@@ -114,6 +114,9 @@
                             <button popover-placement="bottom" popover-trigger='mouseenter'
                                     uib-popover="Create a new ValueSet"
                                     class="btn btn-primary" ng-click="newVs()">New</button>
+
+                           <!-- <button
+                                    class="btn btn-primary" ng-click="cheat()">Cheat</button> -->
                         </form>
                     </div>
 
@@ -386,38 +389,85 @@
 
 
                 <div ng-show="canEdit">
-                    <div class="row">
-                        <div class="col-md-4 col-sm-4">
-                            <h4>Add a new concept</h4>
-                        </div>
-                        <div class="col-md-4 col-sm-4">
-                            <div class="pull-right">Search root</div>
-                        </div>
-                        <div class="col-md-4 col-sm-4">
-                            <select class="form-control" ng-model="input.rootConcept"
-                                    ng-options="root.display for root in rootConcepts"
-                                ng-change="setRootConcept(input.rootConcept)"
-                            ></select>
-                        </div>
-                    </div>
+                    <uib-tabset>
+                        <uib-tab heading="Add from a Terminology">
+                            <br/>
+
+                            <div class="row">
+                                <div class="col-md-4 col-sm-4">
+                                   <!-- <h4>Add a new concept from a Terminology</h4> -->
+                                </div>
+                                <div class="col-md-4 col-sm-4">
+                                    <div class="pull-right">Search root</div>
+                                </div>
+                                <div class="col-md-4 col-sm-4">
+                                    <select class="form-control" ng-model="input.rootConcept"
+                                            ng-options="root.display for root in rootConcepts"
+                                        ng-change="setRootConcept(input.rootConcept)"
+                                    ></select>
+                                </div>
+                            </div>
 
 
 
 
-                    <ng-include src="'/prTemplates/codeableconcept.html'"></ng-include>
-
-                    <div ng-show="results.cc.code">
-                        <button class="btn btn-primary" ng-click="addConcept()"
-                                popover-placement="top" popover-trigger='mouseenter'
-                                uib-popover="Adds the code as a single option">Add</button>
-
-                        <button class="btn btn-primary" ng-click="isAConcept()"
-                                popover-placement="top" popover-trigger='mouseenter'
-                                uib-popover="Adds the code as an 'is-a' filter">
-                            Add as a branch</button>
-                    </div>
+                            <ng-include src="'/prTemplates/codeableconcept.html'"></ng-include>
 
 
+
+                            <div ng-show="results.cc.code">
+                                <button class="btn btn-primary" ng-click="addConcept()"
+                                        popover-placement="top" popover-trigger='mouseenter'
+                                        uib-popover="Adds the code as a single option">Add</button>
+
+                                <button class="btn btn-primary" ng-click="isAConcept()"
+                                        popover-placement="top" popover-trigger='mouseenter'
+                                        uib-popover="Adds the code as an 'is-a' filter">
+                                    Add as a branch</button>
+                            </div>
+
+                        </uib-tab>
+                        <!--
+                        <uib-tab heading="Enter directly">
+                            <br/>
+                            <div>
+                                <div class="row">
+                                    <div class="col-sm-2 col-md-2">
+                                        System
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        <input type="text" class="form-control" ng-model="input.directSystem"/>
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row">
+                                    <div class="col-sm-2 col-md-2">
+                                        Code
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        <input type="text" class="form-control" ng-model="input.directCode"/>
+                                    </div>
+                                    <div class="col-sm-2 col-md-2">
+                                        Description
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        <input type="text" class="form-control" ng-model="input.directDescription"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-2 col-md-2">
+                                        <button class="btn btn-primary" ng-click="addDirect()">Add</button>
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </uib-tab>
+
+                        -->
+                    </uib-tabset>
 
                 </div>
             </div>

@@ -17,6 +17,25 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
 
 
+        $scope.cheat = function() {
+            snomedSystem = "http://fhir.hl7.org.nz/NamingSystem/cheat";
+            createNewValueSet('cheat')
+            $scope.state='new';
+            $scope.canEdit = true;
+        };
+
+        $scope.addDirect = function() {
+            if ($scope.includeElement.concept.length == 0) {
+                $scope.vs.compose.include.push($scope.includeElement);
+            }
+
+
+            $scope.includeElement.concept.push({code:$scope.input.directCode,display:$scope.input.directDescription})
+            $scope.input.isDirty = true;
+            $scope.hasConcept = true;
+        };
+
+
         var config = appConfigSvc.config();
         var termServ = config.servers.terminology;      //the currently configured terminology server
         $scope.serverRoot = config.servers.terminology;
@@ -222,7 +241,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
         $scope.state = 'find';      // edit / new / find
         $scope.input.conceptCache = {};        //hash to store the lookup details of a concept. todo We could cache this...
-        $scope.results.ccDirectSystem = "http://snomed.info/sct";     //default the system name to snomed
+        $scope.results.ccDirectSystem = snomedSystem;//  "http://snomed.info/sct";     //default the system name to snomed
 
 
 
@@ -363,8 +382,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 });
 
                 //establish the separate variables that reference the include.concept and include.filter
-                $scope.includeElement =  $scope.includeElement || {system:'http://snomed.info/sct',concept:[]};
-                $scope.includeElementForFilter = $scope.includeElementForFilter || {system:'http://snomed.info/sct',filter:[]};
+                $scope.includeElement =  $scope.includeElement || {system:snomedSystem,concept:[]};
+                $scope.includeElementForFilter = $scope.includeElementForFilter || {system:snomedSystem,filter:[]};
 
 
             } else {
@@ -378,8 +397,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
 
                 //establish the separate variables that reference the include.concept and include.filter
-                $scope.includeElement = {system:'http://snomed.info/sct',concept:[]};
-                $scope.includeElementForFilter = {system:'http://snomed.info/sct',filter:[]};
+                $scope.includeElement = {system:snomedSystem,concept:[]};
+                $scope.includeElementForFilter = {system:snomedSystem,filter:[]};
 
 
             }
@@ -478,7 +497,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
                                 var qry = $scope.serverRoot + 'CodeSystem/$lookup?code='+filter.value+"&system="+inc.system;
 
                                 $scope.queryUrl = qry;
-                                resourceCreatorSvc.getLookupForCode("http://snomed.info/sct",filter.value).then(
+                                resourceCreatorSvc.getLookupForCode(snomedSystem,filter.value).then(
                                      function(data) {
                                          console.log(data);
                                          if (data.data.parameter) {
@@ -512,7 +531,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
             }
 
             //these are the 'pointer' variables,,,
-            $scope.includeElement =  $scope.includeElement || {system:'http://snomed.info/sct',concept:[]};
+            $scope.includeElement =  $scope.includeElement || {system:snomedSystem,concept:[]};
             //$scope.includeElementForFilter = $scope.includeElementForFilter || {system:'http://snomed.info/sct',filter:[]};
 
 
@@ -550,6 +569,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
             $scope.includeElement.concept.push({code:$scope.results.cc.code,display:$scope.results.cc.display})
             $scope.input.isDirty = true;
             $scope.hasConcept = true;
+            $scope.results.cc = "";
+           // delete
+
         };
 
         //add an 'is-a' concept

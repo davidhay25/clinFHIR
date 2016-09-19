@@ -37,33 +37,44 @@
 
 <div ng-app="sampleApp" ng-controller="reporterCtrl" class="container-fluid">
 
-<!-- TEMP!
 
-    <div ng-controller="documentBuilderCtrl">
-        <ng-include src="'/includes/documentBuilder.html'"></ng-include>
-    </div>
 
--->
 
-    <h3>Failed operations - Validate or Save</h3>
-    <br />
+    <uib-tabset>
+        <uib-tab heading="Log">
+            <h3>Failed operations - Validate or Save</h3>
+            <br />
 
-    <div class="row">
-        <div class="col-md-2 col-sm-2">
-            <div class="list-group">
-                <div class="list-group-item"
-                   ng-repeat="error in errors">
-                    <div style="cursor: pointer" ng-click="errorSelected(error)">
-                        {{error.resource.resourceType}}
-                        <div>{{error.date | date:'medium'}}</div>
+            <div class="row">
+                <div class="col-md-2 col-sm-2">
+                    <div class="list-group">
+                        <div class="list-group-item"
+                           ng-repeat="error in errors">
+                            <div style="cursor: pointer" ng-click="errorSelected(error)">
+                                {{error.resource.resourceType}}
+                                <div>{{error.date | date:'medium'}}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                <div class="col-md-10 col-sm-10">
+                    <pre ng-show="selectedError" >{{selectedError | json}}</pre>
+                </div>
             </div>
-        </div>
-        <div class="col-md-10 col-sm-10">
-            <pre ng-show="selectedError" >{{selectedError | json}}</pre>
-        </div>
-    </div>
+        </uib-tab>
+
+        <uib-tab heading="Document Builder">
+            <div ng-controller="documentBuilderCtrl">
+                <ng-include src="'/includes/documentBuilder.html'"></ng-include>
+            </div>
+        </uib-tab>
+
+
+
+    </uib-tabset>
+
+
+
 
 
 </div>
