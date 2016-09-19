@@ -765,6 +765,7 @@ console.log($scope.resourceVersions);
         delete $scope.dataType ;            //the datatype selected for data entry
         delete $scope.validateResults;      //the results of a validation
         delete $scope.results.profileUrl;
+        delete $scope.input.userText;       //the text entered by a user
         $scope.buildState = "new";
 
         delete $scope.resource;
