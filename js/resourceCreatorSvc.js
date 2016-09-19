@@ -761,7 +761,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     },
                     function (err) {
-                        modalService.showModal({}, {bodyText: 'function: updateFromProfileDefinition - error retrieving ' + url + " " + angular.toJson(err)})
+                        //modalService.showModal({}, {bodyText: 'function: updateFromProfileDefinition - error retrieving ' + url + " " + angular.toJson(err)})
+
+                        modalService.showModal({}, {bodyText: 'function: updateFromProfileDefinition - error retrieving ' + url})
 
                         //alert('function: updateFromProfileDefinition - error retrieving '+ url + " "+ angular.toJson(err))
                     }
@@ -1059,9 +1061,20 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var text = {value: ""};
             addChildrenToNode(resource, treeObject, text);
 
-            var txt = "<div xmlns='http://www.w3.org/1999/xhtml'><div>" + ResourceUtilsSvc.getOneLineSummaryOfResource(resource) + "</div></div>"
 
-            resource.text = {status: 'generated', div: txt};
+
+            var textInResource = ResourceUtilsSvc.getOneLineSummaryOfResource(resource);
+            var resourceStatus = 'generated'
+            if (config.userText) {
+                textInResource = config.userText;
+                resourceStatus = 'additional'
+            }
+
+            var txt = "<div xmlns='http://www.w3.org/1999/xhtml'><div>" + textInResource + "</div></div>"
+
+            resource.text = {status: resourceStatus, div: txt};
+
+
 
 
             return resource;
@@ -2957,6 +2970,18 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         profileUriForThisResource = resource.meta.profile[0]
                     }
 
+                    var resourceText = "";
+                    if (resource.text) {
+                        resourceText = resource.text.div;
+                        //this is the wrapping in the narrative - must be a better way...
+                        resourceText = resourceText.replace('<div xmlns="http://www.w3.org/1999/xhtml"><div>','');
+                        resourceText = resourceText.replace('</div></div>','');
+
+
+
+
+                    }
+
                     console.log(profileUriForThisResource);
 
                     if (!profileUriForThisResource) {
@@ -3004,7 +3029,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                     processNode(parent, tree, key, element, rootId)
                                 });
 
-                                deferred.resolve({treeData: tree, profile: profile});
+                                deferred.resolve({treeData: tree, profile: profile,resourceText:resourceText});
 
 
                             }

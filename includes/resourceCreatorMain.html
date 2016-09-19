@@ -34,6 +34,13 @@
 
         <div class="col-md-4 borderForDetail" >
 
+
+            <h4>User entered text</h4>
+            <textarea class="form-control" ng-model="input.userText"
+                      ng-blur="updateText()"
+                      placeholder="Text for this resource in addition to any generated"></textarea>
+
+
             <div ng-show="selectedNode">
                 <h4>{{'ELEMENTDETAILS' | translate}}: <em>{{selectedNode.ed.path}}</em></h4>
 <!--
@@ -127,7 +134,7 @@
                     <ng-include src="'/includes/dataTypeInputTemplates.html'"></ng-include>
                 </uib-tab>
 
-                <uib-tab ng-show="selectedChild" heading="Selected Element">
+                <uib-tab ng-show="selectedChild" heading="Selected Element Definition">
                     <pre>{{selectedChild | json}}</pre>
                 </uib-tab>
 

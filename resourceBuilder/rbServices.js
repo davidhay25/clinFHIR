@@ -1031,8 +1031,8 @@ console.log(summary);
                     if (bundle && bundle.entry && bundle.entry.length > 0) {
 
                         if (bundle.entry.length >1 ) {
-                            var alrt = 'The terminology server has multiple ValueSets with a URL property (in the resource) of '+uri +". I'll use the first one, but you might want to contact the registry owner and let them know.";
-                           resp.error = alrt;
+                            var alrt = 'The terminology server ('+config.servers.terminology+') has multiple ValueSets with a URL property (in the resource) of '+uri +". I'll use the first one, but you might want to contact the registry owner and let them know.";
+                            resp.error = alrt;
                             if (!noError) {
                                 modalService.showModal({}, {bodyText: alrt})
                             }

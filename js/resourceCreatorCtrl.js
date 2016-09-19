@@ -36,23 +36,23 @@ angular.module("sampleApp")
                     //console.log(data.data)
                     var img = data.data.content.data;
                     //console.log(img)
-                    
+
 
                         document.getElementById('imgWaipu').setAttribute( 'src', 'data:image/jpg;base64,'+img);
                     //$scope.$digest();
                     var img1 = atob(img);
                     console.log(img1)
-                    
+
                 }
             )
 
             */
 
-    var enabled = false;
+    var enabled = false;    //just to disable cookies for now...
 
     $scope.cookies = $cookies.getAll();
     if ($scope.cookies && enabled) {        //disablefor now
-        
+
         var profileUrl = $scope.cookies.myProfile;
         //alert(profileUrl);
 
@@ -124,7 +124,7 @@ angular.module("sampleApp")
         });
 
     };
-            
+
     $scope.login=function(){
         $uibModal.open({
             backdrop: 'static',      //means can't close by clicking on the backdrop.
@@ -140,7 +140,8 @@ angular.module("sampleApp")
     var profile;                    //the profile being used as the base
     var type;                       //base type
     $scope.treeData = [];           //populates the resource tree
-    $scope.results = {};            //the variable for resource property values...
+    $scope.results = {};
+    $scope.input = {};            //the variable for resource property values...
 
     //need to place network graphs on the scope so that they can be 'fitted()' when the display container is shown (as in a tab)
     $scope.graph = {};
@@ -151,7 +152,7 @@ angular.module("sampleApp")
 
     $scope.displayMode = 'front';    //'new' = resource builder, ''patient = patient
     $scope.selectedPatientResourceType = [];
-            
+
     $scope.hasDetailedView = ['Observation','Encounter','Condition']
 
     $scope.config = appConfigSvc.config();  //the configuraton object - especially the data,terminology & conformance servers...
@@ -217,7 +218,7 @@ angular.module("sampleApp")
         $scope.localActivity = resourceCreatorSvc.getResourcesCreated();
         $scope.displayMode = 'localActivity';
     }
-            
+
     $scope.clearLAlist = function() {
         $scope.localActivity = resourceCreatorSvc.clearResourcesCreatedList()
     }
@@ -239,7 +240,7 @@ angular.module("sampleApp")
     };
 
     $scope.laEditResource =function(item) {
-        
+
         $rootScope.$broadcast('setWaitingFlag',true);
         var url = appConfigSvc.getCurrentDataServer().url+ 'Patient/'+item.item.patientId;
         GetDataFromServer.adHocFHIRQuery(url).then(
@@ -253,7 +254,7 @@ angular.module("sampleApp")
             $rootScope.$broadcast('setWaitingFlag',false);
         });
     };
-            
+
 
     $scope.showChart = function() {
         if ($scope.displayMode == 'access') {
@@ -319,6 +320,7 @@ angular.module("sampleApp")
                 //console.log(treeData)
                 $scope.treeData = treeData;
                 $scope.displayMode = 'new';     //display the 'enter new resouce' screen..
+                $scope.input.userText = vo.resourceText;
                 drawTree();
 
 
@@ -343,15 +345,15 @@ angular.module("sampleApp")
                     controller: function($scope,appConfigSvc,modalService){
                         $scope.input={version:"2"}
                         $scope.input.valid = false;
-                        
+
                         $scope.add = function() {
                             var svr = {name:$scope.input.name,url:$scope.input.url,version:parseInt($scope.input.version,10)}
                             console.log(svr);
                             appConfigSvc.addServer(svr,$scope.input.terminology);
                             $scope.$close();
-                            
+
                         }
-                        
+
                         $scope.test = function() {
                             var qry = $scope.input.url + "metadata";
                             $scope.waiting=true;
@@ -367,14 +369,14 @@ angular.module("sampleApp")
                             ).finally(function(){
                                 $scope.waiting=false;
                             })
-                            
+
                         }
 
                     }
 
                 })
             }
-            
+
     //============== event handlers ===================
 
     //the config (ie server) has been update. We need to abandon the resource being built...
@@ -436,11 +438,14 @@ angular.module("sampleApp")
         $scope.displayMode = 'project';
     }
 
-            
-            
+    //called when the user moves out of the 'narrative' text box...
+    $scope.updateText = function() {
+        buildResource();
+    };
 
-            
-    //clears the current resource being buils and re-displays the front screen 
+
+
+    //clears the current resource being buils and re-displays the front screen
     $scope.cancelNewResource = function(state){
 
         //if the resource has been edited, then confirm the cancel...
@@ -500,7 +505,7 @@ angular.module("sampleApp")
             }
         })
     };
-            
+
     $scope.resetLanguageToEnglish = function() {
         $localStorage.preferredLanguage = 'en';     //save default language
         // var url = 'translate/'+code+'.json';
@@ -513,7 +518,7 @@ angular.module("sampleApp")
         $scope.hasVitals = false;
         delete $scope.vitalsTable;
         delete $scope.outcome.selectedResource;
-        
+
         supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
             //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
             function (allResources) {
@@ -706,7 +711,7 @@ angular.module("sampleApp")
         )
     };
 
-            
+
     $scope.loadVersions = function(resource) {
         resourceCreatorSvc.loadVersions(resource).then(
             function(data) {
@@ -895,10 +900,11 @@ console.log($scope.resourceVersions);
 
         var config = {};
         config.profile = $scope.conformProfiles;    //profiles that this resource claims conformance to...
+        config.userText = $scope.input.userText;
 
         var resourceType = resourceCreatorSvc.getResourceTypeForCurrentProfile();
-        
-        
+
+
         //builds the resource. Parameters base type, hierarchical tree view, raw tree data, other config stuff
         //todo note that it should be possible to generate the hierarchical view without depending on tree view which will tidy things up a bit
         $scope.resource = resourceCreatorSvc.buildResource(resourceType,treeObject[0],$scope.treeData,config)
@@ -1044,6 +1050,7 @@ console.log($scope.resourceVersions);
     //when one of the datatypes of the child nodes of the currently selected element in the tree is selected...
     $scope.childSelected = function(ed,inx) {
 
+        delete $scope.dtSelectError;    //shows an error when there are multiple ValusSets with teh same URL
         //delete $scope.complexExtensionRoot;
         //delete $scope.complexExtensionChild;
 
@@ -1051,7 +1058,7 @@ console.log($scope.resourceVersions);
 
         //the datatype of the selected element. This will display the data entry form.
         $scope.dataType = ed.type[inx].code;
-        
+
         if ($scope.dataType == 'Reference') {
             //this is a reference to another resource. We need to get the exact type that was selected...
             //this is used in the next code segment to retrieve the matching existing resources
@@ -1060,14 +1067,14 @@ console.log($scope.resourceVersions);
                 //var ar = type.profile[0].split('/');
                 var ar = Utilities.getProfileFromType(type).split('/');
 
-                
-                
+
+
                 $scope.resourceType = ar[ar.length-1];         //the type name (eg 'Practitioner')
                 //$scope.resourceProfile = type.profile[0];       //the profilefor this type. todo - could really lose $scope.resourceType...
                 $scope.resourceProfile = Utilities.getProfileFromType(type);       //the profilefor this type. todo - could really lose $scope.resourceType...
 
-                
-                
+
+
             } else {
                 //if there's no profile, then the reference can be to any profile...
                 $scope.resourceType = 'Resource';
@@ -1154,9 +1161,9 @@ console.log($scope.resourceVersions);
 
             //sets up the results variable ready for the data entry form
             //todo - also modifies some of the scope variables - this requries a good check...
-            resourceCreatorSvc.dataTypeSelected($scope.dataType,$scope.resourceProfile, 
+            resourceCreatorSvc.dataTypeSelected($scope.dataType,$scope.resourceProfile,
                 $scope.results,ed,$scope,appConfigSvc.getAllResources());
-            
+
             //now see of there were any errors. This is modifying a scope variable - todo should tidy this...
             if ($scope.dtSelectError) {
                 alert($scope.dtSelectError)
@@ -1165,14 +1172,12 @@ console.log($scope.resourceVersions);
         }
     };
 
-
-
     //called when selecting from all resources, and a particular type has been selected. Note that an object
             //is passed - not just the type as a string...
     $scope.resourceTypeSelected = function(typeDef){
         $scope.resourceList = RenderProfileSvc.getResourcesSelectListOfType(
             appConfigSvc.getAllResources(),typeDef.key);
-        
+
     };
 
     //select a single resource from a list of resources
@@ -1209,7 +1214,7 @@ console.log($scope.resourceVersions);
     //when a new element has been populated. The 'find reference resource' function creates the fragment - the others don't
     $scope.saveNewDataType = function(fragment) {
         fragment = fragment || resourceCreatorSvc.getJsonFragmentForDataType($scope.dataType,$scope.results);
-       
+
         //now add the new property to the tree...
         if (fragment) {
 /*
@@ -1279,7 +1284,7 @@ console.log($scope.resourceVersions);
                 return;
             }
             */
-            
+
             var treeNode = {
                 id: 't'+new Date().getTime(),
                 state: {opened: true},
@@ -1298,7 +1303,7 @@ console.log($scope.resourceVersions);
             treeNode.text = display;    //the property name
             treeNode.path = $scope.selectedChild.path;
             treeNode.dataType = {code: $scope.dataType};
-            
+
             //add the new node to the tree...
             $scope.lastTreeData = angular.copy($scope.treeData);
             $scope.treeData.push(treeNode);    //todo - may need to insert at the right place...
@@ -1529,7 +1534,7 @@ console.log($scope.resourceVersions);
         $scope.results.ccDirectCode = item.code;
         //console.log($scope.results.cc)
         $scope.results.ccDirectDisplay = $scope.results.cc.display;
-        
+
 
         resourceCreatorSvc.getLookupForCode(item.system,item.code).then(
             function(data) {
@@ -1607,7 +1612,7 @@ console.log($scope.resourceVersions);
             resolve: {
                 vo : function() {
                     return {
-                       
+
                         resourceType: $scope.resourceType
                     }
                 },
@@ -1661,7 +1666,7 @@ console.log($scope.resourceVersions);
         appConfigSvc.setCurrentPatient(park.patient);
         setUpForNewProfile(park.profile,$scope.treeData)
 
-   
+
         var modalOptions = {
             closeButtonText: "Don't remove",
             actionButtonText: 'Ok',
@@ -1672,7 +1677,7 @@ console.log($scope.resourceVersions);
         modalService.showModal({}, modalOptions).then(function (result) {
             resourceCreatorSvc.removeParkedResource(inx)
         });
-        
+
         $scope.displayMode = 'new';     //will cause the editing page to be displayed
 
     };
@@ -1681,7 +1686,7 @@ console.log($scope.resourceVersions);
 
         var ed = $scope.selectedChild;  //the ED describing the current element
         if (ed && ed.type && ed.type[0].profile) {
-            
+
             var profileName =Utilities.getProfileFromType(ed.type[0]);
             //var profileName =ed.type[0].profile[0];
             alert(profileUrl)
@@ -1765,7 +1770,7 @@ console.log($scope.resourceVersions);
                         $scope.showWaiting = false;
                     })
                 }
-                
+
                 $scope.close = function(){
                     $scope.$close();
                 };
@@ -1869,7 +1874,7 @@ console.log($scope.resourceVersions);
 
          var graphData = resourceCreatorSvc.createGraphAroundSingleResourceInstance(resource,resourceReferences)
          var container = document.getElementById(containerId);
-         
+
          var network = new vis.Network(container, graphData, {});
          $scope.graph[containerId] = network;
 
@@ -1880,7 +1885,7 @@ console.log($scope.resourceVersions);
              $scope.$digest();
          });
      }
-            
+
     $scope.fitGraphInContainer = function(containerId) {
         console.log(containerId,$scope.graph[containerId])
 
@@ -2011,11 +2016,11 @@ console.log($scope.resourceVersions);
             size:'lg',
 
 
-            
+
 
             controller: function($scope,appConfigSvc,resourceCreatorSvc){
                 $scope.config = appConfigSvc.config();
-                
+
                 $scope.input = {show:'raw',extValue:{},copyFile:{}};      //options = raw, results, parsed
 
                 var url= $scope.config.servers.conformance;
@@ -2102,9 +2107,9 @@ console.log($scope.resourceVersions);
                         $scope.waiting = false;
                     })
                 };
-                
-                
-                
+
+
+
                 $scope.load = function() {
                     //load a resource from a server...
                     var url = "http://fhir.hl7.org.nz/dstu2/AllergyIntolerance/84651";
@@ -2328,8 +2333,8 @@ console.log($scope.resourceVersions);
                 console.log(result)
             })
     };
-            
-            
+
+
 
 })
 

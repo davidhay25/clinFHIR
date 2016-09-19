@@ -1,22 +1,13 @@
 
 <div class="rounded-box" ng-show="dataType">       <!-- The top for a box around the data entry form-->
 
-                    <div class="row">
-                        <div class="col-md-11 col-sm-11">
-                            <div><em>{{selectedChild.definition}}</em></div>
-                        </div>
-                        <!--
-                        <div class="col-md-1">
-                            <span ng-show="externalReferenceSpecPage" style="font-size:1.5em;padding-right: 8px">
-                                <a href="{{externalReferenceSpecPage}}" target="_blank">
-                                    <i class="glyphicon glyphicon-globe"></i>
-                                </a>
-                            </span>
-                        </div>
-                        -->
-                    </div>
+    <div class="row">
+        <div class="col-md-11 col-sm-11">
+            <div><em>{{selectedChild.definition}}</em></div>
+        </div>
+    </div>
 
-                    <br />
+    <br />
 
 
     <div ng-show="dataType=='Address'">
@@ -56,7 +47,7 @@
                 <strong>Author</strong>
             </div>
             <div class="col-md-10 col-sm-10">
-                <input type="text" class="form-control" ng-model="results.annotation.authorString"></input>
+                <input type="text" class="form-control" ng-model="results.annotation.authorString"/>
             </div>
         </div>
         <div class="row">
@@ -184,17 +175,14 @@
 
     <div ng-show="dataType=='uri'">
         <input type="text" class="form-control" ng-model="results.uri"/>
-
     </div>
 
     <div ng-show="dataType=='code'">
         <ng-include src="'/prTemplates/code.html'"></ng-include>
-
     </div>
 
     <div ng-show="dataType=='CodeableConcept'">
         <ng-include src="'/prTemplates/codeableconcept.html'"></ng-include>
-
     </div>
 
     <div ng-show="dataType=='Coding'">
@@ -297,7 +285,6 @@
 
 
     <div ng-show="dataType=='Money'">
-
         <div class="row">
             <div class="col-md-2 col-sm-2">
                 <input type="text" class="form-control" ng-model="results.money_amount"/>
@@ -323,17 +310,12 @@
 
     <div ng-show="dataType">
         <br />
-<!--
-<br />
-        <div class="row" ng-show = "element.requirementsDEP">
-            <div class="col-md-12 col-sm-12">
-                <div><strong>Requirements:</strong>{{element.requirements}}</div>
-            </div>
-        </div>
-        -->
 
         <div class="row" >
-            <div class="col-md-12 col-sm-12">
+            <div class="col-md-8 col-sm-8">
+                {{dtSelectError}}
+            </div>
+            <div class="col-md-4 col-sm-4">
                 <button class="btn btn-primary pull-right" style="margin:8px"
                         ng-click="saveNewDataType()">Save</button>
 
