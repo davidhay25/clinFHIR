@@ -844,7 +844,6 @@ console.log($scope.resourceVersions);
             //add the current patient
             var ed = resourceCreatorSvc.getPatientOrSubjectReferenceED();
             if (ed) {
-
                 resourceCreatorSvc.addPatientToTree(ed.path,appConfigSvc.getCurrentPatient(),$scope.treeData);
             }
         }
@@ -1680,6 +1679,18 @@ console.log($scope.resourceVersions);
         });
 
         $scope.displayMode = 'new';     //will cause the editing page to be displayed
+
+
+        //display the children of the root...
+        try {
+            var rootEd = park.profile.snapshot.element[0];
+            navigatorNodeSelected('root', rootEd);   //this will display the child nodes of the root
+        } catch (ex) {
+            alert("There was an error selecting the root in the navigator. That's OK - just do it yourself");
+        }
+
+
+
 
     };
 
