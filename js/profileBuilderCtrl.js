@@ -17,6 +17,18 @@ angular.module("sampleApp")
         }
     };
 
+    $scope.zoomedMM = false;
+    
+    $scope.toggleZoom= function() {
+        $scope.zoomedMM = !$scope.zoomedMM;
+        $timeout(function(){
+            $scope.profileNetwork.fit();
+            console.log('fitting...')
+        },750)
+
+
+        
+    }
     
     //all the known Resource types. Used when creating a reference
     RenderProfileSvc.getAllStandardResourceTypes().then(
