@@ -2636,7 +2636,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             return graphData;
 
         },
-        createGraphOfProfile: function (profile) {
+        createGraphOfProfile: function (profile,options) {
             var deferred = $q.defer();
             var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained', 'modifierExtension'];
 
@@ -2652,8 +2652,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             pathsToDisable.push(rootNode + '.meta');
             pathsToDisable.push(rootNode + '.contained');
             pathsToDisable.push(rootNode + '.text');
-
-
 
             var arNodes = [], arEdges = [];
             var objNodes = {};
@@ -2706,15 +2704,17 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
                 //finally, make sure the path is not a child of one that has been deleted...
-
                 pathsToDisable.forEach(function(disablePath){
                     if (path.substr(0,disablePath.length) == disablePath) {
                         include = false;
                     }
                 });
 
+                //don't show the discriminator...
+                if (ed.slicing && ed.slicing.discriminator) {
+                   // include = false;
 
-
+                }
 
                 if (include) {
                     var label = ar[0];

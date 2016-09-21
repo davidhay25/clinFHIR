@@ -24,6 +24,7 @@
         angular.module("sampleApp").constant("moment", moment);
 
     </script>
+    <script src="js/filters.js"></script>
     <script src="js/documentBuilder.js"></script>
     <script src="resourceBuilder/rbServices.js"></script>
     <script src="js/reporterCtrl.js"></script>
@@ -46,18 +47,19 @@
             <br />
 
             <div class="row">
-                <div class="col-md-2 col-sm-2">
+                <div class="col-md-3 col-sm-3">
                     <div class="list-group">
                         <div class="list-group-item"
                            ng-repeat="error in errors">
                             <div style="cursor: pointer" ng-click="errorSelected(error)">
                                 {{error.resource.resourceType}}
                                 <div>{{error.date | date:'medium'}}</div>
+                                <div>{{error.date | getAgeSeconds}}</div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-10 col-sm-10">
+                <div class="col-md-9 col-sm-9">
                     <pre ng-show="selectedError" >{{selectedError | json}}</pre>
                 </div>
             </div>
@@ -68,8 +70,6 @@
                 <ng-include src="'/includes/documentBuilder.html'"></ng-include>
             </div>
         </uib-tab>
-
-
 
     </uib-tabset>
 

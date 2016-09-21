@@ -50,6 +50,8 @@ angular.module("sampleApp")
 
     var enabled = false;    //just to disable cookies for now...
 
+    $scope.baseUrl = "http://hl7.org/fhir/2016Sep/";    //root for displaying details of resource
+
     $scope.cookies = $cookies.getAll();
     if ($scope.cookies && enabled) {        //disablefor now
 
@@ -758,6 +760,8 @@ console.log($scope.resourceVersions);
     //initialize everything for a newly loaded profile...
     function setUpForNewProfile(profile,treeViewData) {
         $scope.selectedProfileForDisplay = profile;   //used for the profileDisplay component
+
+
         delete $scope.conformProfiles;      //profiles that this resource claims conformance to. Not for baseresources
 
         delete $scope.selectedChild;        //a child element off the current path (eg Condition.identifier
@@ -782,7 +786,11 @@ console.log($scope.resourceVersions);
         //changed in STU-3 !
         var baseType;
 
-
+        try {
+            $scope.typeDefinitionInSpec = $scope.baseUrl+ profile.snapshot.element[0].path;
+        } catch (ex) {
+            alert('profile has no snapshot or element!')
+        }
 
         if (profile.constrainedType) {
             //this is an STU-2 profile
