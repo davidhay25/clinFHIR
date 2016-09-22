@@ -425,21 +425,19 @@
                                         <h4>Node: {{treeNodeItemSelected.node.text}}</h4>
                                         <button ng-hide="edFromTreeNode.min !== 0 || currentNodeIsParent" class="btn btn-primary"
                                                 ng-click="removeNode()">Remove from profile</button>
-        <!-- temp
-                                         <span ng-show="edFromTreeNode && ! edFromTreeNode.myMeta.isExtension">
-                                        -->
+
                                          <span ng-show="edFromTreeNode && ! edFromTreeNode.myMeta.isExtension">
 
-                                            <button class="btn btn-primary" ng-click="input.newNode = 'child'">Add Child Node</button>
+                                            <button class="btn btn-primary" ng-click="input.newNode = 'child'">Add Child Extension</button>
                                             <button class="btn btn-primary" ng-click="input.newNode = 'sibling'"
-                                                    ng-hide="currentNodeIsParent">Add Sibling Node</button>
+                                                    ng-hide="currentNodeIsParent">Add Sibling Extension</button>
                                         </span>
 
 
                                         <div ng-show="input.newNode">
                                             <div class="row">
                                                 <div class="col-md-8 col-sm-8">
-                                                    <h4>Add {{input.newNode}} node</h4>
+                                                    <h4>Add {{input.newNode}} Extension</h4>
                                                 </div>
                                                 <div class="col-md-4 col-sm-4">
                                                     <button class="btn btn-link pull-right"

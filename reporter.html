@@ -15,7 +15,7 @@
     <script src="js/libs/angular-sanitize.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -24,10 +24,19 @@
         angular.module("sampleApp").constant("moment", moment);
 
     </script>
+    <script src="js/resourceSvc.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/resourceCreatorSvc.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/documentBuilder.js"></script>
     <script src="resourceBuilder/rbServices.js"></script>
     <script src="js/reporterCtrl.js"></script>
+
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/appConfigSvc.js"></script>
+
+    <script src="js/modalDialogSvc.js"></script>
+    <script src="js/profileCreatorSvc.js"></script>
 
     <title>Reporter</title>
 
@@ -43,7 +52,7 @@
 
     <uib-tabset>
         <uib-tab heading="Log">
-            <h3>Failed operations - Validate or Save</h3>
+            <h3>Failed operations - Validate or Save, Profile creation</h3>
             <br />
 
             <div class="row">
@@ -53,8 +62,13 @@
                            ng-repeat="error in errors">
                             <div style="cursor: pointer" ng-click="errorSelected(error)">
                                 {{error.resource.resourceType}}
-                                <div>{{error.date | date:'medium'}}</div>
-                                <div>{{error.date | getAgeSeconds}}</div>
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12">
+                                        <span class="pull-right">{{error.date | getAgeSeconds}}</span>
+                                        <div>{{error.date | date:'medium'}}</div>
+                                    </div>
+                                </div>
+                                {{error.user.email}}
                             </div>
                         </div>
                     </div>
@@ -69,6 +83,9 @@
                         </uib-tab>
                         <uib-tab heading="OperationOutcome">
                             <pre ng-show="selectedError" >{{selectedError.oo | json}}</pre>
+                        </uib-tab>
+                        <uib-tab heading="Meta">
+                            <pre ng-show="selectedError" >{{selectedErrorMeta | json}}</pre>
                         </uib-tab>
                     </uib-tabset>
 

@@ -948,7 +948,8 @@ console.log($scope.resourceVersions);
                     errorLog.server = appConfigSvc.getCurrentDataServer();
                     try {
                         if ($scope.firebase.auth().currentUser) {
-                            errorLog.userId = $scope.firebase.auth().currentUser.uid;
+                            errorLog.user = {id:$scope.firebase.auth().currentUser.uid,email:$scope.firebase.auth().currentUser.email};
+                            console.log($scope.firebase.auth().currentUser)
                         }
                     } catch (ex) {
 
@@ -1768,7 +1769,7 @@ console.log($scope.resourceVersions);
                             errorLog.action= 'save';
                             try {
                                 if ($scope.firebase.auth().currentUser) {
-                                    errorLog.userId = $scope.firebase.auth().currentUser.uid;
+                                    errorLog.user = {id:$scope.firebase.auth().currentUser.uid,email:$scope.firebase.auth().currentUser.email};
                                 }
                             } catch (ex) {
 

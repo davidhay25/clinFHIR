@@ -15,6 +15,9 @@ angular.module("sampleApp")
 
         $scope.errorSelected = function(err) {
             $scope.selectedError = err;
+            $scope.selectedErrorMeta = angular.copy(err);
+            delete $scope.selectedErrorMeta.resource;
+            delete $scope.selectedErrorMeta.oo;
         }
 
     });

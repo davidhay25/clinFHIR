@@ -1,5 +1,19 @@
 <div>
     <h3>Document Builder</h3>
+
+    <div class="row rounded-box">
+        <div class="col-md-6 col-sm-6">
+            <button class="btn btn-primary" ng-click="findPatient()">Find Patient</button>
+            {{appConfigSvc.getCurrentDataServer().name}}
+        </div>
+        <div class="col-md-6 col-sm-6">
+            <div class="pull-right">
+                <strong> {{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}}</strong>
+            </div>
+        </div>
+    </div>
+
+
     <div class="row">
         <div class="col-md-2 col-sm-2">
             <h4 style="text-align: center">Select Section</h4>
@@ -10,6 +24,8 @@
                     <span class="pull-right badge">{{type.bundle.total}}</span>
                 </a>
             </div>
+
+            <button class="btn btn-link" ng-click="addSection()">Add Section</button>
         </div>
 
         <div class="col-md-6 col-sm-6">
@@ -58,9 +74,15 @@
                 </div>
                 <div class="col-md-6 col-sm-6">
                     <h5>Add Resource</h5>
+
                     <select class="form-control" ng-model="input.type" ng-change="typeSelected(typ)"
                             ng-show="selectedSection"
-                            ng-options = "typ for typ in selectedSection.types" ></select>
+                            ng-options = "typ.display for typ in uniqueResourceTypes" >
+
+                    </select>
+                    <!-- <select class="form-control" ng-model="input.type" ng-change="typeSelected(typ)"
+                            ng-show="selectedSection"
+                            ng-options = "typ for typ in selectedSection.types" ></select>-->
 
                     <div class="list-group">
                         <a href="#" class="list-group-item" ng-click="resourceSelected(res)"

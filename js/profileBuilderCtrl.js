@@ -159,8 +159,8 @@ angular.module("sampleApp")
     function isAuthoredByClinFhir(profile) {
        // return true
         var isAuthoredByClinFhir = false;
-        if ($scope.frontPageProfile.code) {
-            $scope.frontPageProfile.code.forEach(function(coding){
+        if (profile.code) {
+            profile.code.forEach(function(coding){
                 if (coding.system == 'http://fhir.hl7.org.nz/NamingSystem/application' &&
                     coding.code == 'clinfhir') {
                     isAuthoredByClinFhir = true;

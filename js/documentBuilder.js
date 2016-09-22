@@ -1,8 +1,8 @@
 angular.module("sampleApp").controller('documentBuilderCtrl',
-    function ($scope,$http,ResourceUtilsSvc) {
+    function ($scope,$rootScope, $http,ResourceUtilsSvc,$uibModal,appConfigSvc,$localStorage,$window) {
 
         $scope.ResourceUtilsSvc = ResourceUtilsSvc;
-
+        $scope.appConfigSvc = appConfigSvc;
         $scope.documentBundle = {};
         $scope.possibleResources = [];
         $scope.oneResourceType = [];
@@ -14,29 +14,147 @@ angular.module("sampleApp").controller('documentBuilderCtrl',
         $scope.emptyReasons.withheld = "Withheld";
         $scope.emptyReasons.unavailable = "Unavailable";
 
+        $rootScope.$on('patientSelected',function(ev,patientResource){
+            console.log(patientResource)
+            $scope.currentPatient = patientResource;
+            var svc = appConfigSvc.getCurrentDataServer();
+            console.log(svc)
+            var url = svc.url + 'Patient/'+patientResource.id+'/$everything?_count=100'
+
+            $http.get(url).then(
+                function(data){
+                    $scope.allResourcesBundle = data.data;
+                    //get the unique resources
+                    $scope.uniqueResourceTypes = {};
+
+                    $scope.allResourcesBundle.entry.forEach(function(entry){
+                        var resource = entry.resource;
+                        var type =resource.resourceType;
+
+                        if (! $scope.uniqueResourceTypes[type]) {
+                            $scope.uniqueResourceTypes[type] = {count: 1,display: type + 1,type:type}
+                        } else {
+                            $scope.uniqueResourceTypes[type].count ++
+                            $scope.uniqueResourceTypes[type].display = type + " " +$scope.uniqueResourceTypes[type].count;
+                        }
+
+                    })
+
+
+                    console.log(data.data)
+                }
+            );
+
+        });
+
+
+
+        //when the user wants to locate an existing patient in the data server
+        $scope.findPatient = function(){
+            $uibModal.open({
+                backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
+                keyboard: false,       //same as above.
+                templateUrl: 'modalTemplates/searchForPatient.html',
+                size:'lg',
+                controller: function($scope,ResourceUtilsSvc,resourceSvc,supportSvc,resourceCreatorSvc,appConfigSvc){
+
+                    $scope.input={mode:'find',gender:'male'};   //will be replaced by name randomizer
+                    $scope.input.dob = new Date(1982,9,31);     //will be replaced by name randomizer
+                    $scope.outcome = {log:[]};
+
+                    $scope.input.createSamples = true;
+                    //when the 'Add new patient' is selected...
+                    $scope.seletNewPatientOption = function(){
+                        alert ('Sorry, new patient functionality not available from here')
+                    };
+
+                    var addLog = function(display) {
+                        $scope.outcome.log.push(display);
+                    };
+
+                    $scope.ResourceUtilsSvc = ResourceUtilsSvc;
+
+
+                    //supportSvc.checkReferenceResources
+
+                    $scope.selectNewPatient = function(patient) {
+                        appConfigSvc.setCurrentPatient(patient);
+                        //$scope.recent.patient = appConfigSvc.getRecentPatient();
+                        $rootScope.$emit('patientSelected',patient);
+                        $scope.$close();
+                    };
+
+                    $scope.searchForPatient = function(name) {
+                        $scope.nomatch=false;   //if there were no matching patients
+                        delete $scope.matchingPatientsList;
+                        if (! name) {
+                            alert('Please enter a name');
+                            return true;
+                        }
+                        $scope.waiting = true;
+                        resourceCreatorSvc.findPatientsByName(name).then(
+                            function(data){
+                                // ResourceUtilsSvc.getOneLineSummaryOfResource(patient);
+                                $scope.matchingPatientsList = data;
+                                if (! data || data.length == 0) {
+                                    $scope.nomatch=true;
+                                }
+
+
+                            },
+                            function(err) {
+                                alert('Error finding patient: '+angular.toJson(err))
+                            }
+                        ).finally(function(){
+                            $scope.waiting = false;
+                        })
+                    };
+
+
+
+                    $scope.cancel = function () {
+                        $scope.$close();
+                    }
+
+                }
+            })
+        }
+
+
         
+        //store the config locally for now.
+        if (! $localStorage.docBuilderConfig) {
+            $http.get("artifacts/documentBuilderConfig.json").then(
+                function(data) {
+                    console.log(data.data);
+                    $scope.config = data.data;
+                    $localStorage.docBuilderConfig = data.data;
+                }
+            );
+        } else {
+            $scope.config =$localStorage.docBuilderConfig
+        }
         
-        $http.get('http://localhost:8080/baseDstu3/Patient/1211/$everything?_count=100').then(
-            function(data){
-                $scope.allResourcesBundle = data.data;
+
+        //add a new section to the document...
+        $scope.addSection = function() {
+            var name = $window.prompt('What is the document name');
+           
+            if (name) {
+
+                $localStorage.docBuilderConfig.sections.push({"display":name,"sectionCode":"1098-1","types":["Observation","Condition"]});
+
+                $scope.config =$localStorage.docBuilderConfig;
+
             }
-        );
-
-        $http.get("artifacts/documentBuilderConfig.json").then(
-            function(data) {
-                console.log(data.data);
-                $scope.config = data.data
-            }
-        );
-
-
+        };
 
         //when a resource is removed from the current section
         $scope.removeResource = function(inx) {
-            var res = $scope.selectedSection.resources.splice(inx,1);
+            var res = $scope.selectedSection.resources.splice(inx, 1);
             buildListOfPossibleResources(res.resourceType);     //update the list of possibilities
             buildDocument();
-        }
+        };
 
         //when a single resource is selected to be added
         $scope.resourceSelected = function(res) {
@@ -49,7 +167,8 @@ angular.module("sampleApp").controller('documentBuilderCtrl',
 
         //when a resource type is selected...
         $scope.typeSelected = function(typ) {
-            buildListOfPossibleResources(typ)
+            console.log($scope.input.type.type)
+            buildListOfPossibleResources($scope.input.type.type)
         };
 
 
@@ -57,7 +176,7 @@ angular.module("sampleApp").controller('documentBuilderCtrl',
             $scope.oneResourceType.length = 0;
             $scope.allResourcesBundle.entry.forEach(function(entry){
                 var resource = entry.resource;
-                if (resource.resourceType == $scope.input.type) {
+                if (resource.resourceType == typ) {
 
                     //this is the correct type, is it already in this section?
                     var canAdd = true;
@@ -109,14 +228,16 @@ angular.module("sampleApp").controller('documentBuilderCtrl',
                 delete $scope.input.emptyReason;
             }
             
+            if ($scope.allResourcesBundle && $scope.allResourcesBundle.entry) {
+                $scope.allResourcesBundle.entry.forEach(function(entry){
+                    var resource = entry.resource;
+                    if (section.types.indexOf(resource.resourceType) > -1){
+                        $scope.possibleResources.push(resource)
+                    }
 
-            $scope.allResourcesBundle.entry.forEach(function(entry){
-                var resource = entry.resource;
-                if (section.types.indexOf(resource.resourceType) > -1){
-                    $scope.possibleResources.push(resource)
-                }
+                })
+            }
 
-            })
             
         };
 
