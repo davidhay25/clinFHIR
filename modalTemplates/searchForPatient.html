@@ -48,7 +48,7 @@
                 <ul class="list-group">
                     <li class="list-group-item" ng-repeat="resource in matchingPatientsList">
 
-                        <div ng-click="selectNewPatient(resource)">
+                        <div style="cursor:pointer" ng-click="selectNewPatient(resource)">
                             {{ResourceUtilsSvc.getOneLineSummaryOfResource(resource)}}
                         </div>
 

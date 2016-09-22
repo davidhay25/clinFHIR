@@ -14,6 +14,26 @@ angular.module("sampleApp").controller('documentBuilderCtrl',
         $scope.emptyReasons.withheld = "Withheld";
         $scope.emptyReasons.unavailable = "Unavailable";
 
+
+        $scope.moveSectionUp = function(evt,inx) {
+            evt.stopPropagation();
+            var list = $scope.config.sections;
+            var b = list[inx-1];
+            list[inx-1] = list[inx];
+            list[inx] = b;
+            buildDocument()
+        };
+
+        $scope.moveSectionDown = function(evt,inx) {
+            evt.stopPropagation();
+            var list = $scope.config.sections;
+            var b = list[inx+1];
+            list[inx+1] = list[inx];
+            list[inx] = b;
+            buildDocument()
+        };
+
+
         $rootScope.$on('patientSelected',function(ev,patientResource){
             console.log(patientResource)
             $scope.currentPatient = patientResource;
@@ -46,8 +66,7 @@ angular.module("sampleApp").controller('documentBuilderCtrl',
             );
 
         });
-
-
+        
 
         //when the user wants to locate an existing patient in the data server
         $scope.findPatient = function(){
@@ -128,24 +147,22 @@ angular.module("sampleApp").controller('documentBuilderCtrl',
                 function(data) {
                     console.log(data.data);
                     $scope.config = data.data;
-                    $localStorage.docBuilderConfig = data.data;
+                    $localStorage.docBuilderConfig = angular.copy(data.data);
                 }
             );
         } else {
-            $scope.config =$localStorage.docBuilderConfig
+            $scope.config = angular.copy($localStorage.docBuilderConfig);   //the config object will get updated
+
+
         }
         
-
         //add a new section to the document...
         $scope.addSection = function() {
             var name = $window.prompt('What is the document name');
-           
             if (name) {
 
                 $localStorage.docBuilderConfig.sections.push({"display":name,"sectionCode":"1098-1","types":["Observation","Condition"]});
-
-                $scope.config =$localStorage.docBuilderConfig;
-
+                $scope.config.sections.push({"display":name,"sectionCode":"1098-1","types":["Observation","Condition"]});
             }
         };
 
@@ -257,30 +274,37 @@ angular.module("sampleApp").controller('documentBuilderCtrl',
             $scope.config.sections.forEach(function(section){
 
 
-                var compSection = {title:'',text:''};
+                var compSection = {};
+                compSection.title = section.display;
+                compSection.code = {coding:[{code:section.sectionCode}]};
+                compSection.text = "";
+
+
                 if (section.emptyReason) {
                     //if the section is marked as empty, then create a section with the reason...
                     //var compSection = {};       //the section element in the composition
                     comp.section.push(compSection);     //add to the composition
-                    compSection.title = section.display;
-                    compSection.code = {coding:[{code:section.code}]};
+                   // compSection.title = section.display;
+                    //compSection.code = {coding:[{code:section.code}]};
                     compSection.emptyReason = {coding:[{code:section.emptyReason,system:"http://hl7.org/fhir/ValueSet/list-empty-reason"}]}
                 } else if (section.resources && section.resources.length > 0) {
 
                     //var compSection = {};       //the section element in the composition
                     comp.section.push(compSection);     //add to the composition
-                    compSection.title = section.display;
-                    compSection.code = {coding:[{code:section.code}]};
-                    compSection.entry = [];
+                    //compSection.title = section.display;
+                 //   compSection.code = {coding:[{code:section.sectionCode}]};
+                   // compSection.entry = [];
+                    compSection.entry = compSection.entry || [];
                     section.resources.forEach(function(res){
                         addToBundle(res);       //add the resource to the bundle
-                        var entry = {"reference":res.resourceType + "/" + res.id} //assume a local reference
+                        var entry = {"reference":res.resourceType + "/" + res.id}; //assume a local reference
                         entry.display = ResourceUtilsSvc.getOneLineSummaryOfResource(res);
                         compSection.entry.push(entry);      //add a reference from the section to the resource
                     })
                 } else if (section.text) {
                     //text only - ie no resources...
                     comp.section.push(compSection);     //add to the composition
+
                     compSection.title = section.display;
                 }
 
