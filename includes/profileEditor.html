@@ -86,153 +86,6 @@
 
         <uib-tabset active="showTab.tabIndexActive">
 
-            <uib-tab index="2"heading="Mind Map" select="redrawProfileGraph()">
-
-
-                <div class="row">
-                    <button class="btn btn-link pull-right" ng-click="toggleZoom()">
-                        <span ng-show="zoomedMM">UnZoom</span> <span ng-hide="zoomedMM">Zoom</span>
-                    </button>
-                    <div ng-class="zoomedMM ? 'col-md-11' : 'col-md-8'">
-                        <div id="profileNetwork"></div>
-                    </div>
-
-                    <div ng-class="zoomedMM ? 'col-md-0': 'col-md-4'">
-
-                        <div class='row'>
-                            <div class="col-md-12 col-sm-12">
-
-
-                                <uib-tabset ng-hide="zoomedMM">
-                                    <uib-tab heading="Legend">
-                                        <br/>
-
-
-                                        <table class="table table-condensed table-striped">
-
-                                            <tr><td>Green Background</td><td>Backbone element (has children)</td></tr>
-                                            <tr><td>Yellow Background</td><td>Resource reference</td></tr>
-                                            <tr><td>Blue Background</td><td>Standard Element</td></tr>
-                                            <tr><td>'*' in text</td><td>Multiple allowed</td></tr>
-                                            <tr><td>'C' in text</td><td>Coded element</td></tr>
-                                            <tr><td>Red text</td><td>Required element</td></tr>
-
-                                        </table>
-                                    </uib-tab>
-
-                                    <uib-tab heading="Summary">
-                                        <br/>
-                                        <div class="row greyBackground">
-                                            <div class="col-md-3 col-sm-3">Path</div>
-                                            <div class="col-md-9 col-sm-8">
-                                                {{selectedProfileNetworkED.path}}
-
-                                            </div>
-                                        </div>
-
-                                        <div class="row greyBackground" ng-show="selectedProfileNetworkED.name">
-                                            <div class="col-md-3 col-sm-3">Name</div>
-                                            <div class="col-md-9 col-sm-8">
-                                                {{selectedProfileNetworkED.name}}
-                                            </div>
-                                        </div>
-
-                                        <div class="row greyBackground" ng-show="selectedProfileNetworkED.label">
-                                            <div class="col-md-3 col-sm-3">Label</div>
-                                            <div class="col-md-9 col-sm-8">
-                                                {{selectedProfileNetworkED.label}}
-
-                                            </div>
-                                        </div>
-
-                                        <!-- Data types for Types not in extensions... -->
-                                        <div class="row greyBackground" ng-hide="selectedProfileNetworkED.myMeta.isExtension">
-                                            <div class="col-md-3 col-sm-3">DataType/s</div>
-                                            <div class="col-md-8 col-sm-8">
-                                                <div ng-repeat="item in selectedProfileNetworkED.type">
-                                                    {{item.code}}
-                                                     <span ng-show="item.profile">
-                                                         --> {{Utilities.getProfileFromType(item) | showUrlId}}
-                                                     </span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row greyBackground" ng-show="selectedProfileNetworkED.definition">
-                                            <div class="col-md-3 col-sm-3">Definition</div>
-                                            <div class="col-md-8 col-sm-8">
-                                                <div ng-hide="editDefinition">
-                                                    {{selectedProfileNetworkED.definition}}
-                                                </div>
-                                            </div>
-                                        </div>
-
-
-
-
-                                        <div class="row greyBackground"  ng-show="selectedProfileNetworkED.comments">
-                                            <div class="col-md-3 col-sm-3">Comments</div>
-                                            <div class="col-md-8 col-sm-8">
-                                                <div ng-hide="editComments">
-                                                    {{selectedProfileNetworkED.comments}}
-                                                </div>
-                                            </div>
-                                        </div>
-
-
-
-                                        <div class="row greyBackground" ng-show="selectedProfileNetworkED.min" >
-                                            <div class="col-md-3 col-sm-3">
-                                                Multiplicity
-                                            </div>
-                                            <div class="col-md-8 col-sm-8">
-                                                {{selectedProfileNetworkED.min}}..{{selectedProfileNetworkED.max}}
-                                            </div>
-
-                                        </div>
-
-
-                                        <div class="row greyBackground"
-                                             ng-show="selectedProfileNetworkED.binding">
-                                            <div class="col-md-3 col-sm-3">
-                                                ValueSet
-                                            </div>
-                                            <div class="col-md-8 col-sm-8">
-                                                <div>{{selectedProfileNetworkED.binding.description}}</div>
-
-                                                <a href="#" ng-show="selectedProfileNetworkED.binding.valueSetReference.reference"
-                                                   ng-click="showValueSetForProfile(selectedProfileNetworkED.binding.valueSetReference.reference)">
-                                                    {{selectedProfileNetworkED.binding.valueSetReference.reference}}
-                                                </a>
-                                                <a href="#" ng-show="selectedProfileNetworkED.binding.valueSetUri"
-                                                   ng-click="showValueSetForProfile(selectedProfileNetworkED.binding.valueSetUri,'true')">
-                                                    {{selectedProfileNetworkED.binding.valueSetUri}}
-                                                </a>
-
-                                                <div>Binding strength: {{selectedProfileNetworkED.binding.strength}}</div>
-                                            </div>
-
-
-                                        </div>
-
-
-
-                                    </uib-tab>
-                                    <uib-tab heading="Json">
-                                        <br/>
-                                        <pre>{{selectedProfileNetworkED | json}}</pre>
-                                    </uib-tab>
-                                </uib-tabset>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-
-
-
-            </uib-tab>
 
             <uib-tab index = '0' heading="Profile editor">
                 <br/>
@@ -691,6 +544,155 @@
 
 
             </uib-tab>
+
+            <uib-tab index="2" heading="Mind Map" select="redrawProfileGraph()">
+
+
+                <div class="row">
+                    <button class="btn btn-link pull-right" ng-click="toggleZoom()">
+                        <span ng-show="zoomedMM">UnZoom</span> <span ng-hide="zoomedMM">Zoom</span>
+                    </button>
+                    <div ng-class="zoomedMM ? 'col-md-11' : 'col-md-8'">
+                        <div id="profileNetwork"></div>
+                    </div>
+
+                    <div ng-class="zoomedMM ? 'col-md-0': 'col-md-4'">
+
+                        <div class='row'>
+                            <div class="col-md-12 col-sm-12">
+
+
+                                <uib-tabset ng-hide="zoomedMM">
+                                    <uib-tab heading="Legend">
+                                        <br/>
+
+
+                                        <table class="table table-condensed table-striped">
+
+                                            <tr><td>Green Background</td><td>Backbone element (has children)</td></tr>
+                                            <tr><td>Yellow Background</td><td>Resource reference</td></tr>
+                                            <tr><td>Blue Background</td><td>Standard Element</td></tr>
+                                            <tr><td>'*' in text</td><td>Multiple allowed</td></tr>
+                                            <tr><td>'C' in text</td><td>Coded element</td></tr>
+                                            <tr><td>Red text</td><td>Required element</td></tr>
+
+                                        </table>
+                                    </uib-tab>
+
+                                    <uib-tab heading="Summary">
+                                        <br/>
+                                        <div class="row greyBackground">
+                                            <div class="col-md-3 col-sm-3">Path</div>
+                                            <div class="col-md-9 col-sm-8">
+                                                {{selectedProfileNetworkED.path}}
+
+                                            </div>
+                                        </div>
+
+                                        <div class="row greyBackground" ng-show="selectedProfileNetworkED.name">
+                                            <div class="col-md-3 col-sm-3">Name</div>
+                                            <div class="col-md-9 col-sm-8">
+                                                {{selectedProfileNetworkED.name}}
+                                            </div>
+                                        </div>
+
+                                        <div class="row greyBackground" ng-show="selectedProfileNetworkED.label">
+                                            <div class="col-md-3 col-sm-3">Label</div>
+                                            <div class="col-md-9 col-sm-8">
+                                                {{selectedProfileNetworkED.label}}
+
+                                            </div>
+                                        </div>
+
+                                        <!-- Data types for Types not in extensions... -->
+                                        <div class="row greyBackground" ng-hide="selectedProfileNetworkED.myMeta.isExtension">
+                                            <div class="col-md-3 col-sm-3">DataType/s</div>
+                                            <div class="col-md-8 col-sm-8">
+                                                <div ng-repeat="item in selectedProfileNetworkED.type">
+                                                    {{item.code}}
+                                                     <span ng-show="item.profile">
+                                                         --> {{Utilities.getProfileFromType(item) | showUrlId}}
+                                                     </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row greyBackground" ng-show="selectedProfileNetworkED.definition">
+                                            <div class="col-md-3 col-sm-3">Definition</div>
+                                            <div class="col-md-8 col-sm-8">
+                                                <div ng-hide="editDefinition">
+                                                    {{selectedProfileNetworkED.definition}}
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+
+                                        <div class="row greyBackground"  ng-show="selectedProfileNetworkED.comments">
+                                            <div class="col-md-3 col-sm-3">Comments</div>
+                                            <div class="col-md-8 col-sm-8">
+                                                <div ng-hide="editComments">
+                                                    {{selectedProfileNetworkED.comments}}
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                        <div class="row greyBackground" ng-show="selectedProfileNetworkED.min" >
+                                            <div class="col-md-3 col-sm-3">
+                                                Multiplicity
+                                            </div>
+                                            <div class="col-md-8 col-sm-8">
+                                                {{selectedProfileNetworkED.min}}..{{selectedProfileNetworkED.max}}
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="row greyBackground"
+                                             ng-show="selectedProfileNetworkED.binding">
+                                            <div class="col-md-3 col-sm-3">
+                                                ValueSet
+                                            </div>
+                                            <div class="col-md-8 col-sm-8">
+                                                <div>{{selectedProfileNetworkED.binding.description}}</div>
+
+                                                <a href="#" ng-show="selectedProfileNetworkED.binding.valueSetReference.reference"
+                                                   ng-click="showValueSetForProfile(selectedProfileNetworkED.binding.valueSetReference.reference)">
+                                                    {{selectedProfileNetworkED.binding.valueSetReference.reference}}
+                                                </a>
+                                                <a href="#" ng-show="selectedProfileNetworkED.binding.valueSetUri"
+                                                   ng-click="showValueSetForProfile(selectedProfileNetworkED.binding.valueSetUri,'true')">
+                                                    {{selectedProfileNetworkED.binding.valueSetUri}}
+                                                </a>
+
+                                                <div>Binding strength: {{selectedProfileNetworkED.binding.strength}}</div>
+                                            </div>
+
+
+                                        </div>
+
+
+
+                                    </uib-tab>
+                                    <uib-tab heading="Json">
+                                        <br/>
+                                        <pre>{{selectedProfileNetworkED | json}}</pre>
+                                    </uib-tab>
+                                </uib-tabset>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+
+            </uib-tab>
+
 
             <uib-tab index="3"heading="Difference from base">
                 <br/>

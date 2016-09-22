@@ -761,9 +761,7 @@ console.log($scope.resourceVersions);
     function setUpForNewProfile(profile,treeViewData) {
         $scope.selectedProfileForDisplay = profile;   //used for the profileDisplay component
 
-
         delete $scope.conformProfiles;      //profiles that this resource claims conformance to. Not for baseresources
-
         delete $scope.selectedChild;        //a child element off the current path (eg Condition.identifier
         delete $scope.children;             //all the direct children for the current path
         delete $scope.dataType ;            //the datatype selected for data entry

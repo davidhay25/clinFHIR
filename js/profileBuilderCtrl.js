@@ -3,6 +3,14 @@ angular.module("sampleApp")
 .controller('logicalModelCtrl',function($scope,$rootScope,profileCreatorSvc,resourceCreatorSvc,GetDataFromServer,
                                         appConfigSvc,modalService,RenderProfileSvc,$uibModal,Utilities,$timeout){
 
+
+    //get the fhir version as so moch depends on it...
+    $scope.fhirVersion = 2;
+    var tmp = appConfigSvc.getCurrentConformanceServer();
+    if (tmp.version == 3) {
+        $scope.fhirVersion = 2;
+    }
+
     $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();      //all the known data types
 
     $scope.appConfigSvc = appConfigSvc;      //so we can display donfig stuff on the page
@@ -10,7 +18,7 @@ angular.module("sampleApp")
 
     $scope.setNew = function(){
 
-        if (!$scope.profileInEditor.type) {
+        if ($scope.fhirVersion == 3 && !$scope.profileInEditor.type) {
             modalService.showModal({}, {bodyText: "This base profile does not have a 'type' property so can't be used as the basis for a custom profile."})
         } else {
             $scope.mode = 'new';

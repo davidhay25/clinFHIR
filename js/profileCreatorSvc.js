@@ -1,8 +1,10 @@
 angular.module("sampleApp").service('profileCreatorSvc',
-    function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,GetDataFromServer,$localStorage,Utilities,$sce,modalService) {
+    function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,GetDataFromServer,
+             $localStorage,Utilities,$sce,modalService,SaveDataToServer) {
 
 
         function makeExtensionSD(vo) {
+            console.log(vo)
             //vo.ed             - the element definition that has been built
             //vo.extensionUrl   - the cannonical url for this definition
             //vo.extensionId    - the Id of the structuredefinition on the server
@@ -14,34 +16,51 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
             //the extensionDefinition that describes this extension...
             var extensionSD = {"resourceType": "StructureDefinition","url": vo.extensionUrl,
-                "name": vo.ed.path,"kind": "complex-type",
+                "name": vo.ed.path,
                 "snapshot" : {element:[]}
             };
 
             //these are STU-3 - not sure about STU-2
             if (fhirVersion == 3) {
+
+
+                extensionSD.kind =  "complex-type";
+                extensionSD.type = 'Extension';
+               // extensionSD.constrainedType =  "Extension"
+           //     extensionSD.base= "http://hl7.org/fhir/StructureDefinition/Extension"
+
+
                 extensionSD.abstract = false;
-                extensionSD.baseType = "Extension";
+               // extensionSD.baseType = "Extension";
                 extensionSD.baseDefinition = "http://hl7.org/fhir/StructureDefinition/Extension";
                 extensionSD.derivation = 'constraint';
                 extensionSD.id = vo.extensionId;
                 extensionSD.status='draft';
                 extensionSD.contextType = "datatype";
                 extensionSD.context=["*"];
+
                 extensionSD.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
             } else {
                 extensionSD.constrainedType = "Extension";
                 extensionSD.base = "http://hl7.org/fhir/StructureDefinition/Extension";
             }
 
-            extensionSD.snapshot.element.push({path:'Extension',definition:'ext',min:0,max:'1',type:[{code:'Extension'}]});
-            extensionSD.snapshot.element.push({path:'Extension.url',definition:'Url',min:1,max:'1',type:[{code:'uri'}]});
+
+            var firstElement = {path:'Extension',id:'Extension',definition:'ext',min:0,max:'1'};
+
+            firstElement.base = {"path": "Extension","min": 0,"max": "*"}
 
 
-            //var type = ed.type;     //teh dataTypes
-           // var el = {path:vo.valueName, definition:'value',min:0,max:'1',type:[{code:vo.dt}]}
-            var el = {path:vo.valueName, definition:'value',min:0,max:'1',type:vo.type}
+            extensionSD.snapshot.element.push(firstElement);
+            extensionSD.snapshot.element.push({path:'Extension.url',id:'Extension.url',definition:'Url',min:1,max:'1',type:[{code:'uri'}]});
+
+
+            //var el = {path:vo.valueName, definition:'value',min:0,max:'1',type:vo.type}
+            var el = {path:vo.valueName,id:'Extension'+vo.valueName, definition:'value',min:0,max:'1',type:vo.type}
             extensionSD.snapshot.element.push(el);
+
+
+            console.log(extensionSD)
 
             return extensionSD;
 
@@ -512,8 +531,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                 var sd;         //this is the StructureDefinition for the Profile
 
-
-
                 //create the StructureDefinition - tha same whether a new one. or editing a previous one...
                 //as it's a PUT, updates will simply replace the previous...
                 var profileUrl;
@@ -523,21 +540,17 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         status:'draft',experimental : true};
 
                     sd.abstract = false;
-
-                   
-
                     sd.type = baseProfile.type;  // type is unchanged
-
 
                     //assume that constraining a base resource
                     sd.baseDefinition = baseProfile.baseDefinition;    //assume that constraining a base resource
-
-
-
                     sd.derivation = 'constraint';
                     sd.id = profileName;
                     //sd.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
 
+
+                    sd.kind="resource";
+                    //sd.constrainedType = 
 
                     var profileId = profileName;       //todo - ensure not yet used (or this is an update)
                     profileUrl = config.servers.conformance + "StructureDefinition/" +profileId;
@@ -562,6 +575,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
 
                 } else {
+                    //stu-2
                     sd = {resourceType:'StructureDefinition',name : profileName, kind:'resource',
                         status:'draft',experimental : true, snapshot : {element:[]}};
                     var profileId = profileName;       //todo - ensure not yet used (or this is an update)
@@ -616,10 +630,17 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                                 var typeForExtension = angular.copy(ed.type);       //we're using the ed to store this stuff
 
-                                console.log(typeForExtension)
+                                //console.log(typeForExtension)
 
                                 ed.type[0].code = "Extension";      // 'cause that's what it is...
-                                ed.type[0].profile = [extensionUrl];      //and where to find it.
+
+                                //and where to find it. Note STU-2 is an array and STU-3 is not...
+                                if (fhirVersion == 2) {
+                                    ed.type[0].profile = [extensionUrl];
+                                } else {
+                                    ed.type[0].profile = extensionUrl;
+                                }
+
 
 
                                 //and change the path to be 'Extension'
@@ -640,14 +661,37 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 
                                 var extensionSD = makeExtensionSD(vo);
 
-                                SDsToSave.push(saveStructureDefinition(extensionId,extensionSD).then(
-                                    function() {
-                                        log.push('Saved '+extensionSD.url);
-                                    },function(err){
-                                        alert('Error saving '+extensionSD.url+ ' ' + angular.toJson(err))
-                                        log.push('Error saving '+extensionSD.url+ ' ' + angular.toJson(err));
-                                    }
-                                ));
+                                if (1==1) {
+
+                                    SDsToSave.push(saveStructureDefinition(extensionId, extensionSD).then(
+                                        function () {
+                                            log.push('Saved ' + extensionSD.url);
+                                        }, function (err) {
+                                            alert('Error saving ' + extensionSD.url + ' ' + angular.toJson(err))
+                                            log.push('Error saving ' + extensionSD.url + ' ' + angular.toJson(err));
+
+
+                                            var errorLog = {};
+                                            errorLog.resource = extensionSD;
+
+                                            errorLog.oo = err.data;
+                                            errorLog.server = appConfigSvc.getCurrentDataServer();
+                                            try {
+                                                if ($scope.firebase.auth().currentUser) {
+                                                    //    errorLog.userId = $scope.firebase.auth().currentUser.uid;
+                                                }
+                                            } catch (ex) {
+
+                                            }
+
+
+                                            errorLog.action = 'saveSD';
+                                            SaveDataToServer.submitErrorReport(errorLog);
+
+                                        }
+                                    ));
+
+                                }
                             } else if (ed.myMeta.isDirty) {
                                 //this is an ED that has been modified
 
@@ -657,6 +701,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         //if this element is tobe included in the profile, we can add it now...
                         if (inProfile) {
                             delete ed.myMeta;
+                            ed.id = ed.path;        //in STU-3 all elements need an id that i sthe same as the path..
                             sd.snapshot.element.push(ed)
                         }
 
@@ -667,11 +712,13 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             var idElement = {definition:'Id',min:0,max:'1',type:[{code:'id'}]};
                             idElement.base = {path:"Resource.id",min:0,max:'1'};
                             idElement.path = resourceType+'.id';
+                            idElement.id = resourceType+'.id';//in STU-3 all elements need an id that i sthe same as the path..
 
                             sd.snapshot.element.push(idElement)
 
                             var metaElement = {}
                             metaElement.path = resourceType +'.meta';    //the resource type is always the first element
+                            metaElement.id = resourceType +'.meta';
                             metaElement.definition = 'The meta element';
                             metaElement.min=0;
                             metaElement.max='1';
@@ -683,6 +730,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             var textElement = {definition:'Narrative',min:0,max:'1',type:[{code:'Narrative'}]};
                             textElement.base = {path:"DomainResource.text",min:0,max:'*'};
                             textElement.path = resourceType+'.text';
+                            textElement.id = resourceType+'.text';
 
                             sd.snapshot.element.push(textElement)
 
@@ -703,6 +751,22 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     },function(err){
                         //log.push('Error saving '+sd.url+ ' ' + angular.toJson(err));
                         log.push(err.data);
+                        var errorLog = {};
+                        errorLog.resource = sd;
+
+                        errorLog.oo = err.data;
+                        errorLog.server = appConfigSvc.getCurrentDataServer();
+                        try {
+                            if ($scope.firebase.auth().currentUser) {
+                                //    errorLog.userId = $scope.firebase.auth().currentUser.uid;
+                            }
+                        } catch (ex) {
+
+                        }
+
+
+                        errorLog.action= 'saveSD';
+                        SaveDataToServer.submitErrorReport(errorLog);
                     }));
 
                 console.log(SDsToSave);
