@@ -50,7 +50,7 @@ angular.module("sampleApp")
         defaultConfig.terminologyServers = [];
         defaultConfig.terminologyServers.push({name:'Grahames STU2 Server',version:2,url:"http://fhir2.healthintersections.com.au/open/"});
         defaultConfig.terminologyServers.push({name:'Grahames STU3 Server',version:3,url:"http://fhir3.healthintersections.com.au/open/"});
-        defaultConfig.terminologyServers.push({name:'Public HAPI server STU3 server',version:3,url:"http://fhirtest.uhn.ca/baseDstu3/"});
+        defaultConfig.terminologyServers.push({name:'Public HAPI STU3 server',version:3,url:"http://fhirtest.uhn.ca/baseDstu3/"});
 
 
         //defaultConfig.terminologyServers.push({name:'Ontoserver',version:3,url:"http://ontoserver.csiro.au/stu3/"});
@@ -65,19 +65,17 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:"HealthConnex STU2 server",url:"http://sqlonfhir-dstu2.azurewebsites.net/fhir/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"HealthConnex STU3 server",url:"http://sqlonfhir-may.azurewebsites.net/fhir/",version:3,everythingOperation:true});
 
-        defaultConfig.allKnownServers.push({name:"Local HAPI STU2",url:"http://localhost:8080/baseDstu2/",version:2,everythingOperation:true});
-        defaultConfig.allKnownServers.push({name:"Local HAPI STU3",url:"http://localhost:8080/baseDstu3/",version:3,everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:"Local HAPI STU2 server",url:"http://localhost:8080/baseDstu2/",version:2,everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:"Local HAPI STU3 server",url:"http://localhost:8080/baseDstu3/",version:3,everythingOperation:true});
 
-        defaultConfig.allKnownServers.push({name:"Public HAPI server STU2 server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2,everythingOperation:true});
-        defaultConfig.allKnownServers.push({name:"Public HAPI server STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:"Public HAPI STU2 server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2,everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:"Public HAPI STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"HL7 New Zealand STU2 server",url:"http://fhir.hl7.org.nz/baseDstu2/",version:2});
-        defaultConfig.allKnownServers.push({name:'Ontoserver',version:3,url:"http://52.63.0.196:8080/fhir/"});
-        defaultConfig.allKnownServers.push({name:'MiHIN',version:2,url:"http://52.72.172.54:8080/fhir/baseDstu2/"});
-        defaultConfig.allKnownServers.push({name:'Simplifier',version:2,url:"https://simplifier.net/api/fhir/"});
+        defaultConfig.allKnownServers.push({name:'Ontoserver STU3',version:3,url:"http://52.63.0.196:8080/fhir/"});
+        defaultConfig.allKnownServers.push({name:'MiHIN STU2',version:2,url:"http://52.72.172.54:8080/fhir/baseDstu2/"});
+        defaultConfig.allKnownServers.push({name:'Simplifier STU2',version:2,url:"https://simplifier.net/api/fhir/"});
 
-        defaultConfig.allKnownServers.push({name:'T-system',version:3,url:"https://fhirsandbox1.tsysinteropsvcs.net:8100/sites/123/"});
-
-
+      
 
 
 

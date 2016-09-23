@@ -75,7 +75,7 @@ angular.module("sampleApp").controller('documentBuilderCtrl',
                 keyboard: false,       //same as above.
                 templateUrl: 'modalTemplates/searchForPatient.html',
                 size:'lg',
-                controller: function($scope,ResourceUtilsSvc,resourceSvc,supportSvc,resourceCreatorSvc,appConfigSvc){
+                controller: function($scope,ResourceUtilsSvc,resourceSvc,supportSvc,resourceCreatorSvc,appConfigSvc,modalService){
 
                     $scope.input={mode:'find',gender:'male'};   //will be replaced by name randomizer
                     $scope.input.dob = new Date(1982,9,31);     //will be replaced by name randomizer
@@ -122,7 +122,7 @@ angular.module("sampleApp").controller('documentBuilderCtrl',
 
                             },
                             function(err) {
-                                alert('Error finding patient: '+angular.toJson(err))
+                                modalService.showModal({}, {bodyText: 'Error finding patient - have you selected the correct Data Server?'})
                             }
                         ).finally(function(){
                             $scope.waiting = false;

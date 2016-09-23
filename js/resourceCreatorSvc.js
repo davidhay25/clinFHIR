@@ -68,11 +68,13 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             var qry = appConfigSvc.getCurrentDataServer().url + "\Patient?name=" + name;
 
-
             supportSvc.getAllResourcesFollowingPaging(qry).then(
                 function (data) {
                     console.log(data)
                     deferred.resolve(data);
+                },
+                function(err) {
+                    deferred.reject(err);
                 }
             )
             return deferred.promise;
@@ -3380,7 +3382,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var idRoot = 0;
             console.log(resource)
             function processNode(tree, parentId, element, key) {
-                console.log(key, element);
+
                 if (angular.isArray(element)) {
 
                     aNodeId = getId()

@@ -598,8 +598,9 @@
 
 
 
-
-                        <form ng-hide="displayMode == 'new' || displayMode == 'query' " class="navbar-form navbar-right">
+                        <!-- This display logic is getting a bit convoluted... -->
+                        <form ng-hide="displayMode == 'new' || displayMode == 'query'  "
+                              class="navbar-form navbar-right">
                             <div ng-show="appConfigSvc.getCurrentPatient() && resourceCreatorSvc.getCurrentProfile()">
                                 <button class="btn btn-info pull-right" ng-click="createNewResource()">
                                     {{'NEWRESOURCE' | translate}}</button>

@@ -2395,28 +2395,20 @@ console.log(profile)
                                      $translate,$interval,GetDataFromServer,$firebaseArray){
 
 
-
-
-
-
         $scope.showHelp = true;
         if ($localStorage.dontNeedHelp) {
             $scope.showHelp = false;
         }
 
-      
-
         $scope.closeHelp = function(){
             $scope.showHelp = false;
             $localStorage.dontNeedHelp = true;
-            
-        }
+        };
 
         $scope.input = {};
         $scope.input.showingLocalProfile = false;   //true when the currently selected profile is viewed...
         //when a new resource has been uploaded. Add to the list and select...
         $scope.resourceUploaded = function(url) {
-            //alert(url);
 
             GetDataFromServer.getConformanceResourceByUrl(url).then(
                 function(profile){
@@ -2507,7 +2499,7 @@ console.log(profile)
 
             $scope.frontPageProfile = null;
 
-            $rootScope.$broadcast('setWaitingFlag',true);   //activates the 'show waiting' icon...
+            //$rootScope.$broadcast('setWaitingFlag',true);   //activates the 'show waiting' icon...
 
             $scope.frontPageProfile = profile;      //set the profile in the component
             //broadcast an event so that the profile edit controller (logicalModelCtrl) can determine if this is a core profile and can't be edited...
@@ -2698,7 +2690,7 @@ console.log(profile)
                 templateUrl: 'modalTemplates/searchForPatient.html',
                 size:'lg',
                 controllerX : 'patientCtrl',
-                controller: function($scope,ResourceUtilsSvc,supportSvc,$q){
+                controller: function($scope,ResourceUtilsSvc,supportSvc,$q,modalService){
                     
                     $scope.input={mode:'find',gender:'male'};   //will be replaced by name randomizer
                     $scope.input.dob = new Date(1982,9,31);     //will be replaced by name randomizer
@@ -2831,16 +2823,15 @@ console.log(profile)
                         $scope.waiting = true;
                         resourceCreatorSvc.findPatientsByName(name).then(
                             function(data){
-                                // ResourceUtilsSvc.getOneLineSummaryOfResource(patient);
+
                                 $scope.matchingPatientsList = data;
                                 if (! data || data.length == 0) {
                                     $scope.nomatch=true;
                                 }
-
-
                             },
                             function(err) {
-                                alert('Error finding patient: '+angular.toJson(err))
+                                modalService.showModal({}, {bodyText: 'Error finding patient - have you selected the correct Data Server?'})
+
                             }
                         ).finally(function(){
                             $scope.waiting = false;
