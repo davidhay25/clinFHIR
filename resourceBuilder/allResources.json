@@ -47,6 +47,7 @@
   {"name": "Substance","reference":true},
   {"name": "DeviceUseRequest"},
   {"name": "DiagnosticReport"},
+  {"name": "DiagnosticRequest"},
   {"name": "Medication","reference":true},
   {"name": "MessageHeader","reference":true},
   {"name": "DocumentManifest"},
