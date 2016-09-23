@@ -82,7 +82,7 @@
   {"name": "RelatedPerson"},
   {"name": "Basic"},
   {"name": "ProcessResponse","reference":true},
-  {"name": "Specimen","reference":true},
+  {"name": "Specimen"},
   {"name": "AuditEvent","reference":true},
   {"name": "EnrollmentResponse","reference":true},
   {"name": "Patient","reference":true},
