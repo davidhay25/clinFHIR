@@ -200,6 +200,26 @@ angular.module("sampleApp")
 
 
 
+
+    $scope.findResourceOtherPatient = function(type) {
+
+
+        $uibModal.open({
+            backdrop: 'static',      //means can't close by clicking on the backdrop.
+            keyboard: false,       //same as above.
+            templateUrl: 'modalTemplates/findResourceOtherPatient.html',
+            size: 'lg',
+            controller: 'fopCtrl', 
+            resolve : {
+                resourceType: function () {          //the default config
+                    return type;
+
+                }
+            }
+        })
+
+        }
+
     //data for the chart
     GetDataFromServer.getAccessAudit().then(
         function(log){
@@ -302,7 +322,7 @@ angular.module("sampleApp")
 
     //when the user selects 'edit resource' from the resource display
     $scope.editExistingResource = function(resource) {
-        console.log(resource)
+        //console.log(resource)
         $scope.isEditingResource = resource;        //so we know to PUT an update when saving...
 
         $rootScope.$broadcast('setWaitingFlag',true);
@@ -333,7 +353,7 @@ angular.module("sampleApp")
         ).finally(function(){
             $rootScope.$broadcast('setWaitingFlag',false);
         })
-    }
+    };
 
 
             //add new server
@@ -1738,24 +1758,40 @@ console.log($scope.resourceVersions);
 
                             $scope.saveState='success';
                             $scope.saving = false;
-                            $scope.outcome = "Resource saved with the ID:";
-
+                            $scope.outcome = "Resource saved at: ";
 
                             //determine the id of the resource assigned by the server
-                            var serverId;
-                            serverId = data.headers('Content-Location');
-                            if (! serverId) {
-                                serverId = data.headers('Location');
+                            var serverUrl;
+                            serverUrl = data.headers('Content-Location');
+                            if (! serverUrl) {
+                                serverUrl = data.headers('Location');
                             }
 
-                            $scope.outcome += serverId;
+                            $scope.outcome += serverUrl;
+
+                            //get the actual ID from the location. This could be a service call
+                            var ar = serverUrl.split('/');
+                            var resourceType = $scope.resource.resourceType;
+                            var inx = -1;
+                            ar.forEach(function(el,pos){
+                                if (el == resourceType) {
+                                    inx = pos;
+                                }
+                            });
+
+                            //the id will be the value after the type...
+                            if (inx > -1) {
+                                $scope.resource.id = ar[inx+1];
+                                console.log($scope.resource)
+                            }
+
 
                             var user = {}
                             if ($scope.firebase && $scope.firebase.auth()) {
                                 user = $scope.firebase.auth().currentUser;
                             }
 
-                            resourceCreatorSvc.registerSuccessfulResourceCreated(serverId,$scope.resource,
+                            resourceCreatorSvc.registerSuccessfulResourceCreated(serverUrl,$scope.resource,
                                 appConfigSvc.getCurrentPatient(),user);
 
                         },
@@ -1791,7 +1827,7 @@ console.log($scope.resourceVersions);
                 }
 
                 $scope.close = function(){
-                    $scope.$close();
+                    $scope.$close($scope.resource);
                 };
 
                 $scope.cancel = function(){
@@ -1810,9 +1846,12 @@ console.log($scope.resourceVersions);
                     return $scope.isEditingResource;    //if we are editing an existing resource..
                 }
             }
-        }).result.then(function(){
+        }).result.then(function(resource){
             $scope.buildState = 'saved';    //todo should really check for save erors
-                $rootScope.$emit("reloadPatient")
+                $scope.isEditingResource = resource;
+                console.log(resource)
+
+                $rootScope.$emit("reloadPatient");      //will trigger a re-load of the resources for this patient...
             });
         };
 
@@ -2689,8 +2728,7 @@ console.log(profile)
                 keyboard: false,       //same as above.
                 templateUrl: 'modalTemplates/searchForPatient.html',
                 size:'lg',
-                controllerX : 'patientCtrl',
-                controller: function($scope,ResourceUtilsSvc,supportSvc,$q,modalService){
+                controller: function($scope,ResourceUtilsSvc,supportSvc,$q,modalService,appConfigSvc){
                     
                     $scope.input={mode:'find',gender:'male'};   //will be replaced by name randomizer
                     $scope.input.dob = new Date(1982,9,31);     //will be replaced by name randomizer
@@ -2700,6 +2738,7 @@ console.log(profile)
                     //when the 'Add new patient' is selected...
                     $scope.seletNewPatientOption = function(){
                         $scope.input.mode='new'
+                        $scope.waiting = true;
                         supportSvc.getRandomName().then(
                             function(data) {
                                 try {
@@ -2716,7 +2755,9 @@ console.log(profile)
                                 }
 
                             }
-                        );
+                        ).finally(function(){
+                            $scope.waiting = false;
+                        });
                     }
 
                     var addLog = function(display) {
@@ -2735,6 +2776,7 @@ console.log(profile)
                         $scope.waiting = true;
                         var nameText = $scope.input.fname + " " + $scope.input.lname;
                         addLog('Adding '+nameText);
+
                         supportSvc.createPatient($scope.input).then(
                             function(patient){
                                 var patientId = patient.id;
@@ -2812,6 +2854,24 @@ console.log(profile)
 
 
                     }
+                    
+                    //directly load a patient based on their id
+                    $scope.loadPatient = function(id) {
+                        var url = appConfigSvc.getCurrentDataServer().url + "Patient/"+id;
+                        GetDataFromServer.adHocFHIRQuery(url).then(
+                            function(data){
+                                var patient = data.data;
+                                appConfigSvc.setCurrentPatient(patient);
+                                $rootScope.$emit('patientSelected',patient);
+                                $scope.$close();
+                            },
+                            function(err){
+                                modalService.showModal({}, {bodyText: 'No patient with that Id found.'})
+
+                            }
+                        )
+                        
+                    };
 
                     $scope.searchForPatient = function(name) {
                         $scope.nomatch=false;   //if there were no matching patients

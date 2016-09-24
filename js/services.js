@@ -266,11 +266,17 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             options.period = options.period || 30;  //what period of time the enounters should be over
             var bundle = {resourceType: 'Bundle', type: 'transaction', entry: []};
 
+            var fhirVersion = appConfigSvc.getCurrentFhirVersion();
             for (var i = 0; i < options.count; i++) {
                 var id = 't'+ new Date().getTime() + i;
                 var cond = {resourceType: 'Condition'};
                 cond.id = id;
-                cond.patient = {reference:'Patient/'+patientId};
+                if (fhirVersion == 2) {
+                    cond.patient = {reference:'Patient/'+patientId};
+                } else {
+                    cond.subject = {reference:'Patient/'+patientId};
+                }
+
                 cond.verificationStatus = this.getRandomEntryFromOptions('conditionVerificationStatus');
                 cond.code = this.getRandomEntryFromOptions('conditionCode');
                 var encounter = this.getRandomReferenceResource('Encounter');   //there may not be an encounter (if they aren't being created)

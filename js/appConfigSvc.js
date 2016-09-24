@@ -238,6 +238,13 @@ angular.module("sampleApp")
                     }
                 }
             },
+            getCurrentFhirVersion : function() {
+                var version = 3;       //default to v3
+                var vConf = this.getCurrentConformanceServer().version;
+                var vData = this.getCurrentDataServer().version;
+                if (vConf == 2 && vData == 2) { version = 2}
+                return version;
+            },
             setCurrentPatient : function(patient) {
                 currentPatient = patient;
             },
