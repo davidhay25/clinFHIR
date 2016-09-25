@@ -198,11 +198,7 @@ angular.module("sampleApp")
     //---- the array of standard timimg elements
     $scope.timingArray = RenderProfileSvc.populateTimingList();
 
-
-
-
     $scope.findResourceOtherPatient = function(type) {
-
 
         $uibModal.open({
             backdrop: 'static',      //means can't close by clicking on the backdrop.
@@ -216,9 +212,25 @@ angular.module("sampleApp")
 
                 }
             }
-        })
+        }).result.then(
+            function(vo){
+                console.log(vo)
 
-        }
+               // if (vo.resource) {
+
+                    var v = {reference: vo.resource.resourceType + "/" + vo.resource.id};
+
+
+                    v.display = ResourceUtilsSvc.getOneLineSummaryOfResource(vo.resource) +
+                        ' for ' + ResourceUtilsSvc.getOneLineSummaryOfResource(vo.patient);
+                    
+                    $scope.saveNewDataType({value:v,text:v.display});
+
+               // }
+            }
+        )
+
+    }
 
     //data for the chart
     GetDataFromServer.getAccessAudit().then(

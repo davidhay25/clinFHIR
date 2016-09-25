@@ -215,11 +215,12 @@
                ng-model="input.recentProfile" ng-click="selectProfile(profile)"
                 style="cursor: pointer">
 
-                <i class="glyphicon glyphicon-eye-open" ng-click="showLocalProfile($event,profile)"></i>
+                <i title="Show or edit profile" class="glyphicon glyphicon-eye-open" ng-click="showLocalProfile($event,profile)"></i>
 
                 {{profile.url}}
 
-                <i class="glyphicon glyphicon-remove pull-right" ng-click="removeSavedProfile($event,$index)"></i>
+                <i title='Remove profile from list' class="glyphicon glyphicon-remove pull-right"
+                   ng-click="removeSavedProfile($event,$index)"></i>
                     <a title="Show specification for this resource" target = "_blank" style="padding-right: 10px"
                        ng-href="{{baseUrl+ profile.snapshot.element[0].path}}" class="pull-right"
                         ng-show="profile.url.indexOf('hl7.org/fhir') > -1">
@@ -227,11 +228,6 @@
                         <i class="glyphicon glyphicon-globe " ></i>
 
                     </a>
-
-
-
-
-
 
             </li>
 

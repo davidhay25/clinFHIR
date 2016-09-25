@@ -7,14 +7,21 @@ angular.module("sampleApp")
             $scope.ResourceUtilsSvc = ResourceUtilsSvc;
             $scope.resourceType = resourceType
             
+            //when one of the matching patients is selected
             $scope.selectPatient = function(patient) {
                 console.log(patient);
-                var url = appConfigSvc.getCurrentDataServer().url  + "Patient/"+patient.id+'/'+ resourceType
-                //http://fhirtest.uhn.ca/baseDstu3/Condition?patient._id=21561
+                $scope.selectedPatient = patient;
+                var url = appConfigSvc.getCurrentDataServer().url + resourceType + "?subject._id="+patient.id;
+
+
+
+               // var url = http://fhirtest.uhn.ca/baseDstu3/Condition?patient._id=21561
                 console.log(url);
                 GetDataFromServer.adHocFHIRQuery(url).then(
                     function(data) {
                         console.log(data)
+                        $scope.resourcesFromOtherPatient = data.data;
+                        
                     },
                     function(err) {
                         alert(angular.toJson(err))
@@ -26,7 +33,10 @@ angular.module("sampleApp")
                 
                 
             }
-            
+
+
+
+            //find patients with matching names...
             $scope.searchForPatient = function(name) {
                 $scope.nomatch=false;   //if there were no matching patients
                 delete $scope.matchingPatientsList;
@@ -50,8 +60,10 @@ angular.module("sampleApp")
                 })
             };
             
-            
-            
+            //when the actual resource has been selected...
+            $scope.selectResource = function(resource) {
+                $scope.$close({resource:resource,patient:$scope.selectedPatient});
+            }
 
 
     });
