@@ -94,7 +94,7 @@
 
         angular.module("sampleApp").constant("moment", moment);
 
-        angular.module("sampleApp").config(function($locationProvider,$translateProvider,$localStorageProvider){
+        angular.module("sampleApp").config(function($locationProvider,$translateProvider,$localStorageProvider){//},$httpProvider){
             //console.log($localStorageProvider)
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -109,6 +109,16 @@
 
             //console.log(localStorage)
             $translateProvider.useSanitizeValueStrategy('escape');
+
+            /*
+            //http://stackoverflow.com/questions/33660712/angularjs-post-fails-response-for-preflight-has-invalid-http-status-code-404
+            $httpProvider.defaults.headers.common = {};
+            $httpProvider.defaults.headers.post = {};
+            $httpProvider.defaults.headers.put = {};
+            $httpProvider.defaults.headers.patch = {};
+
+            */
+
 
 
             //to avoif FOUC - https://angular-translate.github.io/docs/#/guide/12_asynchronous-loading

@@ -1,0 +1,40 @@
+[
+  {
+    "resourceType": "AllergyIntolerance",
+    "status": "active-confirmed",
+    "type": "allergy",
+    "criticality": "high",
+    "code": {
+      "coding" : [
+        {"code": "108575001","system":"http://snomed.info/ct","display":"lisinopril"}
+      ],
+      "text" : "lisinopril"
+    },
+    "onset": "2010-07-01",
+    "reaction": [
+      {
+        "certainty" : "confirmed",
+        "severity" : "mild",
+        "onset" : "2010-07-01",
+        "exposureRoute" : {
+          "coding" : [
+            {"code": "26643006","system":"http://snomed.info/ct","display":"oral"}
+          ],
+          "text" : "Oral Route"
+        },
+        "manifestation": [
+          {
+            "coding": [
+              {
+                "system": "http://example.org/system",
+                "code": "49727002",
+                "display": "cough"
+              }
+            ],
+            "text": "Cough"
+          }
+        ]
+      }
+    ]
+  }
+]

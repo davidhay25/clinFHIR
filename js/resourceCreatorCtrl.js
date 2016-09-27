@@ -2818,6 +2818,10 @@ console.log(profile)
                                                     query.push(supportSvc.createObservations(patientId,{logFn:addLog}));
                                                     addLog('adding Appointments...');
                                                     query.push(supportSvc.createAppointments(patientId,{logFn:addLog}));
+                                                    addLog('adding Medication List...');
+                                                    query.push(supportSvc.buildMedicationList(patientId,{logFn:addLog}));
+                                                    addLog('adding Allergy List...');
+                                                    query.push(supportSvc.buildAllergiesList(patientId,{logFn:addLog}));
 
                                                     $q.all(query).then(
                                                         //regardless of success or failure, turn off the saving flag

@@ -372,7 +372,70 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             return deferred.promise;
 
         },
-        buildMedicationList : function(patientId) {
+        buildAllergiesList : function(patientId,options) {
+            var today = moment().format();
+            var allergyList = {resourceType : 'List',title:'Allergies List', entry:[], date : today,
+                subject : {reference:'Patient/'+patientId},
+                status : 'current',
+                mode: 'snapshot',
+                code : {coding : [{code:'allergies',system:'http://hl7.org/fhir/list-example-use-codes'}]}};
+
+            var deferred = $q.defer();
+            var url = "artifacts/allergies.json";     //the reference list of medications to add to the list
+            var bundle = {resourceType:'Bundle',type:'transaction',entry:[]};
+            var listBundleEntry = {resource : allergyList,request:{method:'POST',url:'List/'}};
+
+            bundle.entry.push(listBundleEntry);
+            GetDataFromServer.adHocFHIRQuery(url).then(
+                function(data) {
+                    var refList = data.data;
+                    refList.forEach(function(allergy,inx){
+                        //each entry is a basic medication statement - needs to have the patient specific stuff added
+                        allergy.patient = {reference:'Patient/'+patientId};
+                        allergy.id = 'al'+inx;
+                        allergy.reporter = {reference:'Patient/'+patientId};
+
+                       
+                        var entry = {date: today, item : {reference : 'AllergyIntolerance/'+allergy.id}}
+                        allergyList.entry.push(entry);
+
+                        var bundleEntry = {resource : allergy,request:{method:'POST',url:'AllergyIntolerance/'}};
+
+                        bundle.entry.push(bundleEntry);
+
+                    });
+
+
+
+                    console.log(angular.toJson(bundle));
+
+
+                    // ... and save - as a transaction
+                    var url = appConfigSvc.getCurrentDataServerBase();
+                    $http.post(url,bundle).then(
+                        function (data) {
+                            deferred.resolve(refList);
+                        },
+                        function(err){
+                            alert('Error saving allergy list:\n'+angular.toJson(err))
+                            deferred.reject(err)
+                        }
+                    );
+
+
+                    if (options.logFn) {
+                        options.logFn('Added Allergies List')
+                    }
+                    //deferred.resolve(refList);
+                }
+            );
+
+
+
+            return deferred.promise;
+
+        },
+        buildMedicationList : function(patientId,options) {
             var today = moment().format();
             var medList = {resourceType : 'List',title:'Medication List', entry:[], date : today,
                 subject : {reference:'Patient/'+patientId},
@@ -411,7 +474,23 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                     console.log(angular.toJson(bundle));
 
 
-                    deferred.resolve(refList);
+                    // ... and save - as a transaction
+                    var url = appConfigSvc.getCurrentDataServerBase();
+                    $http.post(url,bundle).then(
+                        function (data) {
+                            deferred.resolve(refList);
+                        },
+                        function(err){
+                            alert('Error saving medication list:\n'+angular.toJson(err))
+                            deferred.reject(err)
+                        }
+                    );
+
+
+                    if (options.logFn) {
+                        options.logFn('Added Medications List')
+                    }
+                    //deferred.resolve(refList);
                 }
             );
 
