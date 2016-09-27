@@ -148,6 +148,9 @@ angular.module("sampleApp").controller('sampleCtrl', function ($rootScope, $scop
                         query.push(supportSvc.createConditions(id,{logFn:addLog}));
                         query.push(supportSvc.createObservations(id,{logFn:addLog}));
                         query.push(supportSvc.createAppointments(id,{logFn:addLog}));
+                        query.push(supportSvc.buildMedicationList(id,{logFn:addLog}));
+
+                        
 
                         $q.all(query).then(
                             //regardless of success or failure, turn off the saving flag

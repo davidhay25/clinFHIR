@@ -75,9 +75,9 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'MiHIN STU2',version:2,url:"http://52.72.172.54:8080/fhir/baseDstu2/"});
         defaultConfig.allKnownServers.push({name:'Simplifier STU2',version:2,url:"https://simplifier.net/api/fhir/"});
 
-      
+        defaultConfig.allKnownServers.push({name:'Aegis WildFHIR STU3',version:3,url:" http://wildfhir.aegis.net/fhir1-6-0/"});
 
-
+        
 
         //place all the servers in a hash indexed by url. THis is used for the userConfig
         var allServersHash = {};

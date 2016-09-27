@@ -1,0 +1,66 @@
+[
+  {
+    "resourceType" : "MedicationStatement",
+    "medicationCodeableConcept" : {
+      "coding" : [
+        {"code": "91143003","system":"http://snomed.info/ct","display":"salbutamol 90 mcg/spray"}
+      ],
+      "text" : "salbutamol 90 mcg/spray"
+    },
+    "reasonForUseCodeableConcept" : {
+      "coding" : [
+        {"code":"195967001","system":"http://snomed.info/ct","display":"asthma (disorder)"}
+      ],
+      "text" : "asthma"
+    },
+    "dosage" : [
+      {
+        "text" : "2 puffs every 4 hours as needed",
+        "timing" : {
+          "repeat": {
+            "frequency": "1",
+            "period": "4",
+            "periodUnit": "h"
+          }
+        },
+        "asNeededBoolean": true,
+        "doseQuantity": {
+          "value" : "2",
+          "system" : "http://snomed.info/ct","unit":"puffs","code" : "415215001"
+        }
+      }
+    ]
+  },
+  {
+    "resourceType" : "MedicationStatement",
+    "medicationCodeableConcept" : {
+      "coding" : [
+        {"code": "7947003","system":"http://snomed.info/ct","display":"aspirin 81 mg"}
+      ],
+      "text" : "aspirin 81 mg"
+    },
+    "reasonForUseCodeableConcept" : {
+      "coding" : [
+        {"code":"73211009","system":"http://snomed.info/ct","display":"diabetes (disorder)"}
+      ],
+      "text" : "diabetes"
+    },
+    "dosage" : [
+      {
+        "text" : "once daily",
+        "timing" : {
+          "repeat": {
+            "frequency": "1",
+            "period": "1",
+            "periodUnit": "d"
+          }
+        },
+        "doseQuantity": {
+          "value" : "2",
+          "system" : "http://snomed.info/ct","unit":"tablet","code" : "428673006"
+        }
+      }
+    ]
+  }
+]
+

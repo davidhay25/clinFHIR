@@ -96,7 +96,7 @@
 -->
 
 <div class="row">
-    <div ng-class="{'col-md-4 col-sm-4':!conformance}">
+    <div ng-class="{'col-md-2 col-sm-2':!conformance}">
 
 
         <div class="row">
@@ -129,28 +129,13 @@
 
     </div>
 
-    <div ng-class="{'col-md-8 col-sm-8':!conformance}">
+    <div ng-class="{'col-md-10 col-sm-10':!conformance}">
 
         <div ng-show="conformance">
             <uib-tabset>
                 <uib-tab heading="Description">
                     <br/>
-<!--
-                    <div class="row">
-                        <div class="col-sm-2 col-md-2">
-                            Name
-                        </div>
-                        <div class="col-sm-4 col-md-4">
-                            {{conformance.name}}
-                        </div>
-                        <div class="col-sm-2 col-md-2">
-                            FHIR version
-                        </div>
-                        <div class="col-sm-4 col-md-4">
-                            {{conformance.fhirVersion}}
-                        </div>
 
-                    </div> -->
 
                     <table class="table">
                         <tr>
@@ -304,17 +289,7 @@
 
         </div>
 
-<!--
-        <div class="row" ng-show="response">
-            <div class="col-md-12 col-sm-12">
-                <div ng-repeat="(key,value) in responseHeaders">
-                    {{key}} {{value}}
-                </div>
 
-
-            </div>
-        </div>
--->
 
         <div class="row" ng-show="err">
             <div class="col-md-12 col-sm-12">
@@ -325,8 +300,50 @@
 
         <div class="row" ng-show="response && input.localMode == 'serverquery'">
             <div class="col-md-12 col-sm-12">
-                <div><strong>StatusCode:{{response.status}}</strong></div>
-                <pre>{{response.data | json}}</pre>
+
+                <div class="row">
+                    <div class="col-md-4 col-sm-4">
+                        <div><strong>StatusCode:</strong>{{response.status}}</div>
+                    </div>
+                    <div class="col-md-4 col-sm-4">
+                        <div><strong>Count:</strong>{{response.data.entry.length}}</div>
+                    </div>
+                </div>
+
+
+
+                <uib-tabset>
+                    <uib-tab heading="Contents">
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3">
+                                <div class="list-group"  style="height:600px; overflow-y: auto;">
+                                    <div ng-class="{'list-group-item':true,'list-group-item-info':result.selectedEntry.fullUrl == entry.fullUrl}"
+                                         ng-repeat="entry in response.data.entry">
+                                        <div ng-click="result.selectedEntry = entry" style="cursor: pointer">
+                                            {{entry.resource.resourceType}}
+                                            <div>{{entry.resource.id}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9 col-sm-9">
+                                <pre>{{result.selectedEntry | json}}</pre>
+                            </div>
+                        </div>
+
+
+
+                    </uib-tab>
+
+                    <uib-tab heading="Json">
+                        <pre>{{response.data | json}}</pre>
+                    </uib-tab>
+                </uib-tabset>
+
+
+
+
             </div>
         </div>
 

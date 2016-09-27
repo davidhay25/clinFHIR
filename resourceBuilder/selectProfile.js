@@ -133,8 +133,6 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
                                 }
                             });
 
-
-
                             searchString += "&_count=100&_sort=_id";
                             
                             $scope.query = searchString;

@@ -1565,7 +1565,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             }
 
             if (!duplicate) {
-                $localStorage.queryHistory.push(hx);
+                $localStorage.queryHistory.splice(0,0,hx);
             }
             return $localStorage.queryHistory;
         },

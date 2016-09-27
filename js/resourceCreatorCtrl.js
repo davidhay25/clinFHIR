@@ -47,7 +47,13 @@ angular.module("sampleApp")
             )
 
             */
-
+/*
+            supportSvc.buildMedicationList(100).then(
+                function(data) {
+                   // console.log(data)
+                }
+            )
+*/
     var enabled = false;    //just to disable cookies for now...
 
     $scope.baseUrl = "http://hl7.org/fhir/2016Sep/";    //root for displaying details of resource
@@ -2939,6 +2945,7 @@ console.log(profile)
         $scope.config = $localStorage.config;
         $scope.operationsUrl = $scope.config.baseSpecUrl + "operations.html";
         $scope.input = {serverType:'known'};  //serverType allows select from known servers or enter ad-hoc
+        $scope.result = {selectedEntry:{}}
 
         $scope.queryHistory = $localStorage.queryHistory;
         $scope.makeUrl = function(type) {
