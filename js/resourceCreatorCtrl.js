@@ -1996,35 +1996,12 @@ console.log(profile)
             $scope.resourceReferences = resourceSvc.getReference(resource, $scope.allResourcesAsList, $scope.allResourcesAsDict);
 
 
-            //console.log($scope.resourceReferences)
+
 
             //create and draw the graph representation for this single resource...
 
             createGraphOneResource(resource,'resourcenetwork')
-/*
-            var graphData = resourceCreatorSvc.createGraphAroundSingleResourceInstance(resource,$scope.resourceReferences)
-            //var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList);
-            var container = document.getElementById('resourcenetwork');
-            var network = new vis.Network(container, graphData, {});
-
-            network.on("click", function (obj) {
-                 //console.log(obj)
-
-                //$scope.resourceSelected({resource:reference.resource})
-
-                var nodeId = obj.nodes[0];  //get the first node
-                var node = graphData.nodes.get(nodeId);
-                //console.log(node);
-                $scope.resourceSelected({resource:node.resource})
-
-                // $scope.selectedGraphNode = graphData.nodes.get(nodeId);
-                //console.log($scope.selectedGraphNode)
-                $scope.$digest();
-            });
-
-*/
-
-
+            
             $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(resource, true)], {type: "text/text"}));
             $scope.downloadLinkJsonName = resource.resourceType + "-" + resource.id;
 
@@ -2812,8 +2789,8 @@ console.log(profile)
                                                 function(msg) {
                                                     addLog(msg);
                                                    var query = [];
-                                                    addLog('adding Conditions...');
-                                                    query.push(supportSvc.createConditions(patientId,{logFn:addLog}));
+                                                    //addLog('adding Conditions...');
+                                                   // query.push(supportSvc.createConditions(patientId,{logFn:addLog}));
                                                     addLog('adding Observations...');
                                                     query.push(supportSvc.createObservations(patientId,{logFn:addLog}));
                                                     addLog('adding Appointments...');
@@ -2822,6 +2799,8 @@ console.log(profile)
                                                     query.push(supportSvc.buildMedicationList(patientId,{logFn:addLog}));
                                                     addLog('adding Allergy List...');
                                                     query.push(supportSvc.buildAllergiesList(patientId,{logFn:addLog}));
+                                                    addLog('adding Condition List...');
+                                                    query.push(supportSvc.buildConditionList(patientId,{logFn:addLog}));
 
                                                     $q.all(query).then(
                                                         //regardless of success or failure, turn off the saving flag

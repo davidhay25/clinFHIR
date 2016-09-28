@@ -8,7 +8,7 @@ angular.module("sampleApp")
 //also holds the current patient and all their resources...
     //note that the current profile is maintained by resourceCreatorSvc
 
-    .service('appConfigSvc', function($localStorage,$http,$timeout,$q,ResourceUtilsSvc) {
+    .service('appConfigSvc', function($localStorage,$http,$timeout,$q) {
 
         var dataServer;         //the currently selected data server server
         var currentPatient;     //the currently selected patint
@@ -489,13 +489,37 @@ angular.module("sampleApp")
                     }
                 });
 
+
+                //note can't call 'onelinesummary' as get a circular dependency...
                 if (!isInProject) {
-                    var patientDisplay = ResourceUtilsSvc.getOneLineSummaryOfResource(patient);
+                    var patientDisplay = (patient);
                     project.patients.push({"name" :patientDisplay,"id" : patient.id,added: moment().format()});
                     fireBase.$save(project)
                 }
 
+                function getHumanNameSummary(data){
+                    if (!data) {
+                        return "";
+                    }
+                    var txt = "";
+                    if (data.text) {
+                        return data.text;
+                    } else {
+                        txt += getString(data.given);
+                        txt += getString(data.family);
+                        return txt;
+                    }
 
+                    function getString(ar) {
+                        var lne = '';
+                        if (ar) {
+                            ar.forEach(function(el){
+                                lne += el + " ";
+                            } )
+                        }
+                        return lne;
+                    }
+                }
 
             },
             removeProfileFromProject : function (profile,project,fireBase) {

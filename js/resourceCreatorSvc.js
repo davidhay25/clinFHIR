@@ -3380,7 +3380,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         buildResourceTree: function (resource) {
             var tree = [];
             var idRoot = 0;
-            console.log(resource)
+            //console.log(resource)
             function processNode(tree, parentId, element, key) {
 
                 if (angular.isArray(element)) {
@@ -3442,7 +3442,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var parentId = '#';
 
 
-            console.log(tree);
+            //console.log(tree);
 
             return tree;
 

@@ -2072,7 +2072,7 @@ console.log(summary);
 
     }
 })
-    .service('ResourceUtilsSvc', function() {
+    .service('ResourceUtilsSvc', function(appConfigSvc) {
     function getPeriodSummary(data) {
         if (!data) {
             return "";
@@ -2094,26 +2094,14 @@ console.log(summary);
             return data.text;
         } else {
             if (data.coding && data.coding.length > 0) {
-                if (data.text) {txt += data.text + " ";}
-                var c = data.coding[0];
+                //if (data.text) {txt += data.text + " ";}
+                var c = data.coding[0];     //only look at the first one...
                 var d = c.display || '';
                 txt += d + " ["+ c.code + "]";
 
             }
             return txt;
         }
-        /*
-        if (data.coding && data.coding.length > 0) {
-            if (data.text) {txt += data.text + " ";}
-            var c = data.coding[0];
-            var d = c.display || '';
-            txt += d + " ["+ c.code + "]";
-
-        } else {
-            txt += data.text;
-        }
-        return txt;
-        */
     }
 
     function getHumanNameSummary(data){
@@ -2141,10 +2129,31 @@ console.log(summary);
     }
 
     return {
-        getOneLineSummaryOfResource : function(resource,fhirVersion) {
-            fhirVersion = fhirVersion || 3;
+        getOneLineSummaryOfResource : function(resource,fhirVersionDEP) {
+
+            var fhirVersion = appConfigSvc.getCurrentFhirVersion(); //defaults to 3 unless both data and conformance servers are on 2...
+
+
+            //fhirVersion = fhirVersion || 3;
             if (resource) {
                 switch (resource.resourceType) {
+                    case "MedicationStatement" :
+                        var txt="";
+                        if (resource.medicationCodeableConcept) {
+                            txt += getCCSummary(resource.medicationCodeableConcept);
+
+                        } else {
+                            return "FamilyMemberHistory Id: "+resource.id;
+                        }
+
+                        if (resource.dosage && resource.dosage.length > 0 && resource.dosage[0].text) {
+                            txt += " "+ resource.dosage[0].text
+                        }
+
+
+                        txt = txt ||  "MedicationStatement";
+                        return txt;
+                        break;
                     case "FamilyMemberHistory" :
                         if (resource.relationship) {
                             return getCCSummary(resource.relationship);
@@ -2169,7 +2178,12 @@ console.log(summary);
                         }
                         break;
                     case "AllergyIntolerance" :
-                        return getCCSummary(resource.substance);
+                        if (fhirVersion == 3) {
+                            return getCCSummary(resource.code);
+                         } else {
+                            return getCCSummary(resource.substance);
+                        }
+
                         break;
                     case "Practitioner" :
                         if (resource.name) {

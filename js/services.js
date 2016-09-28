@@ -78,8 +78,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             referenceResources.push({resourceType:'Organization',name:'clinFHIR Sample creator',
                 identifier : [{value:'cf',system:identifierSystem}],text:{status:'generated',div:"<div>clinFhir</div>"}});
         }
-
-
     }
 
     //when invoking the create, we need the fhir verson as Practioner.name chnaged multiplicity..
@@ -100,21 +98,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
             return $http.get('https://randomuser.me/api/?format=json&nat=nz');
 
-          /*
 
-            var deferred = $q.defer();
-            $http.get('https://randomuser.me/api/?format=json').then(
-                function(data){
-                    deferred.resolve(data.data);
-                },
-                function(){
-                    deferred.reject
-                }
-            );
-
-            return deferred.promise;
-
-*/
 
         },
         getReferenceResources : function(){
@@ -256,7 +240,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
 
         },
-        createConditions : function (patientId,options) {
+        createConditionsDEP : function (patientId,options) {
 
             //create a set of encounters for the patient and add them to the referenceResources (just for this session)
             var deferred = $q.defer();
@@ -335,7 +319,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             return deferred.promise;
 
         },
-        buildProblemList : function(id,empty) {
+        buildProblemListDEP : function(id,empty) {
             //make a problem list from the conditions
             var deferred = $q.defer();
             var today = moment().format();
@@ -357,6 +341,8 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 var entry = {date: today, item : {reference : 'Condition/'+condition.id}}
                 problemList.entry.push(entry);
             }
+            
+            
             // ... and save
             var url = appConfigSvc.getCurrentDataServerBase()+ "List";
             $http.post(url,problemList).then(
@@ -406,8 +392,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                     });
 
 
-
-                    console.log(angular.toJson(bundle));
+                    //console.log(angular.toJson(bundle));
 
 
                     // ... and save - as a transaction
@@ -425,6 +410,75 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
                     if (options.logFn) {
                         options.logFn('Added Allergies List')
+                    }
+                    //deferred.resolve(refList);
+                }
+            );
+
+
+
+            return deferred.promise;
+
+        },
+        buildConditionList : function(patientId,options) {
+            var today = moment().format();
+            var conditionList = {resourceType : 'List',title:'Problems List', entry:[], date : today,
+                subject : {reference:'Patient/'+patientId},
+                status : 'current',
+                mode: 'snapshot',
+                code : {coding : [{code:'problems',system:'http://hl7.org/fhir/list-example-use-codes'}]}};
+
+            var deferred = $q.defer();
+            var url = "artifacts/conditions.json";     //the reference list of medications to add to the list
+            var bundle = {resourceType:'Bundle',type:'transaction',entry:[]};
+            var listBundleEntry = {resource : conditionList,request:{method:'POST',url:'List/'}};
+
+            bundle.entry.push(listBundleEntry);
+            GetDataFromServer.adHocFHIRQuery(url).then(
+                function(data) {
+                    var refList = data.data;
+                    var fhirVersion = appConfigSvc.getCurrentFhirVersion();
+                    refList.forEach(function(condition,inx){
+                        //each entry is a basic medication statement - needs to have the patient specific stuff added
+                        if (fhirVersion == 2) {
+                            condition.patient = {reference:'Patient/'+patientId};
+                        } else {
+                            condition.subject = {reference:'Patient/'+patientId};
+                        }
+
+                       // condition.patient = {reference:'Patient/'+patientId};
+                        condition.id = 'cond'+inx;
+                      //  condition.reporter = {reference:'Patient/'+patientId};
+
+
+                        var entry = {date: today, item : {reference : 'Condition/'+condition.id}}
+                        conditionList.entry.push(entry);
+
+                        var bundleEntry = {resource : condition,request:{method:'POST',url:'Condition/'}};
+
+                        bundle.entry.push(bundleEntry);
+
+                    });
+
+
+                    //console.log(angular.toJson(bundle));
+
+
+                    // ... and save - as a transaction
+                    var url = appConfigSvc.getCurrentDataServerBase();
+                    $http.post(url,bundle).then(
+                        function (data) {
+                            deferred.resolve(refList);
+                        },
+                        function(err){
+                            alert('Error saving allergy list:\n'+angular.toJson(err))
+                            deferred.reject(err)
+                        }
+                    );
+
+
+                    if (options.logFn) {
+                        options.logFn('Added Conditions List')
                     }
                     //deferred.resolve(refList);
                 }
@@ -468,10 +522,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                         bundle.entry.push(bundleEntry);
 
                     });
-
-
-
-                    console.log(angular.toJson(bundle));
 
 
                     // ... and save - as a transaction
