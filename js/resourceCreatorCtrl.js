@@ -600,12 +600,19 @@ angular.module("sampleApp")
 
                     if (bundle.entry) {
                         bundle.entry.forEach(function (entry) {
-                            $scope.allResourcesAsList.push(entry.resource);
+
+
+                            //not here as there are duplaications (resources referenced by others)
+                            //$scope.allResourcesAsList.push(entry.resource);
+
+
                             var hash = entry.resource.resourceType + "/" + entry.resource.id;
                             $scope.allResourcesAsDict[hash] = entry.resource;
 
                         })
                     }
+
+
                     //also need to add the reference resources to the dictionary (so thay can be found in outgoing references)
                     supportSvc.getReferenceResources().forEach(function (resource) {
                         var hash = resource.resourceType + "/" + resource.id;
@@ -620,6 +627,10 @@ angular.module("sampleApp")
 
                 });
 
+                //need to do this after the hash has been created to avoid duplications...
+                angular.forEach($scope.allResourcesAsDict,function(res){
+                    $scope.allResourcesAsList.push(res);
+                });
 
                 //create and draw the graph representation...
                 var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList);
