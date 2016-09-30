@@ -1,5 +1,9 @@
 
-
+<style>
+    .myActive {
+        background-color: red;
+    }
+</style>
 
 <uib-tabset>
     <uib-tab heading="Resource explorer">
@@ -9,7 +13,8 @@
             <div class="col-md-2">
                 <h4>Resource Types</h4>
                 <div class="list-group">
-                    <a href="#" class="list-group-item" ng-click="typeSelected(type)"
+                    <a href="#"  ng-click="typeSelected(type)"
+                       ng-class="{'list-group-item':true,'active':type.type == outcome.selectedType}"
                        ng-repeat="type in outcome.resourceTypes ">
                         {{type.type}}
                         <span class="pull-right badge">{{type.bundle.total}}</span>
@@ -48,7 +53,8 @@
 
                         <h4>{{outcome.selectedType}} resources</h4>
                         <div class="list-group">
-                            <a href="#" class="list-group-item"
+                            <a href="#"
+                               ng-class="{'list-group-item':true,'active':entry.resource.id == outcome.selectedResource.id}"
                                ng-repeat="entry in outcome.allResourcesOfOneType.entry">
                                 <div style="cursor: pointer" ng-click="resourceSelected(entry)">
                                     <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
@@ -66,15 +72,23 @@
                             <div class="alert alert-warning" style="margin-top: 8px">
                                 <div class="row">
                                     <div class="col-md-10">
-                                        <button class="btn btn-link" ng-hide="resourceVersions"
-                                                ng-click="loadVersions(outcome.selectedResource)">Show versions - if any. (only Json & tree updated)</button>
+                                        <!--
+                                                                               <span class="btn btn-link">Versions:</span>
 
-                                        <ul class="pagination" style="margin-top:1px;margin-bottom:1px" ng-show="resourceVersions">
+                                                                               <button class="btn btn-link" ng-hide="resourceVersions"
+                                                                                       ng-click="loadVersions(outcome.selectedResource)">Show versions - if any. (only Json & tree updated)</button>
+                                       -->
+                                        <ul class="pagination" style="margin-top:1px;margin-bottom:1px" ng-show="resourceVersions && resourceVersions.entry.length > 1">
+                                            <li><a href="#"><strong>Versions:</strong></a></li>
+
                                             <li ng-repeat="ent in resourceVersions.entry">
                                                 <a href="#" ng-click="selectVersion(ent.resource)">{{resourceVersions.entry.length - $index}}</a>
                                             </li>
                                         </ul>
+
+
                                     </div>
+
                                     <div class="col-md-2">
                                         <div class="pull-right">
                                             <button class="btn btn-link"
@@ -93,14 +107,6 @@
 
                             <div class="row">
                                 <div class="col-md-8">
-<!--
-                                    <div class="pull-right">
-                                        <button class="btn btn-link"
-                                            ng-click="editExistingResource(outcome.selectedResource)">Edit Resource
-                                        </button>
-
-                                    </div>
-                                    -->
 
                                     <uib-tabset>
                                         <uib-tab heading="Json">

@@ -139,23 +139,25 @@
 
                         <checkbox ng-model="input.createSamples"></checkbox>
 
-<!--
-                        <span><input style="width: 50px; height: 50px;" type="checkbox"  ng-model="input.createSamples"> </span>
-
--->
                     </div>
                     <div class="col-md-5">
                         <div href="#" ng-click="addNewPatient()" class="btn btn-primary pull-right">Save</div>
                     </div>
 
                 </div>
-
-
-
             </form>
 
 
         </div>
+
+        <div class="row" style="margin-top: 20px">
+            <div class="col-md-12" ng-show="allDone">
+                <strong>All resources have been created. Click the close button to return to the front page</strong>
+                <p>You can review the resource instances that were created using the 'Details' link at the upper left on the screen.</p>
+            </div>
+
+        </div>
+
 
     </div>
 

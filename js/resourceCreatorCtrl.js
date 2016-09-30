@@ -1986,7 +1986,7 @@ console.log(profile)
             },500            )
 
         }
-    }
+    };
 
     //when an individual resource has been selected...
     $scope.resourceSelected = function(entry) {
@@ -2007,6 +2007,7 @@ console.log(profile)
             $scope.resourceReferences = resourceSvc.getReference(resource, $scope.allResourcesAsList, $scope.allResourcesAsDict);
 
 
+            $scope.loadVersions(resource);  //load all the versions for this resource...
 
 
             //create and draw the graph representation for this single resource...
@@ -2823,6 +2824,9 @@ console.log(profile)
                                                             $rootScope.$emit('patientSelected',patient);
                                                             $scope.loading = false;
                                                             $scope.allowClose = true;
+                                                            $scope.allDone = true;
+                                                            
+                                                            
                                                         },
                                                         function(err) {
                                                             alert('error creating sample resources\n'+angular.toJson(err))
@@ -2858,7 +2862,12 @@ console.log(profile)
                                 
                             },
                             function(err) {
-                                alert('error saving patient\n'+angular.toJson(err))
+                                var msg = "Unable to create the Patient. This can be caused by a CORS error on the server you're talking to. ";
+                                msg += "Here's the error I got: "+angular.toJson(err);
+                                modalService.showModal({}, {bodyText: msg})
+
+                               // console.log(err);
+                               // alert('error saving patient\n'+angular.toJson(err))
                                 $scope.waiting = false;
                                 $scope.allowClose = true;
                             }
