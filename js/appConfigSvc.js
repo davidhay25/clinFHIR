@@ -81,7 +81,7 @@ angular.module("sampleApp")
 
         defaultConfig.allKnownServers.push({name:'Aegis WildFHIR STU3',version:3,url:" http://wildfhir.aegis.net/fhir1-6-0/"});
 
-        
+
         //place all the servers in a hash indexed by url. THis is used for the userConfig
         var allServersHash = {};
         defaultConfig.allKnownServers.forEach(function(server){

@@ -2521,9 +2521,16 @@ console.log(profile)
 
 
                     $scope.recent.patient = vo.patients;
-                    
 
-                    appConfigSvc.checkConsistency();    //will set the terminology server...
+                    $scope.consistencyCheck = appConfigSvc.checkConsistency();
+                    //appConfigSvc.checkConsistency();    //will set the terminology server...
+
+                    $scope.config = $localStorage.config;   //because the terminology server may have changed...
+                    $scope.input.selectedTS = $scope.config.servers.terminology;
+                    if (! $scope.consistencyCheck.consistent) {
+                        $scope.error = 'Warning! These servers are on a different FHIR version. Weird things will happen...';
+                    }
+
                     $rootScope.$broadcast('setWaitingFlag',false);
 
                 }
