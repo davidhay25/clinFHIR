@@ -71,7 +71,7 @@
 
                             <div class="alert alert-warning" style="margin-top: 8px">
                                 <div class="row">
-                                    <div class="col-md-10">
+                                    <div class="col-md-8">
                                         <!--
                                                                                <span class="btn btn-link">Versions:</span>
 
@@ -89,11 +89,14 @@
 
                                     </div>
 
-                                    <div class="col-md-2">
+                                    <div class="col-md-4">
                                         <div class="pull-right">
-                                            <button class="btn btn-link"
+                                            <button class="btn btn-link" ng-hide="outcome.selectedResource.contained"
                                                     ng-click="editExistingResource(outcome.selectedResource)">Edit Resource
                                             </button>
+                                            <div ng-show="outcome.selectedResource.contained">
+                                                Can't edit with Contained
+                                            </div>
 
                                         </div>
                                     </div>

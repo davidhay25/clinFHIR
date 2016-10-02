@@ -460,15 +460,12 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
                     });
 
-
-                    //console.log(angular.toJson(bundle));
-
-
                     // ... and save - as a transaction
                     var url = appConfigSvc.getCurrentDataServerBase();
                     $http.post(url,bundle).then(
                         function (data) {
-                            deferred.resolve(refList);
+                            //deferred.resolve(refList);
+                            deferred.resolve(data.data);
                         },
                         function(err){
                             alert('Error saving allergy list:\n'+angular.toJson(err))
@@ -549,18 +546,34 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             return deferred.promise;
             
         },
-        createEncounters : function (patientId,options) {
+        createEncounters : function (patientId,options,bundleConditions) {
             //create a set of encounters for the patient and add them to the referenceResources (just for this session)
+            console.log(bundleConditions)
             var deferred = $q.defer();
             options = options || {}
-            options.count = options.count || 5;     //number to reate
-            options.period = options.period || 30;  //what period of time the enounters should be over
+            options.count = options.count || 10;     //number to reate
+            options.period = options.period || 60;  //what period of time the enounters should be over
             var bundle = {resourceType:'Bundle',type:'transaction',entry:[]};
 
             for (var i= 0; i< options.count;i++) {
                 var id = 't'+ new Date().getTime() + i;
                 var enc = {resourceType:'Encounter',status:'finished'};
                 enc.id = id;
+
+
+                enc.indication = []
+                //find a random number of Random Condition as the indication
+
+                var cnt = parseInt(3 * Math.random());
+                for (var j=0; j < cnt; j++) {
+                    var ref = bundleConditions.entry[parseInt(bundleConditions.entry.length * Math.random())];
+                    console.log(ref)
+                    if (ref.response.location && ref.response.location.indexOf('Condition') > -1) {
+                        enc.indication.push({reference:ref.response.location});
+                    }
+
+                }
+
 
                 enc.patient = {reference:'Patient/'+patientId};
                 enc.reason = [];
@@ -1155,7 +1168,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
                     function getId(location) {
                         var ar = location.split('/');
-                        console.log(ar);
+                        //console.log(ar);
                         if (ar[ar.length-2] == '_history') {
                             return ar[ar.length-3]
                         } else {

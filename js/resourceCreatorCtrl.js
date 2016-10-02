@@ -2801,47 +2801,54 @@ console.log(profile)
 
                                 if ($scope.input.createSamples) {
                                     addLog('Checking that the required reference resources exist');
-                                    supportSvc.checkReferenceResources().then(
+                                    supportSvc.checkReferenceResources().then (
                                         function() {
                                             addLog('adding Encounters...');
-                                            supportSvc.createEncounters(patientId).then(
-                                                function(msg) {
-                                                    addLog(msg);
-                                                   var query = [];
-                                                    //addLog('adding Conditions...');
-                                                   // query.push(supportSvc.createConditions(patientId,{logFn:addLog}));
-                                                    addLog('adding Observations...');
-                                                    query.push(supportSvc.createObservations(patientId,{logFn:addLog}));
-                                                    addLog('adding Appointments...');
-                                                    query.push(supportSvc.createAppointments(patientId,{logFn:addLog}));
-                                                    addLog('adding Medication List...');
-                                                    query.push(supportSvc.buildMedicationList(patientId,{logFn:addLog}));
-                                                    addLog('adding Allergy List...');
-                                                    query.push(supportSvc.buildAllergiesList(patientId,{logFn:addLog}));
-                                                    addLog('adding Condition List...');
-                                                    query.push(supportSvc.buildConditionList(patientId,{logFn:addLog}));
+                                            supportSvc.buildConditionList(patientId,{logFn:addLog}).then(
+                                                function(bundleConditions) {
+                                                    supportSvc.createEncounters(patientId,{},bundleConditions).then(
+                                                        function(msg){
+                                                            addLog(msg);
+                                                               var query = [];
+                                                                //addLog('adding Conditions...');
+                                                               // query.push(supportSvc.createConditions(patientId,{logFn:addLog}));
+                                                                addLog('adding Observations...');
+                                                                query.push(supportSvc.createObservations(patientId,{logFn:addLog}));
+                                                                addLog('adding Appointments...');
+                                                                query.push(supportSvc.createAppointments(patientId,{logFn:addLog}));
+                                                                addLog('adding Medication List...');
+                                                                query.push(supportSvc.buildMedicationList(patientId,{logFn:addLog}));
+                                                                addLog('adding Allergy List...');
+                                                                query.push(supportSvc.buildAllergiesList(patientId,{logFn:addLog}));
+                                                              //  addLog('adding Condition List...');
+                                                                //query.push(supportSvc.buildConditionList(patientId,{logFn:addLog}));
+        
+                                                                $q.all(query).then(
+                                                                    //regardless of success or failure, turn off the saving flag
+                                                                    function() {
+                                                                        $scope.saving = false;
+                                                                        supportSvc.resetResourceReferences();   //remove all the newly created resources from the reference resource list...
+                                                                        // not yet.. $scope.$close();
+                                                                        appConfigSvc.setCurrentPatient(patient);
+                                                                        $rootScope.$emit('patientSelected',patient);
+                                                                        $scope.loading = false;
+                                                                        $scope.allowClose = true;
+                                                                        $scope.allDone = true;
+        
+        
+                                                                    },
+                                                                    function(err) {
+                                                                        alert('error creating sample resources\n'+angular.toJson(err))
+                                                                        $scope.allowClose = true;
+                                                                        $scope.loading = false;
+                                                                    }
+                                                                )
+        
+                                                            })
 
-                                                    $q.all(query).then(
-                                                        //regardless of success or failure, turn off the saving flag
-                                                        function() {
-                                                            $scope.saving = false;
-                                                            supportSvc.resetResourceReferences();   //remove all the newly created resources from the reference resource list...
-                                                            // not yet.. $scope.$close();
-                                                            appConfigSvc.setCurrentPatient(patient);
-                                                            $rootScope.$emit('patientSelected',patient);
-                                                            $scope.loading = false;
-                                                            $scope.allowClose = true;
-                                                            $scope.allDone = true;
-                                                            
-                                                            
-                                                        },
-                                                        function(err) {
-                                                            alert('error creating sample resources\n'+angular.toJson(err))
-                                                            $scope.allowClose = true;
-                                                            $scope.loading = false;
-                                                        }
 
-                                                    )
+
+
                                                 },
                                                 function(err) {
                                                     alert(angular.toJson(err))

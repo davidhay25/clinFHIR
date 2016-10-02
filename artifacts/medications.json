@@ -33,11 +33,27 @@
   },
   {
     "resourceType" : "MedicationStatement",
-    "medicationCodeableConcept" : {
-      "coding" : [
-        {"code": "7947003","system":"http://snomed.info/ct","display":"aspirin 81 mg"}
-      ],
-      "text" : "aspirin 81 mg"
+    "contained" : [
+      {
+        "resourceType": "Medication",
+        "id" : "med1",
+        "code": {
+          "coding": [
+            {
+              "code": "7947003",
+              "system": "http://snomed.info/ct",
+              "display": "aspirin 81 mg"
+            }
+          ],
+          "text": "aspirin 81 mg"
+        },
+        "isBrand" : false
+      }
+
+    ],
+    "medicationReference" : {
+      "reference": "#med1",
+      "display" : "aspirin 81 mg"
     },
     "reasonForUseCodeableConcept" : {
       "coding" : [

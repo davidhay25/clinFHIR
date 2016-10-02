@@ -477,46 +477,74 @@
 
                                     <ul class="dropdown-menu" role="menu">
                                         <li>
-                                            <a href="#" ng-click="showQuery()">{{'MENU.QUERYSERVERS'|translate}}</a>
+                                            <a href="#" ng-click="showQuery()"
+                                               uib-popover="Make queries against a FHIR Server"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">{{'MENU.QUERYSERVERS'|translate}}</a>
                                         </li>
 
 
                                         <li>
-                                            <a href="#" ng-click="newExtension()">Extension editor <img class="pull-right" src="icons/external.png"/></a>
+                                            <a href="#" ng-click="newExtension()"
+                                               uib-popover="Create a new Extension Definition"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">Extension editor
+                                                </a>
                                         </li>
 
 
 
                                         <li>
-                                            <a href="valuesetCreator.html" target="_blank">ValueSet editor <img class="pull-right" src="icons/external.png"/> </a>
+                                            <a href="valuesetCreator.html" target="_blank"
+                                               uib-popover="Load the ValueSet editor"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">ValueSet editor <img class="pull-right" src="icons/external.png"/> </a>
                                         </li>
 
                                         <li class="divider"></li>
                                         <li>
-                                            <a href="#" ng-click="resetConfig()">{{'MENU.RESETCONFIG'|translate}}</a>
+                                            <a href="#" ng-click="resetConfig()"
+                                               uib-popover="Reset the system configuration"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">{{'MENU.RESETCONFIG'|translate}}</a>
                                         </li>
 
                                         <li>
-                                            <a href="#" ng-click="addServer()">Add server</a>
+                                            <a href="#" ng-click="addServer()"
+                                               uib-popover="Add a new server not currently in the list"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">Add server</a>
                                         </li>
 
 
 
                                         <li>
-                                            <a href="#" ng-click="clearProfileCache()">{{'MENU.CLEARPROFILECACHE'|translate}}</a>
+                                            <a href="#" ng-click="clearProfileCache()"
+                                               uib-popover="Clear the list of profiles"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">{{'MENU.CLEARPROFILECACHE'|translate}}</a>
                                         </li>
                                         <li>
-                                            <a href="#" ng-click="clearPatientCache()">{{'MENU.CLEARPATIENTCACHE'|translate}}</a>
+                                            <a href="#" ng-click="clearPatientCache()"
+                                               uib-popover="Clear the list of patients"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">{{'MENU.CLEARPATIENTCACHE'|translate}}</a>
                                         </li>
                                         <li class="divider"></li>
 
                                         <li>
-                                            <a href="#" ng-click="showChart()">Access statistics</a>
+                                            <a href="#" ng-click="showChart()"
+                                               uib-popover="Show how many people are using clinFHIR"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">Access statistics</a>
                                         </li>
 
 
                                         <li>
-                                            <a href="#" ng-click="showLocalActivity()">Local Activity
+                                            <a href="#" ng-click="showLocalActivity()"
+                                               uib-popover="Show resources recently created"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">Local Activity
                                             <span class="badge pull-right">{{resourceCreatorSvc.getResourcesCreated().length}}</span>
                                             </a>
                                         </li>
@@ -524,16 +552,25 @@
 
 
                                         <li>
-                                            <a href="reporter.html" target="_blank">Error log <img class="pull-right"  src="icons/external.png"/> </a>
+                                            <a href="reporter.html" target="_blank"
+                                               uib-popover="Display list of issues when creating resources"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">Error log <img class="pull-right"  src="icons/external.png"/> </a>
                                         </li>
 
                                         <li>
-                                            <a href="#" ng-click="showValidateInstance()">Validate Resource</a>
+                                            <a href="#" ng-click="showValidateInstance()"
+                                               uib-popover="Validate an external resource instance"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">Validate Resource</a>
                                         </li>
                                         <li class="divider"></li>
 
                                         <li>
-                                            <a href="#" ng-click="changeLanguage()">{{'MENU.CHANGELANGUAGE'|translate}}</a>
+                                            <a href="#" ng-click="changeLanguage()"
+                                               uib-popover="Select a different language"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">{{'MENU.CHANGELANGUAGE'|translate}}</a>
                                         </li>
                                         <li>
                                             <a href="#" ng-show="translate.use() !== 'en'"

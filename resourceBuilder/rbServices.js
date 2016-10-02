@@ -2142,8 +2142,8 @@ console.log(summary);
                         if (resource.medicationCodeableConcept) {
                             txt += getCCSummary(resource.medicationCodeableConcept);
 
-                        } else {
-                            return "FamilyMemberHistory Id: "+resource.id;
+                        } else if (resource.medicationReference && resource.medicationReference.display ) {
+                            txt += resource.medicationReference.display;
                         }
 
                         if (resource.dosage && resource.dosage.length > 0 && resource.dosage[0].text) {
