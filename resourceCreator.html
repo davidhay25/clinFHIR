@@ -5,14 +5,9 @@
     <meta charset="UTF-8">
     <script src="js/libs/jquery-1.9.0.min.js"></script>
     <script src="js/libs/angular.min1-5.js"></script>
-<!--
-    <script src="js/libs/ui-bootstrap-tpls-1.2.5.min.js"></script>
-    -->
+
     <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
-   <!--
-   <script src="js/libs/angular.min.1.4.js"></script>
-    <script src="js/libs/ui-bootstrap-tpls-0.14.3.min.js"></script>
--->
+
     <script src="js/libs/go-debug.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
@@ -245,6 +240,9 @@
     <script src="js/consultBuilder.js"></script>
     <script src="js/documentBuilder.js"></script>
     <script src="js/findOtherPatient.js"></script>
+
+    <script src="js/observationsDisplayCtrl.js"></script>
+    <script src="js/extensionsCtrl.js"></script>
     <title>FHIR Resource Creator</title>
 
     <style type="text/css">
@@ -293,21 +291,7 @@
             databaseURL: "https://clinfhir.firebaseio.com",
             storageBucket: ""
         };
-     //   firebase.initializeApp(config);
 
-/*
-        firebase.database().ref('project/list').set({
-            names: [
-                {name:'test'}
-            ]
-        });
-*/
-        /*
-        firebase.database().ref('project/list').once('value').then(function(snapshot) {
-            console.log(snapshot.val())
-        });
-
-        */
 
     </script>
 
@@ -483,7 +467,7 @@
                                                popover-trigger="'mouseenter'">{{'MENU.QUERYSERVERS'|translate}}</a>
                                         </li>
 
-
+<!--
                                         <li>
                                             <a href="#" ng-click="newExtension()"
                                                uib-popover="Create a new Extension Definition"
@@ -491,7 +475,14 @@
                                                popover-trigger="'mouseenter'">Extension editor
                                                 </a>
                                         </li>
-
+-->
+                                        <li>
+                                            <a href="#" ng-click="showExtensions()"
+                                               uib-popover="Find and create Extension definitions"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">Extension Definitions
+                                            </a>
+                                        </li>
 
 
                                         <li>
@@ -702,6 +693,11 @@
             </div>
 
 -->
+
+            <div  ng-controller="extensionsCtrl" ng-show="displayMode == 'extensions'">
+                <ng-include src="'/includes/extensions.html'"></ng-include>
+            </div>
+
 
             <div ng-show="displayMode == 'access'">
                 <div>

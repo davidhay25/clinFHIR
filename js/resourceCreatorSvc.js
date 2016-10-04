@@ -5,14 +5,15 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
     var currentProfileEl;     //the profile being used...
     var currentProfile;         //the profile in use
-   // var objNodes = {};          //the nodes indexed
 
-    //colours for graph
+    //colours for graph = http://www.w3schools.com/colors/colors_picker.asp
     var objColours ={};
     objColours.Encounter = '#93FF1A';
     objColours.Condition = '#E89D0C';
-    objColours.Observation = '#FF0000';
-
+    objColours.Observation = '#ff8080';
+    objColours.List = '#FFFFCC';
+    objColours.Practitioner = '#FFBB99';
+    objColours.MedicationStatement = '#ffb3ff';
 
         //function to capitalize the first letter of a word...
     String.prototype.toProperCase = function () {
@@ -28,7 +29,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         var ar = path.split('.');
         ar.shift();
         return ar.join('.');
-    }
+    };
 
     //get the extension type (single, complex) and data type from the ExtensionDefinition (StructureDefinition).
 

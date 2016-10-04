@@ -279,7 +279,7 @@ angular.module("sampleApp")
 
     };
 
-    $scope.laEditResource =function(item) {
+    $scope.laEditResource = function(item) {
 
         $rootScope.$broadcast('setWaitingFlag',true);
         var url = appConfigSvc.getCurrentDataServer().url+ 'Patient/'+item.item.patientId;
@@ -295,6 +295,10 @@ angular.module("sampleApp")
         });
     };
 
+
+    $scope.showExtensions = function() {
+        $scope.displayMode = 'extensions';
+    }
 
     $scope.showChart = function() {
         if ($scope.displayMode == 'access') {
@@ -461,6 +465,7 @@ angular.module("sampleApp")
         loadPatientDetails(function(patient){
             setUpForNewProfile(resourceCreatorSvc.getCurrentProfile());
         });
+
     });
 
     //when a new resource has been created. Don't reset the new resource as this allows incremental versions of the resource to be saved...
@@ -548,17 +553,15 @@ angular.module("sampleApp")
 
     $scope.resetLanguageToEnglish = function() {
         $localStorage.preferredLanguage = 'en';     //save default language
-        // var url = 'translate/'+code+'.json';
-        // $translateProvider.useUrlLoader(url);
         $translate.use('en')
-    }
+    };
 
     //load existing data for the current patient
     function loadPatientDetails(cb) {
         $scope.hasVitals = false;
         delete $scope.vitalsTable;
         delete $scope.outcome.selectedResource;
-
+        $rootScope.$broadcast('setWaitingFlag',true);
         supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
             //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
             function (allResources) {
@@ -632,6 +635,7 @@ angular.module("sampleApp")
                     $scope.allResourcesAsList.push(res);
                 });
 
+                
                 //create and draw the graph representation...
                 var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList);
                 var container = document.getElementById('mynetwork');
@@ -646,6 +650,10 @@ angular.module("sampleApp")
                     //console.log($scope.selectedGraphNode)
                     $scope.$digest();
                 });
+
+                $rootScope.$broadcast('patientObservations',allResources['Observation']);//used to draw the observation charts...
+                
+             
 
                 //create and draw the timeline. The service will display the number of encounters for each condition
                 var timelineData =resourceCreatorSvc.createTimeLine($scope.allResourcesAsList,allResources['Condition']);
@@ -668,7 +676,7 @@ angular.module("sampleApp")
             }
             )
             .finally(function () {
-                $scope.loadingPatient = false;
+                $rootScope.$broadcast('setWaitingFlag',false);
                 if (cb) {
                     cb()
                 }
@@ -767,14 +775,17 @@ angular.module("sampleApp")
         resourceCreatorSvc.loadVersions(resource).then(
             function(data) {
                 $scope.resourceVersions = data.data;    //a bundle of all the versions for this resource...
-console.log($scope.resourceVersions);
             }
         )
     };
+
     $scope.selectVersion = function(resource) {
         $scope.outcome.selectedResource = resource;     //todo - any side effects of a version rather than the latest?
 
         drawResourceTree(resource)
+
+        $scope.resourceSelected({resource:resource});
+
 
     };
 
@@ -1988,8 +1999,8 @@ console.log(profile)
         }
     };
 
-    //when an individual resource has been selected...
-    $scope.resourceSelected = function(entry) {
+    //when an individual resource has been selected... isVersion is true whendisplaying a version
+    $scope.resourceSelected = function(entry,isVersion) {
         delete $scope.outcome.selectedResource;
         delete $scope.resourceReferences;
         delete $scope.downloadLinkJsonContent;
@@ -2000,14 +2011,16 @@ console.log(profile)
         delete $scope.resourceVersions;
 
         if (entry && entry.resource) {
-
+            $rootScope.$broadcast('setWaitingFlag',true);
             var resource = entry.resource;
             drawResourceTree(resource);         //display the resource tree
             $scope.outcome.selectedResource = resource;     //for the json display
             $scope.resourceReferences = resourceSvc.getReference(resource, $scope.allResourcesAsList, $scope.allResourcesAsDict);
 
-
-            $scope.loadVersions(resource);  //load all the versions for this resource...
+            if (! isVersion) {
+                //don't load versions again!
+                $scope.loadVersions(resource);  //load all the versions for this resource...
+            }
 
 
             //create and draw the graph representation for this single resource...
@@ -2028,28 +2041,14 @@ console.log(profile)
                     $scope.xmlResource = "<error>Sorry, Unable to load Xml version</error>";
                    // alert(angular.toJson(err, true))
                 }
-            )
+            ).finally(function(){
+                $rootScope.$broadcast('setWaitingFlag',false);
+            })
 
         }
 
     };
-/*
-    //when the user selects the 'view XML' option
-    $scope.xmlSelected = function(type,id) {
-        console.log(type,id)
 
-        GetDataFromServer.getXmlResource(type+"/"+id+"?_format=xml").then(
-            function(data){
-                $scope.xmlResource = data.data;
-                $scope.downloadLinkXmlContent = window.URL.createObjectURL(new Blob([data.data], {type: "text/xml"}));
-                $scope.downloadLinkXmlName = type+"-"+id+".xml";
-            },
-            function(err) {
-                alert(angular.toJson(err,true))
-            }
-        )
-    };
-            */
 
     $scope.selectNewResource = function(reference) {
         $scope.resourceSelected({resource:reference.resource})
@@ -2844,19 +2843,24 @@ console.log(profile)
                                                                     }
                                                                 )
         
-                                                            })
+                                                            },
+                                                        function(err){
+                                                            alert('error creating Encounters '+ angular.toJson(err));
+                                                        }
+                                                    )
 
 
 
 
                                                 },
                                                 function(err) {
-                                                    alert(angular.toJson(err))
+                                                    alert('error building the condition list ' + angular.toJson(err))
                                                     $scope.allowClose = true;
                                                 }
                                             )},
                                         function(err){
                                             //service will display error
+                                            alert('error checking reference resources')
                                             $scope.allowClose = true;
                                         }
                                     ).finally(function(){

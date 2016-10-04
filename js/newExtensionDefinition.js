@@ -103,13 +103,20 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                     function(data){
                         console.log(data);
                         //if there is already an SDef - see if it authored by clinFHIR - todo
-                        var config = {bodyText:'Sorry, that name is already used on the Conformance server'};
-                        modalService.showModal({}, config)
+/*
+                        if (data.status !== 410) {
+                            //410 indicates that the Sdef was deleted, od OK to overwrite
+                            var config = {bodyText:'Sorry, that name is already used on the Conformance server'};
+                            modalService.showModal({}, config)
+                        } else {
+                            $scope.canSaveEd = true;
+                        }
+*/
 
                     },function(err){
                         console.log(err);
-                        //as long as the status is 404, it's save to create a new one...
-                        if (err.status == 404) {
+                        //as long as the status is 404 or 410, it's save to create a new one...
+                        if (err.status == 404 || err.status == 410) {
                             $scope.canSaveEd = true;
                             
                         } else {
@@ -294,7 +301,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
                 if (fhirVersion == 2) {
                     extensionDefinition.kind='datatype';
-                    extensionDefinition.type = 'Extension';
+                    extensionDefinition.constrainedType = 'Extension';      //was set to 'kind' which is the search name!
                 } else if (fhirVersion ==3) {
                     extensionDefinition.kind='complex-type';
 

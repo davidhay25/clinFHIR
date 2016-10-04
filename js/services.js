@@ -2,7 +2,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
     //options for building the samples that will come from a UI
     var buildConfig = {};
-    buildConfig.encounterObservation = .5;      //chance that a group of observations will reference an encounter
+    buildConfig.encounterObservation = 1; //.5;      //chance that a group of observations will reference an encounter
     buildConfig.createProblemList = 'yes';      // yes | no | empty
     buildConfig.problemListLength = 3;          //size of the problemlist
 
@@ -10,11 +10,11 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
     var identifierSystem ='http://fhir.hl7.org.nz/identifier';
 
     var observations=[];    //used for generating sample data plus vitals...
-    observations.push({code:'8310-5',display:'Body Temperature',min:36, max:39,unit:'C',round:10,isVital:true});
+    observations.push({code:'8310-5',display:'Body Temperature',min:36, max:37,unit:'C',round:10,isVital:true});
     observations.push({code:'8867-4',display:'Heart Rate',min:70,max:90,unit:'bpm',round:1,isVital:true});
     observations.push({code:'9279-1',display:'Respiratory Rate',min:25,max:35,unit:'resp/min',round:1,isVital:true});
     observations.push({code:'8302-2',display:'Height',max:90,min:90,unit:'cm',round:10});
-    observations.push({code:'3141-9',display:'Weight',max:90,min:70,unit:'Kg',round:10,isVital:true});
+    observations.push({code:'3141-9',display:'Weight',max:80,min:70,unit:'Kg',round:10,isVital:true});
 
     //load the json file with all the optional values for creating samples...
 
@@ -199,7 +199,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             var bundle = {resourceType:'Bundle',type:'transaction',entry:[]};
 
             var cnt = 0;
-            for (var i=0; i < 3; i++) {
+            for (var i=0; i < 5; i++) {                 //5 sets per type of observation
                 var date = moment().subtract(i,'weeks');
 
 
@@ -234,10 +234,11 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 function(data){
                     if (options && options.logFn)
                         options.logFn('Added '+cnt +' Observations')
+                },
+                function(err) {
+                    alert('error saving Observations '+ angular.toJson(err));
                 }
             );      //don't care about the response
-
-
 
         },
         createConditionsDEP : function (patientId,options) {
@@ -399,6 +400,10 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                     var url = appConfigSvc.getCurrentDataServerBase();
                     $http.post(url,bundle).then(
                         function (data) {
+                            if (options.logFn) {
+                                options.logFn('Added Allergies List')
+                            }
+                            //deferred.resolve(refList);
                             deferred.resolve(refList);
                         },
                         function(err){
@@ -408,10 +413,10 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                     );
 
 
-                    if (options.logFn) {
-                        options.logFn('Added Allergies List')
-                    }
-                    //deferred.resolve(refList);
+
+                },
+                function(err) {
+                    alert('error getting list of allergies to create: ' + angular.toJson(err))
                 }
             );
 
@@ -465,19 +470,24 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                     $http.post(url,bundle).then(
                         function (data) {
                             //deferred.resolve(refList);
+                            if (options.logFn) {
+                                options.logFn('Added Conditions List')
+                            }
                             deferred.resolve(data.data);
                         },
                         function(err){
-                            alert('Error saving allergy list:\n'+angular.toJson(err))
+                            alert('Error saving condition list:\n'+angular.toJson(err))
                             deferred.reject(err)
                         }
                     );
 
 
-                    if (options.logFn) {
-                        options.logFn('Added Conditions List')
-                    }
+
                     //deferred.resolve(refList);
+                }
+                ,
+                function(err) {
+                    alert('error getting list of conditions to create: ' + angular.toJson(err))
                 }
             );
 
@@ -525,6 +535,9 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                     var url = appConfigSvc.getCurrentDataServerBase();
                     $http.post(url,bundle).then(
                         function (data) {
+                            if (options.logFn) {
+                                options.logFn('Added Medications List')
+                            }
                             deferred.resolve(refList);
                         },
                         function(err){
@@ -534,10 +547,12 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                     );
 
 
-                    if (options.logFn) {
-                        options.logFn('Added Medications List')
-                    }
+
                     //deferred.resolve(refList);
+                },
+
+                function(err) {
+                    alert('error getting list of medications to create: ' + angular.toJson(err))
                 }
             );
 
@@ -849,17 +864,14 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             var allResources = {};
             //the currently selected data server object (not just the url)
             var dataServer = appConfigSvc.getCurrentDataServer();
+            var resourceHash = {};      //this is used to avoid duplications that $everything can return...
 
             if (dataServer.everythingOperation) {
                 //The everything operation will return all patient related resources. not all servers recognize this, and
                 //some implement paging and small default sizes (hapi) and some don't (grahame)
-                //var url = dataServer.url + "Patient/"+patientId + '/$everything?_count=100'
-                var url = dataServer.url + "Patient/"+patientId + '/$everything';
-               // if (dataServer.everythingOperationCount) {
-                 //   url += "?_count="+dataServer.everythingOperationCount;
-               // }
 
-                //console.log(url);
+                var url = dataServer.url + "Patient/"+patientId + '/$everything';
+
 
                 this.getAllResourcesFollowingPaging(url).then(
                     function(arrayOfResource){
@@ -869,11 +881,19 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                                 var type = resource.resourceType;
                                 //Grahame returns AuditEvents in $everything...
                                 if (type !== 'AuditEvent') {
-                                    if (! allResources[type]) {
-                                        allResources[type] = {entry:[],total:0};        //this is also supposed to be a bundle
+                                    //check to see if we have aleady retrieved this resource...
+                                    var location = type+'/'+resource.id
+                                    if (!resourceHash[location] ) {
+                                        resourceHash[location] = 'x';
+                                        if (! allResources[type]) {
+                                            allResources[type] = {entry:[],total:0};        //this is also supposed to be a bundle
+                                        }
+
+                                        allResources[type].entry.push({resource:resource});
+                                        allResources[type].total ++;
                                     }
-                                    allResources[type].entry.push({resource:resource});
-                                    allResources[type].total ++;
+
+
                                 }
 
                             })

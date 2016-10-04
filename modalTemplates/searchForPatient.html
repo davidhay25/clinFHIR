@@ -129,7 +129,6 @@
 
                     </div>
 
-
                 </div>
 
 
@@ -141,7 +140,8 @@
 
                     </div>
                     <div class="col-md-5">
-                        <div href="#" ng-click="addNewPatient()" class="btn btn-primary pull-right">Save</div>
+                        <!-- Don't show the button until the name is there... -->
+                        <div href="#" ng-click="addNewPatient()" ng-show='input.lname' class="btn btn-primary pull-right">Save</div>
                     </div>
 
                 </div>

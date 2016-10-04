@@ -72,12 +72,7 @@
                             <div class="alert alert-warning" style="margin-top: 8px">
                                 <div class="row">
                                     <div class="col-md-8">
-                                        <!--
-                                                                               <span class="btn btn-link">Versions:</span>
 
-                                                                               <button class="btn btn-link" ng-hide="resourceVersions"
-                                                                                       ng-click="loadVersions(outcome.selectedResource)">Show versions - if any. (only Json & tree updated)</button>
-                                       -->
                                         <ul class="pagination" style="margin-top:1px;margin-bottom:1px" ng-show="resourceVersions && resourceVersions.entry.length > 1">
                                             <li><a href="#"><strong>Versions:</strong></a></li>
 
@@ -232,6 +227,32 @@
         </div>
 
 
+    </uib-tab>
+
+    <uib-tab heading="Observations" >
+        <br/>
+        <div ng-controller="observationsDisplayCtrl">
+            <div class="row">
+                <div class="col-md-2 col-sm-2">
+                    <div class="list-group">
+                        <a href="#"  ng-click="obsSelected(key,value)"
+                           ng-class="{'list-group-item':true,'active':1==2}"
+                           ng-repeat="(key,value) in observations ">
+                            {{value.display}}
+                            <span class="pull-right badge">{{value.list.length}}</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-10 col-sm-10">
+                    <div style="width: 100%; height: 300px; border: 1px solid lightgray;"
+                         id="observationsChart"></div>
+                </div>
+
+            </div>
+
+
+
+        </div>
     </uib-tab>
 
     <uib-tab heading="Encounter timeline">

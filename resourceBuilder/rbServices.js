@@ -48,14 +48,38 @@ angular.module("sampleApp").
                     }
                 );
             }
-
-
-
-
-
             return deferred.promise;
         },
-
+        updateResource : function(server,resource)  {
+            //update a resource supplying the url and the resource...
+            var deferred = $q.defer();
+            var url = server.url + 'StructureDefinition/'+resource.id;
+            $http.put(url, resource).then(
+                function(data) {
+                    deferred.resolve(data);
+                },
+                function(err) {
+                    //alert("errr calling validate operation:\n"+angular.toJson(err))
+                    deferred.reject(err.data);
+                }
+            );
+            return deferred.promise;
+        },
+        deleteResource : function(server,resource)  {
+            //update a resource supplying the url and the resource...
+            var deferred = $q.defer();
+            var url = server.url + 'StructureDefinition/'+resource.id;
+            $http.delete(url, resource).then(
+                function(data) {
+                    deferred.resolve(data);
+                },
+                function(err) {
+                    //alert("errr calling validate operation:\n"+angular.toJson(err))
+                    deferred.reject(err.data);
+                }
+            );
+            return deferred.promise;
+        },
         saveValueSetToTerminologyServerById : function(id,valueSet) {
             //save a ValueSet at a given location
             var config = appConfigSvc.config();
@@ -487,7 +511,20 @@ angular.module("sampleApp").
                         }
 
 
+                        if (element.binding) {
 
+                            vo.strength = element.binding.strength;
+                            if (element.binding.valueSetReference) {
+                                vo.valueSetReference = element.binding.valueSetReference.reference;
+                            }
+
+                            if (element.binding.valueSetUri) {
+                                vo.valueSetUri = element.binding.valueSetUri;
+                            }
+
+                        }
+
+/*
                         if (element.binding) {
 
                             vo.strength = element.binding.strength;
@@ -499,6 +536,7 @@ angular.module("sampleApp").
                             }
 
                         }
+                        */
 
                     }
                 })
