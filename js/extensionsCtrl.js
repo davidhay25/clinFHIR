@@ -2,12 +2,31 @@
 
 angular.module("sampleApp")
     .controller('extensionsCtrl',
-        function ($rootScope,$scope,GetDataFromServer,appConfigSvc,Utilities,$uibModal,SaveDataToServer,modalService,$timeout) {
+        function ($rootScope,$scope,GetDataFromServer,appConfigSvc,Utilities,$uibModal,RenderProfileSvc,SaveDataToServer,modalService,$timeout) {
 
             $scope.input = {param:'hl7',searchParam:'publisher',searchStatus:'all'};
 
-            $scope.input = {param:'test',searchParam:'name',searchStatus:'all'};
 
+            RenderProfileSvc.getAllStandardResourceTypes().then(
+                function(lst) {
+                    $scope.allResourceTypes = lst;
+                    //console.log($scope.allResourceTypes);
+                }
+            );
+
+
+            $rootScope.$on('userLoggedIn',function(){
+                var userProfile = $rootScope.userProfile;
+                console.log(userProfile)
+                if (userProfile.extDef && userProfile.extDef.defaultPublisher) {
+                    $scope.input = {param:userProfile.extDef.defaultPublisher,searchParam:'publisher',searchStatus:'all'};
+
+                }
+            });
+
+            $rootScope.$on('userLoggedOut',function() {
+                $scope.input = {param:'hl7',searchParam:'publisher',searchStatus:'all'};
+            });
 
             $scope.errors = [];
             $scope.appConfigSvc = appConfigSvc;
@@ -104,16 +123,20 @@ angular.module("sampleApp")
 
             $scope.search = function(param) {
                 var query = appConfigSvc.getCurrentConformanceServer().url;
+                var downLoadName = '';
                 switch ($scope.input.searchParam) {
 
                     case 'publisher' :
                         query += "StructureDefinition?publisher:contains="+param;
+                        downLoadName = 'publisher-'+param;
                         break;
                     case 'description' :
                         query += "StructureDefinition?description:contains="+param;
+                        downLoadName = 'description-'+param;
                         break;
                     case 'name' :
                         query += "StructureDefinition?name:contains="+param;
+                        downLoadName = 'name-'+param;
                         break;
                     case 'identifier' :
                         var id = $scope.input.identifierId;
@@ -128,6 +151,7 @@ angular.module("sampleApp")
                         }
 
                         query += "StructureDefinition?identifier="+ident;
+                        downLoadName = 'identifier-'+ident;
                         break;
                     case 'resource' :
                         param = $scope.input.resourceType;
@@ -136,6 +160,7 @@ angular.module("sampleApp")
                         if (t == '*') {
                             t += ",Resource";
                         }
+                        downLoadName = 'resource-'+param;
 
                         query += "StructureDefinition?ext-context:contains="+t;
 
@@ -150,13 +175,13 @@ angular.module("sampleApp")
 
                 query += "&type=Extension&_count=100"
 
-                console.log(query)
+                console.log(query,downLoadName)
 
-                getExtensions(query)
+                getExtensions(query,downLoadName)
             }
 
 
-            function getExtensions(query,selectedExtension) {
+            function getExtensions(query,downLoadName) {
                 $scope.loading=true;
                 delete $scope.extensionsArray;
                 delete $scope.selectedExtension;
@@ -184,7 +209,7 @@ angular.module("sampleApp")
 
 
                             });
-
+/*
                             if (selectedExtension) {
                                 //this is an extension being edited. Find it in the bundle and re-set if...
                                 $scope.extensionsArray.forEach(function (entry) {
@@ -195,6 +220,11 @@ angular.module("sampleApp")
 
                                 })
                             }
+                            */
+
+                            $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(bundle, true)], {type: "text/text"}));
+                            $scope.downloadLinkJsonName = downLoadName;
+
                         }
 
 
@@ -214,7 +244,7 @@ angular.module("sampleApp")
 
                 $scope.selectedExtension = entry.resource;
 
-                $scope.isAuthoredByClinFhir = isAuthoredByClinFhir($scope.selectedExtension);
+                $scope.isAuthoredByClinFhir = Utilities.isAuthoredByClinFhir($scope.selectedExtension);
                 
                 //extensionDefinition.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
                 
@@ -346,7 +376,7 @@ angular.module("sampleApp")
                 }
 
             };
-
+/*
             function isAuthoredByClinFhir(profile) {
                 // return true
                 var isAuthoredByClinFhir = false;
@@ -372,5 +402,5 @@ angular.module("sampleApp")
 
                 return isAuthoredByClinFhir;
             }
-
+*/
         });

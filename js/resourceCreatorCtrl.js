@@ -14,7 +14,7 @@ angular.module("sampleApp")
     .controller('resourceCreatorCtrl',
         function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,$translate,
                   $localStorage,RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,
-                  $location,resourceSvc,$window,$timeout,$firebaseArray,$filter,$cookies) {
+                  $location,resourceSvc,$window,$timeout,$firebaseArray,$filter,$firebaseObject,$cookies) {
 
 
             if (window.location.href.indexOf('localhost') > -1) {
@@ -27,33 +27,7 @@ angular.module("sampleApp")
 
             })
 
-    //register that the application has been started... (for reporting)
-    //resourceCreatorSvc.registerAccess();
 
-/*
-            $http.get('http://fhir.hl7.org.nz/dstu2/Media/93389').then(
-                function(data) {
-                    //console.log(data.data)
-                    var img = data.data.content.data;
-                    //console.log(img)
-
-
-                        document.getElementById('imgWaipu').setAttribute( 'src', 'data:image/jpg;base64,'+img);
-                    //$scope.$digest();
-                    var img1 = atob(img);
-                    console.log(img1)
-
-                }
-            )
-
-            */
-/*
-            supportSvc.buildMedicationList(100).then(
-                function(data) {
-                   // console.log(data)
-                }
-            )
-*/
     var enabled = false;    //just to disable cookies for now...
 
     $scope.baseUrl = "http://hl7.org/fhir/2016Sep/";    //root for displaying details of resource
@@ -111,22 +85,73 @@ angular.module("sampleApp")
 
     }
 
+
+    //called whenever the auth state changes - eg login/out, initial load, create user etc.
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+            var updateProfile = false;      //this is just a cheat so I can update my config...
+                //if it's me, then set me as adminstrator and other stuff...
+            if (user.uid == "C6955l18fegSZTbdPeU8NJupQS63") {
+
+                if (updateProfile || !$rootScope.userProfile || !$rootScope.userProfile.roles) {
+                    $rootScope.userProfile.roles = [{administrator : true}];
+                    $rootScope.userProfile.$save();
+                }
+                if (updateProfile || !$rootScope.userProfile || !$rootScope.userProfile.extDef) {
+                    $rootScope.userProfile.extDef = {permissions : {canCreate : true, canActivate : true, canEdit:true, canRetire: true, canDelete : true}}
+                    $rootScope.userProfile.extDef.defaultPublisher = 'Orion Health';
+                    $rootScope.userProfile.$save();
+                }
+
+            } else {
+
+            }
+
+            $rootScope.$broadcast('userLoggedIn')
+
+        } else {
+            // No user is signed in.
+        }
+    });
+
+
+            //console.log(firebase.auth().currentUser)
+
+    //there's already a loggedin user, so set the user properties on the rootScope
+    /*if (firebase.auth().currentUser) {
+
+        var refUsers = firebase.database().ref().child("users");
+        var userProfile = firebase.database().ref().child("users").child(firebase.auth().currentUser.uid)
+
+        console.log(userProfile)
+
+    }
+
+            */
+
+    //get the firebase projects link
     var refProjects = firebase.database().ref().child("projects");
-    //console.log(refProjects)
-    // create a synchronized array
     $rootScope.fbProjects = $firebaseArray(refProjects);
 
-    var refLoad = firebase.database().ref().child("loadResource");
+    //get
+
+    //var refLoad = firebase.database().ref().child("loadResource");
     //console.log(refLoad)
     // create a synchronized array
-    $rootScope.fbLoadResource = $firebaseArray(refLoad);
+   // $rootScope.fbLoadResource = $firebaseArray(refLoad);
 
 
-    $scope.firebase = firebase;     //place on scope so can adjust dispaly
+
+    //place on scope so can adjust dispaly
+    $scope.firebase = firebase;
 
     $scope.logout=function(){
         firebase.auth().signOut().then(function() {
+            delete $rootScope.userProfile;
+            $rootScope.$broadcast('userLoggedOut')
             modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
+
         }, function(error) {
             modalService.showModal({}, {bodyText: 'Sorry, there was an error lgging out - please try again'})
         });
@@ -144,7 +169,8 @@ angular.module("sampleApp")
 
     };
 
-
+   
+            
     var profile;                    //the profile being used as the base
     var type;                       //base type
     $scope.treeData = [];           //populates the resource tree

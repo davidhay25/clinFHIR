@@ -1,7 +1,7 @@
 /*has been deprectde - don't call make function - expensive! */
 
 angular.module("sampleApp").controller('extensionDefCtrl',
-        function ($scope,$uibModal,appConfigSvc,GetDataFromServer,Utilities,modalService,$http) {
+        function ($rootScope,$scope,$uibModal,appConfigSvc,GetDataFromServer,Utilities,modalService,$http) {
 
             $scope.childElements = [];      //array of child elements
             $scope.input ={};
@@ -9,6 +9,9 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
             $scope.conformanceSvr = appConfigSvc.getCurrentConformanceServer();
 
+            if ($rootScope.userProfile && $rootScope.userProfile.extDef) {
+                $scope.input.publisher = $rootScope.userProfile.extDef.defaultPublisher;
+            }
 
             $scope.save = function() {
                 delete $scope.validateResults;
@@ -279,9 +282,10 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 //the version of fhir that this SD is being deployed against...
                 var fhirVersion = $scope.conformanceSvr.version;        //get from the conformance server
                 var name = $scope.input.name;       //the name of the extension
-                var definition = $scope.input.name;       //the name of the extension
-                var comments = $scope.input.name;       //the name of the extension
-                var short = $scope.input.name;
+                var definition = $scope.input.description;       //the name of the extension
+                var comments = $scope.input.description;       //the name of the extension
+                var short = $scope.input.short;
+
 
                 extensionDefinition.id = name;
                 extensionDefinition.url = $scope.conformanceSvr.url + name;
@@ -298,6 +302,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 extensionDefinition.status = 'draft';
                 extensionDefinition.abstract= false;
 
+                extensionDefinition.publisher = $scope.input.publisher;
 
                 if (fhirVersion == 2) {
                     extensionDefinition.kind='datatype';

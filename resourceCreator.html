@@ -77,9 +77,10 @@
             databaseURL: "https://clinfhir.firebaseio.com",
             storageBucket: ""
         };
-        console.log(firebase)
+      //  console.log(firebase)
         if (firebase) {
             firebase.initializeApp(config);
+            console.log(firebase.auth().currentUser)
         }
 
         angular.module("sampleApp",['ui.checkbox','ngAnimate','ngCookies','ui.bootstrap','ngSanitize',

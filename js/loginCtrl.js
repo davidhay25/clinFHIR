@@ -10,7 +10,16 @@ angular.module("sampleApp")
 
             //var auth = $firebaseAuth();
 
+            $scope.resetPW=function(){
 
+                var email = $scope.input.email;
+                firebase.auth().sendPasswordResetEmail(email).then(function() {
+                    modalService.showModal({}, {bodyText: 'A reset password email has been sent to '+email})
+
+                }).catch(function(error) {
+                    console.error("Error: ", error);
+                });
+            };
 
             $scope.userLogin = function() {
                 var email = $scope.input.email;
@@ -60,8 +69,6 @@ angular.module("sampleApp")
 
                 });
             };
-
-
 
             firebase.auth().onAuthStateChanged(function(user) {
                 if (user) {

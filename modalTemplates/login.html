@@ -40,15 +40,19 @@
             <div class="col-md-6 col-sm-6 col-xs-6">
                 <input class='form-control' type="password" ng-model="input.password"/>
             </div>
-
         </div>
 
         <div class="row" style="margin-bottom: 8px">
             <div class="col-md-8 col-sm-8">
-                <button ng-show="input.email && input.password" class="btn btn-link pull-right"
+                <button ng-show="input.email && input.password" class="btn btn-primary pull-right"
                         ng-click="userLogin()">Login</button>
+                <button ng-show="input.email" class="btn btn-link pull-right"
+                        ng-click="resetPW()">Reset password</button>
             </div>
         </div>
+
+
+
 
 
 

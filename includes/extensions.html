@@ -12,7 +12,8 @@
                 ({{appConfigSvc.getCurrentConformanceServer().url}})</div>
             </div>
             <div class="col-md-2 col-sm-2">
-                <button class="btn btn-default pull-right" ng-click="newExtension()">New Definition</button>
+                <button class="btn btn-default pull-right" ng-show="userProfile.extDef.permissions.canCreate"
+                        ng-click="newExtension()">New Definition</button>
             </div>
         </div>
     </div>
@@ -69,6 +70,7 @@
                         <i class="glyphicon glyphicon-search" ></i></a>
                 </div>
             </div>
+
             <div class="row" style="margin-bottom: 8px">
                 <div class="col-md-5 col-sm-5 col-xs-5">
                     <select class="form-control" ng-model="input.searchStatus">
@@ -78,6 +80,15 @@
                         <option value="all">All</option>
                     </select>
                 </div>
+                <div class="col-md-7 col-sm-7">
+
+
+                    <a class="pull-right" ng-show="extensionsArray" download="{{downloadLinkJsonName}}.json"
+                       href="{{downloadLinkJsonContent}}"> <span class="badge"> {{extensionsArray.length}}</span> <i class="glyphicon glyphicon-cloud-download" ></i>
+
+                    </a>
+                </div>
+
 
 
             </div>
@@ -96,12 +107,10 @@
                         </div>
                     </div>
 
-                    {{entry.resource.description | limitTo : 120}}
+                    {{entry.resource.description | limitTo : 200}}
                 </li>
             </ul>
-
-
-          </div>
+        </div>
         <div class="col-md-8 col-sm-8 col-xs-8">
 
             <uib-tabset ng-show="selectedExtension">
@@ -345,16 +354,20 @@
                     <div class="row">
                         <div class="col-md-12" ng-show="isAuthoredByClinFhir">
                             <div class="pull-right">
-                                <button class="btn btn-primary" ng-show="selectedExtension.status == 'draft'"
+                                <button class="btn btn-primary"
+                                        ng-show="userProfile.extDef.permissions.canEdit && selectedExtension.status == 'draft'"
                                         ng-click="editExtension()">Edit </button>
 
-                                <button class="btn btn-primary" ng-show="selectedExtension.status == 'active'"
+                                <button class="btn btn-primary"
+                                        ng-show="userProfile.extDef.permissions.canRetire && selectedExtension.status == 'active'"
                                         ng-click="retireExtension('retire')">Retire </button>
 
-                                <button class="btn btn-warning" ng-show="selectedExtension.status == 'draft'"
+                                <button class="btn btn-warning"
+                                        ng-show="userProfile.extDef.permissions.canDelete && selectedExtension.status == 'draft'"
                                         ng-click="deleteExtension()">Delete </button>
 
-                                <button class="btn btn-primary" ng-show="selectedExtension.status == 'draft'"
+                                <button class="btn btn-primary"
+                                        ng-show="userProfile.extDef.permissions.canActivatee && selectedExtension.status == 'draft'"
                                         ng-click="activateExtension('activate')">Activate </button>
 
 
