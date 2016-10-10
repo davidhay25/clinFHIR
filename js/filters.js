@@ -115,6 +115,7 @@ angular.module("sampleApp")
             }
 
         }})
+    
     .filter('referenceType',function(){
             return function(ref) {
                 //return the last part of a url - allowing for stu2 (array) or stu3 (single)

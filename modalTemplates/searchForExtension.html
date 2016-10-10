@@ -29,16 +29,30 @@
 
         <div class="row">
             <div class="col-md-4 col-sm-4">
-                <div class="list-group">
-                    <div class="list-group-item" ng-repeat="ent in bundle.entry"
-                         ng-click="selectExtension(ent)" style="cursor: pointer">
-
-                        {{ent.resource.name}}
+                <div style="height:400px; overflow-y: auto;" >
+                    <div class="list-group">
+                        <div class="list-group-item" ng-repeat="ent in bundle.entry"
+                             ng-click="selectExtension(ent)" style="cursor: pointer">
+                            {{ent.resource.name}}
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-8 col-sm-8">
-                <pre>{{selectedExtension | json}}</pre>
+
+                <uib-tabset ng-show="analyse">
+                    <uib-tab heading="Description">
+                        <fhir-extension analyse="analyse" ></fhir-extension>
+                    </uib-tab>
+                    <uib-tab heading="Json">
+                        <pre>{{selectedExtension | json}}</pre>
+                    </uib-tab>
+                    <uib-tab heading="Analysis">
+                        <pre>{{analyse | json}}</pre>
+                    </uib-tab>
+                </uib-tabset>
+
+
             </div>
         </div>
 
@@ -46,16 +60,11 @@
 
     <div class="modal-footer">
         <div class="row">
-            <div class="col-md-8">
-                <div class="text-left">
+            <div class="col-md-12">
 
-
-                </div>
-
+                {{conformanceServerUrl}}{{qry}}
             </div>
-            <div class="col-md-4">
-                {{conformanceServerUrl}} {{qry}}
-            </div>
+
         </div>
 
 

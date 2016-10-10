@@ -684,7 +684,8 @@ angular.module("sampleApp").
             return vo;
         },
         analyseExtensionDefinition3 : function(SD) {
-            //return a vo that contains an analysis of the extension. Used by the profile builder only (at this point)
+            //return a vo that contains an analysis of the extension. Used by the profile builder only and extension directive
+            // (at this point)
             var that = this;
 
             //if this is a complex extension (2 level only) then the property 'complex' has the analysis...
@@ -692,6 +693,9 @@ angular.module("sampleApp").
             vo.display = SD.display; //will use this when displaying the element
             vo.name = SD.name;
 
+            vo.context = SD.context;
+            vo.publisher = SD.publisher;
+            vo.url = SD.url;
 
             //vo.eds = [];     //a suppary of element definitions - so I can see them in the UI
             var discriminator;      //if this is sliced, then a discriminator will be set...
@@ -720,7 +724,14 @@ angular.module("sampleApp").
 
                         //get rid of the url and value that are part of the 'parent' rather than the children...
                         if (arPath.length == 2) {
-                            if (arPath[1] == 'url' || arPath[1].indexOf('value')>-1) {include = false}
+                            //updated as was not getting details for simple extensions...
+                            if (arPath[1] == 'url') {include = false}
+                            if (vo.isComplexExtension && arPath[1].indexOf('value')>-1){include = false}    //THIS is the parent...
+
+                            //if (arPath[1] == 'url' || arPath[1].indexOf('value')>-1) {include = false}
+
+
+
                         }
 
 

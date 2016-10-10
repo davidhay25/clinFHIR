@@ -766,7 +766,7 @@ angular.module("sampleApp")
 
             templateUrl: 'modalTemplates/searchForExtension.html',
             size:'lg',
-            controller: function($scope,resourceType,GetDataFromServer,appConfigSvc){
+            controller: function($scope,resourceType,GetDataFromServer,appConfigSvc,Utilities){
                 $scope.resourceType = resourceType;
 
                 //construct the query to retrene extension defintions...
@@ -800,7 +800,45 @@ angular.module("sampleApp")
                 $scope.showWaiting = true;
                 GetDataFromServer.queryConformanceServer(qry).then(
                     function(data) {
-                        $scope.bundle = data.data;
+                        //filter out the ones not for this resource type. Not sure if this can be done server side...
+                        $scope.bundle = {entry:[]}
+                        if (data.data && data.data.entry) {
+                            data.data.entry.forEach(function(entry){
+                                var include = false;
+                                if (entry.resource) {
+                                    if (! entry.resource.context) {
+                                        include = true;
+                                    } else  {
+                                        entry.resource.context.forEach(function(ctx){
+                                            if (ctx == '*' || ctx.indexOf(resourceType) > -1) {
+                                                include = true;
+                                            }
+                                        })
+                                    }
+                                }
+
+
+                                if (include) {
+                                    $scope.bundle.entry.push(entry)
+                                }
+
+                            })
+                        }
+
+                        $scope.bundle.entry.sort(function(a,b){
+                            if (a.resource && b.resource) {
+                                if (a.resource.name > b.resource.name) {
+                                    return 1
+                                } else {
+                                    return -1;
+                                }
+                            } else {
+                                return 0
+                            }
+
+                        });
+
+                        //$scope.bundle = data.data;
                         console.log($scope.bundle);
                     }
                 ).finally(function(){
@@ -809,6 +847,10 @@ angular.module("sampleApp")
 
                 $scope.selectExtension = function(ent) {
                     $scope.selectedExtension = ent.resource
+
+
+                    $scope.analyse = Utilities.analyseExtensionDefinition3($scope.selectedExtension)
+
                 }
 
 
