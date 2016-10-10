@@ -6,7 +6,7 @@ angular.module('sampleApp').service('modalService', ['$uibModal',
             backdrop: true,
             keyboard: true,
             modalFade: true,
-            templateUrl: '/includes/modalDialogTemplate.html'
+            templateUrl: '/modalTemplates/modalDialogTemplate.html'
         };
 
         var modalOptions = {

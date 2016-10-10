@@ -196,6 +196,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
         },
         createObservations : function(patientId,options) {
+            var deferred = $q.defer();
             var bundle = {resourceType:'Bundle',type:'transaction',entry:[]};
 
             var cnt = 0;
@@ -232,14 +233,16 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
             this.postBundle(bundle).then(
                 function(data){
-                    if (options && options.logFn)
-                        options.logFn('Added '+cnt +' Observations')
+                    if (options && options.logFn){options.logFn('Added '+cnt +' Observations')}
+
+                    deferred.resolve();
                 },
                 function(err) {
                     alert('error saving Observations '+ angular.toJson(err));
+                    deferred.reject();
                 }
             );      //don't care about the response
-
+            return deferred.promise;
         },
         createConditionsDEP : function (patientId,options) {
 
@@ -373,7 +376,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             var listBundleEntry = {resource : allergyList,request:{method:'POST',url:'List/'}};
 
             bundle.entry.push(listBundleEntry);
-            GetDataFromServer.adHocFHIRQuery(url).then(
+            GetDataFromServer.localServerQuery(url).then(
                 function(data) {
                     var refList = data.data;
                     refList.forEach(function(allergy,inx){
@@ -439,13 +442,18 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             var listBundleEntry = {resource : conditionList,request:{method:'POST',url:'List/'}};
 
             bundle.entry.push(listBundleEntry);
-            GetDataFromServer.adHocFHIRQuery(url).then(
+            GetDataFromServer.localServerQuery(url).then(
                 function(data) {
                     var refList = data.data;
                     var fhirVersion = appConfigSvc.getCurrentFhirVersion();
                     refList.forEach(function(condition,inx){
-                        //each entry is a basic medication statement - needs to have the patient specific stuff added
+                        //each entry is a basic condition - needs to have the patient specific stuff added
                         if (fhirVersion == 2) {
+                            //the onset[x] property got renamed...
+                            var onset = condition.onsetAge
+                            condition.onsetQuantity = onset;
+                            delete condition.onsetAge;
+
                             condition.patient = {reference:'Patient/'+patientId};
                         } else {
                             condition.subject = {reference:'Patient/'+patientId};
@@ -510,7 +518,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             var listBundleEntry = {resource : medList,request:{method:'POST',url:'List/'}};
 
             bundle.entry.push(listBundleEntry);
-            GetDataFromServer.adHocFHIRQuery(url).then(
+            GetDataFromServer.localServerQuery(url).then(
                 function(data) {
                     var refList = data.data;
                     refList.forEach(function(medStmt,inx){
@@ -582,12 +590,19 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 var cnt = parseInt(3 * Math.random());
                 for (var j=0; j < cnt; j++) {
                     var ref = bundleConditions.entry[parseInt(bundleConditions.entry.length * Math.random())];
-                    console.log(ref)
+                    //console.log(ref)
                     if (ref.response.location && ref.response.location.indexOf('Condition') > -1) {
                         enc.indication.push({reference:ref.response.location});
                     }
 
                 }
+
+                //an empty array causes a parsing error on Grahames server...
+                if (enc.indication.length == 0) {
+                    delete enc.indication;
+                }
+
+
 
 
                 enc.patient = {reference:'Patient/'+patientId};
@@ -875,6 +890,9 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
                 this.getAllResourcesFollowingPaging(url).then(
                     function(arrayOfResource){
+
+                        //console.log(arrayOfResource)
+
                         if (arrayOfResource) {
                             arrayOfResource.forEach(function(resource){        //this is a bundle
                                 //var resource = entry.resource;

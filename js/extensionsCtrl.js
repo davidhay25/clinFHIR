@@ -6,6 +6,11 @@ angular.module("sampleApp")
 
             $scope.input = {param:'hl7',searchParam:'publisher',searchStatus:'all'};
 
+            $scope.mode = 'extension'
+
+            $scope.changeMode = function(mode) {
+                $scope.mode = mode;
+            }
 
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(lst) {
@@ -123,6 +128,7 @@ angular.module("sampleApp")
 
             $scope.search = function(param) {
                 var query = appConfigSvc.getCurrentConformanceServer().url;
+                $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer().url;  //for the detail display
                 var downLoadName = '';
                 switch ($scope.input.searchParam) {
 
@@ -173,9 +179,15 @@ angular.module("sampleApp")
                 }
 
 
-                query += "&type=Extension&_count=100"
 
-                console.log(query,downLoadName)
+
+                if ($scope.mode == 'extension') {
+                    query += "&type=Extension";      //this is foe an extension
+                } else {
+                    query += "&kind=resource"
+                }
+
+
 
                 getExtensions(query,downLoadName)
             }
@@ -186,7 +198,7 @@ angular.module("sampleApp")
                 delete $scope.extensionsArray;
                 delete $scope.selectedExtension;
                 delete $scope.index;
-
+console.log(query)
 
                 GetDataFromServer.adHocFHIRQuery(query).then(
                     function(data) {

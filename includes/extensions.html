@@ -5,19 +5,34 @@
         <div class="alert alert-warning" role="alert">Accessing server, please wait...</div>
     </div>
 
-    <div class="rounded-box-filled">
+    <div>
         <div class="row">
-            <div class="col-md-10 col-sm-10">
-                <div style="vertical-align: middle">Extension definitions on {{appConfigSvc.getCurrentConformanceServer().name }}
+            <div class="col-md-4 col-sm-4">
+                <button ng-click="changeMode('extension')"
+                        ng-class="{btn:true,'btn-default':true,active:mode=='extension'}">Extension Definitions</button>
+                <button  ng-click="changeMode('profile')"
+                        ng-class="{btn:true,'btn-default':true,active:mode=='profile'}">Profiles</button>
+            </div>
+
+
+            <div class="col-md-6 col-sm-6">
+                <div>
+                    <span ng-show="mode=='extension'"> Extension definitions</span>
+                    <span ng-show="mode=='profile'"> Profiles</span>
+
+                    on {{appConfigSvc.getCurrentConformanceServer().name }}
                 ({{appConfigSvc.getCurrentConformanceServer().url}})</div>
             </div>
             <div class="col-md-2 col-sm-2">
-                <button class="btn btn-default pull-right" ng-show="userProfile.extDef.permissions.canCreate"
-                        ng-click="newExtension()">New Definition</button>
+                <button class="btn btn-default pull-right"
+                        ng-show="mode=='extension' && userProfile.extDef.permissions.canCreate"
+                        ng-click="newExtension()">New Extension Definition</button>
             </div>
+
+
         </div>
     </div>
-    <br/>
+    <hr/>
     <div class="row">
 
         <div class="col-md-4 col-sm-4 col-xs-4">
@@ -113,7 +128,10 @@
         </div>
         <div class="col-md-8 col-sm-8 col-xs-8">
 
-            <uib-tabset ng-show="selectedExtension">
+
+
+
+            <uib-tabset ng-show="selectedExtension && mode=='extension'">
                 <uib-tab heading="Details">
 
 
@@ -366,8 +384,8 @@
                                         ng-show="userProfile.extDef.permissions.canDelete && selectedExtension.status == 'draft'"
                                         ng-click="deleteExtension()">Delete </button>
 
-                                <button class="btn btn-primary"
-                                        ng-show="userProfile.extDef.permissions.canActivatee && selectedExtension.status == 'draft'"
+                                <button class="btn btn-success"
+                                        ng-show="userProfile.extDef.permissions.canActivate && selectedExtension.status == 'draft'"
                                         ng-click="activateExtension('activate')">Activate </button>
 
 

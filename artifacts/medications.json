@@ -7,12 +7,15 @@
       ],
       "text" : "salbutamol 90 mcg/spray"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"195967001","system":"http://snomed.info/ct","display":"asthma (disorder)"}
       ],
       "text" : "asthma"
-    },
+    }],
     "dosage" : [
       {
         "text" : "2 puffs every 4 hours as needed",
@@ -55,12 +58,14 @@
       "reference": "#med1",
       "display" : "aspirin 81 mg"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"73211009","system":"http://snomed.info/ct","display":"diabetes (disorder)"}
       ],
       "text" : "diabetes"
-    },
+    }],
     "dosage" : [
       {
         "text" : "once daily",
@@ -86,12 +91,14 @@
       ],
       "text" : "beclomethasone HFA"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"195967001","system":"http://snomed.info/ct","display":"asthma (disorder)"}
       ],
       "text" : "asthma"
-    },
+    }],
     "dosage" : [
       {
         "text" : "2 puffs twice daily",
@@ -118,12 +125,14 @@
       ],
       "text" : "carvedilol"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"38341003","system":"http://snomed.info/ct","display":"hypertension (disorder)"}
       ],
       "text" : "hypertension"
-    },
+    }],
     "dosage" : [
       {
         "text" : "twice daily",
@@ -149,12 +158,14 @@
       ],
       "text" : "chlorthalidone"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"38341003","system":"http://snomed.info/ct","display":"hypertension (disorder)"}
       ],
       "text" : "hypertension"
-    },
+    }],
     "dosage" : [
       {
         "text" : "once daily",
@@ -180,12 +191,14 @@
       ],
       "text" : "citalopram"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"35489007","system":"http://snomed.info/ct","display":"depression (disorder)"}
       ],
       "text" : "depression"
-    },
+    }],
     "dosage" : [
       {
         "text" : "once daily",
@@ -211,12 +224,14 @@
       ],
       "text" : "gabapentin"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"247398009","system":"http://snomed.info/ct","display":"neuropathic pain (disorder)"}
       ],
       "text" : "neuropathic pain"
-    },
+    }],
     "dosage" : [
       {
         "text" : "twice daily",
@@ -242,21 +257,23 @@
       ],
       "text" : "insulin glargine"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"73211009","system":"http://snomed.info/ct","display":"diabetes (disorder)"}
       ],
       "text" : "diabetes"
-    },
+    }],
     "dosage" : [
       {
         "text" : "28 units before bed",
         "timing" : {
           "repeat": {
-            "frequency": "1",
+            "frequency" : 1,
             "period": "1",
-            "periodUnit": "d",
-            "when":"HS"
+            "periodUnit": "d"
+
           }
         },
         "doseQuantity": {
@@ -274,12 +291,14 @@
       ],
       "text" : "losartan 100mg"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"38341003","system":"http://snomed.info/ct","display":"hypertension (disorder)"}
       ],
       "text" : "hypertension"
-    },
+    }],
     "dosage" : [
       {
         "text" : "once daily",
@@ -305,12 +324,14 @@
       ],
       "text" : "metformin 1000mg"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"73211009","system":"http://snomed.info/ct","display":"diabetes (disorder)"}
       ],
       "text" : "diabetes"
-    },
+    }],
     "dosage" : [
       {
         "text" : "1 tab twice daily",
@@ -336,12 +357,14 @@
       ],
       "text" : "naproxen 500mg"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"69896004","system":"http://snomed.info/ct","display":"rheumatoid arthritis (disorder)"}
       ],
       "text" : "rheumatoid arthritis"
-    },
+    }],
     "dosage" : [
       {
         "text" : "1 tab twice daily",
@@ -367,12 +390,14 @@
       ],
       "text" : "omeprazole 40mg"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"235595009","system":"http://snomed.info/ct","display":"GERD (disorder)"}
       ],
       "text" : "Gastro Oesophageal reflux"
-    },
+    }],
     "dosage" : [
       {
         "text" : "1 tab once daily",
@@ -398,12 +423,14 @@
       ],
       "text" : "prednisone 20mg"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"195967001","system":"http://snomed.info/ct","display":"asthma (disorder)"}
       ],
       "text" : "asthma"
-    },
+    }],
     "dosage" : [
       {
         "text" : "2 tabs once daily",
@@ -430,12 +457,14 @@
       ],
       "text" : "simvastatin 40mg"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"13644009","system":"http://snomed.info/ct","display":"high cholesterol"}
       ],
       "text" : "high cholesterol"
-    },
+    }],
     "dosage" : [
       {
         "text" : "1 tab once daily",
@@ -462,12 +491,14 @@
       ],
       "text" : "terbinafine 250mg"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" :[ {
       "coding" : [
         {"code":"414941008","system":"http://snomed.info/ct","display":"onychomycosis"}
       ],
       "text" : "onychomycosis"
-    },
+    }],
     "dosage" : [
       {
         "text" : "1 tab once daily",
@@ -494,21 +525,23 @@
       ],
       "text" : "zolpidem 5mg"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"193462001","system":"http://snomed.info/ct","display":"insomnia"}
       ],
       "text" : "insomnia"
-    },
+    }],
     "dosage" : [
       {
         "text" : "1 tab before bed",
         "timing" : {
           "repeat": {
-            "frequency": "1",
+            "frequency" : 1,
             "period": "1",
-            "periodUnit": "d",
-            "when":"HS"
+            "periodUnit": "d"
+
           }
         },
         "doseQuantity": {
@@ -526,12 +559,14 @@
       ],
       "text" : "lisinopril 20mg"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"38341003","system":"http://snomed.info/ct","display":"hypertension (disorder)"}
       ],
       "text" : "hypertension"
-    },
+    }],
     "dosage" : [
       {
         "text" : "once daily",
@@ -557,21 +592,22 @@
       ],
       "text" : "isosorbide mononitrate 20mg"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"194828000","system":"http://snomed.info/ct","display":"angina"}
       ],
       "text" : "hypertension"
-    },
+    }],
     "dosage" : [
       {
         "text" : "once daily at bedtime",
         "timing" : {
           "repeat": {
-            "frequency": "1",
+            "frequency" : 1,
             "period": "1",
-            "periodUnit": "d",
-            "when":"HS"
+            "periodUnit": "d"
           }
         },
         "doseQuantity": {
@@ -589,12 +625,14 @@
       ],
       "text" : "buspirone 5mg"
     },
-    "reasonForUseCodeableConcept" : {
+    "status": "active",
+    "notTaken": false,
+    "reasonForUseCode" : [{
       "coding" : [
         {"code":"19748006","system":"http://snomed.info/ct","display":"anxiety disorder"}
       ],
       "text" : "anxiety disorder"
-    },
+    }],
     "dosage" : [
       {
         "text" : "3 times daily",

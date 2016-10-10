@@ -176,12 +176,12 @@
       ],
       "text" : "rheumatoid arthritis - both hands"
     },
-    "bodySite" : {
+    "bodySite" : [{
       "coding" : [
         {"code": "12861001","system":"http://snomed.info/ct","display":"both hands"}
       ],
       "text" : "both hands"
-    },
+    }],
     "evidence" : [
       {
         "code": {
@@ -228,12 +228,12 @@
       ],
       "text" : "rheumatoid arthritis - left elbow"
     },
-    "bodySite" : {
+    "Site" : [{
       "coding" : [
         {"code": "1927002","system":"http://snomed.info/ct","display":"left elbow"}
       ],
       "text" : "left elbow"
-    },
+    }],
     "evidence" : [
       {
         "code": {

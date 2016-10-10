@@ -5,24 +5,29 @@ var fileServer = new static.Server({ indexFile: "resourceCreator.html" });
 var request  = require('request');
 var moment = require('moment');
 
-var myParser = require("body-parser");
+var httpProxy = require('http-proxy')
+
+//  remove for proxy var myParser = require("body-parser");
 var Cookies = require( "cookies" )
 
 
 var express = require('express');
 var app = express();
-app.use(myParser.json({extended : true}));
+//remove for proxy app.use(myParser.json({extended : true}));
 
 //var connect = require('connect');
 var http = require('http');
+
+
+
+
+
 
 //var app = connect();
 
 
 process.on('uncaughtException', function(err) {
     console.log('>>>>>>>>>>>>>>> Caught exception: ' + err);
-
-
 });
 
 var db;
@@ -40,6 +45,25 @@ MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
         db = ldb;
     }
 });
+
+
+// proxy - for servers not implementing CORS
+var proxy = httpProxy.createProxyServer({});
+proxy.on('error', function (err, req, res) {
+    console.log('proxy error',err)
+    res.writeHead(500, {
+        'Content-Type': 'text/plain'
+    });
+    res.end('Something went wrong. And we are reporting a custom error message.');
+});
+
+proxy.on('proxyRes', function (proxyRes, req, res) {
+    //console.log('RAW Response from the target', JSON.stringify(proxyRes.headers, true, 2));
+});
+proxy.on('proxyReq', function (proxyRes, req, res) {
+    //console.log('sending');
+});
+
 
 
 function recordAccess(req) {
@@ -71,6 +95,37 @@ function recordAccess(req) {
 
 //return status pages, index is resourceCeator.html
 app.use('/', express.static(__dirname,{index:'/resourceCreator.html'}));
+
+
+//--- proxies for Grahames server. Could generalize this using - eg - headers,but will need to update allservices making $http calls...
+app.all('/grahamv3/*',function(req,res){
+    //console.log(req.url)
+    req.url = req.url.replace('grahamv3/','')
+    proxy.web(req, res, { target: 'http://fhir3.healthintersections.com.au/open/' });
+});
+
+app.all('/grahamv2/*',function(req,res){
+    //console.log(req.url)
+    req.url = req.url.replace('grahamv2/','')
+    proxy.web(req, res, { target: 'http://fhir3.healthintersections.com.au/open/' });
+});
+
+
+
+/*
+app.get('/proxy/*',function(req,res){
+    console.log(req.url)
+    req.url = req.url.replace('proxy/','')
+    proxy.web(req, res, { target: 'http://fhir3.healthintersections.com.au/open/' });
+});
+
+app.post('/proxy/*',function(req,res){
+    console.log('post: '+ req.url)
+    req.url = req.url.replace('proxy/','')
+    proxy.web(req, res, { target: 'http://fhir3.healthintersections.com.au/open/' });
+});
+
+*/
 
 
 //this is used for the re-direct from simplifier

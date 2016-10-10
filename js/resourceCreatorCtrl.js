@@ -32,6 +32,13 @@ angular.module("sampleApp")
 
     $scope.baseUrl = "http://hl7.org/fhir/2016Sep/";    //root for displaying details of resource
 
+
+    if (appConfigSvc.checkConfigVersion()) {
+        var txt = 'The default configuration has been updated. Please re-load the page for it to take effect.'
+        modalService.showModal({}, {bodyText: txt})
+
+    }
+
     $scope.cookies = $cookies.getAll();
     if ($scope.cookies && enabled) {        //disablefor now
 
@@ -116,31 +123,10 @@ angular.module("sampleApp")
     });
 
 
-            //console.log(firebase.auth().currentUser)
-
-    //there's already a loggedin user, so set the user properties on the rootScope
-    /*if (firebase.auth().currentUser) {
-
-        var refUsers = firebase.database().ref().child("users");
-        var userProfile = firebase.database().ref().child("users").child(firebase.auth().currentUser.uid)
-
-        console.log(userProfile)
-
-    }
-
-            */
 
     //get the firebase projects link
     var refProjects = firebase.database().ref().child("projects");
     $rootScope.fbProjects = $firebaseArray(refProjects);
-
-    //get
-
-    //var refLoad = firebase.database().ref().child("loadResource");
-    //console.log(refLoad)
-    // create a synchronized array
-   // $rootScope.fbLoadResource = $firebaseArray(refLoad);
-
 
 
     //place on scope so can adjust dispaly
@@ -595,7 +581,7 @@ angular.module("sampleApp")
                 appConfigSvc.setAllResources(allResources);
                 $rootScope.$broadcast('resourcesLoadedForPatient')
 
-                //console.log(allResources);
+                console.log(allResources);
                 $scope.allResources = allResources;
                 //all conditions is used by the timeline display to
                 //var allConditions = allResources['Condition'];
@@ -640,7 +626,6 @@ angular.module("sampleApp")
 
                         })
                     }
-
 
                     //also need to add the reference resources to the dictionary (so thay can be found in outgoing references)
                     supportSvc.getReferenceResources().forEach(function (resource) {
@@ -2668,7 +2653,7 @@ console.log(profile)
 
             //Display a countdown timer so the user knows something is happenning
             var stop;
-            $scope.elapsed= 10;     //this timeout is set in the resourceCreatorSvc.getConformanceResource as well...
+            $scope.elapsed= 15;     //this timeout is set in the resourceCreatorSvc.getConformanceResource as well...
             timer = function() {
 
                 if ( angular.isDefined(stop) ) return;      //only have 1 at a time...
@@ -2809,6 +2794,8 @@ console.log(profile)
                     //supportSvc.checkReferenceResources
 
                     //add - and select - a new patient..
+                    //note that Grahames server can't handle multiple concurrent requests - whucg is why theres
+                    //a rather ineligant 'pyramid of doom' sync calls....
                     $scope.addNewPatient = function() {
                         $scope.showLog = true;
                         $scope.allowClose = false;
@@ -2835,43 +2822,106 @@ console.log(profile)
                                                         function(msg){
                                                             addLog(msg);
                                                                var query = [];
-                                                                //addLog('adding Conditions...');
-                                                               // query.push(supportSvc.createConditions(patientId,{logFn:addLog}));
+
+
+
+
+                                                            supportSvc.createObservations(patientId,{logFn:addLog}).then(
+                                                                function() {
+                                                                    supportSvc.buildMedicationList(patientId,{logFn:addLog}).then(
+                                                                        function() {
+                                                                            supportSvc.createAppointments(patientId,{logFn:addLog}).then(
+                                                                                function() {
+                                                                                    supportSvc.buildAllergiesList(patientId,{logFn:addLog}).then(
+                                                                                        function () {
+                                                                                            $scope.saving = false;
+                                                                                            supportSvc.resetResourceReferences();   //remove all the newly created resources from the reference resource list...
+                                                                                            // not yet.. $scope.$close();
+                                                                                            appConfigSvc.setCurrentPatient(patient);
+                                                                                            $rootScope.$emit('patientSelected',patient);
+                                                                                            $scope.loading = false;
+                                                                                            $scope.allowClose = true;
+                                                                                            $scope.allDone = true;
+                                                                                        },
+                                                                                        function (err) {
+                                                                                            //error for allergies...
+                                                                                            modalService.showModal({}, {bodyText: "Error saving allergies:"+angular.toJson(err)})
+                                                                                            $scope.allowClose = true;
+
+                                                                                        }
+                                                                                    )
+
+                                                                                },
+                                                                                function(err) {
+                                                                                    //error for appointments
+                                                                                    modalService.showModal({}, {bodyText: "Error saving appointments:"+angular.toJson(err)})
+                                                                                    $scope.allowClose = true;
+                                                                                }
+                                                                            )
+
+                                                                        },
+                                                                        function(err) {
+                                                                            //error for meds
+                                                                            modalService.showModal({}, {bodyText: "Error saving meds:"+angular.toJson(err)})
+                                                                            $scope.allowClose = true;
+                                                                        }
+
+
+
+                                                                    )
+
+
+                                                                },function(err) {
+                                                                    //error for obs
+                                                                    modalService.showModal({}, {bodyText: "Error saving obs:"+angular.toJson(err)})
+                                                                    $scope.allowClose = true;
+
+                                                                }
+                                                            );
+
+
+
+/* - this is an async create - works for hapi,but not Grahame. Maybe a server option?
                                                                 addLog('adding Observations...');
                                                                 query.push(supportSvc.createObservations(patientId,{logFn:addLog}));
+
+
                                                                 addLog('adding Appointments...');
                                                                 query.push(supportSvc.createAppointments(patientId,{logFn:addLog}));
                                                                 addLog('adding Medication List...');
                                                                 query.push(supportSvc.buildMedicationList(patientId,{logFn:addLog}));
                                                                 addLog('adding Allergy List...');
                                                                 query.push(supportSvc.buildAllergiesList(patientId,{logFn:addLog}));
-                                                              //  addLog('adding Condition List...');
-                                                                //query.push(supportSvc.buildConditionList(patientId,{logFn:addLog}));
-        
-                                                                $q.all(query).then(
-                                                                    //regardless of success or failure, turn off the saving flag
-                                                                    function() {
-                                                                        $scope.saving = false;
-                                                                        supportSvc.resetResourceReferences();   //remove all the newly created resources from the reference resource list...
-                                                                        // not yet.. $scope.$close();
-                                                                        appConfigSvc.setCurrentPatient(patient);
-                                                                        $rootScope.$emit('patientSelected',patient);
-                                                                        $scope.loading = false;
-                                                                        $scope.allowClose = true;
-                                                                        $scope.allDone = true;
-        
-        
-                                                                    },
-                                                                    function(err) {
-                                                                        alert('error creating sample resources\n'+angular.toJson(err))
-                                                                        $scope.allowClose = true;
-                                                                        $scope.loading = false;
-                                                                    }
-                                                                )
+
+                                                     $q.all(query).then(
+                                                     //regardless of success or failure, turn off the saving flag
+                                                     function() {
+                                                     $scope.saving = false;
+                                                     supportSvc.resetResourceReferences();   //remove all the newly created resources from the reference resource list...
+                                                     // not yet.. $scope.$close();
+                                                     appConfigSvc.setCurrentPatient(patient);
+                                                     $rootScope.$emit('patientSelected',patient);
+                                                     $scope.loading = false;
+                                                     $scope.allowClose = true;
+                                                     $scope.allDone = true;
+
+
+                                                     },
+                                                     function(err) {
+                                                     alert('error creating sample resources\n'+angular.toJson(err))
+                                                     $scope.allowClose = true;
+                                                     $scope.loading = false;
+                                                     }
+                                                     )
+
+
+*/
+
         
                                                             },
                                                         function(err){
                                                             alert('error creating Encounters '+ angular.toJson(err));
+                                                            $scope.allowClose = true;
                                                         }
                                                     )
 
@@ -2918,7 +2968,9 @@ console.log(profile)
                         );
 
 
-                    }
+                    };
+
+
                     
                     //directly load a patient based on their id
                     $scope.loadPatient = function(id) {

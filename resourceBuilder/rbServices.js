@@ -137,6 +137,9 @@ angular.module("sampleApp").
             //console.log(qry)
             return $http.get(qry);
         },
+        localServerQuery : function(url) {
+            return $http.get(url);
+        },
         adHocFHIRQuery : function(url) {
             //an ahhoc query - full url given - to avoid a controller using $http directly...
             var deferred = $q.defer();
