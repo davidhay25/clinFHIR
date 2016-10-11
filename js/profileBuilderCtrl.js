@@ -204,11 +204,15 @@ angular.module("sampleApp")
 
     //when a profile is selected from the front screen, check if it is a core type
     //note that the tree component has already been set up with the new profile so no need to do it again...
-    $scope.$on('profileSelected',function(event,data){
+    $scope.$on('profileSelected',function(event,selectedProfile){
         delete $scope.isBaseResource;
         $scope.logOfChanges = [];
         $scope.allowEdit = false;    //the profile being viewed can be altered
-        var selectedProfile = data.profile;
+        //var selectedProfile = data.profile;
+
+
+        $scope.frontPageProfile = selectedProfile;      //this is the property in the tree component...
+        console.log(selectedProfile)
 
         $scope.profileInEditor = selectedProfile;
 
@@ -308,7 +312,19 @@ angular.module("sampleApp")
         delete $scope.model;
         delete $scope.selectedNode;
         delete $scope.edFromTreeNode;
-        $rootScope.$emit('closeProfileEditPage');
+
+        //now set the displayMode. If there is a 'currentMode' on the rootScope, then set to that (as it was the mode
+        //from where the profile editor was invoked. Otherwise, load the front page...
+        if ($rootScope.lastModeActivity && $rootScope.lastModeActivity.currentMode) {
+            $rootScope.$broadcast('setDisplayMode',{newMode:$rootScope.lastModeActivity.currentMode,currentMode: 'profileEditor'});  //display the profile editor page
+        } else {
+            $rootScope.$broadcast('setDisplayMode',{newMode:'front',currentMode: 'profileEditor'});  //display the profile editor page
+        }
+
+        //$rootScope.$emit('closeProfileEditPage');
+        
+        
+        
     }
 
     //when the tree is re-drawn. model is the array of tree nodes.

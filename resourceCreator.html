@@ -705,6 +705,9 @@
 
 -->
 
+
+
+
             <div ng-controller="extensionsCtrl" ng-show="displayMode == 'extensions'">
                 <ng-include src="'/includes/extensions.html'"></ng-include>
             </div>
@@ -755,8 +758,14 @@
 
 
 
+
             <div ng-show="displayMode == 'front'" ng-controller="frontCtrl">
                 <ng-include src="'/includes/frontPage.html'"></ng-include>
+            </div>
+
+
+            <div ng-show="displayMode == 'profileEditor'" ng-controller="logicalModelCtrl">
+                <ng-include src="'/includes/profileEditor.html'"></ng-include>
             </div>
 
 

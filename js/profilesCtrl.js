@@ -23,25 +23,13 @@ angular.module("sampleApp")
 
 
             //called to display the editing and details screen - from the 'eye'...
-            $scope.showLocalProfile = function() {
+            $scope.showProfileDetails = function() {
 
                 var profile = angular.copy($scope.selectedProfile)
 
-                console.log(profile)
-               // $scope.waiting=true;    //will be disabled by the ontreeredraw from the profile component
-                //$scope.showProfileEditPage = true;      //displays the editor page (and hides the front page)
 
-                //$scope.frontPageProfile = null;
-
-                //$rootScope.$broadcast('setWaitingFlag',true);   //activates the 'show waiting' icon...
-
-                //$scope.frontPageProfile = profile;      //set the profile in the component
-                //broadcast an event so that the profile edit controller (logicalModelCtrl) can determine if this is a core profile and can't be edited...
-                $rootScope.$broadcast('showProfileEditor',profile);     //to display the editor
-                
-               // $rootScope.$broadcast('profileSelected',{profile:profile});
-
-
+                $rootScope.$broadcast('profileSelected',profile);       //allows components to initalise with the profile
+                $rootScope.$broadcast('setDisplayMode',{newMode:'profileEditor',currentMode: 'profiles'});  //display the profile editor page
 
             };
 
@@ -71,7 +59,7 @@ angular.module("sampleApp")
             });
 
             $rootScope.$on('setDisplayMode',function(ev,mode) {
-                if (mode == 'profiles') {
+                if (mode.newMode == 'profiles') {
                     delete $scope.profilesArray;
                     delete $scope.selectedProfile;
                 }

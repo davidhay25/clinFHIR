@@ -25,9 +25,9 @@
 
 </style>
 
-<div ng-controller="logicalModelCtrl">
+<div>
 
-    <div ng-show="showProfileEditPage"  class="row rounded-box">
+    <div class="row rounded-box">
         <div class="col-md-2">
             <div class="myPadded">
                 <strong ng-show="mode=='view'">Viewing profile</strong>
@@ -84,7 +84,7 @@
 
 
 
-    <div ng-show="showProfileEditPage">
+    <div>
 
         <uib-tabset active="showTab.tabIndexActive">
 
@@ -105,10 +105,7 @@
                               updateelementdefinition = "updateElementDefinitionInComponent"
                               ontreedraw="onTreeDraw(item)" newnode="newNodeToAdd"></show-profile>
 
-                <!-- temp
-                <button class="btn btn-link pull-right"
-                        ng-click="newExtension()">New extension</button>
-    -->
+
                 <div class="myScroll">
                     <div id="localTree"></div>
                 </div>

@@ -27,7 +27,7 @@ angular.module("sampleApp")
             $rootScope.$on('patientObservations',function(event,obsBundle) {
                 delete $scope.observations;
                 console.log(obsBundle)
-                if (obsBundle) {
+                if (obsBundle && obsBundle.entry) {
 
                     var obsCodes = {}
                     obsBundle.entry.forEach(function(entry){

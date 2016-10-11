@@ -46,7 +46,7 @@ angular.module("sampleApp")
             });
 
             $rootScope.$on('setDisplayMode',function(ev,mode) {
-                if (mode == 'extensions') {
+                if (mode.newMode == 'extensions') {
                     delete $scope.extensionsArray;
                     delete $scope.selectedExtension;
                 }

@@ -310,13 +310,19 @@ angular.module("sampleApp")
 
     $scope.showExtensionsDEP = function() {
         $scope.displayMode = 'extensions';
-        $rootScope.$broadcast('setDisplayMode','extensions');
+        $rootScope.$broadcast('setDisplayMode',{newMode:'extensions'});
     }
 
 
+    $rootScope.$on('setDisplayMode',function(event,mode){
+        $scope.displayMode = mode.newMode;
+        console.log('setting displayMode to ' + mode.newMode)
+        $rootScope.lastModeActivity = mode;         //so a component (like the profile builder) can re-load a previous mode (from mode.currentMode)
+    });
+
     $scope.changeDisplayMode = function(mode) {
-        $scope.displayMode = mode;
-        $rootScope.$broadcast('setDisplayMode',mode);
+        //$scope.displayMode = mode;
+        $rootScope.$broadcast('setDisplayMode',{newMode:mode});
     }
 
 
@@ -463,6 +469,7 @@ angular.module("sampleApp")
 
     //when a new profile is selected from the front page...
     $rootScope.$on('profileSelected',function(event,profile){
+        console.log(profile)
         $scope.dirty=false;     //a new form is loaded
         $scope.parkedHx = false;
         setUpForNewProfile(profile);
@@ -2462,6 +2469,7 @@ console.log(profile)
 
 
         //display the profile editor page (as also called from the profiles explorer)
+        /*
         $rootScope.$on('showProfileEditor',function(event,profile){
 
             console.log('showProfileEditor',profile)
@@ -2470,6 +2478,8 @@ console.log(profile)
 
             $scope.showProfileEditPage = true;      //displays the editor page (and hides the front page)
         });
+
+        */
 
         $scope.showHelp = true;
         if ($localStorage.dontNeedHelp) {
@@ -2577,17 +2587,28 @@ console.log(profile)
         //when the 'eye' icon is clicked in the list. we want to view the profile in the tree - and potentially edit it
         //the actual profile has been loaded, and is passed into the function
         $scope.showLocalProfile = function(event,profile) {
-            $scope.waiting=true;    //will be disabled by the ontreeredraw from the profile component
+            //event.cancelBubble();
+            event.stopPropagation();        //otherwise the event to select the profile (for the builder) is fired...
+            
+            //$scope.waiting=true;    //will be disabled by the ontreeredraw from the profile component
             //$scope.showProfileEditPage = true;      //displays the editor page (and hides the front page)
 
-            //$scope.frontPageProfile = null;
-            //$scope.frontPageProfile = profile;      //set the profile in the component
+           // $scope.frontPageProfile = null;
+           // $scope.frontPageProfile = profile;      //set the profile in the component
             //broadcast an event so that the profile edit controller (logicalModelCtrl) can determine if this is a core profile and can't be edited...
 
-            $rootScope.$broadcast('showProfileEditor',profile);     //to display the editor
 
-            $scope.$broadcast('profileSelected',{profile:profile});
-           
+            //$rootScope.$broadcast('showProfileEditor',profile);     //to display the editor
+
+            //$scope.$emit('profileSelected',{profile:profile});
+            $rootScope.$broadcast('profileSelected',profile);
+
+            $rootScope.$broadcast('setDisplayMode',{newMode:'profileEditor'});  //display the profie editor page
+
+
+
+
+            $scope.frontPageProfile = profile;
 
 
         };
@@ -2619,12 +2640,13 @@ console.log(profile)
 
             }
         };
-
+/*
         //when the page is closed in the profile editor. Needs to inform the parent page to close the editor...
         $rootScope.$on('closeProfileEditPage',function(){
             $scope.showProfileEditPage = false;
         });
 
+        */
 
 
         function setup() {
@@ -2754,7 +2776,7 @@ console.log(profile)
             $rootScope.$emit('patientSelected',patient);
         };
 
-        //when a profile is selected from the list (not the dialog) to build a resource from. It returns the profile (StructureDefinition resource)
+        //when a profile is selected from the 'myProfiles' list (not the dialog) to build a resource from. It returns the profile (StructureDefinition resource)
         $scope.selectProfile = function(profile) {
 
             //console.log(profile)
@@ -2764,8 +2786,7 @@ console.log(profile)
 
             resourceCreatorSvc.setCurrentProfile(clone);
             $rootScope.$emit('profileSelected',clone);      //will cause the builder to be set up for the seelcted profile...
-
-
+            
         };
 
         //when the user wants to locate an existing patient in the data server
