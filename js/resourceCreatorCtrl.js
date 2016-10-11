@@ -107,7 +107,7 @@ angular.module("sampleApp")
                 }
                 if (updateProfile || !$rootScope.userProfile || !$rootScope.userProfile.extDef) {
                     $rootScope.userProfile.extDef = {permissions : {canCreate : true, canActivate : true, canEdit:true, canRetire: true, canDelete : true}}
-                    $rootScope.userProfile.extDef.defaultPublisher = 'Orion Health';
+                    $rootScope.userProfile.extDef.defaultPublisher = 'Orion';
                     $rootScope.userProfile.$save();
                 }
 
@@ -494,6 +494,7 @@ angular.module("sampleApp")
             //console.log('reload')
         });
     });
+
 
 
 
@@ -2459,6 +2460,17 @@ console.log(profile)
                                      $translate,$interval,GetDataFromServer,$firebaseArray){
 
 
+
+        //display the profile editor page (as also called from the profiles explorer)
+        $rootScope.$on('showProfileEditor',function(event,profile){
+
+            console.log('showProfileEditor',profile)
+            $scope.frontPageProfile = profile;      //set the profile in the component
+            //broadcast an event so that the profile edit controller (logicalModelCtrl) can determine if this is a core profile and can't be edited...
+
+            $scope.showProfileEditPage = true;      //displays the editor page (and hides the front page)
+        });
+
         $scope.showHelp = true;
         if ($localStorage.dontNeedHelp) {
             $scope.showHelp = false;
@@ -2566,19 +2578,22 @@ console.log(profile)
         //the actual profile has been loaded, and is passed into the function
         $scope.showLocalProfile = function(event,profile) {
             $scope.waiting=true;    //will be disabled by the ontreeredraw from the profile component
-            $scope.showProfileEditPage = true;      //displays the editor page (and hides the front page)
+            //$scope.showProfileEditPage = true;      //displays the editor page (and hides the front page)
 
-            $scope.frontPageProfile = null;
-
-            //$rootScope.$broadcast('setWaitingFlag',true);   //activates the 'show waiting' icon...
-
-            $scope.frontPageProfile = profile;      //set the profile in the component
+            //$scope.frontPageProfile = null;
+            //$scope.frontPageProfile = profile;      //set the profile in the component
             //broadcast an event so that the profile edit controller (logicalModelCtrl) can determine if this is a core profile and can't be edited...
+
+            $rootScope.$broadcast('showProfileEditor',profile);     //to display the editor
+
             $scope.$broadcast('profileSelected',{profile:profile});
            
 
 
         };
+
+
+
 
 
         //removing a profile from the list

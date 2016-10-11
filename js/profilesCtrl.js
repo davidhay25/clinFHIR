@@ -4,7 +4,8 @@ angular.module("sampleApp")
     .controller('profilesCtrl',
         function ($rootScope,$scope,GetDataFromServer,appConfigSvc,Utilities,$uibModal,RenderProfileSvc,SaveDataToServer,modalService,$timeout) {
 
-            $scope.input = {param:'hl7',searchParam:'publisher',searchStatus:'all'};
+            //$scope.input = {param:'hl7',searchParam:'publisher',searchStatus:'all'};
+            $scope.input = {searchParam:'resource',searchStatus:'all'};
 
             $scope.$watch('input.searchParam',function(){
                // alert('c')
@@ -16,9 +17,45 @@ angular.module("sampleApp")
                 function(lst) {
                     $scope.allResourceTypes = lst;
                     //console.log($scope.allResourceTypes);
+                    $scope.input.resourceType = lst[0]
                 }
             );
 
+
+            //called to display the editing and details screen - from the 'eye'...
+            $scope.showLocalProfile = function() {
+
+                var profile = angular.copy($scope.selectedProfile)
+
+                console.log(profile)
+               // $scope.waiting=true;    //will be disabled by the ontreeredraw from the profile component
+                //$scope.showProfileEditPage = true;      //displays the editor page (and hides the front page)
+
+                //$scope.frontPageProfile = null;
+
+                //$rootScope.$broadcast('setWaitingFlag',true);   //activates the 'show waiting' icon...
+
+                //$scope.frontPageProfile = profile;      //set the profile in the component
+                //broadcast an event so that the profile edit controller (logicalModelCtrl) can determine if this is a core profile and can't be edited...
+                $rootScope.$broadcast('showProfileEditor',profile);     //to display the editor
+                
+               // $rootScope.$broadcast('profileSelected',{profile:profile});
+
+
+
+            };
+
+            $scope.treeNodeSelected = function(item){
+                console.log(item)
+                try {
+                    $scope.selectedEd = angular.copy(item.node.data.ed);
+                    delete $scope.selectedEd.myMeta
+                    $scope.$digest();       //as the event is outside of angular
+                } catch (ex){
+                    
+                }
+                
+            }
 
             $rootScope.$on('userLoggedIn',function(){
                 var userProfile = $rootScope.userProfile;
@@ -139,6 +176,8 @@ angular.module("sampleApp")
                 
                 var conformanceServer =  appConfigSvc.getCurrentConformanceServer();
                 var query = conformanceServer.url;
+                query += "StructureDefinition?kind=resource";
+                var fhirVersion = conformanceServer.version;
                 
                 //because I have to proxy Grahames server. Don't really like this...
                 $scope.conformanceServer = conformanceServer.realUrl || conformanceServer.url;  //for the detail display
@@ -146,15 +185,15 @@ angular.module("sampleApp")
                 switch ($scope.input.searchParam) {
 
                     case 'publisher' :
-                        query += "StructureDefinition?publisher:contains="+param;
+                        query += "&publisher:contains="+param;
                         downLoadName = 'publisher-'+param;
                         break;
                     case 'description' :
-                        query += "StructureDefinition?description:contains="+param;
+                        query += "&description:contains="+param;
                         downLoadName = 'description-'+param;
                         break;
                     case 'name' :
-                        query += "StructureDefinition?name:contains="+param;
+                        query += "&name:contains="+param;
                         downLoadName = 'name-'+param;
                         break;
                     case 'identifier' :
@@ -169,19 +208,21 @@ angular.module("sampleApp")
                             ident = system + "|" + id;
                         }
 
-                        query += "StructureDefinition?identifier="+ident;
+                        query += "&identifier="+ident;
                         downLoadName = 'identifier-'+ident;
                         break;
                     case 'resource' :
                         param = $scope.input.resourceType;
-                        var t = param.name;
-                        //Both '*' and 'Resource' are used for 'any resource'
-                        if (t == '*') {
-                            t += ",Resource";
-                        }
-                        downLoadName = 'resource-'+param;
+                        var typ = param.name;       //the name of the base type
 
-                        query += "StructureDefinition?ext-context:contains="+t;
+                        if (fhirVersion == 3) {
+                            query += "&base=http://hl7.org/fhir/StructureDefinition/"+typ
+                        } else {
+                            query += "&type="+typ
+                        }
+
+
+                        downLoadName = 'resource-'+param;
 
                         break;
                 }
@@ -191,28 +232,27 @@ angular.module("sampleApp")
                     query += "&status="+$scope.input.searchStatus;
                 }
 
-                query += "&type=Extension";     //this is the same for STU-2 & 3...
+
 
 
 
 
 
                 getProfiles(query,downLoadName)
-            }
-
+            };
 
             function getProfiles(query,downLoadName) {
                 $scope.loading=true;
                 delete $scope.profilesArray;
                 delete $scope.selectedProfile;
                 delete $scope.index;
-console.log(query)
-                $scope.query = query;
+                console.log(query)
+                $scope.query = query;       //for display....
 
                 GetDataFromServer.adHocFHIRQuery(query).then(
                     function(data) {
                         var bundle = data.data;
-                        $scope.loading=false;
+
 
                         if (bundle && bundle.entry) {
                             $scope.profilesArray = bundle.entry;
@@ -240,18 +280,19 @@ console.log(query)
 
                     },
                     function(err) {
-                        $scope.loading=false;
+
                         alert("Error:"+angular.toJson(err));
                     }
-                )
+                ).finally(function(){
+                    $scope.loading=false;
+                })
             }
 
 
             delete $scope.selectedProfile;
-            
+
             $scope.selectProfile = function(entry,inx){
-
+                $scope.selectedProfile = entry.resource
+                console.log($scope.selectedProfile)
             };
-
-
         });

@@ -7,11 +7,8 @@
 
     <div>
         <div class="row">
-
-
             <div class="col-md-10 col-sm-10">
                 <div>
-
 
                     Profiles on {{appConfigSvc.getCurrentConformanceServer().name }}
                 ({{appConfigSvc.getCurrentConformanceServer().url}})</div>
@@ -101,9 +98,9 @@
 
             </div>
 
-            <ul class="list-group" style=" height:600px; overflow: auto;" >
+            <ul class="list-group" style=" height:500px; overflow: auto;" >
                 <li style="cursor: pointer" ng-class="{'list-group-item':1==1,listItemSelected:$index==index}"
-                    ng-repeat="entry in extensionsArray"
+                    ng-repeat="entry in profilesArray"
                         ng-click="selectProfile(entry,$index)">
 
                     <div class="row">
@@ -122,63 +119,54 @@
         </div>
         <div class="col-md-8 col-sm-8 col-xs-8">
 
-
-
-
             <uib-tabset ng-show="selectedProfile">
-                <uib-tab heading="Details">
+                <uib-tab heading="Description">
 
-
-                    <div class="row textRow" ng-hide="isComplexExtension">
-                        <div class="col-md-2"><strong>Extension Type</strong></div>
-                        <div class="col-md-10 col-sm-10">Simple</div>
-                    </div>
-
-                    <div class="row textRow" ng-show="isComplexExtension">
-                        <div class="col-md-2"><strong>Extension Type</strong></div>
-                        <div class="col-md-10 col-sm-10">Complex</div>
+                    <div class="row textRow">
+                        <div class="col-md-2"><strong>Base Type</strong></div>
+                        <div class="col-md-10 col-sm-10">{{selectedProfile.constrainedType}}{{selectedProfile.type}}</div>
                     </div>
 
                     <div class="row textRow">
                         <div class="col-md-2"><strong>URL</strong></div>
-                        <div class="col-md-10 col-sm-10">{{selectedExtension.url}}</div>
+                        <div class="col-md-10 col-sm-10">{{selectedProfile.url}}</div>
                     </div>
 
                     <div class="row textRow">
                         <div class="col-md-2"><strong>ID on Server</strong></div>
-                        <div class="col-md-10 col-sm-10">{{selectedExtension.id}}
-                            <span style="margin-left: 40px"> ( {{conformanceServer}}StructureDefinition/{{selectedExtension.id}} )</span></div>
+                        <div class="col-md-10 col-sm-10">{{selectedProfile.id}}
+                            <span style="margin-left: 40px"> ( {{conformanceServer}}StructureDefinition/{{selectedProfile.id}} )</span></div>
                     </div>
 
 
                     <div class="row textRow" >
                         <div class="col-md-2 col-sm-2"><strong>Status</strong></div>
-                        <div class="col-md-10 col-sm-10">{{selectedExtension.status}}</div>
+                        <div class="col-md-10 col-sm-10">{{selectedProfile.status}}</div>
                     </div>
 
-                    <div class="row textRow" ng-show="selectedExtension.meta">
+                    <div class="row textRow" ng-show="selectedProfile.meta">
                         <div class="col-md-2 col-sm-2"><strong>Version</strong></div>
                         <div class="col-md-10 col-sm-10">
-                            {{selectedExtension.meta.versionId}}
-                            <span style="padding-left: 10px">({{selectedExtension.meta.lastUpdated | date}})</span>
-                            <span style="padding-left: 10px">{{selectedExtension.lastEditedBy}}</span>
+                            {{selectedProfile.meta.versionId}}
+                            <span style="padding-left: 10px">({{selectedProfile.meta.lastUpdated | date}})</span>
+                            <span style="padding-left: 10px">{{selectedProfile.lastEditedBy}}</span>
                         </div>
                     </div>
 
 
                     <div class="row textRow" >
                         <div class="col-md-2 col-sm-2"><strong>Experimental</strong></div>
-                        <div class="col-md-10 col-sm-10">{{selectedExtension.experimental}}</div>
+                        <div class="col-md-10 col-sm-10">{{selectedProfile.experimental}}</div>
                     </div>
                     <div class="row textRow" >
                         <div class="col-md-2 col-sm-2"><strong>Name</strong></div>
-                        <div class="col-md-10 col-sm-10">{{selectedExtension.name}}</div>
+                        <div class="col-md-10 col-sm-10">{{selectedProfile.name}}</div>
                     </div>
 
                     <div class="row textRow" >
                         <div class="col-md-2 col-sm-2"><strong>Identifier</strong></div>
                         <div class="col-md-10 col-sm-10">
-                            <div ng-repeat="ident in selectedExtension.identifier" ng-hide="ident.system=='http://clinfhir.com'">
+                            <div ng-repeat="ident in selectedProfile.identifier" ng-hide="ident.system=='http://clinfhir.com'">
                                 {{ident.value}}@{{ident.system}}
                             </div>
 
@@ -187,199 +175,25 @@
 
                     <div class="row textRow">
                         <div class="col-md-2"><strong>Description</strong></div>
-                        <div class="col-md-10 col-sm-10">{{selectedExtension.description}}</div>
+                        <div class="col-md-10 col-sm-10">{{selectedProfile.description}}</div>
                     </div>
-
-
-                    <div class="row textRow">
-                        <div class="col-md-2"><strong>Context Type</strong></div>
-                        <div class="col-md-10 col-sm-10">{{selectedExtension.contextType}}</div>
-                    </div>
-
-                    <div class="row textRow">
-                        <div class="col-md-2" ng-hide="selectedExtension['contextType']=='resource'">
-                            <strong>Context</strong>
-                        </div>
-                        <div class="col-md-2" ng-show="selectedExtension['contextType']=='resource'">
-                            <strong>Contexts</strong>
-                        </div>
-
-
-                        <div class="col-md-10 col-sm-10">
-                            <div ng-repeat="ctx in selectedExtension.context">
-                                {{ctx}}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row textRow" ng-show="isComplexExtension">
-                        <div class="col-md-2"><strong>Components</strong></div>
-                        <div class="col-md-10 col-sm-10">
-                            <div class="panel panel-default">
-                                <table class="table table-condensed table-bordered">
-                                    <tr><th>Name</th><th>Short</th><th>Mult</th><th>DataType</th><th>Binding</th></tr>
-                                    <tr ng-repeat="child in analysis.children">
-                                        <td>{{child.ed.name}}</td>
-                                        <td>{{child.ed.short}}</td>
-                                        <td>{{child.ed.min}}...{{child.ed.max}}</td>
-                                        <td>
-                                            <div ng-repeat="dt in child.ed.type track by $index">
-                                                <a ng-href="http://hl7.org/fhir/datatypes.html#{{dt.code}}" target="_blank">
-
-                                                    <span ng-hide="dt.code=='Reference'">{{dt.code}}</span>
-                                                    <span ng-show="dt.code=='Reference'">--></span>
-
-
-                                                    <span ng-show="dt.profile">
-                                                        <span title="{{dt.profile}}">{{dt.profile | referenceType}}</span>
-                                                    </span>
-                                                </a>
-                                            </div>
-
-
-                                        </td>
-                                        <td>
-                                            <a ng-click="findValueSet(comp.boundValueSet)"
-                                               href="#" title="Edit/View ValueSet">
-                                                {{comp.boundValueSet}}
-                                            </a>
-
-
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-
-                        </div>
-                    </div>
-
-
-                    <div class="row textRow" ng-hide="isComplexExtension">
-                        <div class="col-md-2"><strong>DataType</strong></div>
-                        <div class="col-md-10 col-sm-10">
-                            <div ng-repeat = "dt in analysis.dataTypes">
-                                <!--<div ng-repeat = "dt in selectedExtension.localMeta.datatypes">-->
-                                <div class="row">
-                                    <div class="col-md-10 col-sm-10">
-
-                                        <div class="row">
-                                            <div class="col-md-4 col-sm-4">
-                                                <a ng-href="http://hl7.org/fhir/datatypes.html#{{dt.code}}" target="_blank">
-                                                    {{dt.code}}
-                                                </a>
-                                            </div>
-                                            <div class="col-md-4 col-sm-4">
-
-
-<!--
-                                                <div ng-repeat = "t in selectedExtension.localMeta.polymorphicTypes">
-                                                    <a ng-href="http://hl7.org/fhir/datatypes.html#{{t.code}}" target="_blank">
-                                                        {{t.code}}
-                                                    </a>
-
-
-                                                </div>
-                                                -->
-                                            </div>
-                                        </div>
-                                        <div ng-repeat = "rt in selectedExtension.localMeta.referenceTypes">
-                                            -> {{rt.display}}
-                                        </div>
-                                    </div>
-
-                                </div>
-
-
-                            </div>
-
-
-                        </div>
-
-                        </div>
-
-                        <div class="row textRow" ng-hide="isComplexExtension">
-                            <div ng-show="analysis.binding">
-                            <div class="col-md-2"><strong>Binding</strong></div>
-                            <div class="col-md-10 col-sm-10">
-                                <div class="row">
-                                    <div class="col-md-10 col-sm-10">
-                                        <div>
-                                            <strong>ValueSet: </strong>{{analysis.binding.valueSetUri}}
-
-                                            <span ng-show = 'analysis.binding.valueSetReference'>
-                                                Note: valueSetReference = {{analysis.binding.valueSetReference.reference}}
-                                            </span>
-
-                                            <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
-                                                        vs-selected="vsSelected"></vs-browser>
-                                        </div>
-                                        <div>
-                                            <strong>Strength: </strong> {{analysis.binding.strength}}
-                                        </div>
-
-                                    </div>
-                                    <div class="col-md-2 col-sm-2">
-                                        <a ng-click="findValueSet(analysis.binding)"
-                                           href="#" title="View ValueSet">
-                                            <i class="glyphicon glyphicon-eye-open"></i>
-                                        </a>
-                                    </div>
-                                </div>
-
-
-                            </div>
-                            </div>
-                        </div>
-
-
-
-
-
-
-
-
-
-                    <div class="row textRow" ng-show="selectedExtension.localMeta.valueSetUri">
-                        <div class="col-md-2"><strong>Binding</strong></div>
-                        <div class="col-md-10 col-sm-10">
-                            <div class="row">
-                                <div class="col-md-10 col-sm-10">
-                                    <div>
-                                        <strong>Strength: </strong> {{selectedExtension.localMeta.referenceStrength}}
-                                    </div>
-                                    <div>
-                                        <strong>ValueSet: </strong>{{selectedExtension.localMeta.valueSetUri}}
-                                        <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
-                                                    vs-selected="vsSelected"></vs-browser>
-                                    </div>
-                                </div>
-                                <div class="col-md-2 col-sm-2">
-                                    <a ng-click="findValueSet(selectedExtension.localMeta.valueSetUri)"
-                                            href="#" title="Edit/View ValueSet">
-                                        <i class="glyphicon glyphicon-eye-open"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
 
                     <div class="row textRow">
                         <div class="col-md-2"><strong>Publisher</strong></div>
-                        <div class="col-md-10 col-sm-10">{{selectedExtension.publisher}}</div>
+                        <div class="col-md-10 col-sm-10">{{selectedProfile.publisher}}</div>
                     </div>
 
                     <div class="row textRow">
                         <div class="col-md-2"><strong>Multiple allowed?</strong></div>
                         <div class="col-md-10 col-sm-10">
-                            {{selectedExtension.localMeta.multiple ? 'Yes' : 'No'}}
+                            {{selectedProfile.localMeta.multiple ? 'Yes' : 'No'}}
                         </div>
                     </div>
 
-                    <div class="row textRow" ng-show="selectedExtension.contact">
+                    <div class="row textRow" ng-show="selectedProfile.contact">
                         <div class="col-md-2"><strong>Contacts</strong></div>
                         <div class="col-md-10 col-sm-10">
-                            <div ng-repeat = "contact in selectedExtension.contact">
+                            <div ng-repeat = "contact in selectedProfile.contact">
                                 <div class="row">
                                     <div class="col-md-8 col-sm-8">
                                         <div ng-repeat="telecom in contact.telecom">
@@ -395,16 +209,7 @@
                     </div>
 
 
-                    <div class="row textRow" ng-show="errors.length > 0">
-                        <div class="col-md-2"><strong style="color: red">Errors</strong></div>
-                        <div class="col-md-10 col-sm-10">
-                            <div ng-repeat="err in errors">
-                                <strong style="color: red">{{err}}</strong>
-                            </div>
-
-
-                        </div>
-                    </div>
+                    <i title="Show or edit profile" class="glyphicon glyphicon-eye-open" ng-click="showLocalProfile($event,profile)"></i>
 
 
                     <!-- todo this logic could be tidied...-->
@@ -412,19 +217,19 @@
                         <div class="col-md-12" ng-show="isAuthoredByClinFhir">
                             <div class="pull-right">
                                 <button class="btn btn-primary"
-                                        ng-show="userProfile.extDef.permissions.canEdit && selectedExtension.status == 'draft'"
+                                        ng-show="userProfile.extDef.permissions.canEdit && selectedProfile.status == 'draft'"
                                         ng-click="editExtension()">Edit </button>
 
                                 <button class="btn btn-primary"
-                                        ng-show="userProfile.extDef.permissions.canRetire && selectedExtension.status == 'active'"
+                                        ng-show="userProfile.extDef.permissions.canRetire && selectedProfile.status == 'active'"
                                         ng-click="retireExtension('retire')">Retire </button>
 
                                 <button class="btn btn-warning"
-                                        ng-show="userProfile.extDef.permissions.canDelete && selectedExtension.status == 'draft'"
+                                        ng-show="userProfile.extDef.permissions.canDelete && selectedProfile.status == 'draft'"
                                         ng-click="deleteExtension()">Delete </button>
 
                                 <button class="btn btn-success"
-                                        ng-show="userProfile.extDef.permissions.canActivate && selectedExtension.status == 'draft'"
+                                        ng-show="userProfile.extDef.permissions.canActivate && selectedProfile.status == 'draft'"
                                         ng-click="activateExtension('activate')">Activate </button>
 
 
@@ -438,34 +243,41 @@
                     </div>
 
                 </uib-tab>
-                <uib-tab heading="Json">
-                    <pre>{{selectedExtension | json}}</pre>
-                </uib-tab>
-                <uib-tab heading="Analysis">
-                    <pre>{{analysis | json}}</pre>
-                </uib-tab>
-
-
-                <uib-tab heading="Raw Elements">
+                <uib-tab heading="Tree">
                     <div class="row">
-                        <div class="col-md-7 col-sm-7 col-xs-7">
-                            <table class="table table-condensed">
-                                <tr ng-repeat="element in selectedExtension.snapshot.element">
-                                    <td>
-                                        <a href="#" ng-click="input.selectedElement=element">{{element.path}}</a>
-                                    </td>
-                                    <td>{{element.min}}...{{element.max}}</td>
-                                    <td>{{element.short}}</td>
-                                </tr>
-                            </table>
+                        <div class="col-md-5 col-sm-5">
+                            <!-- a component (1.5) todisplay a profile-->
+                            <show-profile profile="selectedProfile"
+                                          ontreenodeselected="treeNodeSelected(item)"
+                                          treedivid="'selectProfileTreeInList'">
+
+                            </show-profile>
+                            <div id="selectProfileTreeInList"></div>
                         </div>
-                        <div class="col-md-5 col-sm-5 col-xs-5">
-                            <pre>{{input.selectedElement | json}}</pre>
+                        <div class="col-md-7 col-sm-7">
+                            <uib-tabset>
+                                <uib-tab heading="Summary">
+                                    <ed-summary ed="selectedEd"></ed-summary>
+                                </uib-tab>
+                                <uib-tab heading="Json">
+                                    <pre>{{selectedEd | json}}</pre>
+                                </uib-tab>
+                            </uib-tabset>
+
                         </div>
                     </div>
 
 
+
                 </uib-tab>
+
+                <uib-tab heading="Json">
+                    <pre>{{selectedProfile | json}}</pre>
+                </uib-tab>
+
+
+
+
             </uib-tabset>
 
         </div>
