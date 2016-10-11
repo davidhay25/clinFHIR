@@ -163,20 +163,16 @@
 
 
             </uib-tab>
+
             <uib-tab heading="Compose"  select="setHelpTopic('compose')">
                 <br />
                 <uib-tabset>
-                    <uib-tab heading="Import" ng-show="selectedvs.compose.import">
-                        <br />
-                        <ul class="list-group">
-                            <li class="list-group-item" ng-repeat="imp in selectedvs.compose.import">{{imp}}</li>
-                        </ul>
 
-                    </uib-tab>
-                    <uib-tab>
-                        <uib-tab-heading>Includes </uib-tab-heading>
+                    <uib-tab heading="Includes">
                         <br />
+
                         <div ng-repeat = "include in  selectedvs.compose.include">
+
                             <h4>{{include.system}}</h4>
 
 
@@ -206,55 +202,65 @@
                                 </table>
                             </div>
                         </div>
-
-
                     </uib-tab>
+                    <uib-tab  heading="Excludes">
+
+                                <br />
+                                <div ng-repeat = "exclude in selectedvs.compose.exclude">
+                                    <h4>{{exclude.system}}</h4>
 
 
-                    <uib-tab>
-                        <uib-tab-heading>Excludes </uib-tab-heading>
+                                    <div ng-show="exclude.filter" >
+                                        <h5>Filters</h5>
+                                        <table class="table table-bordered table-condensed">
+                                            <tr><th>Property</th><th>Operation</th><th>Value</th></tr>
+                                            <tr ng-repeat="filter in exclude.filter">
+                                                <td>{{filter.property}}</td>
+                                                <td>{{filter.op}}</td>
+                                                <td>{{filter.value}}</td>
+
+                                            </tr>
+                                        </table>
+                                    </div>
+
+
+                                    <div ng-show="exclude.concept" >
+                                        <h5>Concepts</h5>
+                                        <table  class="table table-bordered table-condensed">
+                                            <tr><th>Code</th><th>Display</th></tr>
+                                            <tr ng-repeat="concept in exclude.concept">
+                                                <td>{{concept.code}}</td>
+                                                <td>{{concept.display}}</td>
+
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+
+
+                            </uib-tab>
+                    <uib-tab heading="Import" ng-show="selectedvs.compose.import">
                         <br />
-                        <div ng-repeat = "exclude in selectedvs.compose.exclude">
-                            <h4>{{exclude.system}}</h4>
+                        <ul class="list-group">
+                            <li class="list-group-item" ng-repeat="imp in selectedvs.compose.import">{{imp}}</li>
+                        </ul>
+
+                    </uib-tab>
+
+                        </uib-tabset>
 
 
-                            <div ng-show="exclude.filter" >
-                                <h5>Filters</h5>
-                                <table class="table table-bordered table-condensed">
-                                    <tr><th>Property</th><th>Operation</th><th>Value</th></tr>
-                                    <tr ng-repeat="filter in exclude.filter">
-                                        <td>{{filter.property}}</td>
-                                        <td>{{filter.op}}</td>
-                                        <td>{{filter.value}}</td>
-
-                                    </tr>
-                                </table>
-                            </div>
-
-
-                            <div ng-show="exclude.concept" >
-                                <h5>Concepts</h5>
-                                <table  class="table table-bordered table-condensed">
-                                    <tr><th>Code</th><th>Display</th></tr>
-                                    <tr ng-repeat="concept in exclude.concept">
-                                        <td>{{concept.code}}</td>
-                                        <td>{{concept.display}}</td>
-
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
 
 
                     </uib-tab>
 
 
 
-                </uib-tabset>
 
 
 
-            </uib-tab>
+
+
             <uib-tab heading="JSON"  select="setHelpTopic('json')">
                 <br />
                 <pre>{{selectedvsJSON}}</pre>

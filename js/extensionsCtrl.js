@@ -5,12 +5,24 @@ angular.module("sampleApp")
         function ($rootScope,$scope,GetDataFromServer,appConfigSvc,Utilities,$uibModal,RenderProfileSvc,SaveDataToServer,modalService,$timeout) {
 
             $scope.input = {param:'hl7',searchParam:'publisher',searchStatus:'all'};
-
+/*
             $scope.mode = 'extension'
 
             $scope.changeMode = function(mode) {
                 $scope.mode = mode;
             }
+*/
+
+
+            $scope.$watch('input.searchParam',function(){
+               // alert('c')
+                delete $scope.extensionsArray;
+                delete $scope.selectedExtension;
+            })
+
+
+
+
 
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(lst) {
@@ -32,6 +44,15 @@ angular.module("sampleApp")
             $rootScope.$on('userLoggedOut',function() {
                 $scope.input = {param:'hl7',searchParam:'publisher',searchStatus:'all'};
             });
+
+            $rootScope.$on('setDisplayMode',function(ev,mode) {
+                if (mode == 'extensions') {
+                    delete $scope.extensionsArray;
+                    delete $scope.selectedExtension;
+                }
+            });
+
+
 
             $scope.errors = [];
             $scope.appConfigSvc = appConfigSvc;
@@ -127,8 +148,12 @@ angular.module("sampleApp")
             };
 
             $scope.search = function(param) {
-                var query = appConfigSvc.getCurrentConformanceServer().url;
-                $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer().url;  //for the detail display
+                
+                var conformanceServer =  appConfigSvc.getCurrentConformanceServer();
+                var query = conformanceServer.url;
+                
+                //because I have to proxy Grahames server. Don't really like this...
+                $scope.conformanceServer = conformanceServer.realUrl || conformanceServer.url;  //for the detail display
                 var downLoadName = '';
                 switch ($scope.input.searchParam) {
 
@@ -178,14 +203,15 @@ angular.module("sampleApp")
                     query += "&status="+$scope.input.searchStatus;
                 }
 
+                query += "&type=Extension";     //this is the same for STU-2 & 3...
 
-
-
+/*
                 if ($scope.mode == 'extension') {
                     query += "&type=Extension";      //this is foe an extension
                 } else {
                     query += "&kind=resource"
                 }
+                */
 
 
 
@@ -199,6 +225,7 @@ angular.module("sampleApp")
                 delete $scope.selectedExtension;
                 delete $scope.index;
 console.log(query)
+                $scope.query = query;
 
                 GetDataFromServer.adHocFHIRQuery(query).then(
                     function(data) {
@@ -250,7 +277,10 @@ console.log(query)
 
 
             delete $scope.selectedExtension;
+            
             $scope.selectExtension = function(entry,inx){
+
+                delete $scope.isComplexExtension;
                 $scope.index = inx;
                 $scope.errors.length=0;
 
@@ -262,7 +292,8 @@ console.log(query)
                 
                 $scope.selectedExtension.localMeta = {};
                 var vo = getDataTypes($scope.selectedExtension);
-
+                $scope.analysis = vo;
+                $scope.isComplexExtension = vo.isComplexExtension;
                 console.log(vo)
 
                 $scope.selectedExtension.localMeta.datatypes = vo.dataTypes;
@@ -295,10 +326,10 @@ console.log(query)
             function getDataTypes(extension) {
                 delete $scope.complexExtension;
 
-                var extAnalysis = Utilities.analyseExtensionDefinition(extension);
-                if (extAnalysis.complexExtension) {
-                    $scope.complexExtension = extAnalysis.complexExtension;
-                }
+                var extAnalysis = Utilities.analyseExtensionDefinition3(extension);  //was the original service...
+              //  if (extAnalysis.complexExtension) {
+                   // $scope.complexExtension = extAnalysis.complexExtension;
+               // }
                 return extAnalysis;
 
 /*
@@ -367,25 +398,50 @@ console.log(query)
 
 
             //------- show valueset
-            $scope.findValueSet = function(valueSetUri) {
+            $scope.findValueSet = function(binding) {
+                var valueSetUri = binding.valueSetUri;
 
                 if (!valueSetUri) {
-                    alert('The binding.valueSetUri is empty. I cannot show the value set. Sorry about that');
-                    return
+
+                    if (binding.valueSetReference) {
+                        valueSetUri = binding.valueSetReference.reference;
+                        modalService.showModal({}, {bodyText:"I'm going to use a valueSetReference as if it were a Uri. It *should* still work..."}).then(
+                            function(){},
+                            function(){
+                                $scope.loading=true;
+                                Utilities.getValueSetIdFromRegistry(valueSetUri, function (vsDetails) {
+                                        console.log(vsDetails)
+                                        $scope.loading = false;
+                                        $scope.showVSBrowser(vsDetails.resource);
+                                    }
+                                )
+                            }
+
+                        );
+
+
+                    } else {
+                        modalService.showModal({}, {bodyText:'The binding.valueSetUri and binding.valueSetReference are both empty. I cannot show the value set. Sorry about that'});
+
+
+                        return;
+                    }
+
+
+
                 } else {
-                   // var uri = reference;        //not sure this is correct...
+                    // var uri = reference;        //not sure this is correct...
                     $scope.loading=true;
-
-
-
                     Utilities.getValueSetIdFromRegistry(valueSetUri, function (vsDetails) {
-                            //GetDataFromServer.getVSusingURI(uri).then(
-                           console.log(vsDetails)
+                            console.log(vsDetails)
                             $scope.loading = false;
-                            $scope.showVSBrowser(vsDetails);
+                            $scope.showVSBrowser(vsDetails.resource);
                         }
                     );
                 }
+
+
+
 
             };
 /*

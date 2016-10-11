@@ -1,17 +1,42 @@
 /*has been deprectde - don't call make function - expensive! */
 
 angular.module("sampleApp").controller('extensionDefCtrl',
-        function ($rootScope,$scope,$uibModal,appConfigSvc,GetDataFromServer,Utilities,modalService,$http) {
+        function ($rootScope,$scope,$uibModal,appConfigSvc,GetDataFromServer,Utilities,modalService,RenderProfileSvc,$http) {
 
             $scope.childElements = [];      //array of child elements
             $scope.input ={};
             $scope.input.multiplicity = 'opt';
+            $scope.selectedResourceTypes = [];
+            
+            RenderProfileSvc.getAllStandardResourceTypes().then(
+                function(standardResourceTypes) {
+                    $scope.allResourceTypes = standardResourceTypes;       //use to define the context for an extension...
+                    //console.log($scope.allResourceTypes)
+                }
+            )
+
+            
 
             $scope.conformanceSvr = appConfigSvc.getCurrentConformanceServer();
 
             if ($rootScope.userProfile && $rootScope.userProfile.extDef) {
                 $scope.input.publisher = $rootScope.userProfile.extDef.defaultPublisher;
             }
+
+            $scope.selectContext = function(context) {
+                console.log(context);
+                if ($scope.selectedResourceTypes.indexOf(context.name) == -1) {
+                    $scope.selectedResourceTypes.push(context.name)
+
+                    makeSD();
+                }
+
+            };
+
+            $scope.removeResourceType = function(inx) {
+                $scope.selectedResourceTypes.splice(inx,1);
+                makeSD();
+            };
 
             $scope.save = function() {
                 delete $scope.validateResults;
@@ -141,6 +166,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                     controller: function($scope,resourceCreatorSvc){
                         var that = this;
 
+                        
                         $scope.selectedDataTypes = [];     //array of selected datatypes
                         $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();
 
@@ -223,6 +249,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                             var result = {};
                             result.code = $scope.code;
                             result.description = $scope.description;
+                            result.short = $scope.description;
                             result.dataTypes = $scope.selectedDataTypes;
                             $scope.$close(result);
 
@@ -232,7 +259,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 }).result.then(
                     //this is called when the 'add child element' has been saved
                     function(result) {
-                        console.log(result)
+                        //console.log(result)
                         $scope.childElements.push(result);
 
                         makeSD()
@@ -282,13 +309,16 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 //the version of fhir that this SD is being deployed against...
                 var fhirVersion = $scope.conformanceSvr.version;        //get from the conformance server
                 var name = $scope.input.name;       //the name of the extension
-                var definition = $scope.input.description;       //the name of the extension
+                var definition = $scope.input.description || $scope.input.name;       //the defintion of the extension. It is required...
                 var comments = $scope.input.description;       //the name of the extension
                 var short = $scope.input.short;
 
 
                 extensionDefinition.id = name;
-                extensionDefinition.url = $scope.conformanceSvr.url + name;
+
+                //to allow for proxied requests...
+                var cannonicalUrl =  $scope.conformanceSvr.realUrl || $scope.conformanceSvr.url;
+                extensionDefinition.url = cannonicalUrl + name;
 
                 //the format for a simple extensionDefinition SD is different to a complex one...
                 var extensionTypeIsMultiple = false;
@@ -301,16 +331,32 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 extensionDefinition.name = name;
                 extensionDefinition.status = 'draft';
                 extensionDefinition.abstract= false;
-
                 extensionDefinition.publisher = $scope.input.publisher;
+                extensionDefinition.contextType = "resource";
+
+                //if no context defined, then allow all
+
+                if ($scope.selectedResourceTypes.length == 0) {
+                    extensionDefinition.context = ['*'];
+                } else {
+                    extensionDefinition.context = [];
+                    $scope.selectedResourceTypes.forEach(function(typ){
+                        extensionDefinition.context.push(typ)
+                    })
+
+                }
+
+
+
 
                 if (fhirVersion == 2) {
                     extensionDefinition.kind='datatype';
                     extensionDefinition.constrainedType = 'Extension';      //was set to 'kind' which is the search name!
+                    extensionDefinition.base = 'http://hl7.org/fhir/StructureDefinition/Extension';
                 } else if (fhirVersion ==3) {
                     extensionDefinition.kind='complex-type';
-
-                    extensionDefinition.baseType = 'Extension';
+                    extensionDefinition.type='Extension';
+                    //extensionDefinition.baseType = 'Extension';
                     extensionDefinition.baseDefinition = 'http://hl7.org/fhir/StructureDefinition/Extension';
                     extensionDefinition.derivation = 'constraint';
                     extensionDefinition.contextType = "resource";// "datatype";
@@ -335,47 +381,64 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 if (extensionTypeIsMultiple) {
                     var ed1 = {path : 'Extension',name: name,short:short,definition:definition,
                         comments:comments,min:min,max:max,type:[{code:'Extension'}]};
+
+                    ed1.id = ed1.path;
+
+
+
+
                     extensionDefinition.snapshot.element.push(ed1);
 
                     var edSlicing = {path : 'Extension.extension',name: name,short:short,definition:definition,
                         comments:comments,min:min,max:max,type:[{code:'Extension'}]};
-                    edSlicing.slicing = {discriminator:'url',ordered:false,rules:'open'}
+                    edSlicing.slicing = {discriminator:['url'],ordered:false,rules:'open'}
+
+                    edSlicing.id = edSlicing.path;
                     extensionDefinition.snapshot.element.push(edSlicing);
 
 
                 }
 
                 //for each defined child, add the component ElementDefinition elements...
-                $scope.childElements.forEach(function(ce){
+                $scope.childElements.forEach(function(ce,inx){
                     var vo = ce;
                     vo.min = min;
                     vo.max = max;
 
-                    extensionDefinition.snapshot.element = extensionDefinition.snapshot.element.concat(makeChildED(vo,extensionTypeIsMultiple))
+                    extensionDefinition.snapshot.element = extensionDefinition.snapshot.element.concat(makeChildED(vo,extensionTypeIsMultiple,inx))
 
 
                 });
 
+
+                /*  We *may* need to add this with a complex extension (don't know) keep for the moment...
+
                 //the url of this extension. It's at the bottom (not sure why)..
                 var edUrl = {path : 'Extension.url',name: name,short:short,definition:definition,
                     min:1,max:"1",type:[{code:'uri'}],fixedUri:$scope.conformanceSvr.url + name};
-                extensionDefinition.snapshot.element.push(edUrl);
 
+                edUrl.id = edUrl.path;
+                extensionDefinition.snapshot.element.push(edUrl);
+*/
 
                 $scope.jsonED = extensionDefinition;    //just for display
 
-                console.log(JSON.stringify(extensionDefinition));
+                //console.log(JSON.stringify(extensionDefinition));
 
-                console.log(Utilities.analyseExtensionDefinition(extensionDefinition))
+
+
+                if (fhirVersion ==3) {
+                    delete extensionDefinition.snapshot.element[0].type;
+                }
 
                 return extensionDefinition;
 
             };
 
             //build the ElementDefinitions for a single child
-            function makeChildED(vo,isComplex){
+            function makeChildED(vo,isComplex,index){
                 //vo.name, vo.short, vo.definition, vo.comments, vo.min, vo.max, vo.code, vo.dataTypes[code,description]
-                console.log(vo)
+                //console.log(vo)
 
                 vo.description = vo.description || 'No Description'
 
@@ -389,8 +452,14 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 var ed1 = {path : extensionRoot,name: vo.code,min:vo.min,max:vo.max,
                     short:vo.short,definition:vo.description,
                     comments:vo.comments,min:vo.min,max:vo.max,type:[{code:'Extension'}]};
+
+                ed1.base = {path: ed1.path,min:ed1.min, max:ed1.max};
+
+
                 var ed2 = {path : extensionRoot + '.url',name: vo.code,representation:['xmlAttr'],
                     comments:vo.comments,definition:vo.description,min:1,max:"1",type:[{code:'uri'}],fixedUri:vo.code};
+
+                ed2.base = {path: ed2.path,min:ed2.min, max:ed2.max};
 
                 //the value name is 'value' + the code with the first letter capitalized, or value[x] if more than one...
                 var valueName = '[x]';
@@ -402,14 +471,23 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 var ed3 = {path : extensionRoot + '.value'+valueName,name: vo.name,short:vo.short,definition:vo.definition,
                     comments:vo.comments,definition:vo.description,min:vo.min,max:vo.max,type:[]};
                 vo.dataTypes.forEach(function(type){
+
+                    ed3.base = {path: ed3.path,min:ed3.min, max:ed3.max};
+
                     ed3.type.push({code:type.code})
 
                     if (type.vs) {
                         //this is a bound valueset
-                        ed3.binding = {strength : type.vs.strength,valueSetUri:type.vs.vs.url}
+                        ed3.binding = {strength : type.vs.strength,valueSetUri:type.vs.vs.url,description:vo.description}
                     }
 
                 });
+
+                //required by STU-3
+                ed1.id = ed1.path + index;
+                ed2.id = ed2.path + index;
+                ed3.id = extensionRoot + '.value[x]' + index;
+
 
                 arED.push(ed1);
                 arED.push(ed2);
@@ -421,26 +499,6 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
     }
 
-    /*
-order in patient.nationality...
-     Extension
-     Extension.id
-     Extension.extension (slicing)
 
-     Extension.extension (name= nat code)
-     Extension.extension.id
-     Extension.extension.extension
-     Extension.extension.url
-     Extension.extension.valueCC
-
-     Extension.extension (name = period)
-     Extension.extension.id
-     Extension.extension.extension
-     Extension.extension.url
-     Extension.extension.valuePeriod
-
-     Extension.url
-     Extension.value[x]
-     */
 
 );

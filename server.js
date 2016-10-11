@@ -107,7 +107,7 @@ app.all('/grahamv3/*',function(req,res){
 app.all('/grahamv2/*',function(req,res){
     //console.log(req.url)
     req.url = req.url.replace('grahamv2/','')
-    proxy.web(req, res, { target: 'http://fhir3.healthintersections.com.au/open/' });
+    proxy.web(req, res, { target: 'http://fhir2.healthintersections.com.au/open/' });
 });
 
 

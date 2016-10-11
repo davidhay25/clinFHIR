@@ -696,6 +696,7 @@ angular.module("sampleApp").
             vo.context = SD.context;
             vo.publisher = SD.publisher;
             vo.url = SD.url;
+            vo.description = SD.description;
 
             //vo.eds = [];     //a suppary of element definitions - so I can see them in the UI
             var discriminator;      //if this is sliced, then a discriminator will be set...
@@ -842,6 +843,10 @@ angular.module("sampleApp").
 
 
                             })
+                        }
+
+                        if (element.binding) {
+                            vo.binding = element.binding;
                         }
 
 
@@ -1240,11 +1245,12 @@ console.log(summary);
             //Get all the resurces specified by a query, following any paging...
             //http://stackoverflow.com/questions/28549164/how-can-i-do-pagination-with-bluebird-promises
 
+
             //add the count parameter
             if (url.indexOf('?') > -1) {
-                url += "&_count=50"
+                url += "&_count=100"
             } else {
-                url += "?_count=50"
+                url += "?_count=100"
             }
 
 
@@ -1464,6 +1470,8 @@ console.log(summary);
                         deferred.reject();
                     }
                 );
+            } else {
+                deferred.resolve(standardResourceTypes)
             }
 
             return deferred.promise;

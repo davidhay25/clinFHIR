@@ -244,6 +244,7 @@
 
     <script src="js/observationsDisplayCtrl.js"></script>
     <script src="js/extensionsCtrl.js"></script>
+    <script src="js/profilesCtrl.js"></script>
     <script src="js/components/extensionDirective.js"></script>
     <title>FHIR Resource Creator</title>
 
@@ -479,13 +480,20 @@
                                         </li>
 -->
                                         <li>
-                                            <a href="#" ng-click="showExtensions()"
+                                            <a href="#" ng-click="changeDisplayMode('extensions')"
                                                uib-popover="Find and create Extension definitions"
                                                popover-placement="left"
                                                popover-trigger="'mouseenter'">Extension Definitions
                                             </a>
                                         </li>
 
+                                        <li>
+                                            <a href="#" ng-click="changeDisplayMode('profiles')"
+                                               uib-popover="Find and create Profiles"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">Profiles
+                                            </a>
+                                        </li>
 
                                         <li>
                                             <a href="valuesetCreator.html" target="_blank"
@@ -696,10 +704,13 @@
 
 -->
 
-            <div  ng-controller="extensionsCtrl" ng-show="displayMode == 'extensions'">
+            <div ng-controller="extensionsCtrl" ng-show="displayMode == 'extensions'">
                 <ng-include src="'/includes/extensions.html'"></ng-include>
             </div>
 
+            <div ng-controller="profilesCtrl" ng-show="displayMode == 'profiles'">
+                <ng-include src="'/includes/profiles.html'"></ng-include>
+            </div>
 
             <div ng-show="displayMode == 'access'">
                 <div>

@@ -34,7 +34,7 @@ angular.module("sampleApp")
 
 
     if (appConfigSvc.checkConfigVersion()) {
-        var txt = 'The default configuration has been updated. Please re-load the page for it to take effect.'
+        var txt = 'The default configuration has been updated (including the patient data and conformance server). Please re-load the page for it to take effect.'
         modalService.showModal({}, {bodyText: txt})
 
     }
@@ -308,9 +308,17 @@ angular.module("sampleApp")
     };
 
 
-    $scope.showExtensions = function() {
+    $scope.showExtensionsDEP = function() {
         $scope.displayMode = 'extensions';
+        $rootScope.$broadcast('setDisplayMode','extensions');
     }
+
+
+    $scope.changeDisplayMode = function(mode) {
+        $scope.displayMode = mode;
+        $rootScope.$broadcast('setDisplayMode',mode);
+    }
+
 
     $scope.showChart = function() {
         if ($scope.displayMode == 'access') {

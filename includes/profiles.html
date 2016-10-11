@@ -8,26 +8,18 @@
     <div>
         <div class="row">
 
-            <!--
-            <div class="col-md-4 col-sm-4">
-                <button ng-click="changeMode('extension')"
-                        ng-class="{btn:true,'btn-default':true,active:mode=='extension'}">Extension Definitions</button>
-                <button  ng-click="changeMode('profile')"
-                        ng-class="{btn:true,'btn-default':true,active:mode=='profile'}">Profiles</button>
-            </div>
--->
 
             <div class="col-md-10 col-sm-10">
                 <div>
 
 
-                    Extension definitions on {{appConfigSvc.getCurrentConformanceServer().name }}
+                    Profiles on {{appConfigSvc.getCurrentConformanceServer().name }}
                 ({{appConfigSvc.getCurrentConformanceServer().url}})</div>
             </div>
             <div class="col-md-2 col-sm-2">
                 <button class="btn btn-default pull-right"
                         ng-show="userProfile.extDef.permissions.canCreate"
-                        ng-click="newExtension()">New Extension Definition</button>
+                        ng-click="newExtension()">New Profile</button>
             </div>
 
 
@@ -112,7 +104,7 @@
             <ul class="list-group" style=" height:600px; overflow: auto;" >
                 <li style="cursor: pointer" ng-class="{'list-group-item':1==1,listItemSelected:$index==index}"
                     ng-repeat="entry in extensionsArray"
-                        ng-click="selectExtension(entry,$index)">
+                        ng-click="selectProfile(entry,$index)">
 
                     <div class="row">
                         <div class="col-md-9 col-sm-9">
@@ -133,7 +125,7 @@
 
 
 
-            <uib-tabset ng-show="selectedExtension">
+            <uib-tabset ng-show="selectedProfile">
                 <uib-tab heading="Details">
 
 

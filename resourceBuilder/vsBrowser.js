@@ -242,7 +242,7 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                                         if (err.statusCode == 422) {
                                             alert('There were too many concepts to expand - use a filter.');
                                         } else {
-                                            alert('Sorry, there was an error performing the expansion: '+err.msg);
+                                            alert('Sorry, there was an error performing the expansion: '+angular.toJson(err));
                                         }
 
                                     }

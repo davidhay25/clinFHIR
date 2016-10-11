@@ -61,37 +61,59 @@
                                 </div>
                             </div>
 
-
-
+                            <div class="form-group">
+                                <input type="text" ng-model="input.short" class="form-control" placeholder="Short description">
+                            </div>
 
                             <div class="form-group">
                                 <textarea class="form-control" rows="3" ng-model="input.description" placeholder="Description"></textarea>
-
                             </div>
+                            <div class="btn-group">
+                                <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'opt'">0..1</label>
+                                <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'req'">1..1</label>
+                                <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'mult'">0..*</label>
+                            </div>
+
+
 
                         </form>
 
                     </div>
                     <div class="col-md-6 col-sm-6">
 
+                            <div class="form-group">
+                                <!--<label>Name</label>-->
+                                <input type="text" class="form-control" ng-model="input.publisher" placeholder="Publisher">
+                            </div>
 
 
                             <div class="form-group">
 
-                                <input type="text" ng-model="input.short" class="form-control" placeholder="Short description">
+
+                                <h5>Resources that can use this Extension</h5>
+                                <div class="row"  ng-repeat="typ in selectedResourceTypes">
+                                    <div class="col-sm-11 col-md-11">
+                                        {{typ}}
+                                    </div>
+
+                                    <div class="col-sm-1 col-md-1">
+                                        <i class="glyphicon glyphicon-remove" style="cursor: pointer"
+                                           ng-click="removeResourceType($index)"></i>
+                                    </div>
+                                </div>
+
+
+                                <select ng-change="selectContext(input.type)" ng-model="input.type" class="form-control"
+                                        style="margin-top: 8px"
+                                        ng-options="type.name for type in allResourceTypes">
+                                </select>
+
+
+
+
                             </div>
 
 
-
-                        <div class="form-group">
-                            <!--<label>Name</label>-->
-                            <input type="text" class="form-control" ng-model="input.publisher" placeholder="Publisher">
-                        </div>
-                        <div class="btn-group">
-                            <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'opt'">0..1</label>
-                            <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'req'">1..1</label>
-                            <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'mult'">0..*</label>
-                        </div>
                     </div>
                 </div>
 
