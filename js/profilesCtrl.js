@@ -233,7 +233,8 @@ angular.module("sampleApp")
             };
 
             function getProfiles(query,downLoadName) {
-                $scope.loading=true;
+                //$scope.loading=true;
+                $rootScope.$broadcast('setWaitingFlag',true);
                 delete $scope.profilesArray;
                 delete $scope.selectedProfile;
                 delete $scope.index;
@@ -275,7 +276,8 @@ angular.module("sampleApp")
                         alert("Error:"+angular.toJson(err));
                     }
                 ).finally(function(){
-                    $scope.loading=false;
+                    $rootScope.$broadcast('setWaitingFlag',false);
+                    //$scope.loading=false;
                 })
             }
 

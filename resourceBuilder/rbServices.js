@@ -1239,6 +1239,19 @@ console.log(summary);
                 }
             }
 
+            //latest STU-3 changed 'code' -> 'keyword'!
+            if (!isAuthoredByClinFhir) {
+                if (profile.keyword) {
+                    profile.keyword.forEach(function(coding){
+                        if (coding.system == 'http://fhir.hl7.org.nz/NamingSystem/application' &&
+                            coding.code == 'clinfhir') {
+                            isAuthoredByClinFhir = true;
+                        }
+                    })
+                }
+            }
+
+
             return isAuthoredByClinFhir;
         },
         perfromQueryFollowingPaging : function(url,limit){

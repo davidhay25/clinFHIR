@@ -251,25 +251,39 @@ app.post('/errorReport',function(req,res){
         res.json({});
         return;
     }
-
-    //console.log(req.body);
     var clientIp = req.headers['x-forwarded-for'] ||
         req.connection.remoteAddress ||
         req.socket.remoteAddress ||
         req.connection.socket.remoteAddress;
-    var body = req.body;
-    body.ip = clientIp;
-    body.date = new Date().getTime();
-    db.collection("errorLog").insert(body, function (err, result) {
-        if (err) {
-            console.log('Error logging error ',audit)
-            res.end();
-        } else {
 
-            res.end();
+    var body = '';
+    req.on('data', function (data) {
+        body += data;
+        console.log("Partial body: " + body);
+    })
+    
+    req.on('end', function () {
+        console.log("Body: " + body);
+        //console.log(req.body);
 
-        }
+       var jsonBody = JSON.parse(body);
+
+        jsonBody.ip = clientIp;
+        jsonBody.date = new Date().getTime();
+        db.collection("errorLog").insert(jsonBody, function (err, result) {
+            if (err) {
+                console.log('Error logging error ',audit)
+                res.end();
+            } else {
+
+                res.end();
+
+            }
+        });
     });
+
+
+
 });
 
 

@@ -12,7 +12,8 @@ angular.module("sampleApp").controller('newProfileCtrl',
 
 
             $scope.save = function() {
-
+                $rootScope.$broadcast('setWaitingFlag',true);
+                delete $scope.validateResults;
                 //first, get the base resource
                 var baseType = $scope.input.type.name;
                 var url = "http://hl7.org/fhir/StructureDefinition/"+baseType;      //always profile off a base type (for now)
@@ -32,7 +33,10 @@ angular.module("sampleApp").controller('newProfileCtrl',
                             newResource.description = $scope.input.description;
                             //newResource.short = $scope.input.short;
                             newResource.publisher = $scope.input.publisher;
-                            newResource.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
+                            //at the time of writing (Oct 12), the implementaton of stu3 varies wrt 'code' & 'keyword'. Remove this eventually...
+                            newResource.identifier = [{system:"http://clinfhir.com",value:"author"}]
+
+                           // newResource.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
 
                             console.log(newResource);
                             SaveDataToServer.updateStructureDefinition(conf,newResource).then(
@@ -41,10 +45,13 @@ angular.module("sampleApp").controller('newProfileCtrl',
                                     $scope.$close(newResource);     //close, returning the profile
                                 },
                                 function(err) {
+                                    $scope.validateResults = err.data;
                                     modalService.showModal({},{bodyText:"Sorry, there was an error: "+angular.toJson(err)})
 
                                 }
-                            )
+                            ).finally(function(){
+                                $rootScope.$broadcast('setWaitingFlag',false);
+                            })
                         }
 
 
@@ -67,7 +74,13 @@ console.log(fhirVersion)
                 if (fhirVersion == 2) {
                     newResource.constrainedType = type;
                     newResource.base = "http://hl7.org/fhir/StructureDefinition/"+type;
+                    newResource.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
                 } else if (fhirVersion == 3) {
+                    //newResource.type = type;
+                    newResource.type = type;
+                    newResource.derivation = 'constraint';
+                    newResource.baseDefinition = "http://hl7.org/fhir/StructureDefinition/"+type;
+                    newResource.keyword = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
 
                 } else {
                     modalService.showModal({},{bodyText:"There was an unknown FHIR verison: "+fhirVersion})

@@ -32,15 +32,20 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
             extensionSD.status = 'draft';
             extensionSD.abstract= false;
-            extensionSD.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
+
             extensionSD.contextType = "resource";
             extensionSD.context=["*"];
             extensionSD.id = vo.extensionId;
             extensionSD.publisher = 'clinFHIR';
+
+            //at the time of writing (Oct 12), the implementaton of stu3 varies wrt 'code' & 'keyword'. Remove this eventually...
+            extensionSD.identifier = [{system:"http://clinfhir.com",value:"author"}]
+
             //these are STU-3 - not sure about STU-2
             if (fhirVersion == 3) {
 
 
+                extensionSD.keyword = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
                 extensionSD.kind =  "complex-type";
                 extensionSD.type = 'Extension';
                // extensionSD.constrainedType =  "Extension"
@@ -56,23 +61,33 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 //extensionSD.contextType = "datatype";
                 //extensionSD.context=["*"];
 
-                extensionSD.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
+               // extensionSD.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
+
+                var firstElementV3 = {path:'Extension',id:'Extension',definition:'ext',min:0,max:'1'};
+                firstElementV3.base = {"path": "Extension","min": 0,"max": "*"}
+                // - no typon the first element in v3 . firstElement.type = [{code:'Extension'}]
+
+                extensionSD.snapshot.element.push(firstElementV3);
+
             } else {
 
                 extensionSD.kind='datatype';
-
+                extensionSD.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
 
                 extensionSD.constrainedType = "Extension";
                 extensionSD.base = "http://hl7.org/fhir/StructureDefinition/Extension";
+
+                var firstElementV2 = {path:'Extension',id:'Extension',definition:'ext',min:0,max:'1'};
+                firstElementV2.base = {"path": "Extension","min": 0,"max": "*"}
+                firstElementV2.type = [{code:'Extension'}]
+
+                extensionSD.snapshot.element.push(firstElementV2);
             }
 
 
-            var firstElement = {path:'Extension',id:'Extension',definition:'ext',min:0,max:'1'};
 
-            firstElement.base = {"path": "Extension","min": 0,"max": "*"}
-            firstElement.type = [{code:'Extension'}]
 
-            extensionSD.snapshot.element.push(firstElement);
+
             extensionSD.snapshot.element.push({path:'Extension.url',id:'Extension.url',definition:'Url',min:1,max:'1',type:[{code:'uri'}]});
 
 
@@ -571,7 +586,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     sd.id = profileName;
                     //sd.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
 
-
+                    sd.keyword = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
                     sd.kind="resource";
                     //sd.constrainedType = 
 
@@ -610,6 +625,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     sd.abstract=false;
                     sd.id = profileId;
                     sd.publisher = baseProfile.publisher;
+                    sd.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
 
                     //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
                     //var typeName = 'base';
@@ -627,7 +643,10 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                 }
 
-                sd.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
+                //at the time of writing (Oct 12), the implementaton of stu3 varies wrt 'code' & 'keyword'. Remove this eventually...
+                sd.identifier = [{system:"http://clinfhir.com",value:"author"}]
+
+
 
 
                 var log = [];

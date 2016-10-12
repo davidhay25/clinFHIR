@@ -148,7 +148,9 @@ angular.module("sampleApp")
         //console.log($scope.frontPageProfile.code);
 
         // extensionSD.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
-        if (isAuthoredByClinFhir($scope.frontPageProfile)) {
+
+        if (Utilities.isAuthoredByClinFhir($scope.frontPageProfile)) {
+        //if (isAuthoredByClinFhir($scope.frontPageProfile)) {
             $scope.mode = 'edit';           //edit (current), new, view
             $scope.input.profileName = $scope.frontPageProfile.name  //maintained by frontCtrl
         } else {

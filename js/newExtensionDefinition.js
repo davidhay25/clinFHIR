@@ -327,7 +327,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 }
 
                 //the code is used so clinfhir knows which SD resources it has authored - and can modify...
-                extensionDefinition.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
+
                 extensionDefinition.name = name;
                 extensionDefinition.status = 'draft';
                 extensionDefinition.abstract= false;
@@ -346,12 +346,13 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
                 }
 
-
-
+                //at the time of writing (Oct 12), the implementaton of stu3 varies wrt 'code' & 'keyword'. Remove this eventually...
+                extensionDefinition.identifier = [{system:"http://clinfhir.com",value:"author"}]
 
                 if (fhirVersion == 2) {
                     extensionDefinition.kind='datatype';
                     extensionDefinition.constrainedType = 'Extension';      //was set to 'kind' which is the search name!
+                    extensionDefinition.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
                     extensionDefinition.base = 'http://hl7.org/fhir/StructureDefinition/Extension';
                 } else if (fhirVersion ==3) {
                     extensionDefinition.kind='complex-type';
@@ -361,6 +362,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                     extensionDefinition.derivation = 'constraint';
                     extensionDefinition.contextType = "resource";// "datatype";
                     extensionDefinition.context=["Element"];
+                    extensionDefinition.keyword = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
                 }
 
                 var min,max;
