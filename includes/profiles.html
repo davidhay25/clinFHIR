@@ -6,17 +6,17 @@
     </div>
 
     <div>
-        <div class="row">
+        <div class="row rounded-box">
             <div class="col-md-10 col-sm-10">
                 <div>
 
-                    Profiles on {{appConfigSvc.getCurrentConformanceServer().name }}
+                    <span class="lead">Profile explorer </span>  on {{appConfigSvc.getCurrentConformanceServer().name }}
                 ({{appConfigSvc.getCurrentConformanceServer().url}})</div>
             </div>
             <div class="col-md-2 col-sm-2">
                 <button class="btn btn-default pull-right"
                         ng-show="userProfile.extDef.permissions.canCreate"
-                        ng-click="newExtension()">New Profile</button>
+                        ng-click="newProfile()">New Profile</button>
             </div>
 
 
@@ -209,39 +209,6 @@
                     </div>
 
 
-                    <i title="Show or edit profile" class="glyphicon glyphicon-eye-open" ng-click="showProfileDetails($event,profile)"></i>
-
-
-                    <!-- todo this logic could be tidied...-->
-                    <div class="row">
-                        <div class="col-md-12" ng-show="isAuthoredByClinFhir">
-                            <div class="pull-right">
-                                <button class="btn btn-primary"
-                                        ng-show="userProfile.extDef.permissions.canEdit && selectedProfile.status == 'draft'"
-                                        ng-click="editExtension()">Edit </button>
-
-                                <button class="btn btn-primary"
-                                        ng-show="userProfile.extDef.permissions.canRetire && selectedProfile.status == 'active'"
-                                        ng-click="retireExtension('retire')">Retire </button>
-
-                                <button class="btn btn-warning"
-                                        ng-show="userProfile.extDef.permissions.canDelete && selectedProfile.status == 'draft'"
-                                        ng-click="deleteExtension()">Delete </button>
-
-                                <button class="btn btn-success"
-                                        ng-show="userProfile.extDef.permissions.canActivate && selectedProfile.status == 'draft'"
-                                        ng-click="activateExtension('activate')">Activate </button>
-
-
-
-
-                            </div>
-
-
-                        </div>
-                        <div class="col-md-10 col-sm-10"></div>
-                    </div>
-
                 </uib-tab>
                 <uib-tab heading="Tree">
                     <div class="row">
@@ -279,6 +246,55 @@
 
 
             </uib-tabset>
+
+
+            <!-- todo this logic could be tidied...-->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pull-right">
+
+                        <button class="btn btn-primary"
+                                ng-click="showProfileDetails(profile)">Details</button>
+
+   <!--
+                        <i title="Show or edit profile" class="glyphicon glyphicon-eye-open" ng-click="showProfileDetails($event,profile)"></i>
+-->
+<!--
+                        <button class="btn btn-primary"
+                                ng-show="userProfile.extDef.permissions.canEdit && selectedProfile.status == 'draft'"
+                                ng-click="editExtension()">Edit</button>
+
+                        -->
+
+                        <span ng-show="isAuthoredByClinFhir">
+                            <button class="btn btn-primary"
+                                    ng-show="userProfile.extDef.permissions.canRetire && selectedProfile.status == 'active'"
+                                    ng-click="retireProfile('retire')">Retire </button>
+
+                            <button class="btn btn-warning"
+                                    ng-show="userProfile.extDef.permissions.canDelete && selectedProfile.status == 'draft'"
+                                    ng-click="deleteProfile()">Delete </button>
+
+                            <button class="btn btn-success"
+                                    ng-show="userProfile.extDef.permissions.canActivate && selectedProfile.status == 'draft'"
+                                    ng-click="activateProfile('activate')">Activate </button>
+
+                        </span>
+
+
+
+
+
+
+
+                    </div>
+
+
+                </div>
+                <div class="col-md-10 col-sm-10"></div>
+            </div>
+
+
 
         </div>
 

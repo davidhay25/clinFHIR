@@ -27,7 +27,6 @@ angular.module("sampleApp")
 
                 var profile = angular.copy($scope.selectedProfile)
 
-
                 $rootScope.$broadcast('profileSelected',profile);       //allows components to initalise with the profile
                 $rootScope.$broadcast('setDisplayMode',{newMode:'profileEditor',currentMode: 'profiles'});  //display the profile editor page
 
@@ -65,8 +64,6 @@ angular.module("sampleApp")
                 }
             });
 
-
-
             $scope.errors = [];
             $scope.appConfigSvc = appConfigSvc;
 
@@ -75,10 +72,16 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/newProfile.html',
                     size: 'lg',
-                    controller: ""
+                    controller: "newProfileCtrl"
                 }).result.then(
-                    function(result) {
-                        console.log(result)
+                    function(resource) {
+                        //so the resource has been added - call the editing screen with this resource...
+
+                        console.log(resource)
+
+                        $rootScope.$broadcast('profileSelected',resource);       //allows components to initalise with the profile
+                        $rootScope.$broadcast('setDisplayMode',{newMode:'profileEditor',currentMode: 'profiles'});  //display the profile editor page
+
                     })
             };
 
@@ -93,7 +96,7 @@ angular.module("sampleApp")
                     function(){
                         SaveDataToServer.deleteResource(appConfigSvc.getCurrentConformanceServer(),$scope.selectedProfile).then(
                             function(data){
-                                console.log(data);
+                                //console.log(data);
                                 modalService.showModal({}, {bodyText:'Definition is now deleted.'});
 
                                 $scope.profilesArray.splice($scope.index,1);
@@ -124,7 +127,7 @@ angular.module("sampleApp")
                 modalService.showModal({}, modalOptions).then(
                     function(){
                         $scope.selectedProfile.status = 'retire';
-                        SaveDataToServer.updateResource(appConfigSvc.getCurrentConformanceServer(),$scope.selectedProfile).then(
+                        SaveDataToServer.updateStructureDefinition(appConfigSvc.getCurrentConformanceServer(),$scope.selectedProfile).then(
                             function(data){
                                 console.log(data);
                                 modalService.showModal({}, {bodyText:'Definition is now retired, and should no longer be used. (It needs to remain in the registry for existing usages of course.)'});
@@ -147,7 +150,7 @@ angular.module("sampleApp")
                 modalService.showModal({}, modalOptions).then(
                     function(){
                         $scope.selectedProfile.status = 'active';
-                        SaveDataToServer.updateResource(appConfigSvc.getCurrentConformanceServer(),$scope.selectedProfile).then(
+                        SaveDataToServer.updateStructureDefinition(appConfigSvc.getCurrentConformanceServer(),$scope.selectedProfile).then(
                             function(data){
                                 console.log(data);
                                 modalService.showModal({}, {bodyText:'Definition is now active, and can be used by resource instances.'});
@@ -277,10 +280,15 @@ angular.module("sampleApp")
             }
 
 
-            delete $scope.selectedProfile;
+            //delete $scope.selectedProfile;
 
             $scope.selectProfile = function(entry,inx){
                 $scope.selectedProfile = entry.resource
-                console.log($scope.selectedProfile)
+
+                //$scope.isAuthoredByClinFhir = true;
+                $scope.isAuthoredByClinFhir = Utilities.isAuthoredByClinFhir($scope.selectedProfile);
+
+
+                //console.log($scope.selectedProfile)
             };
         });

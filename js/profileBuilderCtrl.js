@@ -287,23 +287,10 @@ angular.module("sampleApp")
             };
 
             modalService.showModal({}, modalOptions).then(function (result) {
-                //delete $scope.showProfileEditPage;
-                //delete $scope.frontPageProfile;
                 closeTheProfileEditor();
-
-                /*  delete $scope.model;
-                 delete $scope.selectedNode;
-                 delete $scope.edFromTreeNode;
-                 $rootScope.$emit('closeProfileEditPage');*/
             })
-
         } else {
-            //delete $scope.showProfileEditPage;
             closeTheProfileEditor();
-            /*delete $scope.model;
-             delete $scope.selectedNode;
-             delete $scope.edFromTreeNode;
-             $rootScope.$emit('closeProfileEditPage');*/
         }
     };
 

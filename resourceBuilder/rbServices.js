@@ -50,8 +50,8 @@ angular.module("sampleApp").
             }
             return deferred.promise;
         },
-        updateResource : function(server,resource)  {
-            //update a resource supplying the url and the resource...
+        updateStructureDefinition : function(server,resource)  {
+            //update a conformance resource supplying the url and the resource...
             var deferred = $q.defer();
             var url = server.url + 'StructureDefinition/'+resource.id;
             $http.put(url, resource).then(

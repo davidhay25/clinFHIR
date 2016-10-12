@@ -20,6 +20,23 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 "snapshot" : {element:[]}
             };
 
+            /*
+             //extensionDefinition.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
+             extensionDefinition.name = name;
+             //extensionDefinition.status = 'draft';
+            // extensionDefinition.abstract= false;
+             extensionDefinition.publisher = $scope.input.publisher;
+             extensionDefinition.contextType = "resource";
+
+             * */
+
+            extensionSD.status = 'draft';
+            extensionSD.abstract= false;
+            extensionSD.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
+            extensionSD.contextType = "resource";
+            extensionSD.context=["*"];
+            extensionSD.id = vo.extensionId;
+            extensionSD.publisher = 'clinFHIR';
             //these are STU-3 - not sure about STU-2
             if (fhirVersion == 3) {
 
@@ -30,17 +47,21 @@ angular.module("sampleApp").service('profileCreatorSvc',
            //     extensionSD.base= "http://hl7.org/fhir/StructureDefinition/Extension"
 
 
-                extensionSD.abstract = false;
+                //extensionSD.abstract = false;
                // extensionSD.baseType = "Extension";
                 extensionSD.baseDefinition = "http://hl7.org/fhir/StructureDefinition/Extension";
                 extensionSD.derivation = 'constraint';
-                extensionSD.id = vo.extensionId;
-                extensionSD.status='draft';
-                extensionSD.contextType = "datatype";
-                extensionSD.context=["*"];
+                //extensionSD.id = vo.extensionId;
+                //extensionSD.status='draft';
+                //extensionSD.contextType = "datatype";
+                //extensionSD.context=["*"];
 
                 extensionSD.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
             } else {
+
+                extensionSD.kind='datatype';
+
+
                 extensionSD.constrainedType = "Extension";
                 extensionSD.base = "http://hl7.org/fhir/StructureDefinition/Extension";
             }
@@ -49,7 +70,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
             var firstElement = {path:'Extension',id:'Extension',definition:'ext',min:0,max:'1'};
 
             firstElement.base = {"path": "Extension","min": 0,"max": "*"}
-
+            firstElement.type = [{code:'Extension'}]
 
             extensionSD.snapshot.element.push(firstElement);
             extensionSD.snapshot.element.push({path:'Extension.url',id:'Extension.url',definition:'Url',min:1,max:'1',type:[{code:'uri'}]});
@@ -531,6 +552,8 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                 var sd;         //this is the StructureDefinition for the Profile
 
+
+
                 //create the StructureDefinition - tha same whether a new one. or editing a previous one...
                 //as it's a PUT, updates will simply replace the previous...
                 var profileUrl;
@@ -562,6 +585,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     sd.description = baseProfile.description;
                     sd.requirements = baseProfile.requirements;
                     sd.copyright = baseProfile.copyright;
+                    sd.publisher = baseProfile.publisher;
                     sd.snapshot = {element:[]};
 
                     //if baseProfile.base is populated then this is a profile being edited...
@@ -581,6 +605,11 @@ angular.module("sampleApp").service('profileCreatorSvc',
                     var profileId = profileName;       //todo - ensure not yet used (or this is an update)
                     profileUrl = config.servers.conformance + "StructureDefinition/" +profileId;
                     sd.url = profileUrl;
+
+                    //elements in the StructureDefinition that are common to all...
+                    sd.abstract=false;
+                    sd.id = profileId;
+                    sd.publisher = baseProfile.publisher;
 
                     //the value of the 'type' property - ie what the base Resource is - changed between stu2 & 3...
                     //var typeName = 'base';
@@ -625,12 +654,8 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 var extensionUrl = config.servers.conformance + "StructureDefinition/" +extensionId;
                                 var dt = ed.type[0].code;   //only a single dt per entry (right now)
 
-                                //now change the datatype in the profile to be an extension, with a profile pointing to the ED
-                                //removed friday...
-
                                 var typeForExtension = angular.copy(ed.type);       //we're using the ed to store this stuff
 
-                                //console.log(typeForExtension)
 
                                 ed.type[0].code = "Extension";      // 'cause that's what it is...
 
@@ -641,8 +666,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                     ed.type[0].profile = extensionUrl;
                                 }
 
-
-
                                 //and change the path to be 'Extension'
                                 var ar = ed.path.split('.');
                                 var extensionDefId = ar[ar.length-1];
@@ -652,7 +675,10 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 //console.log(ed);
 
                                 var vo = {};
+
+                                vo.fhirVersion = fhirVersion;
                                 vo.ed = ed;                         //  the element definition that has been built
+                                delete vo.ed.myData;                //need to remove the 'myData' property
                                 vo.extensionUrl = extensionUrl;     //  the cannonical url for this definition
                                 vo.extensionId = extensionId;       //  the Id of the structuredefinition on the server
                                 vo.valueName = valueName;           //  the name for the 'value' element - eg valueCodeableConcept
@@ -700,7 +726,8 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                         //if this element is tobe included in the profile, we can add it now...
                         if (inProfile) {
-                            delete ed.myMeta;
+                            delete ed.myMeta;   //not sure if this is actually in there...
+                            delete ed.myData;
                             ed.id = ed.path;        //in STU-3 all elements need an id that i sthe same as the path..
                             sd.snapshot.element.push(ed)
                         }

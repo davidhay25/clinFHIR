@@ -111,7 +111,7 @@ angular.module("sampleApp")
                 modalService.showModal({}, modalOptions).then(
                     function(){
                         $scope.selectedExtension.status = 'retire';
-                        SaveDataToServer.updateResource(appConfigSvc.getCurrentConformanceServer(),$scope.selectedExtension).then(
+                        SaveDataToServer.updateStructureDefinition(appConfigSvc.getCurrentConformanceServer(),$scope.selectedExtension).then(
                             function(data){
                                 console.log(data);
                                 modalService.showModal({}, {bodyText:'Definition is now retired, and should no longer be used. (It needs to remain in the registry for existing usages of course.)'});
@@ -134,7 +134,7 @@ angular.module("sampleApp")
                 modalService.showModal({}, modalOptions).then(
                     function(){
                         $scope.selectedExtension.status = 'active';
-                        SaveDataToServer.updateResource(appConfigSvc.getCurrentConformanceServer(),$scope.selectedExtension).then(
+                        SaveDataToServer.updateStructureDefinition(appConfigSvc.getCurrentConformanceServer(),$scope.selectedExtension).then(
                             function(data){
                                 console.log(data);
                                 modalService.showModal({}, {bodyText:'Definition is now active, and can be used by resource instances.'});
