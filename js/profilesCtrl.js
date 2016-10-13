@@ -21,7 +21,6 @@ angular.module("sampleApp")
                 }
             );
 
-
             //called to display the editing and details screen - from the 'eye'...
             $scope.showProfileDetails = function() {
 
@@ -280,7 +279,6 @@ angular.module("sampleApp")
                     //$scope.loading=false;
                 })
             }
-
 
             //delete $scope.selectedProfile;
 

@@ -111,23 +111,6 @@ app.all('/grahamv2/*',function(req,res){
 });
 
 
-
-/*
-app.get('/proxy/*',function(req,res){
-    console.log(req.url)
-    req.url = req.url.replace('proxy/','')
-    proxy.web(req, res, { target: 'http://fhir3.healthintersections.com.au/open/' });
-});
-
-app.post('/proxy/*',function(req,res){
-    console.log('post: '+ req.url)
-    req.url = req.url.replace('proxy/','')
-    proxy.web(req, res, { target: 'http://fhir3.healthintersections.com.au/open/' });
-});
-
-*/
-
-
 //this is used for the re-direct from simplifier
 app.get('/createExample',function(req,res){
     var cookies = new Cookies( req, res )
@@ -244,7 +227,6 @@ app.use('/socket.io',function(req,res){
     res.end();
 });
 
-
 app.post('/errorReport',function(req,res){
     if(! db) {
         //check that the mongo server is running...
@@ -260,11 +242,9 @@ app.post('/errorReport',function(req,res){
     req.on('data', function (data) {
         body += data;
         console.log("Partial body: " + body);
-    })
+    });
     
     req.on('end', function () {
-        console.log("Body: " + body);
-        //console.log(req.body);
 
        var jsonBody = JSON.parse(body);
 
@@ -281,9 +261,6 @@ app.post('/errorReport',function(req,res){
             }
         });
     });
-
-
-
 });
 
 
@@ -358,7 +335,6 @@ var updateLocation = function(doc,ip) {
     var options = {
         method:'GET',
         uri : "http://freegeoip.net/json/"+doc.ip
-
     };
 
     request(options,function(error,response,body){
