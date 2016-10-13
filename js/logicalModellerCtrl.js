@@ -2,29 +2,99 @@
 
 angular.module("sampleApp")
     .controller('logicalModellerCtrl',
-        function ($scope,resourceCreatorSvc,$uibModal,$http,modalService) {
-
+        function ($scope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc) {
+//resourceCreatorSvc
             $scope.input = {};
             $scope.treeData = [];           //populates the resource tree
 
-            $scope.treeData =  [
-
-                { "id" : "ajson1", "parent" : "#", "text" : "Simple root node",state:{opened:true},data : {name:"root",path:"ajson1"} },
-                { "id" : "ajson3", "parent" : "ajson1", "text" : "Child 1" ,state:{opened:true},data : {name:"child1"}},
-                { "id" : "ajson4", "parent" : "ajson1", "text" : "Child 2",state:{opened:true},data : {name:"child2"} }
-            ]
-
-
-
+            $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
             $scope.treeData =  [
 
                 { "id" : "dhTest", "parent" : "#", "text" : "Simple root node",state:{opened:true},data : {name:"root",path:"dhTest"} }
 
-            ]
+            ];
+
+            //load all the logical models created by clinFHIR
+            loadAllModels = function() {
+               var url="http://fhir3.healthintersections.com.au/open/StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
+                $http.get(url).then(
+                    function(data) {
+                        $scope.bundleModels = data.data
+                    },
+                    function(err){
+
+                    }
+                )
+            };
+            loadAllModels();
 
             $scope.rootName = 'dhRoot';
+
             $scope.newModel = function(){
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/newLogicalModel.html',
+                        size: 'lg',
+                        controller: function($scope,appConfigSvc,Utilities,GetDataFromServer,modalService) {
+                            $scope.input = {};
+                            $scope.input.name = 'myModel';
+                            $scope.input.short='A new model';
+                            $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
+                            
+                            $scope.checkModelExists = function(name) {
+                                if (name.indexOf(' ')>-1) {
+                                    modalService.showModal({},{bodyText:"The name cannot contain spaces"})
+                                    return;
+                                }
+
+                                var url = $scope.conformanceServer.url + "StructureDefinition/"+name;
+                                $scope.showWaiting = true;
+                                $scope.canSaveEd = false;
+                                GetDataFromServer.adHocFHIRQuery(url).then(
+                                    function(data){
+
+                                        if (Utilities.isAuthoredByClinFhir(data.data)) {
+                                            modalService.showModal({},{bodyText:"There's already a profile with this name. If you carry on. it will be replaced."})
+                                        } else {
+                                            modalService.showModal({},{bodyText:"Sorry, there's already a profile with this name"})
+                                        }
+
+                                    },function(err){
+                                        console.log(err);
+                                        //as long as the status is 404 or 410, it's save to create a new one...
+                                        if (err.status == 404 || err.status == 410) {
+                                            $scope.canSave = true;
+
+                                        } else {
+                                            var config = {bodyText:'Sorry, there was an unknown error: '+angular.toJson(err,true)};
+                                            modalService.showModal({}, config)
+
+                                        }
+                                    }).finally(function(){
+                                    $scope.showWaiting = false;
+                                })
+                            };
+
+                            $scope.save = function(){
+                                var vo = {};
+                                vo.name = $scope.input.name;
+                                vo.short = $scope.input.short;
+                                vo.purpose = $scope.input.purpose || 'purpose';
+
+                                $scope.$close(vo);
+                            }
+                        }
+
+                    }).result.then(
+                        function(result) {
+                            $scope.rootName = result.name;      //this is the 'type' of the logical model - like 'Condition'
+                            
+                            $scope.treeData =  [
+                                { "id" : $scope.rootName, "parent" : "#", "text" : result.name,state:{opened:true},data : {name:"root",path:$scope.rootName} }
+                            ]
+                            drawTree();
+                            makeSD();
+                        })
                 
             };
 
@@ -32,17 +102,31 @@ angular.module("sampleApp")
             //console.log($scope.dataTypes);
 
             $scope.save = function() {
-                var url = "http://fhir3.healthintersections.com.au/open/StructureDefinition/dhLogicalModel";
+                
+                var url = $scope.conformanceServer.url + "StructureDefinition/" + $scope.SD.id;
+
                 $http.put(url,$scope.SD).then(
                     function(data) {
-                        console.log(data)
+                        //console.log(data)
+                        loadAllModels();
+                        modalService.showModal({},{bodyText:"The model has been updated. You may continue editing."})
                     },
                     function(err) {
-                        console.log(err)
+                        //console.log(err)
                         $scope.error = err;
+                        modalService.showModal({},{bodyText:"Sorry, there was an error saving the profile. View the 'Error' tab above for details."})
                     }
                 )
             };
+
+            $scope.selectModel = function(entry,index) {
+                $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
+                console.log($scope.treeData)
+                $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
+                drawTree();
+                makeSD();
+
+            }
 
             $scope.addNode = function() {
                 var parentPath = $scope.selectedNode.data.path;
@@ -78,15 +162,21 @@ angular.module("sampleApp")
                             $scope.input.description = data.description;
                         }
 
-                        $scope.checkForDuplicatePath = function(){
+                        $scope.checkName = function(){
+                            $scope.canSave = true;
+                            if (! $scope.input.name || $scope.input.name.indexOf('0') > -1) {
+                                $scope.canSave = false;
+                                modalService.showModal({},{bodyText:"The name cannot have spaces in it. Try again."})
+                            }
+
                             var pathForThisElement = parentPath + '.'+$scope.input.name;
                             var duplicateNode = findNodeWithPath(pathForThisElement)
                             if (duplicateNode) {
                                 $scope.canSave = false;
                                    modalService.showModal({},{bodyText:"This name is a duplicate of another and cannot be used. Try again."})
-                                } else {
-                                    $scope.canSave = true;
-                                }
+                                } //else {
+                                   // $scope.canSave = true;
+                               // }
                             //console.log(duplicateNode)
                         };
 
@@ -121,14 +211,14 @@ angular.module("sampleApp")
                 }).result.then(
                     function(result) {
 
-                        var pathForThisElement = result.parentPath + '.'+result.name;
-                        var duplicateNode = findNodeWithPath(pathForThisElement)
+                       // var pathForThisElement = result.parentPath + '.'+result.name;
+                        // duplicateNode = findNodeWithPath(pathForThisElement)
                         
                        // if (duplicateNode) {
                          //   modalService.showModal({},{bodyText:"This name is a duplicate of another and cannot be used. Try again."})
                         //} else {
 
-                            console.log(duplicateNode)
+                            //console.log(duplicateNode)
 
                             if (result.editNode) {
                                 //editing an existing node...
@@ -166,8 +256,8 @@ angular.module("sampleApp")
 
 
                             drawTree()
-                            makeSD();
-                       // }
+                        makeSD();
+                        // }
 
                         function setPath(parentPath,parentId) {
                             $scope.treeData.forEach(function(node){
@@ -205,8 +295,8 @@ angular.module("sampleApp")
                 $scope.treeData = newList;
                 delete $scope.selectedNode;
                 drawTree()
-                makeSD();
-                
+                makeSD()
+
                 //
                 function findChildNodes(lst,parentId) {
                     $scope.treeData.forEach(function(node){
@@ -234,41 +324,23 @@ angular.module("sampleApp")
 
                 return foundNode;
 
-/*
 
-                var rootNodeId = $scope.treeData[0].data.path;
-                var foundNode = findPath(rootNodeId,rootNodeId,path)
-                return foundNode;
-
-                function findPath(parentPath,parentId,targetPath) {
-                    $scope.treeData.forEach(function(node){
-                        if (node.parent == parentId) {
-                            var childPath = parentPath + '.' + node.data.name;
-                            console.log(childPath);
-                            if (childPath == targetPath) {
-                                return node;
-                            } else {
-                                node.data.path = childPath;
-                                findPath(childPath,node.id,targetPath)
-
-                            }
-
-                        }
-                    })
-
-                }
-                
-                */
 
 
             }
 
 
+            //have this as a single finction so we can extract scope properties rather than passing the whole scope across...
+            makeSD = function() {
+                $scope.SD = logicalModelSvc.makeSD($scope,$scope.treeData);
+            };
+
+
 
             //create the StructureDefinition resource for the logical model..
-            makeSD = function() {
+            makeSDDEP = function() {
                 var sd = {resourceType:'StructureDefinition'};
-                sd.id = "dhLogicalModel";
+                sd.id = $scope.rootName;
                 sd.url = "http://fhir.hl7.org.nz/test";
                 sd.name = $scope.rootName;
                 sd.status='draft';
@@ -278,10 +350,13 @@ angular.module("sampleApp")
                 sd.publisher = $scope.input.publisher;
                 //at the time of writing (Oct 12), the implementaton of stu3 varies wrt 'code' & 'keyword'. Remove this eventually...
                 sd.identifier = [{system:"http://clinfhir.com",value:"author"}]
+                sd.keyword = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
+
+
                 sd.kind='logical';
                 sd.abstract=false;
                 sd.baseDefinition ="http://hl7.org/fhir/StructureDefinition/Element"
-                sd.type = "dhTest";
+                sd.type = $scope.rootName;
                 sd.derivation = 'specialization';
 
                 //newResource.type = type;
