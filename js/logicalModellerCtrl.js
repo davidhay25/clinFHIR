@@ -2,8 +2,7 @@
 
 angular.module("sampleApp")
     .controller('logicalModellerCtrl',
-        function ($scope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc) {
-//resourceCreatorSvc
+        function ($scope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout) {
             $scope.input = {};
             $scope.treeData = [];           //populates the resource tree
 
@@ -330,12 +329,18 @@ angular.module("sampleApp")
                             };
                             newNode.data = angular.copy(result);
                             $scope.treeData.push(newNode);
-                            delete $scope.selectedNode;
-                            
+
+                            //delete $scope.selectedNode;
+                            $scope.selectedNode = newNode;
 
                         }
                         var rootNodeId = $scope.treeData[0].data.path;
                         setPath(rootNodeId, rootNodeId)
+
+
+                        if ($scope.selectedNode) {
+                            $scope.treeIdToSelect = $scope.selectedNode.id;
+                        }
 
 
                         drawTree()
@@ -427,13 +432,11 @@ angular.module("sampleApp")
             };
 
 
-
             $scope.moveUp = function(){
                 var path = $scope.selectedNode.data.path;
                 var pos = findPositionInTree(path);     //the location of the element we wish to move in the array
                 console.log(pos);
                 if (pos > 0) {
-
                     var lst = getListOfPeers(path);
                     if (lst[0].data.path !== path) {
                         //so we're not the first... - need to find the one to shift above...
@@ -441,39 +444,24 @@ angular.module("sampleApp")
                             if (lst[i].data.path == path) {
                                 //yes! we've got the one to move above, now where is it in the tree?
                                 var pos1 = findPositionInTree(lst[i-1].data.path);    //this marks where to do the insert
-console.log(pos1)
-
-
                                 removedBranch = pruneBranch(path);
-                                //var arChildren = getChildren(path);
-                                //console.log(arChildren)
-
-                                //remove all the children from the array
-                                //var removedBranch = $scope.treeData.splice(pos,arChildren.length+1)
-                                console.log(removedBranch)
-
                                 insertBranch(removedBranch,pos1);
-/*
-                                for (var j=removedBranch.length-1; j > -1; j--) {
-                                    var nodeToInsert= removedBranch[j];
-                                    $scope.treeData.splice(pos1,0,nodeToInsert)
-                                }
-                                */
-
                                 $scope.isDirty = true;
+                                $scope.treeIdToSelect = findNodeWithPath(path).id;
                                 drawTree();
                                 makeSD();
+
+
                                 break;
                             }
                         }
                     }
-
                 }
             };
 
             $scope.moveDn = function(){
                 var path = $scope.selectedNode.data.path;
-                var originalPos = findPositionInTree(path);     //need to save where the list is now in case we need to re-insert...
+                //var originalPos = findPositionInTree(path);     //need to save where the list is now in case we need to re-insert...
                 var lst = getListOfPeers(path);
                 //find the position of this node in the peers. If we're already at the bottom, then don't shift
                 //if we're second to bottom, then insert point will be right at the bottom.
@@ -489,11 +477,12 @@ console.log(pos1)
                 if (placeInList == lengthOfPeers-1) {
                     //we're at the end of the list - re-insert at original
                 } else if (placeInList == lengthOfPeers-2) {
-                    //we're second to bottom - insert at bottom
+                    //we're second to bottom - do nothing
                     removedBranch = pruneBranch(path);      //prune the list
                     var insertPos = $scope.treeData.length; //the bottom
                     insertBranch(removedBranch,insertPos);
                     $scope.isDirty = true;
+                    $scope.treeIdToSelect = findNodeWithPath(path).id;
                     drawTree();
                     makeSD();
 
@@ -504,65 +493,11 @@ console.log(pos1)
                     var insertPos= findPositionInTree(pathToInsertAbove);   //insert point (after the list was pruned)
                     insertBranch(removedBranch,insertPos);
                     $scope.isDirty = true;
+                    $scope.treeIdToSelect = findNodeWithPath(path).id;
                     drawTree();
                     makeSD();
                 }
 
-
-                return;
-
-
-
-                if (lst[lstlength-1].data.path !== path) {
-                    //make sure we're not already at the bottom
-
-                    removedBranch = pruneBranch(path);      //remove the branch we want to move...
-                    for (var i=0; i < lst.length; i++) {    //find where this node is in the list of peers...
-                        if (lst[i].data.path == path) {
-                            //yes! we've got the one to move below, now where is it in the tree?
-                            var pos1 = findPositionInTree(lst[i].data.path);    //this is the
-                        }
-                    }
-
-
-                }
-
-                return;
-
-                var pos = findPositionInTree(path);
-                if (pos < $scope.treeData.length) {     //make sure we're not at the bottom
-
-
-
-                    var lst = getListOfPeers(path);
-                    if (lst[lstlength-1].data.path !== path) {
-                        //so we're not already the last... - need to find the one to shift below...
-                        for (var i=0; i < lst.length; i++) {
-                            if (lst[i].data.path == path) {
-                                //yes! we've got the one to move below, now where is it in the tree?
-                                var pos1 = findPositionInTree(lst[i].data.path);
-                                var item = $scope.treeData.splice(pos1+1,1)[0]
-                                $scope.treeData.splice(pos,0,item)
-                                drawTree();
-                            }
-                        }
-
-
-                    }
-
-/*
-                    //first check that item above is a peer to this one
-                    var pathOfAbove = $scope.treeData[pos-1].data.path;
-                    if (areSiblings(pathOfAbove,path)) {
-                        var item = $scope.treeData.splice(pos-1,1)[0]
-                        console.log(item);
-                        //item.state = item.state || {}
-                        // item.state.selected = true;
-                        $scope.treeData.splice(pos,0,item)
-                        drawTree();
-                    }
-                    */
-                }
             };
 
             //remove a nde and all of its children
@@ -579,10 +514,10 @@ console.log(pos1)
                     var nodeToInsert= branch[j];
                     $scope.treeData.splice(pos,0,nodeToInsert)
                 }
-            }
+            };
 
             //are the 2 paths siblings (ie under the same parent)
-            areSiblings = function(path1,path2){
+            areSiblingsDEP = function(path1,path2){
                 var ar1 = path1.split('.')
                 var ar2 = path2.split('.')
                 if (ar1.length !== ar2.length) {return false;}
@@ -618,10 +553,10 @@ console.log(pos1)
                     if (node.data.path.lastIndexOf(path,0)=== 0 && node.data.path !==path) {
                         ar.push(node);
                     }
-                })
+                });
                 return ar;
 
-            }
+            };
 
             //create the StructureDefinition resource for the logical model..
             makeSDDEP = function() {
@@ -690,7 +625,10 @@ console.log(pos1)
                     //seems to be the node selection event...
 
                     console.log(data)
-                    $scope.selectedNode = data.node;
+                    if (data.node) {
+                        $scope.selectedNode = data.node;
+                    }
+
 
 
                                 //used in the html template...
@@ -704,9 +642,15 @@ console.log(pos1)
 
                     console.log('redraw')
 
+                    if ($scope.treeIdToSelect) {
+                        $("#lmTreeView").jstree("select_node", "#"+$scope.treeIdToSelect);
+
+                       // $scope.selectedNode = findNodeWithPath(path)
+                        delete $scope.treeIdToSelect
+                    }
+
 
                     if ($scope.treeData.length > 0) {
-                       
                         $scope.$broadcast('treebuilt');
                         $scope.$digest();       //as the event occurred outside of angular...
                     }
@@ -715,8 +659,6 @@ console.log(pos1)
 
 
             }
-
-
 
             drawTree()
     });

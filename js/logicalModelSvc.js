@@ -93,6 +93,11 @@ angular.module("sampleApp")
                     ed.definition = data.description || 'definition';
                     ed.min=0;
                     ed.max = '1';
+                    /*
+                    if (data.constraint) {
+                        ed.constraint = [{human:data.constraint}]
+                    }
+                    */
                     if (data.type) {
                         ed.type = [];
                         data.type.forEach(function(typ) {
