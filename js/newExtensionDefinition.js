@@ -204,7 +204,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                                     $scope.termServer = config.servers.terminology;
                                     //$scope.valueSetRoot = config.servers.terminology + "ValueSet/";
 
-                                    $scope.input.arStrength = ['extensible','extensible','preferred','example'];
+                                    $scope.input.arStrength = ['required','extensible','preferred','example'];
                                     $scope.input.strength = 'preferred'; //currentBinding.strength;
 
 

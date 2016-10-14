@@ -17,18 +17,28 @@ angular.module("sampleApp")
                         var item = {}
                         item.id = path;
                         item.text = arPath[arPath.length -1];   //the text will be the last entry in the path...
+                        item.data = {};
                         if (arPath.length == 1) {
                             //this is the root node
-                            item.parent = '#'
+                            item.parent = '#';
+                            item.data.isRoot = true;
+                            //now set the header data...
+                            item.data.header = {};
+                            
+                            item.data.header.name = sd.name;
+                            item.data.header.short = sd.short;
+                            item.data.header.purpose = sd.purpose;
+
                         } else {
                             //otherwise the parent can be inferred from the path
                             arPath.pop();//
                             item.parent = arPath.join('.');
                         }
                         item.state = {opened:true};     //default to fully expanded
-                        item.data = {};
+
                         item.data.path = path;
                         item.data.name = item.text;
+                        item.data.short = ed.short;
                         item.data.description = ed.definition;
                         item.data.type = ed.type;
                         item.data.min = ed.min;
@@ -41,14 +51,18 @@ angular.module("sampleApp")
                 return arTree;
             },
             makeSD : function(scope,treeData) {
+                var header = treeData[0].data.header || {}      //the first node has the header informatiion
+
                 var sd = {resourceType:'StructureDefinition'};
                 sd.id = scope.rootName;
                 sd.url = "http://fhir.hl7.org.nz/test";
-                sd.name = scope.rootName;
+                sd.name = header.name;
+                sd.title = header.title;
                 sd.status='draft';
                 sd.date = moment().format();
-                sd.description = scope.input.description;
-                //newResource.short = $scope.input.short;
+                sd.purpose = header.purpose;
+                sd.description = header.description;
+
                 sd.publisher = scope.input.publisher;
                 //at the time of writing (Oct 12), the implementaton of stu3 varies wrt 'code' & 'keyword'. Remove this eventually...
                 sd.identifier = [{system:"http://clinfhir.com",value:"author"}]

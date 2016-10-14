@@ -2004,6 +2004,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
              lst.push({code:'SC',description:'Character String with Code'});
              */
 
+            lst.push({code: 'BackboneElement'});
+            
             lst.forEach(function (item) {
                 // item.description = item.description + " ("+ item.code + ")";
                 item.description = item.code;
@@ -2011,7 +2013,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             });
 
 
-            lst.push({code: 'BackboneElement'});
+            
 
             return lst
 
