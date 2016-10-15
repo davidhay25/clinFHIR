@@ -71,6 +71,7 @@
 
     <script src="js/libs/vis.min.js"></script>
     <script src="js/loginCtrl.js"></script>
+    <script src="resourceBuilder/vsBrowser.js"></script>
 
     <title>Logical Modeller</title>
 
@@ -200,6 +201,7 @@
                 <h4>Model properties</h4>
 
                 <uib-tabset>
+                    <br/>
                     <uib-tab heading="Summary">
                         <table class="table table-bordered">
                             <tr><td width="25%">Model Name</td><td>{{treeData[0].data.header.name}}</td></tr>
@@ -273,7 +275,9 @@
                                 {{typ.code}}
                             </div>
                             <div ng-show="selectedNode.data.selectedValueSet">
-                                {{selectedNode.data.selectedValueSet.vs.url}} ({{selectedNode.data.selectedValueSet.strength}})
+                                <span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.vs.url)">
+                                    {{selectedNode.data.selectedValueSet.vs.url}}</span>
+                                    ({{selectedNode.data.selectedValueSet.strength}})
 
                             </div>
 
@@ -313,7 +317,8 @@
 
     </div>
 
-
+    <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
+                vs-selected="vsSelected"></vs-browser>
 
 </div>
 </body>

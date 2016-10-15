@@ -2,7 +2,8 @@
 
 angular.module("sampleApp")
     .controller('logicalModellerCtrl',
-        function ($scope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,$firebaseObject) {
+        function ($scope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
+                  GetDataFromServer,$firebaseObject) {
             $scope.input = {};
             $scope.treeData = [];           //populates the resource tree
 
@@ -61,6 +62,26 @@ angular.module("sampleApp")
             }
 
             $scope.rootNameDEP = 'dhRoot';
+
+
+            $scope.showVSBrowserDialog = {};
+            $scope.showVSBrowser = function(vs) {
+                $scope.showVSBrowserDialog.open(vs);        //the open method defined in the directive...
+            };
+
+            $scope.viewVS = function(uri) {
+                //var url = appConfigSvc
+
+                GetDataFromServer.getValueSet(uri).then(
+                    function(vs) {
+                        console.log(vs)
+                        $scope.showVSBrowserDialog.open(vs);
+
+                    }
+                ).finally (function(){
+                    $scope.showWaiting = false;
+                });
+            };
 
             var createGraphOfProfile = function() {
                 var graphProfile = angular.copy($scope.SD )
@@ -309,9 +330,7 @@ angular.module("sampleApp")
                             });
 
                             $scope.selectedValueSet = data.selectedValueSet;
-                            if (data.selectedValueSet) {
 
-                            }
 
 
                         }
