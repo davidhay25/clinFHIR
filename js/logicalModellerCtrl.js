@@ -2,12 +2,34 @@
 
 angular.module("sampleApp")
     .controller('logicalModellerCtrl',
-        function ($scope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout) {
+        function ($scope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,$firebaseObject) {
             $scope.input = {};
             $scope.treeData = [];           //populates the resource tree
 
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
-            
+
+
+
+            //called whenever the auth state changes - eg login/out, initial load, create user etc.
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+
+                } else {
+                    // No user is signed in.
+                }
+            });
+
+            $scope.login=function(){
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop.
+                    keyboard: false,       //same as above.
+                    templateUrl: 'modalTemplates/login.html',
+                    controller: 'loginCtrl'
+
+                })
+
+            };
+
             //load all the logical models created by clinFHIR
             loadAllModels = function() {
                var url="http://fhir3.healthintersections.com.au/open/StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
@@ -22,7 +44,66 @@ angular.module("sampleApp")
             };
             loadAllModels();
 
-            $scope.rootName = 'dhRoot';
+            if (appConfigSvc.getCurrentConformanceServer().name !== 'Grahame STU3 server (Proxy)') {
+                var modalOptions = {
+                    closeButtonText: "No, don't change",
+                    actionButtonText: 'Yes, change toGrahames server',
+                    headerText: 'Change conformance server',
+                    bodyText: 'At the moment, the modellerwill only work against Grahames STU-3 server. Shall I change to that one (will effect all of clinFHIR)'
+                };
+
+                modalService.showModal({}, modalOptions).then(
+                    function (result) {
+                        alert('sorry - you have to do this yourself in clinFHIR at the moment....');
+
+                    }
+                );
+            }
+
+            $scope.rootNameDEP = 'dhRoot';
+
+            var createGraphOfProfile = function() {
+                var graphProfile = angular.copy($scope.SD )
+
+                resourceCreatorSvc.createGraphOfProfile(graphProfile).then(
+                    function(graphData) {
+
+                        //console.log(graphData)
+                        var container = document.getElementById('mmLogicalModel');
+                        $scope.profileNetwork = new vis.Network(container, graphData, {});
+
+                        $scope.profileNetwork.on("click", function (obj) {
+                            //console.log(obj)
+
+                            var nodeId = obj.nodes[0];  //get the first node
+                            //console.log(nodeId,graphData)
+
+                            var node = graphData.nodes.get(nodeId);
+                            //console.log(node)
+
+                            var pathOfSelectedNode = node.ed.base.path;
+                            $scope.selectedNode = findNodeWithPath(pathOfSelectedNode); //note this is the node for the tree view, not the graph
+
+                            $scope.$digest();
+                            //selectedNetworkElement
+
+                        });
+                    }
+                );
+            };
+
+
+            //this is the event when the profileGraph tab is chosen. Should really move this to a separate controller...
+            $scope.redrawProfileGraph = function() {
+                console.log('click')
+
+                $timeout(function(){
+                    $scope.profileNetwork.fit();
+                    console.log('fitting...')
+                },500            )
+
+
+            }
 
             $scope.newModel = function(){
                 $uibModal.open({
@@ -145,14 +226,35 @@ angular.module("sampleApp")
                 }
 
                 function selectEntry(entry) {
+                    delete $scope.modelHistory;
                     $scope.isDirty = false;
                     $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
                     console.log($scope.treeData)
                     $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                     drawTree();
                     makeSD();
+
+                    logicalModelSvc.getModelHistory($scope.rootName).then(
+                        function(data){
+                            console.log(data.data)
+                            $scope.modelHistory = data.data;
+                        },
+                        function(err) {
+                            alert(angular.toJson(err))
+                        }
+                    )
+
+
                 }
 
+            };
+
+
+            $scope.selectModelVersion = function(entry){
+                $scope.SD = entry.resource;
+                $scope.isHistory = true;
+                $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.SD);
+                drawTree();
             };
 
             $scope.addNode = function() {
@@ -189,6 +291,29 @@ angular.module("sampleApp")
                             $scope.input.name = data.name;
                             $scope.input.short= data.short;
                             $scope.input.description = data.description;
+                            $scope.input.comments= data.comments;
+                            if (data.min == 0) {
+                                $scope.input.multiplicity = 'opt';
+                                if (data.max == '*') {$scope.input.multiplicity = 'mult'}
+                            }
+                            if (data.min == 1){
+                                $scope.input.multiplicity = 'req';
+                                if (data.max == '*') {$scope.input.multiplicity = 'multreq'}
+                            }
+
+                            var dt = data.type[0].code;     //only the first datatype (we only support 1 right now)
+                            $scope.allDataTypes.forEach(function(dt1){
+                                if (dt1.code == dt) {
+                                    $scope.input.dataType = dt1;
+                                }
+                            });
+
+                            $scope.selectedValueSet = data.selectedValueSet;
+                            if (data.selectedValueSet) {
+
+                            }
+
+
                         }
 
                         $scope.checkName = function(){
@@ -214,15 +339,29 @@ angular.module("sampleApp")
                             vo.name = $scope.input.name;
                             vo.short = $scope.input.short;
                             vo.description = $scope.input.description || 'definition';
-                            vo.constraints = $scope.input.constraints;
+                            vo.comments = $scope.input.comments;
                             vo.type = [{code:$scope.input.dataType.code}];
                             vo.editNode = editNode;
                             vo.parentPath = parentPath;
                             vo.selectedValueSet = $scope.selectedValueSet;
+                            switch ($scope.input.multiplicity) {
+                                case 'mult' :
+                                    vo.min =0; vo.max='*';
+                                    break;
+                                case 'opt' :
+                                    vo.min =0; vo.max='1';
+                                    break;
+                                case 'req' :
+                                    vo.min =1; vo.max='1';
+                                    break;
+                                case 'multreq' :
+                                    vo.min =1; vo.max='*';
+                                    break;
+                            }
+                            
                             $scope.$close(vo);
                         };
-
-
+                        
                         $scope.setDataType = function(dt) {
                             if (dt.isCoded) {
 
@@ -303,10 +442,11 @@ angular.module("sampleApp")
                     }
                 }).result.then(
                     function(result) {
-                        
+
+                        console.log(result)
 
                         if (result.editNode) {
-                            //editing an existing node...
+                            //editing an existing node - replace the data property in the node with the results......
                             $scope.treeData.forEach(function (item, index) {
                                 if (item.id == result.editNode.id) {
                                     var clone = angular.copy(result)
@@ -316,7 +456,6 @@ angular.module("sampleApp")
                                     $scope.selectedNode = item;
                                 }
                             })
-
 
                         } else {
                             var parentId = $scope.selectedNode.id;
@@ -334,25 +473,28 @@ angular.module("sampleApp")
                             $scope.selectedNode = newNode;
 
                         }
+
+                        //set all the element paths...
                         var rootNodeId = $scope.treeData[0].data.path;
                         setPath(rootNodeId, rootNodeId)
 
-
+                        //ensure that the tree has the selected node highlighted...
                         if ($scope.selectedNode) {
                             $scope.treeIdToSelect = $scope.selectedNode.id;
                         }
 
 
-                        drawTree()
+                        drawTree();
                         $scope.isDirty = true;
-                        makeSD();
-                        // }
+                        makeSD();       //create the StructureDefinition resource...
+                        
 
+                        //set the path of the element based on the name - and the parent names up th ehierarchy..
                         function setPath(parentPath,parentId) {
                             $scope.treeData.forEach(function(node){
                                 if (node.parent == parentId) {
                                     var childPath = parentPath + '.' + node.data.name;
-                                    console.log(childPath);
+                                    //console.log(childPath);
                                     node.data.path = childPath;
                                     setPath(childPath,node.id)
                                 }
@@ -426,9 +568,10 @@ angular.module("sampleApp")
             }
 
 
-            //have this as a single finction so we can extract scope properties rather than passing the whole scope across...
+            //have this as a single function so we can extract scope properties rather than passing the whole scope across...
             makeSD = function() {
                 $scope.SD = logicalModelSvc.makeSD($scope,$scope.treeData);
+                createGraphOfProfile();     //update the graph display...
             };
 
 
@@ -624,7 +767,7 @@ angular.module("sampleApp")
                 ).on('changed.jstree', function (e, data) {
                     //seems to be the node selection event...
 
-                    console.log(data)
+                    //console.log(data)
                     if (data.node) {
                         $scope.selectedNode = data.node;
                     }
@@ -640,7 +783,7 @@ angular.module("sampleApp")
                 }).on('redraw.jstree', function (e, data) {
 
 
-                    console.log('redraw')
+                    //console.log('redraw')
 
                     if ($scope.treeIdToSelect) {
                         $("#lmTreeView").jstree("select_node", "#"+$scope.treeIdToSelect);

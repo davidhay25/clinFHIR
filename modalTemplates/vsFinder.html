@@ -47,16 +47,22 @@
                 </div>
 
 
-                <div class="row display-row" ng-repeat="entry in searchResultBundle.entry" style="margin-bottom: 5px">
-                    <div class="col-md-9 col-sm-9">
-                        <div><strong>{{entry.resource.id}}</strong></div>
-                        {{entry.resource.name}}
-                        <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>
-                    </div>
-                    <div class="col-md-3 col-sm-3">
-                        <button class="btn btn-link" ng-click="input.vspreview=entry.resource">Select</button>
-                    </div>
-                </div>
+                <ul class="list-group">
+                    <li class="list-group-item" ng-repeat="entry in searchResultBundle.entry" style="margin-bottom: 5px">
+                        <div class="row">
+                            <div class="col-md-9 col-sm-9">
+                                <!--<div><strong>{{entry.resource.id}}</strong></div>-->
+                                {{entry.resource.name}}
+                                <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>
+                            </div>
+                            <div class="col-md-3 col-sm-3">
+                                <button class="btn btn-link" ng-click="input.vspreview=entry.resource">Select</button>
+                            </div>
+                        </div>
+
+                    </li>
+                </ul>
+
 
 
             </div>

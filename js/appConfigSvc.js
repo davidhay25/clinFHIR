@@ -76,9 +76,6 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:"Grahame STU3 server (Proxy)",url:"grahamv3/",version:3,everythingOperation:true,realUrl:'http://fhir3.healthintersections.com.au/open/'});
         defaultConfig.allKnownServers.push({name:"Grahame STU2 server (Proxy)",url:"grahamv2/",version:2,everythingOperation:true,realUrl:'http://fhir2.healthintersections.com.au/open/'});
         
-        
-        
-        
         defaultConfig.allKnownServers.push({name:"Public HAPI STU2 server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Public HAPI STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true});
 

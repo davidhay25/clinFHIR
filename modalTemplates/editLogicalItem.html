@@ -60,13 +60,14 @@
                             <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'opt'">0..1</label>
                             <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'req'">1..1</label>
                             <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'mult'">0..*</label>
+                            <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'multreq'">1..*</label>
                         </div>
                     </div>
 
                     <div class="col-md-8 col-sm-8">
-                        <div><label>Constraints</label></div>
-                        <textarea class="form-control" rows="2" ng-model="input.constraints"
-                                  placeholder="Any constraints on the use of this element"></textarea>
+                        <div><label>Comments</label></div>
+                        <textarea class="form-control" rows="2" ng-model="input.comments"
+                                  placeholder="Any comments on the use of this element"></textarea>
 
                     </div>
 

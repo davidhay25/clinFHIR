@@ -3,9 +3,13 @@ angular.module("sampleApp")
     //also holds the current patient and all their resources...
     //note that the current profile is maintained by resourceCreatorSvc
 
-    .service('logicalModelSvc', function($http,$q) {
+    .service('logicalModelSvc', function($http,$q,appConfigSvc) {
 
         return {
+            getModelHistory : function(id){
+                var url = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/" + id + "/_history";
+                return $http.get(url);
+            },
             createTreeArrayFromSD : function(sd) {
                 //generate the array that the tree uses from the StructureDefinition
                 var arTree = []
@@ -43,6 +47,25 @@ angular.module("sampleApp")
                         item.data.type = ed.type;
                         item.data.min = ed.min;
                         item.data.max = ed.max;
+
+                        item.data.comments = ed.comments;
+
+                        //note that we don't retrieve the complete valueset...
+                        if (ed.binding) {
+                            item.data.selectedValueSet = {strength:ed.binding.strength};
+                            item.data.selectedValueSet.vs = {url:ed.binding.valueSetUri};
+                            item.data.selectedValueSet.vs.name = ed.binding.description;
+                        }
+                        /*
+                        if (data.selectedValueSet) {
+                            ed.binding = {strength:data.selectedValueSet.strength};
+                            ed.binding.valueSetUri = data.selectedValueSet.vs.url;
+                            ed.binding.description = 'The bound valueset'
+
+                        }
+                        */
+
+
                         arTree.push(item);
                     });
 
@@ -91,13 +114,10 @@ angular.module("sampleApp")
                     ed.path = data.path;
                     ed.short = data.short;
                     ed.definition = data.description || 'definition';
-                    ed.min=0;
-                    ed.max = '1';
-                    /*
-                    if (data.constraint) {
-                        ed.constraint = [{human:data.constraint}]
-                    }
-                    */
+                    ed.min=data.min;
+                    ed.max = data.max;
+                    ed.comments = data.comments;
+
                     if (data.type) {
                         ed.type = [];
                         data.type.forEach(function(typ) {
@@ -109,6 +129,13 @@ angular.module("sampleApp")
                         path : ed.path, min:0,max:'1'
                     };
 
+                    if (data.selectedValueSet) {
+                        ed.binding = {strength:data.selectedValueSet.strength};
+                        ed.binding.valueSetUri = data.selectedValueSet.vs.url;
+                        ed.binding.description = data.selectedValueSet.vs.name;
+
+                    }
+
                     sd.snapshot.element.push(ed)
                 });
 
@@ -116,4 +143,4 @@ angular.module("sampleApp")
             }
 
             }
-        })
+        });
