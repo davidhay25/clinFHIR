@@ -113,7 +113,7 @@ angular.module("sampleApp")
                     ed.id = data.path;
                     ed.path = data.path;
                     ed.short = data.short;
-                    ed.definition = data.description || 'definition';
+                    ed.definition = data.description || 'No description';
                     ed.min=data.min;
                     ed.max = data.max;
                     ed.comments = data.comments;

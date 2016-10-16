@@ -168,11 +168,12 @@
 
                 <div class="row">
                     <div class="col-sm-6 col-md-6">
-                        Viewing history
+                        <strong>Viewing history</strong>
                     </div>
                     <div class="col-sm-6 col-md-6">
-                        <div class="clickable" ng-click="exitHistory()">Back to current</div>
-                        <div class="clickable" ng-click="revert()">Revert to this version</div>
+                        <div class="clickable pull-right" ng-click="exitHistory()">Back to current</div>
+                        <br/>
+                        <div class="clickable pull-right" ng-click="revert()">Revert to this version</div>
                     </div>
                 </div>
 
@@ -311,9 +312,9 @@
                             <div ng-repeat = "typ in selectedNode.data.type">
 
 
-                                    <a ng-href="{{rootForDataType}}{{typ.code}}" target="_blank">
-                                        <i class="glyphicon glyphicon-eye-open clickable"></i>
-                                    </a>
+                                <a ng-href="{{rootForDataType}}{{typ.code}}" target="_blank">
+                                    <i class="glyphicon glyphicon-eye-open clickable"></i>
+                                </a>
 
 
                                 {{typ.code}}

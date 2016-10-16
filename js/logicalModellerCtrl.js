@@ -46,6 +46,7 @@ angular.module("sampleApp")
                 )
             };
             loadAllModels();
+            
 
             if (appConfigSvc.getCurrentConformanceServer().name !== 'Grahame STU3 server (Proxy)') {
                 var modalOptions = {
@@ -66,11 +67,11 @@ angular.module("sampleApp")
             $scope.rootNameDEP = 'dhRoot';
 
 
+            //functions and prperties to enable the valueset viewer
             $scope.showVSBrowserDialog = {};
             $scope.showVSBrowser = function(vs) {
                 $scope.showVSBrowserDialog.open(vs);        //the open method defined in the directive...
             };
-
             $scope.viewVS = function(uri) {
                 //var url = appConfigSvc
 
@@ -131,7 +132,26 @@ angular.module("sampleApp")
             $scope.selectNodeFromTable = function(path) {
                 //to allow the details of a selected node in the table to be displayed...
                 $scope.selectedNode = findNodeWithPath(path);
-            }
+            };
+            
+            
+            //revert to a previous version
+            $scope.revert = function() {
+                var modalOptions = {
+                    closeButtonText: "No, don't change",
+                    actionButtonText: 'Yes, please go back to this one',
+                    headerText: 'Revert to previous version',
+                    bodyText: 'Are you sure you wish to make this version the current one'
+                };
+
+                modalService.showModal({}, modalOptions).then(
+                    function (result) {
+                        $scope.save();
+
+                    }
+                );
+            };
+            
             
             $scope.editModel = function(){
                 editModel($scope.SD);

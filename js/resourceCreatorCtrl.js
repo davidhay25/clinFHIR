@@ -175,6 +175,15 @@ angular.module("sampleApp")
 
     $scope.hasDetailedView = ['Observation','Encounter','Condition']
 
+    //todo just for the moment...
+    $scope.showLogicalModeller = function () {
+        if (appConfigSvc.getCurrentConformanceServer().name == 'Grahame STU3 server (Proxy)') {
+            return true;
+        }
+    }
+
+   
+
     $scope.config = appConfigSvc.config();  //the configuraton object - especially the data,terminology & conformance servers...
 
     //show the server query page
