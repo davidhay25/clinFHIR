@@ -330,22 +330,22 @@
                         </td></tr>
                         <tr><td>Actions</td><td><span>
                             <i class="glyphicon glyphicon-arrow-up clickable"
-                               ng-hide = "$index == 0"
+                               ng-hide = "$index == 0 || isHistory"
                                ng-click="moveUp($event,$index)" style="margin-right: 10px"></i>
 
                             <i class="glyphicon glyphicon-arrow-down clickable"
-                               ng-hide = "$index == (config.sections.length -1)"
+                               ng-hide = "$index == (config.sections.length -1) || isHistory"
                                ng-click="moveDn($event,$index)"></i>
 
                     </span>
 
-                            <button ng-show="!selectedNode.data.isRoot"
+                            <button ng-show="!selectedNode.data.isRoot && !isHistory"
                                     class="btn btn-link" ng-click="editNode()">Edit Element</button>
 
 
-                            <button class="btn btn-link" ng-click="addNode()">Add Element</button>
+                            <button ng-show="!isHistory" class="btn btn-link" ng-click="addNode()">Add Element</button>
 
-                            <button ng-show="!selectedNode.data.isRoot"
+                            <button ng-show="!selectedNode.data.isRoot  && !isHistory"
                                         class="btn btn-link" ng-click="deleteNode()">Remove Element</button>
 
                         </td></tr>
