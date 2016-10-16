@@ -309,6 +309,13 @@
                         <tr><td>Mult</td><td>{{selectedNode.data.min}}..{{selectedNode.data.max}}</td></tr>
                         <tr><td>Datatypes</td><td>
                             <div ng-repeat = "typ in selectedNode.data.type">
+
+
+                                    <a ng-href="{{rootForDataType}}{{typ.code}}" target="_blank">
+                                        <i class="glyphicon glyphicon-eye-open clickable"></i>
+                                    </a>
+
+
                                 {{typ.code}}
                             </div>
                             <div ng-show="selectedNode.data.selectedValueSet">

@@ -42,10 +42,24 @@
 
                 <div class="col-md-4 col-sm-4">
                     <label>Datatype</label>
-                    <select ng-change="setDataType(input.dataType)" ng-model="input.dataType" class="form-control"
 
-                            ng-options="type.description for type in allDataTypes">
-                    </select>
+                    <div class="row">
+                        <div class="col-md-10 col-sm-10">
+                            <select ng-change="setDataType(input.dataType)" ng-model="input.dataType" class="form-control"
+
+                                    ng-options="type.description for type in allDataTypes">
+                            </select>
+                        </div>
+                        <div class="col-md-2 col-sm-2">
+                            <a ng-href="{{rootForDataType}}{{input.dataType.code}}" target="_blank">
+                                <i class="glyphicon glyphicon-eye-open clickable"></i>
+                            </a>
+                        </div>
+                    </div>
+
+
+
+
                     <div class="pull-right"><em>{{selectedValueSet.vs.name}}</em></div>
 
                 </div>

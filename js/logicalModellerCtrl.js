@@ -9,6 +9,7 @@ angular.module("sampleApp")
 
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
+            $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
 
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
             firebase.auth().onAuthStateChanged(function(user) {
@@ -367,8 +368,8 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editLogicalItem.html',
                     size: 'lg',
-                    controller: function($scope,allDataTypes,editNode,parentPath,findNodeWithPath){
-
+                    controller: function($scope,allDataTypes,editNode,parentPath,findNodeWithPath,rootForDataType){
+                        $scope.rootForDataType = rootForDataType;
                         $scope.canSave = true;
                         $scope.allDataTypes = allDataTypes;
                         $scope.parentPath = parentPath;
@@ -530,6 +531,9 @@ angular.module("sampleApp")
                         },
                         findNodeWithPath : function() {
                             return findNodeWithPath
+                        },
+                        rootForDataType : function() {
+                            return $scope.rootForDataType;
                         }
                     }
                 }).result.then(
