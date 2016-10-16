@@ -30,7 +30,7 @@ angular.module("sampleApp")
                             item.data.header = {};
                             
                             item.data.header.name = sd.name;
-                            item.data.header.short = sd.short;
+                            item.data.header.title = sd.title;
                             item.data.header.purpose = sd.purpose;
 
                         } else {
@@ -140,6 +140,28 @@ angular.module("sampleApp")
                 });
 
                 return sd;
+            },
+            reOrderTree : function(treeData) {
+                //ensure the elements in the tree array are sorted by parent / child
+                var arTree = [treeData[0]];
+
+                findChildren(treeData[0].data.path,treeData[0].id,arTree);
+                return arTree;
+
+
+                function findChildren(parentPath,parentId,arTree) {
+                    treeData.forEach(function(node){
+                        if (node.parent == parentId) {
+                            arTree.push(node);
+                            var childPath = parentPath + '.' + node.data.name;
+                            //console.log(childPath);
+                           // node.data.path = childPath;
+                            findChildren(childPath,node.id,arTree)
+                        }
+                    })
+
+                }
+
             }
 
             }

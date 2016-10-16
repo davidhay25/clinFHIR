@@ -29,19 +29,20 @@
                     <div class="form-group">
                         <label>Model name</label>
                         <input type="text" class="form-control" ng-model="input.name" auto-focus
-                               ng-blur="checkName()" placeholder="Name of the model">
+                               ng-blur="checkName()" placeholder="Name of the model"
+                                ng-disabled="SD">
                     </div>
                 </div>
                 <div class="col-md-1 col-sm-1">
                     <div class="form-group">
                         <button class="btn btn-primary pull-right" style="margin-top: 25px"
-                            ng-click="checkModelExists(input.name)">Check</button>
+                            ng-click="checkModelExists(input.name)" ng-hide="SD">Check</button>
                     </div>
                 </div>
                 <div class="col-md-7 col-sm-7">
-                    <label>Short</label>
+                    <label>Title</label>
                     <input type="text"
-                           ng-model="input.short" class="form-control" placeholder="Short description">
+                           ng-model="input.title" class="form-control" placeholder="Descriptive title">
                 </div>
             </div>
 

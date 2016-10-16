@@ -10,7 +10,6 @@ angular.module("sampleApp")
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
 
-
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
             firebase.auth().onAuthStateChanged(function(user) {
                 if (user) {
@@ -30,6 +29,8 @@ angular.module("sampleApp")
                 })
 
             };
+
+            $scope.isThisTheCurrentVersion
 
             //load all the logical models created by clinFHIR
             loadAllModels = function() {
@@ -124,16 +125,52 @@ angular.module("sampleApp")
                 },500            )
 
 
+            };
+
+            $scope.selectNodeFromTable = function(path) {
+                //to allow the details of a selected node in the table to be displayed...
+                $scope.selectedNode = findNodeWithPath(path);
             }
+            
+            $scope.editModel = function(){
+                editModel($scope.SD);
+            };
 
             $scope.newModel = function(){
+                editModel();
+            };
+
+            //edit the model description. Create a new one if 'header' is null...
+            var editModel = function(SD){
                 $uibModal.open({
                     templateUrl: 'modalTemplates/newLogicalModel.html',
                         size: 'lg',
-                        controller: function($scope,appConfigSvc,Utilities,GetDataFromServer,modalService) {
+                        controller: function($scope,appConfigSvc,Utilities,GetDataFromServer,modalService,SD) {
                             $scope.input = {};
-                            $scope.input.name = 'myModel';
-                            $scope.input.short='A new model';
+
+                            console.log(SD)
+                            if (SD) {
+                                $scope.SD = SD;
+                                $scope.input.name = SD.name;
+                                $scope.input.purpose = SD.purpose;
+                                $scope.input.title = SD.title;
+                                $scope.canSave = true;
+                            } else {
+                                //$scope.input.name = 'myModel';
+                                //$scope.input.short='A new model';
+                            }
+
+                            $scope.checkName = function() {
+                                var name = $scope.input.name;
+                                if (name.indexOf(' ') != -1) {
+                                    modalService.showModal({},{bodyText:"The name cannot contain spaces"})
+                                    $scope.canSave = false;
+                                    return;
+                                }
+                                $scope.input.name = name.charAt(0).toUpperCase()+name.substr(1);
+
+                            }
+
                             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
                             
                             $scope.checkModelExists = function(name) {
@@ -144,7 +181,7 @@ angular.module("sampleApp")
 
                                 var url = $scope.conformanceServer.url + "StructureDefinition/"+name;
                                 $scope.showWaiting = true;
-                                $scope.canSaveEd = false;
+                                $scope.canSave = false;
                                 GetDataFromServer.adHocFHIRQuery(url).then(
                                     function(data){
 
@@ -173,31 +210,47 @@ angular.module("sampleApp")
                             $scope.save = function(){
                                 var vo = {};
                                 vo.name = $scope.input.name;
-                                vo.title = $scope.input.short;
+                                vo.title = $scope.input.title;
                                 vo.purpose = $scope.input.purpose || 'purpose';
+                                vo.SD = $scope.SD;
 
 
                                 $scope.$close(vo);
                             }
-                        }
+                        },resolve : {
+                            SD: function () {          //the default config
+                                return SD;
+                        }}
 
                     }).result.then(
                         function(result) {
-                            $scope.rootName = result.name;      //this is the 'type' of the logical model - like 'Condition'
-                            
-                            var rootNode = { "id" : $scope.rootName, "parent" : "#", "text" : result.name,state:{opened:true},
-                                data : {name:"root",path:$scope.rootName,isRoot:true} };
-                            
-                            rootNode.data.header = result;      //header based data. keep it in the first node...
-                            
-                            $scope.treeData =  [rootNode]
-                            drawTree();
-                            makeSD();
+                            $scope.isDirty=true;
 
-                            $scope.isDirty = true;      //as this has not beed saved;
+                            if (result.SD) {
+                                //this is an edit
+                                delete result.SD;
+                                $scope.treeData[0].data.header = result;
 
-                            //add it to the list so we can see it
-                            $scope.bundleModels.entry.push({resource:$scope.SD})
+                            } else {
+                                //this is new
+                                $scope.rootName = result.name;      //this is the 'type' of the logical model - like 'Condition'
+
+                                var rootNode = { "id" : $scope.rootName, "parent" : "#", "text" : result.name,state:{opened:true},
+                                    data : {name:"root",path:$scope.rootName,isRoot:true,min:1,max:'1'} };
+
+                                rootNode.data.header = result;      //header based data. keep it in the first node...
+
+                                $scope.treeData =  [rootNode]
+                                drawTree();
+                                makeSD();
+
+                                $scope.isDirty = true;      //as this has not beed saved;
+
+                                //add it to the list so we can see it
+                                $scope.bundleModels.entry.push({resource:$scope.SD})
+                            }
+
+                            $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
 
 
                         })
@@ -215,6 +268,7 @@ angular.module("sampleApp")
                         //console.log(data)
                         loadAllModels();
                         $scope.isDirty = false;
+                        loadHistory($scope.SD.id);      //that way we get the metadata added by the server...
                         modalService.showModal({},{bodyText:"The model has been updated. You may continue editing."})
                     },
                     function(err) {
@@ -254,7 +308,10 @@ angular.module("sampleApp")
                     $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                     drawTree();
                     makeSD();
+                    $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
+                    loadHistory($scope.rootName);
 
+                    /*
                     logicalModelSvc.getModelHistory($scope.rootName).then(
                         function(data){
                             console.log(data.data)
@@ -264,13 +321,28 @@ angular.module("sampleApp")
                             alert(angular.toJson(err))
                         }
                     )
+                    */
 
 
                 }
 
+
+
             };
+            
+            function loadHistory(id) {
+                logicalModelSvc.getModelHistory(id).then(
+                    function(data){
+                        console.log(data.data)
+                        $scope.modelHistory = data.data;
+                    },
+                    function(err) {
+                        alert(angular.toJson(err))
+                    }
+                )
+            }
 
-
+            //select one of the versions to display. We keep the current verson in currentSD (set in makeSD() )
             $scope.selectModelVersion = function(entry){
                 $scope.SD = entry.resource;
                 $scope.isHistory = true;
@@ -283,7 +355,6 @@ angular.module("sampleApp")
                 editNode(null,parentPath);         //will actually create a new node
 
             };
-
 
             $scope.editNode = function() {
                 var parentPath = $scope.selectedNode.data.path;
@@ -306,8 +377,10 @@ angular.module("sampleApp")
                         //$scope.input.short='This is a new element';
                         //$scope.input.description = 'detailed notes about the element'
                         $scope.input.dataType = $scope.allDataTypes[0];
+                        $scope.input.multiplicity = 'opt';
 
                         if (editNode) {
+                            //editing an existing node
                             var data = editNode.data;
                             $scope.input.name = data.name;
                             $scope.input.short= data.short;
@@ -477,6 +550,7 @@ angular.module("sampleApp")
                             })
 
                         } else {
+                            //this is a new node
                             var parentId = $scope.selectedNode.id;
                             var newId = 't' + new Date().getTime();
                             var newNode = {
@@ -487,6 +561,8 @@ angular.module("sampleApp")
                             };
                             newNode.data = angular.copy(result);
                             $scope.treeData.push(newNode);
+
+
 
                             //delete $scope.selectedNode;
                             $scope.selectedNode = newNode;
@@ -547,6 +623,7 @@ angular.module("sampleApp")
                 makeSD();
 
                 $scope.isDirty = true;
+                $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
 
                 //create a list with the paths of all the nodes
                 function findChildNodes(lst,parentId) {
@@ -589,10 +666,32 @@ angular.module("sampleApp")
 
             //have this as a single function so we can extract scope properties rather than passing the whole scope across...
             makeSD = function() {
-                $scope.SD = logicalModelSvc.makeSD($scope,$scope.treeData);
+
+                console.log($scope.treeData);
+
+                var ar = logicalModelSvc.reOrderTree($scope.treeData);
+
+                //$scope.SD = logicalModelSvc.makeSD($scope,$scope.treeData);
+                $scope.SD = logicalModelSvc.makeSD($scope,ar);
+                
                 createGraphOfProfile();     //update the graph display...
+
             };
 
+
+            //exit from the history review
+            $scope.exitHistory = function(){
+                $scope.SD = $scope.currentSD;
+                $scope.isHistory = false;
+
+                //restore the current (working) version...
+                $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.SD)
+                console.log($scope.treeData)
+                $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
+                drawTree();
+                makeSD();
+
+            };
 
             $scope.moveUp = function(){
                 var path = $scope.selectedNode.data.path;
@@ -688,7 +787,7 @@ angular.module("sampleApp")
                 if (ar1.join('.') !== ar2.join('.')) {return false;}
                 return true;
 
-            }
+            };
 
             //return a list of all peers to this one (used by the move functionality)
             getListOfPeers = function(path) {
@@ -703,10 +802,10 @@ angular.module("sampleApp")
                     if ((node.data.path.substr(0,parentPathLength) == parentPath) && (ar1.length == numberOfSteps)) {
                         ar.push(node);
                     }
-                })
+                });
                 return ar;
 
-            }
+            };
 
             //get all the children of this path
             getChildren = function(path) {
@@ -720,62 +819,6 @@ angular.module("sampleApp")
 
             };
 
-            //create the StructureDefinition resource for the logical model..
-            makeSDDEP = function() {
-                var sd = {resourceType:'StructureDefinition'};
-                sd.id = $scope.rootName;
-                sd.url = "http://fhir.hl7.org.nz/test";
-                sd.name = $scope.rootName;
-                sd.status='draft';
-                sd.date = moment().format();
-                sd.description = $scope.input.description;
-                //newResource.short = $scope.input.short;
-                sd.publisher = $scope.input.publisher;
-                //at the time of writing (Oct 12), the implementaton of stu3 varies wrt 'code' & 'keyword'. Remove this eventually...
-                sd.identifier = [{system:"http://clinfhir.com",value:"author"}]
-                sd.keyword = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
-
-
-                sd.kind='logical';
-                sd.abstract=false;
-                sd.baseDefinition ="http://hl7.org/fhir/StructureDefinition/Element"
-                sd.type = $scope.rootName;
-                sd.derivation = 'specialization';
-
-                //newResource.type = type;
-                //newResource.derivation = 'constraint';
-                //newResource.baseDefinition = "http://hl7.org/fhir/StructureDefinition/"+type;
-                //newResource.keyword = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
-
-
-                sd.snapshot = {element:[]};
-
-                $scope.treeData.forEach(function(item){
-                    var data = item.data;
-                   // console.log(data);
-                    var ed = {}
-                    ed.id = data.path;
-                    ed.path = data.path;
-                    ed.short = data.short;
-                    ed.definition = data.description || 'definition';
-                    ed.min=0;
-                    ed.max = '1';
-                    if (data.type) {
-                        ed.type = [];
-                        data.type.forEach(function(typ) {
-                            ed.type.push({code:typ.code});
-                        })
-                    }
-
-                    ed.base = {
-                        path : ed.path, min:0,max:'1'
-                    };
-
-                    sd.snapshot.element.push(ed)
-                });
-
-                $scope.SD = sd;
-            };
 
             function drawTree() {
                 

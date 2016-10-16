@@ -72,6 +72,7 @@
     <script src="js/libs/vis.min.js"></script>
     <script src="js/loginCtrl.js"></script>
     <script src="resourceBuilder/vsBrowser.js"></script>
+    <script src="js/modellerFilters.js"></script>
 
     <title>Logical Modeller</title>
 
@@ -161,9 +162,24 @@
 
 
         </div>
-        <div class="col-md-4 col-sm-4">
+        <div class="col-md-5 col-sm-5">
 
-            <div ng-show="isHistory" class="alert alert-info">Viewing history</div>
+            <div ng-show="isHistory" class="alert alert-warning">
+
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        Viewing history
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        <div class="clickable" ng-click="exitHistory()">Back to current</div>
+                        <div class="clickable" ng-click="revert()">Revert to this version</div>
+                    </div>
+                </div>
+
+
+
+
+            </div>
 
             <uib-tabset ng-show="treeData.length > 0">
                 <uib-tab heading="Designer"/>
@@ -182,6 +198,24 @@
                     <div id="mmLogicalModel"></div>
                 </uib-tab>
 
+                <uib-tab heading="Table">
+                    <br/>
+                    <table class="table table-bordered table-condensed">
+                        <tr><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th></tr>
+                        <tr ng-repeat="ed in SD.snapshot.element">
+                            <td>
+                                <div  ng-click="selectNodeFromTable(ed.path)" class="clickable"
+                                        ng-style="{ 'padding-left': (ed.path | pathindent) }">{{ed.path | lastInPath}}</div>
+                            </td>
+                            <td>{{ed.type[0].code}}</td>
+                            <td>{{ed.min}}..{{ed.max}}</td>
+                            <td>{{ed.definition}}</td>
+                        </tr>
+
+                    </table>
+
+                </uib-tab>
+
                 <uib-tab heading="Json">
                     <pre>{{SD | json}}</pre>
                 </uib-tab>
@@ -196,21 +230,24 @@
         </div>
 
 
-        <div class="col-md-6 col-sm-6">
+        <div class="col-md-5 col-sm-5">
             <div ng-show="treeData.length > 0">
-                <h4>Model properties</h4>
 
+
+                <h4>Model properties</h4>
+                <div><span ng-click = "editModel()" class="clickable pull-right">Edit</span> </div>
                 <uib-tabset>
                     <br/>
                     <uib-tab heading="Summary">
+                        <br/>
                         <table class="table table-bordered">
                             <tr><td width="25%">Model Name</td><td>{{treeData[0].data.header.name}}</td></tr>
                             <tr><td>Model Title</td><td>{{treeData[0].data.header.title}}</td></tr>
                             <tr><td>Model Purpose</td><td>{{treeData[0].data.header.purpose}}</td></tr>
                         </table>
                     </uib-tab>
-                    <uib-tab heading="history">
-
+                    <uib-tab heading="History">
+                        <br/>
                         <ul class="list-group">
 
 
