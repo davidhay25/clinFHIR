@@ -10,15 +10,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
         $scope.results = {};
         $scope.input = {};
-
-        //place all the v3 terminology servers into the array and set the default server ($scope.termServer)
-
-
-
-
-        //--------- terminology servers........
-
-
+        $scope.state = 'find';      // edit / new / find
 
         $scope.cheat = function() {
             snomedSystem = "http://fhir.hl7.org.nz/NamingSystem/cheat";
@@ -27,17 +19,43 @@ angular.module("sampleApp").controller('valuesetCtrl',
             $scope.canEdit = true;
         };
 
+
+        //add directly to the ValueSet (not by looking up a terminology)
         $scope.addDirect = function() {
-            if ($scope.includeElement.concept.length == 0) {
-                $scope.vs.compose.include.push($scope.includeElement);
+            var concept = {code:$scope.input.directCode,display:$scope.input.directDescription}; //this is the concept to add
+            var system = $scope.input.directSystem;     //this is the system to add them to
+            //now see if we already have that system in the vs...
+            var added;
+            for (var i=0; i< $scope.vs.compose.include.length; i++) {
+                var item = $scope.vs.compose.include[i];    //this is an entry in the 'include' array
+                if (item.system == system) {
+                    //this is the same system, so we can just add the concept
+                    item.concept = item.concept || []
+                    item.concept.push(concept);
+                    added = true;
+                    break;
+                }
+            }
+
+            if (! added) {
+                //the system was not found, so add another entry to the 'include' array
+                var item = {system:system,concept:[concept]}
+                $scope.vs.compose.include.push(item)
             }
 
 
-            $scope.includeElement.concept.push({code:$scope.input.directCode,display:$scope.input.directDescription})
-            $scope.input.isDirty = true;
-            $scope.hasConcept = true;
-        };
 
+
+
+          //  if ($scope.includeElement.concept.length == 0) {
+             //   $scope.vs.compose.include.push($scope.includeElement);
+           // }
+
+
+           // $scope.includeElement.concept.push({code:$scope.input.directCode,display:$scope.input.directDescription})
+            $scope.input.isDirty = true;
+            //$scope.hasConcept = true;
+        };
 
         var config = appConfigSvc.config();
         var termServ = config.servers.terminology;      //the currently configured terminology server
@@ -52,8 +70,6 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 }
             }
         });
-
-
 
 
         //theses are the root concepts used in the concept selector. It may be a good idea to move to an external config file...
@@ -77,6 +93,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
             $scope.startupParams = params;
             if (params.vs) {
                 $scope.initialVs = params.vs;
+                delete $scope.state;        //the defualt value is 'find' whicg displays the find dialog...
             }
             if (params.ts) {
                 $scope.initialTerminologyServer = params.ts;
@@ -250,7 +267,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
       //  $scope.setRootConcept($scope.rootConcepts[0]);  //set to the first root concept in the array - chacking that it exists
 
 
-        $scope.state = 'find';      // edit / new / find
+
         $scope.input.conceptCache = {};        //hash to store the lookup details of a concept. todo We could cache this...
         $scope.results.ccDirectSystem = snomedSystem;//  "http://snomed.info/sct";     //default the system name to snomed
 
@@ -376,7 +393,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
         };
 
-        //create a new ValueSet. If vs is passed in, then use that as the basis...
+        //create a new ValueSet. If vs is passed in, then use that as the basis (ie cloning it) ...
         function createNewValueSet(id,vs,description) {
 
             if (vs) {
@@ -428,9 +445,6 @@ angular.module("sampleApp").controller('valuesetCtrl',
                     bodyText: 'Do you wish to add this ValueSet to the Implementation Guide.'
                 };
 
-                
-                
-                
                 modalService.showModal({}, modalOptions).then(
                     function(){
 
@@ -580,7 +594,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 $scope.canEdit = true;
             }
 
-            if ($scope.implementationGuide) {
+            //if the app was called with a VS, then don't offer to add to the IG.
+            // (but 'add new' from the IG will not have initialVs set, therefore do offer to add)
+            if ($scope.implementationGuide && ! $scope.initialVs) {
                 var modalOptions = {
                     closeButtonText: "No, don't add",
                     actionButtonText: 'Yes, please add',
@@ -701,40 +717,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 }
             };
 
-        $scope.expandDEP = function(filter){
-            delete $scope.expansion;
-            delete $scope.queryError;
-            $scope.showWaiting = true;
-            if (filter){
-                GetDataFromServer.getFilteredValueSet($scope.vs.id,filter).then(
-                    function(data){
-                        console.log(data)
-                        $scope.expansion = data.expansion;
-                    },
-                    function(err){
-                        alert(angular.toJson(err))
-                    }
-                ).finally(function(){
-                    $scope.showWaiting = false;
-                });
-            } else {
-                GetDataFromServer.getExpandedValueSet($scope.vs.id).then(
-                    function(data) {
-                        console.log(data)
-                        $scope.expansion = data.expansion;
-                    },
-                    function(err){
-                        alert(angular.toJson(err))
 
-                        $scope.queryError = err
-
-
-                    }
-                ).finally(function(){
-                    $scope.showWaiting = false;
-                });
-            }
-        };
 
         $scope.save = function () {
 

@@ -161,13 +161,24 @@
 
 
             <div ng-repeat = "pkg in ig.package">
-                <h4>{{pkg.description}}</h4>
+                <div class="row">
+                    <div class="col-md-4 col-sm-4">
+                        <h4>{{pkg.description}}</h4>
+                    </div>
+                    <div class="col-md-8 col-sm-8">
+                        <a ng-href="valuesetCreator.html?ig={{ig.url}}" class="pull-right" target="_blank">
+                            Add {{pkg.name}}
+                        </a>
+                    </div>
+                </div>
+
+
                 <ul class="list-group">
                     <li ng-class="{'list-group-item':1==1,'list-group-item-info':SD.type == entry.resource.type}"
                         ng-repeat = "res in pkg.resource">
                         {{res.name}}
                         <span class="pull-right">
-                            <a ng-href="valuesetCreator.html?vs={{res.sourceUri}}&ig={{ig.url}}" target="_blank">Edit (in new window)</a>
+                            <a ng-href="valuesetCreator.html?vs={{res.sourceUri}}&ig={{ig.url}}" target="_blank">Edit </a>
                         </span>
                     </li>
                 </ul>
