@@ -5,7 +5,17 @@ angular.module("sampleApp")
 
     .service('logicalModelSvc', function($http,$q,appConfigSvc,GetDataFromServer) {
 
+        var currentUser;
+        
         return {
+            addSimpleExtension : function(sd,url,value) {
+                //add a simple extension as a string;
+                sd.extension = sd.extension || []
+                sd.extension.push({url:url,valueString:value})
+            },
+            setCurrentUser : function(user) {
+                currentUser = user;
+            },
             createFromBaseType : function(treeData,typeName,rootName) {
               //create a model from the base type, only bringing across stuff we want.
                 //todo - very similar to the logic in createTreeArrayFromSD() - ?call out to separate function...
@@ -103,7 +113,7 @@ angular.module("sampleApp")
             },
             createTreeArrayFromSD : function(sd) {
                 //generate the array that the tree uses from the StructureDefinition
-                var arTree = []
+                var arTree = [];
                 if (sd && sd.snapshot && sd.snapshot.element) {
 
                     sd.snapshot.element.forEach(function(ed){
@@ -119,10 +129,10 @@ angular.module("sampleApp")
                             item.data.isRoot = true;
                             //now set the header data...
                             item.data.header = {};
-                            
                             item.data.header.name = sd.name;
                             item.data.header.title = sd.title;
                             item.data.header.purpose = sd.purpose;
+                            item.data.header.extension = sd.extension;      //save any extensions...
 
                         } else {
                             //otherwise the parent can be inferred from the path
@@ -138,6 +148,7 @@ angular.module("sampleApp")
                         item.data.type = ed.type;
                         item.data.min = ed.min;
                         item.data.max = ed.max;
+
 
                         item.data.comments = ed.comments;
 
@@ -167,7 +178,13 @@ angular.module("sampleApp")
             makeSD : function(scope,treeData) {
                 var header = treeData[0].data.header || {}      //the first node has the header informatiion
 
+                //todo - this will replace any extensions...
                 var sd = {resourceType:'StructureDefinition'};
+                if (currentUser) {
+                    this.addSimpleExtension(sd,'http:www.clinfhir.com/StructureDefinition/userEmail',currentUser.email)
+                }
+
+
                 sd.id = scope.rootName;
                 sd.url = "http://fhir.hl7.org.nz/test";
                 sd.name = header.name;

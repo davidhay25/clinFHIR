@@ -2,7 +2,7 @@
 
 angular.module("sampleApp")
     .controller('logicalModellerCtrl',
-        function ($scope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
+        function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
                   GetDataFromServer,$firebaseObject) {
             $scope.input = {};
             $scope.treeData = [];           //populates the resource tree
@@ -13,25 +13,16 @@ angular.module("sampleApp")
 
 
             //-----------  login stuff....
-
-            //called whenever the auth state changes - eg login/out, initial load, create user etc.
-         /*   firebase.auth().onAuthStateChanged(function(user) {
-                if (user) {
-
-                } else {
-                    // No user is signed in.
-                }
-            });
-
-*/
+            
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
             firebase.auth().onAuthStateChanged(function(user) {
                 if (user) {
                     $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
-
+                    logicalModelSvc.setCurrentUser(user);
                     console.log(user);
                 } else {
                     console.log('no user')
+                    logicalModelSvc.setCurrentUser(null);
                     // No user is signed in.
                 }
             });
@@ -388,7 +379,7 @@ angular.module("sampleApp")
                     delete $scope.modelHistory;
                     $scope.isDirty = false;
                     $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
-                    console.log($scope.treeData)
+                    //console.log($scope.treeData)
                     $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                     drawTree();
                     makeSD();
@@ -417,7 +408,7 @@ angular.module("sampleApp")
             function loadHistory(id) {
                 logicalModelSvc.getModelHistory(id).then(
                     function(data){
-                        console.log(data.data)
+                        //console.log(data.data)
                         $scope.modelHistory = data.data;
                     },
                     function(err) {
@@ -779,7 +770,7 @@ angular.module("sampleApp")
             //have this as a single function so we can extract scope properties rather than passing the whole scope across...
             makeSD = function() {
 
-                console.log($scope.treeData);
+                //console.log($scope.treeData);
 
                 var ar = logicalModelSvc.reOrderTree($scope.treeData);
 
