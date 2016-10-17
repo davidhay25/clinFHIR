@@ -140,7 +140,11 @@ angular.module("sampleApp").
         localServerQuery : function(url) {
             return $http.get(url);
         },
-        adHocFHIRQuery : function(url) {
+        adHocFHIRQueryFollowingPaging : function(url) {
+            //used when a caller expects a bundle
+
+
+
             //an ahhoc query - full url given - to avoid a controller using $http directly...
             var deferred = $q.defer();
             var bundle = Utilities.perfromQueryFollowingPaging(url).then(
@@ -154,6 +158,13 @@ angular.module("sampleApp").
             //return $http.get(url);
 
             return deferred.promise;
+        },
+        adHocFHIRQuery : function(url) {
+            //not all callers expect a bundle!!!
+
+            return $http.get(url);
+
+            
         },
         
         generalFhirQuery : function(qry) {

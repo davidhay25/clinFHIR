@@ -11,7 +11,6 @@ angular.module("sampleApp")
 
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
 
-
             //-----------  login stuff....
             
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
@@ -34,13 +33,12 @@ angular.module("sampleApp")
                     templateUrl: 'modalTemplates/login.html',
                     controller: 'loginCtrl'
                 })
-
             };
             
             
             $scope.logout=function(){
                 firebase.auth().signOut().then(function() {
-                    //delete $rootScope.userProfile;
+                    delete $rootScope.userProfile;
                     modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
 
                 }, function(error) {
