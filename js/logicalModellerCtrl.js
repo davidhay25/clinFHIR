@@ -11,11 +11,27 @@ angular.module("sampleApp")
 
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
 
+
+            //-----------  login stuff....
+
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
-            firebase.auth().onAuthStateChanged(function(user) {
+         /*   firebase.auth().onAuthStateChanged(function(user) {
                 if (user) {
 
                 } else {
+                    // No user is signed in.
+                }
+            });
+
+*/
+            //called whenever the auth state changes - eg login/out, initial load, create user etc.
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+                    $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+
+                    console.log(user);
+                } else {
+                    console.log('no user')
                     // No user is signed in.
                 }
             });
@@ -26,12 +42,29 @@ angular.module("sampleApp")
                     keyboard: false,       //same as above.
                     templateUrl: 'modalTemplates/login.html',
                     controller: 'loginCtrl'
-
                 })
 
             };
+            
+            
+            $scope.logout=function(){
+                firebase.auth().signOut().then(function() {
+                    //delete $rootScope.userProfile;
+                    modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
 
-            $scope.isThisTheCurrentVersion
+                }, function(error) {
+                    modalService.showModal({}, {bodyText: 'Sorry, there was an error lgging out - please try again'})
+                });
+
+            };
+
+
+
+            $scope.firebase = firebase;
+
+            //------------------------------------------
+
+            //$scope.isThisTheCurrentVersion
 
             //load all the logical models created by clinFHIR
             loadAllModels = function() {

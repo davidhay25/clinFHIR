@@ -97,6 +97,9 @@ angular.module("sampleApp")
     firebase.auth().onAuthStateChanged(function(user) {
         if (user) {
             $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+
+            console.log($rootScope.userProfile)
+
             var updateProfile = false;      //this is just a cheat so I can update my config...
                 //if it's me, then set me as adminstrator and other stuff...
             if (user.uid == "C6955l18fegSZTbdPeU8NJupQS63") {

@@ -6,7 +6,7 @@ angular.module("sampleApp")
 
         //https://firebase.google.com/docs/auth/web/manage-users
 
-            $scope.input = {};
+            $scope.input = {password:"",email:""};
 
             //var auth = $firebaseAuth();
 
