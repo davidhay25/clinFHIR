@@ -33,17 +33,17 @@ angular.module("sampleApp")
         */
 
         defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2016-10-11a';
+        defaultConfig.lastUpdated='2016-10-18';
         defaultConfig.baseSpecUrl = "http://hl7.org/fhir/";     //the base for spec documentation
         defaultConfig.logLevel = 0;     //0 = no logging, 1 = log to console
         defaultConfig.enableCache = false;  //whether caching is supported
-        //defaultConfig.servers.terminology = "http://fhir3.healthintersections.com.au/open/";
-        defaultConfig.servers.terminology = "grahamv3/";
+        defaultConfig.servers.terminology = "http://fhir3.healthintersections.com.au/open/";//
+        // defaultConfig.servers.terminology = "grahamv3/";
         //defaultConfig.servers.terminology = "http://fhir.hl7.org.nz/dstu2/";
         defaultConfig.servers.data = "http://fhirtest.uhn.ca/baseDstu3/";
         //defaultConfig.servers.conformance = "http://fhir2.healthintersections.com.au/open/";
-        //defaultConfig.servers.conformance = "http://fhir3.healthintersections.com.au/open/";
-        defaultConfig.servers.conformance = "grahamv3/";
+        defaultConfig.servers.conformance = "http://fhir3.healthintersections.com.au/open/";
+        //defaultConfig.servers.conformance = "grahamv3/";
 
         //default to Grahames DSTU2 server when data and conformance servers are inconsistent...
         defaultConfig.defaultTerminologyServerUrl = "http://fhir3.healthintersections.com.au/open/";
@@ -53,12 +53,12 @@ angular.module("sampleApp")
         defaultConfig.terminologyServers = [];
         defaultConfig.allKnownServers = [];
 
-        //defaultConfig.terminologyServers.push({name:'Grahames STU2 Server',version:2,url:"http://fhir2.healthintersections.com.au/open/"});
-        ///defaultConfig.terminologyServers.push({name:'Grahames STU3 Server',version:3,url:"http://fhir3.healthintersections.com.au/open/"});
+        defaultConfig.terminologyServers.push({name:'Grahames STU2 Server',version:2,url:"http://fhir2.healthintersections.com.au/open/"});
+        defaultConfig.terminologyServers.push({name:'Grahames STU3 Server',version:3,url:"http://fhir3.healthintersections.com.au/open/"});
 
         //realUrl needed for conformance resources...
-        defaultConfig.terminologyServers.push({name:'Grahames STU2 Server',version:2,url:"grahamv2/",realUrl:'http://fhir2.healthintersections.com.au/open/'});
-        defaultConfig.terminologyServers.push({name:'Grahames STU3 Server',version:3,url:"grahamv3/",realUrl:'http://fhir3.healthintersections.com.au/open/'});
+        //defaultConfig.terminologyServers.push({name:'Grahames STU2 Server',version:2,url:"grahamv2/",realUrl:'http://fhir2.healthintersections.com.au/open/'});
+       // defaultConfig.terminologyServers.push({name:'Grahames STU3 Server',version:3,url:"grahamv3/",realUrl:'http://fhir3.healthintersections.com.au/open/'});
 
 
         defaultConfig.terminologyServers.push({name:'Public HAPI STU3 server',version:3,url:"http://fhirtest.uhn.ca/baseDstu3/"});
@@ -70,11 +70,11 @@ angular.module("sampleApp")
 
 
 
-        //defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://fhir2.healthintersections.com.au/open/",version:2,everythingOperation:true});
-        //defaultConfig.allKnownServers.push({name:"Grahame STU3 server",url:"http://fhir3.healthintersections.com.au/open/",version:3,everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://fhir2.healthintersections.com.au/open/",version:2,everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:"Grahame STU3 server",url:"http://fhir3.healthintersections.com.au/open/",version:3,everythingOperation:true});
         
-        defaultConfig.allKnownServers.push({name:"Grahame STU3 server (Proxy)",url:"grahamv3/",version:3,everythingOperation:true,realUrl:'http://fhir3.healthintersections.com.au/open/'});
-        defaultConfig.allKnownServers.push({name:"Grahame STU2 server (Proxy)",url:"grahamv2/",version:2,everythingOperation:true,realUrl:'http://fhir2.healthintersections.com.au/open/'});
+        //defaultConfig.allKnownServers.push({name:"Grahame STU3 server (Proxy)",url:"grahamv3/",version:3,everythingOperation:true,realUrl:'http://fhir3.healthintersections.com.au/open/'});
+        //defaultConfig.allKnownServers.push({name:"Grahame STU2 server (Proxy)",url:"grahamv2/",version:2,everythingOperation:true,realUrl:'http://fhir2.healthintersections.com.au/open/'});
         
         defaultConfig.allKnownServers.push({name:"Public HAPI STU2 server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Public HAPI STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true});

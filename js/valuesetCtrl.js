@@ -1,6 +1,6 @@
 angular.module("sampleApp").controller('valuesetCtrl',
     function ($scope, Utilities, appConfigSvc,SaveDataToServer,GetDataFromServer,resourceCreatorSvc,modalService,
-            $uibModal,profileCreatorSvc,$location) {
+            $uibModal,profileCreatorSvc,$location,igSvc) {
 
 
         //register that the application has been started... (for reporting)
@@ -12,6 +12,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
         $scope.input = {};
 
         //place all the v3 terminology servers into the array and set the default server ($scope.termServer)
+
+
+
 
         //--------- terminology servers........
 
@@ -78,6 +81,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
             if (params.ts) {
                 $scope.initialTerminologyServer = params.ts;
             }
+            if (params.ig) {
+                $scope.implementationGuide = params.ig;
+            }
         }
 
         //see if an initial ValueSet was specified when the app was invoked..
@@ -93,6 +99,11 @@ angular.module("sampleApp").controller('valuesetCtrl',
                             bodyText: 'The valueset specified in the call ('+$scope.initialVs +') does not exist on the Terminology server.'
                         };
 
+
+
+                        
+                        
+                        
                         modalService.showModal({}, modalOptions)
                     }
                 })
@@ -178,7 +189,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
             if ($scope.initialTerminologyServer == $scope.serverRoot) {
                 //this is already the current terminology server - just check the root concept...
-                $scope.setRootConcept($scope.rootConcepts[0]);  //set to the first root concept in the array - chacking that it exists
+                $scope.setRootConcept($scope.rootConcepts[0]);  //set to the first root concept in the array - checking that it exists
 
             } else {
                 //this is a different terminology server to the one currently set as the default
@@ -196,7 +207,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
                     modalService.showModal({},
                         {bodyText: "The default terminology server for cinFHIR has been changed to " + $scope.initialTerminologyServer}
                     ).finally(function () {
-                            $scope.setRootConcept($scope.rootConcepts[0]);  //set to the first root concept in the array - chacking that it exists
+                            $scope.setRootConcept($scope.rootConcepts[0]);  //set to the first root concept in the array - checking that it exists
 
                         }
                     )
@@ -394,18 +405,49 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 $scope.url = $scope.serverRoot+ "ValueSet/" + id;//  $scope.valueSetRoot+id;
                 $scope.vs.compose = {include : []};     //can have multiple includes
 
-
-
                 //establish the separate variables that reference the include.concept and include.filter
                 $scope.includeElement = {system:snomedSystem,concept:[]};
                 $scope.includeElementForFilter = {system:snomedSystem,filter:[]};
-
 
             }
 
             //the contact must include clinfhir to allow editing...
             $scope.vs.contact = $scope.vs.contact || [];
             $scope.vs.contact.push({name : 'clinfhir'})
+
+            $scope.vs.url = $scope.serverRoot+ "ValueSet/" + id;// 
+            
+            
+            //if there is an implememnation guide specied then offer to save it
+            
+            if ($scope.implementationGuide) {
+                var modalOptions = {
+                    closeButtonText: "No, don't add",
+                    actionButtonText: 'Yes, please add',
+                    headerText: 'Add to Implementation Guide',
+                    bodyText: 'Do you wish to add this ValueSet to the Implementation Guide.'
+                };
+
+                
+                
+                
+                modalService.showModal({}, modalOptions).then(
+                    function(){
+
+                        igSvc.addResourceToIg($scope.implementationGuide,'valueSet',$scope.vs.url,$scope.vs.name).then(
+                            function() {
+                                modalService.showModal({}, {bodyText:"ValueSet url has been added to the Implementation Guide. (Do note that you haven't yet created the ValueSet) "})
+                            },
+                            function(err){
+
+                            }
+
+                        )
+                        
+                        
+                    }
+                )
+            }
 
         }
 
@@ -437,7 +479,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
             delete $scope.message;
             //var url = config.servers.terminology + "ValueSet?name="+filter;
 
-            var url =  $scope.serverRoot+"ValueSet?name="+filter;// $scope.valueSetRoot+"?name="+filter;
+            var url =  $scope.serverRoot+"ValueSet?name:contains="+filter;// $scope.valueSetRoot+"?name="+filter;
 
             GetDataFromServer.adHocFHIRQuery(url).then(
                 function(data){
@@ -534,10 +576,37 @@ angular.module("sampleApp").controller('valuesetCtrl',
             $scope.includeElement =  $scope.includeElement || {system:snomedSystem,concept:[]};
             //$scope.includeElementForFilter = $scope.includeElementForFilter || {system:'http://snomed.info/sct',filter:[]};
 
-
             if (isAuthoredByClinFhir(vs)){
                 $scope.canEdit = true;
             }
+
+            if ($scope.implementationGuide) {
+                var modalOptions = {
+                    closeButtonText: "No, don't add",
+                    actionButtonText: 'Yes, please add',
+                    headerText: 'Add to Implementation Guide',
+                    bodyText: 'Do you wish to add this ValueSet to the Implementation Guide.'
+                };
+
+
+                modalService.showModal({}, modalOptions).then(
+                    function(){
+
+                        igSvc.addResourceToIg($scope.implementationGuide,'valueSet',$scope.vs.url,$scope.vs.name).then(
+                            function() {
+                                modalService.showModal({}, {bodyText:"ValueSet url has been added to the Implementation Guide. "})
+                            },
+                            function(err){
+
+                            }
+
+                        )
+
+
+                    }
+                )
+            }
+
         };
 
         //return to the selected list

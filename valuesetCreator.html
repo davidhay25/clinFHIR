@@ -38,6 +38,7 @@
     <script src="js/resourceCreatorSvc.js"></script>
     <script src="js/profileCreatorSvc.js"></script>
     <script src="js/modalDialogSvc.js"></script>
+    <script src="js/igSvc.js"></script>
     <title>FHIR ValueSet Editor</title>
 
 </head>
@@ -49,7 +50,7 @@
         <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 
             <div class="container-fluid">
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <a class="navbar-brand" href="#">
                         clinFHIR ValueSet Editor
                     </a>
@@ -65,11 +66,20 @@
                     </div>
                 </div>
 
-                <div class="col-md-3 col-sm-3">
+                <div class="col-md-4 col-sm-4">
 
-                    <div class="navbar-text" ng-show="vs.id">
-                        {{serverRoot}}ValueSet/{{vs.id}}
+                    <div class="navbar-text">
+                        <div ng-show="vs.id">
+                            ValueSet: {{serverRoot}}ValueSet/{{vs.id}}
+                        </div>
+                        <div ng-show="implementationGuide">
+                            IG: {{implementationGuide}}
+                        </div>
                     </div>
+
+
+
+
                 </div>
 
 
