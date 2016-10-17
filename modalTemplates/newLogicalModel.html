@@ -22,45 +22,61 @@
     </div>
     <div class="modal-body">
 
-
-        <form>
-            <div class="row">
-                <div class="col-md-4 col-sm-4">
-                    <div class="form-group">
-                        <label>Model name</label>
-                        <input type="text" class="form-control" ng-model="input.name" auto-focus
-                               ng-blur="checkName()" placeholder="Name of the model"
-                                ng-disabled="SD">
+        <uib-tabset>
+            <uib-tab heading="Description">
+                <br />
+                <form>
+                    <div class="row">
+                        <div class="col-md-4 col-sm-4">
+                            <div class="form-group">
+                                <label>Model name</label>
+                                <input type="text" class="form-control" ng-model="input.name" auto-focus
+                                       ng-blur="checkName()" placeholder="Name of the model"
+                                       ng-disabled="SD">
+                            </div>
+                        </div>
+                        <div class="col-md-1 col-sm-1">
+                            <div class="form-group">
+                                <button class="btn btn-primary pull-right" style="margin-top: 25px"
+                                        ng-click="checkModelExists(input.name)" ng-hide="SD">Check</button>
+                            </div>
+                        </div>
+                        <div class="col-md-7 col-sm-7">
+                            <label>Title</label>
+                            <input type="text"
+                                   ng-model="input.title" class="form-control" placeholder="Descriptive title">
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-1 col-sm-1">
-                    <div class="form-group">
-                        <button class="btn btn-primary pull-right" style="margin-top: 25px"
-                            ng-click="checkModelExists(input.name)" ng-hide="SD">Check</button>
+
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12">
+                            <label>Purpose of model</label>
+                            <div class="form-group">
+                                <textarea class="form-control" rows="3" ng-model="input.purpose" placeholder="Why has this model been developed"></textarea>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-7 col-sm-7">
-                    <label>Title</label>
-                    <input type="text"
-                           ng-model="input.title" class="form-control" placeholder="Descriptive title">
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12 col-sm-12">
-                    <label>Purpose of model</label>
-                    <div class="form-group">
-                        <textarea class="form-control" rows="3" ng-model="input.purpose" placeholder="Why has this model been developed"></textarea>
-                    </div>
-                </div>
-            </div>
 
 
 
 
 
 
-        </form>
+                </form>
+
+
+            </uib-tab>
+            <uib-tab ng-show = "isNew" heading="Initial content">
+                <br/>
+
+                <select ng-change="selectContext(input.type)" ng-model="input.baseType" class="form-control"
+
+                        ng-options="type.name for type in allResourceTypes">
+                </select>
+
+
+            </uib-tab>
+        </uib-tabset>
 
 
 

@@ -166,9 +166,16 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/newLogicalModel.html',
                         size: 'lg',
-                        controller: function($scope,appConfigSvc,Utilities,GetDataFromServer,modalService,SD) {
+                        controller: function($scope,appConfigSvc,Utilities,GetDataFromServer,modalService,RenderProfileSvc,SD) {
                             $scope.input = {};
 
+                            $scope.isNew = true;
+                            RenderProfileSvc.getAllStandardResourceTypes().then(
+                                function(data){
+                                    $scope.allResourceTypes = data;
+                            });
+
+                            
                             console.log(SD)
                             if (SD) {
                                 $scope.SD = SD;
@@ -176,19 +183,23 @@ angular.module("sampleApp")
                                 $scope.input.purpose = SD.purpose;
                                 $scope.input.title = SD.title;
                                 $scope.canSave = true;
+                                $scope.isNew = false;
                             } else {
                                 //$scope.input.name = 'myModel';
                                 //$scope.input.short='A new model';
                             }
 
                             $scope.checkName = function() {
-                                var name = $scope.input.name;
-                                if (name.indexOf(' ') != -1) {
-                                    modalService.showModal({},{bodyText:"The name cannot contain spaces"})
-                                    $scope.canSave = false;
-                                    return;
+                                if ($scope.input.name) {
+                                    var name = $scope.input.name;
+                                    if (name.indexOf(' ') != -1) {
+                                        modalService.showModal({},{bodyText:"The name cannot contain spaces"})
+                                        $scope.canSave = false;
+                                        return;
+                                    }
+                                    $scope.input.name = name.charAt(0).toUpperCase()+name.substr(1);
                                 }
-                                $scope.input.name = name.charAt(0).toUpperCase()+name.substr(1);
+
 
                             }
 
@@ -234,6 +245,7 @@ angular.module("sampleApp")
                                 vo.title = $scope.input.title;
                                 vo.purpose = $scope.input.purpose || 'purpose';
                                 vo.SD = $scope.SD;
+                                vo.baseType = $scope.input.baseType;       //if a base type was selected
 
 
                                 $scope.$close(vo);
@@ -253,6 +265,11 @@ angular.module("sampleApp")
                                 $scope.treeData[0].data.header = result;
 
                             } else {
+                                //this is a new model
+
+                                console.log(result);
+                               
+
                                 //this is new
                                 $scope.rootName = result.name;      //this is the 'type' of the logical model - like 'Condition'
 
@@ -260,19 +277,32 @@ angular.module("sampleApp")
                                     data : {name:"root",path:$scope.rootName,isRoot:true,min:1,max:'1'} };
 
                                 rootNode.data.header = result;      //header based data. keep it in the first node...
-
                                 $scope.treeData =  [rootNode]
-                                drawTree();
-                                makeSD();
-
                                 $scope.isDirty = true;      //as this has not beed saved;
 
-                                //add it to the list so we can see it
-                                $scope.bundleModels.entry.push({resource:$scope.SD})
+                                //if the user specified a base type, then pre-populate a model from that base
+                                if (result.baseType) {
+                                    logicalModelSvc.createFromBaseType($scope.treeData,result.baseType.name,$scope.rootName).then(
+                                        function(){
+                                            drawTree();
+                                            makeSD();
+                                            //add it to the list so we can see it
+                                            $scope.bundleModels.entry.push({resource:$scope.SD})
+                                            $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
+                                        },
+                                        function(err) {
+                                            alert(angular.toJson(err))
+                                        }
+                                    )
+                                } else {
+                                    drawTree();
+                                    makeSD();
+                                    //add it to the list so we can see it
+                                    $scope.bundleModels.entry.push({resource:$scope.SD})
+                                    $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
+                                }
+
                             }
-
-                            $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
-
 
                         })
                 
@@ -626,28 +656,53 @@ angular.module("sampleApp")
                 };
 
             $scope.deleteNode = function() {
-                //first assemble list of nodes to remove
-                var idToDelete = $scope.selectedNode.id;
-                var lst = [idToDelete];
 
-                findChildNodes(lst,idToDelete);     //all the child nodes (including their children) of the element to be removed
-                //console.log(lst);
+                if ($scope.selectedNode.data.min > 0) {
+                    var modalOptions = {
+                        closeButtonText: "No, don't remove it",
+                        actionButtonText: 'Yes, remove it',
+                        headerText: 'Confirm remove required element',
+                        bodyText: 'This element is required - are you sure you wish to remove it? (It might make creating a profile more difficult later on)'
+                    };
 
-                //now create a new list - excluding the ones to be deleted
-                var newList = [];
-                $scope.treeData.forEach(function(node){
-                    if (lst.indexOf(node.id) == -1) {
-                        newList.push(node);
-                    }
-                });
+                    modalService.showModal({}, modalOptions).then(
+                        function (result) {
+                            removeNode();
+                        }
 
-                $scope.treeData = newList;
-                delete $scope.selectedNode;
-                drawTree();
-                makeSD();
+                    );
+                } else {
+                    removeNode();
+                }
 
-                $scope.isDirty = true;
-                $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
+
+
+                function removeNode() {
+                    //first assemble list of nodes to remove
+                    var idToDelete = $scope.selectedNode.id;
+                    var lst = [idToDelete];
+
+                    findChildNodes(lst,idToDelete);     //all the child nodes (including their children) of the element to be removed
+                    //console.log(lst);
+
+                    //now create a new list - excluding the ones to be deleted
+                    var newList = [];
+                    $scope.treeData.forEach(function(node){
+                        if (lst.indexOf(node.id) == -1) {
+                            newList.push(node);
+                        }
+                    });
+
+                    $scope.treeData = newList;
+                    delete $scope.selectedNode;
+                    drawTree();
+                    makeSD();
+
+                    $scope.isDirty = true;
+                    $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
+
+                }
+
 
                 //create a list with the paths of all the nodes
                 function findChildNodes(lst,parentId) {
