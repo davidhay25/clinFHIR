@@ -24,7 +24,11 @@
     margin-bottom: 8px;
 }
 
-.chat_text {
+
+.hidden {
+    display: none;
+}
+.chat_textDEP {
     border : 1px solid #eeeeee;
     padding : 5px;
     margin:0px;
@@ -39,7 +43,7 @@
     background-color:#F6F6F6;
 }
 
-.chat_conversation_purpose {
+.chat_conversation_purposeDEP {
     border : 1px solid #eeeeee;
     padding : 5px;
     margin:0px;

@@ -166,7 +166,7 @@
                         <h4>{{pkg.description}}</h4>
                     </div>
                     <div class="col-md-8 col-sm-8">
-                        <a ng-href="valuesetCreator.html?ig={{ig.url}}" class="pull-right" target="_blank">
+                        <a ng-href="{{editorPage[pkg.name]}}?ig={{ig.url}}" class="pull-right" target="_blank">
                             Add {{pkg.name}}
                         </a>
                     </div>
@@ -178,7 +178,7 @@
                         ng-repeat = "res in pkg.resource">
                         {{res.name}}
                         <span class="pull-right">
-                            <a ng-href="valuesetCreator.html?vs={{res.sourceUri}}&ig={{ig.url}}" target="_blank">Edit </a>
+                            <a ng-href="{{editorPage[pkg.name]}}?vs={{res.sourceUri}}&ig={{ig.url}}" target="_blank">Edit </a>
                         </span>
                     </li>
                 </ul>

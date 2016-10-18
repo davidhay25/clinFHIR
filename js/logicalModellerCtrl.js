@@ -3,13 +3,40 @@
 angular.module("sampleApp")
     .controller('logicalModellerCtrl',
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
-                  GetDataFromServer,$firebaseObject) {
+                  GetDataFromServer,$firebaseObject,$location) {
             $scope.input = {};
             $scope.treeData = [];           //populates the resource tree
 
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
+            
+            //default pane sized...
+            $scope.leftPaneClass = "col-sm-2 col-md-2"
+            $scope.midPaneClass = "col-md-5 col-sm-5"
+
+
+            //check for commands in the url - specifically a valueset url to edit or view...
+            var params = $location.search();
+            if (params) {
+                $scope.startupParams = params;
+                if (params.vs) {
+                    $scope.initialLM = params.vs;   //the param is names vs - as the same routine in the IG calls valuesets (&others)
+                    //delete $scope.state;        //the defualt value is 'find' whicg displays the find dialog...
+
+                    //don't show the list of models if one was passed in...
+                    $scope.leftPaneClass = "hidden"
+                    $scope.midPaneClass = "col-md-7 col-sm-7"
+
+                }
+                if (params.ts) {
+                    $scope.initialTerminologyServer = params.ts;
+                }
+                if (params.ig) {
+                    $scope.implementationGuide = params.ig;
+                }
+            }
+
 
             //-----------  login stuff....
             
@@ -34,8 +61,7 @@ angular.module("sampleApp")
                     controller: 'loginCtrl'
                 })
             };
-            
-            
+
             $scope.logout=function(){
                 firebase.auth().signOut().then(function() {
                     delete $rootScope.userProfile;
@@ -47,15 +73,16 @@ angular.module("sampleApp")
 
             };
 
-
-
             $scope.firebase = firebase;
 
             //------------------------------------------
 
             //$scope.isThisTheCurrentVersion
 
+
+
             //load all the logical models created by clinFHIR
+
             loadAllModels = function() {
                var url="http://fhir3.healthintersections.com.au/open/StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
                 $http.get(url).then(
@@ -67,10 +94,23 @@ angular.module("sampleApp")
                     }
                 )
             };
-            loadAllModels();
+
+            if (!$scope.initialLM) {
+                loadAllModels();
+            } else {
+                GetDataFromServer.findConformanceResourceByUri($scope.initialLM).then(
+                    function(resource){
+                        $scope.selectModel({resource:resource})
+                    },
+                    function(err) {
+                        alert("error loading "+$scope.initialLM + angular.toJson(err))
+                    }
+                )
+            }
+
             
 
-            if (appConfigSvc.getCurrentConformanceServer().name !== 'Grahame STU3 server (Proxy)') {
+            if (appConfigSvc.getCurrentConformanceServer().name !== 'Grahame STU3 server') {
                 var modalOptions = {
                     closeButtonText: "No, don't change",
                     actionButtonText: 'Yes, change toGrahames server',
@@ -180,6 +220,9 @@ angular.module("sampleApp")
             };
 
             $scope.newModel = function(){
+
+
+
                 editModel();
             };
 
@@ -339,7 +382,11 @@ angular.module("sampleApp")
                 $http.put(url,$scope.SD).then(
                     function(data) {
                         //console.log(data)
-                        loadAllModels();
+                        if (!$scope.initialLM) {
+                            //if there wasn't a model passed in, re-load the list
+                            loadAllModels();
+                        }
+
                         $scope.isDirty = false;
                         loadHistory($scope.SD.id);      //that way we get the metadata added by the server...
                         modalService.showModal({},{bodyText:"The model has been updated. You may continue editing."})
@@ -966,5 +1013,5 @@ angular.module("sampleApp")
 
             }
 
-            drawTree()
+            //drawTree()
     });

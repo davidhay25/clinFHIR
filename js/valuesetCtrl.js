@@ -43,7 +43,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 $scope.vs.compose.include.push(item)
             }
 
-
+            //leave the system...
+            delete $scope.input.directCode;
+            delete $scope.input.directDescription;
 
 
 
@@ -55,6 +57,11 @@ angular.module("sampleApp").controller('valuesetCtrl',
            // $scope.includeElement.concept.push({code:$scope.input.directCode,display:$scope.input.directDescription})
             $scope.input.isDirty = true;
             //$scope.hasConcept = true;
+        };
+
+        $scope.closeQueryError = function(){
+            delete $scope.queryError;
+
         };
 
         var config = appConfigSvc.config();
@@ -638,20 +645,50 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
         };
 
-        //add a new concept to the ValueSet
+        //add a new concept to the ValueSet after being selected from the terminology
         $scope.addConcept = function(){
+
+
+
+
+            var concept = {code:$scope.results.cc.code,display:$scope.results.cc.display}; //this is the concept to add
+            var system = snomedSystem;     //will need to re-visit if we support a terminology other than snomed...
+            //now see if we already have that system in the vs...
+            var added;
+            for (var i=0; i< $scope.vs.compose.include.length; i++) {
+                var item = $scope.vs.compose.include[i];    //this is an entry in the 'include' array
+                if (item.system == system) {
+                    //this is the same system, so we can just add the concept
+                    item.concept = item.concept || []
+                    item.concept.push(concept);
+                    added = true;
+                    break;
+                }
+            }
+
+            if (! added) {
+                //the system was not found, so add another entry to the 'include' array
+                var item = {system:system,concept:[concept]}
+                $scope.vs.compose.include.push(item)
+            }
+
 
             //$scope.vs.compose.include.push($scope.includeElement);
             //$scope.vs.compose.include.push($scope.includeElementForFilter);
 
             //right now, there is only a single incude node where we put all these concepts ('cause they're all from snomed at the moment)
             //so if this is the first one, then we add the reference to the resource...
+
+            /*
             if ($scope.includeElement.concept.length == 0) {
                 $scope.vs.compose.include.push($scope.includeElement);
             }
 
 
             $scope.includeElement.concept.push({code:$scope.results.cc.code,display:$scope.results.cc.display})
+
+            */
+
             $scope.input.isDirty = true;
             $scope.hasConcept = true;
             $scope.results.cc = "";

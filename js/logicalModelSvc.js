@@ -186,7 +186,7 @@ angular.module("sampleApp")
 
 
                 sd.id = scope.rootName;
-                sd.url = "http://fhir.hl7.org.nz/test";
+                sd.url = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/"+sd.id;
                 sd.name = header.name;
                 sd.title = header.title;
                 sd.status='draft';

@@ -66,7 +66,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-4 col-sm-4">
+                <div class="col-md-5 col-sm-5">
 
                     <div class="navbar-text">
                         <div ng-show="vs.id">
@@ -84,9 +84,9 @@
 
 
                 <div class="col-md-3">
-                    {{state}}
+
                     <form class="navbar-form navbar-left" ng-show="showWaiting">
-                     <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
+                        <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
                     </form>
 
                     <!-- Only show the available commands when a server has been selected -->
@@ -133,7 +133,7 @@
 
 
                 </div>
-
+<!--
                 <div class="col-md-1 col-sm-1">
 
                     <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
@@ -161,6 +161,8 @@
                     </ul>
 
                 </div>
+
+                -->
             </div>
         </nav>
 
@@ -229,6 +231,55 @@
                     <uib-tab heading="Contents">
                         <br/>
 
+
+                        <!-- This display logic is a bit wonky...-->
+
+                        <!-- Individually included elements - ie not via a filter -->
+<!--
+                        <h4 ng-show="includeElement.concept.length > 0">Specific included concepts</h4>
+-->
+                        <div ng-repeat="include in vs.compose.include">
+                            <div ng-show = "! include.filter">
+                                <h5 class="banner" >Directly specified - System: {{include.system}}</h5>
+
+
+                                <div class="row display-row">
+
+                                    <div class="col-md-2 col-sm-2"><strong>Code</strong></div>
+                                    <div class="col-md-8 col-sm-8"><strong>Display</strong></div>
+                                    <div class="col-md-1 col-sm-1"></div>
+                                    <div><strong>Remove</strong></div>
+                                </div>
+
+                                <div ng-repeat = "concept in include.concept">
+                                    <div class="row display-row">
+
+                                        <div class="col-md-2 col-sm-2">
+                                            {{concept.code}}
+                                        </div>
+                                        <div class="col-md-8 col-sm-8">
+                                            {{concept.display}}
+                                        </div>
+                                        <div class="col-md-1 col-sm-1">
+
+                                        </div>
+                                        <div class="col-md-1 col-sm-1">
+                                            <i style="cursor: pointer"
+                                               ng-click="removeInclude($index)"
+                                               class="glyphicon glyphicon-minus-sign pull-right"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+
+
+
+                        <!-- -->
+
                         <h5 ng-show="input.hasSystem">Systems</h5>
 
                         <div ng-repeat="include in vs.compose.include track by $index">
@@ -249,6 +300,8 @@
 
                         </div>
 
+
+                        <!--
                         <h5 ng-show="includeElement.concept.length > 0">Specific included concepts</h5>
 
 
@@ -272,11 +325,24 @@
                             </div>
                         </div>
 
+                        -->
+
+
+
 
                         <h5 ng-show="input.hasIsa">'is-a' included concepts (Branch)</h5>
 
                         <div ng-repeat="include in vs.compose.include">
                             <div ng-show = "include.filter">
+                                <h5 class="banner">Filtered System: {{include.system}}</h5>
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-2"><strong>Property</strong></div>
+                                    <div class="col-md-2 col-sm-2"><strong>Operation</strong></div>
+                                    <div class="col-md-3 col-sm-3"><strong>Value</strong></div>
+                                    <div class="col-md-4 col-sm-4"><strong>Display</strong></div>
+                                    <div class="col-md-1 col-sm-1"><strong>Remove</strong></div>
+                                </div>
+
                                 <div class="row">
                                     <div class="col-md-2 col-sm-2">
                                         {{include.filter[0].property}}
@@ -369,7 +435,7 @@
                     </uib-tab>
                 </uib-tabset>
 
-                <div uib-alert class="alert-info" ng-show="queryError">
+                <div close="closeQueryError()" uib-alert class="alert-info" ng-show="queryError">
 
                     <div>Sorry, there were some issues:</div>
                     <div>{{queryUrl}}</div>
@@ -442,7 +508,7 @@
 
                         <uib-tab heading="Enter directly">
                             <br/>
-                            <div>
+                            <div class="rounded-box">
                                 <div class="row">
                                     <div class="col-sm-2 col-md-2">
                                         System
@@ -466,13 +532,12 @@
                                         <input type="text" class="form-control" ng-model="input.directDescription"/>
                                     </div>
                                 </div>
+                                <br/>
                                 <div class="row">
-                                    <div class="col-sm-2 col-md-2">
-                                        <button class="btn btn-primary" ng-click="addDirect()">Add</button>
+                                    <div class="col-sm-12 col-md-12">
+                                        <button class="btn btn-primary pull-right" ng-click="addDirect()">Add</button>
                                     </div>
-                                    <div class="col-sm-4 col-md-4">
 
-                                    </div>
                                 </div>
                             </div>
 

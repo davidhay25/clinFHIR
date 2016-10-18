@@ -19,6 +19,11 @@ angular.module("sampleApp")
                 }
             });
 
+            //pages to edit various resource types
+            $scope.editorPage = {}
+            $scope.editorPage.valueSet = "valuesetCreator.html";
+            $scope.editorPage.logicalModel = "logicalModeller.html";
+
             $scope.login=function(){
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.

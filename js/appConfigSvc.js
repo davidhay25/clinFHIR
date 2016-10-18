@@ -33,7 +33,7 @@ angular.module("sampleApp")
         */
 
         defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2016-10-18';
+        defaultConfig.lastUpdated='2016-10-18a';
         defaultConfig.baseSpecUrl = "http://hl7.org/fhir/";     //the base for spec documentation
         defaultConfig.logLevel = 0;     //0 = no logging, 1 = log to console
         defaultConfig.enableCache = false;  //whether caching is supported
@@ -47,7 +47,7 @@ angular.module("sampleApp")
 
         //default to Grahames DSTU2 server when data and conformance servers are inconsistent...
         defaultConfig.defaultTerminologyServerUrl = "http://fhir3.healthintersections.com.au/open/";
-        //defaultConfig.defaultTerminologyServerUrl = "http://fhir.hl7.org.nz/dstu2/";
+        //defaultConfig.defaultTerminologyServerUrl = "grahamv3/";
 
         //terminology servers. Order is significant as the first one will be selected by default...
         defaultConfig.terminologyServers = [];
@@ -58,7 +58,7 @@ angular.module("sampleApp")
 
         //realUrl needed for conformance resources...
         //defaultConfig.terminologyServers.push({name:'Grahames STU2 Server',version:2,url:"grahamv2/",realUrl:'http://fhir2.healthintersections.com.au/open/'});
-       // defaultConfig.terminologyServers.push({name:'Grahames STU3 Server',version:3,url:"grahamv3/",realUrl:'http://fhir3.healthintersections.com.au/open/'});
+        //defaultConfig.terminologyServers.push({name:'Grahames STU3 Server',version:3,url:"grahamv3/",realUrl:'http://fhir3.healthintersections.com.au/open/'});
 
 
         defaultConfig.terminologyServers.push({name:'Public HAPI STU3 server',version:3,url:"http://fhirtest.uhn.ca/baseDstu3/"});

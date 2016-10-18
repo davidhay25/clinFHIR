@@ -2267,7 +2267,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             }
 
             var url = config.servers.terminology + 'CodeSystem/$lookup?code=' + code + "&system=" + system;
-            // return $http.post(url);
+            console.log(url)
             return $http.get(url);
         },
         parseCodeLookupResponse: function (resp) {
@@ -2315,7 +2315,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         param.part.forEach(function (part) {
 
                             if (part.name == 'code') {
-                                code = part.valueString;
+                                code = part.valueCode;
                             } else if (part.name == 'value') {
                                 value = part.valueString;
                             } else if (part.name == 'description') {
