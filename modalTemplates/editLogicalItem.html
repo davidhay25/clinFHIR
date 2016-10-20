@@ -78,12 +78,23 @@
                         </div>
                     </div>
 
-                    <div class="col-md-8 col-sm-8">
+                    <div class="col-md-4 col-sm-4">
                         <div><label>Comments</label></div>
                         <textarea class="form-control" rows="2" ng-model="input.comments"
                                   placeholder="Any comments on the use of this element"></textarea>
 
                     </div>
+                    <div class="col-md-4 col-sm-4" ng-show="isCoded">
+                        <div><label>ValueSet</label></div>
+
+                        <select class="form-control" ng-model="input.vsFromIg" ng-change="selectVsFromIg()"
+                                ng-options="vs.name for vs in vsInGuide">
+
+                        </select>
+
+                        <div class="clickable" ng-click="selectVsFromServer()">Select from Server</div>
+                    </div>
+
 
 
                 </div>
@@ -95,6 +106,10 @@
                 <textarea class="form-control" rows="5" ng-model="input.description" placeholder="Description of element"></textarea>
             </div>
 
+            <div class="form-group">
+                <div><label>Mapping</label></div>
+                <textarea class="form-control" rows="5" ng-model="input.mapping" placeholder="Describe FHIR mapping"></textarea>
+            </div>
 
 
 

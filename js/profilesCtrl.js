@@ -4,8 +4,8 @@ angular.module("sampleApp")
     .controller('profilesCtrl',
         function ($rootScope,$scope,GetDataFromServer,appConfigSvc,Utilities,$uibModal,RenderProfileSvc,SaveDataToServer,modalService,$timeout) {
 
-            //$scope.input = {param:'hl7',searchParam:'publisher',searchStatus:'all'};
-            $scope.input = {searchParam:'resource',searchStatus:'all'};
+            $scope.input = {param:'hl7',searchParam:'publisher',searchStatus:'all'};
+           // $scope.input = {searchParam:'resource',searchStatus:'all'};
 
             $scope.$watch('input.searchParam',function(){
                // alert('c')

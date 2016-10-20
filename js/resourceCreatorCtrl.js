@@ -180,7 +180,7 @@ angular.module("sampleApp")
 
     //todo just for the moment...
     $scope.showLogicalModeller = function () {
-        if (appConfigSvc.getCurrentConformanceServer().name == 'Grahame STU3 server (Proxy)') {
+        if (appConfigSvc.getCurrentConformanceServer().name == 'Grahame STU3 server') {
             return true;
         }
     }

@@ -51,6 +51,26 @@ angular.module("sampleApp")
 
             //------------------------------------------
 
+            $scope.setIframe = function(pkg,inx){
+                var url= $scope.editorPage[pkg.name];
+                $scope.selectedPackage = pkg;
+                $scope.selectedResource = pkg.resource[inx];
+                var res = pkg.resource[inx];
+                url += '?vs='+res.sourceUri + '&ig='+$scope.ig.url;
+
+
+                $scope.iFrameSource=url
+            }
+
+
+            $scope.addResource = function(pkg){
+                var url= $scope.editorPage[pkg.name];
+              
+                url +=  '?ig='+$scope.ig.url;
+                $scope.iFrameSource=url
+
+            };
+
             $scope.selectGuide=function(entry){
                 console.log(entry)
                 $scope.ig = entry.resource;

@@ -3,7 +3,7 @@
 angular.module("sampleApp")
     .controller('logicalModellerCtrl',
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
-                  GetDataFromServer,$firebaseObject,$location) {
+                  GetDataFromServer,$firebaseObject,$location,igSvc) {
             $scope.input = {};
             $scope.treeData = [];           //populates the resource tree
 
@@ -14,6 +14,7 @@ angular.module("sampleApp")
             //default pane sized...
             $scope.leftPaneClass = "col-sm-2 col-md-2"
             $scope.midPaneClass = "col-md-5 col-sm-5"
+            $scope.rightPaneClass = "col-md-5 col-sm-5";
 
 
             //check for commands in the url - specifically a valueset url to edit or view...
@@ -33,7 +34,10 @@ angular.module("sampleApp")
                     $scope.initialTerminologyServer = params.ts;
                 }
                 if (params.ig) {
+                    //if an implementation guide is passed to the app (which it will if called from the IG app)
+                    //then save the url and load the IG into the service...
                     $scope.implementationGuide = params.ig;
+                    igSvc.loadIg($scope.implementationGuide);
                 }
             }
 
@@ -45,7 +49,7 @@ angular.module("sampleApp")
                 if (user) {
                     $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
                     logicalModelSvc.setCurrentUser(user);
-                    console.log(user);
+
                 } else {
                     console.log('no user')
                     logicalModelSvc.setCurrentUser(null);
@@ -108,7 +112,7 @@ angular.module("sampleApp")
                 )
             }
 
-            
+            /*
 
             if (appConfigSvc.getCurrentConformanceServer().name !== 'Grahame STU3 server') {
                 var modalOptions = {
@@ -126,6 +130,8 @@ angular.module("sampleApp")
                 );
             }
 
+
+            */
             $scope.rootNameDEP = 'dhRoot';
 
 
@@ -242,6 +248,7 @@ angular.module("sampleApp")
 
                             
                             console.log(SD)
+                            //note that a StructureDefinition is passed in when editing...
                             if (SD) {
                                 $scope.SD = SD;
                                 $scope.input.name = SD.name;
@@ -249,6 +256,10 @@ angular.module("sampleApp")
                                 $scope.input.title = SD.title;
                                 $scope.canSave = true;
                                 $scope.isNew = false;
+
+                                if (SD.mapping) {
+                                    $scope.input.mapping = SD.mapping[0].comments;
+                                }
                             } else {
                                 //$scope.input.name = 'myModel';
                                 //$scope.input.short='A new model';
@@ -311,7 +322,7 @@ angular.module("sampleApp")
                                 vo.purpose = $scope.input.purpose || 'purpose';
                                 vo.SD = $scope.SD;
                                 vo.baseType = $scope.input.baseType;       //if a base type was selected
-
+                                vo.mapping = $scope.input.mapping;
 
                                 $scope.$close(vo);
                             }
@@ -328,6 +339,7 @@ angular.module("sampleApp")
                                 //this is an edit
                                 delete result.SD;
                                 $scope.treeData[0].data.header = result;
+                                makeSD();
 
                             } else {
                                 //this is a new model
@@ -366,7 +378,7 @@ angular.module("sampleApp")
                                     $scope.bundleModels.entry.push({resource:$scope.SD})
                                     $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
                                 }
-
+                                makeSD();
                             }
 
                         })
@@ -378,7 +390,7 @@ angular.module("sampleApp")
             $scope.save = function() {
                 
                 var url = $scope.conformanceServer.url + "StructureDefinition/" + $scope.SD.id;
-
+                $scope.showWaiting = true;
                 $http.put(url,$scope.SD).then(
                     function(data) {
                         //console.log(data)
@@ -396,7 +408,9 @@ angular.module("sampleApp")
                         $scope.error = err;
                         modalService.showModal({},{bodyText:"Sorry, there was an error saving the profile. View the 'Error' tab above for details."})
                     }
-                )
+                ).finally(function(){
+                    $scope.showWaiting = false;
+                })
             };
 
             $scope.selectModel = function(entry,index) {
@@ -487,11 +501,12 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editLogicalItem.html',
                     size: 'lg',
-                    controller: function($scope,allDataTypes,editNode,parentPath,findNodeWithPath,rootForDataType){
+                    controller: function($scope,allDataTypes,editNode,parentPath,findNodeWithPath,rootForDataType,igSvc){
                         $scope.rootForDataType = rootForDataType;
                         $scope.canSave = true;
                         $scope.allDataTypes = allDataTypes;
                         $scope.parentPath = parentPath;
+                        $scope.vsInGuide = igSvc.getResourcesInGuide('valueSet');       //so we can show the list of ValueSets in the IG
                         $scope.input = {};
                         //$scope.input.name = 'NewElement';
                         //$scope.input.short='This is a new element';
@@ -505,7 +520,8 @@ angular.module("sampleApp")
                             $scope.input.name = data.name;
                             $scope.input.short= data.short;
                             $scope.input.description = data.description;
-                            $scope.input.comments= data.comments;
+                            $scope.input.comments = data.comments;
+                            $scope.input.mapping = data.mapping;
                             if (data.min == 0) {
                                 $scope.input.multiplicity = 'opt';
                                 if (data.max == '*') {$scope.input.multiplicity = 'mult'}
@@ -521,6 +537,17 @@ angular.module("sampleApp")
                                     $scope.input.dataType = dt1;
                                 }
                             });
+
+                            //set the dropdown if this is a valueset from the IG...
+                            if (data.selectedValueSet && data.selectedValueSet.vs){
+                                $scope.isCoded = true;
+                                $scope.vsInGuide.forEach(function(vs){
+                                    if (vs.sourceUri ==data.selectedValueSet.vs.url) {
+                                        $scope.input.vsFromIg = vs
+                                    }
+                                })
+                            }
+
 
                             $scope.selectedValueSet = data.selectedValueSet;
 
@@ -552,6 +579,7 @@ angular.module("sampleApp")
                             vo.short = $scope.input.short;
                             vo.description = $scope.input.description || 'definition';
                             vo.comments = $scope.input.comments;
+                            vo.mapping = $scope.input.mapping;
                             vo.type = [{code:$scope.input.dataType.code}];
                             vo.editNode = editNode;
                             vo.parentPath = parentPath;
@@ -575,67 +603,84 @@ angular.module("sampleApp")
                         };
                         
                         $scope.setDataType = function(dt) {
+                            $scope.isCoded = false;
                             if (dt.isCoded) {
+                                $scope.isCoded = true;
 
                                 console.log(dt);
-                                $uibModal.open({
-                                    backdrop: 'static',      //means can't close by clicking on the backdrop.
-                                    keyboard: false,       //same as above.
-                                    templateUrl: 'modalTemplates/vsFinder.html',
-                                    size: 'lg',
-                                    controller: function ($scope, appConfigSvc, GetDataFromServer) {
-                                        //this code is all from vsFinderCtrl controller - for some reason I can't reference it from here...
-                                        //and newExtensionDefinition
-                                        $scope.input = {};
-
-                                        var config = appConfigSvc.config();
-                                        $scope.termServer = config.servers.terminology;
-
-                                        $scope.input.arStrength = ['required', 'extensible', 'preferred', 'example'];
-                                        $scope.input.strength = 'preferred'; //currentBinding.strength;
-
-
-                                        $scope.select = function () {
-
-                                            $scope.$close({
-                                                vs: $scope.input.vspreview,
-                                                strength: $scope.input.strength
-                                            });
-                                        };
-
-                                        //find matching ValueSets based on name
-                                        $scope.search = function (filter) {
-                                            $scope.showWaiting = true;
-                                            delete $scope.message;
-                                            delete $scope.searchResultBundle;
-
-                                            var url = $scope.termServer + "ValueSet?name=" + filter;
-                                            $scope.showWaiting = true;
-                                            GetDataFromServer.adHocFHIRQuery(url).then(
-                                                function (data) {
-                                                    $scope.searchResultBundle = data.data;
-                                                    if (!data.data || !data.data.entry || data.data.entry.length == 0) {
-                                                        $scope.message = 'No matching ValueSets found'
-                                                    }
-                                                },
-                                                function (err) {
-                                                    alert(angular.toJson(err))
-                                                }
-                                            ).finally(function () {
-                                                $scope.showWaiting = false;
-                                            })
-                                        };
-                                    }
-                                }).result.then(
-                                    function (vo) {
-                                        //vo is {vs,strength}
-                                        console.log(vo)
-                                        $scope.selectedValueSet = vo;
-                                        dt.vs = vo;         //save the valueset against the datatype
-                                    }
-                                )
+                                
                             }
                         }
+                        
+                        $scope.selectVsFromServer = function(){
+                            $uibModal.open({
+                                backdrop: 'static',      //means can't close by clicking on the backdrop.
+                                keyboard: false,       //same as above.
+                                templateUrl: 'modalTemplates/vsFinder.html',
+                                size: 'lg',
+                                controller: function ($scope, appConfigSvc, GetDataFromServer) {
+                                    //this code is all from vsFinderCtrl controller - for some reason I can't reference it from here...
+                                    //and newExtensionDefinition
+                                    $scope.input = {};
+
+                                    var config = appConfigSvc.config();
+                                    $scope.termServer = config.servers.terminology;
+
+                                    $scope.input.arStrength = ['required', 'extensible', 'preferred', 'example'];
+                                    $scope.input.strength = 'preferred'; //currentBinding.strength;
+
+
+                                    $scope.select = function () {
+
+                                        $scope.$close({
+                                            vs: $scope.input.vspreview,
+                                            strength: $scope.input.strength
+                                        });
+                                    };
+
+                                    //find matching ValueSets based on name
+                                    $scope.search = function (filter) {
+                                        $scope.showWaiting = true;
+                                        delete $scope.message;
+                                        delete $scope.searchResultBundle;
+
+                                        var url = $scope.termServer + "ValueSet?name=" + filter;
+                                        $scope.showWaiting = true;
+                                        GetDataFromServer.adHocFHIRQuery(url).then(
+                                            function (data) {
+                                                $scope.searchResultBundle = data.data;
+                                                if (!data.data || !data.data.entry || data.data.entry.length == 0) {
+                                                    $scope.message = 'No matching ValueSets found'
+                                                }
+                                            },
+                                            function (err) {
+                                                alert(angular.toJson(err))
+                                            }
+                                        ).finally(function () {
+                                            $scope.showWaiting = false;
+                                        })
+                                    };
+                                }
+                            }).result.then(
+                                function (vo) {
+                                    //vo is {vs,strength}
+                                    console.log(vo)
+                                    $scope.selectedValueSet = vo;
+                                    dt.vs = vo;         //save the valueset against the datatype
+                                }
+                            )
+                        };
+
+                        $scope.selectVsFromIg = function(){
+                            var vs = $scope.input.vsFromIg;
+                            var vo={vs:{url:vs.sourceUri,name:vs.name},strength:'preferred'}
+                            $scope.selectedValueSet = vo;
+                            dt.vs = vo;
+
+                            console.log(vo)
+
+                        }
+
 
 
                     },
@@ -653,6 +698,10 @@ angular.module("sampleApp")
                         },
                         rootForDataType : function() {
                             return $scope.rootForDataType;
+                        },
+                        igSvc : function() {
+                            //the Implementation Guide service has the known valueSets (and other goodies)
+                            return igSvc
                         }
                     }
                 }).result.then(
@@ -685,8 +734,7 @@ angular.module("sampleApp")
                             newNode.data = angular.copy(result);
                             $scope.treeData.push(newNode);
 
-
-
+                            
                             //delete $scope.selectedNode;
                             $scope.selectedNode = newNode;
 

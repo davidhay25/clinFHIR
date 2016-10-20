@@ -6,8 +6,35 @@ angular.module("sampleApp")
     .service('igSvc', function($http,$q,appConfigSvc,GetDataFromServer) {
 
         var currentUser;
+        var currentGuide;
 
         return {
+            loadIg : function(igUrl) {
+                //load the IG so we can easily access it...
+                GetDataFromServer.findConformanceResourceByUri(igUrl,null,'ImplementationGuide').then(
+                    function(ig) {
+                        console.log(ig);
+                        currentGuide = ig
+                    },
+                    function(err) {
+                        alert('error loading IG '+angular.toJson(err));
+                    }
+                )
+
+            },
+            getResourcesInGuide : function(type) {
+                //return all the resources of the given type in the guide...
+                var resources = [];
+                if (currentGuide) {
+                    currentGuide.package.forEach(function(pkg){
+                        if (pkg.name = type) {
+                            resources = pkg.resource;
+                        }
+                    })
+                }
+                return resources;
+
+            },
             addResourceToIg: function (igUrl,packageName, vsUrl,vsName) {
                 //adds the resource to the implementation guide
                 var deferred = $q.defer();
@@ -52,7 +79,7 @@ angular.module("sampleApp")
 
                     },
                     function(err) {
-
+                        alert('error loading IG '+angular.toJson(err));
                     }
 
                 );

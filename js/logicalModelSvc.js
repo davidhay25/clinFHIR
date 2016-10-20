@@ -133,6 +133,10 @@ angular.module("sampleApp")
                             item.data.header.title = sd.title;
                             item.data.header.purpose = sd.purpose;
                             item.data.header.extension = sd.extension;      //save any extensions...
+                            if (sd.mapping && sd.mapping.length > 0) {
+                                item.data.header.mapping = sd.mapping[0].comments;
+                                item.data.mapping = sd.mapping[0].comments;     //for the report & summary view...
+                            }
 
                         } else {
                             //otherwise the parent can be inferred from the path
@@ -149,6 +153,9 @@ angular.module("sampleApp")
                         item.data.min = ed.min;
                         item.data.max = ed.max;
 
+                        if (ed.mapping) {
+                            item.data.mapping = ed.mapping[0].map;      //the identity is currently hard coded
+                        }
 
                         item.data.comments = ed.comments;
 
@@ -176,6 +183,7 @@ angular.module("sampleApp")
                 return arTree;
             },
             makeSD : function(scope,treeData) {
+                //create a StructureDefinition from the treeData
                 var header = treeData[0].data.header || {}      //the first node has the header informatiion
 
                 //todo - this will replace any extensions...
@@ -199,6 +207,9 @@ angular.module("sampleApp")
                 sd.identifier = [{system:"http://clinfhir.com",value:"author"}]
                 sd.keyword = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
 
+                if (header.mapping) {
+                    sd.mapping = [{identity:'fhir',name:'Model Mapping',comments:header.mapping}]
+                }
 
                 sd.kind='logical';
                 sd.abstract=false;
@@ -225,6 +236,9 @@ angular.module("sampleApp")
                     ed.min=data.min;
                     ed.max = data.max;
                     ed.comments = data.comments;
+                    if (data.mapping) {
+                        ed.mapping= [{identity:'fhir',map:data.mapping}]
+                    }
 
                     if (data.type) {
                         ed.type = [];

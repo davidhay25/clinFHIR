@@ -17,6 +17,9 @@
                 <button class="btn btn-default pull-right"
                         ng-show="userProfile.extDef.permissions.canCreate"
                         ng-click="newProfile()">New Profile</button>
+                <div ng-hide="userProfile.extDef.permissions.canCreate">
+                    Login to edit/create profile
+                </div>
             </div>
 
 

@@ -67,6 +67,7 @@
     <script src="js/loginCtrl.js"></script>
     <script src="resourceBuilder/vsBrowser.js"></script>
     <script src="js/modellerFilters.js"></script>
+    <script src="js/igSvc.js"></script>
 
 
     <script>
@@ -104,9 +105,15 @@
 
                     </a>
                 </div>
-                <div class="col-md-9">
+                <div class="col-md-8">
 
                     <span class="navbar-text pull-right"> {{conformanceServer.name}}</span>
+                </div>
+
+                <div class="col-md-1">
+                    <form class="navbar-form navbar-left" ng-show="showWaiting">
+                        <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
+                    </form>
                 </div>
 
                 <div class="col-md-1">
@@ -228,6 +235,25 @@
 
                 </uib-tab>
 
+                <uib-tab heading="Mapping report">
+                    <br/>
+                    <table class="table table-bordered table-condensed">
+                        <tr><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th><th>Mapping notes</th></tr>
+                        <tr ng-repeat="ed in SD.snapshot.element">
+                            <td>
+                                <div  ng-click="selectNodeFromTable(ed.path)" class="clickable"
+                                      ng-style="{ 'padding-left': (ed.path | pathindent) }">{{ed.path | lastInPath}}</div>
+                            </td>
+                            <td>{{ed.type[0].code}}</td>
+                            <td>{{ed.min}}..{{ed.max}}</td>
+                            <td>{{ed.definition}}</td>
+                            <td>{{ed.mapping[0].map}}</td>
+                        </tr>
+
+                    </table>
+
+                </uib-tab>
+
                 <uib-tab heading="Json">
                     <pre>{{SD | json}}</pre>
                 </uib-tab>
@@ -242,7 +268,7 @@
         </div>
 
 
-        <div class="col-md-5 col-sm-5">
+        <div ng-class="rightPaneClass">
             <div ng-show="treeData.length > 0">
 
 
@@ -256,6 +282,7 @@
                             <tr><td width="25%">Model Name</td><td>{{treeData[0].data.header.name}}</td></tr>
                             <tr><td>Model Title</td><td>{{treeData[0].data.header.title}}</td></tr>
                             <tr><td>Model Purpose</td><td>{{treeData[0].data.header.purpose}}</td></tr>
+                            <tr ng-show="treeData[0].data.header.mapping"><td>Mapping</td><td>{{treeData[0].data.header.mapping}}</td></tr>
                         </table>
                     </uib-tab>
                     <uib-tab heading="History">
@@ -325,7 +352,7 @@
                         <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
                         <tr><td>Description</td><td>{{selectedNode.data.description}}</td></tr>
                         <tr><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>
-                        <tr><td>Mult</td><td>{{selectedNode.data.min}}..{{selectedNode.data.max}}</td></tr>
+                        <tr><td>Multiplicity</td><td>{{selectedNode.data.min}}..{{selectedNode.data.max}}</td></tr>
                         <tr><td>Datatypes</td><td>
                             <div ng-repeat = "typ in selectedNode.data.type">
 
@@ -346,6 +373,11 @@
 
 
                         </td></tr>
+                        <tr ng-show="selectedNode.data.mapping"><td>Mapping notes</td><td>
+                            {{selectedNode.data.mapping}}
+                        </td>
+
+
                         <tr><td>Actions</td><td>
                             <div ng-show="!firebase.auth().currentUser">
                                 Not logged in - read only mode
