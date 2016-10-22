@@ -440,9 +440,14 @@ angular.module("sampleApp")
                             var qry = $scope.input.url + "metadata";
                             $scope.waiting=true;
                             GetDataFromServer.adHocFHIRQuery(qry).then(
-                                function(){
+                                function(data){
                                     modalService.showModal({}, {bodyText: 'Conformance resource returned. Server can be added'})
                                     $scope.input.valid = true;
+
+                                    //get the fhir version from the conformance resource
+                                    $scope.fhirVersion = data.data.fhirVersion;
+                                   
+
                                 },
                                 function(err){
                                     modalService.showModal({}, {bodyText: 'There is no valid FHIR server at this URL:'+qry})

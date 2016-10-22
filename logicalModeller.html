@@ -152,6 +152,15 @@
         </nav>
     </div>
 
+    <div class="row">
+        <div class="col-md-12 col-sm-12">
+            <div ng-hide="firebase.auth().currentUser" class="alert alert-warning">
+                <p>As you have not logged in, you are able to view Models and comments, but not edit them.
+                To log in, click the  <i class="glyphicon glyphicon-log-in"></i>  icon to the upper right. You can create an account there if you don't already
+                    have one - all you need is an email address.</p>
+            </div>
+        </div>
+    </div>
 
 
 
@@ -191,7 +200,8 @@
         </div>
         <div ng-class="midPaneClass">
 
-        
+
+
 
             <div ng-show="isHistory" class="alert alert-warning">
 
@@ -353,10 +363,12 @@
                             <div class="rounded-box" ng-style="{ 'margin-left': comment.level * 15 }">
                                 <div class="row">
                                     <div class="col-md-8 col-sm-8">
+                                        <!-- .path is present in the 'top' chat of a conversation, .display otherwise-->
                                         {{comment.comment.display}}
                                         {{comment.comment.path}}
                                     </div>
                                     <div class="col-md-4 col-sm-4">
+                                        <div class="pull-right">{{comment.comment.date | getAgeSeconds}}</div>
                                         <div class="pull-right">{{comment.comment.user.email}}</div>
 
                                     </div>
@@ -366,12 +378,13 @@
                                     <div class="col-md-8 col-sm-8">
 
                                     </div>
-                                    <div class="col
-                        -md-4 col-sm-4">
+                                    <div class="col-md-4 col-sm-4">
                                         <div style="margin: 6px" ng-hide="newCommentboxInx == $index"
                                              class="pull-right clickable" ng-click="input.newCommentboxInx = $index">
-                                            <span ng-show = "comment.level == 0">New comment</span>
-                                            <span ng-hide = "comment.level == 0">Reply</span>
+                                            <span ng-show="firebase.auth().currentUser">
+                                                <span ng-show = "comment.level == 0">New comment</span>
+                                                <span ng-hide = "comment.level == 0">Reply</span>
+                                            </span>
 
                                         </div>
 

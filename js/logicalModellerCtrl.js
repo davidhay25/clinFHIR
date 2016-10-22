@@ -29,12 +29,17 @@ angular.module("sampleApp")
           //  $scope.input.modelChat = logicalModelSvc.generateChatDisplay(conv);
             $scope.input.newCommentboxInx = -1;
 
+            //save a new comment from the chat
             $scope.saveComment = function(parent) {
                 console.log(parent)
-                var newComment = {display:$scope.input.newComment,user: {email:'a@b'},children:[]}
+                var user = logicalModelSvc.getCurrentUser();
+
+                var newComment = {display:$scope.input.newComment, date : moment().format(),
+                    user: {email:user.email,uid:user.uid},children:[]}
                 delete $scope.input.newComment;
 
 
+                
                 //$scope.input.modelChatData
 
                 parent.comment.children = parent.comment.children || []
@@ -111,6 +116,7 @@ angular.module("sampleApp")
                 if (user) {
                     $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
                     logicalModelSvc.setCurrentUser(user);
+                    console.log(user,$rootScope.userProfile);
 
                 } else {
                     console.log('no user')

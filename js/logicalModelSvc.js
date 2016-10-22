@@ -16,6 +16,9 @@ angular.module("sampleApp")
             setCurrentUser : function(user) {
                 currentUser = user;
             },
+            getCurrentUser : function(){
+                return currentUser;
+            },
             createFromBaseType : function(treeData,typeName,rootName) {
               //create a model from the base type, only bringing across stuff we want.
                 //todo - very similar to the logic in createTreeArrayFromSD() - ?call out to separate function...

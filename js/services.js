@@ -957,9 +957,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 }
 
 
-
-
-
                 arQuery.push(
 
                     getAllResources(uri).then(
@@ -1000,6 +997,10 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
 
                         deferred.resolve(pageBundle)
+                    },
+                    function() {
+                        //if the call fails, then return an empty bundle todo : is this the correct behaviour?
+                        deferred.resolve({resourceType:'Bundle',entry:[]});
                     }
                 );
                 //}
@@ -1141,6 +1142,10 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
 
                             deferred.resolve(pageBundle)
+                        },
+                        function() {
+                            //if the call fails, then return an empty bundle todo : is this the correct behaviour?
+                            deferred.resolve({resourceType:'Bundle',entry:[]});
                         }
                     );
                 //}
