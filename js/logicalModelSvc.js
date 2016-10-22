@@ -137,6 +137,15 @@ angular.module("sampleApp")
                                 item.data.header.mapping = sd.mapping[0].comments;
                                 item.data.mapping = sd.mapping[0].comments;     //for the report & summary view...
                             }
+                            if (sd.useContext) {
+                                item.header = {type :sd.useContext[0].valueCodeableConcept.code};
+                            }
+
+
+                            //var uc = {code : {code:'logicalType',system:'http:www.hl7.org.nz/NamingSystem/logicalModelContext'}};
+                            //uc.useContext.valueCodeableConcept = {code:header.type,'system':'http:www.hl7.org.nz/NamingSystem/logicalModelContextType'}
+                            //sd.useContext = [uc]
+
 
                         } else {
                             //otherwise the parent can be inferred from the path
@@ -209,6 +218,13 @@ angular.module("sampleApp")
 
                 if (header.mapping) {
                     sd.mapping = [{identity:'fhir',name:'Model Mapping',comments:header.mapping}]
+                }
+
+                if (header.type) {
+                    var uc = {code : {code:'logicalType',system:'http:www.hl7.org.nz/NamingSystem/logicalModelContext'}};
+                    uc.valueCodeableConcept = {coding:[{code:header.type,'system':'http:www.hl7.org.nz/NamingSystem/logicalModelContextType'}]}
+                    sd.useContext = [uc]
+
                 }
 
                 sd.kind='logical';
@@ -284,7 +300,33 @@ angular.module("sampleApp")
 
                 }
 
-            }
+            },
+            generateChatDisplay : function(chatFromServer) {
+               
+
+                var ar = [];    //a list of all comments in display order
+
+                function parseComment(ar,lvl,comment) {
+                    //lvl- display level, comment - the chat being examined
+                    var displayComment = {level:lvl,comment:comment}
+                    ar.push(displayComment);
+                    console.log(displayComment)
+                    if (comment.children) {
+                        lvl++;
+                        comment.children.forEach(function(childComment){
+                            parseComment(ar,lvl,childComment)
+                        })
+                    }
+
+                }
+                parseComment(ar,0,chatFromServer);
+
+                console.log(ar)
+
+                return ar
+
+
+        }
 
             }
         });

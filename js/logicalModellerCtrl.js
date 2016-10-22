@@ -10,11 +10,71 @@ angular.module("sampleApp")
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
+
+
+
+            //$rootScope.fbProjects = $firebaseArray(refChat);
+
+/*
+            var conv = {path : "BloodPressure.data",user: {email:'a@b'},children:[],id:0}
+            var com1 = {display:"This is a comment This is a comment This is a comment This is a comment This is a comment This is a comment This is a comment This is a comment",user: {email:'a@b'},children:[],id:1}
+            conv.children.push(com1);
+
+            var com2 = {display:"This is a another comment",user: {email:'a@b'},children:[],id:2}
+            var com3 = {display:"You are so right!",user: {email:'a@b'},children:[],id:3}
+            com2.children.push(com3);
+            conv.children.push(com2);
+
+*/
+          //  $scope.input.modelChat = logicalModelSvc.generateChatDisplay(conv);
+            $scope.input.newCommentboxInx = -1;
+
+            $scope.saveComment = function(parent) {
+                console.log(parent)
+                var newComment = {display:$scope.input.newComment,user: {email:'a@b'},children:[]}
+                delete $scope.input.newComment;
+
+
+                //$scope.input.modelChatData
+
+                parent.comment.children = parent.comment.children || []
+                parent.comment.children.push(newComment);
+                $scope.input.newCommentboxInx = -1;
+                $scope.input.modelChat = logicalModelSvc.generateChatDisplay( $scope.input.modelChatData);
+
+
+                var key = $scope.rootName;      //the key for this particular models chat in the database
+
+
+                //var conv = {path : key,user: {email:'a@b'},children:[]}
+                //now update the database...
+                var update = {};
+                update[key] = $scope.input.modelChatData;
+
+                firebase.database().ref().child("chat").update(update)
+
+
+
+            }
             
-            //default pane sized...
-            $scope.leftPaneClass = "col-sm-2 col-md-2"
-            $scope.midPaneClass = "col-md-5 col-sm-5"
-            $scope.rightPaneClass = "col-md-5 col-sm-5";
+            
+
+            
+            $scope.showLMSelector = function(){
+                $scope.leftPaneClass = "col-sm-2 col-md-2"
+                $scope.midPaneClass = "col-md-5 col-sm-5"
+                $scope.rightPaneClass = "col-md-5 col-sm-5";
+                $scope.LMSelectorVisible = true;
+            }
+
+            $scope.hideLMSelector = function(){
+                $scope.leftPaneClass = "hidden"
+                $scope.midPaneClass = "col-md-7 col-sm-7"
+                $scope.rightPaneClass = "col-md-5 col-sm-5";
+                $scope.LMSelectorVisible = false;
+            }
+
+            $scope.showLMSelector()
 
 
             //check for commands in the url - specifically a valueset url to edit or view...
@@ -26,8 +86,10 @@ angular.module("sampleApp")
                     //delete $scope.state;        //the defualt value is 'find' whicg displays the find dialog...
 
                     //don't show the list of models if one was passed in...
-                    $scope.leftPaneClass = "hidden"
-                    $scope.midPaneClass = "col-md-7 col-sm-7"
+                    hideLMSelector();
+
+                   // $scope.leftPaneClass = "hidden"
+                   // $scope.midPaneClass = "col-md-7 col-sm-7"
 
                 }
                 if (params.ts) {
@@ -100,6 +162,7 @@ angular.module("sampleApp")
             };
 
             if (!$scope.initialLM) {
+               // $scope.hideLMSelector();
                 loadAllModels();
             } else {
                 GetDataFromServer.findConformanceResourceByUri($scope.initialLM).then(
@@ -241,6 +304,13 @@ angular.module("sampleApp")
                             $scope.input = {};
 
                             $scope.isNew = true;
+
+                            $scope.modelTypes = [];
+                            $scope.modelTypes.push({code:'mds',display:'Minimum Data Set',help:'A common set of data for exchange either by a Document or a Message'})
+                            $scope.modelTypes.push({code:'resource',display:'Single Resource',help:'Will map to a single FHIR resource'})
+                            $scope.input.type = $scope.modelTypes[0];
+                            $scope.input.typeDescription = $scope.input.type.help;
+
                             RenderProfileSvc.getAllStandardResourceTypes().then(
                                 function(data){
                                     $scope.allResourceTypes = data;
@@ -259,6 +329,16 @@ angular.module("sampleApp")
 
                                 if (SD.mapping) {
                                     $scope.input.mapping = SD.mapping[0].comments;
+                                }
+
+                                if (SD.useContext) {
+                                    var ucCode = SD.useContext[0].valueCodeableConcept.code;
+                                    $scope.modelTypes.forEach(function(item){
+                                        if (item.code == ucCode) {
+                                            input.type = item;
+                                        }
+                                    })
+                                    //
                                 }
                             } else {
                                 //$scope.input.name = 'myModel';
@@ -323,6 +403,7 @@ angular.module("sampleApp")
                                 vo.SD = $scope.SD;
                                 vo.baseType = $scope.input.baseType;       //if a base type was selected
                                 vo.mapping = $scope.input.mapping;
+                                vo.type = $scope.input.type.code;
 
                                 $scope.$close(vo);
                             }
@@ -444,6 +525,33 @@ angular.module("sampleApp")
                     makeSD();
                     $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
                     loadHistory($scope.rootName);
+
+                    var refChat = firebase.database().ref().child("chat").child($scope.rootName);
+                    refChat.on('value', function(snapshot) {
+                        console.log(snapshot.val());
+                        var data = snapshot.val();
+                        if (! data) {
+                            //this will be the first chat for this model. Create the base..
+                            var key = $scope.rootName;      //the key for this particular models chat in the database
+                            var conv = {path : key,user: {email:'a@b'},children:[]}
+                            var update = {};
+                            update[key] = conv;
+
+                            firebase.database().ref().child("chat").update(update)
+
+                            $scope.input.newCommentboxInx = -1;
+                            $scope.input.modelChatData = conv;      //the format for storage
+                            $scope.input.modelChat = logicalModelSvc.generateChatDisplay(conv); //the format for display
+
+                        } else {
+                            $scope.input.newCommentboxInx = -1;
+                            $scope.input.modelChatData = data;
+                            $scope.input.modelChat = logicalModelSvc.generateChatDisplay(data);
+                        }
+
+                    });
+
+                    console.log(refChat);
 
                     /*
                     logicalModelSvc.getModelHistory($scope.rootName).then(

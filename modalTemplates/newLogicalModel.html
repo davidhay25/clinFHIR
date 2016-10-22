@@ -27,7 +27,7 @@
                 <br />
                 <form>
                     <div class="row">
-                        <div class="col-md-4 col-sm-4">
+                        <div class="col-md-5 col-sm-5">
                             <div class="form-group">
                                 <label>Model name</label>
                                 <input type="text" class="form-control" ng-model="input.name" auto-focus
@@ -41,7 +41,7 @@
                                         ng-click="checkModelExists(input.name)" ng-hide="SD">Check</button>
                             </div>
                         </div>
-                        <div class="col-md-7 col-sm-7">
+                        <div class="col-md-6 col-sm-6">
                             <label>Title</label>
                             <input type="text"
                                    ng-model="input.title" class="form-control" placeholder="Descriptive title">
@@ -49,17 +49,29 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-12 col-sm-12">
-                            <label>Purpose of model</label>
+
+                        <div class="col-md-6 col-sm-6">
+                            <label>Type of model</label>
+
+                            <select class="form-control" ng-model="input.type"
+                                    ng-change="input.typeDescription = input.type.help"
+                                    ng-options = "type.display for type in modelTypes"></select>
+                            <p><div>{{input.typeDescription}}</div></p>
+                        </div>
+
+                        <div class="col-md-6 col-sm-6">
+                            <label>Purpose/Description of model</label>
                             <div class="form-group">
-                                <textarea class="form-control" rows="3" ng-model="input.purpose" placeholder="Why has this model been developed"></textarea>
+                                <textarea class="form-control" rows="4" ng-model="input.purpose"
+                                          placeholder="Why has this model been developed? What is it intended to do?"></textarea>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <div><label>Mapping</label></div>
-                        <textarea class="form-control" rows="5" ng-model="input.mapping" placeholder="Describe FHIR mapping"></textarea>
+                        <textarea class="form-control" rows="5" ng-model="input.mapping"
+                                  placeholder="Describe FHIR mapping for the Model as a whole. Usually done after the model has been completed"></textarea>
                     </div>
 
 
@@ -69,7 +81,7 @@
 
 
             </uib-tab>
-            <uib-tab ng-show = "isNew" heading="Initial content">
+            <uib-tab ng-show = "isNew && (input.type.code == 'resource')" heading="Initial content">
                 <br/>
 
                 <select ng-change="selectContext(input.type)" ng-model="input.baseType" class="form-control"
