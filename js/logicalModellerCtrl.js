@@ -13,22 +13,20 @@ angular.module("sampleApp")
 
 
 
-            //$rootScope.fbProjects = $firebaseArray(refChat);
 
-/*
-            var conv = {path : "BloodPressure.data",user: {email:'a@b'},children:[],id:0}
-            var com1 = {display:"This is a comment This is a comment This is a comment This is a comment This is a comment This is a comment This is a comment This is a comment",user: {email:'a@b'},children:[],id:1}
-            conv.children.push(com1);
-
-            var com2 = {display:"This is a another comment",user: {email:'a@b'},children:[],id:2}
-            var com3 = {display:"You are so right!",user: {email:'a@b'},children:[],id:3}
-            com2.children.push(com3);
-            conv.children.push(com2);
-
-*/
           //  $scope.input.modelChat = logicalModelSvc.generateChatDisplay(conv);
             $scope.input.newCommentboxInx = -1;
 
+
+            $scope.showCommentEntry = function(comment,levelKey) {
+                console.log(comment,levelKey)
+                return ((comment.levelKey == $scope.currentLevelKey) || comment.level==1);
+            }
+
+            $scope.showConversation = function(levelKey) {
+                $scope.currentLevelKey = levelKey;
+
+            }
             //save a new comment from the chat
             $scope.saveComment = function(parent) {
                 console.log(parent)
@@ -36,10 +34,13 @@ angular.module("sampleApp")
 
                 var newComment = {display:$scope.input.newComment, date : moment().format(),
                     user: {email:user.email,uid:user.uid},children:[]}
+                newComment.id = new Date().getTime();
+
                 delete $scope.input.newComment;
 
 
-                
+                console.log($scope.selectedNode)
+
                 //$scope.input.modelChatData
 
                 parent.comment.children = parent.comment.children || []
@@ -50,13 +51,14 @@ angular.module("sampleApp")
 
                 var key = $scope.rootName;      //the key for this particular models chat in the database
 
-
-                //var conv = {path : key,user: {email:'a@b'},children:[]}
                 //now update the database...
                 var update = {};
                 update[key] = $scope.input.modelChatData;
 
-                firebase.database().ref().child("chat").update(update)
+                console.log(update)
+                console.log(angular.copy(update))
+
+                firebase.database().ref().child("chat").update(angular.copy(update))    //angular.copy() to remove $$hash
 
 
 
@@ -117,10 +119,11 @@ angular.module("sampleApp")
                     $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
                     logicalModelSvc.setCurrentUser(user);
                     console.log(user,$rootScope.userProfile);
-
+                    delete $scope.showNotLoggedIn;
                 } else {
                     console.log('no user')
                     logicalModelSvc.setCurrentUser(null);
+                    $scope.showNotLoggedIn = true;
                     // No user is signed in.
                 }
             });
@@ -323,7 +326,7 @@ angular.module("sampleApp")
                             });
 
                             
-                            console.log(SD)
+                           // console.log(SD)
                             //note that a StructureDefinition is passed in when editing...
                             if (SD) {
                                 $scope.SD = SD;

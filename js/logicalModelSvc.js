@@ -309,15 +309,20 @@ angular.module("sampleApp")
 
                 var ar = [];    //a list of all comments in display order
 
-                function parseComment(ar,lvl,comment) {
+                function parseComment(ar,lvl,comment,levelKey) {
                     //lvl- display level, comment - the chat being examined
-                    var displayComment = {level:lvl,comment:comment}
+
+                    if (lvl == 1) {
+                        levelKey = comment.id;
+                    }
+
+                    var displayComment = {level:lvl,comment:comment,levelKey:levelKey}
                     ar.push(displayComment);
                     console.log(displayComment)
                     if (comment.children) {
                         lvl++;
                         comment.children.forEach(function(childComment){
-                            parseComment(ar,lvl,childComment)
+                            parseComment(ar,lvl,childComment,levelKey)
                         })
                     }
 

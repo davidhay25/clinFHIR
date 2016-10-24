@@ -942,6 +942,9 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             resources.push({type:'List',patientReference:'subject'});
             resources.push({type:'Basic',patientReference:'subject'});
 
+            resources.push({type:'AllergyIntolerance',patientReference:'patient'});
+            resources.push({type:'MedicationStatement',patientReference:'patient'});
+
             var arQuery = [];
 
 

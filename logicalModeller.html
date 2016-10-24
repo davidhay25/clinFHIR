@@ -152,7 +152,7 @@
         </nav>
     </div>
 
-    <div class="row">
+    <div class="row" ng-show="showNotLoggedIn">
         <div class="col-md-12 col-sm-12">
             <div ng-hide="firebase.auth().currentUser" class="alert alert-warning">
                 <p>As you have not logged in, you are able to view Models and comments, but not edit them.
@@ -291,11 +291,7 @@
 
         <div ng-class="rightPaneClass">
 
-
-
-
             <div ng-show="treeData.length > 0">
-
 
                 <h4>Model properties</h4>
                 <div><span ng-click = "editModel()" class="clickable pull-right">Edit</span> </div>
@@ -359,23 +355,49 @@
 
                     <uib-tab ng-show="input.modelChat">
                         <uib-tab-heading>Comments <span class="badge">{{input.modelChat.length-1}}</span> </uib-tab-heading>
-                        <div ng-repeat = "comment in input.modelChat"  >
-                            <div class="rounded-box" ng-style="{ 'margin-left': comment.level * 15 }">
+
+
+<!--
+                        <div ng-repeat = "conv in input.modelChatData.children">
+                            <div class="row" style="margin-bottom: 8px">
+                                <div class="col-md-12 col-sm-12">
+                                    <span><strong>{{conv.user.email}}</strong></span>
+                                    <span class="pull-right">{{conv.date | getAgeSeconds}}</span>
+                                </div>
+
+                            </div>
+                            {{conv.display}}
+
+                        </div>
+
+                        <hr />
+-->
+                        <div ng-repeat = "comment in input.modelChat" >
+                            <div ng-show="showCommentEntry(comment)"
+                                    ng-style="{ 'margin-left': comment.level * 15 }">
+
+                                <div class="row" style="margin-bottom: 8px">
+                                    <div class="col-md-12 col-sm-12">
+                                        <span><strong>{{comment.comment.user.email}}</strong></span>
+                                        {{comment.levelKey}}
+                                        <span class="pull-right">{{comment.comment.date | getAgeSeconds}}</span>
+                                    </div>
+
+                                </div>
+
                                 <div class="row">
-                                    <div class="col-md-8 col-sm-8">
+                                    <div class="col-md-12 col-sm-12">
                                         <!-- .path is present in the 'top' chat of a conversation, .display otherwise-->
                                         {{comment.comment.display}}
                                         {{comment.comment.path}}
                                     </div>
-                                    <div class="col-md-4 col-sm-4">
-                                        <div class="pull-right">{{comment.comment.date | getAgeSeconds}}</div>
-                                        <div class="pull-right">{{comment.comment.user.email}}</div>
 
-                                    </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-8 col-sm-8">
+                                        <span ng-show = "comment.level == 1"
+                                              ng-click="showConversation(comment.levelKey)" >Show conversation</span>
 
                                     </div>
                                     <div class="col-md-4 col-sm-4">
@@ -407,6 +429,9 @@
                             </div>
 
                         </div>
+
+                        <pre>{{input.modelChatData | json}}</pre>
+                        <pre>{{input.modelChat | json}}</pre>
                     </uib-tab>
                 </uib-tabset>
 
