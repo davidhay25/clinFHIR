@@ -345,7 +345,24 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                             //all the slicing stuff above has mucked up extension name. todo needs refinement...
                             if (text == 'extension') {
-                                text = item.name;
+                                if (item.name) {
+                                    text = item.name;
+                                } else if (item.type) {
+                                    //this is a hack as the name element isn't in the Element Definition on the profile.
+                                    var prof = item.type[0].profile;
+                                    if (prof) {
+
+                                        if (angular.isArray(prof)){
+                                            var ar = prof[0].split('/');        //todo something seriously weird here...  should'nt be an array, and shouldn;t be called twice!!
+                                        } else {
+                                            var ar = prof.split('/');
+                                        }
+
+
+                                        text = ar[ar.length-1];
+                                    }
+                                }
+
                             }
 
                             var dataType = '';
@@ -703,6 +720,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 vo.valueName = valueName;           //  the name for the 'value' element - eg valueCodeableConcept
                                 vo.type = ed.myMeta.analysis.dataTypes;     //the type for extensios
                                 //vo.dt = dt;
+                                //vo.name =
                                 
                                 var extensionSD = makeExtensionSD(vo);
 

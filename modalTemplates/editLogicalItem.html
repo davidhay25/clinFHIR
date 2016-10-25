@@ -60,7 +60,9 @@
 
 
 
-                    <div class="pull-right"><em>{{selectedValueSet.vs.name}}</em></div>
+                    <div class="pull-right" ng-show="isCoded">
+                        <em>{{selectedValueSet.vs.name}}</em>
+                    </div>
 
                 </div>
 
@@ -84,15 +86,28 @@
                                   placeholder="Any comments on the use of this element"></textarea>
 
                     </div>
-                    <div class="col-md-4 col-sm-4" ng-show="isCoded">
-                        <div><label>ValueSet</label></div>
+                    <div class="col-md-4 col-sm-4">
 
-                        <select class="form-control" ng-model="input.vsFromIg" ng-change="selectVsFromIg()"
-                                ng-options="vs.name for vs in vsInGuide">
+                        <div ng-show="dt.code=='Reference'">
+                            <div><label>Reference</label></div>
+                            <select  class="form-control" ng-model="input.referenceFromIg"
+                                     ng-options="entry.resource.name for entry in references.entry">
 
-                        </select>
+                            </select>
+                        </div>
 
-                        <div class="clickable" ng-click="selectVsFromServer()">Select from Server</div>
+                        <div ng-show="isCoded">
+                            <div><label>ValueSet</label></div>
+
+                            <select  ng-show="vsInGuide.length > 0" class="form-control" ng-model="input.vsFromIg"
+                                     ng-change="selectVsFromIg()"
+                                     ng-options="vs.name for vs in vsInGuide">
+
+                            </select>
+
+                            <div class="clickable" ng-click="selectVsFromServer()">Select from Server</div>
+                        </div>
+
                     </div>
 
 

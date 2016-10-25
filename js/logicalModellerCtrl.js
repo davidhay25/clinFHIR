@@ -18,8 +18,11 @@ angular.module("sampleApp")
             $scope.input.newCommentboxInx = -1;
 
 
-            $scope.showCommentEntry = function(comment,levelKey) {
-                console.log(comment,levelKey)
+            $scope.showCommentEntry = function(comment,index) {
+                //console.log(comment,levelKey)
+
+
+
                 return ((comment.levelKey == $scope.currentLevelKey) || comment.level==1);
             }
 
@@ -256,7 +259,6 @@ angular.module("sampleApp")
                 );
             };
 
-
             //this is the event when the profileGraph tab is chosen. Should really move this to a separate controller...
             $scope.redrawProfileGraph = function() {
                 console.log('click')
@@ -273,8 +275,7 @@ angular.module("sampleApp")
                 //to allow the details of a selected node in the table to be displayed...
                 $scope.selectedNode = findNodeWithPath(path);
             };
-            
-            
+
             //revert to a previous version
             $scope.revert = function() {
                 var modalOptions = {
@@ -291,8 +292,7 @@ angular.module("sampleApp")
                     }
                 );
             };
-            
-            
+
             $scope.editModel = function(){
                 editModel($scope.SD);
             };
@@ -618,7 +618,9 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editLogicalItem.html',
                     size: 'lg',
-                    controller: function($scope,allDataTypes,editNode,parentPath,findNodeWithPath,rootForDataType,igSvc){
+                    controller: function($scope,allDataTypes,editNode,parentPath,findNodeWithPath,rootForDataType,igSvc,references){
+                        $scope.references = references;
+                        console.log(references);
                         $scope.rootForDataType = rootForDataType;
                         $scope.canSave = true;
                         $scope.allDataTypes = allDataTypes;
@@ -700,7 +702,17 @@ angular.module("sampleApp")
                             vo.type = [{code:$scope.input.dataType.code}];
                             vo.editNode = editNode;
                             vo.parentPath = parentPath;
-                            vo.selectedValueSet = $scope.selectedValueSet;
+                            //coded elements...
+                            if ($scope.isCoded) {
+                                vo.selectedValueSet = $scope.selectedValueSet;
+                            }
+
+                            //for a reference type...
+                            if ($scope.input.dataType.code == 'Reference') {
+                                vo.referenceUri = $scope.input.referenceFromIg.resource.url;
+                                console.log($scope.input.referenceFromIg)
+                            }
+
                             switch ($scope.input.multiplicity) {
                                 case 'mult' :
                                     vo.min =0; vo.max='*';
@@ -715,18 +727,21 @@ angular.module("sampleApp")
                                     vo.min =1; vo.max='*';
                                     break;
                             }
+
+                            //input.referenceFromIg
                             
                             $scope.$close(vo);
                         };
                         
                         $scope.setDataType = function(dt) {
+                            $scope.dt = dt;
+                            console.log(dt);
                             $scope.isCoded = false;
                             if (dt.isCoded) {
                                 $scope.isCoded = true;
-
-                                console.log(dt);
-                                
                             }
+                            
+                            
                         }
                         
                         $scope.selectVsFromServer = function(){
@@ -819,6 +834,9 @@ angular.module("sampleApp")
                         igSvc : function() {
                             //the Implementation Guide service has the known valueSets (and other goodies)
                             return igSvc
+                        },
+                        references : function(){
+                            return $scope.bundleModels;
                         }
                     }
                 }).result.then(

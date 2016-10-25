@@ -141,6 +141,8 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                         }
 */
 
+                        modalService.showModal({}, {bodyText:"Sorry, this name is already in use."})
+
                     },function(err){
                         console.log(err);
                         //as long as the status is 404 or 410, it's save to create a new one...
@@ -384,6 +386,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                     var ed1 = {path : 'Extension',name: name,short:short,definition:definition,
                         comments:comments,min:min,max:max,type:[{code:'Extension'}]};
 
+
                     ed1.id = ed1.path;
 
 
@@ -432,6 +435,14 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 if (fhirVersion ==3) {
                     delete extensionDefinition.snapshot.element[0].type;
                 }
+
+
+
+                //ensure that all the elements have the name set...
+                extensionDefinition.snapshot.element.forEach(function(ed){
+                    ed.name = name;
+                })
+
 
                 return extensionDefinition;
 

@@ -162,6 +162,11 @@ angular.module("sampleApp")
                         item.data.short = ed.short;
                         item.data.description = ed.definition;
                         item.data.type = ed.type;
+                        
+                        if (ed.type && ed.type[0].profile) {
+                            item.data.referenceUri = ed.type[0].profile
+                        }
+                        
                         item.data.min = ed.min;
                         item.data.max = ed.max;
 
@@ -177,6 +182,8 @@ angular.module("sampleApp")
                             item.data.selectedValueSet.vs = {url:ed.binding.valueSetUri};
                             item.data.selectedValueSet.vs.name = ed.binding.description;
                         }
+                        
+                       
                         /*
                         if (data.selectedValueSet) {
                             ed.binding = {strength:data.selectedValueSet.strength};
@@ -262,7 +269,16 @@ angular.module("sampleApp")
                     if (data.type) {
                         ed.type = [];
                         data.type.forEach(function(typ) {
-                            ed.type.push({code:typ.code,profile:typ.profile});
+                            //actually, there will only ever be one type...
+                            var typ1 = {code:typ.code,profile:typ.profile};
+                            if (data.referenceUri) {
+                                typ1.profile = data.referenceUri;
+                            }
+
+
+                            ed.type.push(typ1);
+
+
                         })
                     }
 
@@ -276,6 +292,8 @@ angular.module("sampleApp")
                         ed.binding.description = data.selectedValueSet.vs.name;
 
                     }
+
+
 
                     sd.snapshot.element.push(ed)
                 });
@@ -318,7 +336,7 @@ angular.module("sampleApp")
 
                     var displayComment = {level:lvl,comment:comment,levelKey:levelKey}
                     ar.push(displayComment);
-                    console.log(displayComment)
+                    //console.log(displayComment)
                     if (comment.children) {
                         lvl++;
                         comment.children.forEach(function(childComment){

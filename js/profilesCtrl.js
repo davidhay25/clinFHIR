@@ -88,7 +88,7 @@ angular.module("sampleApp")
                 var modalOptions = {
                     closeButtonText: "No, don't Delete",
                     actionButtonText: 'Yes please',
-                    headerText: 'Activate ' + $scope.selectedProfile.name,
+                    headerText: 'Delete ' + $scope.selectedProfile.name,
                     bodyText: 'Are you sure you want to delete this Extension Definition? (It MUST NEVER have been used in a resource instance)'
                 };
                 modalService.showModal({}, modalOptions).then(
@@ -99,6 +99,7 @@ angular.module("sampleApp")
                                 modalService.showModal({}, {bodyText:'Definition is now deleted.'});
 
                                 $scope.profilesArray.splice($scope.index,1);
+                                
                                 delete $scope.selectedProfile;
                                 delete $scope.index;
 
@@ -284,6 +285,7 @@ angular.module("sampleApp")
 
             $scope.selectProfile = function(entry,inx){
                 $scope.selectedProfile = entry.resource
+                $scope.index = inx;
 
                 //$scope.isAuthoredByClinFhir = true;
                 $scope.isAuthoredByClinFhir = Utilities.isAuthoredByClinFhir($scope.selectedProfile);

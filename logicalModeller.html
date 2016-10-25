@@ -373,8 +373,10 @@
                         <hr />
 -->
                         <div ng-repeat = "comment in input.modelChat" >
-                            <div ng-show="showCommentEntry(comment)"
-                                    ng-style="{ 'margin-left': comment.level * 15 }">
+                            <div ng-show="showCommentEntry(comment,$index)"
+                                    ng-style="{ 'margin-left': comment.level * 15 }"
+                                    class="chatItem"
+                                    >
 
                                 <div class="row" style="margin-bottom: 8px">
                                     <div class="col-md-12 col-sm-12">
@@ -388,27 +390,31 @@
                                 <div class="row">
                                     <div class="col-md-12 col-sm-12">
                                         <!-- .path is present in the 'top' chat of a conversation, .display otherwise-->
-                                        {{comment.comment.display}}
-                                        {{comment.comment.path}}
+                                        {{comment.comment.display}} {{comment.comment.path}}
                                     </div>
 
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-8 col-sm-8">
-                                        <span ng-show = "comment.level == 1"
-                                              ng-click="showConversation(comment.levelKey)" >Show conversation</span>
+                                        <span style="margin-right: 6px" ng-show = "comment.level == 1" class=" clickable"
+                                            ng-click="showConversation(comment.levelKey)" >Show Conversation</span>
 
                                     </div>
                                     <div class="col-md-4 col-sm-4">
+
+                                        <!-- Show the new comment box-->
                                         <div style="margin: 6px" ng-hide="newCommentboxInx == $index"
                                              class="pull-right clickable" ng-click="input.newCommentboxInx = $index">
+
                                             <span ng-show="firebase.auth().currentUser">
                                                 <span ng-show = "comment.level == 0">New comment</span>
                                                 <span ng-hide = "comment.level == 0">Reply</span>
                                             </span>
 
                                         </div>
+
+
 
                                     </div>
                                 </div>
@@ -428,10 +434,16 @@
 
                             </div>
 
-                        </div>
+                            <div class="row" ng-show="comment.level == 1">
+                                <hr style="margin:3px" />
+                            </div>
 
+                        </div> <!-- ng-repeat -->
+<!--
                         <pre>{{input.modelChatData | json}}</pre>
                         <pre>{{input.modelChat | json}}</pre>
+
+                        -->
                     </uib-tab>
                 </uib-tabset>
 
@@ -466,12 +478,16 @@
 
                                 {{typ.code}}
                             </div>
-                            <div ng-show="selectedNode.data.selectedValueSet">
+                            <span ng-show="selectedNode.data.selectedValueSet">
                                 <span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.vs.url)">
                                     {{selectedNode.data.selectedValueSet.vs.url}}</span>
                                     ({{selectedNode.data.selectedValueSet.strength}})
 
-                            </div>
+                            </span>
+                            <span ng-show="selectedNode.data.referenceUri">
+                                {{selectedNode.data.referenceUri}}
+                            </span>
+
 
 
                         </td></tr>

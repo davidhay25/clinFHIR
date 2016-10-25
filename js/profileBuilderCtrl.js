@@ -779,12 +779,18 @@ angular.module("sampleApp")
 
                 var qry = "StructureDefinition?";
                 var conformanceSvr = appConfigSvc.getCurrentConformanceServer();
+
+                qry += 'type=Extension';
+
+                /* - 26-october it appears as if the same query can be used for stu2 & 3...
                 if (conformanceSvr.version == 3) {
                     qry += "kind=complex-type&base=http://hl7.org/fhir/StructureDefinition/Extension";
                 } else {
                     qry = "StructureDefinition?kind=datatype&type=Extension"; //&ext-context="+$scope.resourceType;
                     console.log('v2')
                 }
+                */
+
                 $scope.qry = qry;
                 
   /*              
@@ -815,7 +821,7 @@ angular.module("sampleApp")
                                         include = true;
                                     } else  {
                                         entry.resource.context.forEach(function(ctx){
-                                            if (ctx == '*' || ctx.indexOf(resourceType) > -1) {
+                                            if (ctx == '*' || ctx == 'Element' ||  ctx.indexOf(resourceType) > -1) {
                                                 include = true;
                                             }
                                         })
