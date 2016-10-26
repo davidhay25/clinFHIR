@@ -298,21 +298,7 @@ angular.module("sampleApp").
                 .then(function(data) {
                     deferred.resolve(data.data);
                 },function(err) {
-                   // alert('Error expanding ValueSet:'+angular.toJson());
-                /*
-                //an error expanding the valueset - save the error...
-                var myEvent = {type:'expandValueSet'};   //this is an audit event
-                myEvent.error = true;
-                myEvent.display = "Error expanding "+name+ " valueset";
-                //this is the query that the server will have used...
-                var currentSettings
-                var serverQuery = Utilities.getCurrentSettings().registryServer.server + "ValueSet/"+name;
-                myEvent.data = {url:serverQuery,outcome:oo};
 
-                myEvent.error = true;
-                SaveDataToServer.sendActivityObject(myEvent);
-
-*/
                 deferred.reject(err);
             });
 

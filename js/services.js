@@ -44,9 +44,14 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
         //the is is (or should be) of the format: [base]/[type]/[id]/_history/[vid] - so get the 3rd frm the end...
 
         var ar = serverId.split('/');
-        if (ar.length < 3) {
-            return null;
+        if (ar.length ==3) {
+            //return null;
+            //this is not version specific...
+            return ar[ar.length-1];
         }
+
+
+
 
         return ar[ar.length-3];
 
