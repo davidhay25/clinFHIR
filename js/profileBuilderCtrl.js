@@ -887,7 +887,7 @@ angular.module("sampleApp")
 
 
                 //create a basic Extension definition with the core data required. When the profile is saved, the other stuff will be added
-                ed = {path:newPath,name: analysis.display,myMeta : {isNew:false, isExtension:true, isExistingExtension:true}};
+                ed = {path:newPath,name: extensionDef.name,myMeta : {isNew:false, isExtension:true, isExistingExtension:true}};
                 ed.min=0; ed.max = "1";
                 ed.definition = "definition";
                 ed.type = [{code:'Extension',profile:[extensionDef.url]}];       //<!--- todo is this right?

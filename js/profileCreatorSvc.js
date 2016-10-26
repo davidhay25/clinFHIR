@@ -11,6 +11,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
             //vo.valueName      - the name for the 'value' element - eg valueCodeableConcept
             //vo.fhirVersion    - the version of fhir we are targetting
             //vo.type             - the dataType of the extension
+            //vo.name           - the name of the profile
 
             var fhirVersion = vo.fhirVersion || 3;      //default to version 3...
 
@@ -94,6 +95,12 @@ angular.module("sampleApp").service('profileCreatorSvc',
             //var el = {path:vo.valueName, definition:'value',min:0,max:'1',type:vo.type}
             var el = {path:vo.valueName,id:'Extension'+vo.valueName, definition:'value',min:0,max:'1',type:vo.type}
             extensionSD.snapshot.element.push(el);
+
+
+            //make sure that each element in the extension reference has a name property...
+            extensionSD.snapshot.element.forEach(function(ed){
+                ed.name = vo.name;
+            })
 
 
             console.log(extensionSD)
@@ -344,6 +351,9 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         if (include) {
 
                             //all the slicing stuff above has mucked up extension name. todo needs refinement...
+
+
+                            //there should always be a name  - but just in case there isn't, grab the profile name...
                             if (text == 'extension') {
                                 if (item.name) {
                                     text = item.name;
@@ -720,7 +730,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 vo.valueName = valueName;           //  the name for the 'value' element - eg valueCodeableConcept
                                 vo.type = ed.myMeta.analysis.dataTypes;     //the type for extensios
                                 //vo.dt = dt;
-                                //vo.name =
+                                vo.name = profileName
                                 
                                 var extensionSD = makeExtensionSD(vo);
 

@@ -427,8 +427,10 @@
 
                                          <span ng-show="edFromTreeNode && ! edFromTreeNode.myMeta.isExtension">
 
-                                            <button class="btn btn-primary" ng-click="input.newNode = 'child'">Add Child Extension</button>
-                                            <button class="btn btn-primary" ng-click="input.newNode = 'sibling'"
+                                            <button class="btn btn-primary" ng-click="input.newNode = 'child';selectExistingExtension()">
+
+                                                Add Child Extension</button>
+                                            <button class="btn btn-primary" ng-click="input.newNode = 'sibling';selectExistingExtension()"
                                                     ng-hide="currentNodeIsParent">Add Sibling Extension</button>
                                         </span>
 
@@ -439,12 +441,12 @@
                                                     <h4>Add {{input.newNode}} Extension</h4>
                                                 </div>
                                                 <div class="col-md-4 col-sm-4">
-                                                    <button class="btn btn-link pull-right"
+                                                    <button class="btn btn-success pull-right"
                                                             ng-click="selectExistingExtension()">Select existing</button>
                                                 </div>
                                             </div>
 
-
+<!-- always select now
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <input placeholder="name (no spaces)" type="text" class="form-control mygap"
@@ -454,7 +456,7 @@
                                                     <select class="form-control mygap" ng-model="input.newDatatype"
                                                             ng-options="dt.description for dt in dataTypes"></select>
 
-                                                    <!-- If a reference, then allow to select the type -->
+                                                    //If a reference, then allow to select the type
                                                     <select class="form-control mygap" ng-model="input.newRRForNode"
                                                             ng-show="input.newDatatype.description == 'Reference'"
                                                             ng-options="typ.name for typ in standardResourceTypes"></select>
@@ -486,6 +488,9 @@
                                                 <button class="btn btn-primary pull-right"
                                                         ng-show="input.newElementPath"
                                                         ng-click="addNewNode(input.newNode)">Add</button> </div>
+                      -->
+
+
                                         </div>
                                     </div>
                                 </div>
@@ -495,11 +500,11 @@
                             <!-- not yet enabled
                             <button class="btn btn-link pull-right"
                                     ng-click="selectExistingExtension()">Select existing</button>
-     -->
+
                             <button class="btn btn-link pull-right"
                                     ng-click="newExtension()">New extension</button>
 
-
+-->
 
                             <hr/>
 
