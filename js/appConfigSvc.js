@@ -33,7 +33,7 @@ angular.module("sampleApp")
         */
 
         defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2016-10-18a';
+        defaultConfig.lastUpdated='2016-10-27a';
         defaultConfig.baseSpecUrl = "http://hl7.org/fhir/";     //the base for spec documentation
         defaultConfig.logLevel = 0;     //0 = no logging, 1 = log to console
         defaultConfig.enableCache = false;  //whether caching is supported
@@ -93,6 +93,8 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'MiHIN STU2',version:2,url:"http://52.72.172.54:8080/fhir/baseDstu2/"});
         defaultConfig.allKnownServers.push({name:'Simplifier STU2',version:2,url:"https://simplifier.net/api/fhir/"});
         defaultConfig.allKnownServers.push({name:'Aegis WildFHIR STU3',version:3,url:" http://wildfhir.aegis.net/fhir1-6-0/"});
+        defaultConfig.allKnownServers.push({name:'SNApp',version:3,url:"http://snapp.clinfhir.com:8080/baseDstu3/"});
+
 
 
 
@@ -260,6 +262,14 @@ angular.module("sampleApp")
                 for (var i=0; i < $localStorage.config.allKnownServers.length; i++){
                     var svr = $localStorage.config.allKnownServers[i];
                     if (svr.url == $localStorage.config.servers.conformance) {
+                        return svr;
+                    }
+                }
+            },
+            getCurrentTerminologyServer : function() {
+                for (var i=0; i < $localStorage.config.allKnownServers.length; i++){
+                    var svr = $localStorage.config.allKnownServers[i];
+                    if (svr.url == $localStorage.config.servers.terminology) {
                         return svr;
                     }
                 }

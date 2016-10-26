@@ -96,7 +96,7 @@ angular.module("sampleApp")
                     //delete $scope.state;        //the defualt value is 'find' whicg displays the find dialog...
 
                     //don't show the list of models if one was passed in...
-                    hideLMSelector();
+                    $scope.hideLMSelector();
 
                    // $scope.leftPaneClass = "hidden"
                    // $scope.midPaneClass = "col-md-7 col-sm-7"

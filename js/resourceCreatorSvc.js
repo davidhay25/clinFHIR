@@ -749,6 +749,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         } else {
                             //this is a simple extension
 
+                            elementDef.binding = analysis.binding;
+                            
 
                             if (sdef && sdef.snapshot && sdef.snapshot.element) {
                                 sdef.snapshot.element.forEach(function (ed) {
@@ -764,11 +766,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     },
                     function (err) {
-                        //modalService.showModal({}, {bodyText: 'function: updateFromProfileDefinition - error retrieving ' + url + " " + angular.toJson(err)})
+                         modalService.showModal({}, {bodyText: 'function: updateFromProfileDefinition - error retrieving ' + url})
 
-                        modalService.showModal({}, {bodyText: 'function: updateFromProfileDefinition - error retrieving ' + url})
-
-                        //alert('function: updateFromProfileDefinition - error retrieving '+ url + " "+ angular.toJson(err))
                     }
                 ))
 

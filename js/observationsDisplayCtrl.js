@@ -47,7 +47,7 @@ angular.module("sampleApp")
                             }
 
 
-                            console.log(res);
+                            //console.log(res);
 
                             //obsCodes[code].list.push(res)
 

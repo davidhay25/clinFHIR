@@ -34,7 +34,8 @@ angular.module("sampleApp")
 
 
     if (appConfigSvc.checkConfigVersion()) {
-        var txt = 'The default configuration has been updated (including the patient data and conformance server). Please re-load the page for it to take effect.'
+        var txt = 'The default configuration has been updated (including the patient data and conformance server). Please re-load the page for it to take effect.';
+        txt += " (Note that you will need to re-enter any direct servers you have added via the 'gear' icon)"
         modalService.showModal({}, {bodyText: txt})
 
     }
@@ -1162,8 +1163,7 @@ angular.module("sampleApp")
     $scope.childSelected = function(ed,inx) {
 
         delete $scope.dtSelectError;    //shows an error when there are multiple ValusSets with teh same URL
-        //delete $scope.complexExtensionRoot;
-        //delete $scope.complexExtensionChild;
+        
 
         $scope.selectedChild = ed;
 

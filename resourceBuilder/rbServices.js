@@ -164,7 +164,7 @@ angular.module("sampleApp").
 
             return $http.get(url);
 
-            
+
         },
         
         generalFhirQuery : function(qry) {
@@ -285,8 +285,11 @@ angular.module("sampleApp").
         getFilteredValueSet : function(name,filter){
             //return a filtered selection from a valueset. Uses the $expand operation on grahames server...
             var config = appConfigSvc.config();
-          
-            var qry = config.servers.terminology + "ValueSet/"+name+"/$expand?filter="+filter;
+
+
+            var qry = appConfigSvc.getCurrentTerminologyServer().url + "ValueSet/"+name+"/$expand?filter="+filter;
+
+            //var qry = config.servers.terminology + "ValueSet/"+name+"/$expand?filter="+filter;
 
             config.log(qry,'getFilteredValueSet');
 
@@ -503,6 +506,10 @@ angular.module("sampleApp").
                     }
 
 
+
+
+
+
                     if (element.path.indexOf('Extension.value')>-1) {
                         //vo.element = element;
                         var dt = element.path.replace('Extension.value','').toLowerCase();
@@ -546,6 +553,9 @@ angular.module("sampleApp").
                             if (element.binding.valueSetUri) {
                                 vo.valueSetUri = element.binding.valueSetUri;
                             }
+
+                            vo.binding = element.binding;   //Why does it need to ne more complex than this?
+
 
                         }
 
@@ -1099,7 +1109,8 @@ console.log(summary);
         getValueSetIdFromRegistry : function(uri,cb,noError) {
             //return the id of the ValueSet on the terminology server so we can call $expand on it. For now, assume at the VS is on the terminology.
             var config = appConfigSvc.config();
-            var qry = config.servers.terminology + "ValueSet?url=" + uri;
+            var qry = appConfigSvc.getCurrentTerminologyServer().url + "ValueSet?url=" + uri;
+            //var qry = config.servers.terminology + "ValueSet?url=" + uri;
             config.log(qry,'rbServices:getValueSetIdFromRegistry')
             var that = this;
 

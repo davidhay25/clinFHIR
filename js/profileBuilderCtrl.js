@@ -484,7 +484,7 @@ angular.module("sampleApp")
 
 
     //add a new child node to the current one (as an extension)
-    $scope.addNewNode = function(type) {
+    $scope.addNewNodeDEP = function(type) {
 
         console.log(type);
         var newPath,parentId,ed;
@@ -889,8 +889,17 @@ angular.module("sampleApp")
                 //create a basic Extension definition with the core data required. When the profile is saved, the other stuff will be added
                 ed = {path:newPath,name: extensionDef.name,myMeta : {isNew:false, isExtension:true, isExistingExtension:true}};
                 ed.min=0; ed.max = "1";
-                ed.definition = "definition";
-                ed.type = [{code:'Extension',profile:[extensionDef.url]}];       //<!--- todo is this right?
+                ed.definition = "an extension";       //todo - fix...
+
+
+                if (appConfigSvc.getCurrentFhirVersion() == 3) {
+                    ed.type = [{code:'Extension',profile:extensionDef.url}];
+                } else {
+                    ed.type = [{code:'Extension',profile:[extensionDef.url]}];       
+                }
+
+
+
 
 
 
