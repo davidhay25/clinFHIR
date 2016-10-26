@@ -38,6 +38,8 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
         }
 
 
+        console.log(serverId);
+        
         if (! serverId) {
             return null;
         }
