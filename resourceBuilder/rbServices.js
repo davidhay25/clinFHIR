@@ -282,12 +282,12 @@ angular.module("sampleApp").
 
             alert('findResourceByUrl stub not implemented yet');
         },
-        getFilteredValueSet : function(name,filter){
-            //return a filtered selection from a valueset. Uses the $expand operation on grahames server...
+        getFilteredValueSet : function(id,filter){
+            //return a filtered selection from a valueset. Uses the $expand operation on the terminology server...
             var config = appConfigSvc.config();
 
 
-            var qry = appConfigSvc.getCurrentTerminologyServer().url + "ValueSet/"+name+"/$expand?filter="+filter;
+            var qry = appConfigSvc.getCurrentTerminologyServer().url + "ValueSet/"+id+"/$expand?filter="+filter;
 
             //var qry = config.servers.terminology + "ValueSet/"+name+"/$expand?filter="+filter;
 

@@ -14,7 +14,7 @@ angular.module("sampleApp")
     .controller('resourceCreatorCtrl',
         function ($scope,resourceCreatorSvc,GetDataFromServer,SaveDataToServer,$rootScope,modalService,$translate,
                   $localStorage,RenderProfileSvc,appConfigSvc,supportSvc,$uibModal,ResourceUtilsSvc,Utilities,
-                  $location,resourceSvc,$window,$timeout,$firebaseArray,$filter,$firebaseObject,$cookies) {
+                  $location,resourceSvc,$window,$timeout,$firebaseArray,$filter,$firebaseObject,$cookies,$q) {
 
 
             if (window.location.href.indexOf('localhost') > -1) {
@@ -1468,8 +1468,7 @@ angular.module("sampleApp")
         }
 
     };
-
-
+            
 
     //when entering a new element, if the user selects cancel...
     $scope.cancel = function() {
@@ -1575,35 +1574,64 @@ angular.module("sampleApp")
     //--------- code for CodeableConcept lookup
     $scope.vsLookup = function(text,vs) {
         if (vs) {
-            $scope.waiting = true;
-            return GetDataFromServer.getFilteredValueSet(vs,text).then(
-                function(data,statusCode){
+
+            //if the ValueSet has compose.include element/s, then chances are that the expansion won't work. We have to do it ourselves...
+            if (vs.resource && vs.resource.compose && vs.resource.compose.include) {
+                //first, create an array with all of the composed concepts...
+                var ar = [];
+                vs.resource.compose.include.forEach(function(inc){
+                    ar = ar.concat(inc.concept)
+                });
+
+                //now create a filtered return array
+                text = text.toLowerCase();
+                var returnArray = []
+                ar.forEach(function(item){
+                    if (item.display && item.display.toLowerCase().indexOf(text)> -1) {
+                        returnArray.push(item)
+                    }
+                });
 
 
 
-                    if (data.expansion && data.expansion.contains) {
+                return returnArray;
 
-                        var lst = data.expansion.contains;
-                        return lst;
-                    } else {
+                //return vs.resource.compose.include[0].concept;
+
+            } else {
+                var id = vs.id;
+                $scope.waiting = true;
+                return GetDataFromServer.getFilteredValueSet(id,text).then(
+                    function(data,statusCode){
+
+                        if (data.expansion && data.expansion.contains) {
+
+                            var lst = data.expansion.contains;
+                            return lst;
+                        } else {
+                            return [
+                                {'display': 'No expansion'}
+                            ];
+                        }
+                    }, function(vo){
+                        var statusCode = vo.statusCode;
+                        var oo = vo.data;
+
+
+
+                        alert(angular.toJson(oo));
+
                         return [
-                            {'display': 'No expansion'}
+                            {'display': ""}
                         ];
                     }
-                }, function(vo){
-                    var statusCode = vo.statusCode;
-                    var msg = vo.error;
+                ).finally(function(){
+                    $scope.waiting = false;
+                });
+            }
 
 
-                    alert(msg);
 
-                    return [
-                        {'display': ""}
-                    ];
-                }
-            ).finally(function(){
-                $scope.waiting = false;
-            });
 
         } else {
             return [{'display':'Select the ValueSet to query against'}];
