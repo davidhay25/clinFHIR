@@ -145,6 +145,7 @@ angular.module("sampleApp")
                 
             },
             checkConsistency : function() {
+                var that = this;
                 //check that all the servers are on the same version
                 var rtn = {consistent:true,terminologyServers:[]};       //return an object
 
@@ -176,15 +177,19 @@ angular.module("sampleApp")
                 var version = tmp[0].version;       //the FHIR version
                 for (var i=0; i <config.terminologyServers.length;i++) {
                     var s = config.terminologyServers[i];
-                    //if (s.version == version && !foundServer) {
                     if (s.version == version) {
-
                         rtn.terminologyServers.push(s);
                         //make the first server the default...
                         if (!foundServer) {
                             foundServer = true;
-                            $localStorage.config.servers.terminology = s.url;
-                            console.log('setting  terminology server to '+s.url,'appConfig:config')
+                            //if the currently configured terminology server is the same version, then leave it alone.
+                            //otherwise, set the TS to the first in the list...
+                            if (that.getCurrentTerminologyServer().version !== version) {
+                                $localStorage.config.servers.terminology = s.url;
+                                console.log('setting the terminology server to '+s.url,'appConfig:config')
+                            }
+
+
                         }
 
                     }

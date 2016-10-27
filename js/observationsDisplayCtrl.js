@@ -54,13 +54,13 @@ angular.module("sampleApp")
                         }
 
                     });
-                    console.log(obsCodes);
+                    //console.log(obsCodes);
 
                     $scope.observations = {}
                     var cnt = 0
                     angular.forEach(obsCodes,function(value,code){
 
-                        console.log(code,value)
+                        //console.log(code,value)
                         if (value.list.length >0 ) {
                             $scope.observations[code] = value;
                             cnt++;

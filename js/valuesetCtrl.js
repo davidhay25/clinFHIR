@@ -844,8 +844,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
             console.log(text,vs)
             if (vs) {
+                var id = vs.id;
                 $scope.showWaiting = true;
-                return GetDataFromServer.getFilteredValueSet(vs,text).then(
+                return GetDataFromServer.getFilteredValueSet(id,text).then(
                     function(data,statusCode){
                         if (data.expansion && data.expansion.contains) {
                             var lst = data.expansion.contains;
