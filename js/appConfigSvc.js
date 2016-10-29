@@ -94,6 +94,7 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'Simplifier STU2',version:2,url:"https://simplifier.net/api/fhir/"});
         defaultConfig.allKnownServers.push({name:'Aegis WildFHIR STU3',version:3,url:" http://wildfhir.aegis.net/fhir1-6-0/"});
         defaultConfig.allKnownServers.push({name:'SNApp',version:3,url:"http://snapp.clinfhir.com:8080/baseDstu3/"});
+        defaultConfig.allKnownServers.push({name:'123',version:3,url:"https://fhirsandbox1.tsysinteropsvcs.net/sites/123/"});
 
 
 
@@ -179,7 +180,6 @@ angular.module("sampleApp")
                     var s = config.terminologyServers[i];
                     if (s.version == version) {
                         rtn.terminologyServers.push(s);
-                        //make the first server the default...
                         if (!foundServer) {
                             foundServer = true;
                             //if the currently configured terminology server is the same version, then leave it alone.
@@ -188,7 +188,6 @@ angular.module("sampleApp")
                                 $localStorage.config.servers.terminology = s.url;
                                 console.log('setting the terminology server to '+s.url,'appConfig:config')
                             }
-
 
                         }
 

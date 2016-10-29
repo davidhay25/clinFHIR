@@ -66,8 +66,6 @@ angular.module("sampleApp")
 
 
             }
-            
-            
 
             
             $scope.showLMSelector = function(){
@@ -332,6 +330,7 @@ angular.module("sampleApp")
                                 $scope.SD = SD;
                                 $scope.input.name = SD.name;
                                 $scope.input.purpose = SD.purpose;
+                               
                                 $scope.input.title = SD.title;
                                 $scope.canSave = true;
                                 $scope.isNew = false;
@@ -526,6 +525,7 @@ angular.module("sampleApp")
 
                 function selectEntry(entry) {
                     delete $scope.modelHistory;
+                    delete $scope.selectedNode;
                     $scope.isDirty = false;
                     $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
                     //console.log($scope.treeData)
@@ -625,6 +625,7 @@ angular.module("sampleApp")
                         $scope.canSave = true;
                         $scope.allDataTypes = allDataTypes;
                         $scope.parentPath = parentPath;
+                        $scope.pathDescription = 'Parent path';
                         $scope.vsInGuide = igSvc.getResourcesInGuide('valueSet');       //so we can show the list of ValueSets in the IG
                         $scope.input = {};
                         //$scope.input.name = 'NewElement';
@@ -635,6 +636,7 @@ angular.module("sampleApp")
 
                         if (editNode) {
                             //editing an existing node
+                            $scope.pathDescription = 'Path'
                             var data = editNode.data;
                             $scope.input.name = data.name;
                             $scope.input.short= data.short;

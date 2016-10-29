@@ -123,7 +123,8 @@
 
             <div class="form-group">
                 <div><label>Mapping</label></div>
-                <textarea class="form-control" rows="5" ng-model="input.mapping" placeholder="Describe FHIR mapping"></textarea>
+                <textarea class="form-control" rows="5" ng-model="input.mapping"
+                          placeholder="Describe FHIR mapping. Can also indicate if this element should be bound to a SNOMED term"></textarea>
             </div>
 
 
@@ -131,14 +132,12 @@
         </form>
 
 
-
-
     </div>
 
     <div class="modal-header">
         <div class="row">
             <div class="col-md-12 col-sm-12">
-                <strong>Parent path:</strong> {{parentPath}}
+                <strong>{{pathDescription}}:</strong> {{parentPath}}
 
             </div>
 
