@@ -8,6 +8,9 @@ angular.module("sampleApp")
         var currentUser;
         
         return {
+            insertModel : function(element,insertModel) {
+
+            },
             addSimpleExtension : function(sd,url,value) {
                 //add a simple extension as a string;
                 sd.extension = sd.extension || []
@@ -133,9 +136,12 @@ angular.module("sampleApp")
                             //now set the header data...
                             item.data.header = {};
                             item.data.header.name = sd.name;
-                            item.data.header.title = sd.title;
-                            item.data.header.purpose = sd.purpose;
-                            item.data.header.extension = sd.extension;      //save any extensions...
+                            
+                            //the name of the next 2 elements changed after baltimore, so look in both places until the other stu3 servrs catch up...
+                            item.data.header.purpose = sd.purpose || sd.requirements;
+                            item.data.header.title = sd.title || sd.display;  
+
+                            item.data.header.extension = sd.extension     //save any extensions...
                             if (sd.mapping && sd.mapping.length > 0) {
                                 item.data.header.mapping = sd.mapping[0].comments;
                                 item.data.mapping = sd.mapping[0].comments;     //for the report & summary view...
@@ -218,6 +224,10 @@ angular.module("sampleApp")
                 sd.title = header.title;
                 sd.status='draft';
                 sd.date = moment().format();
+
+
+                //sd.
+
                 sd.purpose = header.purpose;
                 sd.description = header.description;
 
@@ -266,17 +276,23 @@ angular.module("sampleApp")
                         ed.mapping= [{identity:'fhir',map:data.mapping}]
                     }
 
+
                     if (data.type) {
+
+
                         ed.type = [];
                         data.type.forEach(function(typ) {
                             //actually, there will only ever be one type...
-                            var typ1 = {code:typ.code,profile:typ.profile};
-                            if (data.referenceUri) {
-                                typ1.profile = data.referenceUri;
-                            }
+                            //var typ1 = {code:typ.code,profile:typ.profile};
+
+                            ed.type.push(typ);
+
+                        //    if (data.referenceUri) {
+                          //      typ1.profile = data.referenceUri;
+                          //  }
 
 
-                            ed.type.push(typ1);
+                          //  ed.type.push(typ1);
 
 
                         })

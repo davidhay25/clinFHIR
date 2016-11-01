@@ -181,7 +181,8 @@ angular.module("sampleApp")
 
     //todo just for the moment...
     $scope.showLogicalModeller = function () {
-        if (appConfigSvc.getCurrentConformanceServer().name == 'Grahame STU3 server') {
+        if (appConfigSvc.getCurrentConformanceServer().version == 3) {
+            //if (appConfigSvc.getCurrentConformanceServer().name == 'Grahame STU3 server') {
             return true;
         }
     }

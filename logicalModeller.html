@@ -464,6 +464,10 @@
 
 
                                 {{typ.code}}
+                                <div>{{typ.profile}}</div>
+
+
+
                             </div>
                             <span ng-show="selectedNode.data.selectedValueSet">
                                 <span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.vs.url)">
@@ -471,10 +475,11 @@
                                     ({{selectedNode.data.selectedValueSet.strength}})
 
                             </span>
+   <!--
                             <span ng-show="selectedNode.data.referenceUri">
                                 {{selectedNode.data.referenceUri}}
                             </span>
-
+-->
 
 
                         </td></tr>
@@ -513,6 +518,13 @@
 
                                 <button ng-show="!selectedNode.data.isRoot  && !isHistory"
                                         class="btn btn-link" ng-click="deleteNode()">Remove Element</button>
+
+
+                                <!--
+                                <button ng-show="!isHistory" class="btn btn-link" ng-click="insertModel()">Insert Model</button>
+-->
+
+
 
                             </div>
 

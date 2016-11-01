@@ -5,9 +5,9 @@ angular.module("sampleApp").controller('newProfileCtrl',
 
             $scope.childElements = [];      //array of child elements
             $scope.input ={};
-            $scope.input.name= 'dhTest1';
-            $scope.input.short = 'test profile'
-            $scope.input.description = "testing the new profile functionality in clinFHIR"
+            //$scope.input.name= 'dhTest1';
+            //$scope.input.short = 'test profile'
+            //$scope.input.description = "testing the new profile functionality in clinFHIR"
             $scope.selectedResourceTypes = [];
 
 

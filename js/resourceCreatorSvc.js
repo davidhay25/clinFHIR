@@ -1967,7 +1967,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var lst = [];
             lst.push({code: 'string'});
             lst.push({code: 'CodeableConcept', isCoded: true});
-            lst.push({code: 'decimal'});
+            //lst.push({code: 'decimal'});
             lst.push({code: 'Quantity'});
             lst.push({code: 'date'});
             lst.push({code: 'dateTime'});
@@ -1979,11 +1979,29 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             lst.push({code: 'Identifier'});
             lst.push({code: 'uri'});
             lst.push({code: 'Ratio'});
-            lst.push({code: 'HumanName'});
+            //lst.push({code: 'HumanName'});
             lst.push({code: 'Address'});
             lst.push({code: 'ContactPoint'});
             lst.push({code: 'code', isCoded: true});
             lst.push({code: 'Coding', isCoded: true});
+
+
+            lst.push({code: 'markdown'});
+            lst.push({code: 'integer'});
+            lst.push({code: 'decimal'});
+
+            //lst.push({code: 'Ratio'});
+            lst.push({code: 'base64Binary'});
+            lst.push({code: 'Attachment'});
+
+            lst.push({code: 'HumanName'});
+            lst.push({code: 'Annotation'});
+            //lst.push({code: 'ContactPoint'});
+
+            //lst.push({code: 'Coding'});
+            lst.push({code: 'Timing'});
+            //lst.push({code: 'Range'});
+
             /*          return lst;
 
              var lst = [];
@@ -2007,10 +2025,17 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             
             lst.forEach(function (item) {
                 // item.description = item.description + " ("+ item.code + ")";
-                item.description = item.code;
+                item.description = item.description || item.code;
 
             });
 
+            lst.sort(function(a,b){
+                if (a.description.toLowerCase() > b.description.toLowerCase()) {
+                    return 1
+                } else {
+                    return -1
+                }
+            });
 
             
 

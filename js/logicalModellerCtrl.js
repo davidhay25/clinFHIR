@@ -10,7 +10,7 @@ angular.module("sampleApp")
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
-
+            //$scope.bundleModels= [];    //the current list of models
 
 
 
@@ -119,7 +119,7 @@ angular.module("sampleApp")
                 if (user) {
                     $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
                     logicalModelSvc.setCurrentUser(user);
-                    console.log(user,$rootScope.userProfile);
+                    //console.log(user,$rootScope.userProfile);
                     delete $scope.showNotLoggedIn;
                 } else {
                     console.log('no user')
@@ -160,13 +160,17 @@ angular.module("sampleApp")
             //load all the logical models created by clinFHIR
 
             loadAllModels = function() {
-               var url="http://fhir3.healthintersections.com.au/open/StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
+                $scope.conformanceServer
+                var url=$scope.conformanceServer.url + "StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
+
+                //var url="http://fhir3.healthintersections.com.au/open/StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
                 $http.get(url).then(
                     function(data) {
                         $scope.bundleModels = data.data
+                        $scope.bundleModels.entry = $scope.bundleModels.entry || [];    //in case there are no models
                     },
                     function(err){
-
+//alert(err)
                     }
                 )
             };
@@ -315,6 +319,7 @@ angular.module("sampleApp")
                             $scope.modelTypes = [];
                             $scope.modelTypes.push({code:'mds',display:'Minimum Data Set',help:'A common set of data for exchange either by a Document or a Message'})
                             $scope.modelTypes.push({code:'resource',display:'Single Resource',help:'Will map to a single FHIR resource'})
+                            $scope.modelTypes.push({code:'dt',display:'Logical DataType',help:'A re-usable datatype'})
                             $scope.input.type = $scope.modelTypes[0];
                             $scope.input.typeDescription = $scope.input.type.help;
 
@@ -413,6 +418,7 @@ angular.module("sampleApp")
                                 vo.mapping = $scope.input.mapping;
                                 vo.type = $scope.input.type.code;
 
+
                                 $scope.$close(vo);
                             }
                         },resolve : {
@@ -480,7 +486,20 @@ angular.module("sampleApp")
                 
                 var url = $scope.conformanceServer.url + "StructureDefinition/" + $scope.SD.id;
                 $scope.showWaiting = true;
-                $http.put(url,$scope.SD).then(
+                
+                var SDToSave = angular.copy($scope.SD);
+                
+                //this is a hack as only grahames server is on the latest (post baltimore) version of stu3.
+                //it cna be removed when the others (ie hapi) are confrmant also...
+                if (url.indexOf('tersections') == -1) {
+                    SDToSave.requirements = SDToSave.purpose;
+                    SDToSave.display = SDToSave.title;
+                    delete SDToSave.purpose;
+                    delete SDToSave.title
+
+                }
+                
+                $http.put(url,SDToSave).then(
                     function(data) {
                         //console.log(data)
                         if (!$scope.initialLM) {
@@ -672,8 +691,16 @@ angular.module("sampleApp")
 
                             $scope.selectedValueSet = data.selectedValueSet;
 
-
-
+                            //if this is a reference, set the initial reference
+                            if (dt == 'Reference') {
+                                var profileUrl =  data.type[0].profile;     //only the first datatype (we only support 1 right now)
+                                $scope.references.entry.forEach(function(ent){
+                                    if (ent.resource.url == profileUrl) {
+                                        $scope.input.referenceFromIg = ent;
+                                        $scope.dt = {code: 'Reference', isReference: true}; //to show the reference...
+                                    }
+                                })
+                            }
                         }
 
                         $scope.checkName = function(){
@@ -709,11 +736,17 @@ angular.module("sampleApp")
                                 vo.selectedValueSet = $scope.selectedValueSet;
                             }
 
+
+
                             //for a reference type...
                             if ($scope.input.dataType.code == 'Reference') {
-                                vo.referenceUri = $scope.input.referenceFromIg.resource.url;
+                                //vo.referenceUri = $scope.input.referenceFromIg.resource.url;
+                                vo.type[0].profile = $scope.input.referenceFromIg.resource.url;
+                                vo.type[0].targetProfile = $scope.input.referenceFromIg.resource.url;   //not quite sure why we need both...
                                 console.log($scope.input.referenceFromIg)
                             }
+
+
 
                             switch ($scope.input.multiplicity) {
                                 case 'mult' :
@@ -908,6 +941,15 @@ angular.module("sampleApp")
 
                     })
                 };
+
+
+            //insert an external model into the
+            $scope.insertModel = function () {
+
+                //delete $scope.selectedNode;
+
+                logicalModelSvc.insertModel($scope.selectedNode,$scope.treeData )
+            }
 
             $scope.deleteNode = function() {
 
