@@ -31,10 +31,6 @@ var auth = {
 }
 
 
-
-//var app = connect();
-
-
 process.on('uncaughtException', function(err) {
     console.log('>>>>>>>>>>>>>>> Caught exception: ' + err);
 });
@@ -44,6 +40,17 @@ var port = process.env.port;
 if (! port) {
     port=80;
 }
+
+//if the port was passed in on a command line
+process.argv.forEach(function (val, index) {
+    //console.log(index + ': ' + val);
+    if (val == '-p') {
+        port = process.argv[index+1];
+    }
+
+});
+
+
 
 var MongoClient = require('mongodb').MongoClient;
 MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
