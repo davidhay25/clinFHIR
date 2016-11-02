@@ -1577,7 +1577,7 @@ angular.module("sampleApp")
         if (vs) {
 
             //if the ValueSet has compose.include element/s, then chances are that the expansion won't work. We have to do it ourselves...
-            if (vs.resource && vs.resource.compose && vs.resource.compose.include) {
+            if (vs.resource && vs.resource.compose && vs.resource.compose.include  && 1==2) {
                 //first, create an array with all of the composed concepts...
                 var ar = [];
                 vs.resource.compose.include.forEach(function(inc){
@@ -1587,11 +1587,14 @@ angular.module("sampleApp")
                 //now create a filtered return array
                 text = text.toLowerCase();
                 var returnArray = []
-                ar.forEach(function(item){
-                    if (item.display && item.display.toLowerCase().indexOf(text)> -1) {
-                        returnArray.push(item)
-                    }
-                });
+                if (ar && ar.length > 0) {
+                    ar.forEach(function(item){
+                        if (item.display && item.display.toLowerCase().indexOf(text)> -1) {
+                            returnArray.push(item)
+                        }
+                    });
+                }
+
 
 
 
