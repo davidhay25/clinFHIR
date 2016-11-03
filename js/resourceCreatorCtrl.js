@@ -603,6 +603,8 @@ angular.module("sampleApp")
         $translate.use('en')
     };
 
+
+
     //load existing data for the current patient
     function loadPatientDetails(cb) {
         $scope.hasVitals = false;
@@ -3117,6 +3119,10 @@ console.log(profile)
 
                     $scope.cancel = function () {
                         $scope.$close();
+                    }
+
+                    $scope.checkIdentifier = function (identifier) {
+                        alert(identifier)
                     }
 
                 },

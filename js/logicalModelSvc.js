@@ -172,6 +172,23 @@ angular.module("sampleApp")
                         if (ed.type && ed.type[0].profile) {
                             item.data.referenceUri = ed.type[0].profile
                         }
+
+
+                        //determine if this is a coded or a reference type
+                        if (ed.type) {
+                            ed.type.forEach(function(typ){
+                                if (['CodeableConcept','Coding','code'].indexOf(typ.code) > -1) {
+                                    item.data.isCoded = true;
+                                }
+
+                                if (typ.code == 'Reference') {
+                                    item.data.isReference = true;
+                                }
+
+                            })
+                        }
+
+
                         
                         item.data.min = ed.min;
                         item.data.max = ed.max;

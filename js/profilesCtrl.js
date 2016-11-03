@@ -45,7 +45,7 @@ angular.module("sampleApp")
 
             $rootScope.$on('userLoggedIn',function(){
                 var userProfile = $rootScope.userProfile;
-                console.log(userProfile)
+               // console.log(userProfile)
                 if (userProfile.extDef && userProfile.extDef.defaultPublisher) {
                     $scope.input = {param:userProfile.extDef.defaultPublisher,searchParam:'publisher',searchStatus:'all'};
 

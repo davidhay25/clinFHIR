@@ -222,7 +222,7 @@
             </div>
 
             <uib-tabset ng-show="treeData.length > 0">
-                <uib-tab heading="Designer"/>
+                <uib-tab heading="Designer">
                     <br/>
 
                     <span class="pull-right">
@@ -256,7 +256,7 @@
 
                 </uib-tab>
 
-                <uib-tab heading="Mapping report">
+                <uib-tab heading="Mapping">
                     <br/>
                     <table class="table table-bordered table-condensed">
                         <tr><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th><th>Mapping notes</th></tr>
@@ -275,17 +275,63 @@
 
                 </uib-tab>
 
-                <uib-tab heading="Json">
-                    <pre>{{SD | json}}</pre>
+                <uib-tab heading="Coded">
+                    <br/>
+                    <table class="table table-bordered table-condensed">
+                        <tr><th>Element</th><th>ValueSet</th><th>Description</th></tr>
+                        <tr ng-repeat="row in treeData" ng-show="row.data.isCoded">
+                            <td>
+
+                                <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
+                            </td>
+                            <td>{{row.data.selectedValueSet.vs.url}}</td>
+                            <td>{{row.data.description}}</td>
+
+                        </tr>
+                    </table>
                 </uib-tab>
+
+                <uib-tab heading="References">
+                    <br/>
+                    <table class="table table-bordered table-condensed">
+                        <tr><th>Element</th><th>Referenced Model</th><th>Description</th></tr>
+                        <tr ng-repeat="row in treeData" ng-show="row.data.isReference">
+                            <td>
+                                <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
+                            </td>
+                            <td>{{row.data.referenceUri | getLogicalID}}</td>
+                            <td>{{row.data.description}}</td>
+
+                        </tr>
+                    </table>
+                </uib-tab>
+
+
+
+
                 <uib-tab heading="Errors" ng-show="error">
                     <pre>{{error | json}}</pre>
                 </uib-tab>
-                <uib-tab heading="TreeData">
-                    <pre>{{treeData | json}}</pre>
-                </uib-tab>
-            </uib-tabset>
 
+                <uib-tab heading="Dev">
+                    <br />
+                    <uib-tabset>
+
+                        <uib-tab heading="Json">
+                            <pre>{{SD | json}}</pre>
+                        </uib-tab>
+
+                        <uib-tab heading="TreeData">
+                            <pre>{{treeData | json}}</pre>
+                        </uib-tab>
+
+
+                    </uib-tabset>
+                </uib-tab>
+
+
+
+            </uib-tabset>
         </div>
 
 
@@ -543,11 +589,12 @@
 
 
 
-    </div>
+
 
     <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
                 vs-selected="vsSelected"></vs-browser>
 
 </div>
+    </div>
 </body>
 </html>
