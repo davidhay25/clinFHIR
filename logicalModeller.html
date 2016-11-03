@@ -277,18 +277,24 @@
 
                 <uib-tab heading="Coded">
                     <br/>
-                    <table class="table table-bordered table-condensed">
-                        <tr><th>Element</th><th>ValueSet</th><th>Description</th></tr>
-                        <tr ng-repeat="row in treeData" ng-show="row.data.isCoded">
-                            <td>
 
-                                <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
-                            </td>
-                            <td>{{row.data.selectedValueSet.vs.url}}</td>
-                            <td>{{row.data.description}}</td>
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12">
+                            <table class="table table-bordered table-condensed">
+                                <tr><th>Element</th><th>ValueSet</th><th>Description</th></tr>
+                                <tr ng-repeat="row in treeData" ng-show="row.data.isCoded">
+                                    <td>
 
-                        </tr>
-                    </table>
+                                        <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
+                                    </td>
+                                    <td>{{row.data.selectedValueSet.vs.url}}</td>
+                                    <td>{{row.data.description}}</td>
+
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
                 </uib-tab>
 
                 <uib-tab heading="References">

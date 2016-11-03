@@ -239,7 +239,28 @@ angular.module("sampleApp")
 
                         //console.log(graphData)
                         var container = document.getElementById('mmLogicalModel');
-                        $scope.profileNetwork = new vis.Network(container, graphData, {});
+
+                        var options = {
+
+                            edges: {
+                               
+                                smooth: {
+                                    type: 'cubicBezier',
+                                    forceDirection: 'horizontal',
+                                    roundness: 0.4
+                                }
+                            },
+                            layout: {
+                                hierarchical: {
+                                    direction: 'LR',
+                                    nodeSpacing : 35,
+                                    sortMethod:'directed'
+                                }
+                            },
+                            physics:false
+                        };
+
+                        $scope.profileNetwork = new vis.Network(container, graphData, options);
 
                         $scope.profileNetwork.on("click", function (obj) {
                             //console.log(obj)
