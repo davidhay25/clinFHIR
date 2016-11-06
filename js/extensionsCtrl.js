@@ -227,7 +227,7 @@ angular.module("sampleApp")
 console.log(query)
                 $scope.query = query;
 
-                GetDataFromServer.adHocFHIRQuery(query).then(
+                GetDataFromServer.adHocFHIRQueryFollowingPaging(query).then(
                     function(data) {
                         var bundle = data.data;
                         $scope.loading=false;
