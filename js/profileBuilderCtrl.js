@@ -100,7 +100,6 @@ angular.module("sampleApp")
                 var options = {
 
                     edges: {
-
                         smooth: {
                             type: 'cubicBezier',
                             forceDirection: 'horizontal',

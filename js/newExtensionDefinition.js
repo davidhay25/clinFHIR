@@ -432,7 +432,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
 
 
-                if (fhirVersion ==3) {
+                if (fhirVersion ==3 && extensionDefinition.snapshot && extensionDefinition.snapshot.element) {
                     delete extensionDefinition.snapshot.element[0].type;
                 }
 

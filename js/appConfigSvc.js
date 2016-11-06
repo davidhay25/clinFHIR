@@ -15,8 +15,12 @@ angular.module("sampleApp")
         var allResources;       //all resources for the current patient
 
         //the default config for a new browser...
-        var defaultConfig;
+        var defaultConfig = {servers : {}};
+        defaultConfig.lastUpdated='2016-11-05';     //will trigger a reload when this changes
 
+
+        defaultConfig.standardExtensionUrl = {};
+        defaultConfig.standardExtensionUrl.vsDirectConcept = 'http://clinfhir.com/fhir/StructureDefinition/vsDirectConcept';        
 
         var version = {current:'2.0.0',versionHistory:[]}
         
@@ -32,8 +36,8 @@ angular.module("sampleApp")
 
         */
 
-        defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2016-10-27a';
+        //defaultConfig = {servers : {}};
+
         defaultConfig.baseSpecUrl = "http://hl7.org/fhir/";     //the base for spec documentation
         defaultConfig.logLevel = 0;     //0 = no logging, 1 = log to console
         defaultConfig.enableCache = false;  //whether caching is supported

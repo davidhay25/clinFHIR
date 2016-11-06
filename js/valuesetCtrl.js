@@ -48,10 +48,14 @@ angular.module("sampleApp").controller('valuesetCtrl',
             delete $scope.input.directDescription;
 
 
+            //If the system is not snomed, then add an extension to indicate that the VS has had a direct concept added. The resource builder
+            //will iterate through the concepts rather than calling the temrinology server...
+            if (system!== snomedSystem) {
+                var extensionUrl = appConfigSvc.config().standardExtensionUrl.vsDirectConcept;
+                Utilities.addExtensionOnce($scope.vs,extensionUrl,{valueBoolean:true})
+            }
 
-          //  if ($scope.includeElement.concept.length == 0) {
-             //   $scope.vs.compose.include.push($scope.includeElement);
-           // }
+
 
 
            // $scope.includeElement.concept.push({code:$scope.input.directCode,display:$scope.input.directDescription})

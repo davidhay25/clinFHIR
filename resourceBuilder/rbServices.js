@@ -1337,6 +1337,31 @@ console.log(summary);
             return deferred.promise;
 
         },
+        addExtensionOnce : function(resource,url,value) {
+            //add the extension with this url if it does not already exist
+            var found = false;
+            resource.extension = resource.extension || []
+
+            resource.extension.forEach(function(ext){
+                if (ext.url == url) {found = true;}
+            });
+
+            if (! found) {
+                var ext = {url:url}
+                angular.extend(ext,value);
+                resource.extension.push(ext)
+            }
+        },
+        getSingleExtensionValue : function(resource,url) {
+            //return the value of an extension assuming there is only 1...
+            resource.extension = resource.extension || []
+
+            var extension;
+            resource.extension.forEach(function(ext){
+                if (ext.url == url) {extension = ext}
+            });
+            return extension;
+        }
     }
 })
     .service('RenderProfileSvc', function($http,$q,Utilities,ResourceUtilsSvc) {

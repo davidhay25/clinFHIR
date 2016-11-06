@@ -1578,8 +1578,13 @@ angular.module("sampleApp")
     $scope.vsLookup = function(text,vs) {
         if (vs) {
 
+            //the extension that indicates the vs (authored by CF) has direct concepts that are not snomed so can't be expanded
+            var extensionUrl = appConfigSvc.config().standardExtensionUrl.vsDirectConcept;
+            var ext = Utilities.getSingleExtensionValue(vs.resource,extensionUrl)
+            if (ext && ext.valueBoolean) {
+
             //if the ValueSet has compose.include element/s, then chances are that the expansion won't work. We have to do it ourselves...
-            if (vs.resource && vs.resource.compose && vs.resource.compose.include  && 1==2) {
+            //if (vs.resource && vs.resource.compose && vs.resource.compose.include  && 1==2) {
                 //first, create an array with all of the composed concepts...
                 var ar = [];
                 vs.resource.compose.include.forEach(function(inc){
