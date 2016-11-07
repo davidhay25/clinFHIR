@@ -3,7 +3,7 @@ angular.module("sampleApp")
     //also holds the current patient and all their resources...
     //note that the current profile is maintained by resourceCreatorSvc
 
-    .service('logicalModelSvc', function($http,$q,appConfigSvc,GetDataFromServer) {
+    .service('logicalModelSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities) {
 
         var currentUser;
         
@@ -119,6 +119,7 @@ angular.module("sampleApp")
             },
             createTreeArrayFromSD : function(sd) {
                 //generate the array that the tree uses from the StructureDefinition
+                var mappingCommentUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
                 var arTree = [];
                 if (sd && sd.snapshot && sd.snapshot.element) {
 
@@ -141,20 +142,17 @@ angular.module("sampleApp")
                             item.data.header.purpose = sd.purpose || sd.requirements;
                             item.data.header.title = sd.title || sd.display;  
 
-                            item.data.header.extension = sd.extension     //save any extensions...
+                            item.data.header.extension = sd.extension     //save any resource level extensions...
+
+                            //note that mapping node is different in the SD and the ED - but in the same place in the treeData
                             if (sd.mapping && sd.mapping.length > 0) {
+
                                 item.data.header.mapping = sd.mapping[0].comments;
                                 item.data.mapping = sd.mapping[0].comments;     //for the report & summary view...
                             }
                             if (sd.useContext) {
                                 item.header = {type :sd.useContext[0].valueCodeableConcept.code};
                             }
-
-
-                            //var uc = {code : {code:'logicalType',system:'http:www.hl7.org.nz/NamingSystem/logicalModelContext'}};
-                            //uc.useContext.valueCodeableConcept = {code:header.type,'system':'http:www.hl7.org.nz/NamingSystem/logicalModelContextType'}
-                            //sd.useContext = [uc]
-
 
                         } else {
                             //otherwise the parent can be inferred from the path
@@ -172,7 +170,6 @@ angular.module("sampleApp")
                         if (ed.type && ed.type[0].profile) {
                             item.data.referenceUri = ed.type[0].profile
                         }
-
 
                         //determine if this is a coded or a reference type
                         if (ed.type) {
@@ -193,9 +190,22 @@ angular.module("sampleApp")
                         item.data.min = ed.min;
                         item.data.max = ed.max;
 
-                        if (ed.mapping) {
-                            item.data.mapping = ed.mapping[0].map;      //the identity is currently hard coded
+                        if (ed.mapping) {           //the mapping path in the target resource...
+                            var mapItem = ed.mapping[0];    //the actual map - assume only 1...
+                            item.data.mappingPath = mapItem.map;      //the identity is currently hard coded
+                            if (mapItem.extension) {
+                                //there are extensions on this item - find the comment...
+                                var ext = Utilities.getSingleExtensionValue(mapItem,mappingCommentUrl)
+                                if (ext && ext.valueString) {
+                                    item.data.mapping = ext.valueString;
+                                }
+                            }
+                            
+                            
                         }
+
+
+
 
                         item.data.comments = ed.comments;
 
@@ -227,6 +237,7 @@ angular.module("sampleApp")
             makeSD : function(scope,treeData) {
                 //create a StructureDefinition from the treeData
                 var header = treeData[0].data.header || {}      //the first node has the header informatiion
+                var mappingCommentUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
 
                 //todo - this will replace any extensions...
                 var sd = {resourceType:'StructureDefinition'};
@@ -270,11 +281,6 @@ angular.module("sampleApp")
                 sd.type = scope.rootName;
                 sd.derivation = 'specialization';
 
-                //newResource.type = type;
-                //newResource.derivation = 'constraint';
-                //newResource.baseDefinition = "http://hl7.org/fhir/StructureDefinition/"+type;
-                //newResource.keyword = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
-
 
                 sd.snapshot = {element:[]};
 
@@ -289,29 +295,30 @@ angular.module("sampleApp")
                     ed.min=data.min;
                     ed.max = data.max;
                     ed.comments = data.comments;
+                    if (data.mappingPath) {         //the actual path in the target resource
+                        ed.mapping= [{identity:'fhir',map:data.mappingPath}]
+                    }
+
                     if (data.mapping) {
-                        ed.mapping= [{identity:'fhir',map:data.mapping}]
+                        //comments about the mapping - added as an extension to the first mapping node mapping
+                       // var extensionUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
+                        var node = {}
+                        if (ed.mapping) {
+                            node = ed.mapping[0]
+                        }
+
+                        Utilities.addExtensionOnce(node,mappingCommentUrl,{valueString:data.mapping})
+                        ed.mapping = ed.mapping || []
+                        ed.mapping[0] = node;
                     }
 
 
+
                     if (data.type) {
-
-
                         ed.type = [];
                         data.type.forEach(function(typ) {
-                            //actually, there will only ever be one type...
-                            //var typ1 = {code:typ.code,profile:typ.profile};
-
+                            //actually, there will only ever be one type at the moment...
                             ed.type.push(typ);
-
-                        //    if (data.referenceUri) {
-                          //      typ1.profile = data.referenceUri;
-                          //  }
-
-
-                          //  ed.type.push(typ1);
-
-
                         })
                     }
 

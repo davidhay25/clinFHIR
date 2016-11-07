@@ -268,7 +268,13 @@
                             <td>{{ed.type[0].code}}</td>
                             <td>{{ed.min}}..{{ed.max}}</td>
                             <td>{{ed.definition}}</td>
-                            <td>{{ed.mapping[0].map}}</td>
+                            <td>
+                                <div>{{ed.mapping[0].map}}</div>
+                                <div ng-repeat="ext in ed.mapping[0].extension">
+                                    {{ext.valueString}}
+                                </div>
+
+                            </td>
                         </tr>
 
                     </table>
@@ -501,7 +507,7 @@
 
                     <table class="table table-bordered">
                         <!--<tr><td width="20%">Name</td><td>{{selectedNode.data.name}}</td></tr> -->
-                        <tr><td width="20%">Path</td><td>{{selectedNode.data.path}}</td></tr>
+                        <tr><td width="20%">Model path</td><td>{{selectedNode.data.path}}</td></tr>
                         <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
                         <tr><td>Description</td><td>{{selectedNode.data.description}}</td></tr>
                         <tr><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>

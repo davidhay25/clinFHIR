@@ -20,7 +20,12 @@ angular.module("sampleApp")
 
 
         defaultConfig.standardExtensionUrl = {};
-        defaultConfig.standardExtensionUrl.vsDirectConcept = 'http://clinfhir.com/fhir/StructureDefinition/vsDirectConcept';        
+        
+        //if a valueset has concepts entered directly but not in snomed (so terminology services won't expand)
+        defaultConfig.standardExtensionUrl.vsDirectConcept = 'http://clinfhir.com/fhir/StructureDefinition/vsDirectConcept';
+        
+        //comments on the mapping for an element in the ElementDefinition
+        defaultConfig.standardExtensionUrl.edMappingComment = 'http://clinfhir.com/fhir/StructureDefinition/edMappingComment';
 
         var version = {current:'2.0.0',versionHistory:[]}
         

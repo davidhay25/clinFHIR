@@ -794,7 +794,6 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
 
         $scope.showLink = function(){
-//'http://' +
             var urlText = $location.host() + ':' + $location.port() + '/valuesetCreator.html';
             urlText += '?ts='+ $scope.serverRoot;
             if ($scope.vs) {
@@ -810,7 +809,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
             };
 
             modalService.showModal({}, modalOptions)
-        }
+        };
 
 
         //=========== most of these functions are copied from resourceCreatorCtrl. Thre are better ways of reuse !....  ==========
@@ -917,7 +916,6 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
         //use the terminology operation CodeSystem/$lookup to get details of the code / system when manually entered
         $scope.lookupCode = function(system,code) {
-
 
             resourceCreatorSvc.getLookupForCode(system,code).then(
                 function(data) {

@@ -683,6 +683,8 @@ angular.module("sampleApp")
                             $scope.input.description = data.description;
                             $scope.input.comments = data.comments;
                             $scope.input.mapping = data.mapping;
+                            $scope.input.mappingPath = data.mappingPath;
+
                             if (data.min == 0) {
                                 $scope.input.multiplicity = 'opt';
                                 if (data.max == '*') {$scope.input.multiplicity = 'mult'}
@@ -749,6 +751,7 @@ angular.module("sampleApp")
                             vo.description = $scope.input.description || 'definition';
                             vo.comments = $scope.input.comments;
                             vo.mapping = $scope.input.mapping;
+                            vo.mappingPath = $scope.input.mappingPath;
                             vo.type = [{code:$scope.input.dataType.code}];
                             vo.editNode = editNode;
                             vo.parentPath = parentPath;

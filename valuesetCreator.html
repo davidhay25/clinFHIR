@@ -123,46 +123,16 @@
                         <form class="navbar-form navbar-right" ng-hide="vs || state=='new'">
                             <button popover-placement="bottom" popover-trigger='mouseenter'
                                     uib-popover="Create a new ValueSet"
-                                    class="btn btn-primary" ng-click="newVs()">New</button>
+                                    class="btn btn-default" ng-click="newVs()">New ValueSet</button>
 
-                           <!-- <button
-                                    class="btn btn-primary" ng-click="cheat()">Cheat</button> -->
+
                         </form>
                     </div>
 
 
 
                 </div>
-<!--
-                <div class="col-md-1 col-sm-1">
 
-                    <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
-                        <li uib-dropdown>
-                            <a href="#" uib-dropdown-toggle>
-                                <span style="font-size:2em; cursor: pointer">
-                                    <i class="glyphicon glyphicon-cog"></i>
-                                </span>
-                            </a>
-
-                            <ul class="dropdown-menu" role="menu">
-                                <li ng-show="(vs && (state=='new' || state=='edit')) ">
-                                    <a href="#" ng-click="copyVs()">Copy ValueSet to another Server</a>
-                                </li>
-                                <li class="divider"></li>
-                                <li >
-                                    <a href="#" ng-click="copyVs()">Copy ValueSet to another Server</a>
-                                </li>
-
-                                <li>
-                                    <a href="#" ng-click="showLink()">Show link</a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-
-                </div>
-
-                -->
             </div>
         </nav>
 
@@ -191,15 +161,16 @@
                     <br /><br />
                     Alternatively, click the 'New' button at the top right to create a new ValueSet.
 
-
                 </div>
-
+<!--
                 <div uib-alert class="alert-warning" ng-hide="searchResultBundle.entry">
                     <p>Right now, the tool will find and expand any valueset, but when creating a valueset will only
                     work with SNOMED, and requires an STU-3 compatible Terminology server that stores the ValueSets.</p>
                     <p>However, once a ValueSet has been created, it can be copied to any FHIR server.</p>
 
                 </div>
+
+                -->
 
 
 

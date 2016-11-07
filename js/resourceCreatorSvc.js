@@ -2342,11 +2342,12 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             if (part.name == 'code') {
                                 code = part.valueCode;
                             } else if (part.name == 'value') {
-                                value = part.valueString;
+                                value = part.valueString || part.valueCode;
                             } else if (part.name == 'description') {
-                                description = part.valueString;
+                                description = part.valueString || part.valueCode;
                             }
-                        })
+                        });
+
                         //now see what we've got in this parameter...
 
                         switch (code) {
