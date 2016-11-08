@@ -2720,6 +2720,7 @@ console.log(profile)
         }
 
         //loads the configuration for a project. Actually loads the user config as I have plans to extend...
+        /*
         $scope.setProjectDEP = function() {
             
             appConfigSvc.loadUserConfig().then(
@@ -2744,6 +2745,7 @@ console.log(profile)
                 }
             )
         }
+        */
 
 
         //tests that the server is available by retrieving the conformance resource

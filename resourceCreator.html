@@ -248,7 +248,7 @@
     <script src="js/components/extensionDirective.js"></script>
     <script src="js/components/edDirectives.js"></script>
     <script src="js/newProfile.js"></script>
-    <title>FHIR Resource Creator</title>
+    <title>clinFHIR</title>
 
     <style type="text/css">
         #mynetwork {
@@ -473,16 +473,24 @@
                                                popover-placement="left"
                                                popover-trigger="'mouseenter'">{{'MENU.QUERYSERVERS'|translate}}</a>
                                         </li>
+                                        <li class="divider"></li>
 
-<!--
-                                        <li>
-                                            <a href="#" ng-click="newExtension()"
-                                               uib-popover="Create a new Extension Definition"
+                                        <li ng-show="showLogicalModeller()" >
+                                            <a href="logicalModeller.html" target="_blank"
+                                               uib-popover="Load the LogicalModeller"
                                                popover-placement="left"
-                                               popover-trigger="'mouseenter'">Extension editor
-                                                </a>
+                                               popover-trigger="'mouseenter'">Logical modeller
+                                                <img class="pull-right" src="icons/external.png"/> </a>
                                         </li>
--->
+
+                                        <li>
+                                            <a href="valuesetCreator.html" target="_blank"
+                                               uib-popover="Load the ValueSet editor"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">ValueSet editor
+                                                <img class="pull-right" src="icons/external.png"/> </a>
+                                        </li>
+
                                         <li>
                                             <a href="#" ng-click="changeDisplayMode('extensions')"
                                                uib-popover="Find and create Extension definitions"
@@ -499,22 +507,10 @@
                                             </a>
                                         </li>
 
-                                        <li>
-                                            <a href="valuesetCreator.html" target="_blank"
-                                               uib-popover="Load the ValueSet editor"
-                                               popover-placement="left"
-                                               popover-trigger="'mouseenter'">ValueSet editor
-                                                <img class="pull-right" src="icons/external.png"/> </a>
-                                        </li>
 
 
-                                        <li ng-show="showLogicalModeller()" >
-                                            <a href="logicalModeller.html" target="_blank"
-                                               uib-popover="Load the LogicalModeller"
-                                               popover-placement="left"
-                                               popover-trigger="'mouseenter'">Logical modeller
-                                                <img class="pull-right" src="icons/external.png"/> </a>
-                                        </li>
+
+
 
                                         <!-- has the same server requirements as logical modeller-->
                                         <li ng-show="showLogicalModeller()" >

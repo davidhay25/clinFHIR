@@ -96,13 +96,15 @@
                             <button class="btn btn-danger" ng-click="save()">Save</button>
                         </form>
 
+
                         <!-- Show 'back to list' when where's a list, anda valueset has been selected from that list-->
+                        <!-- not sure if we need this...
                         <form class="navbar-form navbar-right" ng-show="(vs && searchResultBundle.entry.length >0) || state=='new' ">
                             <button popover-placement="bottom" popover-trigger='mouseenter'
                                     uib-popover="Find a ValueSet"
                                     class="btn btn-success" ng-click="backToList()">Find</button>
                         </form>
-
+-->
                         <!-- Show 'clone' when there is a vs that cannot be edited (was copy(-->
                         <form class="navbar-form navbar-right" ng-show="(vs && ! canEdit) ">
                             <button popover-placement="bottom" popover-trigger='mouseenter'

@@ -5,16 +5,23 @@ angular.module("sampleApp").controller('vsFinderCtrl',
         $scope.input = {};
 
         var config = appConfigSvc.config();
-        $scope.termServer = config.servers.terminology;
+        $scope.termServer = appConfigSvc.getCurrentTerminologyServer().url;//  config.servers.terminology;
         //$scope.valueSetRoot = config.servers.terminology + "ValueSet/";
 
         $scope.input.arStrength = ['extensible','preferred','example'];
+
         $scope.input.strength = currentBinding.strength;
         $scope.input.description = currentBinding.description;
 
 
-        $scope.select = function() {
+        $scope.selectVSForDisplay = function(vs){
+            $scope.input.vspreview=vs;
+            delete $scope.expansion;
+            delete $scope.input.filter;
+            delete $scope.queryError;
+        }
 
+        $scope.select = function() {
             $scope.$close({vs: $scope.input.vspreview,strength:$scope.input.strength,description : $scope.input.description});
         };
 
@@ -26,7 +33,8 @@ angular.module("sampleApp").controller('vsFinderCtrl',
             
             var url = $scope.termServer+"ValueSet?name="+filter;
             $scope.showWaiting = true;
-            GetDataFromServer.adHocFHIRQuery(url).then(
+            GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
+            //GetDataFromServer.adHocFHIRQuery(url).then(
                 function(data){
                     $scope.searchResultBundle = data.data;
                     if (! data.data || ! data.data.entry || data.data.entry.length == 0) {
@@ -41,6 +49,34 @@ angular.module("sampleApp").controller('vsFinderCtrl',
             })
         };
         
-        
+
+        $scope.showExpansion = function(id,filter) {
+            delete $scope.expansion;
+            delete $scope.queryError;
+            var qry = $scope.termServer+"ValueSet/"+id + "/$expand";
+            if (filter) {
+                qry = $scope.termServer+ "ValueSet/"+  id + "/$expand?filter="+filter;
+            }
+
+            $scope.query = qry;
+            $scope.showWaiting = true;
+            GetDataFromServer.adHocFHIRQuery(qry).then(
+                function(data) {
+                    console.log(data)
+                    $scope.expansion = data.data.expansion;
+                },
+                function(err){
+                    //alert(angular.toJson(err))
+
+                    $scope.queryError = err.data;
+
+
+                }
+            ).finally(function(){
+                $scope.showWaiting = false;
+            });
+        }
+
+
     }
 );

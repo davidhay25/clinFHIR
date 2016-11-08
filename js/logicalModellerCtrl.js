@@ -809,7 +809,13 @@ angular.module("sampleApp")
                                 keyboard: false,       //same as above.
                                 templateUrl: 'modalTemplates/vsFinder.html',
                                 size: 'lg',
-                                controller: function ($scope, appConfigSvc, GetDataFromServer) {
+                                controller: 'vsFinderCtrl',
+                                resolve  : {
+                                    currentBinding: function () {          //the default config
+                                        return {};
+                                    }
+                                },
+                                controllerDEP: function ($scope, appConfigSvc, GetDataFromServer) {
                                     //this code is all from vsFinderCtrl controller - for some reason I can't reference it from here...
                                     //and newExtensionDefinition
                                     $scope.input = {};
@@ -837,7 +843,9 @@ angular.module("sampleApp")
 
                                         var url = $scope.termServer + "ValueSet?name=" + filter;
                                         $scope.showWaiting = true;
-                                        GetDataFromServer.adHocFHIRQuery(url).then(
+
+                                        GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
+                                        //GetDataFromServer.adHocFHIRQuery(url).then(
                                             function (data) {
                                                 $scope.searchResultBundle = data.data;
                                                 if (!data.data || !data.data.entry || data.data.entry.length == 0) {

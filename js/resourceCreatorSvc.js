@@ -806,15 +806,14 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         buildResource: function (type, treeObject, treeData, config) {
             //create the sample resource...
-            //console.log(treeData);
-            //console.log(treeObject);
+
             var resource = {resourceType: type, text: ""};
             if (config.profile) {
                 resource.meta = resource.meta || {};
                 resource.meta.profile = config.profile      //assume this is an array...
             }
 
-            //resource.extension=[]
+
             //create an object hash of the treeData
             var treeHash = {};
             for (var i = 0; i < treeData.length; i++) {

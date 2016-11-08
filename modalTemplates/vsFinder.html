@@ -49,15 +49,18 @@
 
                 <ul class="list-group">
                     <li class="list-group-item" ng-repeat="entry in searchResultBundle.entry" style="margin-bottom: 5px">
-                        <div class="row">
-                            <div class="col-md-9 col-sm-9">
+
+                        <div class="row" ng-click="selectVSForDisplay(entry.resource)" style="cursor: pointer">
+                            <div class="col-md-12 col-sm-12">
                                 <!--<div><strong>{{entry.resource.id}}</strong></div>-->
                                 {{entry.resource.name}}
                                 <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>
                             </div>
+                            <!--
                             <div class="col-md-3 col-sm-3">
-                                <button class="btn btn-link" ng-click="input.vspreview=entry.resource">Select</button>
+                                <button class="btn btn-link" >Select</button>
                             </div>
+                            -->
                         </div>
 
                     </li>
@@ -68,6 +71,9 @@
             </div>
             <div class="col-md-7 col-sm-7">
                 <div ng-show="input.vspreview">
+
+                    <div class="banner"> {{input.vspreview.url}}</div>
+
                     <div class="row">
                         <div class="col-sm-4 col-md-4">
                             <strong>Binding Strength</strong>
@@ -80,6 +86,7 @@
 
                         </div>
                     </div>
+                    <br/>
                     <div class="row">
                         <div class="col-sm-4 col-md-4">
                             <strong>Description</strong>
@@ -93,9 +100,39 @@
                     </div>
 
 
-
+                    <hr/>
                 </div>
-                <pre ng-show="input.vspreview">{{input.vspreview | json}}</pre>
+
+                <uib-tabset ng-show="input.vspreview">
+                    <uib-tab heading="Json">
+                        <br />
+                        <pre ng-show="input.vspreview">{{input.vspreview | json}}</pre>
+                    </uib-tab>
+                    <uib-tab heading="Expand">
+                        <br/>
+                        <div class="row">
+                            <div class="col-sm-8 col-md-8">
+                                <input type="text" class="form-control" placeholder="Filter text" ng-model="input.filter">
+                            </div>
+                            <div class="col-sm-4 col-md-4">
+                                <button class="btn btn-link" ng-click="showExpansion(input.vspreview.id,input.filter)">Expand</button>
+                            </div>
+                        </div>
+                        <br/>
+                        {{queryDEP}}
+                        <table class="table table-bordered">
+                            <tr ng-repeat="item in expansion.contains">
+                                <td>{{item.code}}</td>
+                                <td>{{item.display}}</td>
+                            </tr>
+                        </table>
+                        <div class="alert alert-info" ng-show="queryError">{{queryError}}</div>
+
+                    </uib-tab>
+                </uib-tabset>
+
+
+
             </div>
         </div>
 

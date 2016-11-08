@@ -387,7 +387,7 @@ angular.module("sampleApp")
                 for (var i=0; i < $localStorage.recentProfile.length; i++) {
                     var recent = $localStorage.recentProfile[i];
                     if (recent.profile.url == url && recent.serverUrl == conformanceServerUrl) {
-                        recent.profile = profile;       //<<<< here is where the replacement occurs...
+                     // nov-8 2016  recent.profile = profile;       //<<<< here is where the replacement occurs...
                         alreadyThere = i;
                         break;
                     }
