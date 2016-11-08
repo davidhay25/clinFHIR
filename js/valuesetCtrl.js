@@ -196,7 +196,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
 
         //----- changing the terminology server...  This will update the local preference store...
-        $scope.changeTerminologyServer = function(svr){
+        $scope.changeTerminologyServerDEP = function(svr){
             appConfigSvc.setServerType('terminology',svr.url);  //set the new terminology server in $localStorage...
 
             $scope.serverRoot = svr.url;

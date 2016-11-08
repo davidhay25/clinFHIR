@@ -376,25 +376,33 @@ angular.module("sampleApp")
                 $localStorage.recentPatient =newList;
 
             },
-            addToRecentProfile : function(profile) {
+            addToRecentProfile : function(profile,overwrite) {
                 //add to the list of recent profiles...
                 //replace any existing one - (changes may connectathon)
                 var conformanceServerUrl = $localStorage.config.servers.conformance;
                 
                 $localStorage.recentProfile = $localStorage.recentProfile || [];
-                var alreadyThere = false;
+                var alreadyThere = -1;
                 var url = profile.url;
                 for (var i=0; i < $localStorage.recentProfile.length; i++) {
                     var recent = $localStorage.recentProfile[i];
                     if (recent.profile.url == url && recent.serverUrl == conformanceServerUrl) {
                         recent.profile = profile;       //<<<< here is where the replacement occurs...
-                        alreadyThere = true;
+                        alreadyThere = i;
                         break;
                     }
                 }
 
-                if (! alreadyThere) {
+
+                if (alreadyThere == -1) {
+                    //a new profile
                     $localStorage.recentProfile.push({profile:profile,serverUrl:conformanceServerUrl});
+                } else {
+                    //already in the cache - can I overwrite
+                    if (overwrite) {
+                        //yes...
+                        $localStorage.recentProfile[alreadyThere] = {profile:profile,serverUrl:conformanceServerUrl};
+                    }
                 }
                 
             },

@@ -59,7 +59,7 @@
 
                 <div class="col-md-2 col-sm-2">
                     <div class="navbar-text">
-                    <select class="form-control" ng-change="changeTerminologyServer(termServer)"
+                    <select disabled="disabled"  class="form-control" ng-change="changeTerminologyServer(termServer)"
                             ng-options="value.name for value in terminologyServers track by value.name"
                             ng-model="termServer"></select>
 
@@ -162,15 +162,7 @@
                     Alternatively, click the 'New' button at the top right to create a new ValueSet.
 
                 </div>
-<!--
-                <div uib-alert class="alert-warning" ng-hide="searchResultBundle.entry">
-                    <p>Right now, the tool will find and expand any valueset, but when creating a valueset will only
-                    work with SNOMED, and requires an STU-3 compatible Terminology server that stores the ValueSets.</p>
-                    <p>However, once a ValueSet has been created, it can be copied to any FHIR server.</p>
 
-                </div>
-
-                -->
 
 
 

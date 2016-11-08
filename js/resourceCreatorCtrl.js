@@ -2851,7 +2851,7 @@ console.log(profile)
                 backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
                 keyboard: false,       //same as above.
                 templateUrl: 'modalTemplates/searchForPatient.html',
-                size:'lg',
+                //size:'lg',
                 controller: function($scope,ResourceUtilsSvc,supportSvc,$q,modalService,appConfigSvc){
                     
                     $scope.input={mode:'find',gender:'male'};   //will be replaced by name randomizer

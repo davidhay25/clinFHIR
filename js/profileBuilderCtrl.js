@@ -485,13 +485,21 @@ angular.module("sampleApp")
         $rootScope.$broadcast('setWaitingFlag',true);
         profileCreatorSvc.saveNewProfile(name,$scope.model,$scope.frontPageProfile,isEdit).then(
             function(vo) {
-                alert(angular.toJson(vo.log))
+                //vo is an array of messages as as one time extension defs could be created automatically...
+                modalService.showModal({}, {bodyText: vo.log[0]})
+
+                //alert(angular.toJson(vo.log))
                 //now add to the list of profiles...
-                console.log(vo)
+                //console.log(vo)
                 var clone = angular.copy(vo.profile);
-                appConfigSvc.addToRecentProfile(clone);
+                appConfigSvc.addToRecentProfile(clone,true);  //add to the list, replacing any existing..
                 //resourceCreatorSvc.setCurrentProfile(clone);
                 $scope.recent.profile = appConfigSvc.getRecentProfile();    //re-establish the recent profile list
+
+                //added tuesday nov-8
+                $rootScope.$emit('profileSelected',clone);      //will cause the builder to be set up for the seelcted profile...
+
+
                 closeTheProfileEditor();    //close the editor and re-display the front page
 
             },

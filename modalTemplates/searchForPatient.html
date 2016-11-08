@@ -4,7 +4,11 @@
         <div class="row">
             <div class="col-md-8 col-sm-8">
 
-                <h3 ng-hide="resourceType == 'Resource'" class="modal-title">Search for Patient</h3>
+                <h3 ng-hide="resourceType == 'Resource'" class="modal-title">
+                    <div ng-show="input.mode=='find'">Search for Patient</div>
+                    <div ng-show="input.mode=='new'">Add new Patient</div>
+
+                </h3>
 
             </div>
 
@@ -34,7 +38,7 @@
                            placeholder="Enter name for patient search">
                 </div>
                 <div class="col-md-2">
-                    <button class="btn btn-primary" ng-click="searchForPatient(input.searchPatientName)">Search</button>
+                    <button class="btn btn-link" ng-click="searchForPatient(input.searchPatientName)">Search</button>
                     <!--
                     <span><i class="glyphicon glyphicon-search" ng-click="searchForPatient(input.searchPatientName)"></i></span>
                     -->
@@ -47,7 +51,7 @@
                            placeholder="Enter Id of patient on this server">
                 </div>
                 <div class="col-md-2">
-                    <button class="btn btn-primary" ng-click="loadPatient(input.patientId)">Load</button>
+                    <button class="btn btn-link" ng-click="loadPatient(input.patientId)">Load</button>
                     <!--
                     <span><i class="glyphicon glyphicon-search" ng-click="searchForPatient(input.searchPatientName)"></i></span>
                     -->
@@ -86,7 +90,7 @@
 
 
             <form ng-hide = "showLog" class="form-horizontal" role="form">
-
+<!--
                 <div class="form-group">
                     <label class="col-md-3 control-label">Identifier</label>
                     <div class="col-md-3">
@@ -94,16 +98,16 @@
                         <div>{{identifierCheckMessage}}</div>
                     </div>
                 </div>
-
+-->
                 <div class="form-group">
                     <label class="col-md-3 control-label">First Name</label>
-                    <div class="col-md-3">
+                    <div class="col-md-6">
                         <input class="form-control" type="text" ng-model="input.fname"/>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-md-3 control-label">Last Name</label>
-                    <div class="col-md-3">
+                    <div class="col-md-6">
                         <input class="form-control" type="text" ng-model="input.lname"/>
                     </div>
                 </div>
