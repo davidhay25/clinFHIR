@@ -18,7 +18,7 @@ angular.module("sampleApp")
             var lid = ar[ar.length-1];
             return lid;
         } else {
-            return [];
+            return "" ; //nov 11 - was returning an array
         }
 
     }

@@ -120,6 +120,8 @@ angular.module("sampleApp")
             createTreeArrayFromSD : function(sd) {
                 //generate the array that the tree uses from the StructureDefinition
                 var mappingCommentUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
+                var mapToModelExtensionUrl = appConfigSvc.config().standardExtensionUrl.mapToModel;
+
                 var arTree = [];
                 if (sd && sd.snapshot && sd.snapshot.element) {
 
@@ -179,7 +181,7 @@ angular.module("sampleApp")
                                 }
 
                                 if (typ.code == 'Reference') {
-                                    item.data.isReference = true;
+                                    item.data.isReference = true;   //used to populate the 'is reference' table...
                                 }
 
                             })
@@ -199,6 +201,15 @@ angular.module("sampleApp")
                                 if (ext && ext.valueString) {
                                     item.data.mapping = ext.valueString;
                                 }
+
+                                var ext1 = Utilities.getSingleExtensionValue(mapItem,mapToModelExtensionUrl)
+                                if (ext1 && ext1.valueUri) {
+                                    item.data.mapToModelUrl = ext1.valueUri;
+                                    item.data.referenceUri = ext1.valueUri;     //for the table dsplay...
+                                    item.data.isReference = true;   //this element references another model
+                                }
+
+
                             }
                             
                             
@@ -238,6 +249,9 @@ angular.module("sampleApp")
                 //create a StructureDefinition from the treeData
                 var header = treeData[0].data.header || {}      //the first node has the header informatiion
                 var mappingCommentUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
+                var mapToModelExtensionUrl = appConfigSvc.config().standardExtensionUrl.mapToModel;
+
+
 
                 //todo - this will replace any extensions...
                 var sd = {resourceType:'StructureDefinition'};
@@ -265,6 +279,7 @@ angular.module("sampleApp")
                 sd.keyword = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
 
                 if (header.mapping) {
+                    //mapping comments for the target resource as a whole...
                     sd.mapping = [{identity:'fhir',name:'Model Mapping',comments:header.mapping}]
                 }
 
@@ -301,17 +316,40 @@ angular.module("sampleApp")
 
                     if (data.mapping) {
                         //comments about the mapping - added as an extension to the first mapping node mapping
-                       // var extensionUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
-                        var node = {}
+                        var mappingNode = {}
                         if (ed.mapping) {
-                            node = ed.mapping[0]
+                            //just in case there is more than on emapping
+                            mappingNode = ed.mapping[0]
+                        } else {
+                            ed.mapping = []
                         }
 
-                        Utilities.addExtensionOnce(node,mappingCommentUrl,{valueString:data.mapping})
-                        ed.mapping = ed.mapping || []
-                        ed.mapping[0] = node;
+                        //adds an extension of this url once only to the specified node
+                        Utilities.addExtensionOnce(mappingNode,mappingCommentUrl,{valueString:data.mapping})
+                        //ed.mapping = ed.mapping || []
+                        ed.mapping[0] = mappingNode;
                     }
 
+                    
+                    if (data.mapToModelUrl) {
+                        //this element will actually be mapped to another model (eventually another profile)
+                        //also added as an extension to the first mapping node mapping
+                        var mapToModelNode = {}
+                        if (ed.mapping) {
+                            mapToModelNode = ed.mapping[0]
+                        } else {
+                            ed.mapping = []
+                        }
+
+                        //adds an extension of this url once only to the specified node
+                        Utilities.addExtensionOnce(mapToModelNode,mapToModelExtensionUrl,{valueUri:data.mapToModelUrl})
+                        ed.mapping = ed.mapping || []
+                        ed.mapping[0] = mapToModelNode;
+
+
+
+
+                    }
 
 
                     if (data.type) {

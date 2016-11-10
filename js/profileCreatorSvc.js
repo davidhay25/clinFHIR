@@ -375,6 +375,10 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                             }
 
+                            if (!text) {
+                                text = 'Unknown element'
+                            }
+
                             var dataType = '';
                             if (item.type) {
                                 item.type.forEach(function (it){

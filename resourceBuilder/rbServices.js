@@ -1337,6 +1337,7 @@ console.log(summary);
             return deferred.promise;
 
         },
+
         addExtensionOnce : function(resource,url,value) {
             //add the extension with this url if it does not already exist
             var found = false;

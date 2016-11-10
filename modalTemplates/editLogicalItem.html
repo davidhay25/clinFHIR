@@ -139,7 +139,12 @@
                 <div class="row">
                     <div class="col-md-4 col-sm-4">
                         <div><label>Mapping path</label></div>
-                        <input type="text" class="form-control" ng-model="input.mappingPath" placeholder="path in the traget resource">
+                        <input type="text" class="form-control" ng-model="input.mappingPath" placeholder="path in the target resource">
+
+                        <div><label>Map to model</label></div>
+                        <select  class="form-control" ng-model="input.mapToModelEnt"
+                                 ng-options="entry.resource.name for entry in references.entry"></select>
+
                     </div>
                     <div class="col-md-8 col-sm-8">
                         <div><label>Mapping notes</label></div>

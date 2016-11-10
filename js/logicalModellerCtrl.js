@@ -668,9 +668,7 @@ angular.module("sampleApp")
                         $scope.pathDescription = 'Parent path';
                         $scope.vsInGuide = igSvc.getResourcesInGuide('valueSet');       //so we can show the list of ValueSets in the IG
                         $scope.input = {};
-                        //$scope.input.name = 'NewElement';
-                        //$scope.input.short='This is a new element';
-                        //$scope.input.description = 'detailed notes about the element'
+
                         $scope.input.dataType = $scope.allDataTypes[0];
                         $scope.input.multiplicity = 'opt';
 
@@ -724,6 +722,17 @@ angular.module("sampleApp")
                                     }
                                 })
                             }
+
+                            //this is the url of the model that this item (and it's children) will map to
+                            if (data.mapToModelUrl) {
+                                $scope.references.entry.forEach(function(ent){
+                                    if (ent.resource.url == data.mapToModelUrl) {
+                                        $scope.input.mapToModelEnt = ent;
+                                        //$scope.dt = {code: 'Reference', isReference: true}; //to show the reference...
+                                    }
+                                })
+                            }
+
                         }
 
                         $scope.checkName = function(){
@@ -760,14 +769,25 @@ angular.module("sampleApp")
                                 vo.selectedValueSet = $scope.selectedValueSet;
                             }
 
+                            if ($scope.input.mapToModelEnt && $scope.input.mapToModelEnt.resource) {
+                                //this element is mapped to another model (eventually a profile)
+                                vo.isReference = true;
+                                vo.referenceUri = $scope.input.mapToModelEnt.resource.url; // for the reference table...
+                                vo.mapToModelUrl = $scope.input.mapToModelEnt.resource.url;        //this is the actual model being references
+                            }
 
 
                             //for a reference type...
                             if ($scope.input.dataType.code == 'Reference') {
                                 //vo.referenceUri = $scope.input.referenceFromIg.resource.url;
-                                vo.type[0].profile = $scope.input.referenceFromIg.resource.url;
-                                vo.type[0].targetProfile = $scope.input.referenceFromIg.resource.url;   //not quite sure why we need both...
-                                console.log($scope.input.referenceFromIg)
+                                if ($scope.input.referenceFromIg) {
+                                    vo.isReference = true;
+                                    vo.referenceUri = $scope.input.referenceFromIg.resource.url; // for the reference table...
+                                    vo.type[0].profile = $scope.input.referenceFromIg.resource.url;
+                                    vo.type[0].targetProfile = $scope.input.referenceFromIg.resource.url;   //not quite sure why we need both...
+                                    console.log($scope.input.referenceFromIg)
+                                }
+
                             }
 
 
@@ -1076,6 +1096,7 @@ angular.module("sampleApp")
 
                 //console.log($scope.treeData);
 
+                //sorts the tree array in parent/child order
                 var ar = logicalModelSvc.reOrderTree($scope.treeData);
 
                 //$scope.SD = logicalModelSvc.makeSD($scope,$scope.treeData);
