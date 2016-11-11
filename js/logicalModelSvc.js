@@ -22,6 +22,32 @@ angular.module("sampleApp")
             getCurrentUser : function(){
                 return currentUser;
             },
+            getAllPathsForType : function(typeName){
+                //return all the possible paths for a base type...
+                var deferred = $q.defer();
+                var url = "http://hl7.org/fhir/StructureDefinition/"+typeName;
+
+                GetDataFromServer.findConformanceResourceByUri(url).then(
+                    function(SD){
+                        if (SD && SD.snapshot && SD.snapshot.element) {
+                            var lst = []
+                            SD.snapshot.element.forEach(function(ed) {
+                                lst.push(ed.path)
+                            })
+                            deferred.resolve(lst)
+                        }
+
+
+                    },function(err) {
+                        alert("error qith query: "+url + "\n"+angular.toJson(err));
+                        deferred.reject();
+                    }
+                )
+                return deferred.promise;
+
+
+
+            },
             createFromBaseType : function(treeData,typeName,rootName) {
               //create a model from the base type, only bringing across stuff we want.
                 //todo - very similar to the logic in createTreeArrayFromSD() - ?call out to separate function...
@@ -121,6 +147,7 @@ angular.module("sampleApp")
                 //generate the array that the tree uses from the StructureDefinition
                 var mappingCommentUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
                 var mapToModelExtensionUrl = appConfigSvc.config().standardExtensionUrl.mapToModel;
+                var baseTypeForModel = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
 
                 var arTree = [];
                 if (sd && sd.snapshot && sd.snapshot.element) {
@@ -145,6 +172,14 @@ angular.module("sampleApp")
                             item.data.header.title = sd.title || sd.display;  
 
                             item.data.header.extension = sd.extension     //save any resource level extensions...
+
+                            //see if this model has a base type
+                            var ext1 = Utilities.getSingleExtensionValue(sd,baseTypeForModel)
+                            if (ext1 && ext1.valueString) {
+                                item.data.header.baseType = ext1.valueString;
+
+                            }
+
 
                             //note that mapping node is different in the SD and the ED - but in the same place in the treeData
                             if (sd.mapping && sd.mapping.length > 0) {
@@ -245,21 +280,28 @@ angular.module("sampleApp")
                 }
                 return arTree;
             },
-            makeSD : function(scope,treeData) {
+            makeSD : function(scope,treeData) {     //todo - don't pass in scope...
                 //create a StructureDefinition from the treeData
-                var header = treeData[0].data.header || {}      //the first node has the header informatiion
+                var header = treeData[0].data.header || {} ;     //the first node has the header informatiion
+                console.log(header)
                 var mappingCommentUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
                 var mapToModelExtensionUrl = appConfigSvc.config().standardExtensionUrl.mapToModel;
-
-
-
-                //todo - this will replace any extensions...
+                var baseTypeForModelUrl = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
+                
+                //todo - should use Utile.addExtension...
                 var sd = {resourceType:'StructureDefinition'};
                 if (currentUser) {
                     this.addSimpleExtension(sd,'http:www.clinfhir.com/StructureDefinition/userEmail',currentUser.email)
                 }
 
+                if (header.baseType) {
+                    Utilities.addExtensionOnce(sd,baseTypeForModelUrl,{valueString:header.baseType})
+                   // this.addSimpleExtension(sd,baseTypeForModel,header.baseType)
+                }
 
+                
+                
+                
                 sd.id = scope.rootName;
                 sd.url = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/"+sd.id;
                 sd.name = header.name;

@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2016-11-10';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2016-11-11';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};
@@ -24,9 +24,12 @@ angular.module("sampleApp")
         //if a valueset has concepts entered directly but not in snomed (so terminology services won't expand)
         defaultConfig.standardExtensionUrl.vsDirectConcept = 'http://clinfhir.com/fhir/StructureDefinition/vsDirectConcept';
         
+        
         //comments on the mapping for an element in the ElementDefinition
         defaultConfig.standardExtensionUrl.edMappingComment = 'http://clinfhir.com/fhir/StructureDefinition/edMappingComment';
         defaultConfig.standardExtensionUrl.mapToModel = 'http://clinfhir.com/fhir/StructureDefinition/mapToModel';
+        defaultConfig.standardExtensionUrl.baseTypeForModel = 'http://clinfhir.com/fhir/StructureDefinition/baseTypeForModel';
+        
 
         var version = {current:'2.0.0',versionHistory:[]}
         

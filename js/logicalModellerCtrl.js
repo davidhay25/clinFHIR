@@ -344,6 +344,7 @@ angular.module("sampleApp")
                             $scope.input.type = $scope.modelTypes[0];
                             $scope.input.typeDescription = $scope.input.type.help;
 
+                            //the list of all the base resource types in the spec...
                             RenderProfileSvc.getAllStandardResourceTypes().then(
                                 function(data){
                                     $scope.allResourceTypes = data;
@@ -378,7 +379,17 @@ angular.module("sampleApp")
                                 //$scope.input.name = 'myModel';
                                 //$scope.input.short='A new model';
                             }
-
+/*
+                            $scope.selectBaseType = function(baseType) {
+                                logicalModelSvc.getAllPathsForType(baseType).then(
+                                    function(listOfPaths) {
+                                        console.log(listOfPaths);
+                                        $scope.allPaths =
+                                    }
+                                )
+                            }
+                            */
+                            
                             $scope.checkName = function() {
                                 if ($scope.input.name) {
                                     var name = $scope.input.name;
@@ -435,9 +446,10 @@ angular.module("sampleApp")
                                 vo.title = $scope.input.title;
                                 vo.purpose = $scope.input.purpose || 'purpose';
                                 vo.SD = $scope.SD;
-                                vo.baseType = $scope.input.baseType;       //if a base type was selected
+                                vo.baseType = $scope.input.baseType.name;       //if a base type was selected
                                 vo.mapping = $scope.input.mapping;
                                 vo.type = $scope.input.type.code;
+                                vo.createElementsFromBase = $scope.input.createElementsFromBase;
 
 
                                 $scope.$close(vo);
@@ -467,15 +479,23 @@ angular.module("sampleApp")
                                 $scope.rootName = result.name;      //this is the 'type' of the logical model - like 'Condition'
 
                                 var rootNode = { "id" : $scope.rootName, "parent" : "#", "text" : result.name,state:{opened:true},
-                                    data : {name:"root",path:$scope.rootName,isRoot:true,min:1,max:'1'} };
+                                    data : {name:"root", path:$scope.rootName,isRoot:true,min:1,max:'1',baseType:result.baseType} };
 
                                 rootNode.data.header = result;      //header based data. keep it in the first node...
                                 $scope.treeData =  [rootNode]
                                 $scope.isDirty = true;      //as this has not beed saved;
 
                                 //if the user specified a base type, then pre-populate a model from that base
-                                if (result.baseType) {
-                                    logicalModelSvc.createFromBaseType($scope.treeData,result.baseType.name,$scope.rootName).then(
+                                if (result.baseType && result.createElementsFromBase) {
+
+                                    logicalModelSvc.getAllPathsForType(result.baseType).then(
+                                        function(listOfPaths) {
+                                            console.log(listOfPaths);
+                                        }
+                                    )
+
+
+                                    logicalModelSvc.createFromBaseType($scope.treeData,result.baseType,$scope.rootName).then(
                                         function(){
                                             drawTree();
                                             makeSD();
@@ -568,7 +588,7 @@ angular.module("sampleApp")
                     delete $scope.selectedNode;
                     $scope.isDirty = false;
                     $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
-                    //console.log($scope.treeData)
+                    console.log($scope.treeData)
                     $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                     drawTree();
                     makeSD();
@@ -747,10 +767,7 @@ angular.module("sampleApp")
                             if (duplicateNode) {
                                 $scope.canSave = false;
                                    modalService.showModal({},{bodyText:"This name is a duplicate of another and cannot be used. Try again."})
-                                } //else {
-                                   // $scope.canSave = true;
-                               // }
-                            //console.log(duplicateNode)
+                                } 
                         };
 
                         $scope.save = function() {

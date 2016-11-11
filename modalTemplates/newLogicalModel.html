@@ -81,14 +81,27 @@
 
 
             </uib-tab>
-            <uib-tab ng-show = "isNew && (input.type.code == 'resource')" heading="Initial content">
+            <uib-tab ng-show = "isNew" heading="Base Resource">
                 <br/>
 
-                <select ng-change="selectContext(input.type)" ng-model="input.baseType" class="form-control"
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        <select ng-change="selectBaseType(input.baseType)" ng-model="input.baseType" class="form-control"
 
-                        ng-options="type.name for type in allResourceTypes">
-                </select>
+                                ng-options="type.name for type in allResourceTypes">
+                        </select>
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        Copy elements into model <input type="checkbox" ng-model="input.createElementsFromBase"/>
+                    </div>
+
+                </div>
+
+
                 <br />
+
+
+
                 <em>If this Logical model is based closely on a single FHIR resource, then select the base
                 type from the list and the model will be created with those elements as a starting point</em>
 

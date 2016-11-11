@@ -1355,12 +1355,14 @@ console.log(summary);
         },
         getSingleExtensionValue : function(resource,url) {
             //return the value of an extension assuming there is only 1...
-            resource.extension = resource.extension || []
-
             var extension;
-            resource.extension.forEach(function(ext){
-                if (ext.url == url) {extension = ext}
-            });
+            if (resource) {
+                resource.extension = resource.extension || []
+                resource.extension.forEach(function(ext){
+                    if (ext.url == url) {extension = ext}
+                });
+            }
+
             return extension;
         }
     }
