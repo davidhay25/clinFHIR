@@ -111,10 +111,13 @@
 
 
 
+
+
                 </div>
                 <div class="col-md-2 col-sm-2">
                     <div class="navbar-text clickable" ng-show="LMSelectorVisible" ng-click="hideLMSelector()">Hide Selector</div>
                     <div class="navbar-text clickable" ng-hide="LMSelectorVisible" ng-click="showLMSelector()">Show Selector</div>
+                    <button ng-show="isDirty" class="btn btn-success pull-right" ng-click="save()">Save model</button>
 
                 </div>
 

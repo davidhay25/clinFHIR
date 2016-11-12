@@ -3117,6 +3117,32 @@ console.log(profile)
                         })
                     };
 
+                    $scope.searchForIdentifier = function(identifier) {
+                        $scope.nomatch=false;   //if there were no matching patients
+                        delete $scope.matchingPatientsList;
+                        if (! identifier) {
+                            alert('Please enter an identifier');
+                            return true;
+                        }
+                        $scope.waiting = true;
+                        
+                        resourceCreatorSvc.findPatientsByIdentifier(identifier).then(
+                            function(data){
+
+                                $scope.matchingPatientsList = data;
+                                if (! data || data.length == 0) {
+                                    $scope.nomatch=true;
+                                }
+                            },
+                            function(err) {
+                                modalService.showModal({}, {bodyText: 'Error finding patient - have you selected the correct Data Server?'})
+
+                            }
+                        ).finally(function(){
+                            $scope.waiting = false;
+                        })
+                    };
+
                     $scope.selectNewPatient = function(patient) {
                         appConfigSvc.setCurrentPatient(patient);
                         //$scope.recent.patient = appConfigSvc.getRecentPatient();
@@ -3129,7 +3155,27 @@ console.log(profile)
                     }
 
                     $scope.checkIdentifier = function (identifier) {
-                        alert(identifier)
+                        delete $scope.input.identifierError;
+                        if (identifier) {
+                            var url = appConfigSvc.getCurrentDataServer().url + "Patient?identifier=" +
+                                appConfigSvc.config().standardSystem.identifierSystem + "|"+identifier
+
+
+                            GetDataFromServer.adHocFHIRQuery(url).then(
+                                function(data) {
+
+                                    if (data && data.data && data.data.entry && data.data.entry.length > 0) {
+
+                                        $scope.input.identifierError = 'There is already a patient with this identifier'
+
+                                    }
+                                }
+                            )
+                        }
+
+
+
+
                     }
 
                 },

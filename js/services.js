@@ -129,6 +129,13 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             patient.name = [{use:'official',family:[input.lname],given:[input.fname],text:nameText}];
             patient.gender = input.gender;
             patient.birthDate= moment(input.dob).format('YYYY-MM-DD');
+            if (input.identifier) {
+                //var identifier = appConfigSvc.config().standardSystem.identifierSystem + "|"+input.identifier;
+                patient.identifier = [{system:appConfigSvc.config().standardSystem.identifierSystem,value:input.identifier}]
+            }
+
+
+
             if (cfOrganization) {
                 patient.managingOrganization = {display : 'sampleBuilder',reference : "Organization/"+cfOrganization.id};      //<<<< todo make a real org... - check at startus
 

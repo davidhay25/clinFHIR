@@ -137,16 +137,22 @@
 
             <div class="form-group">
                 <div class="row">
-                    <div class="col-md-4 col-sm-4">
+                    <div class="col-md-6 col-sm-6">
                         <div><label>Mapping path</label></div>
-                        <input type="text" class="form-control" ng-model="input.mappingPath" placeholder="path in the target resource">
 
+
+                        <select  class="form-control" ng-model="input.mappingPath"
+                                 ng-options="path for path in allPaths"></select>
+
+<!--
+                        <input type="text" class="form-control" ng-model="input.mappingPath" placeholder="path in the target resource">
+-->
                         <div><label>Map to model</label></div>
                         <select  class="form-control" ng-model="input.mapToModelEnt"
                                  ng-options="entry.resource.name for entry in references.entry"></select>
 
                     </div>
-                    <div class="col-md-8 col-sm-8">
+                    <div class="col-md-6 col-sm-6">
                         <div><label>Mapping notes</label></div>
                             <textarea class="form-control" rows="5" ng-model="input.mapping"
                           placeholder="Describe FHIR mapping. Can also indicate if this element should be bound to a SNOMED term"></textarea>

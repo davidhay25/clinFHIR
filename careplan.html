@@ -66,8 +66,22 @@
         <button class="btn btn-success" ng-click="loadPlans(input.identifier)">Load Plans</button>
     </div>
 
+
+
 </div>
 
+
+    <table>
+        <tr ng-repeat="plan in input.plans">
+            <td>{{plan.server.name}}</td>
+            <td>{{plan.patient.id}}</td>
+            <td><pre>{{plan.plan | json}}</pre></td>
+        </tr>
+    </table>
+
+
+
+    {{input.plansDEP}}
 
 
 </div>

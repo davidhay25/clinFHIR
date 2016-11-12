@@ -678,7 +678,7 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editLogicalItem.html',
                     size: 'lg',
-                    controller: function($scope,allDataTypes,editNode,parentPath,findNodeWithPath,rootForDataType,igSvc,references){
+                    controller: function($scope,allDataTypes,editNode,parentPath,findNodeWithPath,rootForDataType,igSvc,references,baseType){
                         $scope.references = references;
                         console.log(references);
                         $scope.rootForDataType = rootForDataType;
@@ -691,6 +691,19 @@ angular.module("sampleApp")
 
                         $scope.input.dataType = $scope.allDataTypes[0];
                         $scope.input.multiplicity = 'opt';
+
+
+                        if (baseType) {
+
+                            logicalModelSvc.getAllPathsForType(baseType).then(
+                                function(listOfPaths) {
+                                    console.log(listOfPaths);
+                                    $scope.allPaths = listOfPaths;
+                                }
+                            )
+
+                        }
+
 
                         if (editNode) {
                             //editing an existing node
@@ -941,6 +954,13 @@ angular.module("sampleApp")
                         },
                         references : function(){
                             return $scope.bundleModels;
+                        },
+                        baseType : function() {
+                            var baseType = null
+                            if ($scope.treeData && $scope.treeData[0] && $scope.treeData[0].data &&  $scope.treeData[0].data.header)  {
+                                baseType = $scope.treeData[0].data.header.baseType;
+                            }
+                            return baseType;
                         }
                     }
                 }).result.then(

@@ -23,14 +23,9 @@
 
             </div>
         </div>
-
     </div>
     <div class="modal-body">
-   <!--
-        <div ng-show="loading" class="alert alert-info">
-            Querying server, please wait...
-        </div>
--->
+
         <div ng-show="input.mode == 'find'">
             <div class="row">
                 <div class="col-md-10">
@@ -39,9 +34,6 @@
                 </div>
                 <div class="col-md-2">
                     <button class="btn btn-link" ng-click="searchForPatient(input.searchPatientName)">Search</button>
-                    <!--
-                    <span><i class="glyphicon glyphicon-search" ng-click="searchForPatient(input.searchPatientName)"></i></span>
-                    -->
                 </div>
             </div>
             <br/>
@@ -52,9 +44,16 @@
                 </div>
                 <div class="col-md-2">
                     <button class="btn btn-link" ng-click="loadPatient(input.patientId)">Load</button>
-                    <!--
-                    <span><i class="glyphicon glyphicon-search" ng-click="searchForPatient(input.searchPatientName)"></i></span>
-                    -->
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-md-10">
+                    <input type="text" ng-model="input.identifier" class="form-control"
+                           placeholder="Enter Identifier of patient on this server">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-link" ng-click="searchForIdentifier(input.identifier)">Search</button>
                 </div>
             </div>
 
@@ -90,15 +89,19 @@
 
 
             <form ng-hide = "showLog" class="form-horizontal" role="form">
-<!--
+
                 <div class="form-group">
+                    <!-- Will set input.identifierError in the checkIdentifier() function...-->
                     <label class="col-md-3 control-label">Identifier</label>
                     <div class="col-md-3">
-                        <input class="form-control" type="text" ng-model="input.identifier" ng-blur="checkIdentifier(input.identifier)"/>
-                        <div>{{identifierCheckMessage}}</div>
+                        <input class="form-control" type="text" ng-model="input.identifier"
+                               ng-change="input.identifierError='Tab out of field to check identifier is unique'"
+                               ng-blur="checkIdentifier(input.identifier)"/>
+
                     </div>
+                    <div class="col-md-6">{{input.identifierError}}</div>
                 </div>
--->
+
                 <div class="form-group">
                     <label class="col-md-3 control-label">First Name</label>
                     <div class="col-md-6">
@@ -154,7 +157,8 @@
                     </div>
                     <div class="col-md-5">
                         <!-- Don't show the button until the name is there... -->
-                        <div href="#" ng-click="addNewPatient()" ng-show='input.lname' class="btn btn-primary pull-right">Add patient</div>
+                        <div href="#" ng-click="addNewPatient()" ng-show='input.lname && ! input.identifierError'
+                             class="btn btn-primary pull-right">Add patient</div>
                     </div>
 
                 </div>

@@ -82,6 +82,25 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             //return $http.get(qry);
         },
+        findPatientsByIdentifier: function (identifier) {
+            var deferred = $q.defer();
+
+            var identifierSystem =  appConfigSvc.config().standardSystem.identifierSystem;
+            var qry = appConfigSvc.getCurrentDataServer().url + "\Patient?identifier=" + identifierSystem + "|" + identifier;
+
+            supportSvc.getAllResourcesFollowingPaging(qry).then(
+                function (data) {
+                    console.log(data)
+                    deferred.resolve(data);
+                },
+                function(err) {
+                    deferred.reject(err);
+                }
+            )
+            return deferred.promise;
+
+
+        },
         getJsonFragmentForDataType: function (dt, results, stuVersion) {
             //create a js object that represents a fragment of data for inclusion in a resource based on the datatype...
 
