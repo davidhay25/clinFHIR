@@ -61,7 +61,7 @@ angular.module("sampleApp")
                             console.log(result.patient);
                             var patientId = data.data.entry[0].resource.id;
                             var cpUrl = server.url+'CarePlan?subject='+patientId;
-                            //console.log(cpUrl);
+                            console.log(cpUrl);
                             $http.get(cpUrl).then(
                                 function(data){
                                     //console.log(data.data)

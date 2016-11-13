@@ -8,7 +8,7 @@
       "text" : "salbutamol 90 mcg/spray"
     },
     "status": "active",
-    "notTaken": false,
+
 
     "reasonForUseCode" : [{
       "coding" : [
@@ -59,7 +59,7 @@
       "display" : "aspirin 81 mg"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"73211009","system":"http://snomed.info/ct","display":"diabetes (disorder)"}
@@ -92,7 +92,7 @@
       "text" : "beclomethasone HFA"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"195967001","system":"http://snomed.info/ct","display":"asthma (disorder)"}
@@ -126,7 +126,7 @@
       "text" : "carvedilol"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"38341003","system":"http://snomed.info/ct","display":"hypertension (disorder)"}
@@ -159,7 +159,7 @@
       "text" : "chlorthalidone"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"38341003","system":"http://snomed.info/ct","display":"hypertension (disorder)"}
@@ -192,7 +192,7 @@
       "text" : "citalopram"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"35489007","system":"http://snomed.info/ct","display":"depression (disorder)"}
@@ -225,7 +225,7 @@
       "text" : "gabapentin"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"247398009","system":"http://snomed.info/ct","display":"neuropathic pain (disorder)"}
@@ -258,7 +258,7 @@
       "text" : "insulin glargine"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"73211009","system":"http://snomed.info/ct","display":"diabetes (disorder)"}
@@ -292,7 +292,7 @@
       "text" : "losartan 100mg"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"38341003","system":"http://snomed.info/ct","display":"hypertension (disorder)"}
@@ -325,7 +325,7 @@
       "text" : "metformin 1000mg"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"73211009","system":"http://snomed.info/ct","display":"diabetes (disorder)"}
@@ -358,7 +358,7 @@
       "text" : "naproxen 500mg"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"69896004","system":"http://snomed.info/ct","display":"rheumatoid arthritis (disorder)"}
@@ -391,7 +391,7 @@
       "text" : "omeprazole 40mg"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"235595009","system":"http://snomed.info/ct","display":"GERD (disorder)"}
@@ -424,7 +424,7 @@
       "text" : "prednisone 20mg"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"195967001","system":"http://snomed.info/ct","display":"asthma (disorder)"}
@@ -458,7 +458,7 @@
       "text" : "simvastatin 40mg"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"13644009","system":"http://snomed.info/ct","display":"high cholesterol"}
@@ -492,7 +492,7 @@
       "text" : "terbinafine 250mg"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" :[ {
       "coding" : [
         {"code":"414941008","system":"http://snomed.info/ct","display":"onychomycosis"}
@@ -526,7 +526,7 @@
       "text" : "zolpidem 5mg"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"193462001","system":"http://snomed.info/ct","display":"insomnia"}
@@ -560,7 +560,7 @@
       "text" : "lisinopril 20mg"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"38341003","system":"http://snomed.info/ct","display":"hypertension (disorder)"}
@@ -593,7 +593,7 @@
       "text" : "isosorbide mononitrate 20mg"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"194828000","system":"http://snomed.info/ct","display":"angina"}
@@ -626,7 +626,7 @@
       "text" : "buspirone 5mg"
     },
     "status": "active",
-    "notTaken": false,
+
     "reasonForUseCode" : [{
       "coding" : [
         {"code":"19748006","system":"http://snomed.info/ct","display":"anxiety disorder"}
