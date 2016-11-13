@@ -11,6 +11,7 @@ angular.module("sampleApp")
             //load plans for all stu3 servers...
             $scope.loadPlans = function(identifier) {
                 var allServers = appConfigSvc.getAllServers();
+                $scope.input.plans.length = 0;
                 allServers.forEach(function(server){
                     if (server.version == 3) {
 

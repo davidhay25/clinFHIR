@@ -3251,11 +3251,7 @@ console.log(profile)
                 function(profile) {
                     //now get the profile
                     $scope.selectedProfile = profile;
-
-                    //var vo = resourceCreatorSvc.makeProfileDisplayFromProfile(profile);
-
-                           // $scope.filteredProfile = vo.tab;
-                            //$scope.selectedProfile = vo.profile;
+                    
 
 
                 }
@@ -3461,21 +3457,11 @@ console.log(url);
                 var reference = type.profile.reference;
                 if (reference.indexOf('http://hl7.org/fhir/')> -1) {
                     //this is needs to be treated as a URI, and we have to change it a bit...
-                    reference=reference.replace('profiles','StructureDefinition')
+                    reference=reference.replace('profiles','StructureDefinition')       //this seems wrong...
+                    reference=reference.replace('Profile','StructureDefinition')
 
-//console.log(reference);
                     localFindProfileByUri(reference)
-                    /*
-                    GetDataFromServer.findConformanceResourceByUri(reference).then(
-                        function(profile){
-                            $scope.selectedProfile = profile;
-                            $scope.filteredProfile = resourceCreatorSvc.makeProfileDisplayFromProfile(profile)
-                        },
-                        function(err) {
-                            alert(angular.toJson(err))
-                        }
-                    )
-                    */
+
                 } else {
                     //this is a 'real' reference - ie it is a resolvable URL...
                     $scope.showProfile(reference);
