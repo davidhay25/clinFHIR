@@ -3,8 +3,6 @@ angular.module("sampleApp")
     .controller('carePlanCtrl',
         function ($scope,$http,appConfigSvc,$q) {
 
-
-
             $scope.input = {identifier:'abc123'};
             $scope.input.plans = []
 
@@ -30,8 +28,6 @@ angular.module("sampleApp")
                                     })
                                 }
 
-
-
                             }
                         )
                     }
@@ -51,36 +47,32 @@ angular.module("sampleApp")
                 var url = server.url + "Patient?identifier=" +
                     appConfigSvc.config().standardSystem.identifierSystem + "|"+identifier
 
-                //var url = server.url+'Patient?identifier='+identifier;
-              //  console.log(url);
+
                 $http.get(url).then(
                     function(data){
                         //console.log(data.data)
                         if (data.data && data.data.entry) {
                             //at least 1 patient was found. Just get the first for now, but later reject if >1...
                             result.patient = data.data.entry[0].resource;
-                            console.log(result.patient);
+                            //console.log(result.patient);
                             var patientId = data.data.entry[0].resource.id;
                             var cpUrl = server.url+'CarePlan?subject='+patientId;
-                            console.log(cpUrl);
+                            //console.log(cpUrl);
                             $http.get(cpUrl).then(
                                 function(data){
-                                    //console.log(data.data)
-                                    //if (data.data)
+
                                     result.plans = data.data
                                     deferred.resolve(result);
 
                                 },function(err) {
                                     result.err = err;
                                     deferred.resolve(result);
-                                    //console.log(err)
-                                })
 
+                                })
                         }
 
-
                     },function(err) {
-                        //console.log(err)
+
                         deferred.reject();
                     }
                 )

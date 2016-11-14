@@ -446,7 +446,10 @@ angular.module("sampleApp")
                                 vo.title = $scope.input.title;
                                 vo.purpose = $scope.input.purpose || 'purpose';
                                 vo.SD = $scope.SD;
-                                vo.baseType = $scope.input.baseType.name;       //if a base type was selected
+                                if ($scope.input.baseType) {
+                                    vo.baseType = $scope.input.baseType.name;       //if a base type was selected
+                                }
+
                                 vo.mapping = $scope.input.mapping;
                                 vo.type = $scope.input.type.code;
                                 vo.createElementsFromBase = $scope.input.createElementsFromBase;
