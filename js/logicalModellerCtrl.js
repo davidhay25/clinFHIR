@@ -82,6 +82,9 @@ angular.module("sampleApp")
                 $scope.LMSelectorVisible = false;
             }
 
+
+            //$scope.hideDetail - function
+
             $scope.showLMSelector()
 
 
@@ -96,8 +99,7 @@ angular.module("sampleApp")
                     //don't show the list of models if one was passed in...
                     $scope.hideLMSelector();
 
-                   // $scope.leftPaneClass = "hidden"
-                   // $scope.midPaneClass = "col-md-7 col-sm-7"
+                  
 
                 }
                 if (params.ts) {

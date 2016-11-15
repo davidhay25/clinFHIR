@@ -1680,23 +1680,28 @@ angular.module("sampleApp")
     $scope.selectCCfromList = function(item,model,label,event){
         //get the full lookup for this code - parents, children etc.
 
-        $scope.results.ccDirectSystem = item.system;
-        $scope.results.ccDirectCode = item.code;
-        //console.log($scope.results.cc)
-        $scope.results.ccDirectDisplay = $scope.results.cc.display;
+        if (item.system) {
+            $scope.results.ccDirectSystem = item.system;
+            $scope.results.ccDirectCode = item.code;
+            //console.log($scope.results.cc)
+            $scope.results.ccDirectDisplay = $scope.results.cc.display;
 
 
-        resourceCreatorSvc.getLookupForCode(item.system,item.code).then(
-            function(data) {
-                console.log(data);
-                $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
-                console.log($scope.terminologyLookup);
-            },
-            function(err) {
-                //this will generally occur when using stu-2 - so ignore...
-                //alert(angular.toJson(err));
-            }
-        );
+            resourceCreatorSvc.getLookupForCode(item.system,item.code).then(
+                function(data) {
+                    console.log(data);
+                    $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
+                    console.log($scope.terminologyLookup);
+                },
+                function(err) {
+                    //this will generally occur when using stu-2 - so ignore...
+                    //alert(angular.toJson(err));
+                }
+            );
+        } else {
+            alert('null system value')
+        }
+
 
 //console.log(item,model,label)
     };
@@ -1707,6 +1712,11 @@ angular.module("sampleApp")
                 console.log(data);
                 $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
                 console.log($scope.terminologyLookup);
+
+
+
+
+
             },
             function(err) {
                 alert(angular.toJson(err));
@@ -1717,6 +1727,12 @@ angular.module("sampleApp")
     $scope.selectChildTerm = function(code,description){
         $scope.results.ccDirectDisplay = description;
         $scope.results.ccDirectCode = code;
+
+        //amsterdam
+        $scope.results.cc = {code:code,system:$scope.results.ccDirectSystem,display:description};
+        $scope.results.ccText = description;
+
+
         setTerminologyLookup($scope.results.ccDirectSystem,code)
     }
 
@@ -1724,6 +1740,11 @@ angular.module("sampleApp")
     $scope.selectParentCC = function(parent) {
         $scope.results.ccDirectDisplay = parent.description;
         $scope.results.ccDirectCode = parent.value;
+
+        //amsterdam
+        $scope.results.cc = {code:parent.value,system:$scope.results.ccDirectSystem,display:parent.description};
+        $scope.results.ccText = parent.description;
+
         //look up the relations to this one...
         setTerminologyLookup($scope.results.ccDirectSystem,$scope.results.ccDirectCode)
 
