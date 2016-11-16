@@ -321,7 +321,6 @@ angular.module("sampleApp")
         });
     };
 
-
     $scope.showExtensionsDEP = function() {
         $scope.displayMode = 'extensions';
         $rootScope.$broadcast('setDisplayMode',{newMode:'extensions'});
@@ -520,10 +519,6 @@ angular.module("sampleApp")
             //console.log('reload')
         });
     });
-
-
-
-
 
     //from the project menu, show the editor
     $scope.showProjectEditor = function(){
@@ -982,7 +977,6 @@ angular.module("sampleApp")
         drawTree();
     }
 
-
     //when validating  the resource under construction
     $scope.validate = function(){
         delete $scope.validateResults;
@@ -1023,8 +1017,13 @@ angular.module("sampleApp")
         //todo note that it should be possible to generate the hierarchical view without depending on tree view which will tidy things up a bit
         $scope.resource = resourceCreatorSvc.buildResource(resourceType,treeObject[0],$scope.treeData,config)
         //$scope.resource = resourceCreatorSvc.buildResource(type,treeObject[0],$scope.treeData,config)
-    };
 
+
+        //the properties to enable the download of the resource
+        $scope.downloadResourceJsonContent = window.URL.createObjectURL(new Blob([angular.toJson($scope.resource, true)], {type: "text/text"}));
+        $scope.downloadResourceJsonName = $scope.resource.resourceType + "-" + new Date().getTime();
+        
+    };
 
     $scope.$on('treebuilt',function(){
 
@@ -1159,7 +1158,6 @@ angular.module("sampleApp")
             }
         );
     } ;
-
 
 
     //when one of the datatypes of the child nodes of the currently selected element in the tree is selected...
@@ -1433,7 +1431,7 @@ angular.module("sampleApp")
             });
 
 
-            // $scope.selectedNode = treeNode;     //todo !!!!! may not be correct - may need to use getNodeFromId(treeNode.id);
+             $scope.selectedNode = treeNode;     //todo !!!!! may not be correct - may need to use getNodeFromId(treeNode.id);
 
             if ($scope.selectedNode) {
                 var n = getNodeFromId($scope.selectedNode.id);
@@ -1442,7 +1440,6 @@ angular.module("sampleApp")
                 } else {
                     console.log('issue: nodeid ' + $scope.selectedNode.id + ' not found in saveNewDataType')
                 }
-
             }
 
             $scope.buildState = 'dirty';        //to indicate that the resource has been updated
@@ -1837,6 +1834,7 @@ angular.module("sampleApp")
         appConfigSvc.setCurrentPatient(park.patient);
         setUpForNewProfile(park.profile,$scope.treeData)
 
+        //$scope.selectedNode
 
         var modalOptions = {
             closeButtonText: "Don't remove",
@@ -1855,7 +1853,12 @@ angular.module("sampleApp")
         //display the children of the root...
         try {
             var rootEd = park.profile.snapshot.element[0];
+
+            //set the selected node to the root node...
+            $scope.selectedNode = getNodeFromId($scope.treeData[0].id);     //amsterdam
+
             navigatorNodeSelected('root', rootEd);   //this will display the child nodes of the root
+
         } catch (ex) {
             alert("There was an error selecting the root in the navigator. That's OK - just do it yourself");
         }

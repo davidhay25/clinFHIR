@@ -56,7 +56,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     var ed = this.currentProfile.snapshot.element[i];
                     var ar = ed.path.split('.')
                     if (ar.length == 2) {
-                        if (ar[1] == 'patient' || ar[1] == 'subject') {
+                        if (ar[1].toLowerCase() == 'patient' || ar[1].toLowerCase() == 'subject') {
                             return ed;
                             break;
                         }

@@ -376,7 +376,7 @@
 
 
                             <span uib-dropdown ng-hide="resourceCreatorSvc.getParkedResources().length==0">
-                                  <a href  uib-dropdown-toggle>
+                                  <a uib-dropdown-toggle>
                                       Parked <span class="badge">{{resourceCreatorSvc.getParkedResources().length }}</span>
                                   </a>
                                   <ul uib-dropdown-menu aria-labelledby="simple-dropdown">
@@ -387,7 +387,10 @@
                              </span>
 
 
+
                         </div>
+
+
 
 
 
@@ -407,10 +410,29 @@
                         <form ng-show="displayMode == 'new'" class="navbar-form navbar-right">
 
 
+
+
+
+                            <a class="pull-right" download="{{downloadResourceJsonName}}.json"
+                               style="margin-top: 6px; margin-left: 8px"
+                               popover-placement="left" popover-trigger="'mouseenter'"
+                               uib-popover="Download this resource"
+
+                               href="{{downloadResourceJsonContent}}">
+                                <i style="font-size:1.5em" class="glyphicon glyphicon-download"></i>
+                            </a>
+
+<!--
+                            <button ng-click="download()" style="font-size:1.5em" class="btn btn-link pull-right" >
+                                <i class="glyphicon glyphicon-download"></i></button>
+                            -->
+
+
                             <button ng-hide='isEditingResource' class="btn btn-primary pull-right" ng-click="saveToServer()">
                                 {{'SAVE' | translate}}</button>
                             <button ng-show='isEditingResource'  class="btn btn-primary pull-right" ng-click="saveToServer()">
                                 {{'UPDATE' | translate}}</button>
+
 
 
                             <button style="margin-right: 8px" class="btn btn-info pull-right"
@@ -420,6 +442,9 @@
                                     popover-placement="left" popover-trigger="'mouseenter'"
                                     uib-popover="Validate against Data Server:{{config.servers.data}}"
                                     class="btn btn-link pull-right" ng-click="validate()">{{'VALIDATE' | translate}}</button>
+
+
+
                         </form>
 
 
