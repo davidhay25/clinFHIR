@@ -32,7 +32,7 @@ angular.module("sampleApp")
                     var errorCode = error.code;
                     var errorMessage = error.message;
                     console.log(errorCode,errorMessage)
-
+                    alert(angular.toJson(errorMessage))
 
                     switch (errorCode) {
                         case 'auth/wrong-password':
@@ -58,6 +58,7 @@ angular.module("sampleApp")
                                         // Handle Errors here.
                                         var errorCode = error.code;
                                         var errorMessage = error.message;
+                                        alert(angular.toJson(errorMessage))
                                         // ...
                                     });
                                 });
