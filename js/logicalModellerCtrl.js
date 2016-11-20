@@ -374,18 +374,22 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/newLogicalModel.html',
                         size: 'lg',
-                        controller: function($scope,appConfigSvc,Utilities,GetDataFromServer,modalService,RenderProfileSvc,SD) {
+                        controller: function($scope,appConfigSvc,Utilities,GetDataFromServer,
+                                             modalService,RenderProfileSvc,SD,allModels) {
                             $scope.input = {};
-
                             $scope.isNew = true;
+                            $scope.allModels = allModels;
+                            console.log(allModels)
 
+/*
                             $scope.modelTypes = [];
                             $scope.modelTypes.push({code:'mds',display:'Minimum Data Set',help:'A common set of data for exchange either by a Document or a Message'})
                             $scope.modelTypes.push({code:'resource',display:'Single Resource',help:'Will map to a single FHIR resource'})
                             $scope.modelTypes.push({code:'dt',display:'Logical DataType',help:'A re-usable datatype'})
                             $scope.input.type = $scope.modelTypes[0];
-                            $scope.input.typeDescription = $scope.input.type.help;
 
+                            $scope.input.typeDescription = $scope.input.type.help;
+*/
                             //the list of all the base resource types in the spec...
                             RenderProfileSvc.getAllStandardResourceTypes().then(
                                 function(data){
@@ -493,16 +497,26 @@ angular.module("sampleApp")
                                 }
 
                                 vo.mapping = $scope.input.mapping;
-                                vo.type = $scope.input.type.code;
+                               // vo.type = $scope.input.type.code;
                                 vo.createElementsFromBase = $scope.input.createElementsFromBase;
+                                if ($scope.input.clone) {
+                                    //creating another copy
 
+                                    console.log($scope.input.clone)
+                                    vo.clone = $scope.input.clone.resource;
+                                }
 
                                 $scope.$close(vo);
                             }
-                        },resolve : {
+                        },
+                        resolve : {
                             SD: function () {          //the default config
                                 return SD;
-                        }}
+                            },
+                            allModels : function(){
+                                return $scope.bundleModels;
+                            }
+                        }
 
                     }).result.then(
                         function(result) {
@@ -528,16 +542,34 @@ angular.module("sampleApp")
 
                                 rootNode.data.header = result;      //header based data. keep it in the first node...
                                 $scope.treeData =  [rootNode]
-                                $scope.isDirty = true;      //as this has not beed saved;
+                                $scope.isDirty = true;      //as this has not been saved;
 
-                                //if the user specified a base type, then pre-populate a model from that base
-                                if (result.baseType && result.createElementsFromBase) {
+                                if (result.clone) {
+                                    //if the user specified to copy from another model
 
+                                    delete $scope.modelHistory;
+                                    delete $scope.selectedNode;
+
+                                    $scope.currentSD = logicalModelSvc.clone(result.clone,result.name);
+
+                                    console.log($scope.currentSD);
+                                    $scope.isDirty = true;  //as the model has noy been saved...
+                                    $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.currentSD)
+                                    console.log($scope.treeData)
+                                    $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
+                                    drawTree();
+                                    makeSD();
+                                    
+                                } else if (result.baseType && result.createElementsFromBase) {
+                                    //if the user specified a base type, then pre-populate a model from that base
+
+                                    /* doen't seem to be doing anything with this...
                                     logicalModelSvc.getAllPathsForType(result.baseType).then(
                                         function(listOfPaths) {
                                             console.log(listOfPaths);
                                         }
-                                    )
+                                    );
+                                    */
 
 
                                     logicalModelSvc.createFromBaseType($scope.treeData,result.baseType,$scope.rootName).then(

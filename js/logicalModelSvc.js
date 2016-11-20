@@ -48,6 +48,28 @@ angular.module("sampleApp")
 
 
             },
+            clone : function(baseSD,rootName) {
+                //make a copy of the SD changing the rootName in the path...
+                var newSD = angular.copy(baseSD);
+                newSD.id = rootName;
+                var arUrl = newSD.url.split('/');
+                arUrl[arUrl.length-1] = rootName;
+                newSD.url = arUrl.join('/');
+                newSD.name = rootName;
+                newSD.status = 'draft';
+                newSD.date =  moment().format()
+                
+
+
+                newSD.snapshot.element.forEach(function(ed) {
+                    var path = ed.path;
+                    var arPath = path.split('.');
+                    arPath[0] = rootName;
+                    ed.path = arPath.join('.')
+                })
+                return newSD;
+
+            },
             createFromBaseType : function(treeData,typeName,rootName) {
               //create a model from the base type, only bringing across stuff we want.
                 //todo - very similar to the logic in createTreeArrayFromSD() - ?call out to separate function...

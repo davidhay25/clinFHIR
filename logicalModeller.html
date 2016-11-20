@@ -556,9 +556,8 @@
 
                                 {{typ.code}}
 
+
                                 <!-- Show any profile. If a reference, then hyperlink to the 'display' functionality... -->
-
-
                                 <div ng-show="typ.code == 'Reference'">
                                     <span class="clickable" ng-click="viewReferencedModel(typ.profile)">{{typ.profile}}</span>
                                 </div>
@@ -566,8 +565,6 @@
                                 <div ng-hide="typ.code == 'Reference'">
                                     <div>{{typ.profile}}</div>
                                 </div>
-
-
 
 
                             </div>

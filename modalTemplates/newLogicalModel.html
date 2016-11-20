@@ -51,12 +51,17 @@
                     <div class="row">
 
                         <div class="col-md-6 col-sm-6">
-                            <label>Type of model</label>
 
-                            <select class="form-control" ng-model="input.type"
-                                    ng-change="input.typeDescription = input.type.help"
-                                    ng-options = "type.display for type in modelTypes"></select>
-                            <p><div>{{input.typeDescription}}</div></p>
+                            <div ng-show="isNew">
+                                <label>Copy from another model</label>
+
+                                <select class="form-control" ng-model="input.clone"
+                                        ng-options = "entry.resource.name for entry in allModels.entry"></select>
+
+                            </div>
+
+
+
                         </div>
 
                         <div class="col-md-6 col-sm-6">
@@ -81,7 +86,7 @@
 
 
             </uib-tab>
-            <uib-tab ng-show = "isNew" heading="Base Resource">
+            <uib-tab ng-show = "isNew && !input.clone" heading="Base Resource">
                 <br/>
 
                 <div class="row">
