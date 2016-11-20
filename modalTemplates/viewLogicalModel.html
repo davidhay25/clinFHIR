@@ -1,0 +1,79 @@
+<div>
+
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h3 class="modal-title">View Logical model</h3>
+            </div>
+            <div class="col-md-1">
+                <div ng-show="showWaiting">
+                    <img src="css/ajax_loader_blue_32.gif"/>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="pull-right">
+                    <button class="btn btn-warning" ng-click="$dismiss()">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-body">
+
+
+        <uib-tabset>
+            <uib-tab heading="Table">
+                <br/>
+                <table class="table table-bordered table-condensed">
+                    <tr><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th></tr>
+                    <tr ng-repeat="ed in model.snapshot.element">
+                        <td>
+
+
+                            <div  ng-style="{ 'padding-left': (ed.path | pathindent) }">{{ed.path | lastInPath}}</div>
+                        </td>
+                        <td>{{ed.type[0].code}}
+                            <span ng-show=""></span>
+
+                        </td>
+                        <td>{{ed.min}}..{{ed.max}}</td>
+                        <td>
+                            {{ed.definition}}
+                            <div ng-show="ed.binding">
+                                <div>{{ed.binding.valueSetUri}}</div>
+                            </div>
+
+                        </td>
+                    </tr>
+
+                </table>
+
+            </uib-tab>
+            <uib-tab heading="Json">
+                <br/>
+                <pre>{{model | json}}</pre>
+            </uib-tab>
+        </uib-tabset>
+
+
+
+
+
+
+    </div>
+
+    <div class="modal-header">
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+
+
+            </div>
+
+        </div>
+
+
+
+    </div>
+</div>

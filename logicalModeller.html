@@ -104,25 +104,31 @@
 
                     </a>
                 </div>
-                <div class="col-md-6 col-sm-6">
+                <div class="col-md-5 col-sm-5">
 
                     <span class="navbar-text pull-right"> {{conformanceServer.name}}</span>
 
 
                 </div>
-                <div class="col-md-2 col-sm-2">
-                    <div class="navbar-text clickable" ng-show="LMSelectorVisible" ng-click="hideLMSelector()">Hide Selector</div>
-                    <div class="navbar-text clickable" ng-hide="LMSelectorVisible" ng-click="showLMSelector()">Show Selector</div>
-                    <button ng-show="isDirty" class="btn btn-success pull-right" ng-click="save()">Save model</button>
-
-                </div>
-
 
                 <div class="col-md-1 col-sm-1">
                     <form class="navbar-form navbar-left" ng-show="showWaiting">
                         <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
                     </form>
                 </div>
+
+                <div class="col-md-3 col-sm-3">
+                    <div class="navbar-text clickable" ng-show="LMSelectorVisible" ng-click="hideLMSelector()">Hide Selector</div>
+                    <div class="navbar-text clickable" ng-hide="LMSelectorVisible" ng-click="showLMSelector()">Show Selector</div>
+
+                    <form ng-show="isDirty" class="navbar-form">
+                    <button ng-show="isDirty" class="btn btn-success pull-right" ng-click="save()">Save model</button>
+                    </form>
+
+                </div>
+
+
+
 
                 <div class="col-md-1 col-sm-1">
 
@@ -223,10 +229,11 @@
             <uib-tabset ng-show="treeData.length > 0">
                 <uib-tab heading="Designer">
                     <br/>
-
+<!--
                     <span class="pull-right">
                         <button ng-show="isDirty" class="btn btn-success" ng-click="save()">Save model</button>
                     </span>
+                    -->
 
                 <div id="lmTreeView"></div>
 
@@ -344,8 +351,6 @@
                         </tr>
                     </table>
                 </uib-tab>
-
-
 
 
                 <uib-tab heading="Errors" ng-show="error">
@@ -548,18 +553,33 @@
                                 </a>
 
 
+
                                 {{typ.code}}
-                                <div>{{typ.profile}}</div>
+
+                                <!-- Show any profile. If a reference, then hyperlink to the 'display' functionality... -->
+
+
+                                <div ng-show="typ.code == 'Reference'">
+                                    <span class="clickable" ng-click="viewReferencedModel(typ.profile)">{{typ.profile}}</span>
+                                </div>
+
+                                <div ng-hide="typ.code == 'Reference'">
+                                    <div>{{typ.profile}}</div>
+                                </div>
+
 
 
 
                             </div>
+                            <!-- If there's a ValueSet defined, allow it to be selected... -->
                             <span ng-show="selectedNode.data.selectedValueSet">
                                 <span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.vs.url)">
                                     {{selectedNode.data.selectedValueSet.vs.url}}</span>
                                     ({{selectedNode.data.selectedValueSet.strength}})
 
                             </span>
+
+
    <!--
                             <span ng-show="selectedNode.data.referenceUri">
                                 {{selectedNode.data.referenceUri}}

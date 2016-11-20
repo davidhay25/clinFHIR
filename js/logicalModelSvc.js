@@ -76,7 +76,6 @@ angular.module("sampleApp")
                                     var parentId = arPath.join('.');
                                     var item = {};
 
-
                                     item.id = idThisElement;
                                     item.text = treeText;
                                     item.data = {};
@@ -107,14 +106,7 @@ angular.module("sampleApp")
                                         }
 
                                     }
-                                    /*
-                                     if (data.selectedValueSet) {
-                                     ed.binding = {strength:data.selectedValueSet.strength};
-                                     ed.binding.valueSetUri = data.selectedValueSet.vs.url;
-                                     ed.binding.description = 'The bound valueset'
 
-                                     }
-                                     */
 
 
                                     treeData.push(item);
@@ -472,7 +464,26 @@ angular.module("sampleApp")
                 return ar
 
 
-        }
+        },
+            resolveProfile : function(url) {
+                //return a SD as a logical model from a profile that resolves extensions....
+                var deferred = $q.defer();
+                GetDataFromServer.findConformanceResourceByUri(url).then(
+                    function(SD) {
+                        console.log(SD)
+
+                        if (SD && SD.snapshot && SD.snapshot.element) {
+                            SD.snapshot.element.forEach(function(ed){
+                                console.log(ed.path)
+                            })
+
+                        }
+
+                    }
+                )
+                return deferred.promise;
+
+            }
 
             }
         });

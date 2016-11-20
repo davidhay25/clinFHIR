@@ -75,6 +75,21 @@ angular.module("sampleApp")
                 $scope.LMSelectorVisible = true;
             }
 
+
+/*
+            logicalModelSvc.resolveProfile('http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/renePatient').then(
+                function(sd) {
+
+                }
+            )
+            function importFromProfile() {
+                
+                //http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/renePatient
+                
+
+            }
+            */
+            
             $scope.hideLMSelector = function(){
                 $scope.leftPaneClass = "hidden"
                 $scope.midPaneClass = "col-md-7 col-sm-7"
@@ -155,7 +170,32 @@ angular.module("sampleApp")
 
             //------------------------------------------
 
-            //$scope.isThisTheCurrentVersion
+            $scope.viewReferencedModel = function(modelUrl) {
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/viewLogicalModel.html',
+                    size: 'lg',
+                    controller: function ($scope,allModels,modelUrl) {
+                        console.log(allModels)
+                        
+                        //locate the specific model from the list of models. This won't scale of course...
+                        for (var i=0; i < allModels.entry.length ; i++) {
+                            if (allModels.entry[i].resource.url == modelUrl) {
+                                $scope.model = allModels.entry[i].resource;
+                            }
+                        }
+                        
+                        
+                    },
+                    resolve : {
+                        allModels: function () {          //the default config
+                            return $scope.bundleModels;
+                        },
+                        modelUrl : function(){
+                            return modelUrl
+                        }
+                }})
+            };
+
 
 
 
@@ -527,6 +567,7 @@ angular.module("sampleApp")
             };
 
             $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();
+            $scope.dataTypes.push({code: 'BackboneElement',description: 'BackboneElement'});
 
             $scope.save = function() {
                 
@@ -571,7 +612,7 @@ angular.module("sampleApp")
                 if ($scope.isDirty) {
                     var modalOptions = {
                         closeButtonText: "No, don't lose changes",
-                        actionButtonText: 'Yes, select this model, abandoning changes',
+                        actionButtonText: 'Yes, select this model, abandoning changes to the old',
                         headerText: 'Load model',
                         bodyText: 'You have updated this model. Selecting another one will lose those changes.'
                     };
@@ -680,6 +721,8 @@ angular.module("sampleApp")
 
             //edit or add a new element to the model
             var editNode = function(nodeToEdit,parentPath) {
+
+
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editLogicalItem.html',
                     size: 'lg',
@@ -694,7 +737,17 @@ angular.module("sampleApp")
                         $scope.vsInGuide = igSvc.getResourcesInGuide('valueSet');       //so we can show the list of ValueSets in the IG
                         $scope.input = {};
 
-                        $scope.input.dataType = $scope.allDataTypes[0];
+                        for (var i=0; i< $scope.allDataTypes.length; i++) {
+                            if ($scope.allDataTypes[i].code == 'string') {
+                                $scope.input.dataType = $scope.allDataTypes[i];
+                                break;
+                            }
+                        }
+
+
+
+
+
                         $scope.input.multiplicity = 'opt';
 
 
@@ -802,6 +855,7 @@ angular.module("sampleApp")
                             //coded elements...
                             if ($scope.isCoded) {
                                 vo.selectedValueSet = $scope.selectedValueSet;
+                                vo.isCoded = true;
                             }
 
                             if ($scope.input.mapToModelEnt && $scope.input.mapToModelEnt.resource) {
@@ -998,8 +1052,22 @@ angular.module("sampleApp")
                             newNode.data = angular.copy(result);
                             $scope.treeData.push(newNode);
 
-                            
-                            //delete $scope.selectedNode;
+
+                            //the currently selected parent node type should now be set to 'BackBone element'
+
+                            //vo.type = [{code:$scope.input.dataType.code}];
+                           // if ($scope.selectedNode && $scope.selectedNode.data) {
+                            //the parent type should be backbone element...
+                            var node = findNodeWithPath(parentPath);
+                            if (node){
+                                node.data.type = [{code:'BackboneElement'}]
+                            }
+
+
+                            //}
+
+delete $scope.selectedNode;
+
                             $scope.selectedNode = newNode;
 
                         }
@@ -1024,7 +1092,6 @@ angular.module("sampleApp")
                             $scope.treeData.forEach(function(node){
                                 if (node.parent == parentId) {
                                     var childPath = parentPath + '.' + node.data.name;
-                                    //console.log(childPath);
                                     node.data.path = childPath;
                                     setPath(childPath,node.id)
                                 }
