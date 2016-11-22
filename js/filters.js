@@ -136,9 +136,20 @@ angular.module("sampleApp")
 
 
             }
+        })
+
+        .filter('dropFirstInPath',function(){
+            return function(path) {
+                //return the last part of a url - allowing for stu2 (array) or stu3 (single)
+                if (path) {
+                    var ar = path.split('.');
+                    ar.splice(0,1);
+                    return ar.join('. ')
+                }
+
+
+            }
         }
-
-
 
 ).directive('autoFocus', function($timeout) {
     return {

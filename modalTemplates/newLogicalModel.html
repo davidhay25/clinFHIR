@@ -53,7 +53,46 @@
                         <div class="col-md-6 col-sm-6">
 
                             <div ng-show="isNew">
-                                <label>Copy from another model</label>
+                                <div><label>Model type</label></div>
+                                <div class="btn-group">
+                                    <label class="btn btn-default"
+                                          style="margin-right: 5px" ng-model="input.modelType" uib-btn-radio="'single'">Single resource</label>
+
+                                    <label class="btn btn-default" style="margin-right: 5px"
+                                           ng-model="input.modelType" uib-btn-radio="'multiple'">Multiple resources</label>
+
+                                    <label class="btn btn-default" style="margin-right: 5px"
+                                           ng-model="input.modelType" uib-btn-radio="'clone'">Copy a model</label>
+
+                                </div>
+
+
+
+                                <div  ng-show = "isNew && input.modelType == 'single'" class="rounded-box">
+
+                                    <div style="text-align: center">---- Select the base resource type ---- </div>
+                                    <div class="row">
+                                        <div class="col-sm-7 col-md-7">
+                                            <select ng-change="selectBaseType(input.baseType)" ng-model="input.baseType" class="form-control"
+
+                                                    ng-options="type.name for type in allResourceTypes">
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-5 col-md-5">
+                                            <input type="checkbox" ng-model="input.createElementsFromBase"/> Copy elements into model
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+
+
+                            </div>
+
+
+                            <div ng-show="isNew && input.modelType == 'clone'" class="rounded-box">
+                                <div style="text-align: center;">---- Select model to copy from ---- </div>
 
                                 <select class="form-control" ng-model="input.clone"
                                         ng-options = "entry.resource.name for entry in allModels.entry"></select>
@@ -67,7 +106,7 @@
                         <div class="col-md-6 col-sm-6">
                             <label>Purpose/Description of model</label>
                             <div class="form-group">
-                                <textarea class="form-control" rows="4" ng-model="input.purpose"
+                                <textarea class="form-control" rows="5" ng-model="input.purpose"
                                           placeholder="Why has this model been developed? What is it intended to do?"></textarea>
                             </div>
                         </div>
@@ -86,7 +125,7 @@
 
 
             </uib-tab>
-            <uib-tab ng-show = "isNew && !input.clone" heading="Base Resource">
+            <uib-tab ng-show = "isNew && !input.clone && 1==2" heading="Base Resource ">
                 <br/>
 
                 <div class="row">

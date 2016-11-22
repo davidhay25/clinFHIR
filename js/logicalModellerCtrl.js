@@ -67,6 +67,33 @@ angular.module("sampleApp")
 
             }
 
+            //load the indicated model...
+            $scope.loadReferencedModel = function(url){
+                //find the indicated model (based on the url
+
+                $scope.history = $scope.history || []
+                $scope.history.push({resource:$scope.currentSD})    //save the current model
+
+                for (var i=0; i<$scope.bundleModels.entry.length; i++) {
+                    var resource = $scope.bundleModels.entry[i].resource;
+                    if (resource.url == url) {
+                        selectEntry({resource:resource});
+
+
+
+                        break;
+                    }
+                }
+            };
+
+            //re-load the previous mmodel
+            $scope.goBack = function() {
+                var entry = $scope.history.pop();
+                if (entry) {
+                    selectEntry(entry);
+                }
+            }
+
             
             $scope.showLMSelector = function(){
                 $scope.leftPaneClass = "col-sm-2 col-md-2"
@@ -422,6 +449,7 @@ angular.module("sampleApp")
                                     //
                                 }
                             } else {
+                                $scope.input.modelType = 'multiple'
                                 //$scope.input.name = 'myModel';
                                 //$scope.input.short='A new model';
                             }
@@ -471,7 +499,7 @@ angular.module("sampleApp")
                                         }
 
                                     },function(err){
-                                        console.log(err);
+                                       // console.log(err);
                                         //as long as the status is 404 or 410, it's save to create a new one...
                                         if (err.status == 404 || err.status == 410) {
                                             $scope.canSave = true;
@@ -488,6 +516,7 @@ angular.module("sampleApp")
 
                             $scope.save = function(){
                                 var vo = {};
+                                vo.modelType = $scope.input.modelType;
                                 vo.name = $scope.input.name;
                                 vo.title = $scope.input.title;
                                 vo.purpose = $scope.input.purpose || 'purpose';
@@ -544,6 +573,47 @@ angular.module("sampleApp")
                                 $scope.treeData =  [rootNode]
                                 $scope.isDirty = true;      //as this has not been saved;
 
+                                /*
+                                switch (result.modelType) {
+                                    case 'single' :
+                                        if (result.baseType && result.createElementsFromBase) {
+                                            //if the user specified a base type, then pre-populate a model from that base
+
+
+                                            logicalModelSvc.createFromBaseType($scope.treeData, result.baseType, $scope.rootName).then(
+                                                function () {
+                                                    drawTree();
+                                                    makeSD();
+                                                    //add it to the list so we can see it
+                                                    $scope.bundleModels.entry.push({resource: $scope.SD})
+                                                    $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
+                                                },
+                                                function (err) {
+                                                    alert(angular.toJson(err))
+                                                }
+                                            )
+                                        }
+                                        break;
+                                    case 'clone' :
+                                        delete $scope.modelHistory;
+                                        delete $scope.selectedNode;
+
+                                        $scope.currentSD = logicalModelSvc.clone(result.clone,result.name);
+
+                                        console.log($scope.currentSD);
+                                        $scope.isDirty = true;  //as the model has noy been saved...
+                                        $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.currentSD)
+                                        console.log($scope.treeData)
+                                        $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
+                                        drawTree();
+                                        makeSD();
+                                        break;
+                                    case 'multiple' :
+                                        break;
+
+                                }
+                                */
+
                                 if (result.clone) {
                                     //if the user specified to copy from another model
 
@@ -559,7 +629,7 @@ angular.module("sampleApp")
                                     $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                                     drawTree();
                                     makeSD();
-                                    
+
                                 } else if (result.baseType && result.createElementsFromBase) {
                                     //if the user specified a base type, then pre-populate a model from that base
 
@@ -661,7 +731,7 @@ angular.module("sampleApp")
                     selectEntry(entry)
                 }
 
-                function selectEntry(entry) {
+                function selectEntryDEP(entry) {
                     delete $scope.modelHistory;
                     delete $scope.selectedNode;
                     $scope.isDirty = false;
@@ -718,6 +788,60 @@ angular.module("sampleApp")
 
 
             };
+
+            function selectEntry(entry) {
+                delete $scope.modelHistory;
+                delete $scope.selectedNode;
+                $scope.isDirty = false;
+                $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
+                console.log($scope.treeData)
+                $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
+                drawTree();
+                makeSD();
+                $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
+                loadHistory($scope.rootName);
+
+                var refChat = firebase.database().ref().child("chat").child($scope.rootName);
+                refChat.on('value', function(snapshot) {
+                    console.log(snapshot.val());
+                    var data = snapshot.val();
+                    if (! data) {
+                        //this will be the first chat for this model. Create the base..
+                        var key = $scope.rootName;      //the key for this particular models chat in the database
+                        var conv = {path : key,user: {email:'a@b'},children:[]}
+                        var update = {};
+                        update[key] = conv;
+
+                        firebase.database().ref().child("chat").update(update)
+
+                        $scope.input.newCommentboxInx = -1;
+                        $scope.input.modelChatData = conv;      //the format for storage
+                        $scope.input.modelChat = logicalModelSvc.generateChatDisplay(conv); //the format for display
+
+                    } else {
+                        $scope.input.newCommentboxInx = -1;
+                        $scope.input.modelChatData = data;
+                        $scope.input.modelChat = logicalModelSvc.generateChatDisplay(data);
+                    }
+
+                });
+
+                console.log(refChat);
+
+                /*
+                 logicalModelSvc.getModelHistory($scope.rootName).then(
+                 function(data){
+                 console.log(data.data)
+                 $scope.modelHistory = data.data;
+                 },
+                 function(err) {
+                 alert(angular.toJson(err))
+                 }
+                 )
+                 */
+
+
+            }
             
             function loadHistory(id) {
                 logicalModelSvc.getModelHistory(id).then(
