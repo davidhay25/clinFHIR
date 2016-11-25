@@ -430,8 +430,12 @@ angular.module("sampleApp")
                         $scope.input.valid = false;
 
                         $scope.add = function() {
-                            var svr = {name:$scope.input.name,url:$scope.input.url,version:parseInt($scope.input.version,10)}
-                            console.log(svr);
+                            var svr = {name:$scope.input.name,url:$scope.input.url,
+                                version:parseInt($scope.input.version,10),everythingOperation:$scope.input.everything}
+
+                            
+                            
+                            //console.log(svr);
                             appConfigSvc.addServer(svr,$scope.input.terminology);
                             $scope.$close();
 
