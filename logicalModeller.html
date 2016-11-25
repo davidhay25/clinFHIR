@@ -104,7 +104,7 @@
 
                     </a>
                 </div>
-                <div class="col-md-5 col-sm-5">
+                <div class="col-md-3 col-sm-3">
 
                     <span class="navbar-text pull-right"> {{conformanceServer.name}}</span>
 
@@ -124,12 +124,19 @@
 
                 </div>
 
-                <div class="col-md-3 col-sm-3">
-                    <div class="navbar-text clickable" ng-show="LMSelectorVisible" ng-click="hideLMSelector()">Hide Selector</div>
-                    <div class="navbar-text clickable" ng-hide="LMSelectorVisible" ng-click="showLMSelector()">Show Selector</div>
+                <div class="col-md-5 col-sm-5">
+                    <div ng-hide = "loadedFromBookmark">
+                        <div class="navbar-text clickable" ng-show="LMSelectorVisible" ng-click="hideLMSelector()">Hide Selector</div>
+                        <div class="navbar-text clickable" ng-hide="LMSelectorVisible" ng-click="showLMSelector()">Show Selector</div>
+
+                    </div>
 
                     <form ng-show="isDirty" class="navbar-form">
-                    <button ng-show="isDirty" class="btn btn-success pull-right" ng-click="save()">Save model</button>
+                        <button ng-show="isDirty" class="btn btn-success pull-right" ng-click="save()">Save model</button>
+                    </form>
+
+                    <form ng-show="currentSD && !loadedFromBookmark" class="navbar-form">
+                        <button class="btn btn-warning pull-right" ng-click="generateShortCut()">Generate Shortcut</button>
                     </form>
 
                 </div>

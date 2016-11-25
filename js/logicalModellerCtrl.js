@@ -173,6 +173,78 @@ angular.module("sampleApp")
                 }
             });
 
+/*
+            console.log($location.hash())
+
+
+            var sc = $firebaseObject(firebase.database().ref().child("shortCut").child("tst"));
+            sc.config = {conformanceServer:appConfigSvc.getCurrentConformanceServer()};
+            sc.$save()
+
+            sc.$loaded().then(
+                function(){
+                    console.log( sc.config)
+                }
+            )
+
+*/
+            var hash = $location.hash();
+            if (hash) {
+                var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
+                sc.$loaded().then(
+                    function(){
+                        console.log( sc.config)
+                        //vselectEntry(entry)
+                        $scope.loadedFromBookmark = true;
+
+                        //set the conformance server to the one in the bookmark
+                        var conformanceServer =  sc.config.conformanceServer;
+                        appConfigSvc.setServerType('conformance',conformanceServer.url);
+
+                        var id = sc.config.model.id;    //the id of the model on this server
+                        //get the model from the server...
+                        var url = conformanceServer.url + 'StructureDefinition/'+id;
+                        GetDataFromServer.adHocFHIRQuery(url).then(
+                            function(data){
+                                var model = data.data;
+                                $scope.hideLMSelector();            //only want to see this model...
+                                selectEntry({resource:model});       //select the model
+                            },
+                            function(){
+                                modalService.showModal({}, {bodyText: "The model with the id '"+id + "' is not on the "+conformanceServer.name + " server"})
+                            }
+                        )
+
+
+
+                    }
+                )
+            }
+
+
+            $scope.generateShortCut = function() {
+                var hash = "";
+                var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+                for( var i=0; i < 5; i++ ) {
+                    hash += possible.charAt(Math.floor(Math.random() * possible.length));
+                }
+
+                var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
+                sc.config = {conformanceServer:appConfigSvc.getCurrentConformanceServer()};
+                sc.config.model = {id:$scope.currentSD.id}
+                sc.$save().then(
+                    function(){
+                        modalService.showModal({}, {bodyText: "The shortcut '" + hash + "' has been generated for this model"})
+                    }
+                )
+
+
+
+            };
+
+
+
             $scope.login=function(){
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
@@ -560,7 +632,7 @@ angular.module("sampleApp")
                             } else {
                                 //this is a new model
 
-                                console.log(result);
+                                //console.log(result);
                                
 
                                 //this is new
@@ -784,8 +856,6 @@ angular.module("sampleApp")
 
 
                 }
-
-
 
             };
 
