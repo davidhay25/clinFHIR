@@ -7,6 +7,10 @@ angular.module("sampleApp")
             $scope.input = {};
             $scope.treeData = [];           //populates the resource tree
 
+            $scope.mdOptions = {
+                controls: ["bold", "italic", "separator", "bullets","separator", "heading","separator", "preview"]
+            }
+
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";

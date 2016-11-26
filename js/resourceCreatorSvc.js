@@ -2718,6 +2718,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     include = false;
                 }
 
+                
+
+
                 //some profiles seem to have excluded element in the snapshot (eg care connect)
                 if (ed.max == '0') {
                     include = false;
