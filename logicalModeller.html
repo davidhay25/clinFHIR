@@ -694,13 +694,18 @@
                                               text-preview="Preview"
                                               text-provide-text="Site name"
                                               text-provide-link="Site link"
-                                              show-preview="false"
+
                                               name="thearea"
                                               placeholder="Enter your comments about this version of the model"
                                               options="mdOptions" >
 
                             </markdown-editor>
                         </form>
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12">
+                                <div class="pull-right"><button class="btn btn-link" ng-click="saveComment()">Save</button> </div>
+                            </div>
+                        </div>
                         <h4>Others comments</h4>
                     </uib-tab>
                 </uib-tabset>

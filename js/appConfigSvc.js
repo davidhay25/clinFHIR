@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2016-11-22';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2016-11-26';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};
@@ -32,6 +32,7 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.baseTypeForModel = 'http://clinfhir.com/fhir/StructureDefinition/baseTypeForModel';
 
         defaultConfig.standardSystem.identifierSystem = 'http://clinfhir.com/fhir/NamingSystem/identifier';
+        defaultConfig.standardSystem.practitionerIdentifierSystem = 'http://clinfhir.com/fhir/NamingSystem/practitioner';
 
         var version = {current:'2.0.0',versionHistory:[]}
         

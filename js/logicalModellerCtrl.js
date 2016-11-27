@@ -167,12 +167,27 @@ angular.module("sampleApp")
                 if (user) {
                     $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
                     logicalModelSvc.setCurrentUser(user);
+
+//console.log(user)
+                    //return the practitioner resource that corresponds to the current user
+                    GetDataFromServer.getPractitionerByLogin(user.uid).then(
+                        function(practitioner){
+                            //console.log(practitioner)
+                            $scope.Practitioner = practitioner;
+
+                        },function (err) {
+                            alert(err)
+                        }
+                    )
+
+
                     //console.log(user,$rootScope.userProfile);
                     delete $scope.showNotLoggedIn;
                 } else {
                     console.log('no user')
                     logicalModelSvc.setCurrentUser(null);
                     $scope.showNotLoggedIn = true;
+                    delete $scope.Practitioner;
                     // No user is signed in.
                 }
             });
@@ -225,6 +240,10 @@ angular.module("sampleApp")
                 )
             }
 
+
+            $scope.createTask = function(){
+                //create a new task for this practitioner against this model.
+            }
 
             $scope.generateShortCut = function() {
                 var hash = "";
@@ -866,18 +885,35 @@ angular.module("sampleApp")
             function selectEntry(entry) {
                 delete $scope.modelHistory;
                 delete $scope.selectedNode;
+                delete $scope.commentTask;      //the task to comment on this model...
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
-                console.log($scope.treeData)
+                //console.log($scope.treeData)
                 $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                 drawTree();
                 makeSD();
                 $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
                 loadHistory($scope.rootName);
 
+
+                //if there's a practitioner (ie a logged in user) then see if there is an active task to comment on this model
+                if ($scope.Practitioner) {
+                    var options = {active:true,basedOn:entry.resource}  
+                    GetDataFromServer.getTasksForPractitioner($scope.Practitioner).then(
+                        function(listTasks) {
+                            console.log(listTasks)
+                            if (listTasks.length > 0) {
+                                $scope.commentTask = listTasks[0];  //should only be 1 active task for this practitioner for this model
+                            }
+                        }
+
+                    )
+                }
+
+
                 var refChat = firebase.database().ref().child("chat").child($scope.rootName);
                 refChat.on('value', function(snapshot) {
-                    console.log(snapshot.val());
+                    //console.log(snapshot.val());
                     var data = snapshot.val();
                     if (! data) {
                         //this will be the first chat for this model. Create the base..
@@ -900,7 +936,9 @@ angular.module("sampleApp")
 
                 });
 
-                console.log(refChat);
+
+
+                //console.log(refChat);
 
                 /*
                  logicalModelSvc.getModelHistory($scope.rootName).then(

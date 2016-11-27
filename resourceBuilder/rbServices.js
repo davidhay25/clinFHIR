@@ -16,8 +16,35 @@ angular.module("sampleApp").
     }).
     service('SaveDataToServer', function($http,$q,appConfigSvc) {
     return {
-        //save a resource to the data server
+        addTaskForPractitioner : function (practitioner,options) {
+            //add a new task - options={basedOn: }
+            var deferred = $q.defer();
+
+            var task = {resourceType:'Task'};
+            task.id = 't'+ new Date().getTime();    //so the 
+            
+            task.basedOn = options.basedOn.resourceType + "/"+options.basedOn.id;
+            task.status = 'accepted';
+            task.owner = 'Practitioner/'+practitioner.id;
+            task.intent = 'proposal';
+            task.description = 'review of Logical Model'
+
+            //var url = appConfigSvc.getCurrentDataServer().url + 'Task';
+            this.saveResource(task).then(
+                function(){
+                    deferred.resolve(task)
+                
+            },function(err) {
+                    deferred.reject(err)
+                }
+            
+            );
+            return deferred.promise;
+
+        },
+        
         saveResource : function(resource) {
+            //save a resource to the data server
             var deferred = $q.defer();
             //alert('saving:\n'+angular.toJson(resource));
             //var config = appConfigSvc.config();
@@ -102,6 +129,104 @@ angular.module("sampleApp").
 }).
     service('GetDataFromServer', function($http,$q,appConfigSvc,Utilities,$localStorage) {
     return {
+        
+        getTasksForPractitioner : function (practitioner,options) {
+            var deferred = $q.defer();
+
+            //the system used by clinFHIR for practitioners...
+            var practitionerSystem = appConfigSvc.config().standardSystem.practitionerIdentifierSystem;
+
+            var url = appConfigSvc.getCurrentDataServer().url +
+                "Task?owner:Practitioner="+practitioner.id;
+
+            if (options.active) {
+                url += "&status=requested,accepted";
+            }
+
+            //if there's a based on, then construct a relative reference
+            var basedOn;
+            if (options.basedOn) {
+                basedOn = options.basedOn.resourceType + "/"+options.basedOn.id;
+            }
+
+            this.adHocFHIRQueryFollowingPaging(url).then(
+                function(data) {
+                    var lst = [];
+
+                    if (data.data.entry) {
+                        data.data.entry.forEach(function(entry){
+                            if (basedOn) {
+                                //see if the 'basedOn' reference matches the id of the passed in resource. Assume relative reference for now... todo
+                                //ie that the task is on the same server as the practitiober (Data). Not always true...
+
+                                if (basedOn == entry.resource.basedOn) {
+                                    lst.push(entry.resource)
+                                }
+                            } else {
+                                lst.push(entry.resource)
+                            }
+                        })
+                    }
+
+                   // if (options)
+
+
+
+                    deferred.resolve(lst);    //return a bundle of the tasks (if any)
+                },
+                function(err) {
+
+                }
+            );
+
+            return deferred.promise;
+
+        },
+        getPractitionerByLogin : function (loginIdentifier,details) {
+            //return a Practitioner resource with an identifier that matches the login identifier. Create if not exists...
+            var deferred = $q.defer();
+
+            //the system used by clinFHIR for practitioners...
+            var practitionerSystem = appConfigSvc.config().standardSystem.practitionerIdentifierSystem;
+
+            var url = appConfigSvc.getCurrentDataServer().url +
+                "Practitioner?identifier="+practitionerSystem + "|"+loginIdentifier;
+
+            this.adHocFHIRQuery(url).then(
+                function(data) {
+                    //the practitioner was located (at least one)...
+                    if (data.data && data.data.entry && data.data.entry.length > 0) {
+                        //just take the first one. Should probably check if there is > 1...
+                        deferred.resolve(data.data.entry[0].resource);      //return the
+                    } else {
+                        //so no practitioner was found - create one using the details given...
+                        //use a PUT so we know whhat the id is - a bit lazy really...
+                        var pract = {resourceType:'Practitioner'};
+                        pract.identifier =[{system:practitionerSystem,value:loginIdentifier}];
+                        pract.id = 'clinFhir'+loginIdentifier;
+                        var createUrl = appConfigSvc.getCurrentDataServer().url + "Practitioner/"+pract.id;
+                        $http.put(createUrl,pract).then(
+                            function(){
+                                deferred.resolve(pract);
+                            },
+                            function (err) {
+                                alert('error saving practitioner ' + angular.toJson(err));
+                                deferred.reject();
+                            }
+                        )
+
+                    }
+
+
+                },
+                function(err) {
+                    alert('error getting practitioner ' + angular.toJson(err));
+                    deferred.reject();
+                }
+            )
+
+            return deferred.promise;
+        },
         getValueSet : function(ref,cb) {
             var deferred = $q.defer();
             Utilities.getValueSetIdFromRegistry(ref,function(resp){
@@ -407,6 +532,7 @@ angular.module("sampleApp").
 }).
     service('Utilities', function($http,$q,$localStorage,appConfigSvc,modalService) {
     return {
+
         getConformanceResourceDEP : function(callback) {
             //return the conformance resource  (cached the first time ) in a simple callback for the current data server
             if ($localStorage.conformanceResource) {
