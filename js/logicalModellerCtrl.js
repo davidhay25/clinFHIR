@@ -931,6 +931,8 @@ angular.module("sampleApp")
                 delete $scope.modelHistory;
                 delete $scope.selectedNode;
                 delete $scope.commentTask;      //the task to comment on this model...
+                delete $scope.input.mdComment;  //the comment
+                delete $scope.taskOutputs;      //the outputs of the task (Communication resource currently)
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
                 //console.log($scope.treeData)
@@ -944,7 +946,7 @@ angular.module("sampleApp")
                 //if there's a practitioner (ie a logged in user) then see if there is an active task to comment on this model
                 if ($scope.Practitioner) {
                     var options = {active:true,basedOn:entry.resource}  
-                    GetDataFromServer.getTasksForPractitioner($scope.Practitioner).then(
+                    GetDataFromServer.getTasksForPractitioner($scope.Practitioner,options).then(
                         function(listTasks) {
                             console.log(listTasks)
                             if (listTasks.length > 0) {

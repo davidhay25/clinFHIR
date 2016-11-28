@@ -236,7 +236,8 @@ angular.module("sampleApp").
         },
         getTasksForPractitioner : function (practitioner,options) {
             var deferred = $q.defer();
-            options = options || {active : true};   //default to only active tasks
+            options = options || {}
+            options.active = options.active || true;   //default to only active tasks
 
             //the system used by clinFHIR for practitioners...
             var practitionerSystem = appConfigSvc.config().standardSystem.practitionerIdentifierSystem;
@@ -264,9 +265,11 @@ angular.module("sampleApp").
                                 //see if the 'basedOn' reference matches the id of the passed in resource. Assume relative reference for now... todo
                                 //ie that the task is on the same server as the practitiober (Data). Not always true...
 
-                                if (basedOn == entry.resource.basedOn) {
+                                if (entry.resource.basedOn && basedOn == entry.resource.basedOn[0].reference) {
                                     lst.push(entry.resource)
                                 }
+
+
                             } else {
                                 lst.push(entry.resource)
                             }
