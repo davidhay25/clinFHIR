@@ -3,7 +3,7 @@
 angular.module("sampleApp")
     .controller('logicalModellerCtrl',
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
-                  GetDataFromServer,$firebaseObject,$location,igSvc) {
+                  GetDataFromServer,$firebaseObject,$location,igSvc,SaveDataToServer) {
             $scope.input = {};
             $scope.treeData = [];           //populates the resource tree
 
@@ -14,11 +14,7 @@ angular.module("sampleApp")
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
-            //$scope.bundleModels= [];    //the current list of models
 
-
-
-          //  $scope.input.modelChat = logicalModelSvc.generateChatDisplay(conv);
             $scope.input.newCommentboxInx = -1;
 
 
@@ -34,8 +30,46 @@ angular.module("sampleApp")
                 $scope.currentLevelKey = levelKey;
 
             }
-            //save a new comment from the chat
+
+
+
             $scope.saveComment = function(parent) {
+                //save the comment. For now, a single comment only...
+                var Communication;
+                if ($scope.taskOutputs.length == 0) {
+                    //create a new communication
+                    var type = {text: 'Communication'}
+                    Communication = {resourceType: 'Communication', payload: []};
+                    Communication.payload.push({contentString: $scope.input.mdComment});
+                    Communication.id = 't' + new Date().getTime();
+                } else {
+                    //update an existing one...
+                    Communication = $scope.taskOutputs[0];      //these are only Communication resources right now...
+                    Communication.payload = Communication.payload || [];    //should be unnessecary...
+                    Communication.payload[0] = ({contentString: $scope.input.mdComment});
+                }
+
+                $scope.showWaiting = true;
+                SaveDataToServer.addOutputToTask($scope.commentTask,Communication,type).then(
+                    function(){
+                        alert('Communication saved')
+                    },function(err){
+                        alert('error adding Communication: '+angular.toJson(err))
+                    }
+                ).finally(function(){
+                    $scope.showWaiting = false;
+                })
+
+
+
+
+                
+            };
+
+            //save a new comment from the chat
+
+
+            $scope.saveCommentDEP = function(parent) {
                 console.log(parent)
                 var user = logicalModelSvc.getCurrentUser();
 
@@ -169,7 +203,7 @@ angular.module("sampleApp")
                     logicalModelSvc.setCurrentUser(user);
 
 //console.log(user)
-                    //return the practitioner resource that corresponds to the current user
+                    //return the practitioner resource that corresponds to the current user (the service will create if absent)
                     GetDataFromServer.getPractitionerByLogin(user.uid).then(
                         function(practitioner){
                             //console.log(practitioner)
@@ -243,7 +277,18 @@ angular.module("sampleApp")
 
             $scope.createTask = function(){
                 //create a new task for this practitioner against this model.
-            }
+                SaveDataToServer.addTaskForPractitioner($scope.Practitioner,{basedOn:$scope.currentSD}).then(
+                    function(task){
+                        $scope.commentTask = task
+
+                    },
+                    function(err) {
+                        alert(angular.toJson(err))
+                    }
+                )
+            };
+
+
 
             $scope.generateShortCut = function() {
                 var hash = "";
@@ -904,13 +949,32 @@ angular.module("sampleApp")
                             console.log(listTasks)
                             if (listTasks.length > 0) {
                                 $scope.commentTask = listTasks[0];  //should only be 1 active task for this practitioner for this model
+
+                                //now get any 'output' resources that exist for this task. Will only be Communications...
+                                GetDataFromServer.getOutputsForTask($scope.commentTask,'Communication').then(
+                                    function(lst){
+                                        $scope.taskOutputs = lst;
+                                        console.log(lst)
+
+                                        if (lst.length > 0 && lst[0].payload) {
+                                            //if there is at least 1 communication - set the text...
+                                            //todo - this only supports a single comment per practitioner....
+                                            $scope.input.mdComment = lst[0].payload[0].contentString;
+                                        }
+
+                                    },
+                                    function(err) {
+                                        alert('Error getting task outputs: '+angular.toJson(err))
+                                    }
+                                )
+
                             }
                         }
 
                     )
                 }
 
-
+/*
                 var refChat = firebase.database().ref().child("chat").child($scope.rootName);
                 refChat.on('value', function(snapshot) {
                     //console.log(snapshot.val());
@@ -936,7 +1000,7 @@ angular.module("sampleApp")
 
                 });
 
-
+*/
 
                 //console.log(refChat);
 

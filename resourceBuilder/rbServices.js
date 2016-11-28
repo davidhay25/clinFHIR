@@ -16,16 +16,45 @@ angular.module("sampleApp").
     }).
     service('SaveDataToServer', function($http,$q,appConfigSvc) {
     return {
+        addOutputToTask : function(task,resource,type) {
+            //save the resource, then make a reference to it from the task. Assume that the resource has an id...
+            var deferred = $q.defer();
+            var that =this;
+            this.saveResource(resource).then(
+                function(data) {
+                    //resource has been saved - now add a reference in the task. Assume a relative reference
+                    var ref = resource.resourceType + '/' + resource.id;
+                    task.output = task.output || []
+                    task.output.push({type:type,valueReference : {reference:ref}})
+
+                    that.saveResource(task).then(
+                        function(data) {
+                            deferred.resolve()
+                        },
+                        function(err){
+                            deferred.reject(err);
+                        }
+                    )
+
+                },
+                function(err) {
+                    deferred.reject(err);
+                    //alert('error saving resource: '+angular.toJson(err))
+                }
+            );
+            return deferred.promise;
+
+        },
         addTaskForPractitioner : function (practitioner,options) {
             //add a new task - options={basedOn: }
             var deferred = $q.defer();
 
             var task = {resourceType:'Task'};
-            task.id = 't'+ new Date().getTime();    //so the 
+            task.id = 't'+ new Date().getTime();    //so the new task can be used without reading from the server....
             
-            task.basedOn = options.basedOn.resourceType + "/"+options.basedOn.id;
+            task.basedOn = [{reference:options.basedOn.resourceType + "/"+options.basedOn.id}];
             task.status = 'accepted';
-            task.owner = 'Practitioner/'+practitioner.id;
+            task.owner = {reference:'Practitioner/'+practitioner.id};
             task.intent = 'proposal';
             task.description = 'review of Logical Model'
 
@@ -129,9 +158,85 @@ angular.module("sampleApp").
 }).
     service('GetDataFromServer', function($http,$q,appConfigSvc,Utilities,$localStorage) {
     return {
-        
+        getOutputsForTask : function(task,type) {
+            //return any communication resources created for this task. Type indicates a single resource type only (eg Communcation)
+
+
+            var getResource = function(url,ar) {
+                //reference
+                $http.get(url).then(
+                    function(data){
+                        ar.push(data.data)
+                    },
+                    function(err) {
+                        console.log(err)
+                    }
+                )
+            }
+
+
+            var deferred = $q.defer();
+            var baseUrl = appConfigSvc.getCurrentDataServer().url;// + "Communication?_id="
+            var arQuery = [];
+            var arResources = [];
+            if (task && task.output) {
+                task.output.forEach(function(out){
+                    if (out.valueReference && out.valueReference.reference) {
+                        //this is a referrence to a resource (we assume on the data server)
+                        var ref = out.valueReference.reference;     //the logical reference in the task...
+                        var include = true;
+                        if (type && ref.indexOf(type) == -1) {
+                            include=false;
+                        }
+
+                        if (include) {
+                            arQuery.push(
+
+                                $http.get(baseUrl+ ref).then(
+                                    function(data){
+                                        arResources.push(data.data)
+                                    },
+                                    function(err) {
+                                        console.log(err)
+                                    }
+                                )
+
+                                //getResource(baseUrl+ ref,arResources)
+
+                            )
+                        }
+
+
+                    }
+                })
+
+                console.log(arQuery)
+
+                $q.all(arQuery).then(
+                    function(){
+                        deferred.resolve(arResources)
+                    },
+                    function(err){
+                        deferred.reject(err)
+                    }
+                )
+            } else {
+                //no outputs on the task...
+                deferred.resolve([])
+            }
+
+
+
+
+            return deferred.promise;
+
+
+
+
+        },
         getTasksForPractitioner : function (practitioner,options) {
             var deferred = $q.defer();
+            options = options || {active : true};   //default to only active tasks
 
             //the system used by clinFHIR for practitioners...
             var practitionerSystem = appConfigSvc.config().standardSystem.practitionerIdentifierSystem;
