@@ -52,7 +52,7 @@ angular.module("sampleApp").
             var task = {resourceType:'Task'};
             task.id = 't'+ new Date().getTime();    //so the new task can be used without reading from the server....
             
-            task.basedOn = [{reference:options.basedOn.resourceType + "/"+options.basedOn.id}];
+            task.focus = {reference:options.focus.resourceType + "/"+options.focus.id};
             task.status = 'accepted';
             task.owner = {reference:'Practitioner/'+practitioner.id};
             task.intent = 'proposal';
@@ -174,7 +174,6 @@ angular.module("sampleApp").
                 )
             }
 
-
             var deferred = $q.defer();
             var baseUrl = appConfigSvc.getCurrentDataServer().url;// + "Communication?_id="
             var arQuery = [];
@@ -201,7 +200,7 @@ angular.module("sampleApp").
                                     }
                                 )
 
-                                //getResource(baseUrl+ ref,arResources)
+
 
                             )
                         }
@@ -234,6 +233,11 @@ angular.module("sampleApp").
 
 
         },
+        getTasksBasedOn : function(resource) {
+            //get all the tasks that are basedo on a given resource
+            
+
+        },
         getTasksForPractitioner : function (practitioner,options) {
             var deferred = $q.defer();
             options = options || {}
@@ -249,10 +253,10 @@ angular.module("sampleApp").
                 url += "&status=requested,accepted";
             }
 
-            //if there's a based on, then construct a relative reference
-            var basedOn;
-            if (options.basedOn) {
-                basedOn = options.basedOn.resourceType + "/"+options.basedOn.id;
+            //if there's a focus resource, then construct a relative reference
+            var focus;
+            if (options.focus) {
+                focus = options.focus.resourceType + "/"+options.focus.id;
             }
 
             this.adHocFHIRQueryFollowingPaging(url).then(
@@ -261,11 +265,11 @@ angular.module("sampleApp").
 
                     if (data.data.entry) {
                         data.data.entry.forEach(function(entry){
-                            if (basedOn) {
-                                //see if the 'basedOn' reference matches the id of the passed in resource. Assume relative reference for now... todo
+                            if (focus) {
+                                //see if the 'focus' reference matches the id of the passed in resource. Assume relative reference for now... todo
                                 //ie that the task is on the same server as the practitiober (Data). Not always true...
 
-                                if (entry.resource.basedOn && basedOn == entry.resource.basedOn[0].reference) {
+                                if (entry.resource.focus && focus == entry.resource.focus.reference) {
                                     lst.push(entry.resource)
                                 }
 

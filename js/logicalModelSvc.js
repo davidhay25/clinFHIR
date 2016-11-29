@@ -209,9 +209,20 @@ angular.module("sampleApp")
                             //otherwise the parent can be inferred from the path
                             arPath.pop();//
                             item.parent = arPath.join('.');
+                            if (ed.min == 1) {
+                                item['li_attr'] = {class : 'elementRequired'};
+                            }
+
+                            if (ed.fixedString) {
+                                item['li_attr'] = {class : 'elementFixed'};
+                            }
+
+
                         }
                         item.state = {opened:true};     //default to fully expanded
 
+
+                        item.data.fixedString =ed.fixedString;      //todo, this should probably be a type compatible with this element
                         item.data.path = path;
                         item.data.name = item.text;
                         item.data.short = ed.short;
@@ -297,7 +308,7 @@ angular.module("sampleApp")
             makeSD : function(scope,treeData) {     //todo - don't pass in scope...
                 //create a StructureDefinition from the treeData
                 var header = treeData[0].data.header || {} ;     //the first node has the header informatiion
-                console.log(header)
+                //console.log(header)
                 var mappingCommentUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
                 var mapToModelExtensionUrl = appConfigSvc.config().standardExtensionUrl.mapToModel;
                 var baseTypeForModelUrl = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
@@ -313,9 +324,7 @@ angular.module("sampleApp")
                    // this.addSimpleExtension(sd,baseTypeForModel,header.baseType)
                 }
 
-                
-                
-                
+
                 sd.id = scope.rootName;
                 sd.url = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/"+sd.id;
                 sd.name = header.name;
@@ -351,7 +360,6 @@ angular.module("sampleApp")
                 sd.baseDefinition ="http://hl7.org/fhir/StructureDefinition/Element";
                 sd.type = scope.rootName;
                 sd.derivation = 'specialization';
-
 
                 sd.snapshot = {element:[]};
 
@@ -427,7 +435,7 @@ angular.module("sampleApp")
 
                     }
 
-
+                    ed.fixedString = data.fixedString;  //todo needs to be a compatible type
 
                     sd.snapshot.element.push(ed)
                 });

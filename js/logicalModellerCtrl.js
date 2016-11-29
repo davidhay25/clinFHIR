@@ -37,28 +37,43 @@ angular.module("sampleApp")
                 //save the comment. For now, a single comment only...
                 var Communication;
                 if ($scope.taskOutputs.length == 0) {
-                    //create a new communication
+                    //create a new communication and add it to the task...
                     var type = {text: 'Communication'}
                     Communication = {resourceType: 'Communication', payload: []};
                     Communication.payload.push({contentString: $scope.input.mdComment});
                     Communication.id = 't' + new Date().getTime();
+
+                    $scope.showWaiting = true;
+                    SaveDataToServer.addOutputToTask($scope.commentTask,Communication,type).then(
+                        function(){
+                            alert('Communication saved')
+                        },function(err){
+                            alert('error adding Communication: '+angular.toJson(err))
+                        }
+                    ).finally(function(){
+                        $scope.showWaiting = false;
+                    })
+
+
                 } else {
                     //update an existing one...
                     Communication = $scope.taskOutputs[0];      //these are only Communication resources right now...
                     Communication.payload = Communication.payload || [];    //should be unnessecary...
                     Communication.payload[0] = ({contentString: $scope.input.mdComment});
+                    $scope.showWaiting = true;
+                    SaveDataToServer.saveResource(Communication).then(
+                        function(){
+
+                        },
+                        function(err) {
+                            alert('error updating Communication: '+angular.toJson(err))
+                        }
+                    ).finally(function(){
+                        $scope.showWaiting = false;
+                    })
                 }
 
-                $scope.showWaiting = true;
-                SaveDataToServer.addOutputToTask($scope.commentTask,Communication,type).then(
-                    function(){
-                        alert('Communication saved')
-                    },function(err){
-                        alert('error adding Communication: '+angular.toJson(err))
-                    }
-                ).finally(function(){
-                    $scope.showWaiting = false;
-                })
+
 
 
 
@@ -217,11 +232,17 @@ angular.module("sampleApp")
 
                     //console.log(user,$rootScope.userProfile);
                     delete $scope.showNotLoggedIn;
+
+
+                    checkForComments($scope.currentSD);
+
                 } else {
                     console.log('no user')
                     logicalModelSvc.setCurrentUser(null);
                     $scope.showNotLoggedIn = true;
                     delete $scope.Practitioner;
+                    delete $scope.taskOutputs;
+                    delete $scope.commentTask;
                     // No user is signed in.
                 }
             });
@@ -267,9 +288,7 @@ angular.module("sampleApp")
                                 modalService.showModal({}, {bodyText: "The model with the id '"+id + "' is not on the "+conformanceServer.name + " server"})
                             }
                         )
-
-
-
+                        
                     }
                 )
             }
@@ -277,9 +296,10 @@ angular.module("sampleApp")
 
             $scope.createTask = function(){
                 //create a new task for this practitioner against this model.
-                SaveDataToServer.addTaskForPractitioner($scope.Practitioner,{basedOn:$scope.currentSD}).then(
+                SaveDataToServer.addTaskForPractitioner($scope.Practitioner,{focus:$scope.currentSD}).then(
                     function(task){
                         $scope.commentTask = task
+                        $scope.taskOutputs = [];
 
                     },
                     function(err) {
@@ -942,10 +962,11 @@ angular.module("sampleApp")
                 $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
                 loadHistory($scope.rootName);
 
-
+                checkForComments(entry.resource);
+/*
                 //if there's a practitioner (ie a logged in user) then see if there is an active task to comment on this model
                 if ($scope.Practitioner) {
-                    var options = {active:true,basedOn:entry.resource}  
+                    var options = {active:true,focus:entry.resource}
                     GetDataFromServer.getTasksForPractitioner($scope.Practitioner,options).then(
                         function(listTasks) {
                             console.log(listTasks)
@@ -975,6 +996,7 @@ angular.module("sampleApp")
 
                     )
                 }
+                */
 
 /*
                 var refChat = firebase.database().ref().child("chat").child($scope.rootName);
@@ -1019,6 +1041,41 @@ angular.module("sampleApp")
                  */
 
 
+            }
+
+            function checkForComments(resource) {
+                //if there's a practitioner (ie a logged in user) then see if there is an active task to comment on this model
+                if (resource && $scope.Practitioner) {
+                    var options = {active:true,focus:resource}
+                    GetDataFromServer.getTasksForPractitioner($scope.Practitioner,options).then(
+                        function(listTasks) {
+                           // console.log(listTasks)
+                            if (listTasks.length > 0) {
+                                $scope.commentTask = listTasks[0];  //should only be 1 active task for this practitioner for this model
+
+                                //now get any 'output' resources that exist for this task. Will only be Communications...
+                                GetDataFromServer.getOutputsForTask($scope.commentTask,'Communication').then(
+                                    function(lst){
+                                        $scope.taskOutputs = lst;
+                                        console.log(lst)
+
+                                        if (lst.length > 0 && lst[0].payload) {
+                                            //if there is at least 1 communication - set the text...
+                                            //todo - this only supports a single comment per practitioner....
+                                            $scope.input.mdComment = lst[0].payload[0].contentString;
+                                        }
+
+                                    },
+                                    function(err) {
+                                        alert('Error getting task outputs: '+angular.toJson(err))
+                                    }
+                                )
+
+                            }
+                        }
+
+                    )
+                }
             }
             
             function loadHistory(id) {
@@ -1077,10 +1134,7 @@ angular.module("sampleApp")
                                 break;
                             }
                         }
-
-
-
-
+                        
 
                         $scope.input.multiplicity = 'opt';
 
@@ -1107,6 +1161,7 @@ angular.module("sampleApp")
                             $scope.input.comments = data.comments;
                             $scope.input.mapping = data.mapping;
                             $scope.input.mappingPath = data.mappingPath;
+                            $scope.input.fixedString = data.fixedString;
 
                             if (data.min == 0) {
                                 $scope.input.multiplicity = 'opt';
@@ -1186,6 +1241,7 @@ angular.module("sampleApp")
                             vo.type = [{code:$scope.input.dataType.code}];
                             vo.editNode = editNode;
                             vo.parentPath = parentPath;
+                            vo.fixedString = $scope.input.fixedString;
                             //coded elements...
                             if ($scope.isCoded) {
                                 vo.selectedValueSet = $scope.selectedValueSet;

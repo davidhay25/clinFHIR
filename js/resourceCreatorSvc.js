@@ -578,7 +578,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     } else {
                         //this is not an extension - don't include the standard components...
-                        if (exclusions.indexOf(propertyName) == -1) {
+                        //dec - text exclusions only operate on children of the root...
+                        if ( exclusions.indexOf(propertyName) == -1 || (dotCount !== 1 && propertyName == 'text')) {
                             elementDef.myData = {canAddChild: true, display: propertyName, displayClass: ""};
                             if (elementDef.min !== 0) {
                                 elementDef.myData.displayClass += 'elementRequired ';
@@ -2718,7 +2719,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     include = false;
                 }
 
-                
+
 
 
                 //some profiles seem to have excluded element in the snapshot (eg care connect)

@@ -487,7 +487,9 @@
                                 <tr ng-show="selectedNode.data.mapping"><td>Mapping notes</td><td>
                                     {{selectedNode.data.mapping}}
                                 </td>
-
+                                <tr ng-show="selectedNode.data.fixedString">
+                                    <td>Fixed</td><td>{{selectedNode.data.fixedString}}</td>
+                                </tr>
 
                                 <tr><td>Actions</td><td>
                                     <div ng-show="!firebase.auth().currentUser">
@@ -687,32 +689,47 @@
 
 
                     </uib-tab>
-                    <uib-tab heading="Comments">
+                    <uib-tab heading="Comments" ng-show="Practitioner">
                         <h4>Your comments</h4>
-                        <form name="form">
-                            <markdown-editor  ng-model="input.mdComment"
-                                              text-preview="Preview"
-                                              text-provide-text="Site name"
-                                              text-provide-link="Site link"
+                        <div ng-show="commentTask">
 
-                                              name="thearea"
-                                              placeholder="Enter your comments about this version of the model"
-                                              options="mdOptions" >
+                            <form name="form">
+                                <markdown-editor  ng-model="input.mdComment"
+                                                  text-preview="Preview"
+                                                  text-provide-text="Site name"
+                                                  text-provide-link="Site link"
 
-                            </markdown-editor>
-                        </form>
-                        <div class="row">
-                            <div class="col-sm-12 col-md-12">
-                                <div class="pull-right"><button class="btn btn-link" ng-click="saveComment()">Save</button> </div>
+                                                  name="thearea"
+                                                  placeholder="Enter your comments about this version of the model"
+                                                  options="mdOptions" >
+
+                                </markdown-editor>
+                            </form>
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12">
+                                    <div class="pull-right"><button class="btn btn-link" ng-click="saveComment()">Save</button> </div>
+                                </div>
                             </div>
                         </div>
+
+
+                        <div ng-hide="commentTask">
+                            <p><button ng-click="createTask()" class="btn btn-default">Click here </button> to add a comment about this model</p>
+                            <!--
+                            <p>Click <span ng-click="createTask()" class="clickable">here</span> to add a comment about this model</p> -->
+                        </div>
+
+
                         <h4>Others comments</h4>
 
+<!--
                         <button class="btn btn-default" ng-click="createTask()">Add Task</button>
 
-                        <pre>{{commentTask | json}}</pre>
+                        -->
 
-                        <pre>{{taskOutputs | json}}</pre>
+                        <pre ng-show="commentTask">{{commentTask | json}}</pre>
+
+                        <pre ng-show="taskOutputs">{{taskOutputs | json}}</pre>
 
 
                     </uib-tab>
