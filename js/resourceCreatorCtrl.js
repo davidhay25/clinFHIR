@@ -159,7 +159,6 @@ angular.module("sampleApp")
 
     };
 
-   
             
     var profile;                    //the profile being used as the base
     var type;                       //base type
@@ -195,6 +194,11 @@ angular.module("sampleApp")
     $scope.showQuery = function(conformanceUrl){
         $scope.displayMode="query";
         $rootScope.startup = {conformanceUrl:conformanceUrl};     //the query controller will automatically download and display this resource
+    };
+
+
+    $scope.showUserDetails = function() {
+        $scope.displayMode="userDetails";
     };
 
     //check for commands in the url

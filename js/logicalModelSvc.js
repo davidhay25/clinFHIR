@@ -8,6 +8,7 @@ angular.module("sampleApp")
         var currentUser;
         
         return {
+            
             insertModel : function(element,insertModel) {
 
             },

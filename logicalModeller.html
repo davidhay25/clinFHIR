@@ -211,24 +211,53 @@
             </div>
 
 
-            <ul class="list-group" style=" height:500px; overflow: auto;" >
-                <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.type == entry.resource.type}"
-                    ng-repeat="entry in bundleModels.entry"
-                    ng-click="selectModel(entry,$index)">
+            <uib-tabset>
+                <uib-tab heading="All">
 
-                    <div class="row">
-                        <div class="col-md-9 col-sm-9">
-                            <h4>{{entry.resource.name}}</h4>
-                        </div>
-                        <div class="col-md-3 col-sm-3">
-                            <em class="pull-right">{{entry.resource.status}}</em>
-                        </div>
-                    </div>
+                    <div><input type="text" class="form-control" placeholder="Filter model list by id" ng-model="input.filter" ng-change="filterModelList(input.filter)"/> </div>
 
-                    {{entry.resource.description | limitTo : 200}}
-                </li>
-            </ul>
+                    <ul class="list-group" style=" height:500px; overflow: auto;" >
+                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.type == entry.resource.type}"
+                            ng-repeat="entry in bundleModels.entry"
+                            ng-click="selectModel(entry,$index)">
 
+                            <div class="row">
+                                <div class="col-md-9 col-sm-9">
+                                    <h4>{{entry.resource.name}}</h4>
+                                </div>
+                                <div class="col-md-3 col-sm-3">
+                                    <em class="pull-right">{{entry.resource.status}}</em>
+                                </div>
+                            </div>
+
+                            {{entry.resource.description | limitTo : 200}}
+                        </li>
+                    </ul>
+
+
+
+                </uib-tab>
+                <uib-tab heading="Palette">
+
+                    <ul class="list-group" style=" height:500px; overflow: auto;" >
+                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.id == entry.item.display}"
+                            ng-repeat="entry in lmPalette.entry"
+                            ng-click="selectFromPalette(entry.item)">
+
+                            <div class="row">
+                                <div class="col-md-9 col-sm-9">
+                                    <h4>{{entry.item.reference | getLogicalID}}</h4>
+                                </div>
+
+                            </div>
+
+                            {{entry.resource.description | limitTo : 200}}
+                        </li>
+                    </ul>
+
+                    <pre>{{lmPalette | json}}</pre>
+                </uib-tab>
+            </uib-tabset>
 
 
 
@@ -259,11 +288,11 @@
             <uib-tabset ng-show="treeData.length > 0">
                 <uib-tab heading="Designer">
                     <br/>
-<!--
+
                     <span class="pull-right">
-                        <button ng-show="isDirty" class="btn btn-success" ng-click="save()">Save model</button>
+                        <button ng-show="1" class="btn btn-success" ng-click="addToPalette()">Add to Palette</button>
                     </span>
-                    -->
+
 
                 <div id="lmTreeView"></div>
 
@@ -276,24 +305,7 @@
 
                 <uib-tab heading="Table">
                     <br/>
-                    <!--
-                    <table class="table table-bordered table-condensed">
-                        <tr><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th></tr>
-                        <tr ng-repeat="ed in SD.snapshot.element">
-                            <td>
-                                <div  ng-click="selectNodeFromTable(ed.path)" class="clickable"
-                                        ng-style="{ 'padding-left': (ed.path | pathindent) }">{{ed.path | lastInPath}}</div>
-                            </td>
-                            <td>{{ed.type[0].code}}
-                                <span ng-show=""></span>
 
-                            </td>
-                            <td>{{ed.min}}..{{ed.max}}</td>
-                            <td>{{ed.definition}}</td>
-                        </tr>
-
-                    </table>
-                    -->
 
                     <table class="table table-bordered table-condensed">
                         <tr><th>Element</th><th>DataType</th><th>isRef</th><th>Mult.</th><th>Description</th></tr>
@@ -708,7 +720,7 @@
                                     </tr>
                                 </table>
                             </uib-tab>
-                            <uib-tab heading="Add Comment">
+                            <uib-tab heading="Add/Update Comment">
                                 <br/>
                                 <div ng-show="commentTask">
 

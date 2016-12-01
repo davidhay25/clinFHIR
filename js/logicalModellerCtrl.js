@@ -5,6 +5,9 @@ angular.module("sampleApp")
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
                   GetDataFromServer,$firebaseObject,$location,igSvc,SaveDataToServer,$window) {
             $scope.input = {};
+
+            $scope.code = {};
+            $scope.code.lmPalette = 'lmPalette';        //the list code for the paletteof models...
             $scope.treeData = [];           //populates the resource tree
 
             $scope.mdOptions = {
@@ -238,17 +241,19 @@ console.log(user);
                             //console.log(practitioner)
                             $scope.Practitioner = practitioner;
 
+                            checkForComments($scope.currentSD);     //get comments for this user against this model...
+                            getPalette(practitioner);       //get the palette of logical models
+
+
+
+
                         },function (err) {
                             alert(err)
                         }
-                    )
+                    );
 
-
-                    //console.log(user,$rootScope.userProfile);
                     delete $scope.showNotLoggedIn;
 
-
-                    checkForComments($scope.currentSD);
 
                 } else {
                     console.log('no user')
@@ -260,6 +265,39 @@ console.log(user);
                     // No user is signed in.
                 }
             });
+
+
+
+
+            function getPalette(practitioner)  {
+                delete $scope.palette;
+                GetDataFromServer.getListForPractitioner(practitioner,$scope.code.lmPalette).then(
+                    function(list) {
+                        console.log(list);
+                        if (list) {
+
+                            $scope.lmPalette = list;
+                        }
+                    }, function(err) {
+
+                    }
+                )
+            }
+
+            $scope.selectFromPalette = function(item) {
+                var url = appConfigSvc.getCurrentConformanceServer().url+item.reference;
+                GetDataFromServer.adHocFHIRQuery(url).then(
+                    function(data){
+                        console.log(data)
+                        selectEntry({resource:data.data})
+                    }, function(err) {
+                        alert('error getting model '+angular.toJson(err));
+                    }
+                );
+                console.log(item)
+            }
+
+
 
 /*
             console.log($location.hash())
@@ -346,8 +384,6 @@ console.log(user);
 
             };
 
-
-
             $scope.login=function(){
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
@@ -410,13 +446,73 @@ console.log(user);
                     function(data) {
                         $scope.bundleModels = data.data
                         $scope.bundleModels.entry = $scope.bundleModels.entry || [];    //in case there are no models
+
+                        $scope.bundleModels.entry.sort(function(ent1,ent2){
+                            if (ent1.resource.id > ent2.resource.id) {
+                                return 1
+                            } else {
+                                return -1
+                            }
+                        })
+
+                        //save all the models for the search facility
+                        $scope.originalAllModels = angular.copy($scope.bundleModels);
+
                     },
                     function(err){
-//alert(err)
+                        alert('Error loading models: ' + angular.toJson(err));
                     }
                 )
             };
 
+            //used to provide the filtering capability...
+            $scope.filterModelList = function(filter) {
+                filter = filter.toLowerCase();
+                $scope.bundleModels = {entry:[]};   //a mnimal bundle
+                $scope.originalAllModels.entry.forEach(function(entry){
+                    if (entry.resource.id.toLowerCase().indexOf(filter) > -1) {
+                        $scope.bundleModels.entry.push(entry);
+                    }
+                })
+            };
+
+            //add the current model to the current users palette of models
+            $scope.addToPalette = function() {
+                if ($scope.Practitioner) {
+                    //create the palette if it doesn't exist
+                    if (!$scope.lmPalette) {
+                        $scope.lmPalette = {resourceType:'List',status:'current',mode:'working',entry:[]}
+
+                        $scope.lmPalette.code =
+                            {coding:[{system:appConfigSvc.config().standardSystem.listTypes,code:$scope.code.lmPalette}]}
+
+                        $scope.lmPalette.source = {reference:'Practitioner/'+$scope.Practitioner.id};
+
+                    }
+
+                    //add the current model to it
+                    var entry = {item : {reference: 'StructureDefinition/'+$scope.currentSD.id,display:$scope.currentSD.id}}
+                    $scope.lmPalette.entry.push(entry);
+
+                    //... and save...
+                    SaveDataToServer.saveResource($scope.lmPalette).then(
+                        function(){
+
+                        },
+                        function(err){
+                            alert("error saving List " + angular.toJson(err))
+                        }
+
+                    )
+
+                }
+
+
+
+
+            }
+
+            
             if (!$scope.initialLM) {
                // $scope.hideLMSelector();
                 loadAllModels();
@@ -431,26 +527,7 @@ console.log(user);
                 )
             }
 
-            /*
 
-            if (appConfigSvc.getCurrentConformanceServer().name !== 'Grahame STU3 server') {
-                var modalOptions = {
-                    closeButtonText: "No, don't change",
-                    actionButtonText: 'Yes, change toGrahames server',
-                    headerText: 'Change conformance server',
-                    bodyText: 'At the moment, the modellerwill only work against Grahames STU-3 server. Shall I change to that one (will effect all of clinFHIR)'
-                };
-
-                modalService.showModal({}, modalOptions).then(
-                    function (result) {
-                        alert('sorry - you have to do this yourself in clinFHIR at the moment....');
-
-                    }
-                );
-            }
-
-
-            */
             $scope.rootNameDEP = 'dhRoot';
 
 

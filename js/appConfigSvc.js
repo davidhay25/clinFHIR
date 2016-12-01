@@ -16,11 +16,12 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2016-11-26';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2016-12-02';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
+        defaultConfig.standardCode = {};
         
         //if a valueset has concepts entered directly but not in snomed (so terminology services won't expand)
         defaultConfig.standardExtensionUrl.vsDirectConcept = 'http://clinfhir.com/fhir/StructureDefinition/vsDirectConcept';
@@ -33,7 +34,11 @@ angular.module("sampleApp")
 
         defaultConfig.standardSystem.identifierSystem = 'http://clinfhir.com/fhir/NamingSystem/identifier';
         defaultConfig.standardSystem.practitionerIdentifierSystem = 'http://clinfhir.com/fhir/NamingSystem/practitioner';
+        defaultConfig.standardSystem.listTypes = 'http://clinfhir.com/fhir/CodeSystem/listTypes';
 
+
+        defaultConfig.standardCode.lmPalette = defaultConfig.standardSystem.listTypes + '|lmPalette' 
+            
         var version = {current:'2.0.0',versionHistory:[]}
         
 /*

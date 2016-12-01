@@ -164,6 +164,29 @@ angular.module("sampleApp").
 }).
     service('GetDataFromServer', function($http,$q,appConfigSvc,Utilities,$localStorage) {
     return {
+        getListForPractitioner : function(practitioner,type) {
+            var deferred = $q.defer();
+            var listTypeSystem = appConfigSvc.config().standardSystem.listTypes;
+            var url = appConfigSvc.getCurrentDataServer().url +
+                "List?source:Practitioner="+practitioner.id + "&code=" + listTypeSystem + '|' + type;
+
+            $http.get(url).then(
+                function(data) {
+                    var list;
+                    if (data.data && data.data.entry && data.data.entry.length > 0) {
+                        list = data.data.entry[0].resource;      //assume only 1 matching list...
+                    }
+                    deferred.resolve(list)
+                }, function(err) {
+                    deferred.reject(err);
+                    alert('Error retrieving list '+angular.toJson(err))
+                }
+            );
+
+
+            return deferred.promise;
+
+        },
         getOutputsForModel : function(model,type) {
             //get all the outputs (resources like Communication)
             var that = this;
