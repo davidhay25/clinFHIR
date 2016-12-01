@@ -4,6 +4,15 @@
 
 
 angular.module("sampleApp")
+    .filter('markDown', function() {
+        return function(text) {
+            var converter = new showdown.Converter(),
+
+                html      = converter.makeHtml(text);
+
+            return html;
+        }
+    })
     .filter('oneLineResource', ['ResourceUtilsSvc', function(ResourceUtilsSvc) {
         return function(resource) {
             return ResourceUtilsSvc.getOneLineSummaryOfResource(resource);

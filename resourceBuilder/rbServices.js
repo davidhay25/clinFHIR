@@ -55,11 +55,16 @@ angular.module("sampleApp").
             task.focus = {reference:options.focus.resourceType + "/"+options.focus.id};
             task.status = 'accepted';
             task.owner = {reference:'Practitioner/'+practitioner.id};
+            //add the email as the reference display todo - tidy this - could look for other properties later
+            if (practitioner.telecom) {
+                task.owner.display = practitioner.telecom[0].value;
+            }
+
             task.intent = 'proposal';
             task.description = 'review of Logical Model'
 
             //var url = appConfigSvc.getCurrentDataServer().url + 'Task';
-            this.saveResource(task).then(
+            this.saveResource(task, appConfigSvc.getCurrentConformanceServer().url).then(
                 function(){
                     deferred.resolve(task)
                 
@@ -72,12 +77,13 @@ angular.module("sampleApp").
 
         },
         
-        saveResource : function(resource) {
+        saveResource : function(resource,urlBase) {
             //save a resource to the data server
+            urlBase = urlBase || appConfigSvc.getCurrentDataServerBase();       //default to data server
             var deferred = $q.defer();
             //alert('saving:\n'+angular.toJson(resource));
             //var config = appConfigSvc.config();
-            var qry = appConfigSvc.getCurrentDataServerBase() + resource.resourceType;
+            var qry = urlBase + resource.resourceType;
             if (resource.id) {
                 //this is an update
                 qry += "/"+resource.id;
@@ -158,11 +164,82 @@ angular.module("sampleApp").
 }).
     service('GetDataFromServer', function($http,$q,appConfigSvc,Utilities,$localStorage) {
     return {
+        getOutputsForModel : function(model,type) {
+            //get all the outputs (resources like Communication)
+            var that = this;
+            var deferred = $q.defer();
+
+            //first, get all the tasks associated with this model
+            var url = appConfigSvc.getCurrentDataServer().url + "Task?focus=StructureDefinition/"+model.id;
+
+            $http.get(url).then(
+                function(data){
+                    console.log(data.data);
+
+                    if (data.data && data.data.entry) {
+
+                        var queries = []
+                        var communications = [];
+
+                        data.data.entry.forEach(function(entry){
+                            var task = entry.resource;
+
+                            queries.push(that.getOutputsForTask(task,'Communication').then(
+                                function(lst){
+                                    console.log(lst)
+                                    if (lst.length > 0) {
+                                        lst.forEach(function(item){
+                                            var item = {task:task,comment:item}
+                                            communications.push(item);
+                                        })
+
+
+
+                                    }
+
+                                    //communications = communications.concat(lst)
+                                },
+                                function(err){
+                                    alert(angular.tojson(err))
+                                }
+                            ))
+
+                        });
+
+
+                        $q.all(queries).then(
+                            function(data) {
+                                console.log(communications)
+                                deferred.resolve(communications);
+                            },
+                            function(err){
+                                alert(angular.tojson(err))
+                                deferred.reject(err)
+                            }
+                        )
+                    } else {
+                        deferred.resolve([]);
+                    }
+
+                },
+                function(err) {
+                    console.log(err)
+                    deferred.reject(err)
+                }
+            )
+
+
+
+
+            return deferred.promise;
+
+
+        },
         getOutputsForTask : function(task,type) {
             //return any communication resources created for this task. Type indicates a single resource type only (eg Communcation)
 
 
-            var getResource = function(url,ar) {
+            var getResourceDEP = function(url,ar) {
                 //reference
                 $http.get(url).then(
                     function(data){
@@ -244,7 +321,7 @@ angular.module("sampleApp").
             options.active = options.active || true;   //default to only active tasks
 
             //the system used by clinFHIR for practitioners...
-            var practitionerSystem = appConfigSvc.config().standardSystem.practitionerIdentifierSystem;
+            //var practitionerSystem = appConfigSvc.config().standardSystem.practitionerIdentifierSystem;
 
             var url = appConfigSvc.getCurrentDataServer().url +
                 "Task?owner:Practitioner="+practitioner.id;
@@ -294,10 +371,12 @@ angular.module("sampleApp").
             return deferred.promise;
 
         },
-        getPractitionerByLogin : function (loginIdentifier,details) {
+        getPractitionerByLogin : function (user,details) {
             //return a Practitioner resource with an identifier that matches the login identifier. Create if not exists...
             var deferred = $q.defer();
 
+            var loginIdentifier = user.uid;     //user is a firebase user
+            
             //the system used by clinFHIR for practitioners...
             var practitionerSystem = appConfigSvc.config().standardSystem.practitionerIdentifierSystem;
 
@@ -309,13 +388,16 @@ angular.module("sampleApp").
                     //the practitioner was located (at least one)...
                     if (data.data && data.data.entry && data.data.entry.length > 0) {
                         //just take the first one. Should probably check if there is > 1...
-                        deferred.resolve(data.data.entry[0].resource);      //return the
+                        var pract = data.data.entry[0].resource
+                        pract.telecom = [{system:'email',value:user.email}];    //todo temp!
+                        deferred.resolve(pract);      //return the practitooner
                     } else {
                         //so no practitioner was found - create one using the details given...
                         //use a PUT so we know whhat the id is - a bit lazy really...
                         var pract = {resourceType:'Practitioner'};
                         pract.identifier =[{system:practitionerSystem,value:loginIdentifier}];
                         pract.id = 'clinFhir'+loginIdentifier;
+                        pract.telecom = [{system:'email',value:user.email}];        //the email is the only property we can be sure of having
                         var createUrl = appConfigSvc.getCurrentDataServer().url + "Practitioner/"+pract.id;
                         $http.put(createUrl,pract).then(
                             function(){

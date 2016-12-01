@@ -191,7 +191,7 @@
     <div class="row" ng-show="showNotLoggedIn">
         <div class="col-md-12 col-sm-12">
             <div ng-hide="firebase.auth().currentUser" class="alert alert-warning">
-                <p>As you have not logged in, you are able to view Models and comments, but not edit them.
+                <p>As you have not logged in, you are able to view Models, but not edit them.
                 To log in, click the  <i class="glyphicon glyphicon-log-in"></i>  icon to the upper right. You can create an account there if you don't already
                     have one - all you need is an email address.</p>
             </div>
@@ -690,46 +690,83 @@
 
                     </uib-tab>
                     <uib-tab heading="Comments" ng-show="Practitioner">
-                        <h4>Your comments</h4>
-                        <div ng-show="commentTask">
+                        <br/>
+                        <uib-tabset>
+                            <uib-tab heading="All Comments">
+                                <br/>
+                                <table class="table table-bordered">
+                                    <tr ng-repeat = "item in allComments">
+                                        <td>
+                                            {{item.task.owner.display}}
+                                            <div>{{item.comment.sent | date}}</div>
+                                        </td>
+                                        <td>
+                                            <div ng-repeat="pay in item.comment.payload">
+                                                <p ng-bind-html="pay.contentString |markDown"></p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </uib-tab>
+                            <uib-tab heading="Add Comment">
+                                <br/>
+                                <div ng-show="commentTask">
 
-                            <form name="form">
-                                <markdown-editor  ng-model="input.mdComment"
-                                                  text-preview="Preview"
-                                                  text-provide-text="Site name"
-                                                  text-provide-link="Site link"
+                                    <form name="form">
+                                        <markdown-editor  ng-model="input.mdComment"
+                                                          text-preview="Preview"
+                                                          text-provide-text="Site name"
+                                                          text-provide-link="Site link"
 
-                                                  name="thearea"
-                                                  placeholder="Enter your comments about this version of the model"
-                                                  options="mdOptions" >
+                                                          name="thearea"
+                                                          placeholder="Enter your comments about this version of the model"
+                                                          options="mdOptions" >
 
-                                </markdown-editor>
-                            </form>
-                            <div class="row">
-                                <div class="col-sm-12 col-md-12">
-                                    <div class="pull-right"><button class="btn btn-link" ng-click="saveComment()">Save</button> </div>
+                                        </markdown-editor>
+                                    </form>
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-12">
+                                            <div class="pull-right"><button class="btn btn-link" ng-click="saveComment()">Save</button> </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
 
-                        <div ng-hide="commentTask">
-                            <p><button ng-click="createTask()" class="btn btn-default">Click here </button> to add a comment about this model</p>
-                            <!--
-                            <p>Click <span ng-click="createTask()" class="clickable">here</span> to add a comment about this model</p> -->
-                        </div>
+                                <div ng-hide="commentTask">
+                                    <p><button ng-click="createTask()" class="btn btn-default">Click here </button> to add a comment about this model</p>
+                                    <!--
+                                    <p>Click <span ng-click="createTask()" class="clickable">here</span> to add a comment about this model</p> -->
+                                </div>
+                            </uib-tab>
+
+                            <uib-tab heading="Json">
+                                <pre ng-show="commentTask">{{commentTask | json}}</pre>
+
+                                <pre ng-show="taskOutputs">{{taskOutputs | json}}</pre>
+
+                                <pre ng-show="allComments">{{allComments | json}}</pre>
+                            </uib-tab>
+                        </uib-tabset>
+                        <!--
+
+                                    <h4>Your comments</h4>
 
 
-                        <h4>Others comments</h4>
 
-<!--
-                        <button class="btn btn-default" ng-click="createTask()">Add Task</button>
+                                    <h4>All comments</h4>
 
-                        -->
 
-                        <pre ng-show="commentTask">{{commentTask | json}}</pre>
+                                    <button class="btn btn-default" ng-click="createTask()">Add Task</button>
 
-                        <pre ng-show="taskOutputs">{{taskOutputs | json}}</pre>
+                                    -->
+
+
+
+
+
+
+
+
 
 
                     </uib-tab>

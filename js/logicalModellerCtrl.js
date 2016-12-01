@@ -3,22 +3,30 @@
 angular.module("sampleApp")
     .controller('logicalModellerCtrl',
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
-                  GetDataFromServer,$firebaseObject,$location,igSvc,SaveDataToServer) {
+                  GetDataFromServer,$firebaseObject,$location,igSvc,SaveDataToServer,$window) {
             $scope.input = {};
             $scope.treeData = [];           //populates the resource tree
 
             $scope.mdOptions = {
                 controls: ["bold", "italic", "separator", "bullets","separator", "heading","separator", "preview"]
-            }
+            };
 
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
+
+            if ($scope.conformanceServer.url !== appConfigSvc.getCurrentDataServer().url) {
+                var msg = 'The Conformance and Data servers must be the same for the Comments to work correctly.\n';
+                msg += 'Please reset them and re-load the page if you want comments.'
+                modalService.showModal({}, {bodyText: msg})
+
+            }
+
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
 
-            $scope.input.newCommentboxInx = -1;
+            $scope.input.newCommentboxInxDEP = -1;
 
 
-            $scope.showCommentEntry = function(comment,index) {
+            $scope.showCommentEntryDEP = function(comment,index) {
                 //console.log(comment,levelKey)
 
 
@@ -26,7 +34,7 @@ angular.module("sampleApp")
                 return ((comment.levelKey == $scope.currentLevelKey) || comment.level==1);
             }
 
-            $scope.showConversation = function(levelKey) {
+            $scope.showConversationDEP = function(levelKey) {
                 $scope.currentLevelKey = levelKey;
 
             }
@@ -42,11 +50,14 @@ angular.module("sampleApp")
                     Communication = {resourceType: 'Communication', payload: []};
                     Communication.payload.push({contentString: $scope.input.mdComment});
                     Communication.id = 't' + new Date().getTime();
+                    Communication.sent = moment().format();
 
                     $scope.showWaiting = true;
                     SaveDataToServer.addOutputToTask($scope.commentTask,Communication,type).then(
                         function(){
-                            alert('Communication saved')
+                            modalService.showModal({}, {bodyText: "Comment saved"});
+                            getAllComments();
+                           // alert('Comment saved')
                         },function(err){
                             alert('error adding Communication: '+angular.toJson(err))
                         }
@@ -63,7 +74,8 @@ angular.module("sampleApp")
                     $scope.showWaiting = true;
                     SaveDataToServer.saveResource(Communication).then(
                         function(){
-
+                            modalService.showModal({}, {bodyText: "Comment updated"});
+                            getAllComments();
                         },
                         function(err) {
                             alert('error updating Communication: '+angular.toJson(err))
@@ -213,13 +225,15 @@ angular.module("sampleApp")
             
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
             firebase.auth().onAuthStateChanged(function(user) {
+                delete $scope.input.mdComment;
+console.log(user);
                 if (user) {
                     $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
                     logicalModelSvc.setCurrentUser(user);
 
-//console.log(user)
+
                     //return the practitioner resource that corresponds to the current user (the service will create if absent)
-                    GetDataFromServer.getPractitionerByLogin(user.uid).then(
+                    GetDataFromServer.getPractitionerByLogin(user).then(
                         function(practitioner){
                             //console.log(practitioner)
                             $scope.Practitioner = practitioner;
@@ -323,7 +337,8 @@ angular.module("sampleApp")
                 sc.config.model = {id:$scope.currentSD.id}
                 sc.$save().then(
                     function(){
-                        modalService.showModal({}, {bodyText: "The shortcut '" + hash + "' has been generated for this model"})
+                        var shortCut = $window.location.href+"#"+hash
+                        modalService.showModal({}, {bodyText: "The shortcut  " +  shortCut + "  has been generated for this model"})
                     }
                 )
 
@@ -382,8 +397,6 @@ angular.module("sampleApp")
                         }
                 }})
             };
-
-
 
 
             //load all the logical models created by clinFHIR
@@ -963,6 +976,20 @@ angular.module("sampleApp")
                 loadHistory($scope.rootName);
 
                 checkForComments(entry.resource);
+
+                getAllComments();
+                /*
+                GetDataFromServer.getOutputsForModel($scope.currentSD).then(
+                    function(lst) {
+                        console.log(lst)
+                        $scope.allComments = lst;
+                    }, function (err) {
+
+                    }
+                )
+                */
+
+
 /*
                 //if there's a practitioner (ie a logged in user) then see if there is an active task to comment on this model
                 if ($scope.Practitioner) {
@@ -1041,6 +1068,17 @@ angular.module("sampleApp")
                  */
 
 
+            }
+
+            function getAllComments(){
+                GetDataFromServer.getOutputsForModel($scope.currentSD).then(
+                    function(lst) {
+                        console.log(lst)
+                        $scope.allComments = lst;
+                    }, function (err) {
+
+                    }
+                )
             }
 
             function checkForComments(resource) {
