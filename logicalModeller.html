@@ -158,9 +158,6 @@
 
                 </div>
 
-
-
-
                 <div class="col-md-1 col-sm-1">
 
                     <div class="nav navbar-form navbar-right" ng-hide="firebase.auth().currentUser">
@@ -264,9 +261,10 @@
         </div>
         <div ng-class="midPaneClass">
 
+<!--
+            <div>{{taskOutputs | json}}</div>
 
-
-
+-->
             <div ng-show="isHistory" class="alert alert-warning">
 
                 <div class="row">
@@ -290,11 +288,20 @@
                     <br/>
 
                     <span class="pull-right">
-                        <button ng-show="1" class="btn btn-success" ng-click="addToPalette()">Add to Palette</button>
+                        <button ng-hide="isInPalette" class="btn btn-success" ng-click="addToPalette()">Add to Palette</button>
+                        <button ng-show="isInPalette" class="btn btn-danger" ng-click="removeFromPalette()">Remove from Palette</button>
+
+
+
                     </span>
 
 
+
                 <div id="lmTreeView"></div>
+
+
+
+
 
                 </uib-tab>
 
@@ -448,7 +455,8 @@
                                 <tr><td>Description</td><td>{{selectedNode.data.description}}</td></tr>
                                 <tr><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>
                                 <tr><td>Multiplicity</td><td>{{selectedNode.data.min}}..{{selectedNode.data.max}}</td></tr>
-                                <tr><td>Datatypes</td><td>
+                                <tr><td>Datatypes</td>
+                                    <td>
                                     <div ng-repeat = "typ in selectedNode.data.type">
 
 
@@ -495,9 +503,34 @@
                                  -->
 
 
-                                </td></tr>
+                                </td>
+
+
+                                </tr>
+                                <tr ng-show="valueSetOptions">
+                                    <td>Options</td>
+                                    <td>
+
+                                        <ul>
+                                            <li ng-repeat="option in valueSetOptions">{{option.display}}</li>
+                                        </ul>
+<!--
+                                        <table class="table table-bordered">
+                                            <tr ng-repeat="option in valueSetOptions">
+                                                <td>{{option.code}}</td>
+                                                <td>{{option.display}}</td>
+                                            </tr>
+                                        </table>
+                                        -->
+                                    </td>
+                                </tr>
                                 <tr ng-show="selectedNode.data.mapping"><td>Mapping notes</td><td>
                                     {{selectedNode.data.mapping}}
+
+
+
+
+
                                 </td>
                                 <tr ng-show="selectedNode.data.fixedString">
                                     <td>Fixed</td><td>{{selectedNode.data.fixedString}}</td>
@@ -701,14 +734,14 @@
 
 
                     </uib-tab>
-                    <uib-tab heading="Comments" ng-show="Practitioner">
+                    <uib-tab heading="Comments" >
                         <br/>
                         <uib-tabset>
                             <uib-tab heading="All Comments">
                                 <br/>
                                 <table class="table table-bordered">
                                     <tr ng-repeat = "item in allComments">
-                                        <td>
+                                        <td width="20%">
                                             {{item.task.owner.display}}
                                             <div>{{item.comment.sent | date}}</div>
                                         </td>
@@ -720,7 +753,7 @@
                                     </tr>
                                 </table>
                             </uib-tab>
-                            <uib-tab heading="Add/Update Comment">
+                            <uib-tab heading="Add/Update Comment" ng-show="Practitioner">
                                 <br/>
                                 <div ng-show="commentTask">
 

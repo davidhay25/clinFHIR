@@ -197,7 +197,7 @@ angular.module("sampleApp").
 
             $http.get(url).then(
                 function(data){
-                    console.log(data.data);
+                   // console.log(data.data);
 
                     if (data.data && data.data.entry) {
 
@@ -209,7 +209,7 @@ angular.module("sampleApp").
 
                             queries.push(that.getOutputsForTask(task,'Communication').then(
                                 function(lst){
-                                    console.log(lst)
+                                   // console.log(lst)
                                     if (lst.length > 0) {
                                         lst.forEach(function(item){
                                             var item = {task:task,comment:item}
@@ -309,7 +309,7 @@ angular.module("sampleApp").
                     }
                 })
 
-                console.log(arQuery)
+                //console.log(arQuery)
 
                 $q.all(arQuery).then(
                     function(){

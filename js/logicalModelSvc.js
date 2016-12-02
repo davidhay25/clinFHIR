@@ -8,7 +8,67 @@ angular.module("sampleApp")
         var currentUser;
         
         return {
-            
+            //return the expanded set of options from the ValueSet
+            getOptionsFromValueSet : function(element) {
+                var deferred = $q.defer();
+                console.log(element);
+
+
+                if (element.selectedValueSet && element.selectedValueSet.vs && element.selectedValueSet.vs.url) {
+                    GetDataFromServer.getValueSet(element.selectedValueSet.vs.url).then(
+                        function(vs) {
+                            //console.log(vs)
+
+                            //the extension that indicates the vs (authored by CF) has direct concepts that are not snomed so can't be expanded
+                            var extensionUrl = appConfigSvc.config().standardExtensionUrl.vsDirectConcept;
+                            var ext = Utilities.getSingleExtensionValue(vs,extensionUrl)
+                            if (ext && ext.valueBoolean) {
+                                //first, create an array with all of the composed concepts...
+                                var ar = [];
+                                vs.compose.include.forEach(function(inc){
+                                    ar = ar.concat(inc.concept)
+                                });
+
+                                //now create a filtered return array
+                                var returnArray = []
+                                if (ar && ar.length > 0) {
+                                    ar.forEach(function(item){
+                                        returnArray.push(item)
+                                    });
+                                }
+
+                                deferred.resolve(returnArray);
+
+                            } else {
+                                var id = vs.id;
+
+                                GetDataFromServer.getExpandedValueSet(id).then(
+                                    function(data){
+                                        if (data.expansion && data.expansion.contains) {
+                                            deferred.resolve(data.expansion.contains);
+
+                                        } else {
+                                            deferred.resolve()
+                                        }
+                                    }, function(err){
+                                        deferred.reject(err)
+                                    }
+                                )
+                            }
+
+                        },
+                        function(err) {
+                            deferred.reject(err);
+                        }
+                    )
+                } else {
+                    deferred.resolve();
+                }
+
+                return deferred.promise;
+
+
+            },
             insertModel : function(element,insertModel) {
 
             },

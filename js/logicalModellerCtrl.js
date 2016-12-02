@@ -17,12 +17,7 @@ angular.module("sampleApp")
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
 
-            if ($scope.conformanceServer.url !== appConfigSvc.getCurrentDataServer().url) {
-                var msg = 'The Conformance and Data servers must be the same for the Comments to work correctly.\n';
-                msg += 'Please reset them and re-load the page if you want comments.'
-                modalService.showModal({}, {bodyText: msg})
 
-            }
 
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
 
@@ -42,9 +37,7 @@ angular.module("sampleApp")
 
             }
 
-
-
-            $scope.saveComment = function(parent) {
+            $scope.saveComment = function() {
                 //save the comment. For now, a single comment only...
                 var Communication;
                 if ($scope.taskOutputs.length == 0) {
@@ -96,8 +89,27 @@ angular.module("sampleApp")
                 
             };
 
-            //save a new comment from the chat
 
+
+            //if the selected node changes, look to see if we can expand any binding...
+            $scope.$watch(
+                function() {return $scope.selectedNode},
+                function() {
+                    if ($scope.selectedNode) {
+                        delete $scope.valueSetOptions;
+                        //console.log($scope.selectedNode)
+                        logicalModelSvc.getOptionsFromValueSet($scope.selectedNode.data).then(
+                            function(lst) {
+                                console.log(lst);
+                                $scope.valueSetOptions = lst;
+                            },
+                            function(err){
+                                $scope.valueSetOptions = [{code:'notExpanded',display:'Unable to get list, may be too long'}]
+                            }
+                        )
+                    }
+
+                });
 
             $scope.saveCommentDEP = function(parent) {
                 console.log(parent)
@@ -245,8 +257,6 @@ console.log(user);
                             getPalette(practitioner);       //get the palette of logical models
 
 
-
-
                         },function (err) {
                             alert(err)
                         }
@@ -266,9 +276,7 @@ console.log(user);
                 }
             });
 
-
-
-
+            //retrieve the list of models on the users current palette...
             function getPalette(practitioner)  {
                 delete $scope.palette;
                 GetDataFromServer.getListForPractitioner(practitioner,$scope.code.lmPalette).then(
@@ -277,15 +285,45 @@ console.log(user);
                         if (list) {
 
                             $scope.lmPalette = list;
+
+                            checkInPalette();   //if the user logs in while a model is selected...
+
                         }
                     }, function(err) {
 
                     }
                 )
             }
+            
+            //remove the current model from the palette
+            $scope.removeFromPalette = function() {
+                if ($scope.lmPalette) {
+                    var pos = -1;
+                    $scope.lmPalette.entry.forEach(function(entry,inx){
+                        if (entry.item && entry.item.reference == 'StructureDefinition/'+$scope.currentSD.id) {
+                            pos = inx;
+                        }
+                    })
+                    
+                    if (pos > -1) {
+                        $scope.lmPalette.entry.splice(pos,1)
+                        //... and save...
+                        SaveDataToServer.saveResource($scope.lmPalette).then(
+                            function(){
+                                $scope.isInPalette = false;
+                            },
+                            function(err){
+                                alert("error updating List " + angular.toJson(err))
+                            }
+
+                        )
+                    }
+                }
+            };
 
             $scope.selectFromPalette = function(item) {
                 var url = appConfigSvc.getCurrentConformanceServer().url+item.reference;
+                $scope.showWaiting = true;
                 GetDataFromServer.adHocFHIRQuery(url).then(
                     function(data){
                         console.log(data)
@@ -293,43 +331,71 @@ console.log(user);
                     }, function(err) {
                         alert('error getting model '+angular.toJson(err));
                     }
+                ).finally(
+                    function(){
+                        $scope.showWaiting = false;
+                    }
                 );
                 console.log(item)
+            };
+
+            //add the current model to the current users palette of models
+            $scope.addToPalette = function() {
+                if ($scope.Practitioner) {
+                    //create the palette if it doesn't exist
+                    if (!$scope.lmPalette) {
+                        $scope.lmPalette = {resourceType:'List',status:'current',mode:'working',entry:[]}
+
+                        $scope.lmPalette.code =
+                        {coding:[{system:appConfigSvc.config().standardSystem.listTypes,code:$scope.code.lmPalette}]}
+
+                        $scope.lmPalette.source = {reference:'Practitioner/'+$scope.Practitioner.id};
+
+                    }
+
+                    //add the current model to it
+                    var entry = {item : {reference: 'StructureDefinition/'+$scope.currentSD.id,display:$scope.currentSD.id}}
+                    $scope.lmPalette.entry.push(entry);
+
+                    //... and save...
+                    SaveDataToServer.saveResource($scope.lmPalette).then(
+                        function(){
+                            $scope.isInPalette = true;
+                        },
+                        function(err){
+                            alert("error saving List " + angular.toJson(err))
+                        }
+
+                    )
+
+                }
+
+
+
+
             }
 
 
 
-/*
-            console.log($location.hash())
-
-
-            var sc = $firebaseObject(firebase.database().ref().child("shortCut").child("tst"));
-            sc.config = {conformanceServer:appConfigSvc.getCurrentConformanceServer()};
-            sc.$save()
-
-            sc.$loaded().then(
-                function(){
-                    console.log( sc.config)
-                }
-            )
-
-*/
+            //if a shortcut has been used there will be a hash so load that
             var hash = $location.hash();
             if (hash) {
                 var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
                 sc.$loaded().then(
                     function(){
                         console.log( sc.config)
-                        //vselectEntry(entry)
+
                         $scope.loadedFromBookmark = true;
 
                         //set the conformance server to the one in the bookmark
                         var conformanceServer =  sc.config.conformanceServer;
                         appConfigSvc.setServerType('conformance',conformanceServer.url);
+                        appConfigSvc.setServerType('data',conformanceServer.url);       //set the data server to the same as the conformance for the comments
 
                         var id = sc.config.model.id;    //the id of the model on this server
                         //get the model from the server...
                         var url = conformanceServer.url + 'StructureDefinition/'+id;
+                        $scope.showWaiting = true;
                         GetDataFromServer.adHocFHIRQuery(url).then(
                             function(data){
                                 var model = data.data;
@@ -339,10 +405,19 @@ console.log(user);
                             function(){
                                 modalService.showModal({}, {bodyText: "The model with the id '"+id + "' is not on the "+conformanceServer.name + " server"})
                             }
-                        )
+                        ).finally(function(){
+                            $scope.showWaiting = false;
+                        })
                         
                     }
                 )
+            } else {
+                if ($scope.conformanceServer.url !== appConfigSvc.getCurrentDataServer().url) {
+                    var msg = 'The Conformance and Data servers must be the same for the Comments to work correctly.\n';
+                    msg += 'Please reset them and re-load the page if you want comments.'
+                    modalService.showModal({}, {bodyText: msg})
+
+                }
             }
 
 
@@ -359,8 +434,6 @@ console.log(user);
                     }
                 )
             };
-
-
 
             $scope.generateShortCut = function() {
                 var hash = "";
@@ -476,43 +549,7 @@ console.log(user);
                 })
             };
 
-            //add the current model to the current users palette of models
-            $scope.addToPalette = function() {
-                if ($scope.Practitioner) {
-                    //create the palette if it doesn't exist
-                    if (!$scope.lmPalette) {
-                        $scope.lmPalette = {resourceType:'List',status:'current',mode:'working',entry:[]}
 
-                        $scope.lmPalette.code =
-                            {coding:[{system:appConfigSvc.config().standardSystem.listTypes,code:$scope.code.lmPalette}]}
-
-                        $scope.lmPalette.source = {reference:'Practitioner/'+$scope.Practitioner.id};
-
-                    }
-
-                    //add the current model to it
-                    var entry = {item : {reference: 'StructureDefinition/'+$scope.currentSD.id,display:$scope.currentSD.id}}
-                    $scope.lmPalette.entry.push(entry);
-
-                    //... and save...
-                    SaveDataToServer.saveResource($scope.lmPalette).then(
-                        function(){
-
-                        },
-                        function(err){
-                            alert("error saving List " + angular.toJson(err))
-                        }
-
-                    )
-
-                }
-
-
-
-
-            }
-
-            
             if (!$scope.initialLM) {
                // $scope.hideLMSelector();
                 loadAllModels();
@@ -527,9 +564,7 @@ console.log(user);
                 )
             }
 
-
             $scope.rootNameDEP = 'dhRoot';
-
 
             //functions and prperties to enable the valueset viewer
             $scope.showVSBrowserDialog = {};
@@ -960,6 +995,7 @@ console.log(user);
                 })
             };
 
+            //select a model from the list of models
             $scope.selectModel = function(entry,index) {
                 if ($scope.isDirty) {
                     var modalOptions = {
@@ -1037,12 +1073,14 @@ console.log(user);
 
             };
 
+            //select a model - whether from the 'all' list or the palette
             function selectEntry(entry) {
                 delete $scope.modelHistory;
                 delete $scope.selectedNode;
                 delete $scope.commentTask;      //the task to comment on this model...
                 delete $scope.input.mdComment;  //the comment
                 delete $scope.taskOutputs;      //the outputs of the task (Communication resource currently)
+
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
                 //console.log($scope.treeData)
@@ -1055,6 +1093,8 @@ console.log(user);
                 checkForComments(entry.resource);
 
                 getAllComments();
+
+                checkInPalette();
                 /*
                 GetDataFromServer.getOutputsForModel($scope.currentSD).then(
                     function(lst) {
@@ -1146,6 +1186,24 @@ console.log(user);
 
 
             }
+
+            //check if the current model is in the current users palette
+            function checkInPalette() {
+                delete $scope.isInPalette;      //true if the model is in the
+
+                if ($scope.currentSD && $scope.lmPalette) {
+                    $scope.lmPalette.entry.forEach(function(entry){
+                        if (entry.item.reference == 'StructureDefinition/'+$scope.currentSD.id) {
+                            $scope.isInPalette = true;
+                        }
+                    })
+                }
+
+
+            }
+
+
+
 
             function getAllComments(){
                 GetDataFromServer.getOutputsForModel($scope.currentSD).then(
