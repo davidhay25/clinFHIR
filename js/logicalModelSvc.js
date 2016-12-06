@@ -9,6 +9,9 @@ angular.module("sampleApp")
         
         return {
             generateSample : function(SD) {
+
+                return;
+                
                 //generate a sample message based on the Logical Model. 
                 var sample = {};
 
@@ -29,7 +32,7 @@ angular.module("sampleApp")
                 var getNodeFromPath = function(path) {
                     var ar = path.split('.');
                     ar.forEach(function(segment){
-                        if (!)
+                       // if (!)
                     })
                 }
                 
