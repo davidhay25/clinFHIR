@@ -8,13 +8,41 @@ angular.module("sampleApp")
         var currentUser;
         
         return {
-            //return the expanded set of options from the ValueSet
+            generateSample : function(SD) {
+                //generate a sample message based on the Logical Model. 
+                var sample = {};
+
+                if (SD && SD.snapshot && SD.snapshot.element) {
+                    var parent = {}
+                    SD.snapshot.element.forEach(function(ed){
+                        var path = ed.path;
+                        var ar = path.split('.');
+                        var leaf = ar[ar.length-1];
+                        if (! parent[leaf]) {
+                            parent[leaf] = leaf
+                        }
+                        parent = parent[leaf]
+
+                    })
+                }
+
+                var getNodeFromPath = function(path) {
+                    var ar = path.split('.');
+                    ar.forEach(function(segment){
+                        if (!)
+                    })
+                }
+                
+                console.log(parent)
+            },
+            
             getOptionsFromValueSet : function(element) {
+                //return the expanded set of options from the ValueSet
                 var deferred = $q.defer();
-                console.log(element);
+                //console.log(element);
 
 
-                if (element.selectedValueSet && element.selectedValueSet.vs && element.selectedValueSet.vs.url) {
+                if (element && element.selectedValueSet && element.selectedValueSet.vs && element.selectedValueSet.vs.url) {
                     GetDataFromServer.getValueSet(element.selectedValueSet.vs.url).then(
                         function(vs) {
                             //console.log(vs)

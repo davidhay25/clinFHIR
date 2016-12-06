@@ -24,6 +24,11 @@ angular.module("sampleApp")
             $scope.input.newCommentboxInxDEP = -1;
 
 
+            //generate a sample document from this SD
+            $scope.generateSample = function(){
+                logicalModelSvc.generateSample($scope.currentSD);
+            };
+
             $scope.showCommentEntryDEP = function(comment,index) {
                 //console.log(comment,levelKey)
 
@@ -100,7 +105,7 @@ angular.module("sampleApp")
                         //console.log($scope.selectedNode)
                         logicalModelSvc.getOptionsFromValueSet($scope.selectedNode.data).then(
                             function(lst) {
-                                console.log(lst);
+                                //console.log(lst);
                                 $scope.valueSetOptions = lst;
                             },
                             function(err){
@@ -735,19 +740,9 @@ console.log(user);
                                 }
                             } else {
                                 $scope.input.modelType = 'multiple'
-                                //$scope.input.name = 'myModel';
-                                //$scope.input.short='A new model';
+                                
                             }
-/*
-                            $scope.selectBaseType = function(baseType) {
-                                logicalModelSvc.getAllPathsForType(baseType).then(
-                                    function(listOfPaths) {
-                                        console.log(listOfPaths);
-                                        $scope.allPaths =
-                                    }
-                                )
-                            }
-                            */
+
                             
                             $scope.checkName = function() {
                                 if ($scope.input.name) {
@@ -964,7 +959,7 @@ console.log(user);
                 var SDToSave = angular.copy($scope.SD);
                 
                 //this is a hack as only grahames server is on the latest (post baltimore) version of stu3.
-                //it cna be removed when the others (ie hapi) are confrmant also...
+                //it can be removed when the others (ie hapi) are confrmant also...
                 if (url.indexOf('tersections') == -1) {
                     SDToSave.requirements = SDToSave.purpose;
                     SDToSave.display = SDToSave.title;
@@ -1629,9 +1624,9 @@ console.log(user);
 
                             //}
 
-delete $scope.selectedNode;
+//delete $scope.selectedNode;
 
-                            $scope.selectedNode = newNode;
+                          //  $scope.selectedNode = newNode;
 
                         }
 
