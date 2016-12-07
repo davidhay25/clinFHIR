@@ -8,35 +8,67 @@ angular.module("sampleApp")
         var currentUser;
         
         return {
-            generateSample : function(SD) {
+            
+            getModelFromBundle : function(bundle,url) {
+                for (var i=0; i<bundle.entry.length; i++) {
+                    var resource = bundle.entry[i].resource;
+                    if (resource.url == url) {
+                        return resource
+                        break;
+                    }
+                }
+            },
 
-                return;
-                
-                //generate a sample message based on the Logical Model. 
+            mapToFHIRBundle : function(input,model) {
+                //map an incomming message to a FHIR bundle (using v2 input)
+                //assume v2 message is in JSON format
+                //strategy: locate patient first (as most resources have a reference to patient)
+                //then process each entry in turn assuming a 1:1 mapping from segment -> resource (todo may need to revisit this)
+                // use the mapping in the model to construct the resource.
+
+
+
+
+
+            },
+
+            generateSample : function(treeObject) {
+
+
+
+                function processNode(resource,node) {
+                    console.log(node, node.children);
+
+
+                    //resource[node.text] = {};
+
+
+                    if (node.children && node.children.length > 0) {
+                        node.children.forEach(function(lnode){
+
+
+                            if (lnode.children && lnode.children.length > 0) {
+                                var obj = {};
+                                resource[lnode.text] = obj;
+                                processNode(obj,lnode)
+                            } else {
+                                resource[lnode.text] = 'sample value';
+                            }
+
+
+
+                        })
+                    } else {
+                        //resource.value = "ValueForNode";
+                    }
+
+                }
+
                 var sample = {};
+                processNode(sample,treeObject[0])
 
-                if (SD && SD.snapshot && SD.snapshot.element) {
-                    var parent = {}
-                    SD.snapshot.element.forEach(function(ed){
-                        var path = ed.path;
-                        var ar = path.split('.');
-                        var leaf = ar[ar.length-1];
-                        if (! parent[leaf]) {
-                            parent[leaf] = leaf
-                        }
-                        parent = parent[leaf]
-
-                    })
-                }
-
-                var getNodeFromPath = function(path) {
-                    var ar = path.split('.');
-                    ar.forEach(function(segment){
-                       // if (!)
-                    })
-                }
-                
-                console.log(parent)
+                console.log(sample)
+                return sample;
             },
             
             getOptionsFromValueSet : function(element) {
@@ -264,6 +296,12 @@ angular.module("sampleApp")
                         var item = {}
                         item.id = path;
                         item.text = arPath[arPath.length -1];   //the text will be the last entry in the path...
+
+                        //show if an element is multiple...
+                        if (ed.max == '*') {
+                            item.text += " *"
+                        }
+
                         item.data = {};
                         if (arPath.length == 1) {
                             //this is the root node

@@ -149,7 +149,7 @@
                     </div>
 
                     <form ng-show="isDirty" class="navbar-form">
-                        <button ng-show="isDirty" class="btn btn-success pull-right" ng-click="save()">Save model</button>
+                        <button ng-show="isDirty && canSaveModel" class="btn btn-success pull-right" ng-click="save()">Save model</button>
                     </form>
 
                     <form ng-show="currentSD && !loadedFromBookmark" class="navbar-form">
@@ -177,8 +177,6 @@
                             <div href="#" ng-click="logout()"> <i class="glyphicon glyphicon-log-out"></i></div>
                         </span>
                     </div>
-
-
                 </div>
 
             </div>
@@ -213,7 +211,7 @@
 
                     <div><input type="text" class="form-control" placeholder="Filter model list by id" ng-model="input.filter" ng-change="filterModelList(input.filter)"/> </div>
 
-                    <ul class="list-group" style=" height:500px; overflow: auto;" >
+                    <ul class="list-group" style=" height:700px; overflow: auto;" >
                         <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.type == entry.resource.type}"
                             ng-repeat="entry in bundleModels.entry"
                             ng-click="selectModel(entry,$index)">
@@ -317,6 +315,7 @@
                     <table class="table table-bordered table-condensed">
                         <tr><th>Element</th><th>DataType</th><th>isRef</th><th>Mult.</th><th>Description</th></tr>
                         <tr ng-repeat="row in treeData">
+
                             <td>
 
                                 <div  ng-style="{ 'padding-left': (row.data.path | pathindent) }"
@@ -342,8 +341,9 @@
                 <uib-tab heading="Mapping">
                     <br/>
                     <table class="table table-bordered table-condensed">
-                        <tr><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th><th>Mapping notes</th></tr>
+                        <tr><th></th><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th><th>Mapping notes</th></tr>
                         <tr ng-repeat="ed in SD.snapshot.element">
+                            <td>{{$index}}</td>
                             <td>
                                 <div  ng-click="selectNodeFromTable(ed.path)" class="clickable"
                                       ng-style="{ 'padding-left': (ed.path | pathindent) }">{{ed.path | lastInPath}}</div>
@@ -455,7 +455,28 @@
                                 <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
                                 <tr><td>Description</td><td>{{selectedNode.data.description}}</td></tr>
                                 <tr><td>Mapping Path</td><td>{{selectedNode.data.mappingPath}}</td></tr>
-                                <tr><td>Map to Model</td><td>{{selectedNode.data.referenceUri | getLogicalID}}</td></tr>
+                                <tr ng-show="selectedNode.data.referenceUri| getLogicalID">
+                                    <td>Map to Model</td>
+                                    <td>
+                                        {{selectedNode.data.referenceUri | getLogicalID}}
+
+
+
+
+                                        <span ng-hide="isDirty" class="clickable pull-right"
+                                              ng-click="loadReferencedModel(selectedNode.data.referenceUri)">
+                                            Load
+                                        </span>
+
+                                          <span style="margin-right: 8px" class="clickable pull-right" ng-click="mergeModel(selectedNode.data.referenceUri)">
+                                                Merge
+                                          </span>
+
+                                        <span style="margin-right: 8px" class="clickable pull-right" ng-click="viewReferencedModel(selectedNode.data.referenceUri)">
+                                            View
+                                        </span>
+                                    </td>
+                                </tr>
                                 <tr><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>
                                 <tr><td>Multiplicity</td><td>{{selectedNode.data.min}}..{{selectedNode.data.max}}</td></tr>
                                 <tr><td>Datatypes</td>
@@ -474,12 +495,13 @@
 
                                         <!-- Show any profile. If a reference, then hyperlink to the 'display' functionality... -->
                                         <span ng-show="typ.code == 'Reference'" class="pull-right">
-
                                             <span class="clickable" ng-click="viewReferencedModel(typ.profile)">View</span>
 
+
+
+
+
                                             <span ng-hide="isDirty" class="clickable" ng-click="loadReferencedModel(typ.profile)">Load</span>
-
-
                                         </span>
 
                                         <div>{{typ.profile}}</div>
@@ -820,6 +842,8 @@
                     </uib-tab>
                     <uib-tab heading="Commands">
                         <button class="btn btn-default" ng-click="generateSample()">Generate Sample</button>
+
+                        <pre>{{sample | json}}</pre>
                     </uib-tab>
                 </uib-tabset>
 

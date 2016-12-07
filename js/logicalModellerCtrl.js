@@ -24,9 +24,84 @@ angular.module("sampleApp")
             $scope.input.newCommentboxInxDEP = -1;
 
 
+
+
+            //merge the referenced model into this one at this point
+            $scope.mergeModel = function(url){
+                $scope.canSaveModel = false;        //to prevent the base model from being replaced... 
+                var modelToMerge = logicalModelSvc.getModelFromBundle($scope.bundleModels,url);
+
+                if (modelToMerge) {
+
+                    var pathToInsertAt = $scope.selectedNode.id;
+
+                    //find the position in the current SD where this path is...
+                    var posToInsertAt = -1;
+                    for (var i=0; i< $scope.SD.snapshot.element.length; i++) {
+                        var ed = $scope.SD.snapshot.element[i];
+                        if (ed.path == pathToInsertAt) {
+                            posToInsertAt = i+1;
+                        }
+                    }
+
+
+                    if (posToInsertAt) {
+                        //posToInsertAt
+                        //right. here is where we are ready to insert. Start from the second one...
+                        var arInsert = [];      //the array of ed's to insert
+                        for (var j = modelToMerge.snapshot.element.length -1; j >0 ; j--) {     //needs to be descending, due the inset at the same point
+
+                            //for (var j = 1; j < modelToMerge.snapshot.element.length; j++) {
+                            var edToInsert = angular.copy(modelToMerge.snapshot.element[j]);
+                            //now, change the path in the edToInsert to it's consistent with the parent...
+                            var ar = edToInsert.path.split('.');
+                            ar.shift();     //remove the root
+                            edToInsert.path = pathToInsertAt + '.' + ar.join('.');
+                            edToInsert.id = edToInsert.path;
+
+                            $scope.SD.snapshot.element.splice(posToInsertAt,0,edToInsert)
+                            //arInsert.push(edToInsert);
+                        }
+
+                        //insert the array of new elements into the current SD
+                       // $scope.currentSD.snapshot.element.splice(i,0,arInsert)
+
+                        $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.SD);  //create a new tree
+                        drawTree();     //... and draw
+                        createGraphOfProfile();     //and generate the mind map...
+
+
+
+
+
+                    }
+
+
+
+                   // var ar = logicalModelSvc.createTreeArrayFromSD(modelToMerge);
+                  //  console.log(ar);
+
+
+
+
+
+                }
+
+
+                console.log($scope.selectedNode);
+
+                console.log(modelToMerge);
+
+            }
+
             //generate a sample document from this SD
             $scope.generateSample = function(){
-                logicalModelSvc.generateSample($scope.currentSD);
+
+
+                var treeObject = $('#lmTreeView').jstree().get_json();    //creates a hierarchical view of the resource
+                console.log(treeObject)
+                
+                $scope.sample = logicalModelSvc.generateSample(treeObject);
             };
 
             $scope.showCommentEntryDEP = function(comment,index) {
@@ -516,11 +591,18 @@ console.log(user);
             //load all the logical models created by clinFHIR
 
             loadAllModels = function() {
-                $scope.conformanceServer
+                //$scope.conformanceServer
+
+
+
+
+
                 var url=$scope.conformanceServer.url + "StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
 
                 //var url="http://fhir3.healthintersections.com.au/open/StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
-                $http.get(url).then(
+                GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
+
+               // $http.get(url).then(
                     function(data) {
                         $scope.bundleModels = data.data
                         $scope.bundleModels.entry = $scope.bundleModels.entry || [];    //in case there are no models
@@ -688,6 +770,7 @@ console.log(user);
 
             //edit the model description. Create a new one if 'header' is null...
             var editModel = function(SD){
+                $scope.canSaveModel = true;     //allow edits to the model to be saved
                 $uibModal.open({
                     templateUrl: 'modalTemplates/newLogicalModel.html',
                         size: 'lg',
@@ -951,6 +1034,29 @@ console.log(user);
             $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();
             $scope.dataTypes.push({code: 'BackboneElement',description: 'BackboneElement'});
 
+
+            //add the v2 datatypes here. todo - perhaps there's a 'model source' property that selects from different data types?
+            $scope.dataTypes.push({code: 'CE',description: 'CE Coded Entity'});
+            $scope.dataTypes.push({code: 'CM',description: 'CM Composite'});
+            $scope.dataTypes.push({code: 'CWE',description: 'CWE Coded With Exceptions'});
+            $scope.dataTypes.push({code: 'CX',description: 'CX Extended CompositeId'});
+            $scope.dataTypes.push({code: 'EI',description: 'EI Entity Identifier'});
+            $scope.dataTypes.push({code: 'HD',description: 'HD Hierarchic Descriptor'});
+            $scope.dataTypes.push({code: 'IS',description: 'ID Coded, HL7 Defined'});
+            $scope.dataTypes.push({code: 'IS',description: 'IS Coded, User Defined'});
+            $scope.dataTypes.push({code: 'PL',description: 'PL Person Location'});
+            $scope.dataTypes.push({code: 'SI',description: 'SI Sequence Id'});
+            $scope.dataTypes.push({code: 'ST',description: 'ST String'});
+            $scope.dataTypes.push({code: 'TS',description: 'TS Timestamp'});
+            $scope.dataTypes.push({code: 'XAD',description: 'XAD Extended Address'});
+            $scope.dataTypes.push({code: 'XCN',description: 'XCN Extended name + ID for Persons'});
+            $scope.dataTypes.push({code: 'XPN',description: 'XPN Extended Person Name'});
+            $scope.dataTypes.push({code: 'XTN',description: 'XTN Extended Telecommunications Number'});
+
+
+
+
+
             $scope.save = function() {
                 
                 var url = $scope.conformanceServer.url + "StructureDefinition/" + $scope.SD.id;
@@ -1075,6 +1181,7 @@ console.log(user);
                 delete $scope.commentTask;      //the task to comment on this model...
                 delete $scope.input.mdComment;  //the comment
                 delete $scope.taskOutputs;      //the outputs of the task (Communication resource currently)
+                $scope.canSaveModel = true;     //allow edits to the model to be saved
 
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
@@ -1660,6 +1767,7 @@ console.log(user);
 
                     })
                 };
+
 
 
             //insert an external model into the
