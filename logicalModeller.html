@@ -98,9 +98,7 @@
             border: 1px solid #ccc;
             border-radius: 2px;
         }
-        markdown-editorDEP textarea {
-            font-family: monospace;
-        }
+
     </style>
 
 </head>
@@ -665,22 +663,6 @@
                             <uib-tab ng-show="input.modelChat && 1==2">
                                 <uib-tab-heading>Comments <span class="badge">{{input.modelChat.length-1}}</span> </uib-tab-heading>
 
-
-        <!--
-                                <div ng-repeat = "conv in input.modelChatData.children">
-                                    <div class="row" style="margin-bottom: 8px">
-                                        <div class="col-md-12 col-sm-12">
-                                            <span><strong>{{conv.user.email}}</strong></span>
-                                            <span class="pull-right">{{conv.date | getAgeSeconds}}</span>
-                                        </div>
-
-                                    </div>
-                                    {{conv.display}}
-
-                                </div>
-
-                                <hr />
-        -->
                                 <div ng-repeat = "comment in input.modelChat" >
                                     <div ng-show="showCommentEntry(comment,$index)"
                                             ng-style="{ 'margin-left': comment.level * 15 }"
@@ -754,6 +736,9 @@
 
                                 -->
                             </uib-tab>
+
+
+
                         </uib-tabset>
 
 
@@ -768,11 +753,14 @@
                                     <tr ng-repeat = "item in allComments">
                                         <td width="20%">
                                             {{item.task.owner.display}}
-                                            <div>{{item.comment.sent | date}}</div>
+                                            <div>{{item.comment.authored | date}}</div>
                                         </td>
                                         <td>
-                                            <div ng-repeat="pay in item.comment.payload">
-                                                <p ng-bind-html="pay.contentString |markDown"></p>
+                                            <div ng-repeat="c in item.comment.item">
+                                                <div ng-repeat="a in c.answer">
+                                                    <p ng-bind-html="a.valueString |markDown"></p>
+                                                </div>
+
                                             </div>
                                         </td>
                                     </tr>

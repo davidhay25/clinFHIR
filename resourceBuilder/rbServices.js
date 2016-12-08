@@ -207,7 +207,7 @@ angular.module("sampleApp").
                         data.data.entry.forEach(function(entry){
                             var task = entry.resource;
 
-                            queries.push(that.getOutputsForTask(task,'Communication').then(
+                            queries.push(that.getOutputsForTask(task,'QuestionnaireResponse').then(
                                 function(lst){
                                    // console.log(lst)
                                     if (lst.length > 0) {

@@ -100,22 +100,30 @@
 
         <div class="row">
             <div class="col-md-4 col-sm-4">
-
+                <h3>Source model</h3>
                 <select class="form-control" ng-model="input.srcMap"
                         ng-change="selectModel('src',input.srcMap.resource)"
                         ng-options="entry.resource.name for entry in bundleModels.entry"></select>
-
+                <br/>
                 <div id="srcTreeView"></div>
             </div>
             <div class="col-md-4 col-sm-4">
 
+                <div>Source: {{selectedNode['src'].data.path}}</div>
+                <div>Target: {{selectedNode['targ'].data.path}}</div>
+
+                <pre ng-show="selectedMap">
+                    {{selectedMap | json}}
+                </pre>
+
+
             </div>
             <div class="col-md-4 col-sm-4">
-
+                <h3>Target model</h3>
                 <select class="form-control" ng-model="input.targMap"
                         ng-change="selectModel('targ',input.targMap.resource)"
                         ng-options="entry.resource.name for entry in bundleModels.entry"></select>
-
+                <br/>
                 <div id="targTreeView"></div>
             </div>
 

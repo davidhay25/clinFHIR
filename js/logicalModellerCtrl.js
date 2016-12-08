@@ -33,56 +33,13 @@ angular.module("sampleApp")
 
                 if (modelToMerge) {
 
-                    var pathToInsertAt = $scope.selectedNode.id;
 
-                    //find the position in the current SD where this path is...
-                    var posToInsertAt = -1;
-                    for (var i=0; i< $scope.SD.snapshot.element.length; i++) {
-                        var ed = $scope.SD.snapshot.element[i];
-                        if (ed.path == pathToInsertAt) {
-                            posToInsertAt = i+1;
-                        }
-                    }
+                    logicalModelSvc.mergeModel($scope.SD,$scope.selectedNode.id,modelToMerge);
 
 
-                    if (posToInsertAt) {
-                        //posToInsertAt
-                        //right. here is where we are ready to insert. Start from the second one...
-                        var arInsert = [];      //the array of ed's to insert
-                        for (var j = modelToMerge.snapshot.element.length -1; j >0 ; j--) {     //needs to be descending, due the inset at the same point
-
-                            //for (var j = 1; j < modelToMerge.snapshot.element.length; j++) {
-                            var edToInsert = angular.copy(modelToMerge.snapshot.element[j]);
-                            //now, change the path in the edToInsert to it's consistent with the parent...
-                            var ar = edToInsert.path.split('.');
-                            ar.shift();     //remove the root
-                            edToInsert.path = pathToInsertAt + '.' + ar.join('.');
-                            edToInsert.id = edToInsert.path;
-
-                            $scope.SD.snapshot.element.splice(posToInsertAt,0,edToInsert)
-                            //arInsert.push(edToInsert);
-                        }
-
-                        //insert the array of new elements into the current SD
-                       // $scope.currentSD.snapshot.element.splice(i,0,arInsert)
-
-                        $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.SD);  //create a new tree
-                        drawTree();     //... and draw
-                        createGraphOfProfile();     //and generate the mind map...
-
-
-
-
-
-                    }
-
-
-
-                   // var ar = logicalModelSvc.createTreeArrayFromSD(modelToMerge);
-                  //  console.log(ar);
-
-
-
+                    $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.SD);  //create a new tree
+                    drawTree();     //... and draw
+                    createGraphOfProfile();     //and generate the mind map...
 
 
                 }
@@ -119,6 +76,59 @@ angular.module("sampleApp")
 
             $scope.saveComment = function() {
                 //save the comment. For now, a single comment only...
+                var QuestionnaireResponse;
+                if ($scope.taskOutputs.length == 0) {
+                    //create a new QuestionnaireResponse and add it to the task...
+                    var type = {text: 'QuestionnaireResponse'}
+                    QuestionnaireResponse = {resourceType: 'QuestionnaireResponse', item: [],status:'completed'};
+                    QuestionnaireResponse.item.push({linkId:'general', answer:[{valueString: $scope.input.mdComment}]}   );
+                    QuestionnaireResponse.id = 't' + new Date().getTime();
+                    QuestionnaireResponse.authored = moment().format();
+
+                    $scope.showWaiting = true;
+                    SaveDataToServer.addOutputToTask($scope.commentTask,QuestionnaireResponse,type).then(
+                        function(){
+                            modalService.showModal({}, {bodyText: "Comment saved"});
+                            getAllComments();
+                           // alert('Comment saved')
+                        },function(err){
+                            alert('error adding QuestionnaireResponse: '+angular.toJson(err))
+                        }
+                    ).finally(function(){
+                        $scope.showWaiting = false;
+                    })
+
+
+                } else {
+                    //update an existing one...
+                    QuestionnaireResponse = $scope.taskOutputs[0];      //these are only QuestionnaireResponse resources right now...
+                    QuestionnaireResponse.item = QuestionnaireResponse.item || [];    //should be unnessecary...
+                    QuestionnaireResponse.authored = moment().format();
+                    QuestionnaireResponse.item[0] = {linkId:'general', answer:[{valueString: $scope.input.mdComment}]};
+                    $scope.showWaiting = true;
+                    SaveDataToServer.saveResource(QuestionnaireResponse).then(
+                        function(){
+                            modalService.showModal({}, {bodyText: "Comment updated"});
+                            getAllComments();
+                        },
+                        function(err) {
+                            alert('error updating QuestionnaireResponse: '+angular.toJson(err))
+                        }
+                    ).finally(function(){
+                        $scope.showWaiting = false;
+                    })
+                }
+
+
+
+
+
+
+                
+            };
+
+            $scope.saveCommentDEP = function() {
+                //save the comment. For now, a single comment only...
                 var Communication;
                 if ($scope.taskOutputs.length == 0) {
                     //create a new communication and add it to the task...
@@ -133,7 +143,7 @@ angular.module("sampleApp")
                         function(){
                             modalService.showModal({}, {bodyText: "Comment saved"});
                             getAllComments();
-                           // alert('Comment saved')
+                            // alert('Comment saved')
                         },function(err){
                             alert('error adding Communication: '+angular.toJson(err))
                         }
@@ -166,7 +176,7 @@ angular.module("sampleApp")
 
 
 
-                
+
             };
 
 
@@ -321,7 +331,7 @@ angular.module("sampleApp")
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
             firebase.auth().onAuthStateChanged(function(user) {
                 delete $scope.input.mdComment;
-console.log(user);
+
                 if (user) {
                     $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
                     logicalModelSvc.setCurrentUser(user);
@@ -361,7 +371,7 @@ console.log(user);
                 delete $scope.palette;
                 GetDataFromServer.getListForPractitioner(practitioner,$scope.code.lmPalette).then(
                     function(list) {
-                        console.log(list);
+
                         if (list) {
 
                             $scope.lmPalette = list;
@@ -1303,9 +1313,7 @@ console.log(user);
 
 
             }
-
-
-
+            
 
             function getAllComments(){
                 GetDataFromServer.getOutputsForModel($scope.currentSD).then(
@@ -1328,17 +1336,24 @@ console.log(user);
                             if (listTasks.length > 0) {
                                 $scope.commentTask = listTasks[0];  //should only be 1 active task for this practitioner for this model
 
-                                //now get any 'output' resources that exist for this task. Will only be Communications...
-                                GetDataFromServer.getOutputsForTask($scope.commentTask,'Communication').then(
+                                //now get any 'output' resources that exist for this task. Will only be QuestionnaireResponses...
+                                GetDataFromServer.getOutputsForTask($scope.commentTask,'QuestionnaireResponse').then(
                                     function(lst){
                                         $scope.taskOutputs = lst;
                                         console.log(lst)
 
-                                        if (lst.length > 0 && lst[0].payload) {
-                                            //if there is at least 1 communication - set the text...
-                                            //todo - this only supports a single comment per practitioner....
-                                            $scope.input.mdComment = lst[0].payload[0].contentString;
+                                        if (lst.length > 0 && lst[0].item) {
+                                            //if there is at least 1 QuestionnaireResponse - set the text...
+                                            //todo - this only supports a single comment per practitioner per model....
+                                            try {
+                                                $scope.input.mdComment = lst[0].item[0].answer[0].valueString;
+                                            } catch (err){
+                                                alert('There was an error getting the comment')
+                                            }
+
                                         }
+
+
 
                                     },
                                     function(err) {

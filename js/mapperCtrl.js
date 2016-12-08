@@ -6,15 +6,62 @@ angular.module("sampleApp")
             $scope.input = {};
             $scope.selectedModel = {};
             $scope.selectedModelTree = {};
+            $scope.selectedNode = {};
+            $scope.maps = [];       //collection of maps...
+            
 
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
+
+
+            $scope.$on('nodeSelected',function(event,data){
+                delete $scope.selectedMap;
+                var srcElement = $scope.selectedNode['src']
+                var targElement = $scope.selectedNode['targ']
+
+                if (srcElement && targElement) {
+                    for (var i=0; i < $scope.maps.length; i++) {
+                        var map = $scope.maps[i];
+                        if (map.src == srcElement.data.path && map.targ == targElement.data.path) {
+                            $scope.selectedMap = map;
+                            break;
+                        }
+                    }
+
+                    if (! $scope.selectedMap) {
+                        var newMap = {src:srcElement.data.path,targ:targElement.data.path};
+                        $scope.maps.push(newMap)
+                        $scope.selectedMap = newMap;
+                    }
+
+                }
+
+            });
+
 
 
             $scope.selectModel = function(dir,model) {
                 console.log(dir,model);
                 $scope.selectedModel[dir] = model;
                 $scope.selectedModelTree[dir] = logicalModelSvc.createTreeArrayFromSD(model);
+
+
+
+
+
+/*
+                var modelToMerge = logicalModelSvc.getModelFromBundle($scope.bundleModels,url);
+
+                if (modelToMerge) {
+
+
+                    logicalModelSvc.mergeModel($scope.SD, $scope.selectedNode.id, modelToMerge);
+                }
+                */
+
                 drawTree(dir,$scope.selectedModelTree[dir])
+
+
+
 
 
             }
@@ -30,14 +77,16 @@ angular.module("sampleApp")
 
                     //console.log(data)
                     if (data.node) {
-                        $scope.selectedNode = data.node;
+                        $scope.selectedNode[dir] = data.node;
+                        $scope.$broadcast('nodeSelected');
+                        $scope.$digest();       //as the event occurred outside of angular...
+
                     }
 
 
 
                     //used in the html template...
 
-                    $scope.$digest();       //as the event occurred outside of angular...
 
 
 

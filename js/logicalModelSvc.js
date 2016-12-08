@@ -8,6 +8,51 @@ angular.module("sampleApp")
         var currentUser;
         
         return {
+
+            mergeModel : function(targetModel,pathToInsertAt,modelToMerge) {
+
+
+
+                //var pathToInsertAt = $scope.selectedNode.id;
+
+                //find the position in the current SD where this path is...
+                var posToInsertAt = -1;
+                for (var i = 0; i < targetModel.snapshot.element.length; i++) {
+                    var ed = targetModel.snapshot.element[i];
+                    if (ed.path == pathToInsertAt) {
+                        posToInsertAt = i + 1;
+                    }
+                }
+
+
+                if (posToInsertAt) {
+                    //posToInsertAt
+                    //right. here is where we are ready to insert. Start from the second one...
+                    //var arInsert = [];      //the array of ed's to insert
+                    for (var j = modelToMerge.snapshot.element.length - 1; j > 0; j--) {     //needs to be descending, due the inset at the same point
+
+                        //for (var j = 1; j < modelToMerge.snapshot.element.length; j++) {
+                        var edToInsert = angular.copy(modelToMerge.snapshot.element[j]);
+                        //now, change the path in the edToInsert to it's consistent with the parent...
+                        var ar = edToInsert.path.split('.');
+                        ar.shift();     //remove the root
+                        edToInsert.path = pathToInsertAt + '.' + ar.join('.');
+                        edToInsert.id = edToInsert.path;
+
+                        targetModel.snapshot.element.splice(posToInsertAt, 0, edToInsert)
+                        //arInsert.push(edToInsert);
+                    }
+
+                    //insert the array of new elements into the current SD
+                    // $scope.currentSD.snapshot.element.splice(i,0,arInsert)
+
+                    //  $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.SD);  //create a new tree
+                    // drawTree();     //... and draw
+                    // createGraphOfProfile();     //and generate the mind map...
+
+
+                }
+            },
             
             getModelFromBundle : function(bundle,url) {
                 for (var i=0; i<bundle.entry.length; i++) {
