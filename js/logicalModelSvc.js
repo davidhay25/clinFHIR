@@ -239,77 +239,32 @@ angular.module("sampleApp")
                 return newSD;
 
             },
-            createFromBaseType : function(treeData,typeName,rootName) {
+            createFromBaseType : function(treeData,typeName,rootName,useStu2) {
               //create a model from the base type, only bringing across stuff we want.
                 //todo - very similar to the logic in createTreeArrayFromSD() - ?call out to separate function...
                 var deferred = $q.defer();
                 var elementsToIgnore =['id','meta','implicitRules','language','text','contained','extension','modifierExtension'];
                 var url = "http://hl7.org/fhir/StructureDefinition/"+typeName;
 
-                GetDataFromServer.findConformanceResourceByUri(url).then(
+                var serverUrl;  //set this for STU-2 - will defailt to the current one if not set...
+
+
+
+
+                if (useStu2) {
+                    //for now get the st2 resources directly off HAPI server. todo - this needs to be configurable in some way...
+                    serverUrl = "http://fhirtest.uhn.ca/baseDstu2/";
+                    console.log('getting from STU-2')
+
+                }
+
+
+                GetDataFromServer.findConformanceResourceByUri(url,serverUrl).then(
                     function(SD){
-                        SD.snapshot.element.forEach(function(ed){
-                            var path = ed.path;
-                            var arPath = path.split('.');
+                        makeTreeData(SD,treeData);
 
-                            if (arPath.length > 1) { //skip the first one
+                        console.log(treeData);
 
-                                arPath[0] = rootName;           //use the rootname of the Logical Model
-                                var idThisElement = arPath.join('.')
-                                var treeText = arPath.pop();//
-                                var include = true;
-                                if (elementsToIgnore.indexOf(treeText) > -1) {
-                                    include = false;
-                                }
-
-
-                                if (include) {
-                                    var parentId = arPath.join('.');
-                                    var item = {};
-
-                                    item.id = idThisElement;
-                                    item.text = treeText;
-                                    item.data = {};
-                                    item.parent = parentId;
-                                    item.state = {opened:true};     //default to fully expanded
-
-                                    item.data.path = idThisElement;     //is the same as the path...
-                                    item.data.name = item.text;
-                                    item.data.short = ed.short;
-                                    item.data.description = ed.definition;
-                                    item.data.type = ed.type;
-                                    item.data.min = ed.min;
-                                    item.data.max = ed.max;
-
-                                    item.data.comments = ed.comments;
-
-                                    //note that we don't retrieve the complete valueset...
-                                    if (ed.binding) {
-                                        item.data.selectedValueSet = {strength:ed.binding.strength};
-                                        item.data.selectedValueSet.vs = {url:ed.binding.valueSetUri};
-                                        item.data.selectedValueSet.vs.name = ed.binding.description;
-
-
-                                        //this is a reference not a name - make up a uri (todo - load the reference to get the URL
-                                        if (ed.binding.valueSetReference) {
-                                            //todo - this is safe ONLY when loading one of the base types in the spec...
-                                            item.data.selectedValueSet.vs.url = ed.binding.valueSetReference.reference;
-                                        }
-
-                                    }
-
-
-
-                                    treeData.push(item);
-                                }
-
-
-
-
-
-
-                            }
-                        })
                         deferred.resolve(treeData);
 
                     },
@@ -319,7 +274,84 @@ angular.module("sampleApp")
                     }
                 )
 
+
+
+
+
                 return deferred.promise;
+
+                function makeTreeData(SD,treeData) {
+
+                    //The hAPI server is mossing the snapshot element for some reason. Hopefully the differential is complete...
+                    var elements = SD.snapshot || SD.differential;
+
+                    elements.element.forEach(function(ed){
+                        var path = ed.path;
+                        var arPath = path.split('.');
+
+                        if (arPath.length > 1) { //skip the first one
+
+                            arPath[0] = rootName;           //use the rootname of the Logical Model
+                            var idThisElement = arPath.join('.')
+                            var treeText = arPath.pop();//
+                            var include = true;
+                            if (elementsToIgnore.indexOf(treeText) > -1) {
+                                include = false;
+                            }
+
+
+                            if (include) {
+                                var parentId = arPath.join('.');
+                                var item = {};
+
+                                item.id = idThisElement;
+                                item.text = treeText;
+                                item.data = {};
+                                item.parent = parentId;
+                                item.state = {opened:true};     //default to fully expanded
+
+                                item.data.path = idThisElement;     //is the same as the path...
+                                item.data.name = item.text;
+                                item.data.short = ed.short;
+                                item.data.description = ed.definition;
+                                item.data.type = ed.type;
+                                item.data.min = ed.min;
+                                item.data.max = ed.max;
+
+                                item.data.comments = ed.comments;
+
+                                //note that we don't retrieve the complete valueset...
+                                if (ed.binding) {
+                                    item.data.selectedValueSet = {strength:ed.binding.strength};
+                                    item.data.selectedValueSet.vs = {url:ed.binding.valueSetUri};
+                                    item.data.selectedValueSet.vs.name = ed.binding.description;
+
+
+                                    //this is a reference not a name - make up a uri (todo - load the reference to get the URL
+                                    if (ed.binding.valueSetReference) {
+                                        //todo - this is safe ONLY when loading one of the base types in the spec...
+                                        item.data.selectedValueSet.vs.url = ed.binding.valueSetReference.reference;
+                                    }
+
+                                }
+
+
+
+                                treeData.push(item);
+                            }
+
+
+
+
+
+
+                        }
+                    })
+
+
+                }
+
+
 
             },
             getModelHistory : function(id){

@@ -69,15 +69,57 @@
 
 
 </div>
+    <br/>
 
-    <table class="table table-bordered">
-        <tr ng-repeat="plan in input.plans">
-            <td>{{plan.server.name}}</td>
-            <td>{{plan.patient.id}}</td>
-            <td><pre>{{plan.plan | json}}</pre></td>
-        </tr>
-    </table>
+    <uib-tabset>
+        <uib-tab heading="Individual Plans">
+            <table class="table table-bordered" ng-show="input.plans.length > 0">
+                <tr>
+                    <th>Index</th><th>Server</th><th>Patient</th><th>Detail</th>
+                </tr>
+                <tr ng-repeat="plan in input.plans">
+                    <td>{{$index}}</td>
+                    <td>
+                        <div>{{plan.server.name}}</div>
+                        <div><a ng-click="toggleDetail($index)">Toggle detail</a></div>
+                    </td>
+                    <td>
+                        <div>Id: {{plan.patient.id}}</div>
+                    </td>
+                    <td>
+                        <div ng-show="output.showDetail[$index]">
+                            <uib-tabset>
+                                <uib-tab heading="Summary">
+                                    <table>
+                                        <tr>
+                                            <td>Addresses</td>
+                                            <td>
+                                                <ul>
+                                                    <li ng-repeat="a in plan.plan.addresses">{{a.display}}</li>
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    </table>
 
+                                </uib-tab>
+                                <uib-tab heading="Json">
+                                    <pre>{{plan.plan | json}}</pre>
+                                </uib-tab>
+                            </uib-tabset>
+                        </div>
+
+
+                    </td>
+                </tr>
+            </table>
+
+
+
+        </uib-tab>
+        <uib-tab heading="Combined Plans">
+
+        </uib-tab>
+    </uib-tabset>
 
 
     {{input.plansDEP}}

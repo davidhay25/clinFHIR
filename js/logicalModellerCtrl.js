@@ -722,7 +722,9 @@ angular.module("sampleApp")
                             var node = graphData.nodes.get(nodeId);
                             //console.log(node)
 
-                            var pathOfSelectedNode = node.ed.base.path;
+                            var pathOfSelectedNode = node.ed.path; //node.ed.base.path not working with merged...
+
+                            //var pathOfSelectedNode = node.ed.base.path;
                             $scope.selectedNode = findNodeWithPath(pathOfSelectedNode); //note this is the node for the tree view, not the graph
 
                             $scope.$digest();
@@ -772,9 +774,7 @@ angular.module("sampleApp")
             };
 
             $scope.newModel = function(){
-
-
-
+                
                 editModel();
             };
 
@@ -866,7 +866,7 @@ angular.module("sampleApp")
                                     function(data){
 
                                         if (Utilities.isAuthoredByClinFhir(data.data)) {
-                                            modalService.showModal({},{bodyText:"There's already a profile with this name. If you carry on. it will be replaced."})
+                                            modalService.showModal({},{bodyText:"There's already a profile with this name. Please select another name."})
                                         } else {
                                             modalService.showModal({},{bodyText:"Sorry, there's already a profile with this name"})
                                         }
@@ -901,6 +901,11 @@ angular.module("sampleApp")
                                 vo.mapping = $scope.input.mapping;
                                // vo.type = $scope.input.type.code;
                                 vo.createElementsFromBase = $scope.input.createElementsFromBase;
+                                vo.useV2ForCreateElementsFromBase = $scope.input.useV2ForCreateElementsFromBase;
+
+
+                                
+                                
                                 if ($scope.input.clone) {
                                     //creating another copy
 
@@ -1015,7 +1020,8 @@ angular.module("sampleApp")
                                     */
 
 
-                                    logicalModelSvc.createFromBaseType($scope.treeData,result.baseType,$scope.rootName).then(
+                                    logicalModelSvc.createFromBaseType($scope.treeData,result.baseType,
+                                        $scope.rootName,result.useV2ForCreateElementsFromBase).then(
                                         function(){
                                             drawTree();
                                             makeSD();
@@ -1140,6 +1146,7 @@ angular.module("sampleApp")
                     $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
                     loadHistory($scope.rootName);
 
+                    /*
                     var refChat = firebase.database().ref().child("chat").child($scope.rootName);
                     refChat.on('value', function(snapshot) {
                         console.log(snapshot.val());
@@ -1166,6 +1173,8 @@ angular.module("sampleApp")
                     });
 
                     console.log(refChat);
+
+                    */
 
                     /*
                     logicalModelSvc.getModelHistory($scope.rootName).then(
@@ -1313,12 +1322,12 @@ angular.module("sampleApp")
 
 
             }
-            
+
 
             function getAllComments(){
                 GetDataFromServer.getOutputsForModel($scope.currentSD).then(
                     function(lst) {
-                        console.log(lst)
+                        //console.log(lst)
                         $scope.allComments = lst;
                     }, function (err) {
 
