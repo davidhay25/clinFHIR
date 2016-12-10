@@ -23,7 +23,13 @@ angular.module("sampleApp")
     return function(id) {
         //console.log(id);
         if (id) {
-            var ar = id.split('/');
+            var url = id;
+            if (angular.isArray(id)){
+                url = id[0];
+            }
+
+            //console.log(id);
+            var ar = url.split('/');
             var lid = ar[ar.length-1];
             return lid;
         } else {

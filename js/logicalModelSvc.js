@@ -6,9 +6,177 @@ angular.module("sampleApp")
     .service('logicalModelSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities) {
 
         var currentUser;
-        
+        var elementsToIgnore =['id','meta','implicitRules','language','text','contained','extension','modifierExtension'];
+
+
+
+        function makeTreeDataElementDEP(rootName,ed,treeData) {
+            //generate an item for the tree
+
+                var path = ed.path;
+                var arPath = path.split('.');
+
+                if (arPath.length > 1) { //skip the first one
+
+                    arPath[0] = rootName;           //use the rootname of the Logical Model
+                    var idThisElement = arPath.join('.')
+                    var treeText = arPath.pop();//
+                    var include = true;
+                    if (elementsToIgnore.indexOf(treeText) > -1) {
+                        include = false;
+                    }
+
+                    if (include) {
+                        console.log(idThisElement);
+                        var parentId = arPath.join('.');
+                        var item = {};
+
+                        item.id = idThisElement;
+                        item.text = treeText;
+                        item.data = {};
+                        item.parent = parentId;
+
+
+                        //test that the parent exists
+                        var found = false;
+                        treeData.forEach(function (item) {
+                            if (item.id == parentId) {
+                                found = true;
+                            }
+
+                        });
+
+                        if (!found) {
+                            console.log('Missing parent element ' + parentId)
+                            throw 'Missing parent element ' + parentId + '. This is because the model definition is incorrect, so I cannot use it.';
+                            return;
+                        }
+
+
+                        item.state = {opened: true};     //default to fully expanded
+
+                        item.data.path = idThisElement;     //is the same as the path...
+                        item.data.name = item.text;
+                        item.data.short = ed.short;
+                        item.data.description = ed.definition;
+                        item.data.type = ed.type;
+                        item.data.min = ed.min;
+                        item.data.max = ed.max;
+
+                        item.data.comments = ed.comments;
+
+                        //note that we don't retrieve the complete valueset...
+                        if (ed.binding) {
+                            item.data.selectedValueSet = {strength: ed.binding.strength};
+                            item.data.selectedValueSet.vs = {url: ed.binding.valueSetUri};
+                            item.data.selectedValueSet.vs.name = ed.binding.description;
+
+
+                            //this is a reference not a name - make up a uri (todo - load the reference to get the URL
+                            if (ed.binding.valueSetReference) {
+                                //todo - this is safe ONLY when loading one of the base types in the spec...
+                                item.data.selectedValueSet.vs.url = ed.binding.valueSetReference.reference;
+                            }
+
+                        }
+
+
+                        treeData.push(item);
+                         return item;
+                    } else {
+                        return null;
+                    }
+
+
+                }
+
+
+
+        }
+
+
+
+
         return {
 
+
+            importFromProfile : function(){
+                var that = this;
+                var deferred = $q.defer();
+                var serverUrl = "http://fhir.hl7.org.nz/dstu2/";
+                var url = serverUrl + "StructureDefinition/ohAllergyIntolerance";
+                var queries = []
+
+                GetDataFromServer.adHocFHIRQuery(url).then(
+                    function(data){
+                        var profile = data.data;
+
+                        var treeData = that.createTreeArrayFromSD(profile);
+
+                        //now, pull out all the extensions and resolve the name and datatypes...
+
+                        treeData.forEach(function (item) {
+                            if (item.text.substr(0,9) == 'extension') {
+                                if (item.data) {
+                                    var uri = item.data.referenceUri;
+                                    if (uri) {
+                                        //now retrieve the SD that describes this extension and update the tree. Assume it is on the same server...
+                                        queries.push(checkExtensionDef(uri,item));
+                                    }
+
+                                }
+                            }
+
+                        });
+                        
+
+                        $q.all(queries).then(
+                            function() {
+                                console.log('DONE')
+                                deferred.resolve(treeData)
+                            },
+                            function(err){
+                                console.log('ERROR: ', err)
+                            }
+                        );
+
+
+
+                        function checkExtensionDef(extUrl,item){
+                            var deferred = $q.defer();
+                            var url = serverUrl + "StructureDefinition?url=" + extUrl;
+                            GetDataFromServer.adHocFHIRQuery(url).then(
+                                function(data) {
+                                    var bundle = data.data;
+                                    if (bundle && bundle.entry) {
+                                        var extensionDef = bundle.entry[0].resource;     //should really only be one...
+                                        var analysis = Utilities.analyseExtensionDefinition3(extensionDef);
+                                        //console.log(analysis)
+                                        if (analysis.name) {
+                                            item.text = analysis.name;
+                                            //console.log(item)
+                                        }
+                                        item.data.analysis = analysis;
+                                    }
+                                    //console.log(data.data)
+                                    deferred.resolve();
+                                },
+                                function(err) {
+                                    deferred.reject();
+                                }
+                            );
+                            return deferred.promise;
+                        };
+
+
+                    },function (err) {
+                        console.log(err)
+                    }
+                )
+
+
+                return deferred.promise;
+            },
             mergeModel : function(targetModel,pathToInsertAt,modelToMerge) {
 
 
@@ -246,7 +414,7 @@ angular.module("sampleApp")
                 var elementsToIgnore =['id','meta','implicitRules','language','text','contained','extension','modifierExtension'];
                 var url = "http://hl7.org/fhir/StructureDefinition/"+typeName;
 
-                var serverUrl;  //set this for STU-2 - will defailt to the current one if not set...
+                var serverUrl;  //set this for STU-2 - will default to the current one if not set...
 
 
 
@@ -254,6 +422,7 @@ angular.module("sampleApp")
                 if (useStu2) {
                     //for now get the st2 resources directly off HAPI server. todo - this needs to be configurable in some way...
                     serverUrl = "http://fhirtest.uhn.ca/baseDstu2/";
+                    //serverUrl = "http://fhir2.healthintersections.com.au/open/";
                     console.log('getting from STU-2')
 
                 }
@@ -261,11 +430,16 @@ angular.module("sampleApp")
 
                 GetDataFromServer.findConformanceResourceByUri(url,serverUrl).then(
                     function(SD){
-                        makeTreeData(SD,treeData);
+                        try {
+                            makeTreeData(SD,treeData);
 
-                        console.log(treeData);
+                            console.log(treeData);
 
-                        deferred.resolve(treeData);
+                            deferred.resolve(treeData);
+                        } catch (ex) {
+                            deferred.reject(ex)
+                        }
+
 
                     },
                     function(err) {
@@ -282,7 +456,8 @@ angular.module("sampleApp")
 
                 function makeTreeData(SD,treeData) {
 
-                    //The hAPI server is mossing the snapshot element for some reason. Hopefully the differential is complete...
+                    //The hAPI server is missing the snapshot element for some reason.
+                    // Hopefully the differential is complete... - this was an issue with the SD ? todo needto d this
                     var elements = SD.snapshot || SD.differential;
 
                     elements.element.forEach(function(ed){
@@ -301,6 +476,7 @@ angular.module("sampleApp")
 
 
                             if (include) {
+                                console.log(idThisElement);
                                 var parentId = arPath.join('.');
                                 var item = {};
 
@@ -308,6 +484,24 @@ angular.module("sampleApp")
                                 item.text = treeText;
                                 item.data = {};
                                 item.parent = parentId;
+
+
+                                //test that the parent exists
+                                var found = false;
+                                treeData.forEach(function (item) {
+                                    if (item.id == parentId) {
+                                        found = true;
+                                    }
+
+                                });
+
+                                if (! found) {
+                                    console.log('Missing parent element '+parentId)
+                                    throw 'Missing parent element '+parentId + '. This is because the model definition is incorrect, so I cannot use it.';
+                                    return;
+                                }
+
+
                                 item.state = {opened:true};     //default to fully expanded
 
                                 item.data.path = idThisElement;     //is the same as the path...
@@ -364,15 +558,39 @@ angular.module("sampleApp")
                 var mapToModelExtensionUrl = appConfigSvc.config().standardExtensionUrl.mapToModel;
                 var baseTypeForModel = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
 
+                var cntExtension = 0;
                 var arTree = [];
                 if (sd && sd.snapshot && sd.snapshot.element) {
 
                     sd.snapshot.element.forEach(function(ed){
+                        var include = true;
+
                         var path = ed.path;     //this is always unique in a logical model...
                         var arPath = path.split('.');
                         var item = {}
                         item.id = path;
                         item.text = arPath[arPath.length -1];   //the text will be the last entry in the path...
+
+                        //give a unique name if an extension...
+                        if (item.text === 'extension') {
+                            item.text = 'extension_' + cntExtension;
+                            item.id = path += "_"+cntExtension;
+
+                            cntExtension ++;
+
+
+                            console.log(ed);
+
+                            //see if this extension points to an extension definition
+                            if (ed.type && ed.type[0].profile) {
+
+                            } else {
+                                include = false;
+                            }
+
+
+                        }
+
 
                         //show if an element is multiple...
                         if (ed.max == '*') {
@@ -437,7 +655,13 @@ angular.module("sampleApp")
                         item.data.type = ed.type;
                         
                         if (ed.type && ed.type[0].profile) {
-                            item.data.referenceUri = ed.type[0].profile
+                            item.data.referenceUri = ed.type[0].profile;
+
+                            //in stu2 this is an array...
+                            if (angular.isArray(item.data.referenceUri)) {
+                                item.data.referenceUri = item.data.referenceUri[0];
+                            }
+
                         }
 
                         //determine if this is a coded or a reference type
@@ -505,7 +729,10 @@ angular.module("sampleApp")
                         */
 
 
-                        arTree.push(item);
+                        if (include) {
+                            arTree.push(item);
+                        }
+
                     });
 
 

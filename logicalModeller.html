@@ -477,6 +477,10 @@
                                 </tr>
                                 <tr><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>
                                 <tr><td>Multiplicity</td><td>{{selectedNode.data.min}}..{{selectedNode.data.max}}</td></tr>
+                                <tr ng-show="selectedNode.data.analysis">
+                                    <td>Extension data</td>
+                                    <td>{{selectedNode.data.analysis | json}}</td>
+                                </tr>
                                 <tr><td>Datatypes</td>
                                     <td>
                                     <div ng-repeat = "typ in selectedNode.data.type">
@@ -537,14 +541,7 @@
                                         <ul>
                                             <li ng-repeat="option in valueSetOptions">{{option.display}}</li>
                                         </ul>
-<!--
-                                        <table class="table table-bordered">
-                                            <tr ng-repeat="option in valueSetOptions">
-                                                <td>{{option.code}}</td>
-                                                <td>{{option.display}}</td>
-                                            </tr>
-                                        </table>
-                                        -->
+
                                     </td>
                                 </tr>
                                 <tr ng-show="selectedNode.data.mapping"><td>Mapping notes</td><td>
@@ -554,7 +551,7 @@
 
 
 
-                                </td>
+                                </td></tr>
                                 <tr ng-show="selectedNode.data.fixedString">
                                     <td>Fixed</td><td>{{selectedNode.data.fixedString}}</td>
                                 </tr>

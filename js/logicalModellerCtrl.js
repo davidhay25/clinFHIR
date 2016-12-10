@@ -18,6 +18,19 @@ angular.module("sampleApp")
 
 
 
+            
+            //testing...
+            logicalModelSvc.importFromProfile().then(
+                function(treeData){
+                    $scope.treeData = treeData
+                    console.log($scope.treeData)
+                    $scope.rootName = 'test';        //the id of the first element is the 'type' of the logical model
+                    drawTree();
+
+            })
+            
+            
+
 
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
 
@@ -179,8 +192,7 @@ angular.module("sampleApp")
 
             };
 
-
-
+            
             //if the selected node changes, look to see if we can expand any binding...
             $scope.$watch(
                 function() {return $scope.selectedNode},
@@ -661,7 +673,7 @@ angular.module("sampleApp")
                 )
             }
 
-            $scope.rootNameDEP = 'dhRoot';
+            //$scope.rootNameDEP = 'dhRoot';
 
             //functions and prperties to enable the valueset viewer
             $scope.showVSBrowserDialog = {};
