@@ -2689,6 +2689,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         createGraphOfProfile: function (profile,options) {
             var deferred = $q.defer();
             var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained', 'modifierExtension'];
+            var elementsToInclude = [];     //used for the parent paths...
 
             if (! profile || !profile.snapshot || !profile.snapshot.element) {
                 alert('This profile has no snapshot')
@@ -2702,6 +2703,17 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             pathsToDisable.push(rootNode + '.meta');
             pathsToDisable.push(rootNode + '.contained');
             pathsToDisable.push(rootNode + '.text');
+
+
+            if (options && options.parentPath) {
+                //the list of paths that are ancestor paths to the parent...
+                var ar = options.parentPath.split('.')
+                while (ar.length > 0) {
+                    elementsToInclude.push(ar.join('.'));
+                    ar.pop();
+                }
+            }
+
 
             var arNodes = [], arEdges = [];
             var objNodes = {};
@@ -2718,8 +2730,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 if (ar.length > 1 && elementsToDisable.indexOf(ar[ar.length - 1]) > -1) {
                     include = false;
                 }
-
-
 
 
                 //some profiles seem to have excluded element in the snapshot (eg care connect)
@@ -2756,7 +2766,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 }
 
 
-                //finally, make sure the path is not a child of one that has been deleted...
+                //Make sure the path is not a child of one that has been deleted...
                 pathsToDisable.forEach(function(disablePath){
                     if (path.substr(0,disablePath.length) == disablePath) {
                         include = false;
@@ -2768,6 +2778,27 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                    // include = false;
 
                 }
+
+                //if there is a parent other than the root...
+                if (options && options.parentPath) {
+                    var l = options.parentPath.length;
+                    if (path.substr(0,l) !== options.parentPath) {
+                        include = false;
+                    }
+
+                    //include the ancestors
+                    elementsToInclude.forEach(function(pth){
+                        if (path == pth) {
+                            include = true;
+                        }
+                    })
+
+
+
+
+                }
+
+
 
                 if (include) {
                     var label = ar[0];

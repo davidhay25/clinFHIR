@@ -45,11 +45,6 @@
         });
         angular.module("sampleApp").constant("moment", moment);
 
-
-
-
-
-
     </script>
     <script src="js/logicalModellerCtrl.js"></script>
     <script src="js/modalDialogSvc.js"></script>
@@ -74,6 +69,7 @@
     <script src="js/newVSFinder.js"></script>
     <script src="js/libs/showdown.min.js"></script>
     <script src="js/libs/angular-lightweight-markdown-editor.min.js"></script>
+    <script src="resourceBuilder/selectProfile.js"></script>
 
     <script>
         var config = {
@@ -152,6 +148,10 @@
 
                     <form ng-show="currentSD && !loadedFromBookmark" class="navbar-form">
                         <button class="btn btn-warning pull-right" ng-click="generateShortCut()">Share</button>
+                    </form>
+
+                    <form ng-hide="currentSD && !loadedFromBookmark" class="navbar-form">
+                        <button class="btn btn-warning pull-right" ng-click="findProfile()">Import</button>
                     </form>
 
                 </div>
@@ -248,7 +248,7 @@
                         </li>
                     </ul>
 
-                    <pre>{{lmPalette | json}}</pre>
+
                 </uib-tab>
             </uib-tabset>
 
@@ -284,10 +284,8 @@
                     <br/>
 
                     <span class="pull-right">
-                        <button ng-hide="isInPalette" class="btn btn-success" ng-click="addToPalette()">Add to Palette</button>
-                        <button ng-show="isInPalette" class="btn btn-danger" ng-click="removeFromPalette()">Remove from Palette</button>
-
-
+                        <button ng-hide="isInPalette" class="btn btn-link" ng-click="addToPalette()">Add to Palette</button>
+                        <button ng-show="isInPalette" class="btn btn-link" ng-click="removeFromPalette()">Remove from Palette</button>
 
                     </span>
 
@@ -302,7 +300,7 @@
                 </uib-tab>
 
 
-                <uib-tab heading="Mind Map"  select="redrawProfileGraph()">
+                <uib-tab heading="Mind Map"  select="redrawProfileGraph()"  deselect="input.graphTabIsSelected = false">
                     <div id="mmLogicalModel"></div>
                 </uib-tab>
 
@@ -597,11 +595,23 @@
                                     </div>
 
 
+                                    <div ng-show="input.graphTabIsSelected">
+                                        <span>Map display options: </span>
+                                        <button class="btn btn-link" ng-click="setParentInGraph(selectedNode)">Hide other nodes</button>
+                                        <button class="btn btn-link" ng-click="resetGraph()">Reset</button>
+                                    </div>
+
 
 
                                 </td></tr>
 
                             </table>
+
+
+
+
+
+
                         </div>
 
 
@@ -842,7 +852,13 @@
 
 
 
+        <!-- a directive that allows a profile to be selected - not just a base one... -->
+        <!---->
+        <select-profile trigger="showFindProfileDialog"
+                        all-resource-types="allResourceTypes"
+                        profile-selected="selectedProfileFromDialog" type="'profile'">
 
+        </select-profile>
 
 
     <vs-browser trigger="showVSBrowserDialog" hidesearch="true"

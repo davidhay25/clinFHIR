@@ -3,7 +3,7 @@
 angular.module("sampleApp")
     .controller('logicalModellerCtrl',
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
-                  GetDataFromServer,$firebaseObject,$location,igSvc,SaveDataToServer,$window) {
+                  GetDataFromServer,$firebaseObject,$location,igSvc,SaveDataToServer,$window,RenderProfileSvc) {
             $scope.input = {};
 
             $scope.code = {};
@@ -17,8 +17,7 @@ angular.module("sampleApp")
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
 
-
-            
+            /*
             //testing...
             logicalModelSvc.importFromProfile().then(
                 function(treeData){
@@ -28,9 +27,21 @@ angular.module("sampleApp")
                     drawTree();
 
             })
-            
-            
 
+            */
+
+            //for selecting a profile to import
+            $scope.showFindProfileDialog = {};
+            //all the base types for the selection...
+            RenderProfileSvc.getAllStandardResourceTypes().then(
+                function(data){
+                    $scope.allResourceTypes = data;
+                });
+
+            $scope.findProfile = function() {
+                $scope.showFindProfileDialog.open();
+            };
+            
 
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
 
@@ -611,7 +622,6 @@ angular.module("sampleApp")
 
 
             //load all the logical models created by clinFHIR
-
             loadAllModels = function() {
                 //$scope.conformanceServer
 
@@ -673,7 +683,7 @@ angular.module("sampleApp")
                 )
             }
 
-            //$scope.rootNameDEP = 'dhRoot';
+
 
             //functions and prperties to enable the valueset viewer
             $scope.showVSBrowserDialog = {};
@@ -694,15 +704,40 @@ angular.module("sampleApp")
                 });
             };
 
-            var createGraphOfProfile = function() {
+            
+            
+            //re-draw the graph setting the indicated path as the parent...
+            $scope.setParentInGraph = function(selectedNode) {
+                console.log(selectedNode)
+                var path = selectedNode.data.path;
+                createGraphOfProfile({parentPath:path})
+            };
+
+            //reset the graph to have the parent as the root
+            $scope.resetGraph = function(){
+                createGraphOfProfile();
+            }
+            
+            //called when the graph tab is selected or de-selected
+            $scope.graphTabSelected = function(selected) {
+
+                $scope.input.graphTabIsSelected = selected;
+            }
+
+            var createGraphOfProfile = function(options) {
+                delete $scope.graphData;
                 var graphProfile = angular.copy($scope.SD )
 
-                resourceCreatorSvc.createGraphOfProfile(graphProfile).then(
+                resourceCreatorSvc.createGraphOfProfile(graphProfile,options).then(
                     function(graphData) {
+                        $scope.graphData = graphData;
+
+                        console.log(graphData)
+
+                        //drawGraphFromGraphData(graphData);      //actually generate the graph...
 
                         //console.log(graphData)
                         var container = document.getElementById('mmLogicalModel');
-
                         var options = {
 
                             edges: {
@@ -743,18 +778,71 @@ angular.module("sampleApp")
                             //selectedNetworkElement
 
                         });
+
+
                     }
                 );
             };
+
+
+            //generate the graph. allows tge graph to be manipulated (eg nodes hidden) after creation...
+            var drawGraphFromGraphDataDEP = function(graphData,options) {
+                //console.log(graphData)
+                var container = document.getElementById('mmLogicalModel');
+                var options = {
+
+                    edges: {
+
+                        smooth: {
+                            type: 'cubicBezier',
+                            forceDirection: 'horizontal',
+                            roundness: 0.4
+                        }
+                    },
+                    layout: {
+                        hierarchical: {
+                            direction: 'LR',
+                            nodeSpacing : 35,
+                            sortMethod:'directed'
+                        }
+                    },
+                    physics:false
+                };
+
+                $scope.profileNetwork = new vis.Network(container, graphData, options);
+
+                $scope.profileNetwork.on("click", function (obj) {
+                    //console.log(obj)
+
+                    var nodeId = obj.nodes[0];  //get the first node
+                    //console.log(nodeId,graphData)
+
+                    var node = graphData.nodes.get(nodeId);
+                    //console.log(node)
+
+                    var pathOfSelectedNode = node.ed.path; //node.ed.base.path not working with merged...
+
+                    //var pathOfSelectedNode = node.ed.base.path;
+                    $scope.selectedNode = findNodeWithPath(pathOfSelectedNode); //note this is the node for the tree view, not the graph
+
+                    $scope.$digest();
+                    //selectedNetworkElement
+
+                });
+
+
+            }
 
             //this is the event when the profileGraph tab is chosen. Should really move this to a separate controller...
             $scope.redrawProfileGraph = function() {
                 console.log('click')
 
+                $scope.input.graphTabIsSelected = true;
+
                 $timeout(function(){
                     $scope.profileNetwork.fit();
                     console.log('fitting...')
-                },500            )
+                },1000            )
 
 
             };
@@ -819,7 +907,7 @@ angular.module("sampleApp")
                             });
 
                             
-                           // console.log(SD)
+                           // console.log($scope.allResourceTypes)
                             //note that a StructureDefinition is passed in when editing...
                             if (SD) {
                                 $scope.SD = SD;
@@ -866,7 +954,7 @@ angular.module("sampleApp")
                             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
                             
                             $scope.checkModelExists = function(name) {
-                                if (name.indexOf(' ')>-1) {
+                                if (name && name.indexOf(' ')>-1) {
                                     modalService.showModal({},{bodyText:"The name cannot contain spaces"})
                                     return;
                                 }

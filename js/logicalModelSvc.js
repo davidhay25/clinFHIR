@@ -579,7 +579,7 @@ angular.module("sampleApp")
                             cntExtension ++;
 
 
-                            console.log(ed);
+                            //console.log(ed);
 
                             //see if this extension points to an extension definition
                             if (ed.type && ed.type[0].profile) {
