@@ -58,7 +58,9 @@ angular.module("sampleApp")
                 if (modelToMerge) {
 
 
-                    logicalModelSvc.mergeModel($scope.SD,$scope.selectedNode.id,modelToMerge);
+                    if (! logicalModelSvc.mergeModel($scope.SD,$scope.selectedNode.id,modelToMerge)) {
+                        modalService.showModal({}, {bodyText: "Sorry, can't merge this model. Please save, reload and try again"});
+                    }
 
 
                     $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.SD);  //create a new tree
@@ -732,7 +734,7 @@ angular.module("sampleApp")
                     function(graphData) {
                         $scope.graphData = graphData;
 
-                        console.log(graphData)
+                        //console.log(graphData)
 
                         //drawGraphFromGraphData(graphData);      //actually generate the graph...
 
@@ -891,15 +893,6 @@ angular.module("sampleApp")
                             $scope.allModels = allModels;
                             console.log(allModels)
 
-/*
-                            $scope.modelTypes = [];
-                            $scope.modelTypes.push({code:'mds',display:'Minimum Data Set',help:'A common set of data for exchange either by a Document or a Message'})
-                            $scope.modelTypes.push({code:'resource',display:'Single Resource',help:'Will map to a single FHIR resource'})
-                            $scope.modelTypes.push({code:'dt',display:'Logical DataType',help:'A re-usable datatype'})
-                            $scope.input.type = $scope.modelTypes[0];
-
-                            $scope.input.typeDescription = $scope.input.type.help;
-*/
                             //the list of all the base resource types in the spec...
                             RenderProfileSvc.getAllStandardResourceTypes().then(
                                 function(data){
@@ -992,7 +985,7 @@ angular.module("sampleApp")
                                 vo.modelType = $scope.input.modelType;
                                 vo.name = $scope.input.name;
                                 vo.title = $scope.input.title;
-                                vo.purpose = $scope.input.purpose || 'purpose';
+                                vo.purpose = $scope.input.purpose || $scope.input.name ; //'purpose';
                                 vo.SD = $scope.SD;
                                 if ($scope.input.baseType) {
                                     vo.baseType = $scope.input.baseType.name;       //if a base type was selected
@@ -1038,10 +1031,6 @@ angular.module("sampleApp")
                             } else {
                                 //this is a new model
 
-                                //console.log(result);
-                               
-
-                                //this is new
                                 $scope.rootName = result.name;      //this is the 'type' of the logical model - like 'Condition'
 
                                 var rootNode = { "id" : $scope.rootName, "parent" : "#", "text" : result.name,state:{opened:true},
@@ -1304,6 +1293,64 @@ angular.module("sampleApp")
 
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
+
+
+                var vo = logicalModelSvc.makeReferencedMapsModel(entry.resource,$scope.bundleModels);   //todo - may not be the right place...
+
+                console.log(vo.graphData)
+
+                //so that we can draw a table with the references in it...
+                $scope.modelReferences = vo.references;
+
+                var container = document.getElementById('refLogicalModel');
+                var options = {
+
+                    edges: {
+
+                        smooth: {
+                            type: 'cubicBezier',
+                            //forceDirection: 'horizontal',
+                            roundness: 0.4
+                        }
+                    },
+                    layout: {
+                        hierarchical: {
+                            direction: 'LR',
+                            nodeSpacing : 35,
+                            sortMethod:'directed'
+                        }
+                    },
+                    physics:true
+                };
+
+                var options = {};
+
+                var options = {
+                    physics: {
+                        enabled: true,
+                        barnesHut: {
+                            gravitationalConstant: -10000,
+                        }
+                    }
+                }
+
+                $scope.refNetwork = new vis.Network(container, vo.graphData, options);
+                $scope.refNetwork.on("click", function (obj) {
+                    //console.log(obj)
+                    //this is selecting a model
+
+                    var nodeId = obj.nodes[0];  //get the first node
+                    //console.log(nodeId,graphData)
+
+          
+                    $scope.$digest();
+                    //selectedNetworkElement
+
+                });
+                
+                
+                
+                
                 //console.log($scope.treeData)
                 $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                 drawTree();
@@ -1405,6 +1452,20 @@ angular.module("sampleApp")
                  )
                  */
 
+
+            }
+
+            //called when the graph tab is selected
+            $scope.redrawReferencesChart = function () {
+                //alert('redraw')
+
+                $timeout(function(){
+                    if ($scope.refNetwork) {
+                        $scope.refNetwork.fit();
+                    }
+
+                    //console.log('fitting...')
+                },1000            )
 
             }
 
@@ -2000,6 +2061,8 @@ angular.module("sampleApp")
 
                 //$scope.SD = logicalModelSvc.makeSD($scope,$scope.treeData);
                 $scope.SD = logicalModelSvc.makeSD($scope,ar);
+
+               // logicalModelSvc.makeReferencedMapsModel($scope.SD);   //todo - may not be the right place...
                 
                 createGraphOfProfile();     //update the graph display...
 
@@ -2148,7 +2211,10 @@ angular.module("sampleApp")
 
 
             function drawTree() {
-                
+
+
+
+
 
                 $('#lmTreeView').jstree('destroy');
                 $('#lmTreeView').jstree(

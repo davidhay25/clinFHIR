@@ -99,7 +99,91 @@ angular.module("sampleApp")
 
         return {
 
+            makeReferencedMapsModel : function(SD,bundle) {
+                console.log(SD)
+                var that = this;
+                var lst = [];
 
+                getModelReferences(lst,SD,SD.url);      //recursively find all the references between models...
+
+                console.log(lst);
+
+                //build the tree model...
+
+                var arNodes = [], arEdges = [];
+                var objNodes = {};
+
+
+                lst.forEach(function(reference){
+
+                    var srcNode = getNodeByUrl(reference.src,reference.path,objNodes,arNodes);
+                    var targNode = getNodeByUrl(reference.targ,reference.path,objNodes,arNodes);
+
+                    var ar = reference.path.split('.');
+                    var label = ar.pop();
+                    //ar.splice(0,1);
+                    //var label = ar.join('.');
+                    arEdges.push({from: srcNode.id, to: targNode.id, label: label,arrows : {to:true}})
+
+                })
+
+
+                var nodes = new vis.DataSet(arNodes);
+                var edges = new vis.DataSet(arEdges);
+
+                // provide the data in the vis format
+                var data = {
+                    nodes: nodes,
+                    edges: edges
+                };
+
+
+                return {references:lst,graphData:data};
+
+                function getNodeByUrl(url,label,nodes) {
+                    if (nodes[url]) {
+                        return nodes[url];
+                    } else {
+                        var ar = url.split('/')
+                        //var label =
+                        var node = {id: arNodes.length +1, label: ar[ar.length-1], shape: 'box'};
+                        if (arNodes.length == 0) {
+                            //this is the first node
+                            node.color = 'green'
+                            node.font = {color:'white'}
+                        }
+
+
+                        nodes[url] = node;
+                        arNodes.push(node);
+                        return node;
+                    }
+                }
+
+
+                function getModelReferences(lst,SD,srcUrl) {
+                    var treeData = that.createTreeArrayFromSD(SD);
+                    
+                    treeData.forEach(function(item){
+
+                        if (item.data) {
+                            //console.log(item.data.referenceUri);
+                            if (item.data.referenceUri) {
+                                lst.push({src:srcUrl, targ:item.data.referenceUri, path: item.data.path});
+                                var newSD = that.getModelFromBundle(bundle,item.data.referenceUri);
+                                if (newSD) {
+                                    getModelReferences(lst,newSD,newSD.url)
+                                }
+
+                            }
+                        }
+                    })
+                    
+                }
+                
+                
+
+            },
             importFromProfile : function(){
                 var that = this;
                 var deferred = $q.defer();
@@ -193,7 +277,7 @@ angular.module("sampleApp")
                 }
 
 
-                if (posToInsertAt) {
+                if (posToInsertAt > -1) {
                     //posToInsertAt
                     //right. here is where we are ready to insert. Start from the second one...
                     //var arInsert = [];      //the array of ed's to insert
@@ -211,14 +295,11 @@ angular.module("sampleApp")
                         //arInsert.push(edToInsert);
                     }
 
-                    //insert the array of new elements into the current SD
-                    // $scope.currentSD.snapshot.element.splice(i,0,arInsert)
-
-                    //  $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.SD);  //create a new tree
-                    // drawTree();     //... and draw
-                    // createGraphOfProfile();     //and generate the mind map...
+                    return true;
 
 
+                } else {
+                    return false;
                 }
             },
             
@@ -679,7 +760,6 @@ angular.module("sampleApp")
                         }
 
 
-                        
                         item.data.min = ed.min;
                         item.data.max = ed.max;
 
