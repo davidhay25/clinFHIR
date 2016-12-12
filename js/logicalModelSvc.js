@@ -137,8 +137,13 @@ angular.module("sampleApp")
                     edges: edges
                 };
 
+                //construct an object that is indexed by nodeId (for the model selection from the graph
+                var nodeObj = {};
+                arNodes.forEach(function(node){
+                    nodeObj[node.id] = node;
+                })
 
-                return {references:lst,graphData:data};
+                return {references:lst,graphData:data, nodes : nodeObj};
 
                 function getNodeByUrl(url,label,nodes) {
                     if (nodes[url]) {
@@ -146,7 +151,7 @@ angular.module("sampleApp")
                     } else {
                         var ar = url.split('/')
                         //var label =
-                        var node = {id: arNodes.length +1, label: ar[ar.length-1], shape: 'box'};
+                        var node = {id: arNodes.length +1, label: ar[ar.length-1], shape: 'box',url:url};
                         if (arNodes.length == 0) {
                             //this is the first node
                             node.color = 'green'

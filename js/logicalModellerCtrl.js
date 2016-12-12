@@ -1293,37 +1293,16 @@ angular.module("sampleApp")
 
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
-
-
+                
                 var vo = logicalModelSvc.makeReferencedMapsModel(entry.resource,$scope.bundleModels);   //todo - may not be the right place...
 
-                console.log(vo.graphData)
+                //console.log(vo.graphData)
 
                 //so that we can draw a table with the references in it...
                 $scope.modelReferences = vo.references;
+                var allNodesObj = vo.nodes;
 
                 var container = document.getElementById('refLogicalModel');
-                var options = {
-
-                    edges: {
-
-                        smooth: {
-                            type: 'cubicBezier',
-                            //forceDirection: 'horizontal',
-                            roundness: 0.4
-                        }
-                    },
-                    layout: {
-                        hierarchical: {
-                            direction: 'LR',
-                            nodeSpacing : 35,
-                            sortMethod:'directed'
-                        }
-                    },
-                    physics:true
-                };
-
-                var options = {};
 
                 var options = {
                     physics: {
@@ -1336,13 +1315,21 @@ angular.module("sampleApp")
 
                 $scope.refNetwork = new vis.Network(container, vo.graphData, options);
                 $scope.refNetwork.on("click", function (obj) {
-                    //console.log(obj)
+                    
                     //this is selecting a model
 
                     var nodeId = obj.nodes[0];  //get the first node
                     //console.log(nodeId,graphData)
+                    var node = allNodesObj[nodeId];
 
-          
+                    $scope.history = $scope.history || []
+                    $scope.history.push({resource:$scope.currentSD})    //save the current model
+
+
+                    var model = logicalModelSvc.getModelFromBundle($scope.bundleModels,node.url); //the model referenceed by this node
+                    selectEntry({resource:model});
+
+
                     $scope.$digest();
                     //selectedNetworkElement
 
