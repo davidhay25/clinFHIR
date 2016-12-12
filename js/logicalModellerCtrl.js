@@ -1141,22 +1141,22 @@ angular.module("sampleApp")
 
 
             //add the v2 datatypes here. todo - perhaps there's a 'model source' property that selects from different data types?
-            $scope.dataTypes.push({code: 'CE',description: 'CE Coded Entity'});
-            $scope.dataTypes.push({code: 'CM',description: 'CM Composite'});
-            $scope.dataTypes.push({code: 'CWE',description: 'CWE Coded With Exceptions'});
-            $scope.dataTypes.push({code: 'CX',description: 'CX Extended CompositeId'});
-            $scope.dataTypes.push({code: 'EI',description: 'EI Entity Identifier'});
-            $scope.dataTypes.push({code: 'HD',description: 'HD Hierarchic Descriptor'});
-            $scope.dataTypes.push({code: 'IS',description: 'ID Coded, HL7 Defined'});
-            $scope.dataTypes.push({code: 'IS',description: 'IS Coded, User Defined'});
-            $scope.dataTypes.push({code: 'PL',description: 'PL Person Location'});
-            $scope.dataTypes.push({code: 'SI',description: 'SI Sequence Id'});
-            $scope.dataTypes.push({code: 'ST',description: 'ST String'});
-            $scope.dataTypes.push({code: 'TS',description: 'TS Timestamp'});
-            $scope.dataTypes.push({code: 'XAD',description: 'XAD Extended Address'});
-            $scope.dataTypes.push({code: 'XCN',description: 'XCN Extended name + ID for Persons'});
-            $scope.dataTypes.push({code: 'XPN',description: 'XPN Extended Person Name'});
-            $scope.dataTypes.push({code: 'XTN',description: 'XTN Extended Telecommunications Number'});
+            $scope.dataTypes.push({code: 'CE',description: 'v2 CE Coded Entity'});
+            $scope.dataTypes.push({code: 'CM',description: 'v2 CM Composite'});
+            $scope.dataTypes.push({code: 'CWE',description: 'v2 CWE Coded With Exceptions'});
+            $scope.dataTypes.push({code: 'CX',description: 'v2 CX Extended CompositeId'});
+            $scope.dataTypes.push({code: 'EI',description: 'v2 EI Entity Identifier'});
+            $scope.dataTypes.push({code: 'HD',description: 'v2 HD Hierarchic Descriptor'});
+            $scope.dataTypes.push({code: 'IS',description: 'v2 ID Coded, HL7 Defined'});
+            $scope.dataTypes.push({code: 'IS',description: 'v2 IS Coded, User Defined'});
+            $scope.dataTypes.push({code: 'PL',description: 'v2 PL Person Location'});
+            $scope.dataTypes.push({code: 'SI',description: 'v2 SI Sequence Id'});
+            $scope.dataTypes.push({code: 'ST',description: 'v2 ST String'});
+            $scope.dataTypes.push({code: 'TS',description: 'v2 TS Timestamp'});
+            $scope.dataTypes.push({code: 'XAD',description: 'v2 XAD Extended Address'});
+            $scope.dataTypes.push({code: 'XCN',description: 'v2 XCN Extended name + ID for Persons'});
+            $scope.dataTypes.push({code: 'XPN',description: 'v2 XPN Extended Person Name'});
+            $scope.dataTypes.push({code: 'XTN',description: 'v2 XTN Extended Telecommunications Number'});
 
 
 
@@ -1318,19 +1318,25 @@ angular.module("sampleApp")
                     
                     //this is selecting a model
 
-                    var nodeId = obj.nodes[0];  //get the first node
-                    //console.log(nodeId,graphData)
-                    var node = allNodesObj[nodeId];
+                    if ($scope.isDirty) {
+                        modalService.showModal({},{bodyText:"There are unsaved changes to the current model."})
+                    } else {
+                        var nodeId = obj.nodes[0];  //get the first node
+                        //console.log(nodeId,graphData)
+                        var node = allNodesObj[nodeId];
 
-                    $scope.history = $scope.history || []
-                    $scope.history.push({resource:$scope.currentSD})    //save the current model
+                        $scope.history = $scope.history || []
+                        $scope.history.push({resource:$scope.currentSD})    //save the current model
 
 
-                    var model = logicalModelSvc.getModelFromBundle($scope.bundleModels,node.url); //the model referenceed by this node
-                    selectEntry({resource:model});
+                        var model = logicalModelSvc.getModelFromBundle($scope.bundleModels,node.url); //the model referenceed by this node
+                        selectEntry({resource:model});
 
 
-                    $scope.$digest();
+                        $scope.$digest();
+                    }
+
+
                     //selectedNetworkElement
 
                 });

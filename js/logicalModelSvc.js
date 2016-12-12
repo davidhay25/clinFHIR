@@ -680,7 +680,7 @@ angular.module("sampleApp")
 
                         //show if an element is multiple...
                         if (ed.max == '*') {
-                            item.text += " *"
+                         //    item.text += " *"
                         }
 
                         item.data = {};
