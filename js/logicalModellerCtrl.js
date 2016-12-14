@@ -226,6 +226,30 @@ angular.module("sampleApp")
 
                 });
 
+
+            //copy the files referenced by the current model to another server
+            $scope.copyFiles = function() {
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop.
+                    keyboard: false,       //same as above.
+                    templateUrl: 'modalTemplates/fileCopy.html',
+                    controller: 'fileCopyCtrl',
+                    resolve : {
+                        
+                        fileList : function(){
+                            //var lst = [];
+                            var vo = {files : []}
+                            vo.server = appConfigSvc.getCurrentConformanceServer().url;
+
+                            $scope.uniqueModelsList.forEach(function(item) {
+                                vo.files.push({url:item.url})
+                            })
+                        
+                            return vo
+                        }}
+                })
+            }
+
             $scope.saveCommentDEP = function(parent) {
                 console.log(parent)
                 var user = logicalModelSvc.getCurrentUser();
@@ -267,7 +291,7 @@ angular.module("sampleApp")
                 //find the indicated model (based on the url
 
                 $scope.history = $scope.history || []
-                $scope.history.push({resource:$scope.currentSD})    //save the current model
+                $scope.history.push({resource:$scope.currentType})    //save the current model
 
                 for (var i=0; i<$scope.bundleModels.entry.length; i++) {
                     var resource = $scope.bundleModels.entry[i].resource;
@@ -368,7 +392,7 @@ angular.module("sampleApp")
                             //console.log(practitioner)
                             $scope.Practitioner = practitioner;
 
-                            checkForComments($scope.currentSD);     //get comments for this user against this model...
+                            checkForComments($scope.currentType);     //get comments for this user against this model...
                             getPalette(practitioner);       //get the palette of logical models
 
 
@@ -415,7 +439,7 @@ angular.module("sampleApp")
                 if ($scope.lmPalette) {
                     var pos = -1;
                     $scope.lmPalette.entry.forEach(function(entry,inx){
-                        if (entry.item && entry.item.reference == 'StructureDefinition/'+$scope.currentSD.id) {
+                        if (entry.item && entry.item.reference == 'StructureDefinition/'+$scope.currentType.id) {
                             pos = inx;
                         }
                     })
@@ -469,7 +493,7 @@ angular.module("sampleApp")
                     }
 
                     //add the current model to it
-                    var entry = {item : {reference: 'StructureDefinition/'+$scope.currentSD.id,display:$scope.currentSD.id}}
+                    var entry = {item : {reference: 'StructureDefinition/'+$scope.currentType.id,display:$scope.currentType.id}}
                     $scope.lmPalette.entry.push(entry);
 
                     //... and save...
@@ -538,7 +562,7 @@ angular.module("sampleApp")
 
             $scope.createTask = function(){
                 //create a new task for this practitioner against this model.
-                SaveDataToServer.addTaskForPractitioner($scope.Practitioner,{focus:$scope.currentSD}).then(
+                SaveDataToServer.addTaskForPractitioner($scope.Practitioner,{focus:$scope.currentType}).then(
                     function(task){
                         $scope.commentTask = task
                         $scope.taskOutputs = [];
@@ -560,7 +584,7 @@ angular.module("sampleApp")
 
                 var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
                 sc.config = {conformanceServer:appConfigSvc.getCurrentConformanceServer()};
-                sc.config.model = {id:$scope.currentSD.id}
+                sc.config.model = {id:$scope.currentType.id}
                 sc.$save().then(
                     function(){
                         var shortCut = $window.location.href+"#"+hash
@@ -1087,11 +1111,11 @@ angular.module("sampleApp")
                                     delete $scope.modelHistory;
                                     delete $scope.selectedNode;
 
-                                    $scope.currentSD = logicalModelSvc.clone(result.clone,result.name);
+                                    $scope.currentType = logicalModelSvc.clone(result.clone,result.name);
 
-                                    console.log($scope.currentSD);
+                                    console.log($scope.currentType);
                                     $scope.isDirty = true;  //as the model has noy been saved...
-                                    $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.currentSD)
+                                    $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.currentType)
                                     console.log($scope.treeData)
                                     $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                                     drawTree();
@@ -1116,7 +1140,7 @@ angular.module("sampleApp")
                                             makeSD();
                                             //add it to the list so we can see it
                                             $scope.bundleModels.entry.push({resource:$scope.SD})
-                                            $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
+                                            $scope.currentType = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
                                         },
                                         function(err) {
                                             alert(angular.toJson(err))
@@ -1127,7 +1151,7 @@ angular.module("sampleApp")
                                     makeSD();
                                     //add it to the list so we can see it
                                     $scope.bundleModels.entry.push({resource:$scope.SD})
-                                    $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
+                                    $scope.currentType = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
                                 }
                                 makeSD();
                             }
@@ -1232,7 +1256,7 @@ angular.module("sampleApp")
                     $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                     drawTree();
                     makeSD();
-                    $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
+                    $scope.currentType = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
                     loadHistory($scope.rootName);
 
                     /*
@@ -1296,10 +1320,12 @@ angular.module("sampleApp")
                 
                 var vo = logicalModelSvc.makeReferencedMapsModel(entry.resource,$scope.bundleModels);   //todo - may not be the right place...
 
-                //console.log(vo.graphData)
-
                 //so that we can draw a table with the references in it...
                 $scope.modelReferences = vo.references;
+                $scope.uniqueModelsList = vo.lstNodes;
+                
+                
+                //console.log($scope.uniqueModelsList)
                 var allNodesObj = vo.nodes;
 
                 var container = document.getElementById('refLogicalModel');
@@ -1311,7 +1337,7 @@ angular.module("sampleApp")
                             gravitationalConstant: -10000,
                         }
                     }
-                }
+                };
 
                 $scope.refNetwork = new vis.Network(container, vo.graphData, options);
                 $scope.refNetwork.on("click", function (obj) {
@@ -1326,7 +1352,7 @@ angular.module("sampleApp")
                         var node = allNodesObj[nodeId];
 
                         $scope.history = $scope.history || []
-                        $scope.history.push({resource:$scope.currentSD})    //save the current model
+                        $scope.history.push({resource:$scope.currentType})    //save the current model
 
 
                         var model = logicalModelSvc.getModelFromBundle($scope.bundleModels,node.url); //the model referenceed by this node
@@ -1342,13 +1368,11 @@ angular.module("sampleApp")
                 });
                 
                 
-                
-                
-                //console.log($scope.treeData)
+
                 $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                 drawTree();
                 makeSD();
-                $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
+                $scope.currentType = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
                 loadHistory($scope.rootName);
 
                 checkForComments(entry.resource);
@@ -1466,9 +1490,9 @@ angular.module("sampleApp")
             function checkInPalette() {
                 delete $scope.isInPalette;      //true if the model is in the
 
-                if ($scope.currentSD && $scope.lmPalette) {
+                if ($scope.currentType && $scope.lmPalette) {
                     $scope.lmPalette.entry.forEach(function(entry){
-                        if (entry.item.reference == 'StructureDefinition/'+$scope.currentSD.id) {
+                        if (entry.item.reference == 'StructureDefinition/'+$scope.currentType.id) {
                             $scope.isInPalette = true;
                         }
                     })
@@ -1479,7 +1503,7 @@ angular.module("sampleApp")
 
 
             function getAllComments(){
-                GetDataFromServer.getOutputsForModel($scope.currentSD).then(
+                GetDataFromServer.getOutputsForModel($scope.currentType).then(
                     function(lst) {
                         //console.log(lst)
                         $scope.allComments = lst;
@@ -2000,7 +2024,7 @@ angular.module("sampleApp")
                     makeSD();
 
                     $scope.isDirty = true;
-                    $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
+                    $scope.currentType = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
 
                 }
 
@@ -2064,7 +2088,7 @@ angular.module("sampleApp")
 
             //exit from the history review
             $scope.exitHistory = function(){
-                $scope.SD = $scope.currentSD;
+                $scope.SD = $scope.currentType;
                 $scope.isHistory = false;
 
                 //restore the current (working) version...

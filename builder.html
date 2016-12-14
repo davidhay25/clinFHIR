@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <base href="/" />
+    <meta charset="UTF-8">
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
+    <script src="js/libs/angular.min1-5.js"></script>
+
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+    <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
+
+    <link rel="stylesheet" type="text/css" href="css/angular-lightweight-markdown-editor.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+    <script src="js/libs/jstree.min.js"></script>
+
+    <script src="js/libs/firebase.js"></script>
+    <script src="js/libs/angularfire.min.js"></script>
+
+    <style>
+        #resourceGraph {
+            width: 100%;
+            height: 600px;
+            border: 1px solid lightgray;
+        }
+    </style>
+
+    <script>
+
+        //https://github.com/rallu/angular-lightweight-markdown-editor
+
+
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','ngSanitize']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+        angular.module("sampleApp").constant("moment", moment);
+
+    </script>
+    <script src="js/builderCtrl.js"></script>
+    <script src="js/builderSvc.js"></script>
+    <script src="js/modalDialogSvc.js"></script>
+    <script src="js/appConfigSvc.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
+    <script src="js/logicalModelSvc.js"></script>
+    <script src="js/resourceCreatorSvc.js"></script>
+    <script src="js/profileCreatorSvc.js"></script>
+    <script src="js/resourceSvc.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/filters.js"></script>
+    <script src="js/libs/vis.min.js"></script>
+
+    <!--
+
+
+    <script src="js/profileCreatorSvc.js"></script>
+
+
+    <script src="js/documentBuilder.js"></script>
+
+
+
+
+
+
+
+
+    <script src="js/loginCtrl.js"></script>
+    <script src="resourceBuilder/vsBrowser.js"></script>
+    <script src="js/modellerFilters.js"></script>
+    <script src="js/igSvc.js"></script>
+    <script src="js/newVSFinder.js"></script>
+-->
+
+    <title>Builder</title>
+
+
+
+
+</head>
+
+
+<body style="padding: 8px;padding-top: 80px" >
+
+    <div ng-app="sampleApp" ng-controller="builderCtrl" class="container-fluid">
+
+
+        <nav ng-hide="startupParams.hideNav" class="navbar navbar-default navbar-fixed-top" role="navigation">
+
+            <div class="container-fluid">
+                <div class="col-md-2 col-sm-2">
+                    <a class="navbar-brand" href="#">
+                        Builder
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <button ng-click="makeGraph()">graph</button>
+
+        <div class="row">
+            <div class="col-md-9 col-sm-9">
+
+                <uib-tabset>
+                    <uib-tab heading="All resources">
+                        <br/>
+
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <table class="table table-bordered table-condensed">
+                                    <tr><td>Type</td><td>Text</td></tr>
+                                    <tr ng-repeat="entry in resourcesBundle.entry">
+                                        <td><div class='clickable' ng-click="selectResource(entry.resource)">
+                                            {{entry.resource.resourceType}}</div>
+                                        </td>
+                                        <td><p ng-bind-html="entry.resource.text.div"></p></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6 col-sm-6">
+                                <h4>Summary</h4>
+                                <div>Resource Type: <strong>{{currentResource.resourceType}}</strong></div>
+                                <div class="rounded-box"><p ng-bind-html="currentResource.text.div"></p></div>
+
+
+                                <h4>Reference</h4>
+
+
+                                <table class="table table-condensed table-bordered">
+                                    <tr><th>Path</th><th>Potential resources</th></tr>
+                                    <tr ng-repeat="(key,data) in objReferences">
+                                        <td>{{key | dropFirstInPath}} {{data.ref.min}}..{{data.ref.max}}</td>
+                                        <td>
+                                            <table width="100%">
+                                                <tr ng-repeat = "resource in data.resource">
+                                                    <td><div title="{{resource.resourceType}}" ng-bind-html="resource.text.div">
+
+                                                    </div></td>
+                                                    <td><div class="pull-right">
+
+                                                        <span>
+                                                            <i class="glyphicon glyphicon-plus-sign"
+                                                                 ng-click="linkToResource(key,resource,data.ref)" style="cursor: pointer">
+
+                                                        </i></span>
+                                                        </div>
+                                                    </td>
+
+                                                </tr>
+                                            </table>
+
+
+                                        </td>
+
+                                    </tr>
+                                </table>
+
+                                <pre>{{currentResource | json}}</pre>
+
+                            </div>
+
+                        </div>
+
+
+
+                    </uib-tab>
+                    <uib-tab heading="Graph" select="redrawChart()">
+                        <div id="resourceGraph"></div>
+                        <br/>
+                    </uib-tab>
+                </uib-tabset>
+
+
+            </div>
+            <div class="col-md-3 col-sm-3">
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <select ng-model="input.newResource" class="form-control"
+                                ng-change="newTypeSelected(input.newResource)"
+                                ng-options="resource.name for resource in resources"></select>
+                    </div>
+                </div>
+
+
+                <div class="row" ng-show="currentType">
+                    <div class="col-md-12 col-sm-12">
+                        <br/>
+
+                        <uib-tabset>
+                            <uib-tab heading="New resource">
+                                <br/>
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-2">
+                                        Text
+                                    </div>
+                                    <div class="col-md-10 col-sm-10">
+                                        <textarea class="form-control" ng-model="input.text"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+
+
+
+                                    <div class="col-md-2 col-sm-2">
+
+                                    </div>
+                                    <div class="col-md-10 col-sm-10">
+                                        <button class="btn btn-default" ng-click="addNewResource(input.newResource.name)">Add</button>
+                                    </div>
+                                </div>
+
+
+                            </uib-tab>
+
+                            <uib-tab heading="References">
+                                <table class="table table-bordered table-condensed">
+                                    <tr><th>Path</th><th>Resource Type</th></tr>
+                                    <tr ng-repeat="ref in references">
+                                        <td>{{ref.path | dropFirstInPath}}</td>
+                                        <td>{{ref.profile | getLogicalID}}</td>
+
+                                    </tr>
+                                </table>
+                            </uib-tab>
+                        </uib-tabset>
+
+                    </div>
+                </div>
+
+
+
+
+
+
+
+
+            </div>
+
+        </div>
+
+    </div>
+</body>
+</html>

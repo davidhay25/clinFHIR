@@ -69,6 +69,7 @@
 
     <script src="js/libs/vis.min.js"></script>
     <script src="js/loginCtrl.js"></script>
+    <script src="js/fileCopyCtrl.js"></script>
     <script src="resourceBuilder/vsBrowser.js"></script>
     <script src="js/modellerFilters.js"></script>
     <script src="js/igSvc.js"></script>
@@ -118,7 +119,7 @@
                 <div class="col-md-3 col-sm-3">
                     <span>
                         <a class="navbar-brand" href="#" ng-click="showVersion()">
-                            Logical Modeller: {{currentSD.url | getLogicalID}}
+                            Logical Modeller: {{currentType.url | getLogicalID}}
 
                         </a>
                     </span>
@@ -160,6 +161,11 @@
 
                     <form ng-show="currentSD && !loadedFromBookmark" class="navbar-form">
                         <button class="btn btn-warning pull-right" ng-click="generateShortCut()">Share</button>
+
+                        <button class="btn btn-warning pull-right" ng-click="copyFiles()">Copy</button>
+
+
+
                     </form>
 
                     <form ng-hide="currentSD && !loadedFromBookmark" class="navbar-form">
@@ -204,11 +210,12 @@
     </div>
 
 
+
     <div class="row">
         <div ng-class="leftPaneClass">
             <div class="row">
                 <div class="col-md-8 col-sm-8">
-                    <h4>Models</h4>
+                    <h4>Model Selector</h4>
                 </div>
                 <div class="col-md-4 col-sm-4">
                     <button ng-show="firebase.auth().currentUser" class="btn btn-link pull-right" ng-click="newModel()">New Model</button>
@@ -217,6 +224,46 @@
 
 
             <uib-tabset>
+                <uib-tab heading="Palette">
+
+                    <ul class="list-group" style=" height:500px; overflow: auto;" >
+                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.id == entry.item.display}"
+                            ng-repeat="entry in lmPalette.entry"
+                            ng-click="selectFromPalette(entry.item)">
+
+                            <div class="row">
+                                <div class="col-md-9 col-sm-9">
+                                    <h4>{{entry.item.reference | getLogicalID}}</h4>
+                                </div>
+
+                            </div>
+
+                            {{entry.resource.description | limitTo : 200}}
+                        </li>
+                    </ul>
+
+
+                </uib-tab>
+                <uib-tab heading="Current">
+
+                    <ul class="list-group" style=" height:500px; overflow: auto;" >
+                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.id == entry.item.display}"
+                            ng-repeat="ref in uniqueModelsList"
+                            ng-click="loadReferencedModel(ref.url)">
+
+                            <div class="row">
+                                <div class="col-md-12 col-sm-12">
+                                    <h4>{{ref.url | getLogicalID}}</h4>
+                                </div>
+
+                            </div>
+
+
+                        </li>
+                    </ul>
+
+
+                </uib-tab>
                 <uib-tab heading="All">
 
                     <div><input type="text" class="form-control" placeholder="Filter model list by id" ng-model="input.filter" ng-change="filterModelList(input.filter)"/> </div>
@@ -242,26 +289,7 @@
 
 
                 </uib-tab>
-                <uib-tab heading="Palette">
 
-                    <ul class="list-group" style=" height:500px; overflow: auto;" >
-                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.id == entry.item.display}"
-                            ng-repeat="entry in lmPalette.entry"
-                            ng-click="selectFromPalette(entry.item)">
-
-                            <div class="row">
-                                <div class="col-md-9 col-sm-9">
-                                    <h4>{{entry.item.reference | getLogicalID}}</h4>
-                                </div>
-
-                            </div>
-
-                            {{entry.resource.description | limitTo : 200}}
-                        </li>
-                    </ul>
-
-
-                </uib-tab>
             </uib-tabset>
 
 

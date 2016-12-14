@@ -100,7 +100,8 @@ angular.module("sampleApp")
         return {
 
             makeReferencedMapsModel : function(SD,bundle) {
-                console.log(SD)
+                //builds the model that has all the models referenced by the indicated SD, recursively...
+                //console.log(SD)
                 var that = this;
                 var lst = [];
 
@@ -139,11 +140,18 @@ angular.module("sampleApp")
 
                 //construct an object that is indexed by nodeId (for the model selection from the graph
                 var nodeObj = {};
+                arAllModels = []; //construct an array of all the models references by this one
                 arNodes.forEach(function(node){
                     nodeObj[node.id] = node;
-                })
+                    arAllModels.push({url:node.url})
+                });
 
-                return {references:lst,graphData:data, nodes : nodeObj};
+
+
+
+
+
+                return {references:lst,graphData:data, nodes : nodeObj,lstNodes : arAllModels};
 
                 function getNodeByUrl(url,label,nodes) {
                     if (nodes[url]) {
@@ -174,7 +182,8 @@ angular.module("sampleApp")
                         if (item.data) {
                             //console.log(item.data.referenceUri);
                             if (item.data.referenceUri) {
-                                lst.push({src:srcUrl, targ:item.data.referenceUri, path: item.data.path});
+                                var ref = {src:srcUrl, targ:item.data.referenceUri, path: item.data.path}
+                                lst.push(ref);
                                 var newSD = that.getModelFromBundle(bundle,item.data.referenceUri);
                                 if (newSD) {
                                     getModelReferences(lst,newSD,newSD.url)
