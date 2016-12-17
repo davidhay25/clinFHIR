@@ -159,7 +159,7 @@ angular.module("sampleApp")
             if (path) {
                 var ar = path.split('.');
                 ar.splice(0,1);
-                return ar.join('. ')
+                return ar.join('.') //removed training space...
             }
 
 

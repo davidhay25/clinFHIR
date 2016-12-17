@@ -3,14 +3,141 @@ angular.module("sampleApp")
     //also holds the current patient and all their resources...
     //note that the current profile is maintained by resourceCreatorSvc
 
-    .service('builderSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities) {
-      
+    .service('builderSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities,$filter) {
+
+        var gAllReferences = []
+        var gSD = {};   //a has of all SD's reas this session by type
+
         return {
+            getSD : function(type) {
+                var deferred = $q.defer();
+
+                if (gSD[type]) {
+                    deferred.resolve(gSD[type])
+                } else {
+                    var uri = "http://hl7.org/fhir/StructureDefinition/"+type;
+                    GetDataFromServer.findConformanceResourceByUri(uri).then(
+                        function(SD) {
+                            gSD[type] = SD;
+                            deferred.resolve(SD);
+                        },function(err){
+                            deferred.reject(err)
+                        })
+                }
+                
+                return deferred.promise;
+            },
+            getEDInfoForPath : function(path) {
+                var ar = path.split('.');
+                var type = ar[0];       //the resource type is the first segment in the path
+                var SD = gSD[type];     //it must have been read at this point...
+                var info = {};          //this will be the info about this element...
+
+                //find the path
+                if (SD.snapshot && SD.snapshot.element) {
+                    SD.snapshot.element.forEach(function (ed) {
+
+                        if (ed.path == path) {
+                            if (ed.max == '*') {
+                                info.isMultiple = true
+                            }
+                            
+                            return info;
+                        }
+                    })
+                    
+                }
+            },
+            getDetailsByPathForResource : function(resource) {
+                //return a hash by path for the given resource indicating multiplicty at that point. Used for creating references...
+                //var type = resource.resourceType;
+                var deferred = $q.defer();
+                var uri = "http://hl7.org/fhir/StructureDefinition/" + resource.resourceType;
+                GetDataFromServer.findConformanceResourceByUri(uri).then(
+                    function (SD) {
+                        console.log(SD);
+                        var hash = {}
+                        if (SD && SD.snapshot && SD.snapshot.element) {
+                            SD.snapshot.element.forEach(function (ed) {
+                                var path = ed.path;
+                                var detail = {};        //key details about this path
+                                if (ed.max == '*') {
+                                    detail.multiple = true;
+                                }
+                                hash[path]=detail;
+                            })
+                        }
+
+                    },
+                    function (err) {
+console.log(err);
+                        deferred.reject(err)
+                    })
+                return deferred.promise;
+            },
+            getSrcTargReferences : function(url) {
+                //get all the references to & from the resource
+                var vo = {src:[],targ :[]}
+                gAllReferences.forEach(function(ref){
+                    if (ref.src == url) {
+                        vo.src.push(ref)
+                    }
+                    if (ref.targ == url) {
+                        vo.targ.push(ref)
+                    }
+                })
+                return vo;
+            },
+            getReferencesFromResourceDEP : function(resource) {
+                var refs = [];
+                findReferences(refs,resource,resource.resourceType)
+                return refs;
+
+                //find elements of type refernce at this level
+                function findReferences(refs,node,nodePath) {
+                    angular.forEach(node,function(value,key){
+                        //console.log(key,value);
+                        //if it's an object, does it have a child called 'reference'?
+                        if (angular.isObject(value)) {
+                            if (value.reference) {
+                                //this is a reference!
+                                //console.log('>>>>>>>>'+value.reference)
+                                var lpath = nodePath + '.' + key;
+                                refs.push({path:lpath,reference : value.reference})
+                            } else {
+                                //if it's not a reference, then does it have any children?
+                                findReferences(refs,value,lpath)
+                            }
+                        }
+                        if (angular.isArray(value)) {
+                            value.forEach(function(obj){
+                                //examine each element in the array
+
+                                if (obj.reference) {
+                                    //this is a reference!
+                                    //console.log('>>>>>>>>'+value.reference)
+                                    var lpath = nodePath + '.' + key;
+                                    refs.push({path:lpath,reference : obj.reference})
+                                } else {
+                                    //if it's not a reference, then does it have any children?
+                                }
+                            })
+
+
+                        }
+
+
+
+                    })
+                }
+
+            },
             makeGraph : function(bundle) {
                 //builds the model that has all the models referenced by the indicated SD, recursively...
                 //console.log(SD)
                 var that = this;
                 var allReferences = [];
+                gAllReferences.length = 0;
 
                 var allResources = {};  //all resources hash by id
 
@@ -19,32 +146,40 @@ angular.module("sampleApp")
                 
                 //for each entry in the bundle, find the resource that it references
                 bundle.entry.forEach(function(entry){
-                    console.log(entry);
+                    //console.log(entry);
                     var resource = entry.resource;
                     var url = resource.resourceType+'/'+resource.id;
 
                     //add an entry to the node list for this resource...
-                    var node = {id: arNodes.length +1, label: resource.resourceType, shape: 'box',url:url};
+                    var node = {id: arNodes.length +1, label: resource.resourceType, shape: 'box',url:url,cf : {resource:resource}};
                     arNodes.push(node);
                     objNodes[node.url] = node;
-                   // allResources[resource.resourceType+'/'+resource.id] =
+
+                    //var refs = that.getReferencesFromResource(resource)
 
                     var refs = [];
                     findReferences(refs,resource,resource.resourceType)
 
                     refs.forEach(function(ref){
                         allReferences.push({src:node,path:ref.path,targ:ref.reference})
+                        gAllReferences.push({src:url,path:ref.path,targ:ref.reference});    //all relationsin the collection
                     })
 
 
-                })
+                });
 
 
                 //so now we have the references, build the graph model...
                 allReferences.forEach(function(ref){
                     var targetNode = objNodes[ref.targ];
-                    arEdges.push({from: ref.src.id, to: targetNode.id, label: ref.path,arrows : {to:true}})
-                })
+                    if (targetNode) {
+                        var label = $filter('dropFirstInPath')(ref.path);
+                        arEdges.push({from: ref.src.id, to: targetNode.id, label: label,arrows : {to:true}})
+                    } else {
+                        console.log('>>>>>>> error Node Id '+ref.targ + ' is not present')
+                    }
+
+                });
 
                 var nodes = new vis.DataSet(arNodes);
                 var edges = new vis.DataSet(arEdges);
@@ -55,16 +190,12 @@ angular.module("sampleApp")
                     edges: edges
                 };
 
-
-                
                 return {graphData : data};
-
-
 
                 //find elements of type refernce at this level
                 function findReferences(refs,node,nodePath) {
                     angular.forEach(node,function(value,key){
-                        console.log(key,value);
+                        //console.log(key,value);
                         //if it's an object, does it have a child called 'reference'?
                         if (angular.isObject(value)) {
                             if (value.reference) {
@@ -72,15 +203,32 @@ angular.module("sampleApp")
                                 console.log('>>>>>>>>'+value.reference)
                                 var lpath = nodePath + '.' + key;
                                 refs.push({path:lpath,reference : value.reference})
+                            } else {
+                                //if it's not a reference, then does it have any children?
+                                findReferences(refs,value,lpath)
                             }
+                        } else if (angular.isArray(value)) {
+                            value.forEach(function(obj){
+                                //examine each element in the array
+
+                                if (obj.reference) {
+                                    //this is a reference!
+                                    //console.log('>>>>>>>>'+value.reference)
+                                    var lpath = nodePath + '.' + key;
+                                    refs.push({path:lpath,reference : obj.reference})
+                                } else {
+                                    //if it's not a reference, then does it have any children?
+                                }
+                            })
+
+
                         }
-
-
 
                     })
                 }
 
 
+                /*
                 
                 getModelReferences(lst,SD,SD.url);      //recursively find all the references between models...
 
@@ -171,7 +319,7 @@ angular.module("sampleApp")
 
                 }
 
-
+*/
 
             },
             getResourcesOfType : function(type,bundle){
