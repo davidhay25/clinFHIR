@@ -95,7 +95,7 @@ angular.module("sampleApp")
             $timeout(function(){
                 makeGraph()
             }, 1000);
-            //$scope.makeGraph()
+
 
             $scope.redrawChart = function(){
                 //$scope.chart.fit();
@@ -108,34 +108,65 @@ angular.module("sampleApp")
 
             //add a segment to the resource at this path
             $scope.addSegment = function(hashPath) {
-                var path = $filter('dropFirstInPath')(hashPath.path);
+
+
+                //var path = $filter('dropFirstInPath')(hashPath.path);
                 var insertPoint = $scope.currentResource;
-                var ar = path.split('.');
+                var ar = hashPath.path.split('.');
+                var rootPath = ar.splice(0,1)[0];
+
                 if (ar.length > 0) {
-                    for (var i=0; i < ar.length-1; i++) {
-                        //not the last one... -
+                    for (var i=0; i < ar.length-1; i++) {  //not the last one... -
+
                         var segment = ar[i];
-                        insertPoint[segment] = insertPoint[segment] || {}  // todo,need to allow for arrays
+                        var fullPath = rootPath
+                        for (var j=0; j < i; j++) {
+                            fullPath += '.' + ar[j];
+                        }
+
+                        //todo - will barf for path length > 2
+                        console.log(fullPath)
+                        var info = builderSvc.getEDInfoForPath(fullPath)
+                        if (info.isMultiple) {
+                            insertPoint[segment] = insertPoint[segment] || []
+                        } else {
+                            insertPoint[segment] = insertPoint[segment] || {}  // todo,need to allow for arrays
+                        }
+
+
+
                         insertPoint = insertPoint[segment]
                     }
                     path = ar[ar.length-1];       //this will be the property on the 'last'segment
                 }
 
 
-                if (hashPath.max == 1) {
+                //todo - actually, need to find out whether the parent already exists, and whether it is single or multiple...
+
+                var ar1 = hashPath.path.split('.');
+                ar1.pop();
+                var parentPath = ar1.join('.')
+                var edParent = builderSvc.getEDInfoForPath(parentPath)
+
+                if (!edParent) {
+                    alert("ED not found for path "+ parentPath)
+                }
+
+                if (edParent.max == 1) {
                     insertPoint[path] = {}
                 }
-                if (hashPath.max =='*') {
+                if (edParent.max =='*') {
                     insertPoint[path] = insertPoint[path] || []
+
                     //insertPoint[path].push({reference:resource.resourceType+'/'+resource.id})
                 }
 
-            }
+            };
 
 
             $scope.selectResource = function(resource) {
                 delete $scope.input.text;
-                console.log(resource);
+                //console.log(resource);
                 $scope.currentResource = resource;
                 var url = resource.resourceType+'/'+resource.id;
                 $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
@@ -145,22 +176,38 @@ angular.module("sampleApp")
                 //var uri = "http://hl7.org/fhir/StructureDefinition/"+resource.resourceType;
                 //GetDataFromServer.findConformanceResourceByUri(uri).then(
                     function(SD) {
-                        console.log(SD);
+                        //console.log(SD);
 
 
                         profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
                             function(vo) {
-                                console.log(vo.treeData)
+                                //console.log(vo.treeData)
 
                                 $('#SDtreeView').jstree('destroy');
                                 $('#SDtreeView').jstree(
                                     {'core': {'multiple': false, 'data': vo.treeData, 'themes': {name: 'proton', responsive: true}}}
                                 ).on('select_node.jstree', function (e, data) {
 
+
+
+
+                                    console.log(data.node);
                                     $scope.hashReferences = {}      //a hash of type vs possible resources for that type
                                     delete $scope.hashPath;
 
                                     if (data.node && data.node.data && data.node.data.ed) {
+
+                                        var path = data.node.data.ed.path;
+
+
+
+
+                                        //var info = builderSvc.getEDInfoForPath(path)
+                                        //console.log(info);
+                                        //builderSvc.addNodeAtPath($scope.currentResource,path);
+
+
+
                                         $scope.possibleReferences = [];
                                         var ed = data.node.data.ed;
                                         if (ed.type) {
@@ -171,6 +218,9 @@ angular.module("sampleApp")
                                             var ar = ed.path.split('.');
                                             if (ar.length > 2) {
                                                 $scope.hashPath.offRoot = false;
+
+
+
                                             }
 
 
@@ -179,10 +229,10 @@ angular.module("sampleApp")
                                                 if (typ.code == 'Reference' && typ.profile) {
                                                     //console.log(typ.profile)
                                                     var type = $filter('getLogicalID')(typ.profile);
-                                                    console.log(type);
+                                                    //console.log(type);
                                                     $scope.hashReferences[type] = []
                                                     var ar = builderSvc.getResourcesOfType(type,$scope.resourcesBundle);
-console.log(ar);
+//console.log(ar);
 
                                                     if (ar.length > 0) {
                                                         ar.forEach(function(resource){
@@ -287,6 +337,19 @@ console.log(ar);
             };
 
             $scope.linkToResource = function(pth,resource,ref){
+
+
+
+                builderSvc.insertReferenceAtPath($scope.currentResource,pth,resource)
+
+                makeGraph();    //this will update the list of all paths in this model...
+                var url = $scope.currentResource.resourceType+'/'+$scope.currentResource.id;
+                $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
+                
+
+                return;     //<<<<<<<<<< temp
+
+
                 //reference this resource to the current one
                 var path = $filter('dropFirstInPath')(pth);
                 var insertPoint = $scope.currentResource;

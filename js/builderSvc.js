@@ -9,6 +9,100 @@ angular.module("sampleApp")
         var gSD = {};   //a has of all SD's reas this session by type
 
         return {
+            insertReferenceAtPath : function(resource,path,referencedResource) {
+
+
+                console.log(resource,path,referencedResource);
+                var info = this.getEDInfoForPath(path);
+
+                var segmentPath = resource.resourceType;
+
+                //var rootPath = $filter('dropFirstInPath')(path);
+                var path = $filter('dropFirstInPath')(path);
+                var insertPoint = resource;
+                var ar = path.split('.');
+                if (ar.length > 0) {
+                    for (var i=0; i < ar.length-1; i++) {
+                        //not the last one... -
+                        var segment = ar[i];
+
+
+                        segmentPath += '.'+segment;
+                        console.log(segmentPath)
+
+                        var segmentInfo = this.getEDInfoForPath(segmentPath);
+
+                        if (segmentInfo.isMultiple) {
+                            insertPoint[segment] = insertPoint[segment] || []  // todo,need to allow for arrays
+                            var node = {};
+                            insertPoint[segment].push(node)
+                            insertPoint = node
+                        } else {
+                            insertPoint[segment] = insertPoint[segment] || {}  // todo,need to allow for arrays
+                            insertPoint = insertPoint[segment]
+                        }
+
+
+
+
+                    }
+                    path = ar[ar.length-1];       //this will be the property on the 'last'segment
+                }
+
+
+
+
+                if (info.max == 1) {
+                    insertPoint[path] = {reference:referencedResource.resourceType+'/'+referencedResource.id}
+                }
+                if (info.max =='*') {
+                    insertPoint[path] = insertPoint[path] || []
+                    insertPoint[path].push({reference:referencedResource.resourceType+'/'+referencedResource.id})
+                }
+
+
+                return;
+
+
+                var that = this;
+                var info = this.getEDInfoForPath(path);
+                console.log(path);
+
+                var insertPoint = resource;
+                var ar = path.split('.');
+                var rootPath = ar.splice(0,1)[0];
+
+                if (ar.length > 0) {
+                    for (var i=0; i <= ar.length-1; i++) {
+
+                        var segment = ar[i];
+                        var fullPath = rootPath
+                        for (var j=0; j <= i; j++) {
+                            fullPath += '.' + ar[j];
+                        }
+
+                        //todo - will barf for path length > 2
+                        console.log(fullPath)
+                        var info = that.getEDInfoForPath(fullPath)
+
+                        if (info.isMultiple) {
+                        
+                            insertPoint[segment] = insertPoint[segment] || []
+
+                        } else {
+                            insertPoint[segment] = insertPoint[segment] || {}  // todo,need to allow for arrays
+                        }
+
+
+
+                        insertPoint = insertPoint[segment]
+                    }
+                    path = ar[ar.length-1];       //this will be the property on the 'last'segment
+                }
+
+
+
+            },
             getSD : function(type) {
                 var deferred = $q.defer();
 
@@ -38,15 +132,18 @@ angular.module("sampleApp")
                     SD.snapshot.element.forEach(function (ed) {
 
                         if (ed.path == path) {
+                            info.max = ed.max;
                             if (ed.max == '*') {
                                 info.isMultiple = true
                             }
                             
-                            return info;
+
                         }
                     })
                     
                 }
+                return info;
+
             },
             getDetailsByPathForResource : function(resource) {
                 //return a hash by path for the given resource indicating multiplicty at that point. Used for creating references...
@@ -327,7 +424,7 @@ console.log(err);
                 var ar = [];
                 bundle.entry.forEach(function(entry){
                     var resource = entry.resource;
-                    if (resource.resourceType == type) {
+                    if (resource.resourceType == type || type == 'Resource') {
                         ar.push(resource);
                     }
                 })
