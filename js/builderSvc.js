@@ -322,6 +322,7 @@ console.log(err);
 
                     //add an entry to the node list for this resource...
                     var node = {id: arNodes.length +1, label: resource.resourceType, shape: 'box',url:url,cf : {resource:resource}};
+                    node.title = resource.text.div;
                     arNodes.push(node);
                     objNodes[node.url] = node;
 

@@ -104,7 +104,7 @@
                     </a>
                 </div>
                 <div class="col-md-8 col-sm-8">
-
+                    {{appConfigSvc.getCurrentConformanceServer().name}}
                 </div>
 
                 <div class="col-md-2 col-sm-2">
@@ -160,29 +160,16 @@
                                 <div id="SDtreeView"></div>
                             </div>
                             <div class="col-sm-6 col-md-6">
-   <!--
-                                <pre>{{hashReferences | json}}</pre>
--->
 
 
-                                <div class="banner">{{hashPath.path}}</div>
 
+                                <div class="banner" ng-show="hashPath">{{hashPath.path}}</div>
 
-                                <!--
-                                <div ng-hide="hashPath.offRoot">
-                                    <div>Segments</div>
-                                    <ul>
-                                        <li ng-repeat="segment in hashPath.segments">{{segment}}</li>
-                                    </ul>
-                                    <button class="btn btn-link" ng-click="addSegment(hashPath)">Add</button>
+                                <div ng-show="hashPath.isReference">
 
-                                </div>
+                                    <strong>Potential References</strong>
 
-                                -->
-
-                                <strong>Potential References</strong>
-
-                                <table class="table table-condensed table-bordered">
+                                    <table class="table table-condensed table-bordered">
                                     <tr><th>Type</th><th>Potential resources</th></tr>
                                     <tr ng-repeat="(key,data) in hashReferences">
                                         <td>{{key}}</td>
@@ -212,31 +199,15 @@
                                     </tr>
                                 </table>
 
+                                </div>
 
-                                <pre>{{currentResource | json}}</pre>
+                                {{hashPath.definition}}
+
+                                {{hashPath.comments}}
 
 <!--
-
-                                    <table width="100%">
-                                        <tr ng-repeat = "resource in possibleReferences">
-                                            <td>
-                                                <div title="{{resource.resourceType}}" ng-bind-html="resource.text.div"></div>
-                                            </td>
-                                            <td><div class="pull-right">
-
-                                        <span>
-                                            <i class="glyphicon glyphicon-plus"
-                                               ng-click="linkToResource(key,resource,data.ref)" style="cursor: pointer">
-
-                                            </i>
-                                        </span>
-                                            </div>
-                                            </td>
-
-                                        </tr>
-                                    </table>
+                                <pre>{{currentResource | json}}</pre>
 -->
-
 
 
 
@@ -247,7 +218,7 @@
 
 
                     </uib-tab>
-                    <uib-tab heading="Summary">
+                    <uib-tab heading="Resource Summary">
                         <hr/>
 
                         <div>Resource Type: <strong>{{currentResource.resourceType}}</strong>
@@ -258,85 +229,34 @@
 
 
 
-                        <h4>References</h4>
+                        <h4>Current References</h4>
 
-                        <uib-tabset>
 
-                            <uib-tab heading="Current">
-                                <br/>
-                                <div>
-                                    <strong>From this resource</strong>
-                                    <table class="table table-condensed table-bordered">
-                                        <tr><th>Path</th><th>Target resource</th><th></th></tr>
-                                        <tr ng-repeat="ref in currentResourceRefs.src">
-                                            <td>{{ref.path}}</td>
-                                            <td>{{ref.targ}}</td>
-                                            <td><i class="glyphicon glyphicon-remove"
-                                                   ng-click="removeReference(ref)" style="cursor: pointer">
-
-                                            </i></td>
-                                        </tr>
-                                    </table>
-
-                                    <strong>To this resource</strong>
-                                    <table class="table table-condensed table-bordered">
-                                        <tr><th>From</th><th>Source path</th></tr>
-                                        <tr ng-repeat="ref in currentResourceRefs.targ">
-                                            <td>{{ref.src}}</td>
-                                            <td>{{ref.path}}</td>
-                                        </tr>
-                                    </table>
-                                </div>
-
-                            </uib-tab>
-
-                            <uib-tab heading="Create">
-<!--
-                                <br/>
+                            <div>
+                                <strong>From this resource</strong>
                                 <table class="table table-condensed table-bordered">
-                                    <tr><th>Path</th><th>Potential resources</th></tr>
-                                    <tr ng-repeat="(key,data) in objReferences">
-                                        <td>{{key | dropFirstInPath}} {{data.ref.min}}..{{data.ref.max}}</td>
-                                        <td>
-                                            <table width="100%">
-                                                <tr ng-repeat = "resource in data.resource">
-                                                    <td>
-                                                        <div title="{{resource.resourceType}}" ng-bind-html="resource.text.div"></div>
-                                                    </td>
-                                                    <td><div class="pull-right">
+                                    <tr><th>Path</th><th>Target resource</th><th></th></tr>
+                                    <tr ng-repeat="ref in currentResourceRefs.src">
+                                        <td>{{ref.path}}</td>
+                                        <td>{{ref.targ}}</td>
+                                        <td><i class="glyphicon glyphicon-remove"
+                                               ng-click="removeReference(ref)" style="cursor: pointer">
 
-                                                <span>
-                                                    <i class="glyphicon glyphicon-plus"
-                                                       ng-click="linkToResource(key,resource,data.ref)" style="cursor: pointer">
-
-                                                    </i>
-                                                </span>
-                                                    </div>
-                                                    </td>
-
-                                                </tr>
-                                            </table>
-
-
-                                        </td>
-
+                                        </i></td>
                                     </tr>
                                 </table>
 
+                                <strong>To this resource</strong>
+                                <table class="table table-condensed table-bordered">
+                                    <tr><th>From</th><th>Source path</th></tr>
+                                    <tr ng-repeat="ref in currentResourceRefs.targ">
+                                        <td>{{ref.src}}</td>
+                                        <td>{{ref.path}}</td>
+                                    </tr>
+                                </table>
+                            </div>
 
-                                {{l2Nodes}}
-                                {{bbNodesX}}
-                                <div ng-repeat="(key,value) in l2Nodes">
-                                    {{key}}
-                                    <div ng-repeat = "ref in value">
-                                        {{ref}}
-                                    </div>
 
-                                </div>
-
--->
-                            </uib-tab>
-                        </uib-tabset>
 
 
 

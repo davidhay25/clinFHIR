@@ -5,6 +5,7 @@ angular.module("sampleApp")
                   $timeout,$localStorage,$filter,profileCreatorSvc) {
 
             $scope.input = {};
+            $scope.appConfigSvc = appConfigSvc;
 
             $scope.resourcesBundle = $localStorage.builderBundle || {resourceType:'Bundle',entry:[]}
 
@@ -14,6 +15,7 @@ angular.module("sampleApp")
                 $scope.resourcesBundle = $localStorage.builderBundle
                 //delete $localStorage.builderBundle;
                 makeGraph();
+                delete $scope.currentResource;
             }
 
             $scope.removeResource = function(resource) {
@@ -118,7 +120,7 @@ angular.module("sampleApp")
             }
 
             //add a segment to the resource at this path
-            $scope.addSegment = function(hashPath) {
+            $scope.addSegmentDEP = function(hashPath) {
 
 
                 //var path = $filter('dropFirstInPath')(hashPath.path);
@@ -211,19 +213,18 @@ angular.module("sampleApp")
                                         var path = data.node.data.ed.path;
 
 
-
-
-                                        //var info = builderSvc.getEDInfoForPath(path)
-                                        //console.log(info);
-                                        //builderSvc.addNodeAtPath($scope.currentResource,path);
-
-
-
                                         $scope.possibleReferences = [];
                                         var ed = data.node.data.ed;
+
+
                                         if (ed.type) {
+
+
                                             $scope.hashPath = {path: ed.path};
                                             $scope.hashPath.max = ed.max;
+                                            $scope.hashPath.definition = ed.definition;
+                                            $scope.hashPath.comments = ed.comments;
+                                            /*
                                             $scope.hashPath.offRoot = true;
                                             //is this path off the root, or a sub path?
                                             var ar = ed.path.split('.');
@@ -233,22 +234,26 @@ angular.module("sampleApp")
 
 
                                             }
-
+*/
 
                                                 //is this a reference?
                                             ed.type.forEach(function(typ){
                                                 if (typ.code == 'Reference' && typ.profile) {
-                                                    //console.log(typ.profile)
+                                                    $scope.hashPath.isReference = true;
+                                                    
                                                     var type = $filter('getLogicalID')(typ.profile);
-                                                    //console.log(type);
-                                                    $scope.hashReferences[type] = []
+
+
+                                                    
                                                     var ar = builderSvc.getResourcesOfType(type,$scope.resourcesBundle);
-//console.log(ar);
 
                                                     if (ar.length > 0) {
                                                         ar.forEach(function(resource){
 
-                                                            //objReferences[path].ref = ref;
+                                                            type = resource.resourceType;   //allows for Reference
+
+                                                            $scope.hashReferences[type] = $scope.hashReferences[type] || []
+                                                            
                                                             $scope.hashReferences[type].push(resource);
                                                         })
                                                     }
@@ -264,7 +269,7 @@ angular.module("sampleApp")
 
 
 
-                                    console.log($scope.hashReferences)
+                                    //console.log($scope.hashReferences)
 
                                     $scope.$digest();
 
@@ -357,46 +362,9 @@ angular.module("sampleApp")
                 var url = $scope.currentResource.resourceType+'/'+$scope.currentResource.id;
                 $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
 
-/*
-                return;     //<<<<<<<<<< temp
-
-
-                //reference this resource to the current one
-                var path = $filter('dropFirstInPath')(pth);
-                var insertPoint = $scope.currentResource;
-                var ar = path.split('.');
-                if (ar.length > 0) {
-                    for (var i=0; i < ar.length-1; i++) {
-                        //not the last one... -
-                        var segment = ar[i];
-                        insertPoint[segment] = insertPoint[segment] || {}  // todo,need to allow for arrays
-                        insertPoint = insertPoint[segment]
-                    }
-                    path = ar[ar.length-1];       //this will be the property on the 'last'segment
-                }
-
-
-                if (ref.max == 1) {
-                    insertPoint[path] = {reference:resource.resourceType+'/'+resource.id}
-                }
-                if (ref.max =='*') {
-                    insertPoint[path] = insertPoint[path] || []
-                    insertPoint[path].push({reference:resource.resourceType+'/'+resource.id})
-                }
-
-
-
-
-
-                console.log(resource,ref)
-
-                makeGraph();    //this will update the list of all paths in this model...
-                var url = $scope.currentResource.resourceType+'/'+$scope.currentResource.id;
-                $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
-
-                */
 
             }
+
 
 
 
