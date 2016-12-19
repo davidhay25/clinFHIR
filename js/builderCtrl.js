@@ -97,6 +97,17 @@ angular.module("sampleApp")
             }, 1000);
 
 
+            $scope.removeReference = function(ref) {
+                console.log(ref)
+                var path = ref.path;
+                var target = ref.targ;
+                builderSvc.removeReferenceAtPath($scope.currentResource,path,ref.index)
+                makeGraph();    //this will update the list of all paths in this model...
+                var url = $scope.currentResource.resourceType+'/'+$scope.currentResource.id;
+                $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
+                
+            }
+
             $scope.redrawChart = function(){
                 //$scope.chart.fit();
                 $timeout(function(){
@@ -345,8 +356,8 @@ angular.module("sampleApp")
                 makeGraph();    //this will update the list of all paths in this model...
                 var url = $scope.currentResource.resourceType+'/'+$scope.currentResource.id;
                 $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
-                
 
+/*
                 return;     //<<<<<<<<<< temp
 
 
@@ -374,16 +385,7 @@ angular.module("sampleApp")
                 }
 
 
-                /*
-                if (ref.max == 1) {
-                    $scope.currentResource[path] = {reference:resource.resourceType+'/'+resource.id}
-                }
-                if (ref.max =='*') {
-                    $scope.currentResource[path] = $scope.currentResource[path] || []
-                    $scope.currentResource[path].push({reference:resource.resourceType+'/'+resource.id})
-                }
 
-                */
 
 
                 console.log(resource,ref)
@@ -391,6 +393,8 @@ angular.module("sampleApp")
                 makeGraph();    //this will update the list of all paths in this model...
                 var url = $scope.currentResource.resourceType+'/'+$scope.currentResource.id;
                 $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
+
+                */
 
             }
 

@@ -9,6 +9,79 @@ angular.module("sampleApp")
         var gSD = {};   //a has of all SD's reas this session by type
 
         return {
+            removeReferenceAtPath : function(resource,path,inx) {
+                //find where the reference is that we want to remove
+
+                var ar = path.split('.');
+                ar.splice(0,1);
+
+                if (ar.length > 1) {
+                    ar.pop();
+                }
+                path = ar.join('.')
+
+
+               // var path = $filter('dropFirstInPath')(path);
+                //path.pop();
+                console.log(resource,path,inx);
+                if (inx !== undefined) {
+                    var ptr = resource[path]
+                    //delete ptr[inx]
+                    ptr.splice(inx,1);
+                } else {
+                    delete resource[path]
+                }
+
+
+
+
+
+/*
+                var info = this.getEDInfoForPath(path);
+
+                var segmentPath = resource.resourceType;
+                //var rootPath = $filter('dropFirstInPath')(path);
+                var path = $filter('dropFirstInPath')(path);
+                var deletePoint = resource;
+                var ar = path.split('.');
+                if (ar.length > 0) {
+                    for (var i=0; i < ar.length-1; i++) {
+                        //not the last one... -
+                        var segment = ar[i];
+                        
+                        segmentPath += '.'+segment;
+                        console.log(segmentPath)
+
+                        var segmentInfo = this.getEDInfoForPath(segmentPath);
+
+                        if (segmentInfo.isMultiple) {
+                            deletePoint[segment] = deletePoint[segment] || []  // todo,need to allow for arrays
+                            var node = {};
+                            deletePoint[segment].push(node)
+                            deletePoint = node
+                        } else {
+                            deletePoint[segment] = deletePoint[segment] || {}  // todo,need to allow for arrays
+                            deletePoint = deletePoint[segment]
+                        }
+
+
+
+
+                    }
+                    path = ar[ar.length-1];       //this will be the property on the 'last'segment
+                }
+
+
+                
+                console.log(insertPoint)
+
+*/
+
+                if (inx) {
+                    
+                }
+
+            },
             insertReferenceAtPath : function(resource,path,referencedResource) {
 
 
@@ -258,8 +331,8 @@ console.log(err);
                     findReferences(refs,resource,resource.resourceType)
 
                     refs.forEach(function(ref){
-                        allReferences.push({src:node,path:ref.path,targ:ref.reference})
-                        gAllReferences.push({src:url,path:ref.path,targ:ref.reference});    //all relationsin the collection
+                        allReferences.push({src:node,path:ref.path,targ:ref.reference,index:ref.index})
+                        gAllReferences.push({src:url,path:ref.path,targ:ref.reference,index:ref.index});    //all relationsin the collection
                     })
 
 
@@ -290,36 +363,43 @@ console.log(err);
                 return {graphData : data};
 
                 //find elements of type refernce at this level
-                function findReferences(refs,node,nodePath) {
+                function findReferences(refs,node,nodePath,index) {
                     angular.forEach(node,function(value,key){
                         //console.log(key,value);
                         //if it's an object, does it have a child called 'reference'?
+
+
+                        if (angular.isArray(value)) {
+                            value.forEach(function(obj,inx) {
+                                //examine each element in the array
+                                var lpath = nodePath + '.' + key;
+                                if (obj.reference) {
+                                    //this is a reference!
+                                    //console.log('>>>>>>>>'+value.reference)
+                                    //var lpath = nodePath + '.' + key;
+                                    refs.push({path: lpath, reference: obj.reference})
+                                } else {
+                                    //if it's not a reference, then does it have any children?
+                                    findReferences(refs,obj,lpath,inx)
+                                }
+                            })
+                        } else
+
                         if (angular.isObject(value)) {
+                            var   lpath = nodePath + '.' + key;
                             if (value.reference) {
                                 //this is a reference!
                                 console.log('>>>>>>>>'+value.reference)
-                                var lpath = nodePath + '.' + key;
-                                refs.push({path:lpath,reference : value.reference})
+                                //lpath = nodePath + '.' + key;
+                                refs.push({path:lpath,reference : value.reference,index:index})
                             } else {
                                 //if it's not a reference, then does it have any children?
                                 findReferences(refs,value,lpath)
                             }
-                        } else if (angular.isArray(value)) {
-                            value.forEach(function(obj){
-                                //examine each element in the array
-
-                                if (obj.reference) {
-                                    //this is a reference!
-                                    //console.log('>>>>>>>>'+value.reference)
-                                    var lpath = nodePath + '.' + key;
-                                    refs.push({path:lpath,reference : obj.reference})
-                                } else {
-                                    //if it's not a reference, then does it have any children?
-                                }
-                            })
-
-
                         }
+
+
+
 
                     })
                 }
