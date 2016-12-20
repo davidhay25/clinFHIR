@@ -2,17 +2,65 @@
 angular.module("sampleApp")
     .controller('builderCtrl',
         function ($scope,$http,appConfigSvc,$q,GetDataFromServer,resourceCreatorSvc,RenderProfileSvc,builderSvc,
-                  $timeout,$localStorage,$filter,profileCreatorSvc) {
+                  $timeout,$localStorage,$filter,profileCreatorSvc,modalService) {
 
             $scope.input = {};
             $scope.appConfigSvc = appConfigSvc;
 
-            $scope.resourcesBundle = $localStorage.builderBundle || {resourceType:'Bundle',entry:[]}
 
+            //var currentBunbleName = 'builderBundle';        //the name of the
+
+
+            $scope.currentBundleIndex = 0;     //the index of the bundle currently being used
+            if (! $localStorage.builderBundles) {
+                $localStorage.builderBundles = [{name:'Default',bundle:{resourceType:'Bundle',entry:[]}}]
+            }
+
+            $scope.builderBundles = $localStorage.builderBundles;
+
+            $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+
+
+
+            $scope.newBundle = function() {
+                var name = prompt('Name of Bundle');
+                if (name) {
+                    var newBundle = {name:name,bundle:{resourceType:'Bundle',entry:[]}}
+                    $localStorage.builderBundles.push(newBundle);
+                    $scope.resourcesBundle = newBundle.bundle;
+                    $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
+                    makeGraph();
+                    delete $scope.currentResource;
+                }
+            }
+
+            $scope.selectBundle = function(inx){
+                $scope.currentBundleIndex = inx;
+                $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+                makeGraph();
+                delete $scope.currentResource;
+            }
+
+            //$scope.resourcesBundle = $localStorage.builderBundle || {resourceType:'Bundle',entry:[]}
+
+
+            $scope.displayMode = 'view';    //options 'new', 'view'
 
             $scope.clearAllData = function() {
-                $localStorage.builderBundle = {resourceType:'Bundle',entry:[]}//
-                $scope.resourcesBundle = $localStorage.builderBundle
+                //$localStorage.builderBundle = {resourceType:'Bundle',entry:[]}//
+                //$scope.resourcesBundle = $localStorage.builderBundle
+
+                $localStorage.builderBundles.splice($scope.currentBundleIndex,1)   //delete the bundle
+                $scope.currentBundleIndex = 0; //set the current bundle to the first (default) one
+                if ($localStorage.builderBundles.length == 0) {
+                    //no bundles left
+                    $localStorage.builderBundles = [{name:'Default',bundle:{resourceType:'Bundle',entry:[]}}]
+                } else {
+
+                }
+
+                $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+
                 //delete $localStorage.builderBundle;
                 makeGraph();
                 delete $scope.currentResource;
@@ -21,25 +69,61 @@ angular.module("sampleApp")
             $scope.removeResource = function(resource) {
                 //remove this resource from the bundle
 
-                var inx = -1;
-                for (var i=0; i < $localStorage.builderBundle.entry.length; i++) {
-                    var r = $localStorage.builderBundle.entry[i].resource;
-                    if (r.resourceType == resource.resourceType && r.id == resource.id) {
-                        inx = i;
-                        break;
+
+                var modalOptions = {
+                    closeButtonText: "No, don't remove",
+                    actionButtonText: 'Yes, please remove',
+                    headerText: 'Remove resource',
+                    bodyText: 'Are you sure you want to remove this resource (Any references to it will NOT be removed'
+                };
+/*
+                modalService.showModal({}, modalOptions).then(
+                    function (result) {
+                        var inx = -1;
+                        for (var i=0; i < $localStorage.builderBundle.entry.length; i++) {
+                            var r = $localStorage.builderBundle.entry[i].resource;
+                            if (r.resourceType == resource.resourceType && r.id == resource.id) {
+                                inx = i;
+                                break;
+                            }
+                        }
+                        if (inx > -1) {
+                            $localStorage.builderBundle.entry.splice(inx,1);
+                            makeGraph();
+                            delete $scope.currentResource;
+                        }
+
                     }
-                }
-                if (inx > -1) {
-                    $localStorage.builderBundle.entry.splice(inx,1);
-                    makeGraph();
-                    delete $scope.currentResource;
-                }
+                );
+                */
+
+                modalService.showModal({}, modalOptions).then(
+                    function (result) {
+                        var inx = -1;
+                        for (var i=0; i < $scope.resourcesBundle.entry.length; i++) {
+                            var r = $scope.resourcesBundle.entry[i].resource;
+                            if (r.resourceType == resource.resourceType && r.id == resource.id) {
+                                inx = i;
+                                break;
+                            }
+                        }
+                        if (inx > -1) {
+                            $scope.resourcesBundle.entry.splice(inx,1);
+                            makeGraph();
+                            delete $scope.currentResource;
+                        }
+
+                    }
+                );
+
 
             }
 
             //generate the graph of resources and references between them
             makeGraph = function() {
-                var vo = builderSvc.makeGraph($localStorage.builderBundle)   //todo - may not be the right place...
+                //var vo = builderSvc.makeGraph($localStorage.builderBundle)   //todo - may not be the right place...
+                var vo = builderSvc.makeGraph($scope.resourcesBundle)   //todo - may not be the right place...
+
 
 
                 //console.log(vo);
@@ -119,6 +203,22 @@ angular.module("sampleApp")
 
             }
 
+
+            $scope.showVSBrowserDialog = {};
+            $scope.viewVS = function(uri) {
+                //var url = appConfigSvc
+
+                GetDataFromServer.getValueSet(uri).then(
+                    function(vs) {
+                        console.log(vs)
+                        $scope.showVSBrowserDialog.open(vs);
+
+                    }
+                ).finally (function(){
+                    $scope.showWaiting = false;
+                });
+            };
+            
             //add a segment to the resource at this path
             $scope.addSegmentDEP = function(hashPath) {
 
@@ -221,7 +321,8 @@ angular.module("sampleApp")
 
 
                                             $scope.hashPath = {path: ed.path};
-                                            $scope.hashPath.max = ed.max;
+                                            $scope.hashPath.ed = ed;
+                                            //$scope.hashPath.max = ed.max;
                                             $scope.hashPath.definition = ed.definition;
                                             $scope.hashPath.comments = ed.comments;
                                             /*
@@ -375,7 +476,13 @@ angular.module("sampleApp")
                     $scope.input.text+'</div>'};
                 console.log(resource);
                 $scope.resourcesBundle.entry.push({resource:resource});
-                $localStorage.builderBundle = $scope.resourcesBundle;
+               // $localStorage.builderBundle = $scope.resourcesBundle;
+
+
+              //  $scope.resourcesBundle
+
+                $scope.displayMode = 'view';
+
                 makeGraph();
             };
 
@@ -398,7 +505,7 @@ angular.module("sampleApp")
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(lst) {
                     $scope.resources = lst
-                    //console.log($scope.resources);
+                    
 
 
                 }

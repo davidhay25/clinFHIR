@@ -60,8 +60,10 @@
     <script src="js/filters.js"></script>
     <script src="js/libs/vis.min.js"></script>
 
-    <!--
+    <script src="resourceBuilder/vsBrowser.js"></script>
 
+    <!--
+    <script src="js/newVSFinder.js"></script>
 
     <script src="js/profileCreatorSvc.js"></script>
 
@@ -76,10 +78,10 @@
 
 
     <script src="js/loginCtrl.js"></script>
-    <script src="resourceBuilder/vsBrowser.js"></script>
+
     <script src="js/modellerFilters.js"></script>
     <script src="js/igSvc.js"></script>
-    <script src="js/newVSFinder.js"></script>
+
 -->
 
     <title>Builder</title>
@@ -118,7 +120,38 @@
 
 
         <div class="row">
+
+            <div class="col-md-2 col-sm-2">
+
+                <button class="btn btn-link pull-right" ng-click="newBundle()">New thing</button>
+                <h4>Things</h4>
+
+                <ul class="list-group" >
+                    <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':$index == currentBundleIndex}"
+                        ng-repeat="entry in builderBundles"
+                        ng-click="selectBundle($index)">
+
+                        <div class="row">
+                            <div class="col-md-9 col-sm-9">
+                                <strong>{{entry.name}}</strong>
+                            </div>
+
+                        </div>
+
+
+                    </li>
+                </ul>
+
+
+
+
+            </div>
+
             <div class="col-md-5 col-sm-5">
+
+                <button ng-hide="displayMode == 'new'"
+                        ng-click="displayMode = 'new'"
+                        class="btn btn-primary pull-right">Add Resource</button>
 
                 <uib-tabset>
                     <uib-tab heading="All resources">
@@ -153,83 +186,40 @@
 
 
             <div class="col-md-4 col-sm-4">
-                <uib-tabset ng-show="currentResource">
-                    <uib-tab heading="Profile">
-                        <div class="row">
-                            <div class="col-sm-6 col-md-6">
-                                <div id="SDtreeView"></div>
-                            </div>
-                            <div class="col-sm-6 col-md-6">
 
+                <div ng-show="displayMode == 'view'">
+                    <uib-tabset ng-show="currentResource">
+                        <uib-tab heading="Resource Summary">
+                            <br/>
 
-
-                                <div class="banner" ng-show="hashPath">{{hashPath.path}}</div>
-
-                                <div ng-show="hashPath.isReference">
-
-                                    <strong>Potential References</strong>
-
-                                    <table class="table table-condensed table-bordered">
-                                    <tr><th>Type</th><th>Potential resources</th></tr>
-                                    <tr ng-repeat="(key,data) in hashReferences">
-                                        <td>{{key}}</td>
-                                        <td>
-                                            <table width="100%">
-                                                <tr ng-repeat = "resource in data">
-                                                    <td>
-                                                        <div title="{{resource.resourceType}}" ng-bind-html="resource.text.div"></div>
-                                                    </td>
-                                                    <td><div class="pull-right">
-
-                                                <span>
-                                                    <i class="glyphicon glyphicon-plus"
-                                                       ng-click="linkToResource(hashPath.path,resource,hashPath)" style="cursor: pointer">
-
-                                                    </i>
-                                                </span>
-                                                    </div>
-                                                    </td>
-
-                                                </tr>
-                                            </table>
-
-
-                                        </td>
-
-                                    </tr>
-                                </table>
-
+                            <div class="row">
+                                <div class="col-md-6 col-sm-6">
+                                    Resource Type: <strong>{{currentResource.resourceType}}</strong>
                                 </div>
+                                <div class="col-md-6 col-sm-6">
 
-                                {{hashPath.definition}}
+                                    <i class="glyphicon glyphicon-remove pull-right"
+                                       title="Delete"
+                                       ng-click="removeResource(currentResource)" style="cursor: pointer">
 
-                                {{hashPath.comments}}
+                                    </i>
+                                    <!--
+                                                                    <button class="btn btn-link pull-right"
+                                                                            ng-click="removeResource(currentResource)">Remove</button>
 
-<!--
-                                <pre>{{currentResource | json}}</pre>
--->
-
-
-
-
-
+                                                                    -->
+                                </div>
                             </div>
-                        </div>
-
-
-                    </uib-tab>
-                    <uib-tab heading="Resource Summary">
-                        <hr/>
-
-                        <div>Resource Type: <strong>{{currentResource.resourceType}}</strong>
-                            <span class="pull-right">
-                                <button class="btn btn-link" ng-click="removeResource(currentResource)">Remove</button> </span>
-                        </div>
-                        <div class="rounded-box"><p ng-bind-html="currentResource.text.div"></p></div>
 
 
 
-                        <h4>Current References</h4>
+
+
+                            <div class="rounded-box"><p ng-bind-html="currentResource.text.div"></p></div>
+
+
+
+                            <h4>Current References</h4>
 
 
                             <div>
@@ -260,7 +250,7 @@
 
 
 
-                        <hr/>
+                            <hr/>
 
 
 
@@ -268,85 +258,197 @@
 
 
 
-                    </uib-tab>
-                    <uib-tab heading="Resource Json">
-                        <pre>{{currentResource | json}}</pre>
-                    </uib-tab>
+                        </uib-tab>
+                        <uib-tab heading="Profile">
+                            <div class="row">
+                                <div class="col-sm-6 col-md-6">
+                                    <div id="SDtreeView"></div>
+                                </div>
+                                <div class="col-sm-6 col-md-6">
 
-                </uib-tabset>
 
-            </div>
+                                    <br/>
+                                    <div class="banner" ng-show="hashPath">{{hashPath.path}}</div>
+
+                                    <div ng-show="hashPath.isReference">
+
+                                        <strong>Potential References</strong>
+
+                                        <table class="table table-condensed table-bordered">
+                                        <tr><th>Type</th><th>Potential resources</th></tr>
+                                        <tr ng-repeat="(key,data) in hashReferences">
+                                            <td>{{key}}</td>
+                                            <td>
+                                                <table width="100%">
+                                                    <tr ng-repeat = "resource in data">
+                                                        <td>
+                                                            <div title="{{resource.resourceType}}" ng-bind-html="resource.text.div"></div>
+                                                        </td>
+                                                        <td><div class="pull-right">
+
+                                                    <span>
+                                                        <i class="glyphicon glyphicon-plus"
+                                                           ng-click="linkToResource(hashPath.path,resource,hashPath)" style="cursor: pointer">
+
+                                                        </i>
+                                                    </span>
+                                                        </div>
+                                                        </td>
+
+                                                    </tr>
+                                                </table>
 
 
-            <div class="col-md-3 col-sm-3">
-                <div class="row">
-                    <div class="col-md-6 col-sm-6">
-                        <select ng-model="input.newResource" class="form-control"
-                                ng-change="newTypeSelected(input.newResource)"
-                                ng-options="resource.name for resource in resources"></select>
-                    </div>
+                                            </td>
+
+                                        </tr>
+                                    </table>
+
+                                    </div>
+
+
+
+
+                                    <h5>DataType/s</h5>
+                                    <div ng-repeat="type in hashPath.ed.type">
+                                        <div ng-hide="type.code == 'Reference'">
+                                            <a target="_blank"
+                                               ng-href="http://hl7.org/fhir/datatypes.html#{{type.code}}">
+                                                {{type.code}}
+                                            </a>
+                                        </div>
+                                        <div ng-show="type.code == 'Reference'">
+                                            --> {{type.profile | referenceType}}
+                                        </div>
+
+                                    </div>
+
+                                    <div ng-show="hashPath.ed.binding">
+                                        <h5>ValueSet Binding ({{hashPath.ed.binding.strength}})</h5>
+                                        <div>
+                                            <button class="btn btn-link" ng-click="viewVS(hashPath.ed.binding.valueSetReference.reference)">
+                                                {{hashPath.ed.binding.valueSetReference.reference}}
+                                            </button>
+
+
+                                        </div>
+                                        <div></div>
+                                    </div>
+                                    <hr/>
+                                    {{hashPath.definition}}
+
+                                    {{hashPath.comments}}
+
+    <!--
+                                    <pre>{{currentResource | json}}</pre>
+    -->
+
+
+
+
+
+                                </div>
+                            </div>
+
+
+                        </uib-tab>
+
+                        <uib-tab heading="Resource Json">
+                            <pre>{{currentResource | json}}</pre>
+                        </uib-tab>
+
+                    </uib-tabset>
                 </div>
 
 
-                <div class="row" ng-show="currentType">
-                    <div class="col-md-12 col-sm-12">
-                        <br/>
-
-                        <uib-tabset>
-                            <uib-tab heading="New resource instance">
-                                <br/>
-                                <div class="row">
-                                    <div class="col-md-2 col-sm-2">
-                                        Text
-                                    </div>
-                                    <div class="col-md-10 col-sm-10">
-                                        <textarea class="form-control" ng-model="input.text"></textarea>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-
-
-
-                                    <div class="col-md-2 col-sm-2">
-
-                                    </div>
-                                    <div class="col-md-10 col-sm-10">
-                                        <button class="btn btn-default" ng-click="addNewResource(input.newResource.name)">Add</button>
-                                    </div>
-                                </div>
-
-
-                            </uib-tab>
-
-                            <uib-tab heading="About this resource">
-
-                                >> show spec in separate tab
-                                <h4>Potential references</h4>
-                                <table class="table table-bordered table-condensed">
-                                    <tr><th>Path</th><th>Resource Type</th></tr>
-                                    <tr ng-repeat="ref in references">
-                                        <td>{{ref.path | dropFirstInPath}}</td>
-                                        <td>{{ref.profile | getLogicalID}}</td>
-
-                                    </tr>
-                                </table>
-                            </uib-tab>
-                        </uib-tabset>
-
+                <div ng-show="displayMode == 'new'">
+                    <h4>Add new Resource</h4>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3">
+                            Resource Type:
+                        </div>
+                        <div class="col-md-6 col-sm-6">
+                            <select ng-model="input.newResource" class="form-control"
+                                    ng-change="newTypeSelected(input.newResource)"
+                                    ng-options="resource.name for resource in resources"></select>
+                        </div>
                     </div>
+
+
+
+                    <div class="row" ng-show="currentType">
+                        <div class="col-md-12 col-sm-12">
+                            <br/>
+
+                            <uib-tabset>
+                                <uib-tab heading="New resource instance">
+                                    <br/>
+                                    <div class="row">
+                                        <div class="col-md-2 col-sm-2">
+                                            Text
+                                        </div>
+                                        <div class="col-md-10 col-sm-10">
+                                            <textarea class="form-control" ng-model="input.text"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+
+
+
+                                        <div class="col-md-2 col-sm-2">
+
+                                        </div>
+                                        <div class="col-md-10 col-sm-10">
+                                            <button class="btn btn-default" ng-click="addNewResource(input.newResource.name)">Add</button>
+                                        </div>
+                                    </div>
+
+
+                                </uib-tab>
+
+                                <uib-tab heading="About this resource">
+
+                                    <div>
+                                        <a target="_blank" class="pull-right"
+                                           ng-href="http://hl7.org/fhir/{{input.newResource.name}}.html">
+                                            {{input.newResource.name}}
+                                        </a>
+                                    </div>
+
+
+                                    <h4>Potential references</h4>
+                                    <table class="table table-bordered table-condensed">
+                                        <tr><th>Path</th><th>Resource Type</th></tr>
+                                        <tr ng-repeat="ref in references">
+                                            <td>{{ref.path | dropFirstInPath}}</td>
+                                            <td>{{ref.profile | getLogicalID}}</td>
+
+                                        </tr>
+                                    </table>
+                                </uib-tab>
+                            </uib-tabset>
+
+                            <button class="btn btn-default" ng-click="displayMode = 'view'">Cancel</button>
+
+
+                        </div>
+                    </div>
+
+
+
+
+                </div>
+
                 </div>
 
 
 
-
-
-
-
-
-            </div>
 
         </div>
+
+        <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
+                    vs-selected="vsSelected"></vs-browser>
 
     </div>
 </body>
