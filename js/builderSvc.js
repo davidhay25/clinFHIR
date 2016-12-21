@@ -7,8 +7,93 @@ angular.module("sampleApp")
 
         var gAllReferences = []
         var gSD = {};   //a has of all SD's reas this session by type
+        var showLog = false;
 
         return {
+            addStringToText : function(resource,txt) {
+                //add the txt to the resource.text.div element...
+                var raw = $filter('cleanTextDiv')(resource.text.div);
+                raw += " "+txt;
+                resource.text.div =  $filter('addTextDiv')(raw);
+            },
+            addPropertyValue : function(resource,hashPath,dt,value) {
+                //add a value to a resource property...  type of value will depend on datatype
+                //var that = this;
+                console.log(resource,hashPath,dt,value)
+                var info = this.getEDInfoForPath(hashPath.path)
+
+                var path = $filter('dropFirstInPath')(hashPath.path);   //the path off the root
+                //for now, we only allow values for properties directly off the root...
+                if (path.indexOf('.') > -1) {
+                    return "Can only add to root properties";
+                }
+
+
+                switch (dt) {
+                    case 'code' :
+                        if (info.isMultiple) {
+                            resource[path] = resource[path] || []
+                            resource[path].push(value.code)
+                        } else {
+                            resource[path] = value.code;
+                        }
+                        this.addStringToText(resource,path+": "+ value.code)
+                        break;
+                    case 'string' :
+                        if (info.isMultiple) {
+                            resource[path] = resource[path] || []
+                            resource[path].push(value)
+                        } else {
+                            resource[path] = value;
+                        }
+                        this.addStringToText(resource,path+": "+ value)
+                        break;
+                    case "CodeableConcept" :
+                        //value is an object that can have properties code, system, display, text
+                        var cc = {},text="";
+                        if (value && value.cc) {
+
+                            //when a CC is rendered as a set of radios the output is a json string...
+                            if (angular.isString(value.cc)) {
+                                value.cc = {coding:angular.fromJson(value.cc)}
+                                delete value.cc.coding.extension;
+                            }
+
+
+                            if (value.cc.coding) {
+
+
+                                cc.coding = [value.cc.coding]
+                                if (value.cc.coding.display) {
+                                    text = value.cc.coding.display
+                                }
+
+
+                            }
+                            if (value.cc.text) {
+                                cc.text = value.text;
+                                text = value.cc.text;
+                            }
+
+                            // var v = {text:value};
+                            if (info.isMultiple) {
+                                resource[path] = resource[path] || []
+                                resource[path].push(cc)
+                            } else {
+                                resource[path] = cc;
+                            }
+
+                            if (text) {
+                                this.addStringToText(resource, path + ": " + text)
+                            }
+                        }
+
+                        break;
+                }
+
+
+
+            },
             removeReferenceAtPath : function(resource,path,inx) {
                 //find where the reference is that we want to remove
 
@@ -366,7 +451,7 @@ console.log(err);
                 //find elements of type refernce at this level
                 function findReferences(refs,node,nodePath,index) {
                     angular.forEach(node,function(value,key){
-                        //console.log(key,value);
+                        
                         //if it's an object, does it have a child called 'reference'?
 
 
@@ -376,8 +461,7 @@ console.log(err);
                                 var lpath = nodePath + '.' + key;
                                 if (obj.reference) {
                                     //this is a reference!
-                                    //console.log('>>>>>>>>'+value.reference)
-                                    //var lpath = nodePath + '.' + key;
+                                   
                                     refs.push({path: lpath, reference: obj.reference})
                                 } else {
                                     //if it's not a reference, then does it have any children?
@@ -390,8 +474,7 @@ console.log(err);
                             var   lpath = nodePath + '.' + key;
                             if (value.reference) {
                                 //this is a reference!
-                                console.log('>>>>>>>>'+value.reference)
-                                //lpath = nodePath + '.' + key;
+                                if (showLog) {console.log('>>>>>>>>'+value.reference)}
                                 refs.push({path:lpath,reference : value.reference,index:index})
                             } else {
                                 //if it's not a reference, then does it have any children?

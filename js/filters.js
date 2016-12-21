@@ -152,7 +152,22 @@ angular.module("sampleApp")
 
             }
         })
+    .filter('cleanTextDiv',function(){
+        //remove the <div  xmlns='http://www.w3.org/1999/xhtml'>{texthere}</div> tgs...
+        return function(textDiv) {
+            textDiv = textDiv.replace("<div xmlns='http://www.w3.org/1999/xhtml'>","");
+            textDiv = textDiv.substr(0,textDiv.length - 6);
+            return textDiv;
 
+        }
+    })
+    .filter('addTextDiv',function(){
+        //add the <div  xmlns='http://www.w3.org/1999/xhtml'>{texthere}</div> tgs...
+        return function(textDiv) {
+            return "<div xmlns='http://www.w3.org/1999/xhtml'>" + textDiv + "</div>";
+
+        }
+    })
     .filter('dropFirstInPath',function(){
         return function(path) {
             //return the last part of a path - allowing for stu2 (array) or stu3 (single)

@@ -6,6 +6,17 @@
     <p>{{modalOptions.bodyText}}</p>
 </div>
 
+<div ng-show="modalOptions.userText !== undefined">
+    <div class="row">
+        <div class="col-md-10 col-sm-10 col-md-offset-1 col-sm-offset-1 ">
+            <textarea rows = '3' class = 'form-control ' ng-model="modalOptions.userText"></textarea>
+        </div>
+    </div>
+
+</div>
+
+
+
 <div class="modal-footer">
     <button autoFocus type="button" class="btn btn-warning"
             data-ng-click="modalOptions.close()">{{modalOptions.closeButtonText}}</button>

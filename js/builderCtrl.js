@@ -2,14 +2,16 @@
 angular.module("sampleApp")
     .controller('builderCtrl',
         function ($scope,$http,appConfigSvc,$q,GetDataFromServer,resourceCreatorSvc,RenderProfileSvc,builderSvc,
-                  $timeout,$localStorage,$filter,profileCreatorSvc,modalService) {
+                  $timeout,$localStorage,$filter,profileCreatorSvc,modalService,Utilities) {
 
             $scope.input = {};
+            $scope.input.dt = {};   //data entered as part of populating a datatype
             $scope.appConfigSvc = appConfigSvc;
 
 
             //var currentBunbleName = 'builderBundle';        //the name of the
 
+            $scope.supportedDt = ['CodeableConcept','string','code']
 
             $scope.currentBundleIndex = 0;     //the index of the bundle currently being used
             if (! $localStorage.builderBundles) {
@@ -46,11 +48,113 @@ angular.module("sampleApp")
 
             $scope.displayMode = 'view';    //options 'new', 'view'
 
-            $scope.clearAllData = function() {
+            //displays the data entry screen for adding a datatype value
+            $scope.addValueForDt = function(hashPath,dt) {
+
+                if ($scope.supportedDt.indexOf(dt) > -1) {
+                    delete $scope.input.dt;
+
+                    console.log(hashPath,dt)
+                    $scope.enterPropertyValue = ! $scope.enterPropertyValue;       //will display the property entry
+
+                    $scope.dataTypeBeingEntered = dt;
+                    $scope.hashPathBingEntered = hashPath;
+
+                }
+
+
+            };
+            //adds a new value to a property
+            $scope.saveNewValue = function(){
+
+                console.log($scope.input.dt)
+               // $scope.enterPropertyValue = false;
+               // return;
+
+                builderSvc.addPropertyValue($scope.currentResource,
+                    $scope.hashPathBingEntered,
+                    $scope.dataTypeBeingEntered,
+                    $scope.input.dt)
+                $scope.enterPropertyValue = false;
+            };
+
+            //--------- code for CodeableConcept lookup
+
+           // var url = 'http://clinfhir.com/fhir/ValueSet/'+item.name;
+            var url = 'http://hl7.org/fhir/ValueSet/condition-code';
+            Utilities.getValueSetIdFromRegistry(url,function(vsDetails) {
+                $scope.vsDetails = vsDetails;  //vsDetails = {id: type: resource: }
+                console.log(vsDetails);
+            })
+
+            $scope.vsLookup = function(text,vs) {
+
+                console.log(text,vs)
+                if (vs) {
+                    var id = vs.id;
+                    $scope.showWaiting = true;
+                    return GetDataFromServer.getFilteredValueSet(id,text).then(
+                        function(data,statusCode){
+                            if (data.expansion && data.expansion.contains) {
+                                var lst = data.expansion.contains;
+                                return lst;
+                            } else {
+                                return [
+                                    {'display': 'No expansion'}
+                                ];
+                            }
+                        }, function(vo){
+                            var statusCode = vo.statusCode;
+                            var msg = vo.error;
+
+
+                            alert(msg);
+
+                            return [
+                                {'display': ""}
+                            ];
+                        }
+                    ).finally(function(){
+                        $scope.showWaiting = false;
+                    });
+
+                } else {
+                    return [{'display':'Select the ValueSet to query against'}];
+                }
+            };
+
+
+            $scope.editResource = function(resource){
+
+                var modalOptions = {
+                    closeButtonText: "Cancel",
+                    actionButtonText: 'Save',
+                    headerText: 'Edit resource text',
+                    bodyText: 'Current text:',
+                    userText :   $filter('cleanTextDiv')(resource.text.div)
+                };
+
+                 modalService.showModal({}, modalOptions).then(
+                    function (result) {
+                        console.log(result)
+                        if (result.userText) {
+                            resource.text.div = $filter('addTextDiv')(result.userText);
+                            makeGraph();
+                        }
+
+
+                    }
+                 );
+
+
+
+            }
+
+            $scope.deleteBundle = function(inx) {
                 //$localStorage.builderBundle = {resourceType:'Bundle',entry:[]}//
                 //$scope.resourcesBundle = $localStorage.builderBundle
 
-                $localStorage.builderBundles.splice($scope.currentBundleIndex,1)   //delete the bundle
+                $localStorage.builderBundles.splice(inx)   //delete the bundle
                 $scope.currentBundleIndex = 0; //set the current bundle to the first (default) one
                 if ($localStorage.builderBundles.length == 0) {
                     //no bundles left
@@ -61,7 +165,7 @@ angular.module("sampleApp")
 
                 $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
 
-                //delete $localStorage.builderBundle;
+
                 makeGraph();
                 delete $scope.currentResource;
             }
@@ -152,6 +256,7 @@ angular.module("sampleApp")
 
                     var nodeId = obj.nodes[0];  //get the first node
                    // console.log(nodeId,graphData)
+
 
                     var node = vo.graphData.nodes.get(nodeId);
                     console.log(node)
@@ -325,16 +430,45 @@ angular.module("sampleApp")
                                             //$scope.hashPath.max = ed.max;
                                             $scope.hashPath.definition = ed.definition;
                                             $scope.hashPath.comments = ed.comments;
-                                            /*
-                                            $scope.hashPath.offRoot = true;
-                                            //is this path off the root, or a sub path?
-                                            var ar = ed.path.split('.');
-                                            if (ar.length > 2) {
-                                                $scope.hashPath.offRoot = false;
 
 
+                                            //get the ValueSet if there is one bound...
+                                            if ($scope.hashPath.ed.binding && $scope.hashPath.ed.binding.valueSetReference &&
+                                                $scope.hashPath.ed.binding.valueSetReference.reference) {
 
+                                                var url = $scope.hashPath.ed.binding.valueSetReference.reference;
+                                                Utilities.getValueSetIdFromRegistry(url,function(vsDetails) {
+                                                    $scope.vsDetails = vsDetails;  //vsDetails = {id: type: resource: }
+                                                    console.log(vsDetails);
+                                                    if ($scope.vsDetails.type == 'list' || ed.type[0].code == 'code') {
+                                                        //this has been recognized as a VS that has only a small number of options...
+                                                        GetDataFromServer.getExpandedValueSet($scope.vsDetails.id).then(
+                                                            function(vs) {
+                                                                $scope.expandedValueSet = vs;
+                                                                console.log(vs);
+                                                            },function(err) {
+                                                                alert(err + ' expanding ValueSet')
+                                                            }
+                                                        )
+                                                    }
+                                                })
                                             }
+
+
+
+
+
+
+                                        /*
+                                        $scope.hashPath.offRoot = true;
+                                        //is this path off the root, or a sub path?
+                                        var ar = ed.path.split('.');
+                                        if (ar.length > 2) {
+                                            $scope.hashPath.offRoot = false;
+
+
+
+                                        }
 */
 
                                                 //is this a reference?
@@ -472,18 +606,16 @@ angular.module("sampleApp")
             $scope.addNewResource = function(type) {
                 var resource = {resourceType : type};
                 resource.id = 't'+new Date().getTime();
-                resource.text = {status:'generated',div:"<div  xmlns='http://www.w3.org/1999/xhtml'>"+
-                    $scope.input.text+'</div>'};
+                resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text)};
+
                 console.log(resource);
                 $scope.resourcesBundle.entry.push({resource:resource});
-               // $localStorage.builderBundle = $scope.resourcesBundle;
-
-
-              //  $scope.resourcesBundle
-
                 $scope.displayMode = 'view';
 
+                $scope.selectResource(resource)
                 makeGraph();
+
+                //$scope.selectResource(node.cf.resource)
             };
 
             $scope.newTypeSelected = function(item) {

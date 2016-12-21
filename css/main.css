@@ -1,5 +1,12 @@
 
 /* classes for the tree view icons...*/
+
+.iconSpacing {
+    /*  left and right spacing for icons in a horizontalbar */
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
 .icon-ext {
     background-image: url('/icons/icon_reference.png');
 }

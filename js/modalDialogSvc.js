@@ -24,6 +24,9 @@ angular.module('sampleApp').service('modalService', ['$uibModal',
             return this.show(customModalDefaults, customModalOptions);
         };
 
+        
+        
+        
         this.show = function (customModalDefaults, customModalOptions) {
             //Create temp objects to work with since we're in a singleton service
             var tempModalDefaults = {};
@@ -39,6 +42,11 @@ angular.module('sampleApp').service('modalService', ['$uibModal',
                 tempModalDefaults.controller = function ($scope, $uibModalInstance) {
                     $scope.modalOptions = tempModalOptions;
                     $scope.modalOptions.ok = function (result) {
+                        result = result || {}
+                        result.userText = $scope.modalOptions.userText;
+
+
+
                         $uibModalInstance.close(result);
                     };
                     $scope.modalOptions.close = function (result) {
