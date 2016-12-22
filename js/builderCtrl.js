@@ -2,7 +2,7 @@
 angular.module("sampleApp")
     .controller('builderCtrl',
         function ($scope,$http,appConfigSvc,$q,GetDataFromServer,resourceCreatorSvc,RenderProfileSvc,builderSvc,
-                  $timeout,$localStorage,$filter,profileCreatorSvc,modalService,Utilities) {
+                  $timeout,$localStorage,$filter,profileCreatorSvc,modalService,Utilities,$uibModal) {
 
             $scope.input = {};
             $scope.input.dt = {};   //data entered as part of populating a datatype
@@ -11,7 +11,7 @@ angular.module("sampleApp")
 
             //var currentBunbleName = 'builderBundle';        //the name of the
 
-            $scope.supportedDt = ['CodeableConcept','string','code']
+            $scope.supportedDt = ['CodeableConcept','string','code','date','Period','dateTime']
 
             $scope.currentBundleIndex = 0;     //the index of the bundle currently being used
             if (! $localStorage.builderBundles) {
@@ -54,18 +54,52 @@ angular.module("sampleApp")
                 if ($scope.supportedDt.indexOf(dt) > -1) {
                     delete $scope.input.dt;
 
-                    console.log(hashPath,dt)
-                    $scope.enterPropertyValue = ! $scope.enterPropertyValue;       //will display the property entry
+                    var ar = hashPath.path.split('.');
+                    if (ar.length > 2) {
+                        modalService.showModal({}, {userText:'Sorry, only elements directly off the root can currently have values.'})
+                    } else {
+                        $uibModal.open({
+                            templateUrl: 'modalTemplates/addPropertyInBuilder.html',
+                            size: 'lg',
+                            controller: 'addPropertyInBuilderCtrl',
+                            resolve : {
+                                dt: function () {          //the default config
+                                    return dt;
+                                },
+                                hashPath: function () {          //the default config
+                                    return hashPath;
+                                },
+                                resource: function () {          //the default config
+                                    return $scope.currentResource;
+                                },
+                                vsDetails: function () {          //the default config
+                                    return $scope.vsDetails;
+                                },
+                                expandedValueSet: function () {          //the default config
+                                    return $scope.expandedValueSet;
+                                }
+                            }
+                        })
 
-                    $scope.dataTypeBeingEntered = dt;
-                    $scope.hashPathBingEntered = hashPath;
+                        //return;
+
+/*
+                        console.log(hashPath,dt)
+                        $scope.enterPropertyValue = ! $scope.enterPropertyValue;       //will display the property entry
+
+                        $scope.dataTypeBeingEntered = dt;
+                        $scope.hashPathBingEntered = hashPath;
+                        */
+                    }
+
+
 
                 }
 
 
             };
             //adds a new value to a property
-            $scope.saveNewValue = function(){
+            $scope.saveNewValueDEP = function(){
 
                 console.log($scope.input.dt)
                // $scope.enterPropertyValue = false;
@@ -80,6 +114,7 @@ angular.module("sampleApp")
 
             //--------- code for CodeableConcept lookup
 
+            /*
            // var url = 'http://clinfhir.com/fhir/ValueSet/'+item.name;
             var url = 'http://hl7.org/fhir/ValueSet/condition-code';
             Utilities.getValueSetIdFromRegistry(url,function(vsDetails) {
@@ -87,7 +122,9 @@ angular.module("sampleApp")
                 console.log(vsDetails);
             })
 
-            $scope.vsLookup = function(text,vs) {
+            */
+
+            $scope.vsLookupDEP = function(text,vs) {
 
                 console.log(text,vs)
                 if (vs) {
@@ -124,6 +161,7 @@ angular.module("sampleApp")
             };
 
 
+            //edit the resource text
             $scope.editResource = function(resource){
 
                 var modalOptions = {
@@ -150,24 +188,45 @@ angular.module("sampleApp")
 
             }
 
+            //remove a bundle set...
             $scope.deleteBundle = function(inx) {
+
+
+                var modalOptions = {
+                    closeButtonText: "No, I changed my mind",
+                    actionButtonText: 'Yes, please remove',
+                    headerText: 'Remove resource set',
+                    bodyText: 'Are you sure you wish to remove this resource set?'
+                };
+
+                modalService.showModal({}, modalOptions).then(
+                    function () {
+                        $localStorage.builderBundles.splice(inx)   //delete the bundle
+                        $scope.currentBundleIndex = 0; //set the current bundle to the first (default) one
+                        if ($localStorage.builderBundles.length == 0) {
+                            //no bundles left
+                            $localStorage.builderBundles = [{name:'Default',bundle:{resourceType:'Bundle',entry:[]}}]
+                        } else {
+
+                        }
+
+                        $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+
+
+                        makeGraph();
+                        delete $scope.currentResource;
+
+                    }
+                );
+
+
+
+
+
                 //$localStorage.builderBundle = {resourceType:'Bundle',entry:[]}//
                 //$scope.resourcesBundle = $localStorage.builderBundle
 
-                $localStorage.builderBundles.splice(inx)   //delete the bundle
-                $scope.currentBundleIndex = 0; //set the current bundle to the first (default) one
-                if ($localStorage.builderBundles.length == 0) {
-                    //no bundles left
-                    $localStorage.builderBundles = [{name:'Default',bundle:{resourceType:'Bundle',entry:[]}}]
-                } else {
 
-                }
-
-                $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
-
-
-                makeGraph();
-                delete $scope.currentResource;
             }
 
             $scope.removeResource = function(resource) {
@@ -230,10 +289,7 @@ angular.module("sampleApp")
 
 
 
-                //console.log(vo);
-
                 var container = document.getElementById('resourceGraph');
-                //var container = $('#resourceGraph');
 
                 var options = {
                     physics: {
@@ -383,7 +439,8 @@ angular.module("sampleApp")
 
 
             $scope.selectResource = function(resource) {
-                delete $scope.input.text;
+                //delete $scope.input.text;
+                delete $scope.hashPath;
                 //console.log(resource);
                 $scope.currentResource = resource;
                 var url = resource.resourceType+'/'+resource.id;
@@ -412,6 +469,8 @@ angular.module("sampleApp")
                                     console.log(data.node);
                                     $scope.hashReferences = {}      //a hash of type vs possible resources for that type
                                     delete $scope.hashPath;
+                                    delete $scope.expandedValueSet;
+                                    delete $scope.currentElementValue;
 
                                     if (data.node && data.node.data && data.node.data.ed) {
 
@@ -421,7 +480,9 @@ angular.module("sampleApp")
                                         $scope.possibleReferences = [];
                                         var ed = data.node.data.ed;
 
-
+                                        $scope.currentElementValue = builderSvc.getValueForPath($scope.currentResource,path);
+                                        
+                                        //get the type information
                                         if (ed.type) {
 
 
@@ -610,6 +671,15 @@ angular.module("sampleApp")
 
                 console.log(resource);
                 $scope.resourcesBundle.entry.push({resource:resource});
+
+                $scope.resourcesBundle.entry.sort(function(a,b){
+                    if (a.resource.resourceType > b.resource.resourceType) {
+                        return 1
+                    } else {
+                        return -1
+                    }
+                })
+
                 $scope.displayMode = 'view';
 
                 $scope.selectResource(resource)

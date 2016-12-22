@@ -1,4 +1,29 @@
 <div>
+
+
+    <div ng-show="dataTypeBeingEntered == 'Period'">
+        <div class="row">
+            <div class="col-md-6  col-sm-6 ">
+                <div uib-datepicker ng-model="input.dt.period.start" class="well well-sm"></div>
+            </div>
+            <div class="col-md-6  col-sm-6 ">
+                <div uib-datepicker ng-model="input.dt.period.end" class="well well-sm"></div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <div ng-show="dataTypeBeingEntered == 'date' || dataTypeBeingEntered == 'dateTime'">
+        <div class="row">
+            <div class="col-md-7  col-sm-7 col-centered">
+                <div uib-datepicker ng-model="input.dt.date" class="well well-sm"></div>
+            </div>
+        </div>
+
+    </div>
+
     <div ng-show="dataTypeBeingEntered == 'string'">
         <input placeholder = 'Enter text value' type="text" class="form-control" ng-model="input.dt.string"/>
     </div>
@@ -6,7 +31,7 @@
 
     <div ng-show="dataTypeBeingEntered == 'code'">
         <div class="row">
-            <div class="col-md-6 col-sm-6" ng-repeat = "option in expandedValueSet.expansion.contains">
+            <div class="col-md-3 col-sm-3" ng-repeat = "option in expandedValueSet.expansion.contains">
                 <input type="radio" ng-model="input.dt.code" name="name" value="{{option.code}}"  />
                 <span title="{{option.system}}">{{option.display}}</span>
             </div>
@@ -20,7 +45,7 @@
 
             <div ng-switch-when="list">
                 <div class="row">
-                    <div class="col-md-6 col-sm-6" ng-repeat = "option in expandedValueSet.expansion.contains">
+                    <div class="col-md-3 col-sm-3" ng-repeat = "option in expandedValueSet.expansion.contains">
                         <input type="radio" ng-model="input.dt.cc" name="name" value="{{option}}"  />
                         <span title="{{option.system}}">{{option.display}}</span>
                     </div>

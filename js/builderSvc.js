@@ -10,11 +10,43 @@ angular.module("sampleApp")
         var showLog = false;
 
         return {
+            getValueForPath : function(resource,inPath) {
+                //return a string display for a path value. root only at this stage...
+                var path = $filter('dropFirstInPath')(inPath);   //the path off the root
+                var info = this.getEDInfoForPath(inPath)
+                var rawValue = resource[path];
+                if (info.isMultiple && resource[path]) {
+                    rawValue = resource[path][0];
+                }
+                var display = "";
+                if (rawValue) {
+                    display = rawValue;
+                    //figure out the display
+                    if (rawValue.coding) {
+                        //this is a cc
+                        display = rawValue.coding[0].display;
+                        //display = rawValue.coding[0].code + " ("+rawValue.coding[0].system+")";
+                    } else if (rawValue.start || rawValue.end) {
+                        //this is a period
+
+                    }
+                }
+
+
+
+
+                return {raw:rawValue,display:display}
+
+
+            },
             addStringToText : function(resource,txt) {
                 //add the txt to the resource.text.div element...
-                var raw = $filter('cleanTextDiv')(resource.text.div);
-                raw += " "+txt;
-                resource.text.div =  $filter('addTextDiv')(raw);
+                if (resource.text && resource.text.div) {
+                    var raw = $filter('cleanTextDiv')(resource.text.div);
+                    raw += " "+txt;
+                    resource.text.div =  $filter('addTextDiv')(raw);
+                }
+
             },
             addPropertyValue : function(resource,hashPath,dt,value) {
                 //add a value to a resource property...  type of value will depend on datatype
@@ -30,6 +62,32 @@ angular.module("sampleApp")
 
 
                 switch (dt) {
+
+                    case 'Period' :
+                        var start = value.period.start;
+                        var end = value.period.end;
+                        var insrt = {start:start,end:end}
+                        simpleInsert(info,path,insrt);
+                        /*
+                        if (info.isMultiple) {
+                            resource[path] = resource[path] || []
+                            resource[path].push(insrt)
+                        } else {
+                            resource[path] =insrt;
+                        }
+                        */
+                        break;
+
+                    case 'date' :
+                        if (info.isMultiple) {
+                            resource[path] = resource[path] || []
+                            resource[path].push(value.date)
+                        } else {
+                            resource[path] = value.date;
+                        }
+                        this.addStringToText(resource.path+": "+ value.date)
+                        break;
+
                     case 'code' :
                         if (info.isMultiple) {
                             resource[path] = resource[path] || []
@@ -42,11 +100,11 @@ angular.module("sampleApp")
                     case 'string' :
                         if (info.isMultiple) {
                             resource[path] = resource[path] || []
-                            resource[path].push(value)
+                            resource[path].push(value.string)
                         } else {
-                            resource[path] = value;
+                            resource[path] = value.string;
                         }
-                        this.addStringToText(resource,path+": "+ value)
+                        this.addStringToText(resource,path+": "+ value.string)
                         break;
                     case "CodeableConcept" :
                         //value is an object that can have properties code, system, display, text
@@ -61,14 +119,10 @@ angular.module("sampleApp")
 
 
                             if (value.cc.coding) {
-
-
                                 cc.coding = [value.cc.coding]
                                 if (value.cc.coding.display) {
                                     text = value.cc.coding.display
                                 }
-
-
                             }
                             if (value.cc.text) {
                                 cc.text = value.text;
@@ -89,6 +143,15 @@ angular.module("sampleApp")
                         }
 
                         break;
+                }
+
+                function simpleInsert(info,path,insrt) {
+                    if (info.isMultiple) {
+                        resource[path] = resource[path] || []
+                        resource[path].push(insrt)
+                    } else {
+                        resource[path] =insrt;
+                    }
                 }
 
 
@@ -215,7 +278,20 @@ angular.module("sampleApp")
                 }
                 if (info.max =='*') {
                     insertPoint[path] = insertPoint[path] || []
-                    insertPoint[path].push({reference:referencedResource.resourceType+'/'+referencedResource.id})
+
+                    var reference = referencedResource.resourceType+'/'+referencedResource.id;
+                    //make sure there isn't already a reference to this resource
+                    var alreadyReferenced = false;
+                    insertPoint[path].forEach(function(ref){
+                        if (ref.reference == reference) {
+                            alreadyReferenced = true;
+                        }
+                    })
+
+                    if (! alreadyReferenced) {
+                        insertPoint[path].push({reference:reference})
+                    }
+
                 }
 
 
