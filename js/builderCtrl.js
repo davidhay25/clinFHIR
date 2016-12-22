@@ -42,10 +42,7 @@ angular.module("sampleApp")
                 makeGraph();
                 delete $scope.currentResource;
             }
-
-            //$scope.resourcesBundle = $localStorage.builderBundle || {resourceType:'Bundle',entry:[]}
-
-
+            
             $scope.displayMode = 'view';    //options 'new', 'view'
 
             //displays the data entry screen for adding a datatype value
@@ -54,8 +51,32 @@ angular.module("sampleApp")
                 if ($scope.supportedDt.indexOf(dt) > -1) {
                     delete $scope.input.dt;
 
+                    $uibModal.open({
+                        templateUrl: 'modalTemplates/addPropertyInBuilder.html',
+                        size: 'lg',
+                        controller: 'addPropertyInBuilderCtrl',
+                        resolve : {
+                            dt: function () {          //the default config
+                                return dt;
+                            },
+                            hashPath: function () {          //the default config
+                                return hashPath;
+                            },
+                            resource: function () {          //the default config
+                                return $scope.currentResource;
+                            },
+                            vsDetails: function () {          //the default config
+                                return $scope.vsDetails;
+                            },
+                            expandedValueSet: function () {          //the default config
+                                return $scope.expandedValueSet;
+                            }
+                        }
+                    })
+
+/*
                     var ar = hashPath.path.split('.');
-                    if (ar.length > 2) {
+                    if (ar.length > 3) {
                         modalService.showModal({}, {userText:'Sorry, only elements directly off the root can currently have values.'})
                     } else {
                         $uibModal.open({
@@ -83,15 +104,9 @@ angular.module("sampleApp")
 
                         //return;
 
-/*
-                        console.log(hashPath,dt)
-                        $scope.enterPropertyValue = ! $scope.enterPropertyValue;       //will display the property entry
 
-                        $scope.dataTypeBeingEntered = dt;
-                        $scope.hashPathBingEntered = hashPath;
-                        */
                     }
-
+*/
 
 
                 }

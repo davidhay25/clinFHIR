@@ -54,10 +54,13 @@ angular.module("sampleApp")
                 console.log(resource,hashPath,dt,value)
                 var info = this.getEDInfoForPath(hashPath.path)
 
-                var path = $filter('dropFirstInPath')(hashPath.path);   //the path off the root
+                //var path = $filter('dropFirstInPath')(hashPath.path);   //the path off the root
                 //for now, we only allow values for properties directly off the root...
+
+                var path = hashPath.path;
+
                 if (path.indexOf('.') > -1) {
-                    return "Can only add to root properties";
+                  //  return "Can only add to root properties";
                 }
 
 
@@ -67,43 +70,44 @@ angular.module("sampleApp")
                         var start = value.period.start;
                         var end = value.period.end;
                         var insrt = {start:start,end:end}
-                        simpleInsert(info,path,insrt);
-                        /*
-                        if (info.isMultiple) {
-                            resource[path] = resource[path] || []
-                            resource[path].push(insrt)
-                        } else {
-                            resource[path] =insrt;
-                        }
-                        */
+                        simpleInsert(resource,info,path,insrt);
+
                         break;
 
                     case 'date' :
-                        if (info.isMultiple) {
+                        simpleInsert(resource,info,path,value.date,this.getEDInfoForPath);
+                        /* if (info.isMultiple) {
                             resource[path] = resource[path] || []
                             resource[path].push(value.date)
                         } else {
                             resource[path] = value.date;
                         }
+                        */
                         this.addStringToText(resource.path+": "+ value.date)
                         break;
 
                     case 'code' :
+                        simpleInsert(resource,info,path,value.code,this.getEDInfoForPath);
+                        /*
                         if (info.isMultiple) {
                             resource[path] = resource[path] || []
                             resource[path].push(value.code)
                         } else {
                             resource[path] = value.code;
                         }
+                        */
                         this.addStringToText(resource,path+": "+ value.code)
                         break;
                     case 'string' :
+                        simpleInsert(resource,info,path,value.string,this.getEDInfoForPath);
+                        /*
                         if (info.isMultiple) {
                             resource[path] = resource[path] || []
                             resource[path].push(value.string)
                         } else {
                             resource[path] = value.string;
                         }
+                        */
                         this.addStringToText(resource,path+": "+ value.string)
                         break;
                     case "CodeableConcept" :
@@ -130,13 +134,18 @@ angular.module("sampleApp")
                             }
 
                             // var v = {text:value};
+
+                            //simpleInsert(resource,info,path,value.string,this.getEDInfoForPath);
+
+                            simpleInsert(resource,info,path,cc,this.getEDInfoForPath);
+  /*
                             if (info.isMultiple) {
                                 resource[path] = resource[path] || []
                                 resource[path].push(cc)
                             } else {
                                 resource[path] = cc;
                             }
-
+*/
                             if (text) {
                                 this.addStringToText(resource, path + ": " + text)
                             }
@@ -145,7 +154,61 @@ angular.module("sampleApp")
                         break;
                 }
 
-                function simpleInsert(info,path,insrt) {
+                function simpleInsert(resource,info,path,insrt,getInfo) {
+
+
+                    var segmentPath = resource.resourceType;
+                    //var info = getInfo(segmentPath);       //the final insert point
+
+
+                    var path = $filter('dropFirstInPath')(path);
+                    var insertPoint = resource;
+                    var ar = path.split('.');
+                    if (ar.length > 0) {
+                        for (var i=0; i < ar.length-1; i++) {
+                            //not the last one... -
+                            var segment = ar[i];
+
+                            segmentPath += '.'+segment;
+                            console.log(segmentPath)
+
+                            var segmentInfo = getInfo(segmentPath);
+
+                            if (segmentInfo.isMultiple) {
+                                insertPoint[segment] = insertPoint[segment] || []  // todo,need to allow for arrays
+                                var node = {};
+                                insertPoint[segment].push(node)
+                                insertPoint = node
+                            } else {
+                                insertPoint[segment] = insertPoint[segment] || {}  // todo,need to allow for arrays
+                                insertPoint = insertPoint[segment]
+                            }
+
+
+
+
+                        }
+                        path = ar[ar.length-1];       //this will be the property on the 'last'segment
+                    }
+
+
+
+
+                    if (info.isMultiple) {
+                        insertPoint[path] = resource[path] || []
+                        insertPoint[path].push(insrt)
+                    } else {
+                        insertPoint[path] =insrt;
+                    }
+
+                    return;
+
+
+
+
+
+
+//-----------------
                     if (info.isMultiple) {
                         resource[path] = resource[path] || []
                         resource[path].push(insrt)
