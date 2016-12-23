@@ -115,14 +115,20 @@
                         Builder
                     </a>
                 </div>
-                <div class="col-md-8 col-sm-8">
+                <div class="col-md-6 col-sm-6">
                     <div class="navbar-text">
-                        Conformance: {{appConfigSvc.getCurrentConformanceServer().name}}
+                        Conformance server: {{appConfigSvc.getCurrentConformanceServer().name}}
                     </div>
 
                 </div>
 
-                <div class="col-md-2 col-sm-2">
+                <div class="col-md-4 col-sm-4">
+
+                    <div class="navbar-text pull-right">
+                        STU version: {{appConfigSvc.getCurrentConformanceServer().version}}
+                    </div>
+
+
 
                 </div>
 
@@ -181,7 +187,7 @@
                         <div class="row">
                             <div class="col-md-12 col-sm-12">
                                 <table class="table table-bordered table-condensed">
-                                    <tr><td>Type</td><td>Text</td></tr>
+                                    <tr><th>Type</th><th>Text</th></tr>
                                     <tr ng-repeat="entry in resourcesBundle.entry">
                                         <td><div class='clickable' ng-click="selectResource(entry.resource)">
                                             {{entry.resource.resourceType}}</div>
@@ -217,10 +223,9 @@
                                 <div class="col-sm-5 col-md-5">
                                     <br />
                                     <span class="pull-right">
-                                        <a target="_blank" ng-href="http://hl7.org/fhir/{{currentResource.resourceType | getLogicalID}}">
+                                        <a target="_blank" ng-href="{{fhirBasePath}}{{currentResource.resourceType | getLogicalID | lowercase}}.html">
                                             <i class="glyphicon glyphicon-globe"
                                                title="View Resource definition in spec">
-
                                             </i>
 
                                         </a>
@@ -291,7 +296,7 @@
 
                                             <div>
                                                 <div class="pull-right">
-                                                    <a target="_blank" ng-href="http://hl7.org/fhir/datatypes.html#{{type.code}}">
+                                                    <a target="_blank" ng-href="{{fhirBasePath}}datatypes.html#{{type.code}}">
                                                         <i class="glyphicon glyphicon-globe"
                                                            title="View Datatype in spec">
 
@@ -311,7 +316,7 @@
                                         <div ng-show="type.code == 'Reference'">
                                             <div>
                                                 <div class="pull-right">
-                                                    <a target="_blank" ng-href="http://hl7.org/fhir/{{type.profile | referenceType}}">
+                                                    <a target="_blank" ng-href="{{fhirBasePath}}{{type.profile | referenceType | lowercase}} ">
                                                         <i class="glyphicon glyphicon-globe"
                                                            title="View Resource in spec">
 
@@ -549,7 +554,7 @@
 
                                     <div>
                                         <a target="_blank" class="pull-right"
-                                           ng-href="http://hl7.org/fhir/{{input.newResource.name}}.html">
+                                           ng-href="{{fhirBasePath}}{{input.newResource.name | lowercase}}.html">
                                             View in spec
                                         </a>
                                     </div>

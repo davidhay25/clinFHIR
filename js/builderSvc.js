@@ -66,6 +66,20 @@ angular.module("sampleApp")
 
                 switch (dt) {
 
+                    case 'HumanName' :
+                        console.log(value)
+                        var insrt = {text:value.HumanName.text}
+                        simpleInsert(resource,info,path,insrt);
+                        this.addStringToText(resource.path+": "+ insrt.text)
+                        break;
+
+                    case 'Address' :
+                        console.log(value)
+                        var insrt = {text:value.Address.text}
+                        simpleInsert(resource,info,path,insrt);
+                        this.addStringToText(resource.path+": "+ insrt.text)
+                        break;
+
                     case 'Period' :
                         var start = value.period.start;
                         var end = value.period.end;
@@ -163,6 +177,7 @@ angular.module("sampleApp")
 
                     var path = $filter('dropFirstInPath')(path);
                     var insertPoint = resource;
+                    var segmentInfo;
                     var ar = path.split('.');
                     if (ar.length > 0) {
                         for (var i=0; i < ar.length-1; i++) {
@@ -172,7 +187,7 @@ angular.module("sampleApp")
                             segmentPath += '.'+segment;
                             console.log(segmentPath)
 
-                            var segmentInfo = getInfo(segmentPath);
+                             segmentInfo = getInfo(segmentPath);
 
                             if (segmentInfo.isMultiple) {
                                 insertPoint[segment] = insertPoint[segment] || []  // todo,need to allow for arrays
@@ -193,9 +208,20 @@ angular.module("sampleApp")
 
 
 
-
+                    //if (info.isMultiple) {
                     if (info.isMultiple) {
-                        insertPoint[path] = resource[path] || []
+                        /*
+                        //if there is already a child on the insertpath, then add this node
+                        if (insertPoint[path] && insertPoint[path].length > 0) {
+                            var x = insertPoint[path];
+                            insertPoint[path] =insrt;
+                        } else {
+                            insertPoint[path] = insertPoint[path] || []
+                            insertPoint[path].push(insrt)
+                        }
+*/
+                        //insertPoint[path] = resource[path] || []
+                        insertPoint[path] = insertPoint[path] || []
                         insertPoint[path].push(insrt)
                     } else {
                         insertPoint[path] =insrt;
@@ -209,12 +235,15 @@ angular.module("sampleApp")
 
 
 //-----------------
+                    /*
                     if (info.isMultiple) {
                         resource[path] = resource[path] || []
                         resource[path].push(insrt)
                     } else {
                         resource[path] =insrt;
                     }
+
+                    */
                 }
 
 
@@ -317,6 +346,9 @@ angular.module("sampleApp")
                         var segmentInfo = this.getEDInfoForPath(segmentPath);
 
                         if (segmentInfo.isMultiple) {
+
+
+
                             insertPoint[segment] = insertPoint[segment] || []  // todo,need to allow for arrays
                             var node = {};
                             insertPoint[segment].push(node)
@@ -422,7 +454,7 @@ angular.module("sampleApp")
                 var ar = path.split('.');
                 var type = ar[0];       //the resource type is the first segment in the path
                 var SD = gSD[type];     //it must have been read at this point...
-                var info = {};          //this will be the info about this element...
+                var info = {path:path};          //this will be the info about this element...
 
                 //find the path
                 if (SD.snapshot && SD.snapshot.element) {

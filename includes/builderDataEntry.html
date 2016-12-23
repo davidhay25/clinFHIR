@@ -28,6 +28,13 @@
         <input placeholder = 'Enter text value' type="text" class="form-control" ng-model="input.dt.string"/>
     </div>
 
+    <div ng-show="dataTypeBeingEntered == 'Address'">
+        <input placeholder = 'Enter text value of Address' type="text" class="form-control" ng-model="input.dt.Address.text"/>
+    </div>
+
+    <div ng-show="dataTypeBeingEntered == 'HumanName'">
+        <input placeholder = 'Enter text value of Name' type="text" class="form-control" ng-model="input.dt.HumanName.text"/>
+    </div>
 
     <div ng-show="dataTypeBeingEntered == 'code'">
         <div class="row">
@@ -37,6 +44,8 @@
             </div>
         </div>
     </div>
+
+
 
 
     <div ng-show="dataTypeBeingEntered == 'CodeableConcept'">

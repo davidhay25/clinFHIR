@@ -11,7 +11,7 @@ angular.module("sampleApp")
 
             //var currentBunbleName = 'builderBundle';        //the name of the
 
-            $scope.supportedDt = ['CodeableConcept','string','code','date','Period','dateTime']
+            $scope.supportedDt = ['CodeableConcept','string','code','date','Period','dateTime','Address','HumanName']
 
             $scope.currentBundleIndex = 0;     //the index of the bundle currently being used
             if (! $localStorage.builderBundles) {
@@ -22,6 +22,17 @@ angular.module("sampleApp")
 
             $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
 
+
+
+            //set the base path for linking to the spec
+            switch (appConfigSvc.getCurrentConformanceServer().version) {
+                case 2:
+                    $scope.fhirBasePath="http://hl7.org/fhir/";
+                    break;
+                case 3:
+                    $scope.fhirBasePath="http://build.fhir.org/";
+                    break;
+            }
 
 
             $scope.newBundle = function() {
@@ -516,17 +527,20 @@ angular.module("sampleApp")
                                                 Utilities.getValueSetIdFromRegistry(url,function(vsDetails) {
                                                     $scope.vsDetails = vsDetails;  //vsDetails = {id: type: resource: }
                                                     console.log(vsDetails);
-                                                    if ($scope.vsDetails.type == 'list' || ed.type[0].code == 'code') {
-                                                        //this has been recognized as a VS that has only a small number of options...
-                                                        GetDataFromServer.getExpandedValueSet($scope.vsDetails.id).then(
-                                                            function(vs) {
-                                                                $scope.expandedValueSet = vs;
-                                                                console.log(vs);
-                                                            },function(err) {
-                                                                alert(err + ' expanding ValueSet')
-                                                            }
-                                                        )
+                                                    if ($scope.vsDetails) {
+                                                        if ($scope.vsDetails.type == 'list' || ed.type[0].code == 'code') {
+                                                            //this has been recognized as a VS that has only a small number of options...
+                                                            GetDataFromServer.getExpandedValueSet($scope.vsDetails.id).then(
+                                                                function (vs) {
+                                                                    $scope.expandedValueSet = vs;
+                                                                    console.log(vs);
+                                                                }, function (err) {
+                                                                    alert(err + ' expanding ValueSet')
+                                                                }
+                                                            )
+                                                        }
                                                     }
+
                                                 })
                                             }
 
