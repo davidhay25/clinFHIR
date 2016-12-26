@@ -38,7 +38,6 @@
          }
 
 
-
     </style>
 
     <script>
@@ -46,7 +45,7 @@
         //https://github.com/rallu/angular-lightweight-markdown-editor
 
 
-        angular.module("sampleApp",['ui.bootstrap','ngStorage','ngSanitize']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','ngSanitize','firebase']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -94,6 +93,22 @@
 
 -->
 
+
+    <script>
+        var config = {
+            apiKey: "AIzaSyBNMohLbPiSKwpGwfARopdeW_6LLXujcUo",
+            authDomain: "clinfhir.firebaseapp.com",
+            databaseURL: "https://clinfhir.firebaseio.com",
+            storageBucket: ""
+        };
+
+        //  console.log(firebase)
+        if (firebase) {
+            firebase.initializeApp(config);
+
+        }
+    </script>
+
     <title>Builder</title>
 
 
@@ -115,30 +130,84 @@
                         Builder
                     </a>
                 </div>
-                <div class="col-md-6 col-sm-6">
+                <div class="col-md-3 col-sm-3">
                     <div class="navbar-text">
                         Conformance server: {{appConfigSvc.getCurrentConformanceServer().name}}
+                        <div>Data server: {{appConfigSvc.getCurrentDataServer().name}}</div>
                     </div>
 
                 </div>
 
-                <div class="col-md-4 col-sm-4">
+                <div class="col-md-3 col-sm-3">
 
                     <div class="navbar-text pull-right">
                         STU version: {{appConfigSvc.getCurrentConformanceServer().version}}
                     </div>
 
-
-
                 </div>
 
+                <div class="col-md-2 col-sm-2">
+                    <div class="navbar-text">
+                        <span class="clickable" ng-click="libraryVisible = ! libraryVisible">
+                            <span ng-show="libraryVisible">Hide </span>
+                            <span ng-hide="libraryVisible">View </span>
+                            Library</span>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-2">
+                    <div class="navbar-text">
+                        <span ng-hide="libraryVisible" class="clickable" ng-click="saveToLibrary()">Save to Library</span>
+                    </div>
+                </div>
 
             </div>
         </nav>
 
 
+        <div class="row" ng-show="libraryVisible">
 
-        <div class="row">
+            <h4>Library</h4>
+            <div class="row">
+                <div class="col-md-2 col-sm-2">
+
+                    <ul class="list-group" >
+                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':$index == currentLibraryIndex}"
+                            ng-repeat="entry in library.entry"
+                            ng-click="selectLibraryEntry($index)">
+
+                            <div class="row">
+                                <div class="col-md-10 col-sm-10">
+                                    <strong>{{entry.resource.description}}</strong>
+                                </div>
+                                <div class="col-md-2 col-sm-2">
+                                    <div ng-show="entry.resource.meta.cachedLocally">
+                                        C
+                                    </div>
+<!--
+                                    <i class="glyphicon glyphicon-remove"
+                                       title="Delete"
+                                       ng-click="deleteBundle($index)" style="cursor: pointer">
+
+                                    </i>
+                                    -->
+                                </div>
+
+                            </div>
+
+
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+
+
+
+        </div>
+
+        <div class="row" ng-hide="libraryVisible">
+
 
             <div class="col-md-2 col-sm-2">
 

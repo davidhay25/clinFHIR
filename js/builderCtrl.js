@@ -2,11 +2,106 @@
 angular.module("sampleApp")
     .controller('builderCtrl',
         function ($scope,$http,appConfigSvc,$q,GetDataFromServer,resourceCreatorSvc,RenderProfileSvc,builderSvc,
-                  $timeout,$localStorage,$filter,profileCreatorSvc,modalService,Utilities,$uibModal) {
+                  $timeout,$localStorage,$filter,profileCreatorSvc,modalService,Utilities,$uibModal,$rootScope,$firebaseObject) {
 
             $scope.input = {};
             $scope.input.dt = {};   //data entered as part of populating a datatype
             $scope.appConfigSvc = appConfigSvc;
+
+            
+
+            $scope.saveToLibrary = function(){
+
+                console.log($localStorage.builderBundles[$scope.currentBundleIndex])
+                //return;
+
+               builderSvc.saveToLibrary($localStorage.builderBundles[$scope.currentBundleIndex]).then(
+                   function (data) {
+                       modalService.showModal({}, {bodyText:'The set has been updated in the Library. You can continue editing.'})
+                       console.log(data)
+                   },function (err) {
+                       modalService.showModal({}, {bodyText:'Sorry, there was an error updating the library:' + angular.toJson(err)})
+                       console.log(err)
+                   }
+               );
+                
+
+            };
+
+            builderSvc.loadLibrary().then(
+                function(bundle){
+                    $scope.library = bundle;    //this is a bundle of DocumentReference resources...
+
+                    //add meta information for display. Makes it a non-lgal resource, but don't really care
+                    $scope.library.entry.forEach(function(entry){
+                        var dr = entry.resource;
+                        //now see if the bundle in the DR is cached locally (the id of the dr is the same as the bundle
+                        //var cachedLocally = false;
+                        $localStorage.builderBundles.forEach(function (local) {
+                            if (local.bundle.id == dr.id) {
+                                dr.meta = dr.meta || {}
+                                dr.meta.cachedLocally = true;
+                            }
+                        })
+                    })
+
+
+
+
+                }
+            );
+
+            
+
+            /*
+            $scope.showLibrary = function(){
+                $scope.leftPaneClass = "col-sm-2 col-md-2"
+                $scope.midPaneClass = "col-md-5 col-sm-5"
+                $scope.rightPaneClass = "col-md-5 col-sm-5";
+                $scope.libraryVisible = true;
+            };
+            
+            */
+
+
+
+
+
+            //called whenever the auth state changes - eg login/out, initial load, create user etc.
+            firebase.auth().onAuthStateChanged(function(user) {
+                delete $scope.input.mdComment;
+//console.log(user)
+                if (user) {
+                    $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+
+                    //logicalModelSvc.setCurrentUser(user);
+
+
+                    //return the practitioner resource that corresponds to the current user (the service will create if absent)
+                    GetDataFromServer.getPractitionerByLogin(user).then(
+                        function(practitioner){
+                            console.log(practitioner)
+                            $scope.Practitioner = practitioner;
+
+                        },function (err) {
+                            alert(err)
+                        }
+                    );
+
+                    delete $scope.showNotLoggedIn;
+
+
+                } else {
+                    console.log('no user')
+                    logicalModelSvc.setCurrentUser(null);
+                    $scope.showNotLoggedIn = true;
+                    delete $scope.Practitioner;
+                    delete $scope.taskOutputs;
+                    delete $scope.commentTask;
+                    // No user is signed in.
+                }
+            });
+
 
 
             //var currentBunbleName = 'builderBundle';        //the name of the
@@ -14,8 +109,11 @@ angular.module("sampleApp")
             $scope.supportedDt = ['CodeableConcept','string','code','date','Period','dateTime','Address','HumanName']
 
             $scope.currentBundleIndex = 0;     //the index of the bundle currently being used
+
             if (! $localStorage.builderBundles) {
-                $localStorage.builderBundles = [{name:'Default',bundle:{resourceType:'Bundle',entry:[]}}]
+                var newBundle = {name:'Default',bundle:{resourceType:'Bundle',entry:[]}}
+                newBundle.bundle.id = 't'+new Date().getTime();
+                $localStorage.builderBundles = [newBundle]
             }
 
             $scope.builderBundles = $localStorage.builderBundles;
@@ -23,6 +121,7 @@ angular.module("sampleApp")
             $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
 
 
+            console.log($localStorage.builderBundles)
 
             //set the base path for linking to the spec
             switch (appConfigSvc.getCurrentConformanceServer().version) {
@@ -39,6 +138,7 @@ angular.module("sampleApp")
                 var name = prompt('Name of Bundle');
                 if (name) {
                     var newBundle = {name:name,bundle:{resourceType:'Bundle',entry:[]}}
+                    newBundle.bundle.id = 't'+new Date().getTime();
                     $localStorage.builderBundles.push(newBundle);
                     $scope.resourcesBundle = newBundle.bundle;
                     $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
@@ -691,11 +791,10 @@ angular.module("sampleApp")
             }
 
 
-
-
             $scope.addNewResource = function(type) {
                 var resource = {resourceType : type};
                 resource.id = 't'+new Date().getTime();
+                $scope.input.text = $scope.input.text || "";
                 resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text)};
 
                 console.log(resource);
@@ -713,6 +812,9 @@ angular.module("sampleApp")
 
                 $scope.selectResource(resource)
                 makeGraph();
+
+                
+
 
                 //$scope.selectResource(node.cf.resource)
             };

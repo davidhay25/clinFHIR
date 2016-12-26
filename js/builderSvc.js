@@ -10,6 +10,51 @@ angular.module("sampleApp")
         var showLog = false;
 
         return {
+            saveToLibrary : function (bundleContainer) {
+                //save the bundle to the library. Note that the 'container' of the bundle (includes the name) is passed in...
+                var bundle = bundleContainer.bundle;
+
+                console.log(bundle)
+
+
+
+                var docref = {resourceType:'DocumentReference',id:'cf-'+bundle.id};
+                docref.type = {coding:[{system:'http://clinfhir.com/docs',code:'builderDoc'}]};
+                docref.status = 'current';
+                docref.indexed = moment().format();
+                docref.description = bundleContainer.name;
+                docref.content = [{attachment:{data:btoa(angular.toJson(bundle))}}]
+
+
+                var url = appConfigSvc.getCurrentDataServer().url + 'DocumentReference/'+docref.id;
+
+
+                //console.log(docref);
+                //return;
+
+
+                //$http.put('http://fhirtest.uhn.ca/baseDstu3/Binary/dh',binary).then(
+                return $http.put(url,docref);
+
+            },
+            loadLibrary : function () {
+                //download the DocumentReferences that are the library references...
+                var deferred = $q.defer();
+                var url = appConfigSvc.getCurrentDataServer().url + 'DocumentReference?type=http://clinfhir.com/docs|builderDoc';
+                $http.get(url).then(
+                    function (data) {
+                        deferred.resolve(data.data)
+                        console.log(data.data)
+                    },function (err) {
+                        console.log(err)
+                        deferred.reject(err);
+                    }
+                )
+
+
+
+                return deferred.promise;
+            },
             getValueForPath : function(resource,inPath) {
                 //return a string display for a path value. root only at this stage...
                 var path = $filter('dropFirstInPath')(inPath);   //the path off the root
