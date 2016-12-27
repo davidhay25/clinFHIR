@@ -68,6 +68,7 @@
     <script src="js/filters.js"></script>
     <script src="js/libs/vis.min.js"></script>
     <script src="js/addPropertyInBuilderCtrl.js"></script>
+    <script src="js/docBuilderCtrl.js"></script>
 
     <script src="resourceBuilder/vsBrowser.js"></script>
 
@@ -321,6 +322,13 @@
                             <div id="resourceGraph"></div>
                             <br/>
                         </uib-tab>
+                        <uib-tab heading="Document">
+                            <div ng-controller="docBuilderCtrl">
+                                <ng-include src="'/includes/documentBuilderInc.html'"></ng-include>
+
+                            </div>
+                        </uib-tab>
+
                     </uib-tabset>
 
                 </div>

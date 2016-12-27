@@ -1,0 +1,80 @@
+<div>
+
+
+    <div class="row">
+        <div class="col-md-6 col-sm-6">
+            <h5>Sections</h5>
+            <ul class="list-group" >
+                <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':$index == currentSectionIndex}"
+                    ng-repeat="section in compositionResource.section"
+                    ng-click="selectSection(section)">
+                    <strong>{{section.title}}</strong>
+                </li>
+            </ul>
+
+
+            <input class="form-control" ng-model="sectName" placeholder="New section title"/>
+            <div>
+                <button class="btn btn-link pull-right" ng-click="addSection(sectName)">Add</button>
+            </div>
+        </div>
+        <div class="col-md-6 col-sm-6">
+
+            <strong>Resources in Section (Direct only)</strong>
+
+            <ul class="list-group" >
+                <li style="cursor: pointer" class="list-group-item""
+                    ng-repeat="entry in currentSection.entry">
+
+                    <div class="row">
+                        <div class="col-md-10 col-sm-10">
+                            {{entry.reference}}
+                        </div>
+                        <div class="col-md-2 col-sm-2">
+
+                            <i class="glyphicon glyphicon-arrow-down"
+                               title="Add"
+                               ng-click="removeReferenceFromSection($index)" style="cursor: pointer">
+
+                            </i>
+                        </div>
+
+                    </div>
+
+
+                </li>
+            </ul>
+
+            <hr/>
+
+            <strong>Resources to add to Section</strong>
+
+            <ul class="list-group" >
+                <li style="cursor: pointer" class="list-group-item" ng-repeat="reference in resourcesNotInThisSection">
+
+                    <div class="row">
+                        <div class="col-md-10 col-sm-10">
+                            {{reference}}
+                        </div>
+                        <div class="col-md-2 col-sm-2">
+
+                            <i class="glyphicon glyphicon-arrow-up"
+                               title="Add"
+                               ng-click="addResourceToSection(reference)" style="cursor: pointer">
+
+                            </i>
+                        </div>
+
+                    </div>
+
+
+                </li>
+            </ul>
+
+
+        </div>
+    </div>
+
+
+
+</div>

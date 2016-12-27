@@ -66,6 +66,15 @@ angular.module("sampleApp")
             */
 
 
+            //---------- related to document builder -------
+            
+            $scope.compositionResource = {resourceType:'Composition',section:[]};
+            
+            
+
+            
+
+            //------------------------------------------------
 
 
 

@@ -10,6 +10,10 @@ angular.module("sampleApp")
         var showLog = false;
 
         return {
+            referenceFromResource : function(resource) {
+                //create the reference from the resource
+                return resource.resourceType + "/" + resource.id;
+            },
             saveToLibrary : function (bundleContainer) {
                 //save the bundle to the library. Note that the 'container' of the bundle (includes the name) is passed in...
                 var bundle = bundleContainer.bundle;
