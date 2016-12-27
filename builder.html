@@ -102,7 +102,6 @@
             storageBucket: ""
         };
 
-        //  console.log(firebase)
         if (firebase) {
             firebase.initializeApp(config);
 
@@ -110,8 +109,6 @@
     </script>
 
     <title>Builder</title>
-
-
 
 
 </head>
@@ -174,16 +171,28 @@
                     <ul class="list-group" >
                         <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':$index == currentLibraryIndex}"
                             ng-repeat="entry in library.entry"
-                            ng-click="selectLibraryEntry($index)">
+                            ng-click="selectLibraryEntry(entry,$index)">
 
                             <div class="row">
                                 <div class="col-md-10 col-sm-10">
                                     <strong>{{entry.resource.description}}</strong>
+                                    <div>{{entry.resource.id}}</div>
                                 </div>
                                 <div class="col-md-2 col-sm-2">
                                     <div ng-show="entry.resource.meta.cachedLocally">
                                         C
                                     </div>
+                                    <div ng-hide="entry.resource.meta.cachedLocally">
+                                        <i class="glyphicon glyphicon-cloud-download"
+                                           title="Download"
+                                           ng-click="downloadFromLibrary(entry,$index)" style="cursor: pointer">
+
+                                        </i>
+                                    </div>
+
+
+
+
 <!--
                                     <i class="glyphicon glyphicon-remove"
                                        title="Delete"
@@ -200,6 +209,29 @@
                     </ul>
 
                 </div>
+
+                <div class="col-md-10 col-sm-10">
+
+                    <div class="row">
+                        <div class="col-md-2 col-sm-2 rounded-box" ng-repeat="entry in selectedLibraryEntry.bundle.entry">
+                            {{entry.resource.resourceType}}
+                        </div>
+                    </div>
+
+
+                    <ul class="list-group">
+                        <li class="list-group-item" ng-repeat="entry in selectedLibraryEntry.bundle.entry">
+                            {{entry.resource.resourceType}}
+                        </li>
+                    </ul>
+
+                    {{selectedLibraryEntry | json}}
+
+                </div>
+
+
+
+
             </div>
 
 
@@ -212,7 +244,7 @@
             <div class="col-md-2 col-sm-2">
 
                 <button class="btn btn-link pull-right" ng-click="newBundle()">New set</button>
-                <h4>Sets</h4>
+                <h4>Local sets</h4>
 
                 <ul class="list-group" >
                     <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':$index == currentBundleIndex}"
@@ -245,37 +277,53 @@
 
             <div class="col-md-5 col-sm-5 borderForGraph">
 
-                <button ng-hide="displayMode == 'new'"
-                        ng-click="displayMode = 'new'"
-                        class="btn btn-primary pull-right">Add Resource</button>
 
-                <uib-tabset>
-                    <uib-tab heading="All resources">
-                        <br/>
+                <div ng-hide="resourcesBundle">
+                    <div uib-alert class="alert-warning">
+                        To edit a set of resources, you can either:
+                        <ul>
+                            <li>Click the 'New' link to the left to create a new Set</li>
+                            <li>Select the Library of sets (Link to the upper right) and download one to edit or view</li>
+                        </ul>
+                    </div>
+                </div>
 
-                        <div class="row">
-                            <div class="col-md-12 col-sm-12">
-                                <table class="table table-bordered table-condensed">
-                                    <tr><th>Type</th><th>Text</th></tr>
-                                    <tr ng-repeat="entry in resourcesBundle.entry">
-                                        <td><div class='clickable' ng-click="selectResource(entry.resource)">
-                                            {{entry.resource.resourceType}}</div>
-                                        </td>
-                                        <td><p ng-bind-html="entry.resource.text.div"></p></td>
-                                    </tr>
-                                </table>
+                <div ng-show="resourcesBundle">
+
+
+                    <button ng-hide="displayMode == 'new'"
+                            ng-click="displayMode = 'new'"
+                            class="btn btn-primary pull-right">Add Resource</button>
+
+                    <uib-tabset>
+                        <uib-tab heading="All resources">
+                            <br/>
+
+                            <div class="row">
+                                <div class="col-md-12 col-sm-12">
+                                    <table class="table table-bordered table-condensed">
+                                        <tr><th>Type</th><th>Text</th></tr>
+                                        <tr ng-repeat="entry in resourcesBundle.entry">
+                                            <td><div class='clickable' ng-click="selectResource(entry.resource)">
+                                                {{entry.resource.resourceType}}</div>
+                                            </td>
+                                            <td><p ng-bind-html="entry.resource.text.div"></p></td>
+                                        </tr>
+                                    </table>
+                                </div>
+
                             </div>
 
-                        </div>
 
 
+                        </uib-tab>
+                        <uib-tab heading="Graph" select="redrawChart()">
+                            <div id="resourceGraph"></div>
+                            <br/>
+                        </uib-tab>
+                    </uib-tabset>
 
-                    </uib-tab>
-                    <uib-tab heading="Graph" select="redrawChart()">
-                        <div id="resourceGraph"></div>
-                        <br/>
-                    </uib-tab>
-                </uib-tabset>
+                </div>
 
 
             </div>

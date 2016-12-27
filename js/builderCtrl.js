@@ -8,7 +8,7 @@ angular.module("sampleApp")
             $scope.input.dt = {};   //data entered as part of populating a datatype
             $scope.appConfigSvc = appConfigSvc;
 
-            
+            var idPrefix = 'cf-';   //prefix for the id. todo should be related to the userid in some way...
 
             $scope.saveToLibrary = function(){
 
@@ -17,7 +17,8 @@ angular.module("sampleApp")
 
                builderSvc.saveToLibrary($localStorage.builderBundles[$scope.currentBundleIndex]).then(
                    function (data) {
-                       modalService.showModal({}, {bodyText:'The set has been updated in the Library. You can continue editing.'})
+                       modalService.showModal({}, {bodyText:'The set has been updated in the Library. You can continue editing.'});
+                       refreshLibrary();
                        console.log(data)
                    },function (err) {
                        modalService.showModal({}, {bodyText:'Sorry, there was an error updating the library:' + angular.toJson(err)})
@@ -28,30 +29,31 @@ angular.module("sampleApp")
 
             };
 
-            builderSvc.loadLibrary().then(
-                function(bundle){
-                    $scope.library = bundle;    //this is a bundle of DocumentReference resources...
+            function refreshLibrary() {
+                builderSvc.loadLibrary().then(
+                    function(bundle){
+                        $scope.library = bundle;    //this is a bundle of DocumentReference resources...
 
-                    //add meta information for display. Makes it a non-lgal resource, but don't really care
-                    $scope.library.entry.forEach(function(entry){
-                        var dr = entry.resource;
-                        //now see if the bundle in the DR is cached locally (the id of the dr is the same as the bundle
-                        //var cachedLocally = false;
-                        $localStorage.builderBundles.forEach(function (local) {
-                            if (local.bundle.id == dr.id) {
-                                dr.meta = dr.meta || {}
-                                dr.meta.cachedLocally = true;
-                            }
+                        //add meta information for display. Makes it a non-lgal resource, but don't really care
+                        $scope.library.entry.forEach(function(entry){
+                            var dr = entry.resource;
+                            //now see if the bundle in the DR is cached locally (the id of the dr is the same as the bundle
+                            //var cachedLocally = false;
+                            $localStorage.builderBundles.forEach(function (local) {
+                                if (local.bundle.id == dr.id) {
+                                    dr.meta = dr.meta || {}
+                                    dr.meta.cachedLocally = true;
+                                }
+                            })
                         })
-                    })
+
+                    }
+                );
+            }
+
+            refreshLibrary();       //initial load...
 
 
-
-
-                }
-            );
-
-            
 
             /*
             $scope.showLibrary = function(){
@@ -111,14 +113,24 @@ angular.module("sampleApp")
             $scope.currentBundleIndex = 0;     //the index of the bundle currently being used
 
             if (! $localStorage.builderBundles) {
-                var newBundle = {name:'Default',bundle:{resourceType:'Bundle',entry:[]}}
-                newBundle.bundle.id = 't'+new Date().getTime();
-                $localStorage.builderBundles = [newBundle]
+
+                //modalService.showModal({}, {bodyText:'To get started, either create a new set or download one from the Library.'});
+                $localStorage.builderBundles = []
+                $scope.currentBundleIndex = -1;
+
+               // var newBundle = {name:'Default',bundle:{resourceType:'Bundle',entry:[]}}
+               // newBundle.bundle.id = idPrefix +new Date().getTime();
+               // $localStorage.builderBundles = [newBundle]
+            } else {
+                if ($localStorage.builderBundles.length > 0) {
+                    $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+                }
+
             }
 
-            $scope.builderBundles = $localStorage.builderBundles;
+            $scope.builderBundles = $localStorage.builderBundles;   //all the bundles cached locally...
 
-            $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+            //$scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
 
 
             console.log($localStorage.builderBundles)
@@ -138,14 +150,53 @@ angular.module("sampleApp")
                 var name = prompt('Name of Bundle');
                 if (name) {
                     var newBundle = {name:name,bundle:{resourceType:'Bundle',entry:[]}}
-                    newBundle.bundle.id = 't'+new Date().getTime();
+                    newBundle.bundle.id = idPrefix+new Date().getTime();
                     $localStorage.builderBundles.push(newBundle);
                     $scope.resourcesBundle = newBundle.bundle;
                     $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
                     makeGraph();
                     delete $scope.currentResource;
                 }
-            }
+            };
+
+            $scope.selectLibraryEntry = function(entry,inx){
+                //console.log(entry);
+                $scope.selectedLibraryEntry = entry;
+                $scope.selectedLibraryEntry.bundle =  angular.fromJson(atob(entry.resource.content[0].attachment.data));  //todo not safe
+
+            };
+
+            $scope.downloadFromLibrary = function(entry,inx){
+                //note that the entry is a DocumentReference with a contained bundle as an attachment...
+                var dr = entry.resource;
+                var bundle = angular.fromJson(atob(dr.content[0].attachment.data));   //todo - not safe!
+                var id = bundle.id;
+
+                //see if this set (based on the id) already exists.
+                var alreadyLocal = false;
+                $localStorage.builderBundles.forEach(function (item,inx) {
+                    if (item.bundle.id == id) {
+                        alreadyLocal = true;
+                        modalService.showModal({}, {bodyText:'There is already a copy of this set downloaded. Selecting it now.'});
+                        $scope.resourcesBundle = item.bundle;
+                        $scope.currentBundleIndex= inx;
+                        $scope.libraryVisible = false;
+                    }
+                });
+
+                if (! alreadyLocal) {
+                    var newBundle = {name:dr.description,bundle:bundle}
+                    $localStorage.builderBundles.push(newBundle);
+                    $scope.resourcesBundle = newBundle.bundle;
+                    $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
+                    makeGraph();
+                    delete $scope.currentResource;
+                    $scope.libraryVisible = false;
+                    modalService.showModal({}, {bodyText:'The set has been downloaded from the Library. You can now edit it locally.'});
+                }
+
+
+            };
 
             $scope.selectBundle = function(inx){
                 $scope.currentBundleIndex = inx;
@@ -225,66 +276,6 @@ angular.module("sampleApp")
 
             };
             //adds a new value to a property
-            $scope.saveNewValueDEP = function(){
-
-                console.log($scope.input.dt)
-               // $scope.enterPropertyValue = false;
-               // return;
-
-                builderSvc.addPropertyValue($scope.currentResource,
-                    $scope.hashPathBingEntered,
-                    $scope.dataTypeBeingEntered,
-                    $scope.input.dt)
-                $scope.enterPropertyValue = false;
-            };
-
-            //--------- code for CodeableConcept lookup
-
-            /*
-           // var url = 'http://clinfhir.com/fhir/ValueSet/'+item.name;
-            var url = 'http://hl7.org/fhir/ValueSet/condition-code';
-            Utilities.getValueSetIdFromRegistry(url,function(vsDetails) {
-                $scope.vsDetails = vsDetails;  //vsDetails = {id: type: resource: }
-                console.log(vsDetails);
-            })
-
-            */
-
-            $scope.vsLookupDEP = function(text,vs) {
-
-                console.log(text,vs)
-                if (vs) {
-                    var id = vs.id;
-                    $scope.showWaiting = true;
-                    return GetDataFromServer.getFilteredValueSet(id,text).then(
-                        function(data,statusCode){
-                            if (data.expansion && data.expansion.contains) {
-                                var lst = data.expansion.contains;
-                                return lst;
-                            } else {
-                                return [
-                                    {'display': 'No expansion'}
-                                ];
-                            }
-                        }, function(vo){
-                            var statusCode = vo.statusCode;
-                            var msg = vo.error;
-
-
-                            alert(msg);
-
-                            return [
-                                {'display': ""}
-                            ];
-                        }
-                    ).finally(function(){
-                        $scope.showWaiting = false;
-                    });
-
-                } else {
-                    return [{'display':'Select the ValueSet to query against'}];
-                }
-            };
 
 
             //edit the resource text
@@ -317,7 +308,6 @@ angular.module("sampleApp")
             //remove a bundle set...
             $scope.deleteBundle = function(inx) {
 
-
                 var modalOptions = {
                     closeButtonText: "No, I changed my mind",
                     actionButtonText: 'Yes, please remove',
@@ -327,20 +317,20 @@ angular.module("sampleApp")
 
                 modalService.showModal({}, modalOptions).then(
                     function () {
+                        delete $scope.currentResource;
                         $localStorage.builderBundles.splice(inx)   //delete the bundle
                         $scope.currentBundleIndex = 0; //set the current bundle to the first (default) one
                         if ($localStorage.builderBundles.length == 0) {
                             //no bundles left
-                            $localStorage.builderBundles = [{name:'Default',bundle:{resourceType:'Bundle',entry:[]}}]
+                            $localStorage.builderBundles = []
+                            delete $scope.resourcesBundle;
                         } else {
-
+                            $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+                            makeGraph();
                         }
 
-                        $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
 
 
-                        makeGraph();
-                        delete $scope.currentResource;
 
                     }
                 );
@@ -365,27 +355,7 @@ angular.module("sampleApp")
                     headerText: 'Remove resource',
                     bodyText: 'Are you sure you want to remove this resource (Any references to it will NOT be removed'
                 };
-/*
-                modalService.showModal({}, modalOptions).then(
-                    function (result) {
-                        var inx = -1;
-                        for (var i=0; i < $localStorage.builderBundle.entry.length; i++) {
-                            var r = $localStorage.builderBundle.entry[i].resource;
-                            if (r.resourceType == resource.resourceType && r.id == resource.id) {
-                                inx = i;
-                                break;
-                            }
-                        }
-                        if (inx > -1) {
-                            $localStorage.builderBundle.entry.splice(inx,1);
-                            makeGraph();
-                            delete $scope.currentResource;
-                        }
-
-                    }
-                );
-                */
-
+                
                 modalService.showModal({}, modalOptions).then(
                     function (result) {
                         var inx = -1;
@@ -400,6 +370,17 @@ angular.module("sampleApp")
                             $scope.resourcesBundle.entry.splice(inx,1);
                             makeGraph();
                             delete $scope.currentResource;
+                            /*
+                            if ($scope.resourcesBundle.entry.length > 0) {
+                                //select the first one...
+                                
+                            } else {
+                                //there are no local sets left...
+                            }
+
+                            resourcesBundle
+                            */
+
                         }
 
                     }
@@ -410,61 +391,43 @@ angular.module("sampleApp")
 
             //generate the graph of resources and references between them
             makeGraph = function() {
-                //var vo = builderSvc.makeGraph($localStorage.builderBundle)   //todo - may not be the right place...
-                var vo = builderSvc.makeGraph($scope.resourcesBundle)   //todo - may not be the right place...
-
-
-
-                var container = document.getElementById('resourceGraph');
-
-                var options = {
-                    physics: {
-                        enabled: true,
-                        barnesHut: {
-                            gravitationalConstant: -10000,
+                if ($scope.resourcesBundle) {
+                    var vo = builderSvc.makeGraph($scope.resourcesBundle)   //todo - may not be the right place...
+                    var container = document.getElementById('resourceGraph');
+                    var options = {
+                        physics: {
+                            enabled: true,
+                            barnesHut: {
+                                gravitationalConstant: -10000,
+                            }
                         }
-                    }
-                };
+                    };
+                    $scope.chart = new vis.Network(container, vo.graphData, options);
+                    $scope.chart.on("click", function (obj) {
+                        console.log(obj)
 
 
-                $scope.chart = new vis.Network(container, vo.graphData, options);
-
-                $scope.chart.on("click", function (obj) {
-                    console.log(obj)
+                        //$scope.selectResource(entry.resource)
 
 
-                    //$scope.selectResource(entry.resource)
+                        var nodeId = obj.nodes[0];  //get the first node
+                        // console.log(nodeId,graphData)
 
 
-                    var nodeId = obj.nodes[0];  //get the first node
-                   // console.log(nodeId,graphData)
+                        var node = vo.graphData.nodes.get(nodeId);
+                        console.log(node)
+                        $scope.selectResource(node.cf.resource)
 
+                        $scope.$digest();
+                        //selectedNetworkElement
 
-                    var node = vo.graphData.nodes.get(nodeId);
-                    console.log(node)
-                    $scope.selectResource(node.cf.resource)
-
-                    $scope.$digest();
-                    //selectedNetworkElement
-
-                });
+                    });
+                }
 
 
 
-                
-                return;
-
-  /*
-                //so that we can draw a table with the references in it...
-                $scope.modelReferences = vo.references;
-                $scope.uniqueModelsList = vo.lstNodes;
-
-
-                //console.log($scope.uniqueModelsList)
-                var allNodesObj = vo.nodes;
-*/
-               
             }
+
             $timeout(function(){
                 makeGraph()
             }, 1000);
@@ -484,9 +447,12 @@ angular.module("sampleApp")
             $scope.redrawChart = function(){
                 //$scope.chart.fit();
                 $timeout(function(){
-                    $scope.chart.fit();
-                    console.log('fitting...')
-                },1000            )
+                    if ($scope.chart) {
+                        $scope.chart.fit();
+                        console.log('fitting...')
+                    }
+
+                },1000)
 
             }
 
@@ -793,7 +759,7 @@ angular.module("sampleApp")
 
             $scope.addNewResource = function(type) {
                 var resource = {resourceType : type};
-                resource.id = 't'+new Date().getTime();
+                resource.id = idPrefix+new Date().getTime();
                 $scope.input.text = $scope.input.text || "";
                 resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text)};
 

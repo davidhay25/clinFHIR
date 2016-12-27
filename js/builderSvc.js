@@ -18,7 +18,7 @@ angular.module("sampleApp")
 
 
 
-                var docref = {resourceType:'DocumentReference',id:'cf-'+bundle.id};
+                var docref = {resourceType:'DocumentReference',id:bundle.id};
                 docref.type = {coding:[{system:'http://clinfhir.com/docs',code:'builderDoc'}]};
                 docref.status = 'current';
                 docref.indexed = moment().format();
