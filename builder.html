@@ -322,9 +322,12 @@
                             <div id="resourceGraph"></div>
                             <br/>
                         </uib-tab>
-                        <uib-tab heading="Document">
+                        <uib-tab ng-show = "isaDocument" heading="Document">
                             <div ng-controller="docBuilderCtrl">
+
                                 <ng-include src="'/includes/documentBuilderInc.html'"></ng-include>
+
+
 
                             </div>
                         </uib-tab>

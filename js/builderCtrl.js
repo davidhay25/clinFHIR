@@ -13,7 +13,7 @@ angular.module("sampleApp")
             $scope.saveToLibrary = function(){
 
                 console.log($localStorage.builderBundles[$scope.currentBundleIndex])
-                //return;
+                
 
                builderSvc.saveToLibrary($localStorage.builderBundles[$scope.currentBundleIndex]).then(
                    function (data) {
@@ -26,7 +26,6 @@ angular.module("sampleApp")
                    }
                );
                 
-
             };
 
             function refreshLibrary() {
@@ -68,10 +67,24 @@ angular.module("sampleApp")
 
             //---------- related to document builder -------
             
-            $scope.compositionResource = {resourceType:'Composition',section:[]};
-            
-            
+           // $scope.compositionResource = {resourceType:'Composition',section:[]};
 
+            $rootScope.$on('docUpdated',function(event,composition){
+                console.log(composition)
+                makeGraph();
+            });
+
+
+            function isaDocument() {
+                $scope.isaDocument = false;
+                $scope.resourcesBundle.entry.forEach(function(entry){
+                    if (entry.resource.resourceType =='Composition') {
+                        entry.resource.section = entry.resource.section || [];
+                        $scope.compositionResource = entry.resource;
+                        $scope.isaDocument= true;
+                    }
+                })
+            }
             
 
             //------------------------------------------------
@@ -133,6 +146,7 @@ angular.module("sampleApp")
             } else {
                 if ($localStorage.builderBundles.length > 0) {
                     $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+                    isaDocument();
                 }
 
             }
@@ -158,6 +172,7 @@ angular.module("sampleApp")
             $scope.newBundle = function() {
                 var name = prompt('Name of Bundle');
                 if (name) {
+                    delete $scope.isaDocument
                     var newBundle = {name:name,bundle:{resourceType:'Bundle',entry:[]}}
                     newBundle.bundle.id = idPrefix+new Date().getTime();
                     $localStorage.builderBundles.push(newBundle);
@@ -165,6 +180,7 @@ angular.module("sampleApp")
                     $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
                     makeGraph();
                     delete $scope.currentResource;
+                    $rootScope.$emit('newSet',newBundle);
                 }
             };
 
@@ -201,6 +217,7 @@ angular.module("sampleApp")
                     makeGraph();
                     delete $scope.currentResource;
                     $scope.libraryVisible = false;
+                    isaDocument();      //see if this set is a document (has a Composition resource)
                     modalService.showModal({}, {bodyText:'The set has been downloaded from the Library. You can now edit it locally.'});
                 }
 
@@ -212,8 +229,12 @@ angular.module("sampleApp")
                 $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
                 makeGraph();
                 delete $scope.currentResource;
+                isaDocument();      //determine if this bundle is a document (has a Composition resource)
+                $rootScope.$emit('newSet',$scope.resourcesBundle);
             }
-            
+
+
+
             $scope.displayMode = 'view';    //options 'new', 'view'
 
             //displays the data entry screen for adding a datatype value
@@ -326,6 +347,7 @@ angular.module("sampleApp")
 
                 modalService.showModal({}, modalOptions).then(
                     function () {
+                        $rootScope.$emit('newSet');
                         delete $scope.currentResource;
                         $localStorage.builderBundles.splice(inx)   //delete the bundle
                         $scope.currentBundleIndex = 0; //set the current bundle to the first (default) one
@@ -639,16 +661,20 @@ angular.module("sampleApp")
                                                 //is this a reference?
                                             ed.type.forEach(function(typ){
                                                 if (typ.code == 'Reference' && typ.profile) {
+                                                    //get all the resources of this type  (that are not already referenced by this element
                                                     $scope.hashPath.isReference = true;
                                                     
                                                     var type = $filter('getLogicalID')(typ.profile);
 
-
-                                                    
                                                     var ar = builderSvc.getResourcesOfType(type,$scope.resourcesBundle);
 
                                                     if (ar.length > 0) {
                                                         ar.forEach(function(resource){
+                                                            var reference = builderSvc.referenceFromResource(resource); //get teh referenec (type/id)
+
+                                                            
+
+
 
                                                             type = resource.resourceType;   //allows for Reference
 
@@ -767,6 +793,16 @@ angular.module("sampleApp")
 
 
             $scope.addNewResource = function(type) {
+
+                if (type == 'Composition') {
+                    if ($scope.isaDocument) {
+                        modalService.showModal({}, {bodyText:'There is already a Composition in this set - and there can only be one.'});
+                        $scope.displayMode = 'view';
+                        return;
+                    }
+
+                }
+
                 var resource = {resourceType : type};
                 resource.id = idPrefix+new Date().getTime();
                 $scope.input.text = $scope.input.text || "";
@@ -788,7 +824,14 @@ angular.module("sampleApp")
                 $scope.selectResource(resource)
                 makeGraph();
 
-                
+
+
+
+
+
+                isaDocument();      //determine if this bundle is a document (has a Composition resource)
+
+                $rootScope.$emit('addResource',resource);
 
 
                 //$scope.selectResource(node.cf.resource)
