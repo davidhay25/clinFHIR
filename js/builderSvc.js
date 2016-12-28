@@ -10,6 +10,9 @@ angular.module("sampleApp")
         var showLog = false;
 
         return {
+            getReferencedResourcesForPath : function(){
+                //for the given path
+            },
             referenceFromResource : function(resource) {
                 //create the reference from the resource
                 return resource.resourceType + "/" + resource.id;
@@ -621,7 +624,7 @@ console.log(err);
                 
                 //for each entry in the bundle, find the resource that it references
                 bundle.entry.forEach(function(entry){
-                    //console.log(entry);
+
                     var resource = entry.resource;
                     var url = resource.resourceType+'/'+resource.id;
 
@@ -631,8 +634,6 @@ console.log(err);
                     arNodes.push(node);
                     objNodes[node.url] = node;
 
-                    //var refs = that.getReferencesFromResource(resource)
-
                     var refs = [];
                     findReferences(refs,resource,resource.resourceType)
 
@@ -640,7 +641,6 @@ console.log(err);
                         allReferences.push({src:node,path:ref.path,targ:ref.reference,index:ref.index})
                         gAllReferences.push({src:url,path:ref.path,targ:ref.reference,index:ref.index});    //all relationsin the collection
                     })
-
 
                 });
 
@@ -666,7 +666,7 @@ console.log(err);
                     edges: edges
                 };
 
-                return {graphData : data};
+                return {graphData : data,allReferences:allReferences};
 
                 //find elements of type refernce at this level
                 function findReferences(refs,node,nodePath,index) {

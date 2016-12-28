@@ -384,7 +384,7 @@ angular.module("sampleApp")
                     closeButtonText: "No, don't remove",
                     actionButtonText: 'Yes, please remove',
                     headerText: 'Remove resource',
-                    bodyText: 'Are you sure you want to remove this resource (Any references to it will NOT be removed'
+                    bodyText: 'Are you sure you want to remove this resource (Any references to it will NOT be removed)'
                 };
                 
                 modalService.showModal({}, modalOptions).then(
@@ -418,12 +418,14 @@ angular.module("sampleApp")
                 );
 
 
-            }
+            };
 
             //generate the graph of resources and references between them
             makeGraph = function() {
                 if ($scope.resourcesBundle) {
                     var vo = builderSvc.makeGraph($scope.resourcesBundle)   //todo - may not be the right place...
+                    $scope.allReferences = vo.allReferences;                //all references in the entire set.
+                    console.log($scope.allReferences)
                     var container = document.getElementById('resourceGraph');
                     var options = {
                         physics: {
@@ -435,7 +437,7 @@ angular.module("sampleApp")
                     };
                     $scope.chart = new vis.Network(container, vo.graphData, options);
                     $scope.chart.on("click", function (obj) {
-                        console.log(obj)
+                        //console.log(obj)
 
 
                         //$scope.selectResource(entry.resource)
@@ -450,7 +452,7 @@ angular.module("sampleApp")
                         $scope.selectResource(node.cf.resource)
 
                         $scope.$digest();
-                        //selectedNetworkElement
+                        
 
                     });
                 }
@@ -607,8 +609,6 @@ angular.module("sampleApp")
                                         
                                         //get the type information
                                         if (ed.type) {
-
-
                                             $scope.hashPath = {path: ed.path};
                                             $scope.hashPath.ed = ed;
                                             //$scope.hashPath.max = ed.max;
@@ -643,23 +643,8 @@ angular.module("sampleApp")
 
 
 
-
-
-
-                                        /*
-                                        $scope.hashPath.offRoot = true;
-                                        //is this path off the root, or a sub path?
-                                        var ar = ed.path.split('.');
-                                        if (ar.length > 2) {
-                                            $scope.hashPath.offRoot = false;
-
-
-
-                                        }
-*/
-
-                                                //is this a reference?
                                             ed.type.forEach(function(typ){
+                                                //is this a reference?
                                                 if (typ.code == 'Reference' && typ.profile) {
                                                     //get all the resources of this type  (that are not already referenced by this element
                                                     $scope.hashPath.isReference = true;
@@ -670,17 +655,31 @@ angular.module("sampleApp")
 
                                                     if (ar.length > 0) {
                                                         ar.forEach(function(resource){
-                                                            var reference = builderSvc.referenceFromResource(resource); //get teh referenec (type/id)
+                                                            var reference = builderSvc.referenceFromResource(resource); //get the reference (type/id)
 
-                                                            
+                                                            //search all the references for ones from this path. Don't include them in the list
+                                                            //$scope.allReferences created when the graph is built...
+                                                            var alreadyReferenced = false;
+                                                            $scope.allReferences.forEach(function(ref){
+                                                                //console.log(ref)
+                                                                if (ref.path == path) {
+
+                                                                    if (ref.targ == reference) {
+                                                                        alreadyReferenced = true;
+                                                                    }
+
+                                                                    //console.log('>>' + ref.targ)
+                                                                }
+
+                                                            });
 
 
+                                                            if (! alreadyReferenced) {
+                                                                 type = resource.resourceType;   //allows for Reference
+                                                                 $scope.hashReferences[type] = $scope.hashReferences[type] || []
+                                                                 $scope.hashReferences[type].push(resource);
+                                                            }
 
-                                                            type = resource.resourceType;   //allows for Reference
-
-                                                            $scope.hashReferences[type] = $scope.hashReferences[type] || []
-                                                            
-                                                            $scope.hashReferences[type].push(resource);
                                                         })
                                                     }
 
@@ -695,7 +694,6 @@ angular.module("sampleApp")
 
 
 
-                                    //console.log($scope.hashReferences)
 
                                     $scope.$digest();
 
@@ -787,6 +785,30 @@ angular.module("sampleApp")
                 makeGraph();    //this will update the list of all paths in this model...
                 var url = $scope.currentResource.resourceType+'/'+$scope.currentResource.id;
                 $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
+
+
+
+                //now remove the reference from the list of possibilities...
+
+
+                var type = resource.resourceType;   //allows for Reference
+                var pos = -1;
+                $scope.hashReferences[type].forEach(function(res,inx){
+                    if (res.id == resource.id) {
+                        pos = inx;
+                    }
+                })
+
+                if (pos > -1) {
+                    $scope.hashReferences[type].splice(pos,1);
+                   // if ()
+                }
+
+
+               // $scope.hashReferences[type] = $scope.hashReferences[type] || []
+               // $scope.hashReferences[type].push(resource);
+
+
 
 
             }
