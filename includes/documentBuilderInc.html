@@ -1,10 +1,8 @@
 <div>
 
     <uib-tabset>
-        <uib-tab heading="Header">
 
-        </uib-tab>
-        <uib-tab heading="Entries">
+        <uib-tab heading="Sections">
 
 
             <div class="row">
@@ -35,16 +33,37 @@
                                 ng-repeat="entry in currentSection.entry">
 
                                 <div class="row">
-                                    <div class="col-md-10 col-sm-10">
-                                        {{entry.reference}}
+                                    <div class="col-md-8 col-sm-8">
+                                        <span popover-trigger="'mouseenter'"
+                                              uib-popover-html = "entry.reference | resourceTextFromReference">
+                                            {{entry.reference}}
+                                        </span>
+                                        <!-- {{entry.reference}} | resourceTextFromReference-->
                                     </div>
-                                    <div class="col-md-2 col-sm-2">
+                                    <div class="col-md-4 col-sm-4">
 
-                                        <i class="glyphicon glyphicon-arrow-down"
-                                           title="Add"
-                                           ng-click="removeReferenceFromSection($index)" style="cursor: pointer">
+                                        <div class="pull-right">
+                                            <i class="glyphicon glyphicon-remove"
+                                               title="Remove"
+                                               ng-click="removeReferenceFromSection($index)" style="cursor: pointer">
 
-                                        </i>
+                                            </i>
+                                        </div>
+                                        <br/>
+                                        <div class="pull-right">
+                                            <i class="glyphicon glyphicon-arrow-down iconSpacing"
+                                               title="Move Down"
+                                               ng-click="moveSection($index,'dn')" style="cursor: pointer">
+
+                                            </i>
+
+                                            <i class="glyphicon glyphicon-arrow-up iconSpacing"
+                                               title="Move Down"
+                                               ng-click="moveSection($index,'up')" style="cursor: pointer">
+
+                                            </i>
+                                        </div>
+
                                     </div>
 
                                 </div>
@@ -58,15 +77,17 @@
                         <strong>Resources to add to Section</strong>
 
                         <ul class="list-group" >
-                            <li style="cursor: pointer" class="list-group-item" ng-repeat="reference in resourcesNotInThisSection track by $index">
+                            <li style="cursor: pointer" class="list-group-item"
+                                ng-repeat="reference in resourcesNotInThisSection track by $index">
 
                                 <div class="row">
                                     <div class="col-md-10 col-sm-10">
-                                        {{reference}}
+                                        <span popover-trigger="'mouseenter'" uib-popover-html = "reference.display">
+                                            {{reference.reference}}</span>
                                     </div>
                                     <div class="col-md-2 col-sm-2">
 
-                                        <i class="glyphicon glyphicon-arrow-up"
+                                        <i class="glyphicon glyphicon-plus"
                                            title="Add"
                                            ng-click="addResourceToSection(reference)" style="cursor: pointer">
 
@@ -84,8 +105,11 @@
             </div>
 
         </uib-tab>
-        <uib-tab heading="Generated text">
+        <uib-tab heading="Header">
 
+        </uib-tab>
+        <uib-tab heading="Generated text">
+            <div class="rounded-box"><p ng-bind-html="generatedHtml"></p></div>
         </uib-tab>
 
     </uib-tabset>

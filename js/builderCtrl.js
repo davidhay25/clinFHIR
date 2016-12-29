@@ -8,7 +8,7 @@ angular.module("sampleApp")
             $scope.input.dt = {};   //data entered as part of populating a datatype
             $scope.appConfigSvc = appConfigSvc;
 
-            var idPrefix = 'cf-';   //prefix for the id. todo should be related to the userid in some way...
+            var idPrefix = 'cf-';   //prefix for the id. todo should probably be related to the userid in some way...
 
             $scope.saveToLibrary = function(){
 
@@ -66,11 +66,10 @@ angular.module("sampleApp")
 
 
             //---------- related to document builder -------
-            
-           // $scope.compositionResource = {resourceType:'Composition',section:[]};
+
 
             $rootScope.$on('docUpdated',function(event,composition){
-                console.log(composition)
+                //console.log(composition)
                 makeGraph();
             });
 
@@ -82,6 +81,10 @@ angular.module("sampleApp")
                         entry.resource.section = entry.resource.section || [];
                         $scope.compositionResource = entry.resource;
                         $scope.isaDocument= true;
+
+                        $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
+                        //console.log(html)
+
                     }
                 })
             }
@@ -146,6 +149,7 @@ angular.module("sampleApp")
             } else {
                 if ($localStorage.builderBundles.length > 0) {
                     $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+                    builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
                     isaDocument();
                 }
 
@@ -213,7 +217,9 @@ angular.module("sampleApp")
                     var newBundle = {name:dr.description,bundle:bundle}
                     $localStorage.builderBundles.push(newBundle);
                     $scope.resourcesBundle = newBundle.bundle;
+
                     $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
+                    builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
                     makeGraph();
                     delete $scope.currentResource;
                     $scope.libraryVisible = false;
@@ -227,6 +233,7 @@ angular.module("sampleApp")
             $scope.selectBundle = function(inx){
                 $scope.currentBundleIndex = inx;
                 $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+                builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
                 makeGraph();
                 delete $scope.currentResource;
                 isaDocument();      //determine if this bundle is a document (has a Composition resource)
@@ -401,16 +408,6 @@ angular.module("sampleApp")
                             $scope.resourcesBundle.entry.splice(inx,1);
                             makeGraph();
                             delete $scope.currentResource;
-                            /*
-                            if ($scope.resourcesBundle.entry.length > 0) {
-                                //select the first one...
-                                
-                            } else {
-                                //there are no local sets left...
-                            }
-
-                            resourcesBundle
-                            */
 
                         }
 
@@ -425,7 +422,7 @@ angular.module("sampleApp")
                 if ($scope.resourcesBundle) {
                     var vo = builderSvc.makeGraph($scope.resourcesBundle)   //todo - may not be the right place...
                     $scope.allReferences = vo.allReferences;                //all references in the entire set.
-                    console.log($scope.allReferences)
+                    //console.log($scope.allReferences)
                     var container = document.getElementById('resourceGraph');
                     var options = {
                         physics: {
@@ -464,8 +461,7 @@ angular.module("sampleApp")
             $timeout(function(){
                 makeGraph()
             }, 1000);
-
-
+            
             $scope.removeReference = function(ref) {
                 console.log(ref)
                 var path = ref.path;
@@ -488,8 +484,7 @@ angular.module("sampleApp")
                 },1000)
 
             }
-
-
+            
             $scope.showVSBrowserDialog = {};
             $scope.viewVS = function(uri) {
                 //var url = appConfigSvc
@@ -561,8 +556,7 @@ angular.module("sampleApp")
                 }
 
             };
-
-
+            
             $scope.selectResource = function(resource) {
                 //delete $scope.input.text;
                 delete $scope.hashPath;
@@ -778,6 +772,10 @@ angular.module("sampleApp")
 
             $scope.linkToResource = function(pth,resource,ref){
 
+                if (pth == 'Composition.section.entry') {
+                    modalService.showModal({}, {bodyText:'Use the special Document controls (middle panel, Document tab) to add sections to the composition'});
+                    return;
+                }
 
 
                 builderSvc.insertReferenceAtPath($scope.currentResource,pth,resource)
@@ -812,8 +810,7 @@ angular.module("sampleApp")
 
 
             }
-
-
+            
             $scope.addNewResource = function(type) {
 
                 if (type == 'Composition') {
@@ -883,10 +880,5 @@ angular.module("sampleApp")
 
                 }
             );
-
-
-
-
-
-
+            
         });

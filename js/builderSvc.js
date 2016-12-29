@@ -8,10 +8,68 @@ angular.module("sampleApp")
         var gAllReferences = []
         var gSD = {};   //a has of all SD's reas this session by type
         var showLog = false;
+        var gAllResourcesThisSet = {};      //hash of all resources in the current set
 
         return {
-            getReferencedResourcesForPath : function(){
-                //for the given path
+            resourceFromReference : function(reference) {
+                //get resource from a reference
+                return gAllResourcesThisSet[reference]
+            },
+            setAllResourcesThisSet : function(allResourcesBundle) {
+                //create the hash of all resources in this set;
+                var that = this;
+                gAllResourcesThisSet = {};
+                allResourcesBundle.entry.forEach(function(entry){
+                    var resource = entry.resource;
+                    gAllResourcesThisSet[that.referenceFromResource(resource)] = resource;
+
+                });
+            },
+            addResourceToAllResources : function(resource) {
+                //add a new resource to the hash
+                gAllResourcesThisSet[this.referenceFromResource(resource)] = resource;
+            },
+            makeDocumentText : function(composition,allResourcesBundle){
+                //construct the text representation of a document
+                // order is patient.text, composition.text, sections.text
+                //construct a hash of resources ?todo should this be maintained by the service?
+                var hash ={};
+                var that = this;
+                var html = "";
+
+                allResourcesBundle.entry.forEach(function(entry){
+                    var resource = entry.resource;
+                    hash[that.referenceFromResource(resource)] = resource;
+
+                });
+
+                console.log(hash)
+
+
+                if (composition.patient) {
+                    var patient = hash[composition.patient.reference]
+                    console.log(patient);
+                    if (patient) {
+                        html += "<h3>Patient</h3>"+patient.text.div;
+                    }
+                }
+
+                html += "<h3>Composition</h3>"+composition.text.div;
+
+                html += "<h3>Sections</h3>";
+
+                composition.section.forEach(function(section){
+                    console.log(section);
+                    html += "<h4>"+section.title+"</h4>";
+                    section.entry.forEach(function(entry){
+
+                    })
+
+                })
+
+                return html;
+
+
             },
             referenceFromResource : function(resource) {
                 //create the reference from the resource

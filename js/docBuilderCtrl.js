@@ -15,12 +15,15 @@ angular.module("sampleApp")
             $rootScope.$on('addResource',function(event,resource){
                 console.log(resource)
                 var reference =  builderSvc.referenceFromResource(resource)
-                $scope.resourcesNotInThisSection.push(reference)
+                $scope.resourcesNotInThisSection.push({reference:reference,display:resource.text.div})
 
             });
 
             $rootScope.$on('newSet',function(){
                 delete $scope.currentSection
+
+                
+                
             })
            
 
@@ -30,24 +33,58 @@ angular.module("sampleApp")
 
 
             $scope.addResourceToSection = function(reference) {
-                //add the resource to this sestion and remove from the 'potentials' list
-                $scope.currentSection.entry.push({reference:reference})
-                $rootScope.$emit('docUpdated',$scope.compositionResource);
-                removeStringFromArray($scope.resourcesNotInThisSection,reference);   //remove from the 'not in section' array...
+                //add the resource to this section and remove from the 'potentials' list
+
+                var display = ""
+                var resource = builderSvc.resourceFromReference(reference);
+                if (resource) {
+                    display = resource.text.div
+                }
                 
+                $scope.currentSection.entry.push({reference:reference.reference,
+                    display: display})
+                $rootScope.$emit('docUpdated',$scope.compositionResource);
+
+                //remove from the 'not in this section' array...
+                for (var i=0; i < $scope.resourcesNotInThisSection.length; i++) {
+                    if ($scope.resourcesNotInThisSection[i].reference == reference.reference) {
+                        $scope.resourcesNotInThisSection.splice(i,1);
+                        break;
+                    }
+                }
+
+                // removeStringFromArray($scope.resourcesNotInThisSection,reference);   //remove from the 'not in section' array...
+
+                //These are all scope variables from the parent controller...
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
+
             };
 
 
             $scope.removeReferenceFromSection = function(index) {
                 var reference = $scope.currentSection.entry.splice(index,1);
-                $scope.resourcesNotInThisSection.push(reference[0].reference);
+
+
+                var display = "";
+
+                var resource = builderSvc.resourceFromReference(reference[0].reference);
+                if (resource) {
+                    display = resource.text.div
+
+                }
+
+                $scope.resourcesNotInThisSection.push({reference:reference[0].reference,
+                    display:display});
                 $rootScope.$emit('docUpdated',$scope.compositionResource);
+
+                //These are all scope variables from the parent controller...
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
 
             };
 
 
             //remove a string from an array based on it's value
-            removeStringFromArray = function(arr, ref) {
+            removeStringFromArrayDEP = function(arr, ref) {
                 var g = arr.indexOf(ref);
                 if (g > -1) {
                     arr.splice(g,1)
@@ -75,7 +112,8 @@ angular.module("sampleApp")
                     }
 
                     if (! isInSection) {
-                        $scope.resourcesNotInThisSection.push(builderSvc.referenceFromResource(resource));
+                        $scope.resourcesNotInThisSection.push(
+                            {reference:builderSvc.referenceFromResource(resource),display:resource.text.div});
                     }
 
                 })
@@ -88,9 +126,12 @@ angular.module("sampleApp")
                 delete $scope.input.sectName;     //the name given to the section
                 //$scope.compositionResource is defined in parent controller (builderCtrl);
                 var section = {title:title,entry:[]};
-                
+                $scope.compositionResource.section = $scope.compositionResource.section || []
                 $scope.compositionResource.section.push(section)
                 $scope.selectSection(section)
                 $rootScope.$emit('docUpdated',$scope.compositionResource);
+
+                //These are all scope variables from the parent controller...
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
             }
     });
