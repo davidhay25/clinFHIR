@@ -559,6 +559,8 @@ angular.module("sampleApp")
             
             $scope.selectResource = function(resource) {
                 //delete $scope.input.text;
+                $scope.displayMode = 'view';
+
                 delete $scope.hashPath;
                 //console.log(resource);
                 $scope.currentResource = resource;

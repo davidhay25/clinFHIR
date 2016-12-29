@@ -11,6 +11,23 @@ angular.module("sampleApp")
         var gAllResourcesThisSet = {};      //hash of all resources in the current set
 
         return {
+            generateSectionText : function(section) {
+                //generate the text for a section. todo - needsto become recursive...
+                var html = "";
+                var that = this;
+                section.entry.forEach(function(entry){
+                    console.log(entry)
+                    var resource = that.resourceFromReference(entry.reference);
+                    if (resource) {
+                        html += resource.text.div
+                    }
+
+
+
+
+                })
+                return html;
+            },
             resourceFromReference : function(reference) {
                 //get resource from a reference
                 return gAllResourcesThisSet[reference]
@@ -33,10 +50,10 @@ angular.module("sampleApp")
                 //construct the text representation of a document
                 // order is patient.text, composition.text, sections.text
                 //construct a hash of resources ?todo should this be maintained by the service?
-                var hash ={};
+                //var hash ={};
                 var that = this;
                 var html = "";
-
+/*
                 allResourcesBundle.entry.forEach(function(entry){
                     var resource = entry.resource;
                     hash[that.referenceFromResource(resource)] = resource;
@@ -45,9 +62,10 @@ angular.module("sampleApp")
 
                 console.log(hash)
 
-
+*/
                 if (composition.patient) {
-                    var patient = hash[composition.patient.reference]
+                    var patient = that.resourceFromReference(composition.patient.reference);
+                    //var patient = hash[composition.patient.reference]
                     console.log(patient);
                     if (patient) {
                         html += "<h3>Patient</h3>"+patient.text.div;
@@ -60,10 +78,12 @@ angular.module("sampleApp")
 
                 composition.section.forEach(function(section){
                     console.log(section);
-                    html += "<h4>"+section.title+"</h4>";
-                    section.entry.forEach(function(entry){
 
-                    })
+
+                    html += "<h4>"+section.title+"</h4>";
+                    html += that.generateSectionText(section)
+
+
 
                 })
 

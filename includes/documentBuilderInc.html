@@ -26,6 +26,9 @@
 
                     <div ng-show="currentSection">
                         <div class="banner">{{currentSection.title}}</div>
+
+                        <p ng-bind-html="currentSection.text.div"></p>
+
                         <strong>Resources in Section (Direct only)</strong>
 
                         <ul class="list-group" >
@@ -38,7 +41,7 @@
                                               uib-popover-html = "entry.reference | resourceTextFromReference">
                                             {{entry.reference}}
                                         </span>
-                                        <!-- {{entry.reference}} | resourceTextFromReference-->
+
                                     </div>
                                     <div class="col-md-4 col-sm-4">
 

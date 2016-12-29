@@ -125,9 +125,11 @@ angular.module("sampleApp")
                 var title = $scope.input.sectName
                 delete $scope.input.sectName;     //the name given to the section
                 //$scope.compositionResource is defined in parent controller (builderCtrl);
-                var section = {title:title,entry:[]};
+                //create a text section with a placeholder for generated text
+                var text = {status : 'generated', div : "<div id='gen'>Generated text here</div>"}
+                var section = {title:title,text : text, entry:[]};
                 $scope.compositionResource.section = $scope.compositionResource.section || []
-                $scope.compositionResource.section.push(section)
+                $scope.compositionResource.section.push(section);
                 $scope.selectSection(section)
                 $rootScope.$emit('docUpdated',$scope.compositionResource);
 
