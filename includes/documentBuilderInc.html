@@ -10,9 +10,26 @@
                     <h5>Sections</h5>
                     <ul class="list-group" >
                         <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':$index == currentSectionIndex}"
-                            ng-repeat="section in compositionResource.section"
-                            ng-click="selectSection(section)">
-                            <strong>{{section.title}}</strong>
+                            ng-repeat="section in compositionResource.section">
+
+                            <div class="row">
+                                <div class="col-md-10 col-sm-10" ng-click="selectSection(section)">
+                                    <strong >{{section.title}}</strong>
+                                </div>
+                                <div class="col-md-2 col-sm-2">
+                                    <i class="glyphicon glyphicon-edit iconSpacing pull-right"
+                                       title="Edit text"
+                                       ng-click="editSection(section)" style="cursor: pointer">
+
+                                    </i>
+                                </div>
+                            </div>
+
+
+
+
+
+
                         </li>
                     </ul>
 
@@ -32,13 +49,14 @@
                         <strong>Resources in Section (Direct only)</strong>
 
                         <ul class="list-group" >
-                            <li style="cursor: pointer" class="list-group-item""
+                            <li style="cursor: pointer" class="list-group-item"
                                 ng-repeat="entry in currentSection.entry">
 
                                 <div class="row">
                                     <div class="col-md-8 col-sm-8">
                                         <span popover-trigger="'mouseenter'"
-                                              uib-popover-html = "entry.reference | resourceTextFromReference">
+                                              uib-popover-html = "entry.reference | resourceTextFromReference"
+                                                ng-click = "selectResourceFromSection(entry.reference)">
                                             {{entry.reference}}
                                         </span>
 
@@ -85,7 +103,8 @@
 
                                 <div class="row">
                                     <div class="col-md-10 col-sm-10">
-                                        <span popover-trigger="'mouseenter'" uib-popover-html = "reference.display">
+                                        <span popover-trigger="'mouseenter'" uib-popover-html = "reference.display"
+                                              ng-click = "selectResourceFromSection(reference.reference)">
                                             {{reference.reference}}</span>
                                     </div>
                                     <div class="col-md-2 col-sm-2">
@@ -108,9 +127,33 @@
             </div>
 
         </uib-tab>
+
+        <!--
         <uib-tab heading="Header">
+            <br/>
+            <div class="row">
+                <div class="col-sm-6 col-md-6">
+                    <form>
+                        <div class="form-group">
+                            <label>Document Type</label>
+                            <select class="form-control">
+
+                            </select>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="col-sm-6 col-md-6">
+
+                </div>
+            </div>
+
+
+
 
         </uib-tab>
+
+        -->
         <uib-tab heading="Generated text">
             <div class="rounded-box"><p ng-bind-html="generatedHtml"></p></div>
         </uib-tab>

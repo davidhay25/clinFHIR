@@ -2,7 +2,7 @@
 
 angular.module("sampleApp")
     .controller('docBuilderCtrl',
-        function ($scope,$rootScope,builderSvc) {
+        function ($scope,$rootScope,builderSvc,$uibModal) {
 
 
             //$scope.resourcesBundle - bundle representing current document - defined in parent Controller
@@ -25,7 +25,39 @@ angular.module("sampleApp")
                 
                 
             })
-           
+
+            $rootScope.$on('resourceEdited',function(event,resource){
+                //a resource has been edited - re-create the document text...
+                //These are scope variables from the parent controller...
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource);
+            });
+
+            $scope.editSection =function(section) {
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/editSection.html',
+                    size: 'lg',
+                    controller: function($scope,section){
+                        $scope.section = section;
+
+                        $scope.save = function(){
+                            $scope.$close();
+                        }
+                    },
+                    resolve : {
+                        section: function () {          //the default config
+                            return section;
+                        }
+                    }
+                })
+            };
+
+            $scope.selectResourceFromSection = function(ref){
+                console.log(ref);
+                var resource = builderSvc.resourceFromReference(ref);
+
+                $scope.selectResource(resource);        //<<<< this is in the parent controller
+
+            };
 
             $scope.initializeDocumentDEP = function() {
                 $scope.docInit = true;

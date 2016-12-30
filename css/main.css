@@ -1,6 +1,10 @@
 
 /* classes for the tree view icons...*/
 
+.inset {
+    margin-left: 12px;
+}
+
 .iconSpacing {
     /*  left and right spacing for icons in a horizontalbar */
     padding-left: 5px;

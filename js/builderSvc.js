@@ -12,12 +12,16 @@ angular.module("sampleApp")
 
         return {
             generateSectionText : function(section) {
-                //generate the text for a section. todo - needsto become recursive...
+                //generate the text for a section. todo - needs to become recursive...
+
+                console.log(gAllReferences)
                 var html = "";
                 var that = this;
                 section.entry.forEach(function(entry){
                     console.log(entry)
                     var resource = that.resourceFromReference(entry.reference);
+
+
                     if (resource) {
                         html += resource.text.div
                     }
@@ -27,6 +31,11 @@ angular.module("sampleApp")
 
                 })
                 return html;
+
+
+                //function getText(text,)
+
+
             },
             resourceFromReference : function(reference) {
                 //get resource from a reference
@@ -63,16 +72,16 @@ angular.module("sampleApp")
                 console.log(hash)
 
 */
-                if (composition.patient) {
-                    var patient = that.resourceFromReference(composition.patient.reference);
+                if (composition.subject) {
+                    var subject = that.resourceFromReference(composition.subject.reference);
                     //var patient = hash[composition.patient.reference]
-                    console.log(patient);
-                    if (patient) {
-                        html += "<h3>Patient</h3>"+patient.text.div;
+                    console.log(subject);
+                    if (subject) {
+                        html += "<h3>Subject</h3>" + "<div class='inset'>"+  subject.text.div + "</div>";
                     }
                 }
 
-                html += "<h3>Composition</h3>"+composition.text.div;
+                html += "<h3>Composition</h3>" + "<div class='inset'>"+ composition.text.div + "</div>";
 
                 html += "<h3>Sections</h3>";
 
@@ -81,7 +90,10 @@ angular.module("sampleApp")
 
 
                     html += "<h4>"+section.title+"</h4>";
+                    html += "<div class='inset'>";
+
                     html += that.generateSectionText(section)
+                    html += "</div>";
 
 
 

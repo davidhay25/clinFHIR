@@ -331,6 +331,7 @@ angular.module("sampleApp")
                         console.log(result)
                         if (result.userText) {
                             resource.text.div = $filter('addTextDiv')(result.userText);
+                            $rootScope.$emit('resourceEdited',resource);
                             makeGraph();
                         }
 
@@ -829,7 +830,10 @@ angular.module("sampleApp")
                 $scope.input.text = $scope.input.text || "";
                 resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text)};
 
-                console.log(resource);
+                //console.log(resource);
+
+                builderSvc.addResourceToAllResources(resource)
+
                 $scope.resourcesBundle.entry.push({resource:resource});
 
                 $scope.resourcesBundle.entry.sort(function(a,b){
