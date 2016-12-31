@@ -13,15 +13,32 @@
                             ng-repeat="section in compositionResource.section">
 
                             <div class="row">
-                                <div class="col-md-10 col-sm-10" ng-click="selectSection(section)">
-                                    <strong >{{section.title}}</strong>
+                                <div class="col-md-9 col-sm-9" ng-click="selectSection(section)">
+                                    {{section.title}}
                                 </div>
-                                <div class="col-md-2 col-sm-2">
+                                <div class="col-md-3 col-sm-3">
                                     <i class="glyphicon glyphicon-edit iconSpacing pull-right"
                                        title="Edit text"
                                        ng-click="editSection(section)" style="cursor: pointer">
 
                                     </i>
+
+                                    <br/>
+                                    <div class="pull-right">
+                                        <i class="glyphicon glyphicon-arrow-down "
+                                           title="Move Down"
+                                           ng-click="moveSection($index,'dn')" style="cursor: pointer">
+
+                                        </i>
+
+                                        <i class="glyphicon glyphicon-arrow-up "
+                                           title="Move Up"
+                                           ng-click="moveSection($index,'up')" style="cursor: pointer">
+
+                                        </i>
+                                    </div>
+
+
                                 </div>
                             </div>
 
@@ -34,9 +51,9 @@
                     </ul>
 
 
-                    <input class="form-control" ng-model="input.sectName" placeholder="New section title"/>
+
                     <div>
-                        <button class="btn btn-link pull-right" ng-click="addSection()">Add</button>
+                        <button class="btn btn-link pull-right" ng-click="editSection()">Add</button>
                     </div>
                 </div>
                 <div class="col-md-6 col-sm-6">
@@ -74,13 +91,13 @@
                                         <div class="pull-right">
                                             <i class="glyphicon glyphicon-arrow-down iconSpacing"
                                                title="Move Down"
-                                               ng-click="moveSection($index,'dn')" style="cursor: pointer">
+                                               ng-click="moveSectionResource($index,'dn')" style="cursor: pointer">
 
                                             </i>
 
                                             <i class="glyphicon glyphicon-arrow-up iconSpacing"
-                                               title="Move Down"
-                                               ng-click="moveSection($index,'up')" style="cursor: pointer">
+                                               title="Move Up"
+                                               ng-click="moveSectionResource($index,'up')" style="cursor: pointer">
 
                                             </i>
                                         </div>

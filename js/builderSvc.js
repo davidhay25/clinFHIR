@@ -14,11 +14,11 @@ angular.module("sampleApp")
             generateSectionText : function(section) {
                 //generate the text for a section. todo - needs to become recursive...
 
-                console.log(gAllReferences)
+                //console.log(gAllReferences)
                 var html = "";
                 var that = this;
                 section.entry.forEach(function(entry){
-                    console.log(entry)
+                    //console.log(entry)
                     var resource = that.resourceFromReference(entry.reference);
 
 
@@ -111,7 +111,7 @@ angular.module("sampleApp")
                 //save the bundle to the library. Note that the 'container' of the bundle (includes the name) is passed in...
                 var bundle = bundleContainer.bundle;
 
-                console.log(bundle)
+                //console.log(bundle)
 
 
 

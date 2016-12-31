@@ -2,7 +2,7 @@
 
 angular.module("sampleApp")
     .controller('docBuilderCtrl',
-        function ($scope,$rootScope,builderSvc,$uibModal) {
+        function ($scope,$rootScope,builderSvc,$uibModal,Utilities,GetDataFromServer) {
 
 
             //$scope.resourcesBundle - bundle representing current document - defined in parent Controller
@@ -12,6 +12,7 @@ angular.module("sampleApp")
             $scope.input = {}
 
 
+            //---------- event handlers.........
             $rootScope.$on('addResource',function(event,resource){
                 console.log(resource)
                 var reference =  builderSvc.referenceFromResource(resource)
@@ -32,22 +33,90 @@ angular.module("sampleApp")
                 $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource);
             });
 
-            $scope.editSection =function(section) {
+            //retrieve the list of section codes. This would be replaced in a profile of course...
+            var vsUrl = 'http://hl7.org/fhir/ValueSet/doc-section-codes';      //the default set of document section codes...
+            var sectionCodes;
+            Utilities.getValueSetIdFromRegistry(vsUrl,function(vsDetails) {
+
+                if (vsDetails) {
+                    GetDataFromServer.getExpandedValueSet(vsDetails.id).then(
+                        function (vs) {
+                            sectionCodes = vs.expansion.contains;
+                            sectionCodes.sort(function(a,b){
+                                if (a.display > b.display) {
+                                    return 1;
+                                } else {
+                                    return -1
+                                }
+                            })
+                            console.log(vs);
+                        }, function (err) {
+                            alert(err + ' expanding ValueSet')
+                        }
+                    )
+                }
+
+            })
+
+
+            $scope.editSection = function(section) {
+                var editing = false;
+                if (section) {
+                    editing = true;
+                }
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editSection.html',
-                    size: 'lg',
-                    controller: function($scope,section){
-                        $scope.section = section;
+                    //size: 'lg',
+                    controller: function($scope,inSection,sectionCodes){
+                        inSection = inSection || {}
+                        $scope.input = {};
+                        $scope.mode="New";
+                        $scope.sectionCodes = sectionCodes;
+
+                        if (inSection) {
+                            $scope.input.title = inSection.title;
+                            $scope.mode="Edit";
+                        }
+                        //section = section;
+
+                        $scope.selectCode = function(code){
+                            $scope.input.title = code.display;
+                        };
 
                         $scope.save = function(){
-                            $scope.$close();
+
+                            var section = {title:$scope.input.title,text : ""};
+                            section.entry = inSection.entry || [];
+                            section.code = {coding:[$scope.input.sectionCode]}
+
+                            $scope.$close(section);
                         }
                     },
                     resolve : {
-                        section: function () {          //the default config
+                        inSection: function () {          //the default config
                             return section;
+                        },
+                        sectionCodes : function () {
+                            return sectionCodes;
                         }
                     }
+                }).result.then(function (sect) {
+                    //return a section object...
+
+                    if (editing) {
+                        //only update the properties that the modal can change...
+                        section.title = sect.title;
+                        section.code = sect.code;
+                    } else {
+                        $scope.compositionResource.section = $scope.compositionResource.section || [];
+                        $scope.compositionResource.section.push(sect);
+                    }
+
+                    $scope.selectSection(sect)
+                    $rootScope.$emit('docUpdated',$scope.compositionResource);
+
+                    //These are all scope variables from the parent controller...
+                    $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
                 })
             };
 
@@ -58,6 +127,10 @@ angular.module("sampleApp")
                 $scope.selectResource(resource);        //<<<< this is in the parent controller
 
             };
+
+            $scope.moveSection = function(dirn,inx) {
+
+            }
 
             $scope.initializeDocumentDEP = function() {
                 $scope.docInit = true;
@@ -153,7 +226,7 @@ angular.module("sampleApp")
 
             };
 
-            $scope.addSection = function() {
+            $scope.addSectionDEP = function() {
                 var title = $scope.input.sectName
                 delete $scope.input.sectName;     //the name given to the section
                 //$scope.compositionResource is defined in parent controller (builderCtrl);
