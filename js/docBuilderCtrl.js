@@ -121,15 +121,31 @@ angular.module("sampleApp")
             };
 
             $scope.selectResourceFromSection = function(ref){
-                console.log(ref);
+                //console.log(ref);
                 var resource = builderSvc.resourceFromReference(ref);
 
                 $scope.selectResource(resource);        //<<<< this is in the parent controller
 
             };
 
-            $scope.moveSection = function(dirn,inx) {
+            $scope.moveSection = function(inx,dirn) {
+                //console.log(dirn,inx);
+                var ar = $scope.compositionResource.section;
+                if (dirn == 'up') {
 
+                    var x = ar.splice(inx-1,1);  //remove the one above
+                    ar.splice(inx,0,x[0]);       //and insert...
+
+
+                } else {
+                    var x = ar.splice(inx+1,1);  //remove the one below
+                    ar.splice(inx,0,x[0]);       //and insert...
+                }
+
+                $rootScope.$emit('docUpdated',$scope.compositionResource);
+
+                //These are all scope variables from the parent controller...
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
             }
 
             $scope.initializeDocumentDEP = function() {

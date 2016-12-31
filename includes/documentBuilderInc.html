@@ -12,7 +12,7 @@
                         <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':$index == currentSectionIndex}"
                             ng-repeat="section in compositionResource.section">
 
-                            <div class="row">
+                            <div class="row" ng-mouseover="showMoveArrows = true" ng-mouseleave="showMoveArrows = false">
                                 <div class="col-md-9 col-sm-9" ng-click="selectSection(section)">
                                     {{section.title}}
                                 </div>
@@ -24,14 +24,14 @@
                                     </i>
 
                                     <br/>
-                                    <div class="pull-right">
-                                        <i class="glyphicon glyphicon-arrow-down "
+                                    <div class="pull-right" ng-show="showMoveArrows">
+                                        <i class="glyphicon glyphicon-arrow-down" ng-show="$index < compositionResource.section.length-1"
                                            title="Move Down"
                                            ng-click="moveSection($index,'dn')" style="cursor: pointer">
 
                                         </i>
 
-                                        <i class="glyphicon glyphicon-arrow-up "
+                                        <i class="glyphicon glyphicon-arrow-up" ng-show="$index > 0"
                                            title="Move Up"
                                            ng-click="moveSection($index,'up')" style="cursor: pointer">
 
