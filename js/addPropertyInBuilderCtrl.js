@@ -5,9 +5,18 @@ angular.module("sampleApp")
         function ($scope,dataType,hashPath,builderSvc,resource,vsDetails,expandedValueSet,GetDataFromServer) {
             $scope.dataTypeBeingEntered = dataType;
             $scope.hashPath = hashPath;
+
             $scope.vsDetails = vsDetails;
             $scope.expandedValueSet = expandedValueSet;
             $scope.input = {};
+
+            var path = hashPath.path;
+
+            $scope.dtDisplay = path;       //the display in the header
+            if (path.substr(-3) == '[x]') {
+                var elementRoot = path.substr(0, path.length - 3);
+                $scope.dtDisplay = elementRoot + dataType.substr(0, 1).toUpperCase() + dataType.substr(1);
+            }
 
             if (dataType == 'date' ||dataType == 'dateTime' ) {
                 $scope.input.dt = new Date();

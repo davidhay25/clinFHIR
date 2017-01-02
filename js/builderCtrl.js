@@ -8,20 +8,20 @@ angular.module("sampleApp")
             $scope.input.dt = {};   //data entered as part of populating a datatype
             $scope.appConfigSvc = appConfigSvc;
 
-            console.log(builderSvc.mannualMa)
+            //console.log(builderSvc.mannualMa)
 
             var idPrefix = 'cf-';   //prefix for the id. todo should probably be related to the userid in some way...
 
             $scope.saveToLibrary = function(){
 
-                console.log($localStorage.builderBundles[$scope.currentBundleIndex])
+                //console.log($localStorage.builderBundles[$scope.currentBundleIndex])
 
 
                 builderSvc.saveToLibrary($localStorage.builderBundles[$scope.currentBundleIndex]).then(
                     function (data) {
                         modalService.showModal({}, {bodyText:'The set has been updated in the Library. You can continue editing.'});
                         refreshLibrary();
-                        console.log(data)
+                        //console.log(data)
                     },function (err) {
                         modalService.showModal({}, {bodyText:'Sorry, there was an error updating the library:' + angular.toJson(err)})
                         console.log(err)
@@ -109,7 +109,7 @@ angular.module("sampleApp")
                     //return the practitioner resource that corresponds to the current user (the service will create if absent)
                     GetDataFromServer.getPractitionerByLogin(user).then(
                         function(practitioner){
-                            console.log(practitioner)
+                            //console.log(practitioner)
                             $scope.Practitioner = practitioner;
 
                         },function (err) {
@@ -121,7 +121,7 @@ angular.module("sampleApp")
 
 
                 } else {
-                    console.log('no user')
+                    //console.log('no user')
                     logicalModelSvc.setCurrentUser(null);
                     $scope.showNotLoggedIn = true;
                     delete $scope.Practitioner;
@@ -158,7 +158,7 @@ angular.module("sampleApp")
 
 
 
-            console.log($localStorage.builderBundles)
+            //console.log($localStorage.builderBundles)
 
             //set the base path for linking to the spec
             switch (appConfigSvc.getCurrentConformanceServer().version) {
@@ -238,6 +238,9 @@ angular.module("sampleApp")
             }
 
             $scope.displayMode = 'view';    //options 'new', 'view'
+            $scope.setDisplayMode = function(mode) {
+                $scope.displayMode = mode;
+            }
 
             //displays the data entry screen for adding a datatype value
             $scope.addValueForDt = function(hashPath,dt) {
@@ -313,7 +316,7 @@ angular.module("sampleApp")
             $scope.editResource = function(resource){
 
                 var vo = builderSvc.splitNarrative(resource.text.div)  //return manual & generated text
-                console.log(vo)
+                //console.log(vo)
 
                 var modalOptions = {
                     closeButtonText: "Cancel",
@@ -327,7 +330,7 @@ angular.module("sampleApp")
 
                 modalService.showModal({}, modalOptions).then(
                     function (result) {
-                        console.log(result)
+                        //console.log(result)
                         if (result.userText) {
                             //create the text and add the manual marker (to separate this from generated text)
                             var narrative = builderSvc.addGeneratedText(result.userText,vo.generated);
@@ -450,7 +453,7 @@ angular.module("sampleApp")
 
 
                         var node = vo.graphData.nodes.get(nodeId);
-                        console.log(node)
+                        //console.log(node)
                         $scope.selectResource(node.cf.resource)
 
                         $scope.$digest();
@@ -468,7 +471,7 @@ angular.module("sampleApp")
             }, 1000);
 
             $scope.removeReference = function(ref) {
-                console.log(ref)
+                //console.log(ref)
                 var path = ref.path;
                 var target = ref.targ;
                 builderSvc.removeReferenceAtPath($scope.currentResource,path,ref.index)
@@ -483,7 +486,7 @@ angular.module("sampleApp")
                 $timeout(function(){
                     if ($scope.chart) {
                         $scope.chart.fit();
-                        console.log('fitting...')
+                        //console.log('fitting...')
                     }
 
                 },1000)
@@ -496,7 +499,7 @@ angular.module("sampleApp")
 
                 GetDataFromServer.getValueSet(uri).then(
                     function(vs) {
-                        console.log(vs)
+                        //console.log(vs)
                         $scope.showVSBrowserDialog.open(vs);
 
                     }
@@ -524,7 +527,7 @@ angular.module("sampleApp")
                         }
 
                         //todo - will barf for path length > 2
-                        console.log(fullPath)
+                        //console.log(fullPath)
                         var info = builderSvc.getEDInfoForPath(fullPath)
                         if (info.isMultiple) {
                             insertPoint[segment] = insertPoint[segment] || []
@@ -622,14 +625,14 @@ angular.module("sampleApp")
                                                 var url = $scope.hashPath.ed.binding.valueSetReference.reference;
                                                 Utilities.getValueSetIdFromRegistry(url,function(vsDetails) {
                                                     $scope.vsDetails = vsDetails;  //vsDetails = {id: type: resource: }
-                                                    console.log(vsDetails);
+                                                    //console.log(vsDetails);
                                                     if ($scope.vsDetails) {
                                                         if ($scope.vsDetails.type == 'list' || ed.type[0].code == 'code') {
                                                             //this has been recognized as a VS that has only a small number of options...
                                                             GetDataFromServer.getExpandedValueSet($scope.vsDetails.id).then(
                                                                 function (vs) {
                                                                     $scope.expandedValueSet = vs;
-                                                                    console.log(vs);
+                                                                    //console.log(vs);
                                                                 }, function (err) {
                                                                     alert(err + ' expanding ValueSet')
                                                                 }
@@ -705,7 +708,7 @@ angular.module("sampleApp")
                         var objReferences = {}      //a hash of path vs possible resources for that path
 
                         var references = builderSvc.getReferences(SD); //a list of all possible references by path
-                        console.log(references);
+                        //console.log(references);
                         $scope.bbNodes = [];        //backbone nodes to add
                         $scope.l2Nodes = {};        //a hash of nodes off the root that can have refernces. todo: genaralize for more levels
 
@@ -766,7 +769,7 @@ angular.module("sampleApp")
 
                         })
 
-                        console.log(objReferences)
+                        //console.log(objReferences)
                         $scope.objReferences = objReferences;
 
                     }
@@ -872,10 +875,10 @@ angular.module("sampleApp")
                 var uri = "http://hl7.org/fhir/StructureDefinition/"+type;
                 GetDataFromServer.findConformanceResourceByUri(uri).then(
                     function(data) {
-                        console.log(data);
+                        //console.log(data);
                         $scope.currentType = data;
                         $scope.references = builderSvc.getReferences($scope.currentType)
-                        console.log($scope.references);
+                        //console.log($scope.references);
 
                     }
                 )

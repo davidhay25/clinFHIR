@@ -14,7 +14,7 @@ angular.module("sampleApp")
 
             //---------- event handlers.........
             $rootScope.$on('addResource',function(event,resource){
-                console.log(resource)
+               // console.log(resource)
                 var reference =  builderSvc.referenceFromResource(resource)
                 $scope.resourcesNotInThisSection.push({reference:reference,display:resource.text.div})
 
@@ -49,7 +49,7 @@ angular.module("sampleApp")
                                     return -1
                                 }
                             })
-                            console.log(vs);
+                            //console.log(vs);
                         }, function (err) {
                             alert(err + ' expanding ValueSet')
                         }

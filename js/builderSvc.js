@@ -278,7 +278,7 @@ angular.module("sampleApp")
             addPropertyValue : function(resource,hashPath,dt,value) {
                 //add a value to a resource property...  type of value will depend on datatype
                 //var that = this;
-                console.log(resource,hashPath,dt,value)
+               // console.log(resource,hashPath,dt,value)
                 var info = this.getEDInfoForPath(hashPath.path)
 
                 //var path = $filter('dropFirstInPath')(hashPath.path);   //the path off the root
@@ -294,16 +294,16 @@ angular.module("sampleApp")
                 switch (dt) {
 
                     case 'HumanName' :
-                        console.log(value)
+                       // console.log(value)
                         var insrt = {text:value.HumanName.text}
-                        simpleInsert(resource,info,path,insrt);
+                        simpleInsert(resource,info,path,insrt,dt);
                         this.addStringToText(resource.path+": "+ insrt.text)
                         break;
 
                     case 'Address' :
-                        console.log(value)
+                       // console.log(value)
                         var insrt = {text:value.Address.text}
-                        simpleInsert(resource,info,path,insrt);
+                        simpleInsert(resource,info,path,insrt,dt);
                         this.addStringToText(resource.path+": "+ insrt.text)
                         break;
 
@@ -311,30 +311,30 @@ angular.module("sampleApp")
                         var start = value.period.start;
                         var end = value.period.end;
                         var insrt = {start:start,end:end}
-                        simpleInsert(resource,info,path,insrt);
+                        simpleInsert(resource,info,path,insrt,dt);
 
                         break;
 
                     case 'date' :
                         //value is a Date object...
                         var v = moment(value).format('YYYY-MM-DD');
-                        simpleInsert(resource,info,path,v,this.getEDInfoForPath);
+                        simpleInsert(resource,info,path,v,dt);
                         this.addStringToText(resource.path+": "+ v)
                         break;
                     case 'dateTime' :
                         //value is a Date object...
                         var v = moment(value).format();
-                        simpleInsert(resource,info,path,v,this.getEDInfoForPath);
+                        simpleInsert(resource,info,path,v,dt);
                         this.addStringToText(resource.path+": "+ v)
                         break;
 
                     case 'code' :
-                        simpleInsert(resource,info,path,value.code,this.getEDInfoForPath);
+                        simpleInsert(resource,info,path,value.code,dt);
 
                         this.addStringToText(resource,path+": "+ value.code)
                         break;
                     case 'string' :
-                        simpleInsert(resource,info,path,value.string,this.getEDInfoForPath);
+                        simpleInsert(resource,info,path,value.string,dt);
 
                         this.addStringToText(resource,path+": "+ value.string)
                         break;
@@ -362,7 +362,7 @@ angular.module("sampleApp")
                             }
 
 
-                            simpleInsert(resource,info,path,cc,this.getEDInfoForPath);
+                            simpleInsert(resource,info,path,cc,dt);
 
                             if (text) {
                                 this.addStringToText(resource, path + ": " + text)
@@ -372,13 +372,34 @@ angular.module("sampleApp")
                         break;
                 }
 
-                function simpleInsert(resource,info,path,insrt,getInfo) {
+                function simpleInsert(resource,info,path,insrt,dt) {
+                    var insertPoint = resource;
 
 
                     var segmentPath = resource.resourceType;
                     var path = $filter('dropFirstInPath')(path);
 
-                    var insertPoint = resource;
+
+                    if (path.substr(-3) == '[x]') {
+                        var elementRoot = path.substr(0,path.length-3);
+                        path = elementRoot + dt.substr(0,1).toUpperCase() + dt.substr(1);
+
+                        //delete any elements with this root
+                        angular.forEach(insertPoint,function(value,key){
+                            //console.log(key,value)
+                            if (key.substr(0,elementRoot.length) == elementRoot) {
+                                console.log(key)
+                                delete insertPoint[key]
+                            }
+
+                        })
+
+                    }
+
+                   // console.log(path)
+                    //return;
+
+
                     var segmentInfo;
                     var ar = path.split('.');
                     if (ar.length > 0) {
@@ -387,7 +408,7 @@ angular.module("sampleApp")
                             var segment = ar[i];
 
                             segmentPath += '.'+segment;
-                            console.log(segmentPath)
+                            //console.log(segmentPath)
 
                             segmentInfo = getInfo(segmentPath);
 
@@ -431,7 +452,7 @@ angular.module("sampleApp")
 
                 // var path = $filter('dropFirstInPath')(path);
                 //path.pop();
-                console.log(resource,path,inx);
+                //console.log(resource,path,inx);
                 if (inx !== undefined) {
                     var ptr = resource[path]
                     //delete ptr[inx]
@@ -493,7 +514,7 @@ angular.module("sampleApp")
             insertReferenceAtPath : function(resource,path,referencedResource) {
 
 
-                console.log(resource,path,referencedResource);
+                //console.log(resource,path,referencedResource);
                 var info = this.getEDInfoForPath(path);
 
                 var segmentPath = resource.resourceType;
@@ -509,7 +530,7 @@ angular.module("sampleApp")
 
 
                         segmentPath += '.'+segment;
-                        console.log(segmentPath)
+                        //console.log(segmentPath)
 
                         var segmentInfo = this.getEDInfoForPath(segmentPath);
 
@@ -556,7 +577,7 @@ angular.module("sampleApp")
                     }
 
                 }
-
+/*
 
                 return;
 
@@ -598,6 +619,7 @@ angular.module("sampleApp")
                 }
 
 
+                */
 
             },
             getSD : function(type) {
@@ -649,7 +671,7 @@ angular.module("sampleApp")
                 var uri = "http://hl7.org/fhir/StructureDefinition/" + resource.resourceType;
                 GetDataFromServer.findConformanceResourceByUri(uri).then(
                     function (SD) {
-                        console.log(SD);
+                        //console.log(SD);
                         var hash = {}
                         if (SD && SD.snapshot && SD.snapshot.element) {
                             SD.snapshot.element.forEach(function (ed) {
