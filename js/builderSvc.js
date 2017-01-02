@@ -150,48 +150,41 @@ angular.module("sampleApp")
             makeDocumentText : function(composition,allResourcesBundle){
                 //construct the text representation of a document
                 // order is patient.text, composition.text, sections.text
-                //construct a hash of resources ?todo should this be maintained by the service?
-                //var hash ={};
-                var that = this;
-                var html = "";
-                /*
-                 allResourcesBundle.entry.forEach(function(entry){
-                 var resource = entry.resource;
-                 hash[that.referenceFromResource(resource)] = resource;
-
-                 });
-
-                 console.log(hash)
-
-                 */
-                if (composition.subject) {
-                    var subject = that.resourceFromReference(composition.subject.reference);
-                    //var patient = hash[composition.patient.reference]
-                    //console.log(subject);
-                    if (subject) {
-                        html += "<h3>Subject</h3>" + "<div class='inset'>"+  subject.text.div + "</div>";
+                if (composition) {
+                    var that = this;
+                    var html = "";
+                    if (composition.subject) {
+                        var subject = that.resourceFromReference(composition.subject.reference);
+                        //var patient = hash[composition.patient.reference]
+                        //console.log(subject);
+                        if (subject) {
+                            html += "<h3>Subject</h3>" + "<div class='inset'>"+  subject.text.div + "</div>";
+                        }
                     }
+
+                    html += "<h3>Composition</h3>" + "<div class='inset'>"+ composition.text.div + "</div>";
+
+                    html += "<h3>Sections</h3>";
+
+                    composition.section.forEach(function(section){
+                        //console.log(section);
+
+
+                        html += "<h4>"+section.title+"</h4>";
+                        html += "<div class='inset'>";
+
+                        html += that.generateSectionText(section)
+                        html += "</div>";
+
+
+
+                    })
+
+                    return html;
                 }
 
-                html += "<h3>Composition</h3>" + "<div class='inset'>"+ composition.text.div + "</div>";
-
-                html += "<h3>Sections</h3>";
-
-                composition.section.forEach(function(section){
-                    //console.log(section);
 
 
-                    html += "<h4>"+section.title+"</h4>";
-                    html += "<div class='inset'>";
-
-                    html += that.generateSectionText(section)
-                    html += "</div>";
-
-
-
-                })
-
-                return html;
 
 
             },
@@ -323,39 +316,26 @@ angular.module("sampleApp")
                         break;
 
                     case 'date' :
-                        simpleInsert(resource,info,path,value.date,this.getEDInfoForPath);
-                        /* if (info.isMultiple) {
-                         resource[path] = resource[path] || []
-                         resource[path].push(value.date)
-                         } else {
-                         resource[path] = value.date;
-                         }
-                         */
-                        this.addStringToText(resource.path+": "+ value.date)
+                        //value is a Date object...
+                        var v = moment(value).format('YYYY-MM-DD');
+                        simpleInsert(resource,info,path,v,this.getEDInfoForPath);
+                        this.addStringToText(resource.path+": "+ v)
+                        break;
+                    case 'dateTime' :
+                        //value is a Date object...
+                        var v = moment(value).format();
+                        simpleInsert(resource,info,path,v,this.getEDInfoForPath);
+                        this.addStringToText(resource.path+": "+ v)
                         break;
 
                     case 'code' :
                         simpleInsert(resource,info,path,value.code,this.getEDInfoForPath);
-                        /*
-                         if (info.isMultiple) {
-                         resource[path] = resource[path] || []
-                         resource[path].push(value.code)
-                         } else {
-                         resource[path] = value.code;
-                         }
-                         */
+
                         this.addStringToText(resource,path+": "+ value.code)
                         break;
                     case 'string' :
                         simpleInsert(resource,info,path,value.string,this.getEDInfoForPath);
-                        /*
-                         if (info.isMultiple) {
-                         resource[path] = resource[path] || []
-                         resource[path].push(value.string)
-                         } else {
-                         resource[path] = value.string;
-                         }
-                         */
+
                         this.addStringToText(resource,path+": "+ value.string)
                         break;
                     case "CodeableConcept" :
@@ -381,19 +361,9 @@ angular.module("sampleApp")
                                 text = value.cc.text;
                             }
 
-                            // var v = {text:value};
-
-                            //simpleInsert(resource,info,path,value.string,this.getEDInfoForPath);
 
                             simpleInsert(resource,info,path,cc,this.getEDInfoForPath);
-                            /*
-                             if (info.isMultiple) {
-                             resource[path] = resource[path] || []
-                             resource[path].push(cc)
-                             } else {
-                             resource[path] = cc;
-                             }
-                             */
+
                             if (text) {
                                 this.addStringToText(resource, path + ": " + text)
                             }
@@ -406,10 +376,8 @@ angular.module("sampleApp")
 
 
                     var segmentPath = resource.resourceType;
-                    //var info = getInfo(segmentPath);       //the final insert point
-
-
                     var path = $filter('dropFirstInPath')(path);
+
                     var insertPoint = resource;
                     var segmentInfo;
                     var ar = path.split('.');
@@ -440,48 +408,14 @@ angular.module("sampleApp")
                         path = ar[ar.length-1];       //this will be the property on the 'last'segment
                     }
 
-
-
-                    //if (info.isMultiple) {
                     if (info.isMultiple) {
-                        /*
-                         //if there is already a child on the insertpath, then add this node
-                         if (insertPoint[path] && insertPoint[path].length > 0) {
-                         var x = insertPoint[path];
-                         insertPoint[path] =insrt;
-                         } else {
-                         insertPoint[path] = insertPoint[path] || []
-                         insertPoint[path].push(insrt)
-                         }
-                         */
-                        //insertPoint[path] = resource[path] || []
+
                         insertPoint[path] = insertPoint[path] || []
                         insertPoint[path].push(insrt)
                     } else {
                         insertPoint[path] =insrt;
                     }
-
-                    return;
-
-
-
-
-
-
-//-----------------
-                    /*
-                     if (info.isMultiple) {
-                     resource[path] = resource[path] || []
-                     resource[path].push(insrt)
-                     } else {
-                     resource[path] =insrt;
-                     }
-
-                     */
                 }
-
-
-
             },
             removeReferenceAtPath : function(resource,path,inx) {
                 //find where the reference is that we want to remove

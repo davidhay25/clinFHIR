@@ -59,8 +59,6 @@ angular.module("sampleApp")
 
             refreshLibrary();       //initial load...
 
-
-
             /*
              $scope.showLibrary = function(){
              $scope.leftPaneClass = "col-sm-2 col-md-2"
@@ -73,13 +71,10 @@ angular.module("sampleApp")
 
 
             //---------- related to document builder -------
-
-
             $rootScope.$on('docUpdated',function(event,composition){
                 //console.log(composition)
                 makeGraph();
             });
-
 
             function isaDocument() {
                 $scope.isaDocument = false;
@@ -99,7 +94,6 @@ angular.module("sampleApp")
 
 
             //------------------------------------------------
-
 
 
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
@@ -138,9 +132,6 @@ angular.module("sampleApp")
             });
 
 
-
-            //var currentBunbleName = 'builderBundle';        //the name of the
-
             $scope.supportedDt = ['CodeableConcept','string','code','date','Period','dateTime','Address','HumanName']
 
             $scope.currentBundleIndex = 0;     //the index of the bundle currently being used
@@ -165,7 +156,6 @@ angular.module("sampleApp")
 
             $scope.builderBundles = $localStorage.builderBundles;   //all the bundles cached locally...
 
-            //$scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
 
 
             console.log($localStorage.builderBundles)
@@ -179,7 +169,6 @@ angular.module("sampleApp")
                     $scope.fhirBasePath="http://build.fhir.org/";
                     break;
             }
-
 
             $scope.newBundle = function() {
                 var name = prompt('Name of Bundle');
@@ -248,8 +237,6 @@ angular.module("sampleApp")
                 $rootScope.$emit('newSet',$scope.resourcesBundle);
             }
 
-
-
             $scope.displayMode = 'view';    //options 'new', 'view'
 
             //displays the data entry screen for adding a datatype value
@@ -263,7 +250,7 @@ angular.module("sampleApp")
                         size: 'lg',
                         controller: 'addPropertyInBuilderCtrl',
                         resolve : {
-                            dt: function () {          //the default config
+                            dataType: function () {          //the default config
                                 return dt;
                             },
                             hashPath: function () {          //the default config
@@ -321,7 +308,6 @@ angular.module("sampleApp")
 
             };
             //adds a new value to a property
-
 
             //edit the resource text
             $scope.editResource = function(resource){
@@ -577,21 +563,19 @@ angular.module("sampleApp")
             };
 
             $scope.selectResource = function(resource) {
-                //delete $scope.input.text;
+
                 $scope.displayMode = 'view';
 
                 delete $scope.hashPath;
-                //console.log(resource);
+
                 $scope.currentResource = resource;
                 var url = resource.resourceType+'/'+resource.id;
                 $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
 
 
                 builderSvc.getSD(resource.resourceType).then(
-                    //var uri = "http://hl7.org/fhir/StructureDefinition/"+resource.resourceType;
-                    //GetDataFromServer.findConformanceResourceByUri(uri).then(
+
                     function(SD) {
-                        //console.log(SD);
 
 
                         profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
@@ -606,7 +590,7 @@ angular.module("sampleApp")
 
 
 
-                                    console.log(data.node);
+                                    //console.log(data.node);
                                     $scope.hashReferences = {}      //a hash of type vs possible resources for that type
                                     delete $scope.hashPath;
                                     delete $scope.expandedValueSet;
@@ -659,12 +643,15 @@ angular.module("sampleApp")
 
 
                                             ed.type.forEach(function(typ){
-                                                //is this a reference?
-                                                if (typ.code == 'Reference' && typ.profile) {
+                                                //is this a resource reference?
+
+                                                var targetProfile = typ.profile || typ.targetProfile;       //different in STU2 & 3
+                                                if (typ.code == 'Reference' && targetProfile) {
                                                     //get all the resources of this type  (that are not already referenced by this element
                                                     $scope.hashPath.isReference = true;
 
-                                                    var type = $filter('getLogicalID')(typ.profile);
+
+                                                    var type = $filter('getLogicalID')(targetProfile);
 
                                                     var ar = builderSvc.getResourcesOfType(type,$scope.resourcesBundle);
 
@@ -682,12 +669,9 @@ angular.module("sampleApp")
                                                                     if (ref.targ == reference) {
                                                                         alreadyReferenced = true;
                                                                     }
-
-                                                                    //console.log('>>' + ref.targ)
                                                                 }
 
                                                             });
-
 
                                                             if (! alreadyReferenced) {
                                                                 type = resource.resourceType;   //allows for Reference

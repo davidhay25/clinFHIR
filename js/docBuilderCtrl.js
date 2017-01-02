@@ -260,7 +260,7 @@ angular.module("sampleApp")
                 if (g > -1) {
                     arr.splice(g,1)
                 }
-            }
+            };
 
 
             $scope.selectSection = function(section) {
