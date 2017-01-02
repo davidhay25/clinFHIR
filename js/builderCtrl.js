@@ -2,30 +2,32 @@
 angular.module("sampleApp")
     .controller('builderCtrl',
         function ($scope,$http,appConfigSvc,$q,GetDataFromServer,resourceCreatorSvc,RenderProfileSvc,builderSvc,
-                  $timeout,$localStorage,$filter,profileCreatorSvc,modalService,Utilities,$uibModal,$rootScope,$firebaseObject) {
+                  $timeout,$localStorage,$filter,profileCreatorSvc,modalService,Utilities,$uibModal,$rootScope,$firebaseObject,logicalModelSvc) {
 
             $scope.input = {};
             $scope.input.dt = {};   //data entered as part of populating a datatype
             $scope.appConfigSvc = appConfigSvc;
+
+            console.log(builderSvc.mannualMa)
 
             var idPrefix = 'cf-';   //prefix for the id. todo should probably be related to the userid in some way...
 
             $scope.saveToLibrary = function(){
 
                 console.log($localStorage.builderBundles[$scope.currentBundleIndex])
-                
 
-               builderSvc.saveToLibrary($localStorage.builderBundles[$scope.currentBundleIndex]).then(
-                   function (data) {
-                       modalService.showModal({}, {bodyText:'The set has been updated in the Library. You can continue editing.'});
-                       refreshLibrary();
-                       console.log(data)
-                   },function (err) {
-                       modalService.showModal({}, {bodyText:'Sorry, there was an error updating the library:' + angular.toJson(err)})
-                       console.log(err)
-                   }
-               );
-                
+
+                builderSvc.saveToLibrary($localStorage.builderBundles[$scope.currentBundleIndex]).then(
+                    function (data) {
+                        modalService.showModal({}, {bodyText:'The set has been updated in the Library. You can continue editing.'});
+                        refreshLibrary();
+                        console.log(data)
+                    },function (err) {
+                        modalService.showModal({}, {bodyText:'Sorry, there was an error updating the library:' + angular.toJson(err)})
+                        console.log(err)
+                    }
+                );
+
             };
 
             function refreshLibrary() {
@@ -34,17 +36,22 @@ angular.module("sampleApp")
                         $scope.library = bundle;    //this is a bundle of DocumentReference resources...
 
                         //add meta information for display. Makes it a non-lgal resource, but don't really care
-                        $scope.library.entry.forEach(function(entry){
-                            var dr = entry.resource;
-                            //now see if the bundle in the DR is cached locally (the id of the dr is the same as the bundle
-                            //var cachedLocally = false;
-                            $localStorage.builderBundles.forEach(function (local) {
-                                if (local.bundle.id == dr.id) {
-                                    dr.meta = dr.meta || {}
-                                    dr.meta.cachedLocally = true;
-                                }
+                        if ($scope.library && $scope.library.entry) {
+                            $scope.library.entry.forEach(function(entry){
+                                var dr = entry.resource;
+                                //now see if the bundle in the DR is cached locally (the id of the dr is the same as the bundle
+                                //var cachedLocally = false;
+                                $localStorage.builderBundles.forEach(function (local) {
+                                    if (local.bundle.id == dr.id) {
+                                        dr.meta = dr.meta || {}
+                                        dr.meta.cachedLocally = true;
+                                    }
+                                })
                             })
-                        })
+                        }
+
+
+
 
                     }
                 );
@@ -55,14 +62,14 @@ angular.module("sampleApp")
 
 
             /*
-            $scope.showLibrary = function(){
-                $scope.leftPaneClass = "col-sm-2 col-md-2"
-                $scope.midPaneClass = "col-md-5 col-sm-5"
-                $scope.rightPaneClass = "col-md-5 col-sm-5";
-                $scope.libraryVisible = true;
-            };
-            
-            */
+             $scope.showLibrary = function(){
+             $scope.leftPaneClass = "col-sm-2 col-md-2"
+             $scope.midPaneClass = "col-md-5 col-sm-5"
+             $scope.rightPaneClass = "col-md-5 col-sm-5";
+             $scope.libraryVisible = true;
+             };
+
+             */
 
 
             //---------- related to document builder -------
@@ -76,19 +83,20 @@ angular.module("sampleApp")
 
             function isaDocument() {
                 $scope.isaDocument = false;
+                delete $scope.compositionResource;
                 $scope.resourcesBundle.entry.forEach(function(entry){
                     if (entry.resource.resourceType =='Composition') {
                         entry.resource.section = entry.resource.section || [];
                         $scope.compositionResource = entry.resource;
                         $scope.isaDocument= true;
 
-                        $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
+                        $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle);
                         //console.log(html)
 
                     }
                 })
             }
-            
+
 
             //------------------------------------------------
 
@@ -143,9 +151,9 @@ angular.module("sampleApp")
                 $localStorage.builderBundles = []
                 $scope.currentBundleIndex = -1;
 
-               // var newBundle = {name:'Default',bundle:{resourceType:'Bundle',entry:[]}}
-               // newBundle.bundle.id = idPrefix +new Date().getTime();
-               // $localStorage.builderBundles = [newBundle]
+                // var newBundle = {name:'Default',bundle:{resourceType:'Bundle',entry:[]}}
+                // newBundle.bundle.id = idPrefix +new Date().getTime();
+                // $localStorage.builderBundles = [newBundle]
             } else {
                 if ($localStorage.builderBundles.length > 0) {
                     $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
@@ -273,39 +281,39 @@ angular.module("sampleApp")
                         }
                     })
 
-/*
-                    var ar = hashPath.path.split('.');
-                    if (ar.length > 3) {
-                        modalService.showModal({}, {userText:'Sorry, only elements directly off the root can currently have values.'})
-                    } else {
-                        $uibModal.open({
-                            templateUrl: 'modalTemplates/addPropertyInBuilder.html',
-                            size: 'lg',
-                            controller: 'addPropertyInBuilderCtrl',
-                            resolve : {
-                                dt: function () {          //the default config
-                                    return dt;
-                                },
-                                hashPath: function () {          //the default config
-                                    return hashPath;
-                                },
-                                resource: function () {          //the default config
-                                    return $scope.currentResource;
-                                },
-                                vsDetails: function () {          //the default config
-                                    return $scope.vsDetails;
-                                },
-                                expandedValueSet: function () {          //the default config
-                                    return $scope.expandedValueSet;
-                                }
-                            }
-                        })
+                    /*
+                     var ar = hashPath.path.split('.');
+                     if (ar.length > 3) {
+                     modalService.showModal({}, {userText:'Sorry, only elements directly off the root can currently have values.'})
+                     } else {
+                     $uibModal.open({
+                     templateUrl: 'modalTemplates/addPropertyInBuilder.html',
+                     size: 'lg',
+                     controller: 'addPropertyInBuilderCtrl',
+                     resolve : {
+                     dt: function () {          //the default config
+                     return dt;
+                     },
+                     hashPath: function () {          //the default config
+                     return hashPath;
+                     },
+                     resource: function () {          //the default config
+                     return $scope.currentResource;
+                     },
+                     vsDetails: function () {          //the default config
+                     return $scope.vsDetails;
+                     },
+                     expandedValueSet: function () {          //the default config
+                     return $scope.expandedValueSet;
+                     }
+                     }
+                     })
 
-                        //return;
+                     //return;
 
 
-                    }
-*/
+                     }
+                     */
 
 
                 }
@@ -318,26 +326,36 @@ angular.module("sampleApp")
             //edit the resource text
             $scope.editResource = function(resource){
 
+                var vo = builderSvc.splitNarrative(resource.text.div)  //return manual & generated text
+                console.log(vo)
+
                 var modalOptions = {
                     closeButtonText: "Cancel",
                     actionButtonText: 'Save',
                     headerText: 'Edit resource text',
                     bodyText: 'Current text:',
-                    userText :   $filter('cleanTextDiv')(resource.text.div)
+                    userText :   vo.manual          //pass in the manual text only...
                 };
 
-                 modalService.showModal({}, modalOptions).then(
+
+
+                modalService.showModal({}, modalOptions).then(
                     function (result) {
                         console.log(result)
                         if (result.userText) {
-                            resource.text.div = $filter('addTextDiv')(result.userText);
+                            //create the text and add the manual marker (to separate this from generated text)
+                            var narrative = builderSvc.addGeneratedText(result.userText,vo.generated);
+
+                            resource.text.div = narrative; //$filter('addTextDiv')(narrative);
+
+                            //resource.text.div = $filter('addTextDiv')(result.userText + builderSvc.getManualMarker() + vo.generated);
                             $rootScope.$emit('resourceEdited',resource);
                             makeGraph();
                         }
 
 
                     }
-                 );
+                );
 
 
 
@@ -394,7 +412,7 @@ angular.module("sampleApp")
                     headerText: 'Remove resource',
                     bodyText: 'Are you sure you want to remove this resource (Any references to it will NOT be removed)'
                 };
-                
+
                 modalService.showModal({}, modalOptions).then(
                     function (result) {
                         var inx = -1;
@@ -409,7 +427,7 @@ angular.module("sampleApp")
                             $scope.resourcesBundle.entry.splice(inx,1);
                             makeGraph();
                             delete $scope.currentResource;
-
+                            isaDocument();      //may not still be a document...
                         }
 
                     }
@@ -450,7 +468,7 @@ angular.module("sampleApp")
                         $scope.selectResource(node.cf.resource)
 
                         $scope.$digest();
-                        
+
 
                     });
                 }
@@ -462,7 +480,7 @@ angular.module("sampleApp")
             $timeout(function(){
                 makeGraph()
             }, 1000);
-            
+
             $scope.removeReference = function(ref) {
                 console.log(ref)
                 var path = ref.path;
@@ -471,7 +489,7 @@ angular.module("sampleApp")
                 makeGraph();    //this will update the list of all paths in this model...
                 var url = $scope.currentResource.resourceType+'/'+$scope.currentResource.id;
                 $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
-                
+
             }
 
             $scope.redrawChart = function(){
@@ -485,7 +503,7 @@ angular.module("sampleApp")
                 },1000)
 
             }
-            
+
             $scope.showVSBrowserDialog = {};
             $scope.viewVS = function(uri) {
                 //var url = appConfigSvc
@@ -500,7 +518,7 @@ angular.module("sampleApp")
                     $scope.showWaiting = false;
                 });
             };
-            
+
             //add a segment to the resource at this path
             $scope.addSegmentDEP = function(hashPath) {
 
@@ -557,7 +575,7 @@ angular.module("sampleApp")
                 }
 
             };
-            
+
             $scope.selectResource = function(resource) {
                 //delete $scope.input.text;
                 $scope.displayMode = 'view';
@@ -570,8 +588,8 @@ angular.module("sampleApp")
 
 
                 builderSvc.getSD(resource.resourceType).then(
-                //var uri = "http://hl7.org/fhir/StructureDefinition/"+resource.resourceType;
-                //GetDataFromServer.findConformanceResourceByUri(uri).then(
+                    //var uri = "http://hl7.org/fhir/StructureDefinition/"+resource.resourceType;
+                    //GetDataFromServer.findConformanceResourceByUri(uri).then(
                     function(SD) {
                         //console.log(SD);
 
@@ -603,7 +621,7 @@ angular.module("sampleApp")
                                         var ed = data.node.data.ed;
 
                                         $scope.currentElementValue = builderSvc.getValueForPath($scope.currentResource,path);
-                                        
+
                                         //get the type information
                                         if (ed.type) {
                                             $scope.hashPath = {path: ed.path};
@@ -645,7 +663,7 @@ angular.module("sampleApp")
                                                 if (typ.code == 'Reference' && typ.profile) {
                                                     //get all the resources of this type  (that are not already referenced by this element
                                                     $scope.hashPath.isReference = true;
-                                                    
+
                                                     var type = $filter('getLogicalID')(typ.profile);
 
                                                     var ar = builderSvc.getResourcesOfType(type,$scope.resourcesBundle);
@@ -672,9 +690,9 @@ angular.module("sampleApp")
 
 
                                                             if (! alreadyReferenced) {
-                                                                 type = resource.resourceType;   //allows for Reference
-                                                                 $scope.hashReferences[type] = $scope.hashReferences[type] || []
-                                                                 $scope.hashReferences[type].push(resource);
+                                                                type = resource.resourceType;   //allows for Reference
+                                                                $scope.hashReferences[type] = $scope.hashReferences[type] || []
+                                                                $scope.hashReferences[type].push(resource);
                                                             }
 
                                                         })
@@ -696,7 +714,7 @@ angular.module("sampleApp")
 
 
                                 })
-                                
+
                             }
                         )
 
@@ -707,21 +725,21 @@ angular.module("sampleApp")
                         $scope.bbNodes = [];        //backbone nodes to add
                         $scope.l2Nodes = {};        //a hash of nodes off the root that can have refernces. todo: genaralize for more levels
 
-                            references.forEach(function(ref){
+                        references.forEach(function(ref){
                             var path = ref.path
                             //now to determine if there is an object (or array) at the 'parent' of each node. If there
                             //is, then add it to the list of potential resources to link to. If not, then create
                             //an option that allows the user to add that parent
                             var ar = path.split('.');
-                              //  ar.pop();
+                            //  ar.pop();
 
 
 
 
-                         //   var parentPath  = ar.join('.');
-                               // parentPath =  $filter('dropFirstInPath')(parentPath);
+                            //   var parentPath  = ar.join('.');
+                            // parentPath =  $filter('dropFirstInPath')(parentPath);
 
-                                //console.log(parentPath,resource[parentPath])
+                            //console.log(parentPath,resource[parentPath])
 
                             if (ar.length == 2 ) {   //|| resource[parentPath]
                                 //so this is a reference off the root
@@ -749,9 +767,9 @@ angular.module("sampleApp")
 
                                     var info = builderSvc.getEDInfoForPath(parentPath);
                                     el.info = info
-                                    
+
                                     $scope.l2Nodes[segmentName].push(el)
-                                    
+
                                     $scope.bbNodes.push({level:2,path:path});
                                 }
                                 //so this is a reference to an insert point where the parent does not yet exist
@@ -784,6 +802,7 @@ angular.module("sampleApp")
                 builderSvc.insertReferenceAtPath($scope.currentResource,pth,resource)
 
                 makeGraph();    //this will update the list of all paths in this model...
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle); //update the generated document
                 var url = $scope.currentResource.resourceType+'/'+$scope.currentResource.id;
                 $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
 
@@ -802,18 +821,18 @@ angular.module("sampleApp")
 
                 if (pos > -1) {
                     $scope.hashReferences[type].splice(pos,1);
-                   // if ()
+                    // if ()
                 }
 
 
-               // $scope.hashReferences[type] = $scope.hashReferences[type] || []
-               // $scope.hashReferences[type].push(resource);
+                // $scope.hashReferences[type] = $scope.hashReferences[type] || []
+                // $scope.hashReferences[type].push(resource);
 
 
 
 
             }
-            
+
             $scope.addNewResource = function(type) {
 
                 if (type == 'Composition') {
@@ -828,7 +847,8 @@ angular.module("sampleApp")
                 var resource = {resourceType : type};
                 resource.id = idPrefix+new Date().getTime();
                 $scope.input.text = $scope.input.text || "";
-                resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text)};
+
+                resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text + builderSvc.getManualMarker())};
 
                 //console.log(resource);
 
@@ -878,13 +898,17 @@ angular.module("sampleApp")
 
             }
 
+            $scope.validate = function(){
+                alert('Resource Validation is not yet enabled. Sorry about that...')
+            }
+
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(lst) {
                     $scope.resources = lst
-                    
+
 
 
                 }
             );
-            
+
         });

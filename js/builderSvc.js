@@ -1,7 +1,7 @@
 angular.module("sampleApp")
-    //this returns config options. At the moment it is for servers...
-    //also holds the current patient and all their resources...
-    //note that the current profile is maintained by resourceCreatorSvc
+//this returns config options. At the moment it is for servers...
+//also holds the current patient and all their resources...
+//note that the current profile is maintained by resourceCreatorSvc
 
     .service('builderSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities,$filter) {
 
@@ -9,11 +9,64 @@ angular.module("sampleApp")
         var gSD = {};   //a has of all SD's reas this session by type
         var showLog = false;
         var gAllResourcesThisSet = {};      //hash of all resources in the current set
+        var manualMarkerString = "<a name='mm'/>";     //a marker string to separate manually entered text (above the marker) from generated text below
 
         return {
-            generateSectionText : function(section) {
-                //generate the text for a section. todo - needs to become recursive...
+            splitNarrative : function(narrative) {
 
+                //get the manual part of resource text - the text above the marker string. default to manual text..
+                //assume that the narrative MAY be surrounded by <div> tags...
+
+                var raw = $filter('cleanTextDiv')(narrative);       //the raw text - with 'divs' removed if they are present
+
+
+                var generated='',manual = raw;
+
+                var g = raw.indexOf(manualMarkerString);
+                if (g > -1) {
+                    manual = raw.substr(0,g);
+                    generated = raw.substr(g+manualMarkerString.length);
+                }
+
+                //manual = manual.substr(raw)
+
+                return {manual:manual,generated:generated}
+            },
+            getManualMarker : function() {
+                return manualMarkerString;
+            },
+            addGeneratedText:function(manualText,generatedText){
+                //create a narrative text surrounded by divs. \
+                //assume that 'plain text' is input - returns narrative surrounded by 'divs'
+                var narrative = manualText + manualMarkerString + generatedText;
+
+
+                return $filter('addTextDiv')(narrative);
+
+                /*
+                 //first, remove the </div> at the ene
+                 //resourceText = resourceText.substr(0,textDiv.length - 6);
+
+                 //if there's no marker, the add it...
+                 if (resourceText.indexOf(manualMarkerString) == -1) {
+                 resourceText += manualMarkerString;
+                 }
+
+                 //add the new text
+                 resourceText += newText + "</div>";
+
+                 return resourceText;
+                 */
+
+
+            },
+            generateSectionText : function(section) {
+
+                //construct section text from the text of all resources directly in the section.
+                //for each resource in the section, if it is a List then construct the text from the text of the
+                //immediate children. Otherwise just use the text of the resource.
+
+                //generate the text for a section. todo - needs to become recursive...
                 //console.log(gAllReferences)
                 var html = "";
                 var that = this;
@@ -23,7 +76,46 @@ angular.module("sampleApp")
 
 
                     if (resource) {
-                        html += resource.text.div
+                        if (resource.resourceType == 'List') {
+                            //get the text from all of the references resoruces...
+                            var manual = that.splitNarrative(resource.text.div).manual;  //manually entered text
+                            var generated = "";     //will replace the genereated text...
+
+
+                            //resource.text.div = $filter('addTextDiv')(result.userText + builderSvc.getManualMarker() + vo.generated);
+
+                            if (resource.entry) {
+                                resource.entry.forEach(function(entry){
+                                    //var ref = entry.item.reference;
+                                    var refResource = that.resourceFromReference(entry.item.reference);
+                                    if (refResource) {
+                                        html += refResource.text.div;
+                                        //add the text of the referenced element to the list...
+                                        //var raw = $filter('cleanTextDiv')(refResource.text.div)
+
+                                        //we only want the manually entered text...
+                                        generated += that.splitNarrative(refResource.text.div).manual;  //manually entered text
+                                        //generated +=  $filter('cleanTextDiv')(refResource.text.div);
+
+                                    }
+
+                                })
+                            }
+
+                            //var t = resource.text.div;
+
+                            resource.text.div = that.addGeneratedText(manual,generated);
+
+
+
+                            //resource.text.div = $filter('addTextDiv')(manual + that.getManualMarker() + generated);
+
+
+                        } else {
+                            html += resource.text.div
+                        }
+
+
                     }
 
 
@@ -62,20 +154,20 @@ angular.module("sampleApp")
                 //var hash ={};
                 var that = this;
                 var html = "";
-/*
-                allResourcesBundle.entry.forEach(function(entry){
-                    var resource = entry.resource;
-                    hash[that.referenceFromResource(resource)] = resource;
+                /*
+                 allResourcesBundle.entry.forEach(function(entry){
+                 var resource = entry.resource;
+                 hash[that.referenceFromResource(resource)] = resource;
 
-                });
+                 });
 
-                console.log(hash)
+                 console.log(hash)
 
-*/
+                 */
                 if (composition.subject) {
                     var subject = that.resourceFromReference(composition.subject.reference);
                     //var patient = hash[composition.patient.reference]
-                    console.log(subject);
+                    //console.log(subject);
                     if (subject) {
                         html += "<h3>Subject</h3>" + "<div class='inset'>"+  subject.text.div + "</div>";
                     }
@@ -86,7 +178,7 @@ angular.module("sampleApp")
                 html += "<h3>Sections</h3>";
 
                 composition.section.forEach(function(section){
-                    console.log(section);
+                    //console.log(section);
 
 
                     html += "<h4>"+section.title+"</h4>";
@@ -141,7 +233,7 @@ angular.module("sampleApp")
                 $http.get(url).then(
                     function (data) {
                         deferred.resolve(data.data)
-                        console.log(data.data)
+                        //console.log(data.data)
                     },function (err) {
                         console.log(err)
                         deferred.reject(err);
@@ -202,7 +294,7 @@ angular.module("sampleApp")
                 var path = hashPath.path;
 
                 if (path.indexOf('.') > -1) {
-                  //  return "Can only add to root properties";
+                    //  return "Can only add to root properties";
                 }
 
 
@@ -233,37 +325,37 @@ angular.module("sampleApp")
                     case 'date' :
                         simpleInsert(resource,info,path,value.date,this.getEDInfoForPath);
                         /* if (info.isMultiple) {
-                            resource[path] = resource[path] || []
-                            resource[path].push(value.date)
-                        } else {
-                            resource[path] = value.date;
-                        }
-                        */
+                         resource[path] = resource[path] || []
+                         resource[path].push(value.date)
+                         } else {
+                         resource[path] = value.date;
+                         }
+                         */
                         this.addStringToText(resource.path+": "+ value.date)
                         break;
 
                     case 'code' :
                         simpleInsert(resource,info,path,value.code,this.getEDInfoForPath);
                         /*
-                        if (info.isMultiple) {
-                            resource[path] = resource[path] || []
-                            resource[path].push(value.code)
-                        } else {
-                            resource[path] = value.code;
-                        }
-                        */
+                         if (info.isMultiple) {
+                         resource[path] = resource[path] || []
+                         resource[path].push(value.code)
+                         } else {
+                         resource[path] = value.code;
+                         }
+                         */
                         this.addStringToText(resource,path+": "+ value.code)
                         break;
                     case 'string' :
                         simpleInsert(resource,info,path,value.string,this.getEDInfoForPath);
                         /*
-                        if (info.isMultiple) {
-                            resource[path] = resource[path] || []
-                            resource[path].push(value.string)
-                        } else {
-                            resource[path] = value.string;
-                        }
-                        */
+                         if (info.isMultiple) {
+                         resource[path] = resource[path] || []
+                         resource[path].push(value.string)
+                         } else {
+                         resource[path] = value.string;
+                         }
+                         */
                         this.addStringToText(resource,path+": "+ value.string)
                         break;
                     case "CodeableConcept" :
@@ -294,14 +386,14 @@ angular.module("sampleApp")
                             //simpleInsert(resource,info,path,value.string,this.getEDInfoForPath);
 
                             simpleInsert(resource,info,path,cc,this.getEDInfoForPath);
-  /*
-                            if (info.isMultiple) {
-                                resource[path] = resource[path] || []
-                                resource[path].push(cc)
-                            } else {
-                                resource[path] = cc;
-                            }
-*/
+                            /*
+                             if (info.isMultiple) {
+                             resource[path] = resource[path] || []
+                             resource[path].push(cc)
+                             } else {
+                             resource[path] = cc;
+                             }
+                             */
                             if (text) {
                                 this.addStringToText(resource, path + ": " + text)
                             }
@@ -329,7 +421,7 @@ angular.module("sampleApp")
                             segmentPath += '.'+segment;
                             console.log(segmentPath)
 
-                             segmentInfo = getInfo(segmentPath);
+                            segmentInfo = getInfo(segmentPath);
 
                             if (segmentInfo.isMultiple) {
                                 insertPoint[segment] = insertPoint[segment] || []  // todo,need to allow for arrays
@@ -353,15 +445,15 @@ angular.module("sampleApp")
                     //if (info.isMultiple) {
                     if (info.isMultiple) {
                         /*
-                        //if there is already a child on the insertpath, then add this node
-                        if (insertPoint[path] && insertPoint[path].length > 0) {
-                            var x = insertPoint[path];
-                            insertPoint[path] =insrt;
-                        } else {
-                            insertPoint[path] = insertPoint[path] || []
-                            insertPoint[path].push(insrt)
-                        }
-*/
+                         //if there is already a child on the insertpath, then add this node
+                         if (insertPoint[path] && insertPoint[path].length > 0) {
+                         var x = insertPoint[path];
+                         insertPoint[path] =insrt;
+                         } else {
+                         insertPoint[path] = insertPoint[path] || []
+                         insertPoint[path].push(insrt)
+                         }
+                         */
                         //insertPoint[path] = resource[path] || []
                         insertPoint[path] = insertPoint[path] || []
                         insertPoint[path].push(insrt)
@@ -378,14 +470,14 @@ angular.module("sampleApp")
 
 //-----------------
                     /*
-                    if (info.isMultiple) {
-                        resource[path] = resource[path] || []
-                        resource[path].push(insrt)
-                    } else {
-                        resource[path] =insrt;
-                    }
+                     if (info.isMultiple) {
+                     resource[path] = resource[path] || []
+                     resource[path].push(insrt)
+                     } else {
+                     resource[path] =insrt;
+                     }
 
-                    */
+                     */
                 }
 
 
@@ -403,7 +495,7 @@ angular.module("sampleApp")
                 path = ar.join('.')
 
 
-               // var path = $filter('dropFirstInPath')(path);
+                // var path = $filter('dropFirstInPath')(path);
                 //path.pop();
                 console.log(resource,path,inx);
                 if (inx !== undefined) {
@@ -418,49 +510,49 @@ angular.module("sampleApp")
 
 
 
-/*
-                var info = this.getEDInfoForPath(path);
+                /*
+                 var info = this.getEDInfoForPath(path);
 
-                var segmentPath = resource.resourceType;
-                //var rootPath = $filter('dropFirstInPath')(path);
-                var path = $filter('dropFirstInPath')(path);
-                var deletePoint = resource;
-                var ar = path.split('.');
-                if (ar.length > 0) {
-                    for (var i=0; i < ar.length-1; i++) {
-                        //not the last one... -
-                        var segment = ar[i];
-                        
-                        segmentPath += '.'+segment;
-                        console.log(segmentPath)
+                 var segmentPath = resource.resourceType;
+                 //var rootPath = $filter('dropFirstInPath')(path);
+                 var path = $filter('dropFirstInPath')(path);
+                 var deletePoint = resource;
+                 var ar = path.split('.');
+                 if (ar.length > 0) {
+                 for (var i=0; i < ar.length-1; i++) {
+                 //not the last one... -
+                 var segment = ar[i];
 
-                        var segmentInfo = this.getEDInfoForPath(segmentPath);
+                 segmentPath += '.'+segment;
+                 console.log(segmentPath)
 
-                        if (segmentInfo.isMultiple) {
-                            deletePoint[segment] = deletePoint[segment] || []  // todo,need to allow for arrays
-                            var node = {};
-                            deletePoint[segment].push(node)
-                            deletePoint = node
-                        } else {
-                            deletePoint[segment] = deletePoint[segment] || {}  // todo,need to allow for arrays
-                            deletePoint = deletePoint[segment]
-                        }
+                 var segmentInfo = this.getEDInfoForPath(segmentPath);
 
-
+                 if (segmentInfo.isMultiple) {
+                 deletePoint[segment] = deletePoint[segment] || []  // todo,need to allow for arrays
+                 var node = {};
+                 deletePoint[segment].push(node)
+                 deletePoint = node
+                 } else {
+                 deletePoint[segment] = deletePoint[segment] || {}  // todo,need to allow for arrays
+                 deletePoint = deletePoint[segment]
+                 }
 
 
-                    }
-                    path = ar[ar.length-1];       //this will be the property on the 'last'segment
-                }
 
 
-                
-                console.log(insertPoint)
+                 }
+                 path = ar[ar.length-1];       //this will be the property on the 'last'segment
+                 }
 
-*/
+
+
+                 console.log(insertPoint)
+
+                 */
 
                 if (inx) {
-                    
+
                 }
 
             },
@@ -557,7 +649,7 @@ angular.module("sampleApp")
                         var info = that.getEDInfoForPath(fullPath)
 
                         if (info.isMultiple) {
-                        
+
                             insertPoint[segment] = insertPoint[segment] || []
 
                         } else {
@@ -589,7 +681,7 @@ angular.module("sampleApp")
                             deferred.reject(err)
                         })
                 }
-                
+
                 return deferred.promise;
             },
             getEDInfoForPath : function(path) {
@@ -607,11 +699,11 @@ angular.module("sampleApp")
                             if (ed.max == '*') {
                                 info.isMultiple = true
                             }
-                            
+
 
                         }
                     })
-                    
+
                 }
                 return info;
 
@@ -638,7 +730,7 @@ angular.module("sampleApp")
 
                     },
                     function (err) {
-console.log(err);
+                        console.log(err);
                         deferred.reject(err)
                     })
                 return deferred.promise;
@@ -711,7 +803,7 @@ console.log(err);
 
                 var arNodes = [], arEdges = [];
                 var objNodes = {};
-                
+
                 //for each entry in the bundle, find the resource that it references
                 bundle.entry.forEach(function(entry){
 
@@ -761,7 +853,7 @@ console.log(err);
                 //find elements of type refernce at this level
                 function findReferences(refs,node,nodePath,index) {
                     angular.forEach(node,function(value,key){
-                        
+
                         //if it's an object, does it have a child called 'reference'?
 
 
@@ -771,7 +863,7 @@ console.log(err);
                                 var lpath = nodePath + '.' + key;
                                 if (obj.reference) {
                                     //this is a reference!
-                                   
+
                                     refs.push({path: lpath, reference: obj.reference})
                                 } else {
                                     //if it's not a reference, then does it have any children?
@@ -800,97 +892,97 @@ console.log(err);
 
 
                 /*
-                
-                getModelReferences(lst,SD,SD.url);      //recursively find all the references between models...
 
-                console.log(lst);
+                 getModelReferences(lst,SD,SD.url);      //recursively find all the references between models...
 
-                //build the tree model...
+                 console.log(lst);
 
-
-
-
-                lst.forEach(function(reference){
-
-                    var srcNode = getNodeByUrl(reference.src,reference.path,objNodes,arNodes);
-                    var targNode = getNodeByUrl(reference.targ,reference.path,objNodes,arNodes);
-
-                    var ar = reference.path.split('.');
-                    var label = ar.pop();
-                    //ar.splice(0,1);
-                    //var label = ar.join('.');
-                    arEdges.push({from: srcNode.id, to: targNode.id, label: label,arrows : {to:true}})
-
-                })
-
-
-                var nodes = new vis.DataSet(arNodes);
-                var edges = new vis.DataSet(arEdges);
-
-                // provide the data in the vis format
-                var data = {
-                    nodes: nodes,
-                    edges: edges
-                };
-
-                //construct an object that is indexed by nodeId (for the model selection from the graph
-                var nodeObj = {};
-                arAllModels = []; //construct an array of all the models references by this one
-                arNodes.forEach(function(node){
-                    nodeObj[node.id] = node;
-                    arAllModels.push({url:node.url})
-                });
+                 //build the tree model...
 
 
 
 
+                 lst.forEach(function(reference){
+
+                 var srcNode = getNodeByUrl(reference.src,reference.path,objNodes,arNodes);
+                 var targNode = getNodeByUrl(reference.targ,reference.path,objNodes,arNodes);
+
+                 var ar = reference.path.split('.');
+                 var label = ar.pop();
+                 //ar.splice(0,1);
+                 //var label = ar.join('.');
+                 arEdges.push({from: srcNode.id, to: targNode.id, label: label,arrows : {to:true}})
+
+                 })
 
 
-                return {references:lst,graphData:data, nodes : nodeObj,lstNodes : arAllModels};
+                 var nodes = new vis.DataSet(arNodes);
+                 var edges = new vis.DataSet(arEdges);
 
-                function getNodeByUrl(url,label,nodes) {
-                    if (nodes[url]) {
-                        return nodes[url];
-                    } else {
-                        var ar = url.split('/')
-                        //var label =
-                        var node = {id: arNodes.length +1, label: ar[ar.length-1], shape: 'box',url:url};
-                        if (arNodes.length == 0) {
-                            //this is the first node
-                            node.color = 'green'
-                            node.font = {color:'white'}
-                        }
+                 // provide the data in the vis format
+                 var data = {
+                 nodes: nodes,
+                 edges: edges
+                 };
 
-
-                        nodes[url] = node;
-                        arNodes.push(node);
-                        return node;
-                    }
-                }
+                 //construct an object that is indexed by nodeId (for the model selection from the graph
+                 var nodeObj = {};
+                 arAllModels = []; //construct an array of all the models references by this one
+                 arNodes.forEach(function(node){
+                 nodeObj[node.id] = node;
+                 arAllModels.push({url:node.url})
+                 });
 
 
-                function getModelReferences(lst,SD,srcUrl) {
-                    var treeData = that.createTreeArrayFromSD(SD);
 
-                    treeData.forEach(function(item){
 
-                        if (item.data) {
-                            //console.log(item.data.referenceUri);
-                            if (item.data.referenceUri) {
-                                var ref = {src:srcUrl, targ:item.data.referenceUri, path: item.data.path}
-                                lst.push(ref);
-                                var newSD = that.getModelFromBundle(bundle,item.data.referenceUri);
-                                if (newSD) {
-                                    getModelReferences(lst,newSD,newSD.url)
-                                }
 
-                            }
-                        }
-                    })
 
-                }
+                 return {references:lst,graphData:data, nodes : nodeObj,lstNodes : arAllModels};
 
-*/
+                 function getNodeByUrl(url,label,nodes) {
+                 if (nodes[url]) {
+                 return nodes[url];
+                 } else {
+                 var ar = url.split('/')
+                 //var label =
+                 var node = {id: arNodes.length +1, label: ar[ar.length-1], shape: 'box',url:url};
+                 if (arNodes.length == 0) {
+                 //this is the first node
+                 node.color = 'green'
+                 node.font = {color:'white'}
+                 }
+
+
+                 nodes[url] = node;
+                 arNodes.push(node);
+                 return node;
+                 }
+                 }
+
+
+                 function getModelReferences(lst,SD,srcUrl) {
+                 var treeData = that.createTreeArrayFromSD(SD);
+
+                 treeData.forEach(function(item){
+
+                 if (item.data) {
+                 //console.log(item.data.referenceUri);
+                 if (item.data.referenceUri) {
+                 var ref = {src:srcUrl, targ:item.data.referenceUri, path: item.data.path}
+                 lst.push(ref);
+                 var newSD = that.getModelFromBundle(bundle,item.data.referenceUri);
+                 if (newSD) {
+                 getModelReferences(lst,newSD,newSD.url)
+                 }
+
+                 }
+                 }
+                 })
+
+                 }
+
+                 */
 
             },
             getResourcesOfType : function(type,bundle){
@@ -915,7 +1007,7 @@ console.log(err);
                                 if (type.code == 'Reference') {
                                     if (type.profile) {
 
-                                        
+
 
                                         //note that profile can be an array or a string
                                         if (angular.isArray(type.profile)) {
@@ -932,5 +1024,5 @@ console.log(err);
                 return references;
             }
         }
-        
+
     })
