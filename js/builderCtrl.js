@@ -35,7 +35,7 @@ angular.module("sampleApp")
                     function(bundle){
                         $scope.library = bundle;    //this is a bundle of DocumentReference resources...
 
-                        //add meta information for display. Makes it a non-lgal resource, but don't really care
+                        //add meta information for display. Makes it a non-lgal resource, but don't really care for this purpose...
                         if ($scope.library && $scope.library.entry) {
                             $scope.library.entry.forEach(function(entry){
                                 var dr = entry.resource;

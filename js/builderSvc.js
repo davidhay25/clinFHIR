@@ -11,6 +11,15 @@ angular.module("sampleApp")
         var gAllResourcesThisSet = {};      //hash of all resources in the current set
         var manualMarkerString = "<a name='mm'/>";     //a marker string to separate manually entered text (above the marker) from generated text below
 
+        var objColours ={};
+        objColours.Patient = '#93FF1A';
+        objColours.Composition = '#E89D0C';
+        objColours.List = '#ff8080';
+        objColours.List = '#FFFFCC';
+        objColours.Practitioner = '#FFBB99';
+        objColours.MedicationStatement = '#ffb3ff';
+
+
         return {
             splitNarrative : function(narrative) {
 
@@ -225,8 +234,9 @@ angular.module("sampleApp")
                 var url = appConfigSvc.getCurrentDataServer().url + 'DocumentReference?type=http://clinfhir.com/docs|builderDoc';
                 $http.get(url).then(
                     function (data) {
-                        deferred.resolve(data.data)
                         //console.log(data.data)
+                        deferred.resolve(data.data)
+
                     },function (err) {
                         console.log(err)
                         deferred.reject(err);
@@ -769,6 +779,11 @@ angular.module("sampleApp")
                     //add an entry to the node list for this resource...
                     var node = {id: arNodes.length +1, label: resource.resourceType, shape: 'box',url:url,cf : {resource:resource}};
                     node.title = resource.text.div;
+
+                    if (objColours[resource.resourceType]) {
+                        node.color = objColours[resource.resourceType];
+                    }
+
                     arNodes.push(node);
                     objNodes[node.url] = node;
 
