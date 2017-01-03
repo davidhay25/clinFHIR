@@ -17,7 +17,7 @@
                                     {{section.title}}
                                 </div>
                                 <div class="col-md-3 col-sm-3">
-                                    <i class="glyphicon glyphicon-edit iconSpacing pull-right"
+                                    <i class="glyphicon glyphicon-edit iconSpacing pull-right " ng-show="showMoveArrows"
                                        title="Edit text"
                                        ng-click="editSection(section)" style="cursor: pointer">
 
@@ -69,39 +69,41 @@
                             <li style="cursor: pointer" class="list-group-item"
                                 ng-repeat="entry in currentSection.entry">
 
-                                <div class="row">
+                                <div class="row" ng-mouseover="showSectionArrows = true" ng-mouseleave="showSectionArrows = false">
                                     <div class="col-md-8 col-sm-8">
                                         <span popover-trigger="'mouseenter'"
                                               uib-popover-html = "entry.reference | resourceTextFromReference"
-                                                ng-click = "selectResourceFromSection(entry.reference)">
+                                              ng-click = "selectResourceFromSection(entry.reference)">
                                             {{entry.reference}}
                                         </span>
 
                                     </div>
                                     <div class="col-md-4 col-sm-4">
+                                        <div ng-show="showSectionArrows">
 
-                                        <div class="pull-right">
-                                            <i class="glyphicon glyphicon-remove"
-                                               title="Remove"
-                                               ng-click="removeReferenceFromSection($index)" style="cursor: pointer">
 
-                                            </i>
+                                            <div class="pull-right">
+                                                <i class="glyphicon glyphicon-remove"
+                                                   title="Remove"
+                                                   ng-click="removeReferenceFromSection($index)" style="cursor: pointer">
+
+                                                </i>
+                                            </div>
+                                            <br/>
+                                            <div class="pull-right">
+                                                <i class="glyphicon glyphicon-arrow-down iconSpacing"
+                                                   title="Move Down"  ng-show="$index < currentSection.entry.length -1"
+                                                   ng-click="moveSectionResource($index,'dn')" style="cursor: pointer">
+
+                                                </i>
+
+                                                <i class="glyphicon glyphicon-arrow-up iconSpacing"
+                                                   title="Move Up" ng-show="$index > 0"
+                                                   ng-click="moveSectionResource($index,'up')" style="cursor: pointer">
+
+                                                </i>
+                                            </div>
                                         </div>
-                                        <br/>
-                                        <div class="pull-right">
-                                            <i class="glyphicon glyphicon-arrow-down iconSpacing"
-                                               title="Move Down"
-                                               ng-click="moveSectionResource($index,'dn')" style="cursor: pointer">
-
-                                            </i>
-
-                                            <i class="glyphicon glyphicon-arrow-up iconSpacing"
-                                               title="Move Up"
-                                               ng-click="moveSectionResource($index,'up')" style="cursor: pointer">
-
-                                            </i>
-                                        </div>
-
                                     </div>
 
                                 </div>
