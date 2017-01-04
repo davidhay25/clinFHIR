@@ -116,7 +116,8 @@ angular.module("sampleApp")
                     $rootScope.$emit('docUpdated',$scope.compositionResource);
 
                     //These are all scope variables from the parent controller...
-                    $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
+                    $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedEntry,bundle)
+                    //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
                 })
             };
 
@@ -195,7 +196,8 @@ angular.module("sampleApp")
                 $rootScope.$emit('docUpdated',$scope.compositionResource);
 
                 //These are all scope variables from the parent controller...
-                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
+                //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedEntry.bundle)
             }
 
             $scope.initializeDocumentDEP = function() {
@@ -227,7 +229,8 @@ angular.module("sampleApp")
                 // removeStringFromArray($scope.resourcesNotInThisSection,reference);   //remove from the 'not in section' array...
 
                 //These are all scope variables from the parent controller...
-                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
+                //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedEntry.bundle)
 
             };
 
@@ -249,7 +252,8 @@ angular.module("sampleApp")
                 $rootScope.$emit('docUpdated',$scope.compositionResource);
 
                 //These are all scope variables from the parent controller...
-                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
+                //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedEntry.bundle)
 
             };
 
@@ -268,7 +272,8 @@ angular.module("sampleApp")
 
                 //now compile the list of resources that aren't in this section
                 $scope.resourcesNotInThisSection.length = 0;
-                $scope.resourcesBundle.entry.forEach(function(entry){
+                //$scope.resourcesBundle.entry.forEach(function(entry){
+                $scope.selectedEntry.bundle.entry.forEach(function(entry){
                     var resource= entry.resource;
                     //var reference = resource.resourceType + "/" + resource.id;
 
@@ -305,6 +310,7 @@ angular.module("sampleApp")
                 $rootScope.$emit('docUpdated',$scope.compositionResource);
 
                 //These are all scope variables from the parent controller...
-                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
+                //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedEntry.bundle)
             }
         });

@@ -2,7 +2,8 @@
 angular.module("sampleApp")
     .controller('builderCtrl',
         function ($scope,$http,appConfigSvc,$q,GetDataFromServer,resourceCreatorSvc,RenderProfileSvc,builderSvc,
-                  $timeout,$localStorage,$filter,profileCreatorSvc,modalService,Utilities,$uibModal,$rootScope,$firebaseObject,logicalModelSvc) {
+                  $timeout,$localStorage,$filter,profileCreatorSvc,modalService,Utilities,$uibModal,$rootScope,
+                  $firebaseObject,logicalModelSvc) {
 
             $scope.input = {};
             $scope.input.dt = {};   //data entered as part of populating a datatype
@@ -70,6 +71,44 @@ angular.module("sampleApp")
              */
 
 
+            //---------- login stuff
+            //called whenever the auth state changes - eg login/out, initial load, create user etc.
+            firebase.auth().onAuthStateChanged(function(user) {
+
+
+                if (user) {
+                    $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+                    logicalModelSvc.setCurrentUser(user);
+
+
+                    //return the practitioner resource that corresponds to the current user (the service will create if absent)
+                    GetDataFromServer.getPractitionerByLogin(user).then(
+                        function(practitioner){
+                            //console.log(practitioner)
+                            $scope.Practitioner = practitioner;
+
+
+
+                        },function (err) {
+                            alert(err)
+                        }
+                    );
+
+                    delete $scope.showNotLoggedIn;
+
+
+                } else {
+                    console.log('no user')
+                    logicalModelSvc.setCurrentUser(null);
+                    $scope.showNotLoggedIn = true;
+                    delete $scope.Practitioner;
+
+                }
+            });
+
+            $scope.firebase = firebase;
+
+
             //---------- related to document builder -------
             $rootScope.$on('docUpdated',function(event,composition){
                 //console.log(composition)
@@ -79,13 +118,17 @@ angular.module("sampleApp")
             function isaDocument() {
                 $scope.isaDocument = false;
                 delete $scope.compositionResource;
-                $scope.resourcesBundle.entry.forEach(function(entry){
+
+                $scope.selectedEntry.bundle.entry.forEach(function(entry){
+
+               // }
+                //$scope.resourcesBundle.entry.forEach(function(entry){
                     if (entry.resource.resourceType =='Composition') {
                         entry.resource.section = entry.resource.section || [];
                         $scope.compositionResource = entry.resource;
                         $scope.isaDocument= true;
 
-                        $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle);
+                        $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedEntry.bundle);
                         //console.log(html)
 
                     }
@@ -147,7 +190,8 @@ angular.module("sampleApp")
                 // $localStorage.builderBundles = [newBundle]
             } else {
                 if ($localStorage.builderBundles.length > 0) {
-                    $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+                   // $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+                    $scope.selectedEntry = $localStorage.builderBundles[$scope.currentBundleIndex];
                     builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
                     isaDocument();
                 }
@@ -176,8 +220,10 @@ angular.module("sampleApp")
                     delete $scope.isaDocument
                     var newBundle = {name:name,bundle:{resourceType:'Bundle',entry:[]}}
                     newBundle.bundle.id = idPrefix+new Date().getTime();
+                    newBundle.meta = {isDirty:true,private:true};
                     $localStorage.builderBundles.push(newBundle);
-                    $scope.resourcesBundle = newBundle.bundle;
+                    //$scope.resourcesBundle = newBundle.bundle;
+                    $scope.selectedEntry = newBundle;
                     $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
                     makeGraph();
                     delete $scope.currentResource;
@@ -204,7 +250,8 @@ angular.module("sampleApp")
                     if (item.bundle.id == id) {
                         alreadyLocal = true;
                         modalService.showModal({}, {bodyText:'There is already a copy of this set downloaded. Selecting it now.'});
-                        $scope.resourcesBundle = item.bundle;
+                       // $scope.resourcesBundle = item.bundle;
+                        $scope.selectedEntry = item;
                         $scope.currentBundleIndex= inx;
                         $scope.libraryVisible = false;
                     }
@@ -213,8 +260,9 @@ angular.module("sampleApp")
                 if (! alreadyLocal) {
                     var newBundle = {name:dr.description,bundle:bundle}
                     $localStorage.builderBundles.push(newBundle);
-                    $scope.resourcesBundle = newBundle.bundle;
+                   // $scope.resourcesBundle = newBundle.bundle;
 
+                    $scope.selectedEntry = newBundle;
                     $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
                     builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
                     makeGraph();
@@ -229,12 +277,13 @@ angular.module("sampleApp")
 
             $scope.selectBundle = function(inx){
                 $scope.currentBundleIndex = inx;
-                $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+                //$scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+                $scope.selectedEntry = $localStorage.builderBundles[$scope.currentBundleIndex];
                 builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
                 makeGraph();
                 delete $scope.currentResource;
                 isaDocument();      //determine if this bundle is a document (has a Composition resource)
-                $rootScope.$emit('newSet',$scope.resourcesBundle);
+                $rootScope.$emit('newSet',$scope.selectedEntry.bundle);
             }
 
             $scope.displayMode = 'view';    //options 'new', 'view'
@@ -369,9 +418,11 @@ angular.module("sampleApp")
                         if ($localStorage.builderBundles.length == 0) {
                             //no bundles left
                             $localStorage.builderBundles = []
-                            delete $scope.resourcesBundle;
+                           // delete $scope.resourcesBundle;
+                            delete $scope.selectedEntry;
                         } else {
-                            $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+                            //$scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+                            $scope.selectedEntry = $localStorage.builderBundles[$scope.currentBundleIndex];
                             makeGraph();
                         }
 
@@ -405,15 +456,19 @@ angular.module("sampleApp")
                 modalService.showModal({}, modalOptions).then(
                     function (result) {
                         var inx = -1;
-                        for (var i=0; i < $scope.resourcesBundle.entry.length; i++) {
-                            var r = $scope.resourcesBundle.entry[i].resource;
+                        for (var i=0; i < $scope.selectedEntry.bundle.entry.length; i++) {
+                        //for (var i=0; i < $scope.resourcesBundle.entry.length; i++) {
+                            //var r = $scope.resourcesBundle.entry[i].resource;
+                            var r = $scope.selectedEntry.bundle.entry[i].resource;
                             if (r.resourceType == resource.resourceType && r.id == resource.id) {
                                 inx = i;
                                 break;
                             }
                         }
                         if (inx > -1) {
-                            $scope.resourcesBundle.entry.splice(inx,1);
+                           // $scope.resourcesBundle.entry.splice(inx,1);
+                            $scope.selectedEntry.bundle.entry.splice(inx,1);
+
                             makeGraph();
                             delete $scope.currentResource;
                             isaDocument();      //may not still be a document...
@@ -427,8 +482,10 @@ angular.module("sampleApp")
 
             //generate the graph of resources and references between them
             makeGraph = function() {
-                if ($scope.resourcesBundle) {
-                    var vo = builderSvc.makeGraph($scope.resourcesBundle)   //todo - may not be the right place...
+                //if ($scope.resourcesBundle) {
+                if ($scope.selectedEntry.bundle) {
+                    var vo = builderSvc.makeGraph($scope.selectedEntry.bundle)   //todo - may not be the right place...
+                    //var vo = builderSvc.makeGraph($scope.resourcesBundle)   //todo - may not be the right place...
                     $scope.allReferences = vo.allReferences;                //all references in the entire set.
                     //console.log($scope.allReferences)
                     var container = document.getElementById('resourceGraph');
@@ -656,7 +713,8 @@ angular.module("sampleApp")
 
                                                     var type = $filter('getLogicalID')(targetProfile);
 
-                                                    var ar = builderSvc.getResourcesOfType(type,$scope.resourcesBundle);
+                                                    //var ar = builderSvc.getResourcesOfType(type,$scope.resourcesBundle);
+                                                    var ar = builderSvc.getResourcesOfType(type,$scope.selectedEntry.bundle);
 
                                                     if (ar.length > 0) {
                                                         ar.forEach(function(resource){
@@ -734,7 +792,8 @@ angular.module("sampleApp")
                                 //now find all existing resources with this type
                                 var type = $filter('getLogicalID')(ref.profile);
 //console.log(type)
-                                var ar = builderSvc.getResourcesOfType(type,$scope.resourcesBundle);
+                                var ar = builderSvc.getResourcesOfType(type,$scope.selectedEntry.bundle);
+                                //var ar = builderSvc.getResourcesOfType(type,$scope.resourcesBundle);
                                 if (ar.length > 0) {
                                     ar.forEach(function(resource){
 
@@ -789,7 +848,8 @@ angular.module("sampleApp")
                 builderSvc.insertReferenceAtPath($scope.currentResource,pth,resource)
 
                 makeGraph();    //this will update the list of all paths in this model...
-                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle); //update the generated document
+                //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle); //update the generated documen
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedEntry.bundle); //update the generated document
                 var url = $scope.currentResource.resourceType+'/'+$scope.currentResource.id;
                 $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
 
@@ -841,9 +901,11 @@ angular.module("sampleApp")
 
                 builderSvc.addResourceToAllResources(resource)
 
-                $scope.resourcesBundle.entry.push({resource:resource});
+                $scope.selectedEntry.bundle.entry.push({resource:resource});
+                //$scope.resourcesBundle.entry.push({resource:resource});
 
-                $scope.resourcesBundle.entry.sort(function(a,b){
+                $scope.selectedEntry.bundle.entry.sort(function(a,b){
+                //$scope.resourcesBundle.entry.sort(function(a,b){
                     if (a.resource.resourceType > b.resource.resourceType) {
                         return 1
                     } else {
