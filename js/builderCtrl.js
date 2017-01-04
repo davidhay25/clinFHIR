@@ -12,25 +12,7 @@ angular.module("sampleApp")
             //console.log(builderSvc.mannualMa)
 
             var idPrefix = 'cf-';   //prefix for the id. todo should probably be related to the userid in some way...
-
-            $scope.saveToLibrary = function(){
-
-                //console.log($localStorage.builderBundles[$scope.currentBundleIndex])
-
-
-                builderSvc.saveToLibrary($localStorage.builderBundles[$scope.currentBundleIndex]).then(
-                    function (data) {
-                        modalService.showModal({}, {bodyText:'The set has been updated in the Library. You can continue editing.'});
-                        refreshLibrary();
-                        //console.log(data)
-                    },function (err) {
-                        modalService.showModal({}, {bodyText:'Sorry, there was an error updating the library:' + angular.toJson(err)})
-                        console.log(err)
-                    }
-                );
-
-            };
-
+        //load the library. todo THis will become slow with large numbers of sets...
             function refreshLibrary() {
                 builderSvc.loadLibrary().then(
                     function(bundle){
@@ -119,7 +101,7 @@ angular.module("sampleApp")
                 $scope.isaDocument = false;
                 delete $scope.compositionResource;
 
-                $scope.selectedEntry.bundle.entry.forEach(function(entry){
+                $scope.selectedContainer.bundle.entry.forEach(function(entry){
 
                // }
                 //$scope.resourcesBundle.entry.forEach(function(entry){
@@ -128,7 +110,7 @@ angular.module("sampleApp")
                         $scope.compositionResource = entry.resource;
                         $scope.isaDocument= true;
 
-                        $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedEntry.bundle);
+                        $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedContainer.bundle);
                         //console.log(html)
 
                     }
@@ -191,7 +173,7 @@ angular.module("sampleApp")
             } else {
                 if ($localStorage.builderBundles.length > 0) {
                    // $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
-                    $scope.selectedEntry = $localStorage.builderBundles[$scope.currentBundleIndex];
+                    $scope.selectedContainer = $localStorage.builderBundles[$scope.currentBundleIndex];
                     builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
                     isaDocument();
                 }
@@ -215,22 +197,73 @@ angular.module("sampleApp")
             }
 
             $scope.newBundle = function() {
+
+
+
+
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/newSet.html',
+
+                    controller: function ($scope,GetDataFromServer,appConfigSvc) {
+
+                        $scope.server = appConfigSvc.getCurrentDataServer();
+                        $scope.checkName = function(){
+                            if ($scope.name) {
+                                //alert($scope.name)
+                                $scope.canSave = true;
+                            }
+
+                        };
+
+                        $scope.save = function(){
+                            $scope.$close({name:$scope.name,description:$scope.description})
+                        }
+
+                    }
+                }).result.then(function(vo){
+                    //console.log(vo)
+                    if (vo.name) {
+                        delete $scope.isaDocument
+                        var newBundleContainer = {name:vo.name,bundle:{resourceType:'Bundle',entry:[]}};
+                        newBundleContainer.description = vo.description;
+                        newBundleContainer.bundle.id = idPrefix+new Date().getTime();
+                        newBundleContainer.isDirty = true;
+                        newBundleContainer.isPrivate = true;
+                        $localStorage.builderBundles.push(newBundleContainer);
+                        $scope.selectedContainer = newBundleContainer;
+                        $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
+                        makeGraph();
+                        delete $scope.currentResource;
+                        $rootScope.$emit('newSet',newBundleContainer);
+                    }
+                });
+
+
+
+                return;
+
+
+
+
                 var name = prompt('Name of Bundle');
                 if (name) {
                     delete $scope.isaDocument
-                    var newBundle = {name:name,bundle:{resourceType:'Bundle',entry:[]}}
-                    newBundle.bundle.id = idPrefix+new Date().getTime();
-                    newBundle.meta = {isDirty:true,private:true};
-                    $localStorage.builderBundles.push(newBundle);
-                    //$scope.resourcesBundle = newBundle.bundle;
-                    $scope.selectedEntry = newBundle;
+                    var newBundleContainer = {name:name,bundle:{resourceType:'Bundle',entry:[]}};
+                    newBundleContainer.description = "";
+                    newBundleContainer.bundle.id = idPrefix+new Date().getTime();
+                    newBundleContainer.isDirty = true;
+                    newBundleContainer.isPrivate = true;
+                    $localStorage.builderBundles.push(newBundleContainer);
+                    $scope.selectedContainer = newBundleContainer;
                     $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
                     makeGraph();
                     delete $scope.currentResource;
-                    $rootScope.$emit('newSet',newBundle);
+                    $rootScope.$emit('newSet',newBundleContainer);
                 }
             };
 
+            
+            //called when a library entry is selected to view. may be redundant...
             $scope.selectLibraryEntry = function(entry,inx){
                 //console.log(entry);
                 $scope.selectedLibraryEntry = entry;
@@ -241,49 +274,82 @@ angular.module("sampleApp")
             $scope.downloadFromLibrary = function(entry,inx){
                 //note that the entry is a DocumentReference with a contained bundle as an attachment...
                 var dr = entry.resource;
-                var bundle = angular.fromJson(atob(dr.content[0].attachment.data));   //todo - not safe!
-                var id = bundle.id;
+                var container = builderSvc.getBundleContainerFromDocRef(dr);
+                if (container) {
+                    // var bundle = angular.fromJson(atob(dr.content[0].attachment.data));   //todo - not safe!
+                    var id = container.bundle.id;
 
-                //see if this set (based on the id) already exists.
-                var alreadyLocal = false;
-                $localStorage.builderBundles.forEach(function (item,inx) {
-                    if (item.bundle.id == id) {
-                        alreadyLocal = true;
-                        modalService.showModal({}, {bodyText:'There is already a copy of this set downloaded. Selecting it now.'});
-                       // $scope.resourcesBundle = item.bundle;
-                        $scope.selectedEntry = item;
-                        $scope.currentBundleIndex= inx;
+                    //see if this set (based on the id) already exists.
+                    var alreadyLocal = false;
+                    $localStorage.builderBundles.forEach(function (item,inx) {
+                        if (item.bundle.id == id) {
+                            alreadyLocal = true;
+                            modalService.showModal({}, {bodyText:'There is already a copy of this set downloaded. Selecting it now.'});
+                            // $scope.resourcesBundle = item.bundle;
+                            $scope.selectedContainer = item;
+                            $scope.currentBundleIndex= inx;
+                            $scope.libraryVisible = false;
+                        }
+                    });
+
+                    if (! alreadyLocal) {
+
+
+
+                        //var newBundle = {name:dr.description,bundle:bundle}
+                        $localStorage.builderBundles.push(container);
+                        //$localStorage.builderBundles.push(newBundle);
+                        // $scope.resourcesBundle = newBundle.bundle;
+
+                        $scope.selectedContainer = container;//newBundle;
+                        $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
+                        builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
+                        makeGraph();
+                        delete $scope.currentResource;
                         $scope.libraryVisible = false;
-                    }
-                });
-
-                if (! alreadyLocal) {
-                    var newBundle = {name:dr.description,bundle:bundle}
-                    $localStorage.builderBundles.push(newBundle);
-                   // $scope.resourcesBundle = newBundle.bundle;
-
-                    $scope.selectedEntry = newBundle;
-                    $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
-                    builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
-                    makeGraph();
-                    delete $scope.currentResource;
-                    $scope.libraryVisible = false;
-                    isaDocument();      //see if this set is a document (has a Composition resource)
-                    modalService.showModal({}, {bodyText:'The set has been downloaded from the Library. You can now edit it locally.'});
+                        isaDocument();      //see if this set is a document (has a Composition resource)
+                        modalService.showModal({}, {bodyText:'The set has been downloaded from the Library. You can now edit it locally.'});
+                    } 
+                } else {
+                    alert('There was a problem retrieving the set (id='+ dr.id + ") from the library");
                 }
+                
+              
 
 
             };
 
+
+            $scope.saveToLibrary = function(){
+
+                //console.log($localStorage.builderBundles[$scope.currentBundleIndex])
+
+
+                builderSvc.saveToLibrary($localStorage.builderBundles[$scope.currentBundleIndex]).then(
+                    function (data) {
+                        $scope.selectedContainer.isDirty = false;
+                        modalService.showModal({}, {bodyText:'The set has been updated in the Library. You can continue editing.'});
+                        refreshLibrary();
+                        //console.log(data)
+                    },function (err) {
+                        modalService.showModal({}, {bodyText:'Sorry, there was an error updating the library:' + angular.toJson(err)})
+                        console.log(err)
+                    }
+                );
+
+            };
+
+
+
             $scope.selectBundle = function(inx){
                 $scope.currentBundleIndex = inx;
                 //$scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
-                $scope.selectedEntry = $localStorage.builderBundles[$scope.currentBundleIndex];
+                $scope.selectedContainer = $localStorage.builderBundles[$scope.currentBundleIndex];
                 builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
                 makeGraph();
                 delete $scope.currentResource;
                 isaDocument();      //determine if this bundle is a document (has a Composition resource)
-                $rootScope.$emit('newSet',$scope.selectedEntry.bundle);
+                $rootScope.$emit('newSet',$scope.selectedContainer.bundle);
             }
 
             $scope.displayMode = 'view';    //options 'new', 'view'
@@ -294,6 +360,7 @@ angular.module("sampleApp")
             //displays the data entry screen for adding a datatype value
             $scope.addValueForDt = function(hashPath,dt) {
 
+                $scope.selectedContainer.isDirty = true;
                 if ($scope.supportedDt.indexOf(dt) > -1) {
                     delete $scope.input.dt;
 
@@ -363,7 +430,7 @@ angular.module("sampleApp")
 
             //edit the resource text
             $scope.editResource = function(resource){
-
+                $scope.selectedContainer.isDirty = true;
                 var vo = builderSvc.splitNarrative(resource.text.div)  //return manual & generated text
                 //console.log(vo)
 
@@ -419,10 +486,10 @@ angular.module("sampleApp")
                             //no bundles left
                             $localStorage.builderBundles = []
                            // delete $scope.resourcesBundle;
-                            delete $scope.selectedEntry;
+                            delete $scope.selectedContainer;
                         } else {
                             //$scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
-                            $scope.selectedEntry = $localStorage.builderBundles[$scope.currentBundleIndex];
+                            $scope.selectedContainer = $localStorage.builderBundles[$scope.currentBundleIndex];
                             makeGraph();
                         }
 
@@ -444,7 +511,7 @@ angular.module("sampleApp")
 
             $scope.removeResource = function(resource) {
                 //remove this resource from the bundle
-
+                $scope.selectedContainer.isDirty = true;
 
                 var modalOptions = {
                     closeButtonText: "No, don't remove",
@@ -456,10 +523,10 @@ angular.module("sampleApp")
                 modalService.showModal({}, modalOptions).then(
                     function (result) {
                         var inx = -1;
-                        for (var i=0; i < $scope.selectedEntry.bundle.entry.length; i++) {
+                        for (var i=0; i < $scope.selectedContainer.bundle.entry.length; i++) {
                         //for (var i=0; i < $scope.resourcesBundle.entry.length; i++) {
                             //var r = $scope.resourcesBundle.entry[i].resource;
-                            var r = $scope.selectedEntry.bundle.entry[i].resource;
+                            var r = $scope.selectedContainer.bundle.entry[i].resource;
                             if (r.resourceType == resource.resourceType && r.id == resource.id) {
                                 inx = i;
                                 break;
@@ -467,7 +534,7 @@ angular.module("sampleApp")
                         }
                         if (inx > -1) {
                            // $scope.resourcesBundle.entry.splice(inx,1);
-                            $scope.selectedEntry.bundle.entry.splice(inx,1);
+                            $scope.selectedContainer.bundle.entry.splice(inx,1);
 
                             makeGraph();
                             delete $scope.currentResource;
@@ -483,8 +550,8 @@ angular.module("sampleApp")
             //generate the graph of resources and references between them
             makeGraph = function() {
                 //if ($scope.resourcesBundle) {
-                if ($scope.selectedEntry.bundle) {
-                    var vo = builderSvc.makeGraph($scope.selectedEntry.bundle)   //todo - may not be the right place...
+                if ($scope.selectedContainer.bundle) {
+                    var vo = builderSvc.makeGraph($scope.selectedContainer.bundle)   //todo - may not be the right place...
                     //var vo = builderSvc.makeGraph($scope.resourcesBundle)   //todo - may not be the right place...
                     $scope.allReferences = vo.allReferences;                //all references in the entire set.
                     //console.log($scope.allReferences)
@@ -528,7 +595,7 @@ angular.module("sampleApp")
             }, 1000);
 
             $scope.removeReference = function(ref) {
-                //console.log(ref)
+                $scope.selectedContainer.isDirty = true;
                 var path = ref.path;
                 var target = ref.targ;
                 builderSvc.removeReferenceAtPath($scope.currentResource,path,ref.index)
@@ -714,7 +781,7 @@ angular.module("sampleApp")
                                                     var type = $filter('getLogicalID')(targetProfile);
 
                                                     //var ar = builderSvc.getResourcesOfType(type,$scope.resourcesBundle);
-                                                    var ar = builderSvc.getResourcesOfType(type,$scope.selectedEntry.bundle);
+                                                    var ar = builderSvc.getResourcesOfType(type,$scope.selectedContainer.bundle);
 
                                                     if (ar.length > 0) {
                                                         ar.forEach(function(resource){
@@ -792,7 +859,7 @@ angular.module("sampleApp")
                                 //now find all existing resources with this type
                                 var type = $filter('getLogicalID')(ref.profile);
 //console.log(type)
-                                var ar = builderSvc.getResourcesOfType(type,$scope.selectedEntry.bundle);
+                                var ar = builderSvc.getResourcesOfType(type,$scope.selectedContainer.bundle);
                                 //var ar = builderSvc.getResourcesOfType(type,$scope.resourcesBundle);
                                 if (ar.length > 0) {
                                     ar.forEach(function(resource){
@@ -844,12 +911,13 @@ angular.module("sampleApp")
                     return;
                 }
 
+                $scope.selectedContainer.isDirty = true;
 
                 builderSvc.insertReferenceAtPath($scope.currentResource,pth,resource)
 
                 makeGraph();    //this will update the list of all paths in this model...
                 //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle); //update the generated documen
-                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedEntry.bundle); //update the generated document
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedContainer.bundle); //update the generated document
                 var url = $scope.currentResource.resourceType+'/'+$scope.currentResource.id;
                 $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
 
@@ -891,6 +959,8 @@ angular.module("sampleApp")
 
                 }
 
+                $scope.selectedContainer.isDirty = true;
+
                 var resource = {resourceType : type};
                 resource.id = idPrefix+new Date().getTime();
                 $scope.input.text = $scope.input.text || "";
@@ -901,10 +971,10 @@ angular.module("sampleApp")
 
                 builderSvc.addResourceToAllResources(resource)
 
-                $scope.selectedEntry.bundle.entry.push({resource:resource});
+                $scope.selectedContainer.bundle.entry.push({resource:resource});
                 //$scope.resourcesBundle.entry.push({resource:resource});
 
-                $scope.selectedEntry.bundle.entry.sort(function(a,b){
+                $scope.selectedContainer.bundle.entry.sort(function(a,b){
                 //$scope.resourcesBundle.entry.sort(function(a,b){
                     if (a.resource.resourceType > b.resource.resourceType) {
                         return 1

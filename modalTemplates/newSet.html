@@ -1,0 +1,81 @@
+<div>
+
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                <h3 class="modal-title">Create new set</h3>
+            </div>
+            <div class="col-md-1 col-sm-1">
+                <div ng-show="showWaiting">
+                    <img src="css/ajax_loader_blue_32.gif"/>
+                </div>
+            </div>
+            <div class="col-md-7 col-sm-7">
+                <div class="pull-right">
+                    <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+                    <button class="btn btn-success" ng-show="canSave" ng-click="save()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-body">
+
+
+
+
+        <form>
+            <div class="row">
+
+                <div class="col-md-8 col-sm-8">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" class="form-control" ng-model="name" auto-focus
+                                placeholder="Name of Set, no spaces">
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-4">
+                    <br/>
+                    <button class="btn btn-link" ng-click="checkName()">Check Name</button>
+                </div>
+
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-8 col-sm-8">
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control" ng-model="description"></textarea>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+
+        </form>
+
+
+
+
+
+    </div>
+
+    <div class="modal-header">
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+
+                <em class="pull-right">{{server.name}}</em>
+
+            </div>
+
+        </div>
+
+
+
+    </div>
+</div>

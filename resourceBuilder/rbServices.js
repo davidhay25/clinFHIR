@@ -464,7 +464,7 @@ angular.module("sampleApp").
 
 
         },
-        getProfile : function(profileName) {
+        getProfileDEP : function(profileName) {
             alert('getProfile stub not implemented yet');
         },
         queryConformanceServer : function(qry) {

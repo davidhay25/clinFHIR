@@ -204,32 +204,43 @@ angular.module("sampleApp")
             saveToLibrary : function (bundleContainer) {
                 //save the bundle to the library. Note that the 'container' of the bundle (includes the name) is passed in...
                 var bundle = bundleContainer.bundle;
-
-                //console.log(bundle)
-
-
-
                 var docref = {resourceType:'DocumentReference',id:bundle.id};
                 docref.type = {coding:[{system:'http://clinfhir.com/docs',code:'builderDoc'}]};
                 docref.status = 'current';
                 docref.indexed = moment().format();
-                docref.description = bundleContainer.name;
+                docref.description = bundleContainer.description;
+                if (bundleContainer.isPrivate) {
+                    docref.meta = {security : [{code:'R',system:'http://hl7.org/fhir/v3/Confidentiality'}]}
+                }
                 docref.content = [{attachment:{data:btoa(angular.toJson(bundle))}}]
-
-
                 var url = appConfigSvc.getCurrentDataServer().url + 'DocumentReference/'+docref.id;
-
-
-                //console.log(docref);
-                //return;
-
-
-                //$http.put('http://fhirtest.uhn.ca/baseDstu3/Binary/dh',binary).then(
                 return $http.put(url,docref);
 
             },
+            getBundleContainerFromDocRef : function(dr){
+                //generate a bundleContainer (how the bundle is stored locally) from a documentreference...
+
+                if (dr.content && dr.content[0] && dr.content[0].attachment && dr.content[0].attachment.data) {
+                    var container = {};
+                    container.bundle = angular.fromJson(atob(dr.content[0].attachment.data));
+                    container.description = dr.description;
+                    container.isDirty = false;
+                    //get the security tags.
+                    if (dr.meta && dr.meta.security) {
+                        dr.meta.security.forEach(function(coding){
+                            if (coding.system='' && coding.code == 'R') {
+                                container.isPrivate = true;
+                            }
+                        })
+                    }
+
+
+                }
+
+
+            },
             loadLibrary : function () {
-                //download the DocumentReferences that are the library references...
+                //download ALL the DocumentReferences that are the library references...
                 var deferred = $q.defer();
                 var url = appConfigSvc.getCurrentDataServer().url + 'DocumentReference?type=http://clinfhir.com/docs|builderDoc';
                 $http.get(url).then(

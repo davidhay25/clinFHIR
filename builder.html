@@ -24,6 +24,7 @@
     <script src="js/libs/firebase.js"></script>
     <script src="js/libs/angularfire.min.js"></script>
 
+    <script src="js/libs/angular-bootstrap-checkbox.js"></script>
     <style>
         #resourceGraph {
             width: 100%;
@@ -45,7 +46,7 @@
         //https://github.com/rallu/angular-lightweight-markdown-editor
 
 
-        angular.module("sampleApp",['ui.bootstrap','ngStorage','ngSanitize','firebase']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.checkbox','ui.bootstrap','ngStorage','ngSanitize','firebase']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -146,7 +147,7 @@
 
                 <div class="col-md-2 col-sm-2">
                     <div class="navbar-text">
-                        <div ng-hide="libraryVisible" class="clickable" ng-click="saveToLibrary()">Save to Library</div>
+                        <div ng-hide="libraryVisible || ! selectedContainer.isDirty" class="clickable" ng-click="saveToLibrary()">Save to Library</div>
 
                         <span class="clickable" ng-click="libraryVisible = ! libraryVisible">
                             <span ng-show="libraryVisible">Hide </span>
@@ -257,9 +258,6 @@
 
                 </div>
 
-
-
-
             </div>
 
 
@@ -294,6 +292,14 @@
 
                         </div>
 
+                        <div class="row">
+                            <div class="col-md-10 col-sm-10">
+                                {{entry.description | limitTo : 50}}
+                            </div>
+                        </div>
+
+
+
 
                     </li>
                 </ul>
@@ -306,7 +312,7 @@
             <div class="col-md-5 col-sm-5 borderForGraph">
 
 
-                <div ng-hide="selectedEntry">
+                <div ng-hide="selectedContainer">
                     <div uib-alert class="alert-warning">
                         To edit a set of resources, you can either:
                         <ul>
@@ -316,7 +322,7 @@
                     </div>
                 </div>
 
-                <div ng-show="selectedEntry">
+                <div ng-show="selectedContainer">
 
 
                     <button ng-hide="displayMode == 'new'"
@@ -331,7 +337,7 @@
                                 <div class="col-md-12 col-sm-12">
                                     <table class="table table-bordered table-condensed">
                                         <tr><th>Type</th><th>Text</th></tr>
-                                        <tr ng-repeat="entry in selectedEntry.bundle.entry">
+                                        <tr ng-repeat="entry in selectedContainer.bundle.entry">
                                             <td><div class='clickable' ng-click="selectResource(entry.resource)">
                                                 {{entry.resource.resourceType}}</div>
                                             </td>
@@ -341,6 +347,49 @@
                                 </div>
 
                             </div>
+
+
+
+                        </uib-tab>
+                        <uib-tab heading="Set Summary">
+                            <br/>
+
+                            <div class="row">
+                                <div class="col-sm-6 col-md-6">
+                                    <strong>Name</strong>
+                                    <div>{{selectedContainer.name}}</div>
+                                </div>
+                                <div class="col-sm-6 col-md-6">
+                                    <div class="alert alert-warning" role="alert" ng-show="selectedContainer.isDirty">
+
+
+
+                                        There are changes that are saved locally, but not yet updated to the Library
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+
+
+
+
+                            <strong>Description</strong>
+                            <textarea class="form-control" ng-model = 'selectedContainer.description'></textarea>
+
+
+                            <br />
+                            <div class="row">
+                                <div class="col-sm-1 col-md-1">
+                                    <checkbox ng-model="selectedContainer.isPrivate"/>
+                                </div>
+                                <div class="col-sm-2 col-md-2">
+                                    Private
+                                </div>
+                            </div>
+
 
 
 
