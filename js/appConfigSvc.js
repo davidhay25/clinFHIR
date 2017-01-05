@@ -253,9 +253,6 @@ angular.module("sampleApp")
                     return true;
                 } 
 
-
-
-
             },
             getAllServers : function() {
                 //console.log(config.allKnownServers)

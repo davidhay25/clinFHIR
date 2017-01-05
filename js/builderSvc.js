@@ -15,7 +15,7 @@ angular.module("sampleApp")
         objColours.Patient = '#93FF1A';
         objColours.Composition = '#E89D0C';
         objColours.List = '#ff8080';
-        objColours.List = '#FFFFCC';
+        objColours.Observation = '#FFFFCC';
         objColours.Practitioner = '#FFBB99';
         objColours.MedicationStatement = '#ffb3ff';
 
@@ -83,7 +83,6 @@ angular.module("sampleApp")
                     //console.log(entry)
                     var resource = that.resourceFromReference(entry.reference);
 
-
                     if (resource) {
                         if (resource.resourceType == 'List') {
                             //get the text from all of the references resoruces...
@@ -128,9 +127,9 @@ angular.module("sampleApp")
                     }
 
 
-
-
                 })
+
+                section.text = html;
                 return html;
 
 
@@ -162,14 +161,52 @@ angular.module("sampleApp")
                 if (composition) {
                     var that = this;
                     var html = "";
-                    if (composition.subject) {
-                        var subject = that.resourceFromReference(composition.subject.reference);
-                        //var patient = hash[composition.patient.reference]
-                        //console.log(subject);
-                        if (subject) {
-                            html += "<h3>Subject</h3>" + "<div class='inset'>"+  subject.text.div + "</div>";
+
+
+                    //generate the composition text
+                    var cHtml = ';'
+
+                    var manual = that.splitNarrative(composition.text.div).manual;  //manually entered text
+                    var generated = "";     //will replace the genereated text...
+
+                    //add generated text from resources...
+                    var references = ['subject','encounter','author','custodian']
+                    angular.forEach(composition,function(value,key){
+                        console.log(value,key);
+                        var arResources = [];
+
+                        if (references.indexOf(key) > -1) {
+
+                            if (angular.isArray(value)) {
+                                //var ar = value
+                                value.forEach(function(el) {
+                                    var r = that.resourceFromReference(el.reference)
+                                    arResources.push(r)
+                                })
+                            } else {
+                                arResources.push(that.resourceFromReference(composition[key].reference))
+                            }
+
+
+
                         }
-                    }
+
+                        //this was a resource reference
+                        if (arResources.length > 0) {
+                            arResources.forEach(function(resource){
+                                if (resource) {
+                                    generated += "<div><strong class='inset'>"+key+": </strong>" + that.splitNarrative(resource.text.div).manual + "</div>";
+                                }
+
+                            })
+
+                        }
+
+
+
+                    });
+
+                    composition.text.div = that.addGeneratedText(manual,generated);
 
                     html += "<h3>Composition</h3>" + "<div class='inset'>"+ composition.text.div + "</div>";
 
@@ -223,6 +260,7 @@ angular.module("sampleApp")
                 if (dr.content && dr.content[0] && dr.content[0].attachment && dr.content[0].attachment.data) {
                     var container = {};
                     container.bundle = angular.fromJson(atob(dr.content[0].attachment.data));
+                    container.name = container.bundle.id;
                     container.description = dr.description;
                     container.isDirty = false;
                     //get the security tags.
@@ -233,6 +271,7 @@ angular.module("sampleApp")
                             }
                         })
                     }
+                    return container;
 
 
                 }

@@ -6,9 +6,9 @@
 angular.module("sampleApp")
     .filter('resourceTextFromReference',['builderSvc',function(builderSvc){
         return function(reference) {
-            console.log(reference)
+            //console.log(reference)
             var resource = builderSvc.resourceFromReference(reference);
-            console.log(resource)
+            //console.log(resource)
             if (resource) {
                 return resource.text.div
             } else {

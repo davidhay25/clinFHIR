@@ -14,7 +14,7 @@ angular.module("sampleApp")
 
             //---------- event handlers.........
             $rootScope.$on('addResource',function(event,resource){
-               // console.log(resource)
+
                 var reference =  builderSvc.referenceFromResource(resource)
                 $scope.resourcesNotInThisSection.push({reference:reference,display:resource.text.div})
 
@@ -116,8 +116,8 @@ angular.module("sampleApp")
                     $rootScope.$emit('docUpdated',$scope.compositionResource);
 
                     //These are all scope variables from the parent controller...
-                    $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedEntry,bundle)
-                    //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
+                    //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedContainer,bundle)
+                    $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
                 })
             };
 
@@ -133,49 +133,14 @@ angular.module("sampleApp")
 
                 var ar = $scope.currentSection.entry;
                 moveThing(ar,inx, dirn);
-                /*
-                 return;
 
-                 if (dirn == 'up') {
-
-                 var x = ar.splice(inx-1,1);  //remove the one above
-                 ar.splice(inx,0,x[0]);       //and insert...
-
-
-                 } else {
-                 var x = ar.splice(inx+1,1);  //remove the one below
-                 ar.splice(inx,0,x[0]);       //and insert...
-                 }
-                 $rootScope.$emit('docUpdated',$scope.compositionResource);
-
-                 //These are all scope variables from the parent controller...
-                 $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
-                 */
             }
 
             $scope.moveSection = function(inx,dirn) {
                 //console.log(dirn,inx);
                 var ar = $scope.compositionResource.section;
                 moveThing(ar,inx, dirn);
-                /*
-                 return;
 
-                 if (dirn == 'up') {
-
-                 var x = ar.splice(inx-1,1);  //remove the one above
-                 ar.splice(inx,0,x[0]);       //and insert...
-
-
-                 } else {
-                 var x = ar.splice(inx+1,1);  //remove the one below
-                 ar.splice(inx,0,x[0]);       //and insert...
-                 }
-
-                 $rootScope.$emit('docUpdated',$scope.compositionResource);
-
-                 //These are all scope variables from the parent controller...
-                 $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
-                 */
             }
 
 
@@ -197,7 +162,7 @@ angular.module("sampleApp")
 
                 //These are all scope variables from the parent controller...
                 //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
-                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedEntry.bundle)
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedContainer.bundle)
             }
 
             $scope.initializeDocumentDEP = function() {
@@ -216,7 +181,10 @@ angular.module("sampleApp")
 
                 $scope.currentSection.entry.push({reference:reference.reference,
                     display: display})
-                $rootScope.$emit('docUpdated',$scope.compositionResource);
+
+
+
+                $rootScope.$emit('docUpdated',$scope.compositionResource);      //generates the graph
 
                 //remove from the 'not in this section' array...
                 for (var i=0; i < $scope.resourcesNotInThisSection.length; i++) {
@@ -230,7 +198,7 @@ angular.module("sampleApp")
 
                 //These are all scope variables from the parent controller...
                 //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
-                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedEntry.bundle)
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedContainer.bundle)
 
             };
 
@@ -253,7 +221,7 @@ angular.module("sampleApp")
 
                 //These are all scope variables from the parent controller...
                 //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
-                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedEntry.bundle)
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedContainer.bundle)
 
             };
 
@@ -273,7 +241,7 @@ angular.module("sampleApp")
                 //now compile the list of resources that aren't in this section
                 $scope.resourcesNotInThisSection.length = 0;
                 //$scope.resourcesBundle.entry.forEach(function(entry){
-                $scope.selectedEntry.bundle.entry.forEach(function(entry){
+                $scope.selectedContainer.bundle.entry.forEach(function(entry){
                     var resource= entry.resource;
                     //var reference = resource.resourceType + "/" + resource.id;
 
@@ -311,6 +279,6 @@ angular.module("sampleApp")
 
                 //These are all scope variables from the parent controller...
                 //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
-                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedEntry.bundle)
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedContainer.bundle)
             }
         });

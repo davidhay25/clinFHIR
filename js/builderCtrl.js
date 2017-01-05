@@ -469,6 +469,8 @@ angular.module("sampleApp")
             //remove a bundle set...
             $scope.deleteBundle = function(inx) {
 
+
+
                 var modalOptions = {
                     closeButtonText: "No, I changed my mind",
                     actionButtonText: 'Yes, please remove',
@@ -478,9 +480,10 @@ angular.module("sampleApp")
 
                 modalService.showModal({}, modalOptions).then(
                     function () {
-                        $rootScope.$emit('newSet');
+                        $rootScope.$emit('newSet');     //clears the current section...
+
                         delete $scope.currentResource;
-                        $localStorage.builderBundles.splice(inx)   //delete the bundle
+                        $localStorage.builderBundles.splice(inx,1)   //delete the bundle
                         $scope.currentBundleIndex = 0; //set the current bundle to the first (default) one
                         if ($localStorage.builderBundles.length == 0) {
                             //no bundles left
@@ -550,7 +553,7 @@ angular.module("sampleApp")
             //generate the graph of resources and references between them
             makeGraph = function() {
                 //if ($scope.resourcesBundle) {
-                if ($scope.selectedContainer.bundle) {
+                if ($scope.selectedContainer && $scope.selectedContainer.bundle) {
                     var vo = builderSvc.makeGraph($scope.selectedContainer.bundle)   //todo - may not be the right place...
                     //var vo = builderSvc.makeGraph($scope.resourcesBundle)   //todo - may not be the right place...
                     $scope.allReferences = vo.allReferences;                //all references in the entire set.
