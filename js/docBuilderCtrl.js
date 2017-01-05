@@ -255,7 +255,9 @@ angular.module("sampleApp")
                         }
                     }
 
-                    if (! isInSection) {
+
+
+                    if (! isInSection && resource.resourceType !== 'Composition') {
                         $scope.resourcesNotInThisSection.push(
                             {reference:builderSvc.referenceFromResource(resource),display:resource.text.div});
                     }

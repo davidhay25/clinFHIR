@@ -116,7 +116,7 @@ angular.module("sampleApp")
 
 
 
-                            //resource.text.div = $filter('addTextDiv')(manual + that.getManualMarker() + generated);
+
 
 
                         } else {
@@ -329,19 +329,19 @@ angular.module("sampleApp")
             addStringToText : function(resource,txt) {
                 //add the txt to the resource.text.div element...
                 if (resource.text && resource.text.div) {
-                    var raw = $filter('cleanTextDiv')(resource.text.div);
-                    raw += " "+txt;
-                    resource.text.div =  $filter('addTextDiv')(raw);
+
+
+                    var vo = this.splitNarrative(resource.text.div)
+                    var manual = vo.manual + txt;
+                    resource.text.div = this.addGeneratedText(manual,vo.generated);
+
                 }
 
             },
             addPropertyValue : function(resource,hashPath,dt,value) {
                 //add a value to a resource property...  type of value will depend on datatype
-                //var that = this;
-               // console.log(resource,hashPath,dt,value)
-                var info = this.getEDInfoForPath(hashPath.path)
 
-                //var path = $filter('dropFirstInPath')(hashPath.path);   //the path off the root
+                var info = this.getEDInfoForPath(hashPath.path)
                 //for now, we only allow values for properties directly off the root...
 
                 var path = hashPath.path;
@@ -361,7 +361,7 @@ angular.module("sampleApp")
                         break;
 
                     case 'Address' :
-                       // console.log(value)
+
                         var insrt = {text:value.Address.text}
                         simpleInsert(resource,info,path,insrt,dt);
                         this.addStringToText(resource.path+": "+ insrt.text)

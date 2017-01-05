@@ -74,7 +74,13 @@
                                         <span popover-trigger="'mouseenter'"
                                               uib-popover-html = "entry.reference | resourceTextFromReference"
                                               ng-click = "selectResourceFromSection(entry.reference)">
-                                            {{entry.reference}}
+                                            <!--{{entry.reference}}-->
+
+                                            <p ng-bind-html="entry.reference | resourceTextFromReference"></p>
+                                            <!--
+                                                                                        {{entry.text.div | limitTo : 50}}
+                                                                                        -->
+
                                         </span>
 
                                     </div>
@@ -122,9 +128,12 @@
 
                                 <div class="row">
                                     <div class="col-md-10 col-sm-10">
-                                        <span popover-trigger="'mouseenter'" uib-popover-html = "reference.display"
+                                        <span popover-trigger="'mouseenter'" uib-popover-html = "reference.reference + '<br/>' + reference.display"
                                               ng-click = "selectResourceFromSection(reference.reference)">
-                                            {{reference.reference}}</span>
+                                            <!--{{reference.reference}}-->
+
+                                        <p ng-bind-html="reference.reference | resourceTextFromReference  "></p>
+                                        </span>
                                     </div>
                                     <div class="col-md-2 col-sm-2">
 
