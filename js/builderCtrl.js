@@ -9,19 +9,33 @@ angular.module("sampleApp")
             $scope.input.dt = {};   //data entered as part of populating a datatype
             $scope.appConfigSvc = appConfigSvc;
 
-            //console.log(builderSvc.mannualMa)
+
 
             var idPrefix = 'cf-';   //prefix for the id. todo should probably be related to the userid in some way...
-        //load the library. todo THis will become slow with large numbers of sets...
+            //load the library. todo THis will become slow with large numbers of sets...
             function refreshLibrary() {
-                builderSvc.loadLibrary().then(
-                    function(bundle){
+                builderSvc.loadLibrary($localStorage.builderBundles).then(
+                    function(arContainer){
+                        $scope.libraryContainer = arContainer;
+                        /*
+
                         $scope.library = bundle;    //this is a bundle of DocumentReference resources...
+                        $scope.libraryContainer = [];   //use the container object
+
+                        console.log(bundle)
+
+                        //determine which are already stored loca
+                        var cache = {};
+                        builderBundles.forEach(function(bundle){
+                            cache[bundle.id] = true;
+                        })
 
                         //add meta information for display. Makes it a non-lgal resource, but don't really care for this purpose...
                         if ($scope.library && $scope.library.entry) {
                             $scope.library.entry.forEach(function(entry){
                                 var dr = entry.resource;
+                                $scope.libraryContainer.push(builderSvc.getBundleContainerFromDocRef(dr));  //saves the doc as a container...
+
                                 //now see if the bundle in the DR is cached locally (the id of the dr is the same as the bundle
                                 //var cachedLocally = false;
                                 $localStorage.builderBundles.forEach(function (local) {
@@ -33,9 +47,9 @@ angular.module("sampleApp")
                             })
                         }
 
+console.log($scope.libraryContainer)
 
-
-
+*/
                     }
                 );
             }
@@ -157,6 +171,7 @@ angular.module("sampleApp")
             });
 
 
+            //datatypes for which there is an entry form
             $scope.supportedDt = ['CodeableConcept','string','code','date','Period','dateTime','Address','HumanName']
 
             $scope.currentBundleIndex = 0;     //the index of the bundle currently being used
@@ -182,9 +197,6 @@ angular.module("sampleApp")
 
             $scope.builderBundles = $localStorage.builderBundles;   //all the bundles cached locally...
 
-
-
-            //console.log($localStorage.builderBundles)
 
             //set the base path for linking to the spec
             switch (appConfigSvc.getCurrentConformanceServer().version) {
@@ -262,21 +274,20 @@ angular.module("sampleApp")
                 }
             };
 
-            
             //called when a library entry is selected to view. may be redundant...
-            $scope.selectLibraryEntry = function(entry,inx){
-                //console.log(entry);
-                $scope.selectedLibraryEntry = entry;
-                $scope.selectedLibraryEntry.bundle =  angular.fromJson(atob(entry.resource.content[0].attachment.data));  //todo not safe
+            $scope.selectLibraryContainer = function(container){
+                console.log(container);
+
+                $scope.selectedLibraryContainer = container;
+
+                //$scope.selectedLibraryEntry.bundle =  angular.fromJson(atob(entry.resource.content[0].attachment.data));  //todo not safe
 
             };
 
-            $scope.downloadFromLibrary = function(entry,inx){
-                //note that the entry is a DocumentReference with a contained bundle as an attachment...
-                var dr = entry.resource;
-                var container = builderSvc.getBundleContainerFromDocRef(dr);
+            $scope.downloadFromLibrary = function(container){
+                //note that the entry is a DocumentReference with a bundle as an attachment...
                 if (container) {
-                    // var bundle = angular.fromJson(atob(dr.content[0].attachment.data));   //todo - not safe!
+
                     var id = container.bundle.id;
 
                     //see if this set (based on the id) already exists.
@@ -294,9 +305,6 @@ angular.module("sampleApp")
 
                     if (! alreadyLocal) {
 
-
-
-                        //var newBundle = {name:dr.description,bundle:bundle}
                         $localStorage.builderBundles.push(container);
                         //$localStorage.builderBundles.push(newBundle);
                         // $scope.resourcesBundle = newBundle.bundle;
@@ -319,7 +327,6 @@ angular.module("sampleApp")
 
             };
 
-
             $scope.saveToLibrary = function(){
 
                 //console.log($localStorage.builderBundles[$scope.currentBundleIndex])
@@ -338,8 +345,6 @@ angular.module("sampleApp")
                 );
 
             };
-
-
 
             $scope.selectBundle = function(inx){
                 $scope.currentBundleIndex = inx;
@@ -475,7 +480,7 @@ angular.module("sampleApp")
                     closeButtonText: "No, I changed my mind",
                     actionButtonText: 'Yes, please remove',
                     headerText: 'Remove resource set',
-                    bodyText: 'Are you sure you wish to remove this resource set?'
+                    bodyText: 'Are you sure you wish to remove this resource set from the local cache?'
                 };
 
                 modalService.showModal({}, modalOptions).then(

@@ -172,7 +172,7 @@ angular.module("sampleApp")
                     //add generated text from resources...
                     var references = ['subject','encounter','author','custodian']
                     angular.forEach(composition,function(value,key){
-                        console.log(value,key);
+                        //console.log(value,key);
                         var arResources = [];
 
                         if (references.indexOf(key) > -1) {
@@ -245,7 +245,11 @@ angular.module("sampleApp")
                 docref.type = {coding:[{system:'http://clinfhir.com/docs',code:'builderDoc'}]};
                 docref.status = 'current';
                 docref.indexed = moment().format();
-                docref.description = bundleContainer.description;
+                docref.description = bundleContainer.name;  //yes, I know these names are confusing...
+
+                var extensionUrl = appConfigSvc.config().standardExtensionUrl.docrefDescription;
+                Utilities.addExtensionOnce(docref,extensionUrl,{valueString:bundleContainer.description})
+
                 if (bundleContainer.isPrivate) {
                     docref.meta = {security : [{code:'R',system:'http://hl7.org/fhir/v3/Confidentiality'}]}
                 }
@@ -257,11 +261,50 @@ angular.module("sampleApp")
             getBundleContainerFromDocRef : function(dr){
                 //generate a bundleContainer (how the bundle is stored locally) from a documentreference...
 
-                if (dr.content && dr.content[0] && dr.content[0].attachment && dr.content[0].attachment.data) {
+                if (dr && dr.content && dr.content[0] && dr.content[0].attachment && dr.content[0].attachment.data) {
                     var container = {};
                     container.bundle = angular.fromJson(atob(dr.content[0].attachment.data));
-                    container.name = container.bundle.id;
-                    container.description = dr.description;
+
+                    //create the summary of resources in the container
+                    container.resources = [];       //this will be a sorted list (by type) ...
+                    var obj = {}
+                    if (container.bundle.entry) {
+                        container.bundle.entry.forEach(function(entry){
+                            var resourceType = entry.resource.resourceType;
+                            if (obj[resourceType]) {
+                                obj[resourceType].count++
+                            } else {
+                                obj[resourceType] = {type:resourceType,count:1}
+                            }
+                        })
+                    }
+
+                    for (var o in obj) {
+                        container.resources.push(obj[o])
+                    }
+                    container.resources.sort(function(a,b){
+                        if (a.type < b.type) {
+                            return 1
+                        } else {
+                            return -1
+                        }
+                    });
+
+
+
+
+                    container.name = dr.description;
+                    container.url = appConfigSvc.getCurrentDataServer().url + dr.id;
+                    //container.description = dr.description;
+
+                    //the description is stored in an extension - the dr.description filed is actually the set name...
+                    var extensionUrl = appConfigSvc.config().standardExtensionUrl.docrefDescription;
+                    var ext = Utilities.getSingleExtensionValue(dr,extensionUrl);
+                    if (ext && ext.valueString) {
+                        container.description = ext.valueString;  //yes, I know these names are confusing...
+                    }
+
+
                     container.isDirty = false;
                     //get the security tags.
                     if (dr.meta && dr.meta.security) {
@@ -278,14 +321,50 @@ angular.module("sampleApp")
 
 
             },
-            loadLibrary : function () {
+            loadLibrary : function (builderBundles) {
                 //download ALL the DocumentReferences that are the library references...
+                var that = this;
+                //create a hash for the current sets in the local cache based on id...
+                //determine which are already stored loca
+                var cache = {};
+                builderBundles.forEach(function(bundle){
+                    cache[bundle.bundle.id] = true;
+                });
+
+
                 var deferred = $q.defer();
                 var url = appConfigSvc.getCurrentDataServer().url + 'DocumentReference?type=http://clinfhir.com/docs|builderDoc';
                 $http.get(url).then(
                     function (data) {
                         //console.log(data.data)
-                        deferred.resolve(data.data)
+                        var bundle = data.data;
+                        if (bundle && bundle.entry) {
+                            var arContainer = []
+                            bundle.entry.forEach(function(entry){
+                                var dr = entry.resource;
+                                var container = that.getBundleContainerFromDocRef(dr)
+                                if (cache[dr.id]) {
+                                    container.cachedLocally = true;
+                                }
+
+                                arContainer.push(container);  //saves the doc as a container...
+
+                                //now see if the bundle in the DR is cached locally (the id of the dr is the same as the bundle
+                                //var cachedLocally = false;
+                                /*$localStorage.builderBundles.forEach(function (local) {
+                                    if (local.bundle.id == dr.id) {
+                                        dr.meta = dr.meta || {}
+                                        dr.meta.cachedLocally = true;
+                                    }
+                                })
+                                */
+                            })
+                        }
+
+
+
+
+                        deferred.resolve(arContainer)
 
                     },function (err) {
                         console.log(err)

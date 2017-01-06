@@ -31,6 +31,7 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.edMappingComment = 'http://clinfhir.com/fhir/StructureDefinition/edMappingComment';
         defaultConfig.standardExtensionUrl.mapToModel = 'http://clinfhir.com/fhir/StructureDefinition/mapToModel';
         defaultConfig.standardExtensionUrl.baseTypeForModel = 'http://clinfhir.com/fhir/StructureDefinition/baseTypeForModel';
+        defaultConfig.standardExtensionUrl.docrefDescription = 'http://clinfhir.com/fhir/StructureDefinition/docrefDescription';
 
         defaultConfig.standardSystem.identifierSystem = 'http://clinfhir.com/fhir/NamingSystem/identifier';
         defaultConfig.standardSystem.practitionerIdentifierSystem = 'http://clinfhir.com/fhir/NamingSystem/practitioner';

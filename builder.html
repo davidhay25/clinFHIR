@@ -197,6 +197,41 @@
             <div class="row">
                 <div class="col-md-2 col-sm-2">
 
+
+                    <ul class="list-group" >
+                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':$index == currentLibraryIndex}"
+                            ng-repeat="container in libraryContainer"
+                            ng-click="selectLibraryContainer(container,$index)">
+
+                            <div class="row">
+                                <div class="col-md-10 col-sm-10">
+
+                                    <strong>{{container.name}}</strong>
+                                    <div><em>{{container.description | limitTo: 20}}</em></div>
+                                </div>
+                                <div class="col-md-2 col-sm-2">
+                                    <div ng-show="container.cachedLocally">
+                                        C
+                                    </div>
+                                    <div ng-hide="container.cachedLocally">
+                                        <i class="glyphicon glyphicon-cloud-download"
+                                           title="Download"
+                                           ng-click="downloadFromLibrary(container,$index)" style="cursor: pointer">
+
+                                        </i>
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+
+
+                        </li>
+                    </ul>
+                    
+                    
+<!--
                     <ul class="list-group" >
                         <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':$index == currentLibraryIndex}"
                             ng-repeat="entry in library.entry"
@@ -220,15 +255,6 @@
                                     </div>
 
 
-
-
-<!--
-                                    <i class="glyphicon glyphicon-remove"
-                                       title="Delete"
-                                       ng-click="deleteBundle($index)" style="cursor: pointer">
-
-                                    </i>
-                                    -->
                                 </div>
 
                             </div>
@@ -236,10 +262,57 @@
 
                         </li>
                     </ul>
+                    -->
 
                 </div>
 
+
+
+
                 <div class="col-md-10 col-sm-10">
+
+
+                    <div class="row">
+                        <div class="col-md-6 col-sm-6">
+                            <div class="row">
+                                <div class="col-md-2 col-sm-2">
+                                    Name:
+                                </div>
+                                <div class="col-md-10 col-sm-10">
+                                    {{selectedLibraryContainer.name}}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2 col-sm-2">
+                                    Description:
+                                </div>
+                                <div class="col-md-10 col-sm-10">
+                                    {{selectedLibraryContainer.description}}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2 col-sm-2">
+                                    Url:
+                                </div>
+                                <div class="col-md-10 col-sm-10">
+                                    {{selectedLibraryContainer.url}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-6">
+                            <ul class="list-group">
+                                <li class="list-group-item" ng-repeat= "item in selectedLibraryContainer.resources">
+                                    {{item.type}} <span class="badge">{{item.count}}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+
+
+
+
+<!--
 
                     <div class="row">
                         <div class="col-md-2 col-sm-2 rounded-box" ng-repeat="entry in selectedLibraryEntry.bundle.entry">
@@ -254,7 +327,7 @@
                         </li>
                     </ul>
 
-                    {{selectedLibraryEntry | json}}
+-->
 
                 </div>
 
@@ -269,8 +342,8 @@
 
             <div class="col-md-2 col-sm-2">
 
-                <button class="btn btn-link pull-right" ng-click="newBundle()">New set</button>
-                <h4>Local sets</h4>
+                <button class="btn btn-link pull-right" ng-click="newBundle()">New Set</button>
+                <h4>Local Sets</h4>
 
                 <ul class="list-group" >
                     <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':$index == currentBundleIndex}"
@@ -316,7 +389,7 @@
                     <div uib-alert class="alert-warning">
                         To edit a set of resources, you can either:
                         <ul>
-                            <li>Click the 'New' link to the left to create a new Set</li>
+                            <li>Click the 'New Set' link to the left to create a new Set</li>
                             <li>Select the Library of sets (Link to the upper right) and download one to edit or view</li>
                         </ul>
                     </div>
