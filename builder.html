@@ -210,9 +210,11 @@
                                     <div><em>{{container.description | limitTo: 20}}</em></div>
                                 </div>
                                 <div class="col-md-2 col-sm-2">
+                                    <!--
                                     <div ng-show="container.cachedLocally">
                                         C
                                     </div>
+                                    -->
                                     <div ng-hide="container.cachedLocally">
                                         <i class="glyphicon glyphicon-cloud-download"
                                            title="Download"
@@ -398,7 +400,7 @@
                         To edit a set of resources, you can either:
                         <ul>
                             <li>Click the 'New Set' link to the left to create a new Set</li>
-                            <li>Select the Library of sets (Link to the upper right) and download one to edit or view</li>
+                            <li>Select the Library of sets ('View Library' link to the upper right) and download one to edit or view</li>
                         </ul>
                     </div>
                 </div>
@@ -437,11 +439,12 @@
 
                             <div class="row">
                                 <div class="col-sm-6 col-md-6">
-                                    <strong>Name</strong>
-                                    <div>{{selectedContainer.name}}</div>
+                                    <strong>Name: </strong>
+                                    <span>{{selectedContainer.name}}</span>
                                 </div>
                                 <div class="col-sm-6 col-md-6">
-                                    <div class="alert alert-warning" role="alert" ng-show="selectedContainer.isDirty">
+                                    <div class="alert alert-warning" role="alert"
+                                         ng-show="selectedContainer.isDirty">
 
 
 
@@ -458,19 +461,23 @@
 
 
                             <strong>Description</strong>
-                            <textarea class="form-control" ng-model = 'selectedContainer.description'></textarea>
+                            <textarea class="form-control" ng-change="setDirty()" ng-model = 'selectedContainer.description'></textarea>
 
+
+                            <!--
+
+                            //WARNING: don't use $scope.selectedContainer directly!
 
                             <br />
                             <div class="row">
                                 <div class="col-sm-1 col-md-1">
-                                    <checkbox ng-model="selectedContainer.isPrivate"/>
+                                    <checkbox ng-model="input.isPrivate" ng-click="setPrivate(input.isPrivate)"/>
                                 </div>
                                 <div class="col-sm-2 col-md-2">
                                     Private
                                 </div>
                             </div>
-
+-->
 
 
 
@@ -488,7 +495,9 @@
 
                             </div>
                         </uib-tab>
-
+                        <uib-tab heading="Debug">
+                            <pre>{{selectedContainer | json}}</pre>
+                        </uib-tab>
                     </uib-tabset>
 
                 </div>

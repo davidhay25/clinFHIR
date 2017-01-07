@@ -104,6 +104,9 @@ console.log($scope.libraryContainer)
 
             $scope.firebase = firebase;
 
+            $scope.setPrivate = function(isPrivate){
+                $scope.selectedContainer.isPrivate = ! isPrivate;
+            };
 
             //---------- related to document builder -------
             $rootScope.$on('docUpdated',function(event,composition){
@@ -208,9 +211,12 @@ console.log($scope.libraryContainer)
                     break;
             }
 
+
+            $scope.setDirty = function(){
+                $scope.selectedContainer.isDirty = true;
+            };
+
             $scope.newBundle = function() {
-
-
 
 
                 $uibModal.open({
@@ -251,7 +257,7 @@ console.log($scope.libraryContainer)
                 });
 
 
-
+/*
                 return;
 
 
@@ -272,10 +278,13 @@ console.log($scope.libraryContainer)
                     delete $scope.currentResource;
                     $rootScope.$emit('newSet',newBundleContainer);
                 }
+
+                */
             };
 
             //called when a library entry is selected to view. may be redundant...
             $scope.selectLibraryContainer = function(container,inx){
+
                 console.log(container);
                 $scope.currentLibraryIndex = inx;
                 $scope.selectedLibraryContainer = container;
@@ -284,9 +293,15 @@ console.log($scope.libraryContainer)
 
             };
 
-            $scope.downloadFromLibrary = function(container){
+
+            $scope.downloadFromLibrary = function(inContainer){
                 //note that the entry is a DocumentReference with a bundle as an attachment...
-                if (container) {
+                if (inContainer) {
+
+
+
+
+                    var container = angular.copy(inContainer);
 
                     var id = container.bundle.id;
 
@@ -311,12 +326,17 @@ console.log($scope.libraryContainer)
 
                         $scope.selectedContainer = container;//newBundle;
                         $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
-                        builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
+
+                        builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);  //needed for the 'resource from reference' functionity
                         makeGraph();
-                        delete $scope.currentResource;
-                        $scope.libraryVisible = false;
+                        delete $scope.currentResource;      //so the previous resource details aren't being shown...
+                        $scope.libraryVisible = false;      //hide the library
                         isaDocument();      //see if this set is a document (has a Composition resource)
                         modalService.showModal({}, {bodyText:'The set has been downloaded from the Library. You can now edit it locally.'});
+
+                        refreshLibrary();       //so the download link is disabled...
+                        //console.log($scope.selectedContainer)
+
                     } 
                 } else {
                     alert('There was a problem retrieving the set (id='+ dr.id + ") from the library");
@@ -334,6 +354,7 @@ console.log($scope.libraryContainer)
 
                 builderSvc.saveToLibrary($localStorage.builderBundles[$scope.currentBundleIndex]).then(
                     function (data) {
+
                         $scope.selectedContainer.isDirty = false;
                         modalService.showModal({}, {bodyText:'The set has been updated in the Library. You can continue editing.'});
                         refreshLibrary();

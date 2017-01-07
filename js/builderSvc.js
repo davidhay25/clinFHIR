@@ -164,7 +164,7 @@ angular.module("sampleApp")
 
 
                     //generate the composition text
-                    var cHtml = ';'
+                    //var cHtml = ';'
 
                     var manual = that.splitNarrative(composition.text.div).manual;  //manually entered text
                     var generated = "";     //will replace the genereated text...
@@ -327,9 +327,12 @@ angular.module("sampleApp")
                 //create a hash for the current sets in the local cache based on id...
                 //determine which are already stored loca
                 var cache = {};
-                builderBundles.forEach(function(bundle){
-                    cache[bundle.bundle.id] = true;
-                });
+                if (builderBundles) {
+                    builderBundles.forEach(function(bundle){
+                        cache[bundle.bundle.id] = true;
+                    });
+                }
+
 
 
                 var deferred = $q.defer();

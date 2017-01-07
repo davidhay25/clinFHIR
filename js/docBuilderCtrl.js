@@ -59,6 +59,8 @@ angular.module("sampleApp")
             })
 
 
+
+
             $scope.editSection = function(section) {
                 var editing = false;
                 if (section) {
