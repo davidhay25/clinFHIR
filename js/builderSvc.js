@@ -291,6 +291,11 @@ angular.module("sampleApp")
                     });
 
 
+                    if (dr.meta) {
+                        container.lastUpdated = dr.meta.lastUpdated;
+                        container.version = dr.meta.versionId
+                    }
+
 
 
                     container.name = dr.description;
@@ -411,6 +416,13 @@ angular.module("sampleApp")
             addStringToText : function(resource,txt) {
                 //add the txt to the resource.text.div element...
                 if (resource.text && resource.text.div) {
+
+                    //strip off the leading resource type
+                    var g = txt.indexOf('.');
+                    if (g > -1) {
+
+                        txt = txt.substring(g)
+                    }
 
 
                     var vo = this.splitNarrative(resource.text.div)

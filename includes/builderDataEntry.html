@@ -60,9 +60,18 @@
                     </div>
                 </div>
 
+
+
+                <div ng-hide="expandedValueSet.expansion.includes">
+                    <div uib-alert class="alert-warning" >
+                        This element is configured as a list, but there are no options. This is likely an issue
+                        with the Terminology server. Sorry about that...
+                    </div>
+                </div>
+
+
             </div>
             <div ng-switch-default>
-
 
 
                 <input type="text" ng-model="input.dt.cc.coding"
