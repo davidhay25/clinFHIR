@@ -238,14 +238,23 @@ angular.module("sampleApp")
                 //create the reference from the resource
                 return resource.resourceType + "/" + resource.id;
             },
-            saveToLibrary : function (bundleContainer) {
+            saveToLibrary : function (bundleContainer,user) {
                 //save the bundle to the library. Note that the 'container' of the bundle (includes the name) is passed in...
+
+                console.log(user)
+
                 var bundle = bundleContainer.bundle;
                 var docref = {resourceType:'DocumentReference',id:bundle.id};
                 docref.type = {coding:[{system:'http://clinfhir.com/docs',code:'builderDoc'}]};
                 docref.status = 'current';
                 docref.indexed = moment().format();
                 docref.description = bundleContainer.name;  //yes, I know these names are confusing...
+
+
+                if (user) {
+                    //todo - add Practitioner stuff as well...
+                    docref.author = {display:user.user.email}
+                }
 
                 var extensionUrl = appConfigSvc.config().standardExtensionUrl.docrefDescription;
                 Utilities.addExtensionOnce(docref,extensionUrl,{valueString:bundleContainer.description})
@@ -289,7 +298,7 @@ angular.module("sampleApp")
                             return -1
                         }
                     });
-
+                    container.author = dr.author;
 
                     if (dr.meta) {
                         container.lastUpdated = dr.meta.lastUpdated;
@@ -299,7 +308,7 @@ angular.module("sampleApp")
 
 
                     container.name = dr.description;
-                    container.url = appConfigSvc.getCurrentDataServer().url + dr.id;
+                    container.url = appConfigSvc.getCurrentDataServer().url + "DocumentReference/"+dr.id;
                     //container.description = dr.description;
 
                     //the description is stored in an extension - the dr.description filed is actually the set name...

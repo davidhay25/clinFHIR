@@ -301,6 +301,15 @@
                                     {{selectedLibraryContainer.url}}
                                 </div>
                             </div>
+                            <div class="row" ng-repeat = "author in selectedLibraryContainer.author">
+                                <div class="col-md-3 col-sm-3">
+                                    Author:
+                                </div>
+                                <div class="col-md-9 col-sm-9">
+                                    {{author.display}}
+                                </div>
+                            </div>
+
                             <div class="row">
                                 <div class="col-md-3 col-sm-3">
                                     Last Updated:

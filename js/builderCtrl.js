@@ -140,10 +140,16 @@ console.log($scope.libraryContainer)
 
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
             firebase.auth().onAuthStateChanged(function(user) {
-                delete $scope.input.mdComment;
+                //delete $scope.input.mdComment;
 //console.log(user)
                 if (user) {
-                    $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+                    console.log(user)
+                    $scope.user = {};
+                    $scope.user.user = user;
+                    $scope.user.profile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+
+
+                    //$rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
 
                     //logicalModelSvc.setCurrentUser(user);
 
@@ -152,7 +158,7 @@ console.log($scope.libraryContainer)
                     GetDataFromServer.getPractitionerByLogin(user).then(
                         function(practitioner){
                             //console.log(practitioner)
-                            $scope.Practitioner = practitioner;
+                            $scope.user.practitioner = practitioner;
 
                         },function (err) {
                             alert(err)
@@ -352,7 +358,7 @@ console.log($scope.libraryContainer)
                 //console.log($localStorage.builderBundles[$scope.currentBundleIndex])
 
 
-                builderSvc.saveToLibrary($localStorage.builderBundles[$scope.currentBundleIndex]).then(
+                builderSvc.saveToLibrary($localStorage.builderBundles[$scope.currentBundleIndex],$scope.user).then(
                     function (data) {
 
                         $scope.selectedContainer.isDirty = false;
