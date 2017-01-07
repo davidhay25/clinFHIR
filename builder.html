@@ -124,12 +124,12 @@
         <nav ng-hide="startupParams.hideNav" class="navbar navbar-default navbar-fixed-top" role="navigation">
 
             <div class="container-fluid row">
-                <div class="col-md-2 col-sm-2">
+                <div class="col-md-1 col-sm-1">
                     <a class="navbar-brand" href="#">
                         Builder
                     </a>
                 </div>
-                <div class="col-md-3 col-sm-3">
+                <div class="col-md-4 col-sm-4">
                     <div class="navbar-text">
                         Conformance server: {{appConfigSvc.getCurrentConformanceServer().name}}
                         <div>Data server: {{appConfigSvc.getCurrentDataServer().name}}</div>
@@ -464,6 +464,28 @@
                         <uib-tab heading="Set Summary">
                             <br/>
 
+                            <form class="form-horizontal" role="form">
+                            <div class="form-group">
+                                <div class="col-md-3 col-sm-3">
+                                    <strong>Name</strong>
+                                </div>
+                                <div class="col-md-3 col-sm-3">
+                                    {{selectedContainer.name}}
+                                </div>
+
+                                <div class="col-md-6 col-sm-6">
+                                    <div class="alert alert-warning" role="alert"
+                                         ng-show="selectedContainer.isDirty">
+
+
+
+                                        There are changes that are saved locally, but not yet updated to the Library
+                                    </div>
+                                </div>
+
+                            </div>
+
+<!--
                             <div class="row">
                                 <div class="col-sm-6 col-md-6">
                                     <strong>Name: </strong>
@@ -480,6 +502,16 @@
                                 </div>
                             </div>
 
+-->
+
+                            <div class="form-group">
+                                <div class="col-md-3 col-sm-3">
+                                    <strong>Description</strong>
+                                </div>
+                                <div class="col-md-9 col-sm-9">
+                                    <textarea class="form-control" ng-change="setDirty()" ng-model = 'selectedContainer.description'></textarea>
+                                </div>
+                            </div>
 
 
 
@@ -487,9 +519,47 @@
 
 
 
-                            <strong>Description</strong>
-                            <textarea class="form-control" ng-change="setDirty()" ng-model = 'selectedContainer.description'></textarea>
 
+
+                            <div class="form-group">
+                                <div class="col-md-3 col-sm-3">
+
+                                    <strong>Url</strong>
+                                </div>
+                                <div class="col-md-9 col-sm-9">
+                                    {{selectedContainer.url}}
+                                </div>
+                            </div>
+
+                            <div class="form-group" ng-repeat = "author in selectedContainer.author">
+                                <div class="col-md-3 col-sm-3">
+
+                                    <strong>Author</strong>
+                                </div>
+                                <div class="col-md-9 col-sm-9">
+                                    {{author.display}}
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-md-3 col-sm-3">
+
+                                    <strong>Last Updated</strong>
+                                </div>
+                                <div class="col-md-9 col-sm-9">
+                                    {{selectedContainer.lastUpdated}}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 col-sm-3">
+
+                                    <strong>Version</strong>
+                                </div>
+                                <div class="col-md-9 col-sm-9">
+                                    {{selectedContainer.version}}
+                                </div>
+                            </div>
+                        </form>
 
                             <!--
 
@@ -522,9 +592,13 @@
 
                             </div>
                         </uib-tab>
+
+
                         <uib-tab heading="Debug">
                             <pre>{{selectedContainer | json}}</pre>
                         </uib-tab>
+
+
                     </uib-tabset>
 
                 </div>

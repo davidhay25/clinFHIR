@@ -534,7 +534,8 @@ console.log($scope.libraryContainer)
                         }
 
 
-
+                        refreshLibrary();       //so the download link is disabled...
+                                                //console.log($scope.selectedContainer)
 
                     }
                 );
@@ -642,6 +643,8 @@ console.log($scope.libraryContainer)
                 makeGraph();    //this will update the list of all paths in this model...
                 var url = $scope.currentResource.resourceType+'/'+$scope.currentResource.id;
                 $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
+                $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedContainer.bundle); //update the generated document
+
 
             }
 
