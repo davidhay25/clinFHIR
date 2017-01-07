@@ -275,9 +275,9 @@ console.log($scope.libraryContainer)
             };
 
             //called when a library entry is selected to view. may be redundant...
-            $scope.selectLibraryContainer = function(container){
+            $scope.selectLibraryContainer = function(container,inx){
                 console.log(container);
-
+                $scope.currentLibraryIndex = inx;
                 $scope.selectedLibraryContainer = container;
 
                 //$scope.selectedLibraryEntry.bundle =  angular.fromJson(atob(entry.resource.content[0].attachment.data));  //todo not safe
@@ -482,6 +482,11 @@ console.log($scope.libraryContainer)
                     headerText: 'Remove resource set',
                     bodyText: 'Are you sure you wish to remove this resource set from the local cache?'
                 };
+
+                if ($scope.selectedContainer.isDirty) {
+                    modalOptions.bodyText += " (There are unsaved changes you know...)"
+                }
+
 
                 modalService.showModal({}, modalOptions).then(
                     function () {
