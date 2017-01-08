@@ -443,7 +443,7 @@ angular.module("sampleApp")
             },
             addPropertyValue : function(resource,hashPath,dt,value) {
                 //add a value to a resource property...  type of value will depend on datatype
-
+                var that = this;
                 var info = this.getEDInfoForPath(hashPath.path)
                 //for now, we only allow values for properties directly off the root...
 
@@ -573,7 +573,10 @@ angular.module("sampleApp")
                             segmentPath += '.'+segment;
                             //console.log(segmentPath)
 
-                            segmentInfo = getInfo(segmentPath);
+                            //segmentInfo = getInfo(segmentPath);
+                            segmentInfo = that.getEDInfoForPath(segmentPath);
+
+
 
                             if (segmentInfo.isMultiple) {
                                 insertPoint[segment] = insertPoint[segment] || []  // todo,need to allow for arrays

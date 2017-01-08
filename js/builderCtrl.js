@@ -230,6 +230,8 @@ console.log($scope.libraryContainer)
 
                     controller: function ($scope,GetDataFromServer,appConfigSvc) {
 
+                        $scope.canSave = true;
+
                         $scope.server = appConfigSvc.getCurrentDataServer();
                         $scope.checkName = function(){
                             if ($scope.name) {
@@ -256,6 +258,7 @@ console.log($scope.libraryContainer)
                         $localStorage.builderBundles.push(newBundleContainer);
                         $scope.selectedContainer = newBundleContainer;
                         $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
+
                         makeGraph();
                         delete $scope.currentResource;
                         $rootScope.$emit('newSet',newBundleContainer);
@@ -619,7 +622,10 @@ console.log($scope.libraryContainer)
 
                         var node = vo.graphData.nodes.get(nodeId);
                         //console.log(node)
-                        $scope.selectResource(node.cf.resource)
+                        if (node.cf) {
+                            $scope.selectResource(node.cf.resource)
+                        }
+
 
                         $scope.$digest();
 
@@ -743,6 +749,7 @@ console.log($scope.libraryContainer)
                 $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
 
 
+
                 builderSvc.getSD(resource.resourceType).then(
 
                     function(SD) {
@@ -833,6 +840,17 @@ console.log($scope.libraryContainer)
                                                             //search all the references for ones from this path. Don't include them in the list
                                                             //$scope.allReferences created when the graph is built...
                                                             var alreadyReferenced = false;
+
+
+                                                            $scope.currentResourceRefs.src.forEach(function(item){
+                                                                if (item.path == path && item.targ == reference) {
+                                                                    alreadyReferenced = true;
+                                                                }
+
+                                                            })
+
+/*
+
                                                             $scope.allReferences.forEach(function(ref){
                                                                 //console.log(ref)
                                                                 if (ref.path == path) {
@@ -844,6 +862,7 @@ console.log($scope.libraryContainer)
 
                                                             });
 
+                                                            */
                                                             if (! alreadyReferenced) {
                                                                 type = resource.resourceType;   //allows for Reference
                                                                 $scope.hashReferences[type] = $scope.hashReferences[type] || []
