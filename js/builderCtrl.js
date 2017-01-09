@@ -143,7 +143,7 @@ console.log($scope.libraryContainer)
                 //delete $scope.input.mdComment;
 //console.log(user)
                 if (user) {
-                    console.log(user)
+                    //console.log(user)
                     $scope.user = {};
                     $scope.user.user = user;
                     $scope.user.profile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
@@ -206,7 +206,6 @@ console.log($scope.libraryContainer)
 
             $scope.builderBundles = $localStorage.builderBundles;   //all the bundles cached locally...
 
-
             //set the base path for linking to the spec
             switch (appConfigSvc.getCurrentConformanceServer().version) {
                 case 2:
@@ -216,7 +215,6 @@ console.log($scope.libraryContainer)
                     $scope.fhirBasePath="http://build.fhir.org/";
                     break;
             }
-
 
             $scope.setDirty = function(){
                 $scope.selectedContainer.isDirty = true;
@@ -301,7 +299,6 @@ console.log($scope.libraryContainer)
                 //$scope.selectedLibraryEntry.bundle =  angular.fromJson(atob(entry.resource.content[0].attachment.data));  //todo not safe
 
             };
-
 
             $scope.downloadFromLibrary = function(inContainer){
                 //note that the entry is a DocumentReference with a bundle as an attachment...
@@ -666,8 +663,6 @@ console.log($scope.libraryContainer)
 
             }
 
-
-
             $scope.viewVS = function(uri) {
                 //var url = appConfigSvc
 
@@ -682,21 +677,32 @@ console.log($scope.libraryContainer)
                 });
             };
 
-            $scope.selectResource = function(resource) {
+
+            //if there is a cb (callback property) then execute it after retrieving the SD (as it is generally used for a new resource to add the patient reference)
+            $scope.selectResource = function(resource,cb) {
 
                 $scope.displayMode = 'view';
 
                 delete $scope.hashPath;
 
                 $scope.currentResource = resource;
-                var url = resource.resourceType+'/'+resource.id;
-                $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
+                //var url = resource.resourceType+'/'+resource.id;
+                //$scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
 
 
 
                 builderSvc.getSD(resource.resourceType).then(
 
                     function(SD) {
+
+
+                        if (cb) {
+                            builderSvc.setPatient(resource,SD);     //set the patient reference (if there is a patient or subject property)
+                        }
+
+                        //set up the references after setting the patient...
+                        var url = resource.resourceType+'/'+resource.id;
+                        $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
 
 
                         profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
@@ -903,6 +909,7 @@ console.log($scope.libraryContainer)
 
                         //console.log(objReferences)
                         $scope.objReferences = objReferences;
+                        cb();
 
                     }
                 )
@@ -961,6 +968,8 @@ console.log($scope.libraryContainer)
 
                 }
 
+                $scope.waiting = true;
+
                 $scope.selectedContainer.isDirty = true;
 
                 var resource = {resourceType : type};
@@ -987,23 +996,23 @@ console.log($scope.libraryContainer)
 
                 $scope.displayMode = 'view';
 
-                $scope.selectResource(resource)
-                makeGraph();
 
+                $scope.selectResource(resource,function(){
+                    $scope.waiting = false;
+                    makeGraph();
 
+                    isaDocument();      //determine if this bundle is a document (has a Composition resource)
 
+                    $rootScope.$emit('addResource',resource);
 
-
-
-                isaDocument();      //determine if this bundle is a document (has a Composition resource)
-
-                $rootScope.$emit('addResource',resource);
+                });       //select the resource, indicating that it is a new resource...
 
 
                 //$scope.selectResource(node.cf.resource)
             };
 
             $scope.newTypeSelected = function(item) {
+                $scope.waiting = true;
                 delete $scope.input.text;
                 var type = item.name;
                 var uri = "http://hl7.org/fhir/StructureDefinition/"+type;
@@ -1015,7 +1024,9 @@ console.log($scope.libraryContainer)
                         //console.log($scope.references);
 
                     }
-                )
+                ).finally(function(){
+                    $scope.waiting = false;
+                })
 
             }
 

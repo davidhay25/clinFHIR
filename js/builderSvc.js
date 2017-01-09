@@ -151,10 +151,41 @@ angular.module("sampleApp")
 
                 });
             },
+            setPatient : function(resource,SD) {
+                //if there's a Patient resource already, then scan for 'subject' or 'patient' properties...
+                var that = this;
+                var Patient = null;
+                angular.forEach(gAllResourcesThisSet,function(value,key){
+                    console.log(value,key)
+                    if (value.resourceType == 'Patient') {
+                        Patient = value;
+                    }
+                });
+
+                if (Patient) {
+                    //so there is a patient resource - does this resource have a 'patient' or 'subject' property?
+                    if (SD && SD.snapshot && SD.snapshot.element) {
+                        for (var i=0; i < SD.snapshot.element.length; i++) {
+                            var ed =  SD.snapshot.element[i];
+                            var path = ed.path;
+                            if (path.substr(-7) == 'subject' || path.substr(-7) == 'patient') {
+                                console.log(path);
+                                that.insertReferenceAtPath(resource,path,Patient)
+                                break;
+                            }
+                        }
+                    }
+                }
+            },
             addResourceToAllResources : function(resource) {
                 //add a new resource to the hash
+
                 gAllResourcesThisSet[this.referenceFromResource(resource)] = resource;
+
+
+
             },
+
             makeDocumentText : function(composition,allResourcesBundle){
                 //construct the text representation of a document
                 // order is patient.text, composition.text, sections.text
@@ -1132,15 +1163,16 @@ angular.module("sampleApp")
                         if (ed.type) {
                             ed.type.forEach(function(type){
                                 if (type.code == 'Reference') {
-                                    if (type.profile) {
+                                    var profile = type.profile || type.targetProfile;       //stu3 difference...
+                                    if (profile) {
 
 
 
                                         //note that profile can be an array or a string
-                                        if (angular.isArray(type.profile)) {
-                                            references.push({path:ed.path,profile:type.profile[0].profile,min:ed.min, max:ed.max})
+                                        if (angular.isArray(profile)) {
+                                            references.push({path:ed.path,profile:profile[0].profile,min:ed.min, max:ed.max})
                                         } else {
-                                            references.push({path:ed.path,profile:type.profile,min:ed.min, max:ed.max})
+                                            references.push({path:ed.path,profile:profile,min:ed.min, max:ed.max})
                                         }
                                     }
                                 }
