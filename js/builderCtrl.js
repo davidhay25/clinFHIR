@@ -666,7 +666,8 @@ console.log($scope.libraryContainer)
 
             }
 
-            $scope.showVSBrowserDialog = {};
+
+
             $scope.viewVS = function(uri) {
                 //var url = appConfigSvc
 
@@ -679,63 +680,6 @@ console.log($scope.libraryContainer)
                 ).finally (function(){
                     $scope.showWaiting = false;
                 });
-            };
-
-            //add a segment to the resource at this path
-            $scope.addSegmentDEP = function(hashPath) {
-
-
-                //var path = $filter('dropFirstInPath')(hashPath.path);
-                var insertPoint = $scope.currentResource;
-                var ar = hashPath.path.split('.');
-                var rootPath = ar.splice(0,1)[0];
-
-                if (ar.length > 0) {
-                    for (var i=0; i < ar.length-1; i++) {  //not the last one... -
-
-                        var segment = ar[i];
-                        var fullPath = rootPath
-                        for (var j=0; j < i; j++) {
-                            fullPath += '.' + ar[j];
-                        }
-
-                        //todo - will barf for path length > 2
-                        //console.log(fullPath)
-                        var info = builderSvc.getEDInfoForPath(fullPath)
-                        if (info.isMultiple) {
-                            insertPoint[segment] = insertPoint[segment] || []
-                        } else {
-                            insertPoint[segment] = insertPoint[segment] || {}  // todo,need to allow for arrays
-                        }
-
-
-
-                        insertPoint = insertPoint[segment]
-                    }
-                    path = ar[ar.length-1];       //this will be the property on the 'last'segment
-                }
-
-
-                //todo - actually, need to find out whether the parent already exists, and whether it is single or multiple...
-
-                var ar1 = hashPath.path.split('.');
-                ar1.pop();
-                var parentPath = ar1.join('.')
-                var edParent = builderSvc.getEDInfoForPath(parentPath)
-
-                if (!edParent) {
-                    alert("ED not found for path "+ parentPath)
-                }
-
-                if (edParent.max == 1) {
-                    insertPoint[path] = {}
-                }
-                if (edParent.max =='*') {
-                    insertPoint[path] = insertPoint[path] || []
-
-                    //insertPoint[path].push({reference:resource.resourceType+'/'+resource.id})
-                }
-
             };
 
             $scope.selectResource = function(resource) {
@@ -847,7 +791,7 @@ console.log($scope.libraryContainer)
                                                                     alreadyReferenced = true;
                                                                 }
 
-                                                            })
+                                                            });
 
 /*
 
@@ -1002,10 +946,6 @@ console.log($scope.libraryContainer)
                 }
 
 
-                // $scope.hashReferences[type] = $scope.hashReferences[type] || []
-                // $scope.hashReferences[type].push(resource);
-
-
 
 
             }
@@ -1091,5 +1031,7 @@ console.log($scope.libraryContainer)
 
                 }
             );
+
+            $scope.showVSBrowserDialog = {};
 
         });
