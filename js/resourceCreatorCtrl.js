@@ -250,9 +250,7 @@ angular.module("sampleApp")
             }
         }).result.then(
             function(vo){
-               // console.log(vo)
 
-               // if (vo.resource) {
 
                     var v = {reference: vo.resource.resourceType + "/" + vo.resource.id};
 
@@ -262,7 +260,6 @@ angular.module("sampleApp")
                     
                     $scope.saveNewDataType({value:v,text:v.display});
 
-               // }
             }
         )
 
@@ -421,8 +418,7 @@ angular.module("sampleApp")
     };
 
 
-            //add new server
-
+    //add new server
      $scope.addServer = function(){
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
@@ -540,7 +536,7 @@ angular.module("sampleApp")
 
 
 
-    //clears the current resource being buils and re-displays the front screen
+    //clears the current resource being built and re-displays the front screen
     $scope.cancelNewResource = function(state){
 
         //if the resource has been edited, then confirm the cancel...
@@ -554,12 +550,12 @@ angular.module("sampleApp")
 
             modalService.showModal({}, modalOptions).then(function (result) {
                 //this is the 'yes'
-                clear()
+                clear();
                 $scope.displayMode = 'front';
             })
 
         } else {
-            clear()
+            clear();
             $scope.displayMode = 'front';
         }
 
@@ -2110,10 +2106,26 @@ angular.module("sampleApp")
          $scope.graph[containerId] = network;
 
          network.on("click", function (obj) {
-             var nodeId = obj.nodes[0];  //get the first node
-             var node = graphData.nodes.get(nodeId);
-             $scope.resourceSelected({resource:node.resource});
-             $scope.$digest();
+
+
+             var modalOptions = {
+                 closeButtonText: 'No, I made a mistake',
+                 actionButtonText: 'Yes, load it',
+                 headerText: 'Change resource',
+                 bodyText: 'Do you wish to make this resource the focus?'
+             };
+
+             modalService.showModal({}, modalOptions).then(function (result) {
+                 var nodeId = obj.nodes[0];  //get the first node
+                 var node = graphData.nodes.get(nodeId);
+                 $scope.resourceSelected({resource:node.resource});
+                 $scope.$digest();
+             })
+
+
+
+
+
          });
      }
 

@@ -3,7 +3,7 @@ angular.module("sampleApp")
     .controller('carePlanCtrl',
         function ($scope,$http,appConfigSvc,$q) {
 
-            $scope.input = {identifier:'abc123'};
+            $scope.input = {identifier:'123-456'};
             $scope.input.plans = []
 
             $scope.output = {showDetail:{}};
@@ -94,4 +94,4 @@ angular.module("sampleApp")
             }
 
 
-    });
+    })
