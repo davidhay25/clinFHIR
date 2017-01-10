@@ -80,7 +80,7 @@
       //  console.log(firebase)
         if (firebase) {
             firebase.initializeApp(config);
-            console.log(firebase.auth().currentUser)
+
         }
 
         angular.module("sampleApp",['ui.checkbox','ngAnimate','ngCookies','ui.bootstrap','ngSanitize',
@@ -287,20 +287,6 @@
 
 
 
-<!--
-    <script>
-        // Initialize Firebase
-        var config = {
-            apiKey: "AIzaSyBNMohLbPiSKwpGwfARopdeW_6LLXujcUo",
-            authDomain: "clinfhir.firebaseapp.com",
-            databaseURL: "https://clinfhir.firebaseio.com",
-            storageBucket: ""
-        };
-
-
-    </script>
-
-    -->
 
 
 </head>
@@ -755,21 +741,7 @@
 
             </nav>
 
-            <!-- The list builder -->
 
-            <!--
-            <button class="btn btn-link" ng-click="displayMode = 'list'">ListBuilder</button>
-            <div ng-show="displayMode == 'list'" ng-controller="listbuilderCtrl">
-                <ng-include src="'/includes/listBuilder.html'"></ng-include>
-            </div>
-
-            -->
-<!--
-            <div ng-controller="documentBuilderCtrl">
-                <ng-include src="'/includes/documentBuilder.html'"></ng-include>
-            </div>
-
--->
 
 
 
@@ -815,7 +787,7 @@
             </div>
 
             <div ng-show="displayMode == 'project'" ng-controller="projectCtrl">
-           <!-- <div  ng-controller="projectCtrl">-->
+
 
                 <ng-include src="'/includes/projectEditor.html'"></ng-include>
 
@@ -861,11 +833,11 @@
 
 
 
-
+<!--
             <div ng-show="displayMode == 'consult'" ng-controller="consultbuilderCtrl">
                 <ng-include src="'/includes/consultBuilder.html'"></ng-include>
             </div>
-
+-->
 
             <!-- A directive for browsing value sets-->
             <vs-browser trigger="showVSBrowserDialog"></vs-browser>

@@ -5,13 +5,7 @@ angular.module("sampleApp")
         function ($rootScope,$scope,GetDataFromServer,appConfigSvc,Utilities,$uibModal,RenderProfileSvc,SaveDataToServer,modalService,$timeout) {
 
             $scope.input = {param:'hl7',searchParam:'publisher',searchStatus:'all'};
-/*
-            $scope.mode = 'extension'
 
-            $scope.changeMode = function(mode) {
-                $scope.mode = mode;
-            }
-*/
 
 
             $scope.$watch('input.searchParam',function(){
@@ -27,14 +21,14 @@ angular.module("sampleApp")
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(lst) {
                     $scope.allResourceTypes = lst;
-                    //console.log($scope.allResourceTypes);
+
                 }
             );
 
 
             $rootScope.$on('userLoggedIn',function(){
                 var userProfile = $rootScope.userProfile;
-                console.log(userProfile)
+
                 if (userProfile.extDef && userProfile.extDef.defaultPublisher) {
                     $scope.input = {param:userProfile.extDef.defaultPublisher,searchParam:'publisher',searchStatus:'all'};
 
@@ -65,7 +59,7 @@ angular.module("sampleApp")
                     controller: "extensionDefCtrl"
                 }).result.then(
                     function(result) {
-                        console.log(result)
+
                     })
             };
 
@@ -80,7 +74,7 @@ angular.module("sampleApp")
                     function(){
                         SaveDataToServer.deleteResource(appConfigSvc.getCurrentConformanceServer(),$scope.selectedExtension).then(
                             function(data){
-                                console.log(data);
+
                                 modalService.showModal({}, {bodyText:'Definition is now deleted.'});
 
                                 $scope.extensionsArray.splice($scope.index,1);
@@ -113,7 +107,7 @@ angular.module("sampleApp")
                         $scope.selectedExtension.status = 'retire';
                         SaveDataToServer.updateStructureDefinition(appConfigSvc.getCurrentConformanceServer(),$scope.selectedExtension).then(
                             function(data){
-                                console.log(data);
+
                                 modalService.showModal({}, {bodyText:'Definition is now retired, and should no longer be used. (It needs to remain in the registry for existing usages of course.)'});
                             },
                             function(err) {
@@ -136,7 +130,7 @@ angular.module("sampleApp")
                         $scope.selectedExtension.status = 'active';
                         SaveDataToServer.updateStructureDefinition(appConfigSvc.getCurrentConformanceServer(),$scope.selectedExtension).then(
                             function(data){
-                                console.log(data);
+
                                 modalService.showModal({}, {bodyText:'Definition is now active, and can be used by resource instances.'});
                             },
                             function(err) {
@@ -224,7 +218,7 @@ angular.module("sampleApp")
                 delete $scope.extensionsArray;
                 delete $scope.selectedExtension;
                 delete $scope.index;
-console.log(query)
+
                 $scope.query = query;
 
                 GetDataFromServer.adHocFHIRQueryFollowingPaging(query).then(
@@ -294,7 +288,7 @@ console.log(query)
                 var vo = getDataTypes($scope.selectedExtension);
                 $scope.analysis = vo;
                 $scope.isComplexExtension = vo.isComplexExtension;
-                console.log(vo)
+
 
                 $scope.selectedExtension.localMeta.datatypes = vo.dataTypes;
                 $scope.selectedExtension.localMeta.multiple = vo.multiple;
@@ -410,7 +404,7 @@ console.log(query)
                             function(){
                                 $scope.loading=true;
                                 Utilities.getValueSetIdFromRegistry(valueSetUri, function (vsDetails) {
-                                        console.log(vsDetails)
+
                                         $scope.loading = false;
                                         $scope.showVSBrowser(vsDetails.resource);
                                     }
@@ -433,7 +427,7 @@ console.log(query)
                     // var uri = reference;        //not sure this is correct...
                     $scope.loading=true;
                     Utilities.getValueSetIdFromRegistry(valueSetUri, function (vsDetails) {
-                            console.log(vsDetails)
+
                             $scope.loading = false;
                             $scope.showVSBrowser(vsDetails.resource);
                         }

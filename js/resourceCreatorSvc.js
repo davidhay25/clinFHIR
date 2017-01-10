@@ -3467,31 +3467,30 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                 if (angular.isArray(element)) {
 
-                    aNodeId = getId()
-                    var newNode = {id: aNodeId, parent: parentId, text: key, state: {opened: true, selected: false}};
-                    tree.push(newNode);
-
+                    var aNodeId1 = getId()
+                    var newNode1 = {id: aNodeId1, parent: parentId, text: key, state: {opened: true, selected: false}};
+                    tree.push(newNode1);
 
                     element.forEach(function (child, inx) {
-                        //processNode(tree,parentId,child,key);
-                        processNode(tree, aNodeId, child, '[' + inx + ']');
-                        //processNode(tree,aNodeId,child,key);
+                        processNode(tree, aNodeId1, child, '[' + inx + ']');
+
+                        //processNode(newNode1, aNodeId1, child, '[' + inx + ']');
+
                     })
 
                 } else if (angular.isObject(element)) {
 
-                    oNodeId = getId();
-                    var newNode = {id: oNodeId, parent: parentId, text: key, state: {opened: true, selected: false}};
-                    tree.push(newNode);
+                    var oNodeId = getId();
+                    var newNode2 = {id: oNodeId, parent: parentId, text: key, state: {opened: true, selected: false}};
+                    tree.push(newNode2);
 
                     angular.forEach(element, function (child, key) {
                         processNode(tree, oNodeId, child, key);
-                        //processNode(tree,parentId,child,key);
+
                     })
                 } else {
                     //a simple element
 
-                    //nodeId++;
 
                     if (key == 'div') {
 
@@ -3524,15 +3523,13 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var parentId = '#';
 
 
-            //console.log(tree);
-
             return tree;
 
             //generate a new ID for an element in the tree...
             function getId() {
                 idRoot++;
                 return idRoot;
-                // return "id"+idRoot;//
+
             }
 
 
