@@ -122,7 +122,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
             //generate the list used by the jsTree component to dsplay the tree view of the profile...
             makeProfileDisplayFromProfile : function(inProfile) {
                 //var that = this;
-                console.log('MAKEPROFILE')
+                //console.log('MAKEPROFILE')
                 var loadErrors = [];        //any errors during loading
                 var deferred = $q.defer();
                 var lstTree = [];

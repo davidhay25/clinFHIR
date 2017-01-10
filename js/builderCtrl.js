@@ -264,35 +264,13 @@ console.log($scope.libraryContainer)
                 });
 
 
-/*
-                return;
 
-
-
-
-                var name = prompt('Name of Bundle');
-                if (name) {
-                    delete $scope.isaDocument
-                    var newBundleContainer = {name:name,bundle:{resourceType:'Bundle',entry:[]}};
-                    newBundleContainer.description = "";
-                    newBundleContainer.bundle.id = idPrefix+new Date().getTime();
-                    newBundleContainer.isDirty = true;
-                    newBundleContainer.isPrivate = true;
-                    $localStorage.builderBundles.push(newBundleContainer);
-                    $scope.selectedContainer = newBundleContainer;
-                    $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
-                    makeGraph();
-                    delete $scope.currentResource;
-                    $rootScope.$emit('newSet',newBundleContainer);
-                }
-
-                */
             };
 
             //called when a library entry is selected to view. may be redundant...
             $scope.selectLibraryContainer = function(container,inx){
 
-                console.log(container);
+               // console.log(container);
                 $scope.currentLibraryIndex = inx;
                 $scope.selectedLibraryContainer = container;
 
@@ -419,39 +397,7 @@ console.log($scope.libraryContainer)
                         }
                     })
 
-                    /*
-                     var ar = hashPath.path.split('.');
-                     if (ar.length > 3) {
-                     modalService.showModal({}, {userText:'Sorry, only elements directly off the root can currently have values.'})
-                     } else {
-                     $uibModal.open({
-                     templateUrl: 'modalTemplates/addPropertyInBuilder.html',
-                     size: 'lg',
-                     controller: 'addPropertyInBuilderCtrl',
-                     resolve : {
-                     dt: function () {          //the default config
-                     return dt;
-                     },
-                     hashPath: function () {          //the default config
-                     return hashPath;
-                     },
-                     resource: function () {          //the default config
-                     return $scope.currentResource;
-                     },
-                     vsDetails: function () {          //the default config
-                     return $scope.vsDetails;
-                     },
-                     expandedValueSet: function () {          //the default config
-                     return $scope.expandedValueSet;
-                     }
-                     }
-                     })
 
-                     //return;
-
-
-                     }
-                     */
 
 
                 }

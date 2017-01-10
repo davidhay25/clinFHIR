@@ -25,15 +25,12 @@ angular.module("sampleApp")
 
             $scope.save = function(){
 
-                console.log($scope.input.dt);
-                // $scope.enterPropertyValue = false;
-                // return;
 
                 builderSvc.addPropertyValue(resource,
                     $scope.hashPath,
                     $scope.dataTypeBeingEntered,
                     $scope.input.dt)
-               // $scope.enterPropertyValue = false;
+
                 $scope.$close();
             };
 

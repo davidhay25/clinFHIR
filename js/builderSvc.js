@@ -18,6 +18,9 @@ angular.module("sampleApp")
         objColours.Observation = '#FFFFCC';
         objColours.Practitioner = '#FFBB99';
         objColours.MedicationStatement = '#ffb3ff';
+        objColours.CarePlan = '#FF9900';
+        objColours.CareTeam = '#FFFFCC';
+        objColours.Condition = '#cc9900';
 
 
         return {
@@ -52,20 +55,7 @@ angular.module("sampleApp")
 
                 return $filter('addTextDiv')(narrative);
 
-                /*
-                 //first, remove the </div> at the ene
-                 //resourceText = resourceText.substr(0,textDiv.length - 6);
 
-                 //if there's no marker, the add it...
-                 if (resourceText.indexOf(manualMarkerString) == -1) {
-                 resourceText += manualMarkerString;
-                 }
-
-                 //add the new text
-                 resourceText += newText + "</div>";
-
-                 return resourceText;
-                 */
 
 
             },
@@ -156,7 +146,7 @@ angular.module("sampleApp")
                 var that = this;
                 var Patient = null;
                 angular.forEach(gAllResourcesThisSet,function(value,key){
-                    console.log(value,key)
+                    //console.log(value,key)
                     if (value.resourceType == 'Patient') {
                         Patient = value;
                     }
@@ -169,7 +159,7 @@ angular.module("sampleApp")
                             var ed =  SD.snapshot.element[i];
                             var path = ed.path;
                             if (path.substr(-7) == 'subject' || path.substr(-7) == 'patient') {
-                                console.log(path);
+                                //console.log(path);
                                 that.insertReferenceAtPath(resource,path,Patient)
                                 break;
                             }
@@ -461,7 +451,7 @@ angular.module("sampleApp")
                     var g = txt.indexOf('.');
                     if (g > -1) {
 
-                        txt = txt.substring(g)
+                        txt = txt.substring(g+1)
                     }
 
 
@@ -491,14 +481,14 @@ angular.module("sampleApp")
                        // console.log(value)
                         var insrt = {text:value.HumanName.text}
                         simpleInsert(resource,info,path,insrt,dt);
-                        this.addStringToText(resource.path+": "+ insrt.text)
+                        this.addStringToText(resource,path+": "+ insrt.text)
                         break;
 
                     case 'Address' :
 
                         var insrt = {text:value.Address.text}
                         simpleInsert(resource,info,path,insrt,dt);
-                        this.addStringToText(resource.path+": "+ insrt.text)
+                        this.addStringToText(resource,path+": "+ insrt.text)
                         break;
 
                     case 'Period' :
@@ -513,13 +503,13 @@ angular.module("sampleApp")
                         //value is a Date object...
                         var v = moment(value).format('YYYY-MM-DD');
                         simpleInsert(resource,info,path,v,dt);
-                        this.addStringToText(resource.path+": "+ v)
+                        this.addStringToText(resource,path+": "+ v)
                         break;
                     case 'dateTime' :
                         //value is a Date object...
                         var v = moment(value).format();
                         simpleInsert(resource,info,path,v,dt);
-                        this.addStringToText(resource.path+": "+ v)
+                        this.addStringToText(resource,path+": "+ v)
                         break;
 
                     case 'code' :
@@ -582,7 +572,7 @@ angular.module("sampleApp")
                         angular.forEach(insertPoint,function(value,key){
                             //console.log(key,value)
                             if (key.substr(0,elementRoot.length) == elementRoot) {
-                                console.log(key)
+                                //console.log(key)
                                 delete insertPoint[key]
                             }
 
