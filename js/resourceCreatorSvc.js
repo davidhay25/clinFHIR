@@ -71,7 +71,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             supportSvc.getAllResourcesFollowingPaging(qry).then(
                 function (data) {
-                    console.log(data)
+                   // console.log(data)
                     deferred.resolve(data);
                 },
                 function(err) {
@@ -90,7 +90,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             supportSvc.getAllResourcesFollowingPaging(qry).then(
                 function (data) {
-                    console.log(data)
+                   // console.log(data)
                     deferred.resolve(data);
                 },
                 function(err) {
@@ -898,15 +898,15 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             //what we really want to do is to add it to the element - not to the extension array of this branch
                             //the 'extendedElement' value is set by the getPossibleChildNodes function above...
                             if (lnode.ed.myData.extendedElement) {
-                                console.log('>> extended element')
+                                //console.log('>> extended element')
                                 var parentName = lnode.ed.myData.extendedElement.parentName; //the name of the element in this branch
                                 //is there an element of this name on the current branch?
 
                                 //this routine will add the extension to the element if the element being extended has a value...
                                 angular.forEach(resource, function (value, key) {
-                                    console.log(value, key)
+                                    //console.log(value, key)
                                     if (key == parentName) {
-                                        console.log('parent found')
+                                        //console.log('parent found')
 
                                         if (lnode.ed.myData.extendedElement.isComplex) {
                                             //the parent is a complex datatype
@@ -1016,7 +1016,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                                 if (childNodeHash.isComplexExtension) {
                                     //alert('complex bld')
-                                    console.log(childNodeHash, ed, treeData);
+                                    //console.log(childNodeHash, ed, treeData);
                                     resource.extension = resource.extension || [];
                                     //add the 'parent'
                                     var analysis = ed.cfAnalysis;
@@ -1025,7 +1025,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                                     treeData.forEach(function (tNode) {
                                         if (tNode.parent == childNodeHash.id) {
-                                            console.log('Child', tNode)
+                                            //console.log('Child', tNode)
                                             var child = {url: tNode.text};
                                             child['value' + tNode.dataType.code] = tNode.fragment
                                             complexExt.extension.push(child)
@@ -2258,7 +2258,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             });
 
-            console.log(sd)
+            //console.log(sd)
             //now add the profile to the list of SD's to save
             SDsToSave.push(saveStructureDefinition(profileId, sd).then(
                 function () {
@@ -2268,7 +2268,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     log.push(err.data);
                 }));
 
-            console.log(SDsToSave);
+            //console.log(SDsToSave);
 
             $q.all(SDsToSave).then(
                 function () {
@@ -2284,7 +2284,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
             function saveStructureDefinition(extensionId, extensionDefinition) {
-                console.log(extensionId, extensionDefinition);
+                //console.log(extensionId, extensionDefinition);
                 return $http.put(extensionDefinition.url, extensionDefinition)
 
 
@@ -2311,7 +2311,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             }
 
             var url = config.servers.terminology + 'CodeSystem/$lookup?code=' + code + "&system=" + system;
-            console.log(url)
+            //console.log(url)
             return $http.get(url);
         },
         parseCodeLookupResponse: function (resp) {
@@ -2327,7 +2327,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         break;
 
                     case 'parent' :
-                        console.log(param)
+                       // console.log(param)
                         var code, value, description;
                         param.part.forEach(function (part) {
 
@@ -2401,7 +2401,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                 queries.push(GetDataFromServer.findConformanceResourceByUri(ext.url, serverUrl).then(
                     function (sdef) {
-                        console.log(sdef)
+                       // console.log(sdef)
                         delete ext.noSdef;
                         ext.sdef = sdef;
 
@@ -2444,7 +2444,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     queries.push(GetDataFromServer.findConformanceResourceByUri(url, serverUrl, 'ValueSet').then(
                         function (vs) {
-                            console.log(vs)
+                            //console.log(vs)
                             delete item.noVs;
                             item.vs = vs
 
@@ -2479,7 +2479,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             //copy a conformance resource (eg a StructureDefinition or Value set from a source to a target).
             //If the resource already exists on the target (based on the canonical url) then update it, otherwise create it...
 
-            console.log(uriToCopy, sourceUrl, targetUrl)
+            //console.log(uriToCopy, sourceUrl, targetUrl)
 
             var deferred = $q.defer();
 
@@ -2487,7 +2487,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             GetDataFromServer.findConformanceResourceByUri(uriToCopy, sourceUrl).then(
                 function (resource) {
                     //the resource has been loaded from the source server
-                    console.log(resource)
+                  //  console.log(resource)
                     //var reasourceId = resource.id;
                     delete resource.id;
                     delete resource.meta;
@@ -2497,7 +2497,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     GetDataFromServer.findConformanceResourceByUri(uriToCopy, targetUrl).then(
                         function (oldResource) {
                             //the resource exists - it needs to be updated
-                            console.log(oldResource)
+                           // console.log(oldResource)
                             var resourceId = oldResource.id;
                             var url = targetUrl + resource.resourceType + '/' + resourceId;
                             $http.put(url, resource).then(
@@ -3066,7 +3066,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     }
 
-                    console.log(profileUriForThisResource);
+                    //console.log(profileUriForThisResource);
 
                     if (!profileUriForThisResource) {
                         //load the base profile for this resource if unable to get one from the meta element...
@@ -3143,14 +3143,14 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                     }
                                 });
 
-                                console.log(ext)
+                                //console.log(ext)
 
 
                                 var path = parentPath + '.' + key;
 
 
                                 var ED = getED(path);
-                                console.log(path,ED);
+                             //   console.log(path,ED);
     // lnode.ed.myData.extensionDefUrl;
                                 if (ED) {
                                     ED.myData.extensionDefUrl = ext.url;
@@ -3171,7 +3171,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                     //lnode.ed.myData.extensionDefUrl;
 
 
-                                    console.log(newNode)
+                                   // console.log(newNode)
 
                                     tree.push(newNode);
                                 }
@@ -3384,8 +3384,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 var analysis = Utilities.analyseExtensionDefinition(sdef);
                                 //is this a complex extension? if so then create a vo so we can insert the child elements after getting the definition...
                                 if (analysis.complexExtension) {
-                                    console.log(sdef, analysis);
-                                    console.log(elementDef)
+                                   // console.log(sdef, analysis);
+                                   // console.log(elementDef)
                                     var extPath = analysis.complexExtension.url;    //make up a path from the extension
                                     var ar = extPath.split('.');
                                     var id = ar.pop();
@@ -3436,7 +3436,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 profile.snapshot.element.splice(ext.inx + inx + 1, 0, child)
                             })
 
-                            console.log(ext);
+                           // console.log(ext);
 
 
                         })

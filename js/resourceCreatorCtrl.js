@@ -88,7 +88,7 @@ angular.module("sampleApp")
 
         }
 
-        console.log(profile)
+     //   console.log(profile)
 
 
     }
@@ -99,7 +99,7 @@ angular.module("sampleApp")
         if (user) {
             $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
 
-            console.log($rootScope.userProfile)
+
 
             var updateProfile = false;      //this is just a cheat so I can update my config...
                 //if it's me, then set me as adminstrator and other stuff...
@@ -250,7 +250,7 @@ angular.module("sampleApp")
             }
         }).result.then(
             function(vo){
-                console.log(vo)
+               // console.log(vo)
 
                // if (vo.resource) {
 
@@ -333,7 +333,7 @@ angular.module("sampleApp")
 
     $rootScope.$on('setDisplayMode',function(event,mode){
         $scope.displayMode = mode.newMode;
-        console.log('setting displayMode to ' + mode.newMode)
+        //console.log('setting displayMode to ' + mode.newMode)
         $rootScope.lastModeActivity = mode;         //so a component (like the profile builder) can re-load a previous mode (from mode.currentMode)
     });
 
@@ -495,7 +495,7 @@ angular.module("sampleApp")
 
     //when a new profile is selected from the front page...
     $rootScope.$on('profileSelected',function(event,profile){
-        console.log(profile)
+       // console.log(profile)
         $scope.dirty=false;     //a new form is loaded
         $scope.parkedHx = false;
         setUpForNewProfile(profile);
@@ -554,11 +554,21 @@ angular.module("sampleApp")
 
             modalService.showModal({}, modalOptions).then(function (result) {
                 //this is the 'yes'
+                clear()
                 $scope.displayMode = 'front';
             })
 
         } else {
+            clear()
             $scope.displayMode = 'front';
+        }
+
+
+        function clear() {
+            delete $scope.localSelectedProfile ;
+            //resourceCreatorSvc.setCurrentProfile(null);     //remove the current profile
+            $rootScope.$emit('profileSelected',null);      //will clear the builder...
+
         }
 
 
@@ -621,7 +631,7 @@ angular.module("sampleApp")
                 appConfigSvc.setAllResources(allResources);
                 $rootScope.$broadcast('resourcesLoadedForPatient')
 
-                console.log(allResources);
+               // console.log(allResources);
                 $scope.allResources = allResources;
                 //all conditions is used by the timeline display to
                 //var allConditions = allResources['Condition'];
@@ -736,12 +746,12 @@ angular.module("sampleApp")
 
     $scope.filterTimeLineByCondition = function(reference) {
         delete $scope.outcome.selectedResource;
-        console.log(reference);
+        //console.log(reference);
         //create and draw the timeline. The service will display the number of encounters for each condition
         //todo - this code is (mostly) a copy from the function above - refactor..
         var timelineData =resourceCreatorSvc.createTimeLine($scope.allResourcesAsList,$scope.allResources['Condition'],reference);
 
-        console.log(timelineData)
+       // console.log(timelineData)
         $('#timeline').empty();     //otherwise the new timeline is added below the first...
         var tlContainer = document.getElementById('timeline');
 
@@ -759,10 +769,10 @@ angular.module("sampleApp")
 
     //when a single timeline entry is selected
     var timeLineItemSelected = function(properties,items){
-        console.log(properties);
-        console.log(items)
+        //console.log(properties);
+       // console.log(items)
         var node = items.get(properties.items[0]);
-        console.log(node)
+       // console.log(node)
         $scope.outcome.selectedResource = node.resource;
         createGraphOneResource(node.resource,'resourcenetworkgraphtl')
         $scope.$digest();
@@ -882,13 +892,14 @@ angular.module("sampleApp")
         $scope.buildState = "new";
 
         delete $scope.resource;
+        resourceCreatorSvc.setCurrentProfile(profile);  //save the profile in the service (rather than in the controller) - even if null..
         //if there's no profile, the clear everything. This is called when the server is changed...
         if (!profile) {
             drawTree();
             return;
         }
 
-        resourceCreatorSvc.setCurrentProfile(profile);  //save the profile in the service (rather than in the controller)
+        //resourceCreatorSvc.setCurrentProfile(profile);  //save the profile in the service (rather than in the controller)
         $scope.results.profileUrl = profile.url;
 
         //now set the base type. If a Core profile then it will be the profile name. Otherwise, it is the constarinedType
@@ -1012,24 +1023,29 @@ angular.module("sampleApp")
     //build the resource. Note that this depends on the model created by jsTree so can only be called
     //after that has been rendered...
     var buildResource = function(){
-        var treeObject = $('#treeView').jstree().get_json();    //creates a hierarchical view of the resource
+        //make sure there's a profile before building from it...
+        if (resourceCreatorSvc.getCurrentProfile()) {
+            var treeObject = $('#treeView').jstree().get_json();    //creates a hierarchical view of the resource
 
-        var config = {};
-        config.profile = $scope.conformProfiles;    //profiles that this resource claims conformance to...
-        config.userText = $scope.input.userText;
+            var config = {};
+            config.profile = $scope.conformProfiles;    //profiles that this resource claims conformance to...
+            config.userText = $scope.input.userText;
 
-        var resourceType = resourceCreatorSvc.getResourceTypeForCurrentProfile();
-
-
-        //builds the resource. Parameters base type, hierarchical tree view, raw tree data, other config stuff
-        //todo note that it should be possible to generate the hierarchical view without depending on tree view which will tidy things up a bit
-        $scope.resource = resourceCreatorSvc.buildResource(resourceType,treeObject[0],$scope.treeData,config)
-        //$scope.resource = resourceCreatorSvc.buildResource(type,treeObject[0],$scope.treeData,config)
+            var resourceType = resourceCreatorSvc.getResourceTypeForCurrentProfile();
 
 
-        //the properties to enable the download of the resource
-        $scope.downloadResourceJsonContent = window.URL.createObjectURL(new Blob([angular.toJson($scope.resource, true)], {type: "text/text"}));
-        $scope.downloadResourceJsonName = $scope.resource.resourceType + "-" + new Date().getTime();
+            //builds the resource. Parameters base type, hierarchical tree view, raw tree data, other config stuff
+            //todo note that it should be possible to generate the hierarchical view without depending on tree view which will tidy things up a bit
+            $scope.resource = resourceCreatorSvc.buildResource(resourceType,treeObject[0],$scope.treeData,config)
+            //$scope.resource = resourceCreatorSvc.buildResource(type,treeObject[0],$scope.treeData,config)
+
+
+            //the properties to enable the download of the resource
+            $scope.downloadResourceJsonContent = window.URL.createObjectURL(new Blob([angular.toJson($scope.resource, true)], {type: "text/text"}));
+            $scope.downloadResourceJsonName = $scope.resource.resourceType + "-" + new Date().getTime();
+        }
+
+
         
     };
 
@@ -1323,7 +1339,7 @@ angular.module("sampleApp")
             }
         }).result.then(
             function(item){
-                console.log(item)
+                //console.log(item)
                 $scope.results.resourceItem = item;
             }
         )
@@ -1499,7 +1515,7 @@ angular.module("sampleApp")
         var foundElementToDelete = true
 
         while (foundElementToDelete) {
-            console.log('pass')
+           // console.log('pass')
             foundElementToDelete = false;
             for (var i=0; i<$scope.treeData.length;i++) {
                 var element = $scope.treeData[i];
@@ -1517,7 +1533,7 @@ angular.module("sampleApp")
 
 
 
-        console.log(arDelete)
+        //console.log(arDelete)
 
         //now create a new array with all the non-deleted elements...
         var newTreeArray = [];
@@ -1527,7 +1543,7 @@ angular.module("sampleApp")
                 newTreeArray.push(element);
             }
         }
-        console.log(newTreeArray)
+        //console.log(newTreeArray)
 
         $scope.treeData = newTreeArray
         delete $scope.selectedNode;
@@ -1696,9 +1712,9 @@ angular.module("sampleApp")
 
             resourceCreatorSvc.getLookupForCode(item.system,item.code).then(
                 function(data) {
-                    console.log(data);
+                   //console.log(data);
                     $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
-                    console.log($scope.terminologyLookup);
+                    //console.log($scope.terminologyLookup);
                 },
                 function(err) {
                     //this will generally occur when using stu-2 - so ignore...
@@ -1716,9 +1732,9 @@ angular.module("sampleApp")
     function setTerminologyLookup(system,code) {
         resourceCreatorSvc.getLookupForCode(system,code).then(
             function(data) {
-                console.log(data);
+                //console.log(data);
                 $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
-                console.log($scope.terminologyLookup);
+                //console.log($scope.terminologyLookup);
 
 
 
@@ -1766,7 +1782,7 @@ angular.module("sampleApp")
 
         resourceCreatorSvc.getLookupForCode(system,code).then(
             function(data) {
-                console.log(data);
+               // console.log(data);
 
                 $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
                 $scope.results.ccDirectDisplay = $scope.terminologyLookup.display;
@@ -1939,7 +1955,7 @@ angular.module("sampleApp")
                             //the id will be the value after the type...
                             if (inx > -1) {
                                 $scope.resource.id = ar[inx+1];
-                                console.log($scope.resource)
+                              //  console.log($scope.resource)
                             }
 
 
@@ -2006,7 +2022,7 @@ angular.module("sampleApp")
         }).result.then(function(resource){
             $scope.buildState = 'saved';    //todo should really check for save erors
                 $scope.isEditingResource = resource;
-                console.log(resource)
+                //console.log(resource)
 
                 $rootScope.$emit("reloadPatient");      //will trigger a re-load of the resources for this patient...
             });
@@ -2021,7 +2037,7 @@ angular.module("sampleApp")
     //when a profile is selected...  This is configured in the directive...  Now called from the front page
     $scope.selectedProfileFromDialog = function(profile) {
 
-console.log(profile)
+
         resourceCreatorSvc.insertComplexExtensionED(profile).then(
             function(profile) {
                 var adhocServer;
@@ -2033,7 +2049,7 @@ console.log(profile)
 
                 }
 
-                console.log(profile);
+
 
                 resourceCreatorSvc.setCurrentProfile(profile);
 
@@ -2102,7 +2118,7 @@ console.log(profile)
      }
 
     $scope.fitGraphInContainer = function(containerId) {
-        console.log(containerId,$scope.graph[containerId])
+
 
         if ($scope.graph[containerId]) {
 
@@ -2223,14 +2239,14 @@ console.log(profile)
 
                 //when a user selects a profile - create the array of valuesets referenced by this profile
                 $scope.selectValidationProfile = function(profile){
-                    console.log(profile);
+
                     $scope.valueSets = [];
 
                     if (profile && profile.snapshot && profile.snapshot.element) {
                         profile.snapshot.element.forEach(function(el){
-                           // console.log(el)
+
                             if (el.binding) {
-                               console.log(el)
+
                                 $scope.valueSets.push(el)
                             }
 
@@ -2242,13 +2258,13 @@ console.log(profile)
                 //copy the profile from one server to another
                 $scope.copyProfile = function(targetServer, profile) {
 
-                    console.log(targetServer, profile.url)
+
                     var sourceServer = $scope.input.server;
 
                     resourceCreatorSvc.copyConformanceResource(profile.url,sourceServer.url,targetServer.url).then(
                         function(msg){
                             $scope.copyOutcome = msg
-                            console.log(msg)
+
                         },
                         function (err) {
                             $scope.copyOutcome = err
@@ -2266,7 +2282,7 @@ console.log(profile)
                     $scope.waiting = true;
                     resourceCreatorSvc.checkExtensionDefinitionsAreOnServer($scope.input.server.url,$scope.extensions).then(
                         function(updatedExt) {
-                            console.log(updatedExt)
+
                         },function(err){
                             console.log(err)
                         }
@@ -2280,7 +2296,7 @@ console.log(profile)
                     $scope.waiting = true;
                     resourceCreatorSvc.checkValueSetsAreOnServer($scope.input.copyServer.url,$scope.valueSets).then(
                         function(updatedExt) {
-                            console.log(updatedExt)
+
                         },function(err){
                             console.log(err)
                         }
@@ -2316,7 +2332,7 @@ console.log(profile)
                         alert('This is not valid Json!');
                         return;
                     }
-                    console.log($scope.resource);
+
 
                     $scope.extensions = [];        //this will contain the extensions in this resource...
 
@@ -2345,7 +2361,7 @@ console.log(profile)
 
                     function parseBranch(branch,path) {
                         angular.forEach(branch,function(v,k){
-                            //console.log(k,v);
+
 
                             if (angular.isArray(v)){
                                 //an array could either be a set of extensions, or a 'multiple' element
@@ -2387,7 +2403,7 @@ console.log(profile)
                     var url = $scope.input.server.url + "StructureDefinition?kind=resource&type="+resourceType;
                     GetDataFromServer.adHocFHIRQuery(url).then(
                         function(data) {
-                            console.log(data)
+
                             if (data.data && data.data.entry) {
                                 //this is a bundle
                                 data.data.entry.forEach(function(ent){
@@ -2433,7 +2449,7 @@ console.log(profile)
                     $scope.waiting = true;
                     var oo;
                     $scope.url = $scope.input.server.url;       //just so we can display the url
-                    //console.log($scope.input.server);
+
                     Utilities.validate(resource,$scope.url,$scope.input.profile.url).then(
                         function(data){
 
@@ -2469,25 +2485,7 @@ console.log(profile)
                        // $scope.input.show='results';
                         $scope.waiting = false;
                     });
-                        /*
-                    var url = $scope.config.servers.conformance+ "AllergyIntolerance/$validate?profile="+$scope.profile.url;
-                    console.log(url);
-                    //console.log($scope.instance)
-                    var config = {};
 
-
-
-                    config.headers = {'Content-type':'application/json+fhir'}
-                    $http.post(url,$scope.instance,config).then(
-                        function(data) {
-                            console.log(data);
-                        },
-                        function(err){
-                            console.log(err)
-                        }
-                    )
-
-*/
                 }
 
                 $scope.close = function () {
@@ -2511,7 +2509,7 @@ console.log(profile)
             controller: "extensionDefCtrl"
         }).result.then(
             function(result) {
-                console.log(result)
+
             })
     };
 
@@ -2529,7 +2527,7 @@ console.log(profile)
 
 
         $scope.config = config;
-        //console.log(config);
+
         $scope.input = {};
 
 
@@ -2559,17 +2557,7 @@ console.log(profile)
 
 
         //display the profile editor page (as also called from the profiles explorer)
-        /*
-        $rootScope.$on('showProfileEditor',function(event,profile){
 
-            console.log('showProfileEditor',profile)
-            $scope.frontPageProfile = profile;      //set the profile in the component
-            //broadcast an event so that the profile edit controller (logicalModelCtrl) can determine if this is a core profile and can't be edited...
-
-            $scope.showProfileEditPage = true;      //displays the editor page (and hides the front page)
-        });
-
-        */
 
         $scope.showHelp = true;
         if ($localStorage.dontNeedHelp) {
@@ -2635,14 +2623,13 @@ console.log(profile)
             delete $rootScope.currentProject.canEdit;       //start out not editing
 
 
-          console.log($rootScope.currentProject)
-            //$rootScope.currentProject = $rootScope.userConfig.projects[inx];
+
 
 
             appConfigSvc.setProject($rootScope.currentProject).then(
                 function(vo) {
                     var profiles = vo.profiles;
-                    console.log(profiles)
+
 
                     //set the current servers on the scope - will update the displays as well...
                     $scope.input.conformanceServer = appConfigSvc.getCurrentConformanceServer();
@@ -2743,7 +2730,7 @@ console.log(profile)
             config = $localStorage.config;
 
             config.allKnownServers.forEach(function(svr){
-                //console.log(svr)
+
                 if (config.servers.data == svr.url) {
                     $scope.input.dataServer = svr;}
                 if (config.servers.conformance == svr.url) {$scope.input.conformanceServer = svr}
@@ -2753,33 +2740,7 @@ console.log(profile)
 
         }
 
-        //loads the configuration for a project. Actually loads the user config as I have plans to extend...
-        /*
-        $scope.setProjectDEP = function() {
-            
-            appConfigSvc.loadUserConfig().then(
-                function(data) {
-                    $scope.userConfig = data;
-                    console.log($scope.userConfig)
-                    appConfigSvc.setProject(data.projects[0]).then(
-                        function(profiles) {
-                            console.log(profiles)
 
-                            //set the current servers on the scope - will update the displays as well...
-                            $scope.input.conformanceServer = appConfigSvc.getCurrentConformanceServer();
-                            $scope.input.dataServer = appConfigSvc.getCurrentDataServer();
-                            $scope.recent.profile = profiles;  //set the profiles display
-
-                            appConfigSvc.checkConsistency();    //will set the terminology server...
-
-
-                        }
-                    )   //set uo for a specific project
-
-                }
-            )
-        }
-        */
 
 
         //tests that the server is available by retrieving the conformance resource
@@ -2871,7 +2832,6 @@ console.log(profile)
         //when a profile is selected from the 'myProfiles' list (not the dialog) to build a resource from. It returns the profile (StructureDefinition resource)
         $scope.selectProfile = function(profile) {
 
-            //console.log(profile)
 
             var clone = angular.copy(profile);
             $scope.localSelectedProfile = profile;
@@ -2902,7 +2862,7 @@ console.log(profile)
                         supportSvc.getRandomName().then(
                             function(data) {
                                 try {
-                                    console.log(data)
+
 
                                     var user = data.data.results[0];
                                     $scope.input.dob = moment(user.dob).format();
@@ -2942,7 +2902,7 @@ console.log(profile)
                         supportSvc.createPatient($scope.input).then(
                             function(patient){
                                 var patientId = patient.id;
-                                console.log(patient)
+
                                 addLog('Added patient with the id : '+ patientId)
                                 appConfigSvc.setCurrentPatient(patient);
                                 $rootScope.$emit('patientSelected',patient);
@@ -3096,8 +3056,7 @@ console.log(profile)
                                 msg += "Here's the error I got: "+angular.toJson(err);
                                 modalService.showModal({}, {bodyText: msg})
 
-                               // console.log(err);
-                               // alert('error saving patient\n'+angular.toJson(err))
+
                                 $scope.waiting = false;
                                 $scope.allowClose = true;
                             }
@@ -3245,29 +3204,12 @@ console.log(profile)
 
 
         $scope.treeNodeSelected = function(item) {
-            //console.log(item);
+
             delete $scope.edFromTreeNode;
             if (item.node && item.node.data && item.node.data.ed) {
                 $scope.edFromTreeNode = item.node.data.ed;
                 $scope.$digest();       //the event originated outside of angular...
             }
-
-        };
-
-        //replaced by showValueSetForProfile below...
-        $scope.showValueSetDEP = function (vsUrl) {
-            
-
-            GetDataFromServer.getValueSet(vsUrl).then(
-                function(vs) {
-
-                    $scope.showVSBrowserDialog.open(vs);
-
-                }
-            ).finally (function(){
-                $scope.showWaiting = false;
-            });
-
 
         };
 
@@ -3277,7 +3219,7 @@ console.log(profile)
 
         $scope.showProfileByUrl = function(uri) {
 
-            //console.log($scope.config)
+
             delete $scope.selectedProfile;
             //first get the profile from the conformance server
 
@@ -3296,7 +3238,7 @@ console.log(profile)
 
         //note that the parameter is a URL - not a URI
         $scope.showProfile = function(url) {
-            //console.log($scope.config)
+
             delete $scope.selectedProfile;
             if (url.substr(0,4) !== 'http') {
                 //this is a relative reference. Assume that the profile is on the current conformance server
@@ -3304,7 +3246,7 @@ console.log(profile)
 
             }
 
-console.log(url);
+
             //generate a display of the profile based on it's URL. (points directly to the SD)
             resourceCreatorSvc.getProfileDisplay(url).then(
                 function(vo) {
@@ -3326,7 +3268,7 @@ console.log(url);
                 server = {name:'Ad Hoc server',url:url}
             }
 
-            console.log(server);
+
 
             $scope.input.parameters = "";
             delete $scope.filteredProfile;
@@ -3337,7 +3279,7 @@ console.log(url);
 
             $scope.server =server;
             $scope.buildQuery();
-                //console.log(server);
+
         };
 
         $scope.buildQuery = function() {
@@ -3394,7 +3336,7 @@ console.log(url);
                 $scope.waiting = true;
                 resourceCreatorSvc.getConformanceResource($scope.server.url).then(
                     function (data) {
-                        //console.log(data.data)
+
                         $scope.conformance = data.data
                     },function (err) {
                         alert('Error loading conformance resource:'+angular.toJson(err));
@@ -3420,7 +3362,7 @@ console.log(url);
 
             resourceCreatorSvc.getConformanceResourceFromUrl(url).then(
                 function (data) {
-                    //console.log(data.data)
+
                     $scope.conformance = data.data
                 },function (err) {
                     alert('Error loading conformance resource:'+angular.toJson(err));
@@ -3435,7 +3377,7 @@ console.log(url);
             resourceCreatorSvc.createConformanceQualityReport($scope.conformance).then(
                 function(report) {
                     $scope.qualityReport = report;
-                    //console.log(report)
+
                     $scope.waiting = false;
                 }
             );
@@ -3445,7 +3387,7 @@ console.log(url);
         //the handler for when a valueset is selected from within the <show-profile component on conformanceDisplay.html
         $scope.showValueSetForProfile = function(url){
             //url is actually a URI
-            //console.log(url);
+
 
             GetDataFromServer.getValueSet(url).then(
                 function(vs) {
@@ -3463,10 +3405,10 @@ console.log(url);
 
 
             //retrieve the profile based on its URI and re-set the selected profile
-        //    console.log(uri);
+
             GetDataFromServer.findConformanceResourceByUri(uri).then(
                 function(profile) {
-                    //console.log(profile)
+
                     $scope.selectedProfile = profile;
                 },
                 function(err) {
@@ -3482,7 +3424,7 @@ console.log(url);
             $scope.selectedType = type;
             
             delete $scope.filteredProfile;
-            //console.log(type)
+
             //note that the reference is a URL - ie a direct reference to the SD - not a URI...
             if (type.profile && type.profile.reference) {
                 //there is an issue that the url for the 'base' resources is not resolving - eg
@@ -3531,7 +3473,7 @@ console.log(url);
             $scope.waiting = true;
             resourceCreatorSvc.executeQuery('GET',$scope.query).then(
                 function(data){
-                   // console.log(data);
+
                     $scope.response = data;
 
 
@@ -3592,7 +3534,7 @@ console.log(url);
             $scope.waiting = true;
             resourceCreatorSvc.checkExtensionDefinitionsAreOnServer($scope.input.server.url,$scope.extensions).then(
                 function(updatedExt) {
-                    console.log(updatedExt)
+
                 },function(err){
                     console.log(err)
                 }
@@ -3625,7 +3567,7 @@ console.log(url);
                 alert('This is not valid Json!');
                 return;
             }
-            console.log($scope.resource);
+
 
             $scope.extensions = [];        //this will contain the extensions in this resource...
 
@@ -3634,7 +3576,7 @@ console.log(url);
                 //if they are not, then return false and the caller will parse each element...
                 //var isExtensionArray = false;
                 ar.forEach(function(el){
-                    //console.log('ext==>',el)
+
                     var vo = {};
                     vo.path = path;
                     //the extension will have 2 properties: 'url' and one starting with 'value'
@@ -3646,7 +3588,7 @@ console.log(url);
                         }
                     })
 
-                    console.log(vo);
+
                     $scope.extensions.push(vo);
                 });
                 //return isExtensionArray;
@@ -3654,7 +3596,7 @@ console.log(url);
 
             function parseBranch(branch,path) {
                 angular.forEach(branch,function(v,k){
-                    //console.log(k,v);
+
 
                     if (angular.isArray(v)){
                         //an array could either be a set of extensions, or a 'multiple' element
@@ -3667,17 +3609,16 @@ console.log(url);
                             })
                         }
 
-                        //processArray(v);
-                        //console.log('array')
+
 
 
 
                     } else if (angular.isObject(v)){
                         //if it's an object, then check the children as well. This could be a complex datattype or a backbone element
-                        //console.log('obj')
+
                         parseBranch(v,path + '.' + k)
                     } else {
-                        //console.log('strng')
+
                     }
                 })
             }
@@ -3689,10 +3630,7 @@ console.log(url);
             getProfilesForResourceType($scope.resource.resourceType)
 
 
-            //console.log($scope.extensions)
-            //console.log($scope.input.show)
 
-            //$scope.input.show='parsed'
         };
 
 
@@ -3702,7 +3640,7 @@ console.log(url);
             var url = $scope.input.server.url + "StructureDefinition?kind=resource&type="+resourceType;
             GetDataFromServer.adHocFHIRQuery(url).then(
                 function(data) {
-                    console.log(data)
+
                     if (data.data && data.data.entry) {
                         //this is a bundle
                         data.data.entry.forEach(function(ent){
@@ -3747,7 +3685,7 @@ console.log(url);
             $scope.waiting = true;
             var oo;
             $scope.url = $scope.input.server.url;       //just so we can display the url
-            //console.log($scope.input.server);
+
             Utilities.validate(resource,$scope.url,$scope.input.profile).then(
                 function(data){
 
@@ -3762,12 +3700,12 @@ console.log(url);
 
                 },
                 function(data) {
-                    console.log(data)
+
 
 
                     if (angular.isString(data.data)){
                         $scope.error = data.data;
-                        console.log(data)
+
                         oo = {issue:['shoeme']}
                     } else {
                         oo = data.data;
@@ -3801,7 +3739,7 @@ console.log(url);
 
 .filter('shortUrl',function(){
         return function(input) {
-            //console.log(input);
+
             if (input) {
                 var ar = input.split('/');
                 if (ar.length > 2) {
@@ -3818,7 +3756,7 @@ console.log(url);
     ).filter('showUrlId',function(){
         //show the id component of a url
         return function(input) {
-            //console.log(input);
+
             if (input) {
                 var ar = input.split('/');
                 if (ar.length > 2) {
