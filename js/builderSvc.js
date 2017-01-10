@@ -24,6 +24,17 @@ angular.module("sampleApp")
 
 
         return {
+            isEmptyText : function(text){
+                //return true if the text is empty
+
+                if (text == "<div xmlns='http://www.w3.org/1999/xhtml'>" + this.getManualMarker() + "</div>") {
+                    return true
+                } else {
+                    return false;
+                }
+
+
+            },
             splitNarrative : function(narrative) {
 
                 //get the manual part of resource text - the text above the marker string. default to manual text..

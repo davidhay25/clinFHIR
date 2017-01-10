@@ -637,6 +637,7 @@ console.log($scope.libraryContainer)
 
 
 
+                $scope.waiting = true;
                 builderSvc.getSD(resource.resourceType).then(
 
                     function(SD) {
@@ -861,7 +862,9 @@ console.log($scope.libraryContainer)
 
 
                     }
-                )
+                ).finally(function(){
+                    $scope.waiting = false;
+                })
 
 
             };

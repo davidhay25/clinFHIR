@@ -6,19 +6,18 @@
 angular.module("sampleApp")
     .filter('resourceTextFromReference',['builderSvc',function(builderSvc){
         return function(reference) {
-            //console.log(reference)
+
             var resource = builderSvc.resourceFromReference(reference);
             //console.log(resource)
             if (resource) {
-                if (resource.text.div !== '') {
+                //if the text is empty, return the reference...
+                if (! builderSvc.isEmptyText(resource.text.div )) {
                     return resource.text.div
                 } else {
                     return reference
                 }
-
-
-
             } else {
+                //if the references resource has been removed from the set...
                 return reference
             }
 
