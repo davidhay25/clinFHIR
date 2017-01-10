@@ -415,9 +415,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     //this is being set as a JSON string rather than an object - I'm not sure why...
                     var units = JSON.parse(results.ageunits);
                     var v = {
-                        value: results.age.value,
+                        value: parseFloat(results.age.value),
                         unit: units.display,        //changes sep 2016
-                        system: 'http://ucum.org',
+                        system: 'http://unitsofmeasure.org',
                         code: units.code
                     };
 

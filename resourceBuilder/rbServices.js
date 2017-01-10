@@ -2682,9 +2682,16 @@ console.log(summary);
         function getString(ar) {
             var lne = '';
             if (ar) {
-                ar.forEach(function(el){
-                    lne += el + " ";
-                } )
+                if (angular.isArray(ar)) {      //make sure it's an array. eh humanname isn't...
+                    ar.forEach(function(el){
+                        lne += el + " ";
+                    } )
+                } else {
+                    lne += ar + " ";
+                }
+
+
+
             }
             return lne;
         }

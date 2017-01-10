@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2016-12-02';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-01-09';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};

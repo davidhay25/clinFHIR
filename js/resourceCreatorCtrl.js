@@ -1439,7 +1439,9 @@ angular.module("sampleApp")
             });
 
 
-             $scope.selectedNode = treeNode;     //todo !!!!! may not be correct - may need to use getNodeFromId(treeNode.id);
+            //NOTE: uncommenting this line will select the node after data is entered. Gives a wierd result...
+
+             //$scope.selectedNode = treeNode;     //todo !!!!! may not be correct - may need to use getNodeFromId(treeNode.id);
 
             if ($scope.selectedNode) {
                 var n = getNodeFromId($scope.selectedNode.id);
