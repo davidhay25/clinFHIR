@@ -2633,7 +2633,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var ctr = 0;
 
             //add the cental resource to the nodes array
-            var baseNode = {id: baseId, label: that.createResourceLabel(resource), shape: 'box'};
+            //var baseNode = {id: baseId, label: that.createResourceLabel(resource), shape: 'box'};
+            var baseNode = {id: baseId, label:resource.resourceType, title: that.createResourceLabel(resource), shape: 'box'};
 
             baseNode.resource = resource;
             if (objColours[resource.resourceType]) {
@@ -2647,7 +2648,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 if (ref.resource) {
                     ctr++;
 
-                    var node = {id: baseId + ctr, label: that.createResourceLabel(ref.resource), shape: 'box'} //todo here is where we'll need to find if already added
+                    //var node = {id: baseId + ctr, label: that.createResourceLabel(ref.resource), shape: 'box'}
+                    var node = {id: baseId + ctr, label:ref.resource.resourceType, title: that.createResourceLabel(ref.resource), shape: 'box'} //todo here is where we'll need to find if already added
                     node.resource = ref.resource;
                     if (objColours[ref.resource.resourceType]) {
                         node.color = objColours[ref.resource.resourceType];
@@ -2668,7 +2670,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 if (ref.resource) {
                     ctr++;
 
-                    var node = {id: baseId + ctr, label: that.createResourceLabel(ref.resource), shape: 'box'} //todo here is where we'll need to find if already added
+                    var node = {id: baseId + ctr, label:ref.resource.resourceType, title: that.createResourceLabel(ref.resource), shape: 'box'} //todo here is where we'll need to find if already added
                     node.resource = ref.resource;
                     if (objColours[ref.resource.resourceType]) {
                         node.color = objColours[ref.resource.resourceType];

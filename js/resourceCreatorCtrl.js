@@ -2163,7 +2163,7 @@ angular.module("sampleApp")
             $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(resource, true)], {type: "text/text"}));
             $scope.downloadLinkJsonName = resource.resourceType + "-" + resource.id;
 
-            GetDataFromServer.getXmlResource(resource.resourceType + "/" + resource.id + "?_format=xml").then(
+            GetDataFromServer.getXmlResource(resource.resourceType + "/" + resource.id + "?_format=xml&_pretty=true").then(
                 function (data) {
                     $scope.xmlResource = data.data;
                     $scope.downloadLinkXmlContent = window.URL.createObjectURL(new Blob([data.data], {type: "text/xml"}));
