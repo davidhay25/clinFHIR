@@ -10,7 +10,14 @@ angular.module("sampleApp")
             var resource = builderSvc.resourceFromReference(reference);
             //console.log(resource)
             if (resource) {
-                return resource.text.div
+                if (resource.text.div !== '') {
+                    return resource.text.div
+                } else {
+                    return reference
+                }
+
+
+
             } else {
                 return reference
             }
