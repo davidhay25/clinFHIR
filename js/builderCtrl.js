@@ -909,7 +909,10 @@ console.log($scope.libraryContainer)
 
                         //console.log(objReferences)
                         $scope.objReferences = objReferences;
-                        cb();
+                        if (cb) {
+                            cb();
+                        }
+
 
                     }
                 )
