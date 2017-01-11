@@ -436,6 +436,7 @@ angular.module("sampleApp")
                 var display = "";
                 if (rawValue) {
                     display = rawValue;
+
                     //figure out the display
                     if (rawValue.coding) {
                         //this is a cc

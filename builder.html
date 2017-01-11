@@ -110,7 +110,7 @@
         }
     </script>
 
-    <title>Builder</title>
+    <title>Scenario Builder</title>
 
 
 </head>
@@ -126,7 +126,7 @@
             <div class="container-fluid row">
                 <div class="col-md-1 col-sm-1">
                     <a class="navbar-brand" href="#">
-                        Builder
+                        Scenario Builder
                     </a>
                 </div>
                 <div class="col-md-4 col-sm-4">
@@ -382,8 +382,8 @@
 
             <div class="col-md-2 col-sm-2">
 
-                <button class="btn btn-link pull-right" ng-click="newBundle()">New Set</button>
-                <h4>Local Sets</h4>
+                <button class="btn btn-link pull-right" ng-click="newBundle()">New Scenario</button>
+                <h4>Local Scenarios</h4>
 
                 <ul class="list-group" >
                     <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':$index == currentBundleIndex}"
@@ -464,7 +464,7 @@
 
 
                         </uib-tab>
-                        <uib-tab heading="Set Summary">
+                        <uib-tab heading="Scenario Summary">
                             <br/>
 
                             <form class="form-horizontal" role="form">
@@ -583,6 +583,15 @@
 
                         </uib-tab>
                         <uib-tab heading="Graph" select="redrawChart()">
+                            <div class="row">
+                                <div class="col-md-12 col-sm-12">
+                                    <span class="clickable iconSpacing pull-right"
+                                          ng-click="hidePatient()">Hide Patient</span>
+                                    <span class="clickable iconSpacing pull-right"
+                                          ng-show = "currentResource"
+                                          ng-click="hideOthers()">Hide unconnected </span>
+                                </div>
+                            </div>
                             <div id="resourceGraph"></div>
                             <br/>
                         </uib-tab>

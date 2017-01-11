@@ -553,18 +553,13 @@ console.log($scope.libraryContainer)
                     };
                     $scope.chart = new vis.Network(container, vo.graphData, options);
                     $scope.chart.on("click", function (obj) {
-                        //console.log(obj)
-
-
-                        //$scope.selectResource(entry.resource)
-
 
                         var nodeId = obj.nodes[0];  //get the first node
-                        // console.log(nodeId,graphData)
+
 
 
                         var node = vo.graphData.nodes.get(nodeId);
-                        //console.log(node)
+
                         if (node.cf) {
                             $scope.selectResource(node.cf.resource)
                         }

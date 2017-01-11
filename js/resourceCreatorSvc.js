@@ -2794,10 +2794,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             include = true;
                         }
                     })
-
-
-
-
                 }
 
 
