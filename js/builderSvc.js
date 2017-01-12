@@ -24,6 +24,46 @@ angular.module("sampleApp")
 
 
         return {
+            analyseInstanceForPath : function(resource,path){
+                //analyse the path. if it has an ancestor of type backbone element that is multiple, then show the current entries in the instance
+                var that = this;
+                var ar = path.split('.');
+                var arExistingElements = []
+                var testPath;
+                var currentTestPoint = resource;           //where we are checking...
+
+                var testPath = ar[0]
+                var response = {};
+                for (var inx=1; inx < ar.length-1; inx++) {
+                    var segment = ar[inx];
+                    testPath += '.' + segment
+
+                    var info = that.getEDInfoForPath(testPath);
+
+                    if (info.isBBE && info.isMultiple) {
+                        //the path being passed in has an ancestor that is a multiple bbe. We need to get the existing elements at this path
+                        //afaik this will always be directly off the root -todo: might want to check
+                        arExistingElements = currentTestPoint[segment] || []
+                        response.isMultipleBbe = true;          //indicates that this element does belonge to a repreating bbe (even if the list is currently empty)
+
+                    }
+
+                    if (currentTestPoint[segment]) {
+                        currentTestPoint = currentTestPoint[segment]
+                    } else {
+                        currentTestPoint[segment] = []
+                    }
+
+
+                }
+
+                response.list = arExistingElements;
+                response.modelPoint=currentTestPoint;
+                //return both the list of nodes that are parents to this element, as well as the position in the instance where it was found (so new ones can be added)
+                return response;
+
+
+            },
             isEmptyText : function(text){
                 //return true if the text is empty
 
@@ -429,29 +469,36 @@ angular.module("sampleApp")
                 //return a string display for a path value. root only at this stage...
                 var path = $filter('dropFirstInPath')(inPath);   //the path off the root
                 var info = this.getEDInfoForPath(inPath)
-                var rawValue = resource[path];
-                if (info.isMultiple && resource[path]) {
-                    rawValue = resource[path][0];
-                }
-                var display = "";
-                if (rawValue) {
-                    display = rawValue;
 
-                    //figure out the display
-                    if (rawValue.coding) {
-                        //this is a cc
-                        display = rawValue.coding[0].display;
-                        //display = rawValue.coding[0].code + " ("+rawValue.coding[0].system+")";
-                    } else if (rawValue.start || rawValue.end) {
-                        //this is a period
-
+                if (info.isBBE) {
+                    return {raw:{},display:""}
+                } else {
+                    var rawValue = resource[path];
+                    if (info.isMultiple && resource[path]) {
+                        rawValue = resource[path][0];
                     }
+                    var display = "";
+                    if (rawValue) {
+                        display = rawValue;
+
+                        //figure out the display
+                        if (rawValue.coding) {
+                            //this is a cc
+                            display = rawValue.coding[0].display;
+                            //display = rawValue.coding[0].code + " ("+rawValue.coding[0].system+")";
+                        } else if (rawValue.start || rawValue.end) {
+                            //this is a period
+
+                        }
+                    }
+
+
+
+
+                    return {raw:rawValue,display:display}
                 }
 
 
-
-
-                return {raw:rawValue,display:display}
 
 
             },
@@ -474,65 +521,64 @@ angular.module("sampleApp")
                 }
 
             },
-            addPropertyValue : function(resource,hashPath,dt,value) {
-                //add a value to a resource property...  type of value will depend on datatype
+            addPropertyValue : function(insertPoint,hashPath,dt,value) {
+                //add a value at the insertPoint (eg the resource root).
+                // the last segment of hashPath.path is the actual propertyname. (we need to full path to get the ED)
+                // type of value will depend on datatype
                 var that = this;
                 var info = this.getEDInfoForPath(hashPath.path)
                 //for now, we only allow values for properties directly off the root...
 
                 var path = hashPath.path;
 
-                if (path.indexOf('.') > -1) {
-                    //  return "Can only add to root properties";
-                }
-
+               
 
                 switch (dt) {
 
                     case 'HumanName' :
                        // console.log(value)
                         var insrt = {text:value.HumanName.text}
-                        simpleInsert(resource,info,path,insrt,dt);
-                        this.addStringToText(resource,path+": "+ insrt.text)
+                        simpleInsert(insertPoint,info,path,insrt,dt);
+                        this.addStringToText(insertPoint,path+": "+ insrt.text)
                         break;
 
                     case 'Address' :
 
                         var insrt = {text:value.Address.text}
-                        simpleInsert(resource,info,path,insrt,dt);
-                        this.addStringToText(resource,path+": "+ insrt.text)
+                        simpleInsert(insertPoint,info,path,insrt,dt);
+                        this.addStringToText(insertPoint,path+": "+ insrt.text)
                         break;
 
                     case 'Period' :
                         var start = value.period.start;
                         var end = value.period.end;
                         var insrt = {start:start,end:end}
-                        simpleInsert(resource,info,path,insrt,dt);
+                        simpleInsert(insertPoint,info,path,insrt,dt);
 
                         break;
 
                     case 'date' :
                         //value is a Date object...
                         var v = moment(value).format('YYYY-MM-DD');
-                        simpleInsert(resource,info,path,v,dt);
-                        this.addStringToText(resource,path+": "+ v)
+                        simpleInsert(insertPoint,info,path,v,dt);
+                        this.addStringToText(insertPoint,path+": "+ v)
                         break;
                     case 'dateTime' :
                         //value is a Date object...
                         var v = moment(value).format();
-                        simpleInsert(resource,info,path,v,dt);
-                        this.addStringToText(resource,path+": "+ v)
+                        simpleInsert(insertPoint,info,path,v,dt);
+                        this.addStringToText(insertPoint,path+": "+ v)
                         break;
 
                     case 'code' :
-                        simpleInsert(resource,info,path,value.code,dt);
+                        simpleInsert(insertPoint,info,path,value.code,dt);
 
-                        this.addStringToText(resource,path+": "+ value.code)
+                        this.addStringToText(insertPoint,path+": "+ value.code)
                         break;
                     case 'string' :
-                        simpleInsert(resource,info,path,value.string,dt);
+                        simpleInsert(insertPoint,info,path,value.string,dt);
 
-                        this.addStringToText(resource,path+": "+ value.string)
+                        this.addStringToText(insertPoint,path+": "+ value.string)
                         break;
                     case "CodeableConcept" :
                         //value is an object that can have properties code, system, display, text
@@ -553,26 +599,66 @@ angular.module("sampleApp")
                                 }
                             }
                             if (value.cc.text) {
-                                cc.text = value.text;
+                                cc.text = value.cc.text;
                                 text = value.cc.text;
                             }
 
 
-                            simpleInsert(resource,info,path,cc,dt);
+                            simpleInsert(insertPoint,info,path,cc,dt);
 
                             if (text) {
-                                this.addStringToText(resource, path + ": " + text)
+                                this.addStringToText(insertPoint, path + ": " + text)
                             }
                         }
 
                         break;
                 }
 
-                function simpleInsert(resource,info,path,insrt,dt) {
-                    var insertPoint = resource;
+                function simpleInsert(insertPoint,info,path,insrt,dt) {
+                    //var insertPoint = resource;
+
+                    var elementInfo = that.getEDInfoForPath(path);  //information about the element we're about to insert...
+
+                    var ar = path.split('.');
+                    var propertyName = ar[ar.length-1];     //so we insert at insertPoint[propertyName]
 
 
-                    var segmentPath = resource.resourceType;
+                    //rename the propertyname if it can have different datatypes...
+                    if (propertyName.substr(-3) == '[x]') {
+                        var elementRoot = propertyName.substr(0,propertyName.length-3);     //the propertyname with the [x] removed
+
+                        propertyName = elementRoot + dt.substr(0,1).toUpperCase() + dt.substr(1);   //the new property name
+
+                        //delete any existing elements with this root
+                        angular.forEach(insertPoint,function(value,key){
+                            //console.log(key,value)
+                            if (key.substr(0,elementRoot.length) == elementRoot) {
+
+                                delete insertPoint[key]
+                            }
+
+                        })
+                    }
+
+                    //now do the actual insert...
+                    if (elementInfo.isMultiple) {
+
+                        insertPoint[propertyName] = insertPoint[propertyName] || []
+                        insertPoint[propertyName].push(insrt)
+                    } else {
+                        insertPoint[propertyName] =insrt;
+                    }
+
+
+
+
+
+                    return;
+
+
+
+
+                   // var segmentPath = resource.resourceType;
                     var path = $filter('dropFirstInPath')(path);
 
 
@@ -710,51 +796,74 @@ angular.module("sampleApp")
                 }
 
             },
-            insertReferenceAtPath : function(resource,path,referencedResource) {
+            insertReferenceAtPath : function(resource,path,referencedResource,insertPoint) {
+                //insert a reference to a resource from a resource. If the insert point is passed in, then
+                //add the reference at that point. Otherwise, start from the root of the resource and traverse
+                //the path, adding parent elements (array or object) as required
 
-
-                //console.log(resource,path,referencedResource);
                 var info = this.getEDInfoForPath(path);
+                var elementName;
+                var path;
+                if (insertPoint) {
+                    //the element name will be the last se
+                    var ar = path.split('.');
+                    elementName = ar[ar.length-1]
+                } else {
+                    var segmentPath = resource.resourceType;
 
-                var segmentPath = resource.resourceType;
+                    //var rootPath = $filter('dropFirstInPath')(path);
+                    path = $filter('dropFirstInPath')(path);
+                    insertPoint = resource;
+                    var ar = path.split('.');
+                    if (ar.length > 0) {
+                        for (var i=0; i < ar.length-1; i++) {
+                            //not the last one... -
+                            var segment = ar[i];
+                            segmentPath += '.'+segment;
+                            var segmentInfo = this.getEDInfoForPath(segmentPath);
+                            if (segmentInfo.isMultiple) {
 
-                //var rootPath = $filter('dropFirstInPath')(path);
-                var path = $filter('dropFirstInPath')(path);
-                var insertPoint = resource;
-                var ar = path.split('.');
-                if (ar.length > 0) {
-                    for (var i=0; i < ar.length-1; i++) {
-                        //not the last one... -
-                        var segment = ar[i];
-
-
-                        segmentPath += '.'+segment;
-                        //console.log(segmentPath)
-
-                        var segmentInfo = this.getEDInfoForPath(segmentPath);
-
-                        if (segmentInfo.isMultiple) {
-
-
-
-                            insertPoint[segment] = insertPoint[segment] || []  // todo,need to allow for arrays
-                            var node = {};
-                            insertPoint[segment].push(node)
-                            insertPoint = node
-                        } else {
-                            insertPoint[segment] = insertPoint[segment] || {}  // todo,need to allow for arrays
-                            insertPoint = insertPoint[segment]
+                                insertPoint[segment] = insertPoint[segment] || []  // todo,need to allow for arrays
+                                var node = {};
+                                insertPoint[segment].push(node)
+                                insertPoint = node
+                            } else {
+                                insertPoint[segment] = insertPoint[segment] || {}  // todo,need to allow for arrays
+                                insertPoint = insertPoint[segment]
+                            }
                         }
-
-
-
-
+                        //path = ar[ar.length-1];       //this will be the property on the 'last'segment
+                        elementName = ar[ar.length-1];
                     }
-                    path = ar[ar.length-1];       //this will be the property on the 'last'segment
+
                 }
 
 
 
+
+                //now actually add the reference. this will be at insertPoint[elementName]
+
+                if (info.max == 1) {
+                    insertPoint[elementName] = {reference:referencedResource.resourceType+'/'+referencedResource.id}
+                }
+                if (info.max =='*') {
+                    insertPoint[elementName] = insertPoint[elementName] || []
+
+                    var reference = referencedResource.resourceType+'/'+referencedResource.id;
+                    //make sure there isn't already a reference to this resource
+                    var alreadyReferenced = false;
+                    insertPoint[elementName].forEach(function(ref){
+                        if (ref.reference == reference) {
+                            alreadyReferenced = true;
+                        }
+                    })
+
+                    if (! alreadyReferenced) {
+                        insertPoint[elementName].push({reference:reference})
+                    }
+
+                }
+                /*
 
                 if (info.max == 1) {
                     insertPoint[path] = {reference:referencedResource.resourceType+'/'+referencedResource.id}
@@ -776,48 +885,6 @@ angular.module("sampleApp")
                     }
 
                 }
-/*
-
-                return;
-
-
-                var that = this;
-                var info = this.getEDInfoForPath(path);
-                console.log(path);
-
-                var insertPoint = resource;
-                var ar = path.split('.');
-                var rootPath = ar.splice(0,1)[0];
-
-                if (ar.length > 0) {
-                    for (var i=0; i <= ar.length-1; i++) {
-
-                        var segment = ar[i];
-                        var fullPath = rootPath
-                        for (var j=0; j <= i; j++) {
-                            fullPath += '.' + ar[j];
-                        }
-
-                        //todo - will barf for path length > 2
-                        console.log(fullPath)
-                        var info = that.getEDInfoForPath(fullPath)
-
-                        if (info.isMultiple) {
-
-                            insertPoint[segment] = insertPoint[segment] || []
-
-                        } else {
-                            insertPoint[segment] = insertPoint[segment] || {}  // todo,need to allow for arrays
-                        }
-
-
-
-                        insertPoint = insertPoint[segment]
-                    }
-                    path = ar[ar.length-1];       //this will be the property on the 'last'segment
-                }
-
-
                 */
 
             },
@@ -850,13 +917,24 @@ angular.module("sampleApp")
                     SD.snapshot.element.forEach(function (ed) {
 
                         if (ed.path == path) {
+                            //is this multiple?
                             info.max = ed.max;
                             if (ed.max == '*') {
                                 info.isMultiple = true
                             }
 
+                            //is this a backbone element
+                            if (ed.type) {
+                                ed.type.forEach(function(typ){
+                                    if (typ.code == 'BackboneElement') {
+                                        info.isBBE = true
+                                    }
+                                })
+                            }
+
 
                         }
+
                     })
 
                 }

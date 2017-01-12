@@ -678,10 +678,6 @@
 
 
 
-
-
-
-
                                     <br/>
                                     <div class="banner" ng-show="hashPath">{{hashPath.path}}</div>
 
@@ -692,13 +688,36 @@
                                     </div>
 
 
+                                    <!-- show any existing elements that are parents of this element-->
+                                    <div ng-show="existingElements.isMultipleBbe">
+                                        <br/>
+
+                                        <div class="row">
+                                            <div class="col-sm-3 cl-md-3">
+                                                <h5>Parent branches created</h5>
+                                            </div>
+                                            <div class="col-sm-8 cl-md-8">
+                                                <ul class="pagination">
+                                                    <li  ng-repeat="element in existingElements.list" ng-class="{active:$index==input.selectedExistingElement}">
+                                                        <a href="#" ng-click="input.selectedExistingElement=$index">{{$index}}</a>
+                                                    </li>
+                                                </ul>
+
+                                            </div>
+                                            <div class="col-sm-1 cl-md-1">
+                                                <div><button class="btn btn-link" ng-click="addBBE()">Add</button> </div>
+                                            </div>
+
+                                        </div>
 
 
 
+                                        <pre>{{existingElements.list[input.selectedExistingElement] | json}}</pre>
+
+                                    </div>
 
 
-
-                                    <h5 ng-show="hashPath">DataType/s</h5>
+                                    <h5 ng-show="hashPath">DataType/s  (click to add)</h5>
                                     <div ng-repeat="type in hashPath.ed.type">
                                         <div ng-hide="type.code == 'Reference'">
 
@@ -751,15 +770,16 @@
                                                             <td>
                                                                 <div title="{{resource.resourceType}}" ng-bind-html="resource.text.div"></div>
                                                             </td>
-                                                            <td><div class="pull-right">
+                                                            <td>
+                                                                <div class="pull-right">
 
-                                                    <span>
-                                                        <i class="glyphicon glyphicon-plus"
-                                                           ng-click="linkToResource(hashPath.path,resource,hashPath)" style="cursor: pointer">
+                                                                    <span>
+                                                                        <i class="glyphicon glyphicon-plus"
+                                                                           ng-click="linkToResource(hashPath.path,resource,hashPath)" style="cursor: pointer">
 
-                                                        </i>
-                                                    </span>
-                                                            </div>
+                                                                        </i>
+                                                                    </span>
+                                                                </div>
                                                             </td>
 
                                                         </tr>
@@ -773,29 +793,7 @@
 
                                     </div>
 
-<!--
 
-                                    <div ng-show="enterPropertyValue">
-                                        <br/>
-
-                                        <div class="rounded-box">
-
-                                            <ng-include src="'/includes/builderDataEntry.html'"></ng-include>
-
-                                            <div><
-                                                <button class="btn btn-link" ng-click="saveNewValue()">Save</button>
-
-                                                <span class="clickable pull-right" ng-click="saveNewValue()">Save</span>
-                                            </div>
-                                            <br/>
-
-
-                                        </div>
-
-
-
-                                    </div>
-                                    -->
 
                                     <br/>
 
@@ -896,17 +894,11 @@
                                 </table>
                             </div>
 
-
-
-
-
                             <hr/>
+                        </uib-tab>
 
-
-
-
-
-
+                        <uib-tab heading="Resource Tree">
+                            <div id="resourceTree"></div>
 
                         </uib-tab>
 

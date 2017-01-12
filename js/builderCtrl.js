@@ -370,6 +370,34 @@ console.log($scope.libraryContainer)
             //displays the data entry screen for adding a datatype value
             $scope.addValueForDt = function(hashPath,dt) {
 
+
+                //console.log($scope.input.selectedExistingElement)
+
+                //set the insert point based on the path selected (if any)
+                var insertPoint = $scope.currentResource;
+                if ($scope.input.selectedExistingElement > -1) {
+                    insertPoint = $scope.existingElements.list[$scope.input.selectedExistingElement];
+                }
+
+                //if the immediate predecessor is a BBE with a multiplecity of 1, then adfust the insert point (careplan.activity.detail)
+                var ar = hashPath.path.split('.');
+                ar.pop();       //pop off the segment we are inserting at
+                var testPath = ar.join('.');
+                var info = builderSvc.getEDInfoForPath(testPath);
+                if (info.isBBE && ! info.isMultiple) {
+                    var segmentName = ar[ar.length-1];
+                    if (insertPoint[segmentName]) {
+                        insertPoint = insertPoint[segmentName]
+                    } else {
+                        insertPoint[segmentName] = {};
+                        insertPoint = insertPoint[segmentName]
+                    }
+                }
+
+
+
+
+
                 $scope.selectedContainer.isDirty = true;
                 if ($scope.supportedDt.indexOf(dt) > -1) {
                     delete $scope.input.dt;
@@ -385,8 +413,9 @@ console.log($scope.libraryContainer)
                             hashPath: function () {          //the default config
                                 return hashPath;
                             },
-                            resource: function () {          //the default config
-                                return $scope.currentResource;
+                            insertPoint: function () {          //the point where the insert is to occur ...
+                                return insertPoint
+                                //return $scope.currentResource;
                             },
                             vsDetails: function () {          //the default config
                                 return $scope.vsDetails;
@@ -627,9 +656,7 @@ console.log($scope.libraryContainer)
                 delete $scope.hashPath;
 
                 $scope.currentResource = resource;
-                //var url = resource.resourceType+'/'+resource.id;
-                //$scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
-
+                drawResourceTree(resource)
 
 
                 $scope.waiting = true;
@@ -656,19 +683,17 @@ console.log($scope.libraryContainer)
                                     {'core': {'multiple': false, 'data': vo.treeData, 'themes': {name: 'proton', responsive: true}}}
                                 ).on('select_node.jstree', function (e, data) {
 
-
-
-
-                                    //console.log(data.node);
                                     $scope.hashReferences = {}      //a hash of type vs possible resources for that type
                                     delete $scope.hashPath;
                                     delete $scope.expandedValueSet;
                                     delete $scope.currentElementValue;
+                                   // $scope.input.selectedExistingElement = -1;
+
 
                                     if (data.node && data.node.data && data.node.data.ed) {
+                                        //$scope.currentElementED = data.node.data.ed;
 
                                         var path = data.node.data.ed.path;
-
 
                                         $scope.possibleReferences = [];
                                         var ed = data.node.data.ed;
@@ -682,6 +707,24 @@ console.log($scope.libraryContainer)
                                             //$scope.hashPath.max = ed.max;
                                             $scope.hashPath.definition = ed.definition;
                                             $scope.hashPath.comments = ed.comments;
+
+                                            //analyse the path. if it has an ancestor of type backbone element that is multiple, then show the current entries in the instance
+                                            //returns {list: modelPoint:}
+                                            $scope.existingElements = builderSvc.analyseInstanceForPath($scope.currentResource, path)
+
+                                            console.log($scope.existingElements);
+                                            if ($scope.existingElements.list.length > 0) {
+                                                //leave the selectedExistingElement alone unless it is greater than the length.
+
+                                                if ($scope.existingElements.list.length = 1) {
+                                                    $scope.input.selectedExistingElement = 0;   //select it
+                                                } else if ($scope.input.selectedExistingElement >= $scope.existingElements.list.length) {
+                                                    $scope.input.selectedExistingElement = 0;   //select the first
+                                                }
+
+                                            } else {
+                                                $scope.input.selectedExistingElement = -1;
+                                            }
 
 
                                             //get the ValueSet if there is one bound...
@@ -712,8 +755,9 @@ console.log($scope.libraryContainer)
 
 
                                             ed.type.forEach(function(typ){
-                                                //is this a resource reference?
 
+
+                                                //is this a resource reference?
                                                 var targetProfile = typ.profile || typ.targetProfile;       //different in STU2 & 3
                                                 if (typ.code == 'Reference' && targetProfile) {
                                                     //get all the resources of this type  (that are not already referenced by this element
@@ -722,7 +766,7 @@ console.log($scope.libraryContainer)
 
                                                     var type = $filter('getLogicalID')(targetProfile);
 
-                                                    //var ar = builderSvc.getResourcesOfType(type,$scope.resourcesBundle);
+
                                                     var ar = builderSvc.getResourcesOfType(type,$scope.selectedContainer.bundle);
 
                                                     if (ar.length > 0) {
@@ -773,9 +817,6 @@ console.log($scope.libraryContainer)
 
                                     }
 
-
-
-
                                     $scope.$digest();
 
 
@@ -797,22 +838,13 @@ console.log($scope.libraryContainer)
                             //is, then add it to the list of potential resources to link to. If not, then create
                             //an option that allows the user to add that parent
                             var ar = path.split('.');
-                            //  ar.pop();
-
-
-
-
-                            //   var parentPath  = ar.join('.');
-                            // parentPath =  $filter('dropFirstInPath')(parentPath);
-
-                            //console.log(parentPath,resource[parentPath])
 
                             if (ar.length == 2 ) {   //|| resource[parentPath]
                                 //so this is a reference off the root
                                 objReferences[path] = objReferences[path] || {resource:[],ref:ref}
                                 //now find all existing resources with this type
                                 var type = $filter('getLogicalID')(ref.profile);
-//console.log(type)
+
                                 var ar = builderSvc.getResourcesOfType(type,$scope.selectedContainer.bundle);
                                 //var ar = builderSvc.getResourcesOfType(type,$scope.resourcesBundle);
                                 if (ar.length > 0) {
@@ -864,6 +896,20 @@ console.log($scope.libraryContainer)
 
             };
 
+            $scope.addBBE = function(){
+                //add a new BackBone element for the selected node
+
+                //returns {list: modelPoint:}
+                if ($scope.existingElements.modelPoint) {
+                    //this is the 'parent' root for the currently selected element...
+                    $scope.existingElements.modelPoint.push({});        //add a new element to the resource instance...
+                    $scope.existingElements.list = $scope.existingElements.modelPoint;      //so the list is still pointing to the instance
+                    $scope.input.selectedExistingElement = $scope.existingElements.list.length -1;
+
+                }
+
+            }
+
             $scope.linkToResource = function(pth,resource,ref){
 
                 if (pth == 'Composition.section.entry') {
@@ -873,7 +919,15 @@ console.log($scope.libraryContainer)
 
                 $scope.selectedContainer.isDirty = true;
 
-                builderSvc.insertReferenceAtPath($scope.currentResource,pth,resource)
+                var insertPoint;        //if we want to set the insert point...
+
+                //set the insert point based on the path selected (if any)
+                 //var insertPoint = $scope.currentResource;
+                 if ($scope.input.selectedExistingElement > -1) {
+                    insertPoint = $scope.existingElements.list[$scope.input.selectedExistingElement];
+                 }
+
+                builderSvc.insertReferenceAtPath($scope.currentResource,pth,resource,insertPoint)
 
                 makeGraph();    //this will update the list of all paths in this model...
                 //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle); //update the generated documen
@@ -980,6 +1034,19 @@ console.log($scope.libraryContainer)
             $scope.validate = function(){
                 alert('Resource Validation is not yet enabled. Sorry about that...')
             }
+
+
+            function drawResourceTree(resource) {
+                var treeData = resourceCreatorSvc.buildResourceTree(resource);
+
+                //show the tree of this version
+                $('#resourceTree').jstree('destroy');
+                $('#resourceTree').jstree(
+                    {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+                )
+
+            }
+
 
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(lst) {
