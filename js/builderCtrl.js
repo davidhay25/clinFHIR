@@ -898,6 +898,10 @@ console.log($scope.libraryContainer)
                         }
 
 
+                    },
+                    function (err) {
+                        modalService.showModal({}, {bodyText:angular.toJson(err)});
+
                     }
                 ).finally(function(){
                     $scope.waiting = false;
@@ -1034,6 +1038,10 @@ console.log($scope.libraryContainer)
                         $scope.references = builderSvc.getReferences($scope.currentType)
                         //console.log($scope.references);
 
+                    },
+                    function(err) {
+                        modalService.showModal({}, {bodyText:"Sorry, I couldn't find the profile for the '"+type+"' resource on the Conformance Server ("+appConfigSvc.getCurrentConformanceServer().name+")"});
+                        $scope.setDisplayMode('view')
                     }
                 ).finally(function(){
                     $scope.waiting = false;
