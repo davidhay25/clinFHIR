@@ -371,15 +371,13 @@ console.log($scope.libraryContainer)
             $scope.addValueForDt = function(hashPath,dt) {
 
 
-                //console.log($scope.input.selectedExistingElement)
-
                 //set the insert point based on the path selected (if any)
                 var insertPoint = $scope.currentResource;
                 if ($scope.input.selectedExistingElement > -1) {
                     insertPoint = $scope.existingElements.list[$scope.input.selectedExistingElement];
                 }
 
-                //if the immediate predecessor is a BBE with a multiplecity of 1, then adfust the insert point (careplan.activity.detail)
+                //if the immediate predecessor is a BBE with a multiplecity of 1, then adjust the insert point (careplan.activity.detail)
                 var ar = hashPath.path.split('.');
                 ar.pop();       //pop off the segment we are inserting at
                 var testPath = ar.join('.');
@@ -394,7 +392,58 @@ console.log($scope.libraryContainer)
                     }
                 }
 
+                /*
 
+                //console.log($scope.input.selectedExistingElement)
+
+                //set the insert point based on the path selected (if any)
+                var insertPoint = $scope.currentResource;
+                if ($scope.input.selectedExistingElement > -1) {
+                    insertPoint = $scope.existingElements.list[$scope.input.selectedExistingElement];
+                }
+
+
+
+
+                //if the immediate predecessor is a BBE with a multiplecity of 1, then adjust the insert point (careplan.activity.detail)
+                var ar = hashPath.path.split('.');
+                ar.pop();       //pop off the segment we are inserting at
+
+                if (ar.length == 1) {
+                    //this is an insertion into the root. set theinsertPoint to the resource....
+                    insertPoint = $scope.currentResource;
+                } else {
+                    //this is below the root
+                    var testPath = ar.join('.');
+                    var info = builderSvc.getEDInfoForPath(testPath);
+                    if (info.isBBE && ! info.isMultiple) {      //ie like careplan.activity.detail
+                        var segmentName = ar[ar.length-1];
+
+                        //if insertPoint is null, then this is the first insertion to this path - it will be an empty array..
+                        if (! insertPoint) {
+                           // var insertPoint = {};
+                            insertPoint[segmentName] = {};
+                            insertPoint = insertPoint[segmentName]
+
+                        } else {
+                            if (insertPoint[segmentName]) {
+                                insertPoint = insertPoint[segmentName]
+                            } else {
+                                insertPoint[segmentName] = {};
+                                insertPoint = insertPoint[segmentName]
+                            }
+                        }
+
+
+
+                    } else {
+                        //
+                    }
+                }
+
+
+
+*/
 
 
 
@@ -700,6 +749,7 @@ console.log($scope.libraryContainer)
 
                                         $scope.currentElementValue = builderSvc.getValueForPath($scope.currentResource,path);
 
+
                                         //get the type information
                                         if (ed.type) {
                                             $scope.hashPath = {path: ed.path};
@@ -707,24 +757,6 @@ console.log($scope.libraryContainer)
                                             //$scope.hashPath.max = ed.max;
                                             $scope.hashPath.definition = ed.definition;
                                             $scope.hashPath.comments = ed.comments;
-
-                                            //analyse the path. if it has an ancestor of type backbone element that is multiple, then show the current entries in the instance
-                                            //returns {list: modelPoint:}
-                                            $scope.existingElements = builderSvc.analyseInstanceForPath($scope.currentResource, path)
-
-                                            console.log($scope.existingElements);
-                                            if ($scope.existingElements.list.length > 0) {
-                                                //leave the selectedExistingElement alone unless it is greater than the length.
-
-                                                if ($scope.existingElements.list.length = 1) {
-                                                    $scope.input.selectedExistingElement = 0;   //select it
-                                                } else if ($scope.input.selectedExistingElement >= $scope.existingElements.list.length) {
-                                                    $scope.input.selectedExistingElement = 0;   //select the first
-                                                }
-
-                                            } else {
-                                                $scope.input.selectedExistingElement = -1;
-                                            }
 
 
                                             //get the ValueSet if there is one bound...
@@ -755,7 +787,6 @@ console.log($scope.libraryContainer)
 
 
                                             ed.type.forEach(function(typ){
-
 
                                                 //is this a resource reference?
                                                 var targetProfile = typ.profile || typ.targetProfile;       //different in STU2 & 3
@@ -808,7 +839,33 @@ console.log($scope.libraryContainer)
                                                         })
                                                     }
 
+                                                } else {
+                                                    //if not a refernece, then peform the analysis of the instance - potentially rejecting the addition...
+
+                                                    //analyse the path. if it has an ancestor of type backbone element that is multiple, then show the current entries in the instance
+                                                    //returns {list: modelPoint:}
+                                                    $scope.existingElements = builderSvc.analyseInstanceForPath($scope.currentResource, path)
+
+                                                    if ($scope.existingElements.list.length > 0) {
+                                                        //leave the selectedExistingElement alone unless it is greater than the length.
+
+                                                        if ($scope.existingElements.list.length == 1) {
+                                                            $scope.input.selectedExistingElement = 0;   //select it
+                                                        } else if ($scope.input.selectedExistingElement >= $scope.existingElements.list.length) {
+                                                            $scope.input.selectedExistingElement = 0;   //select the first
+                                                        }
+
+                                                    } else {
+                                                        //for the moment, use the resourcing linking functionity to set up the child nodes. todo fix
+                                                        var msg = 'Please create a reference to a resource on this branch. After that, you can add other datatypes and create new branches as desired';
+                                                        modalService.showModal({}, {bodyText:msg});
+                                                        return;
+                                                    }
+
+
                                                 }
+
+
                                             })
 
 

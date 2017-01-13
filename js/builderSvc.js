@@ -40,26 +40,41 @@ angular.module("sampleApp")
 
                     var info = that.getEDInfoForPath(testPath);
 
-                    if (info.isBBE && info.isMultiple) {
-                        //the path being passed in has an ancestor that is a multiple bbe. We need to get the existing elements at this path
-                        //afaik this will always be directly off the root -todo: might want to check
-                        arExistingElements = currentTestPoint[segment] || []
-                        response.isMultipleBbe = true;          //indicates that this element does belonge to a repreating bbe (even if the list is currently empty)
+                    if (info.isBBE ) {
+                        //if it's a BBE, then is it one that can have multiple children? Note: This algorithm will not work on deeply nested paths...
+                        if (info.isMultiple) {
+                            //the path being passed in has an ancestor that is a multiple bbe. We need to get the existing elements at this path
+                            //afaik this will always be directly off the root -todo: might want to check
+                            arExistingElements = currentTestPoint[segment] || []
+                            response.isMultipleBbe = true;          //indicates that this element does belonge to a repreating bbe (even if the list is currently empty)
+                            if (currentTestPoint) {
+                                currentTestPoint = currentTestPoint[segment]
+
+                            }
+                        } else {
+                            // ?? do what
+                        }
 
                     }
 
-                    if (currentTestPoint[segment]) {
-                        currentTestPoint = currentTestPoint[segment]
-                    } else {
-                        currentTestPoint[segment] = []
-                    }
+
+
 
 
                 }
 
-                response.list = arExistingElements;
-                response.modelPoint=currentTestPoint;
-                //return both the list of nodes that are parents to this element, as well as the position in the instance where it was found (so new ones can be added)
+                if (! currentTestPoint) {
+                    //a parent node doesn't exist. return an empty array for the list - this will trigger a message to create the path first...
+                    response.list = [];
+                    response.modelPoint=resource;
+
+                } else {
+                    response.list = arExistingElements;
+                    response.modelPoint=currentTestPoint;
+                    //return both the list of nodes that are parents to this element, as well as the position in the instance where it was found (so new ones can be added)
+
+                }
+
                 return response;
 
 
