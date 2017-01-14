@@ -370,8 +370,9 @@ console.log($scope.libraryContainer)
             //displays the data entry screen for adding a datatype value
             $scope.addValueForDt = function(hashPath,dt) {
 
+                var ar = hashPath.path.split('.');
 
-                if ($scope.existingElements.list.length == 0) {
+                if (ar.length > 2 &&  $scope.existingElements.list.length == 0) {
                     var msg = 'Please create a reference to a resource on this branch. After that, you can add other datatypes and create new branches as desired';
                     modalService.showModal({}, {bodyText:msg});
                     return;
