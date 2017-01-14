@@ -33,7 +33,7 @@ angular.module("sampleApp")
                 var currentTestPoint = resource;           //where we are checking...
 
                 var testPath = ar[0]
-                var response = {};
+                var response = {path:path};
                 for (var inx=1; inx < ar.length-1; inx++) {
                     var segment = ar[inx];
                     testPath += '.' + segment
@@ -67,6 +67,7 @@ angular.module("sampleApp")
                     //a parent node doesn't exist. return an empty array for the list - this will trigger a message to create the path first...
                     response.list = [];
                     response.modelPoint=resource;
+
 
                 } else {
                     response.list = arExistingElements;

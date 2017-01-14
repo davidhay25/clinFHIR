@@ -423,32 +423,46 @@ console.log($scope.libraryContainer)
                 }
 
 
+
+
                 //set the insert point based on the path selected (if any)
                 var insertPoint = $scope.currentResource;
-                if ($scope.input.selectedExistingElement > -1) {
-                    insertPoint = $scope.existingElements.list[$scope.input.selectedExistingElement];
-                }
+
+
+
+
 
                 //if the immediate predecessor is a BBE with a multiplecity of 1, then adjust the insert point (careplan.activity.detail)
                 var ar = hashPath.path.split('.');
-                ar.pop();       //pop off the segment we are inserting at
-                var testPath = ar.join('.');
-                var info = builderSvc.getEDInfoForPath(testPath);
-                if (info.isBBE && ! info.isMultiple) {
-                    var segmentName = ar[ar.length-1];
-                    if (insertPoint[segmentName]) {
-                        insertPoint = insertPoint[segmentName]
-                    } else {
-                        insertPoint[segmentName] = {};
-                        insertPoint = insertPoint[segmentName]
+
+
+                //if we're not inserting onto the root, then we need to set the insert point based on the path & selected index
+                if (ar.length > 2) {
+
+                    if ($scope.input.selectedExistingElement > -1) {
+                        insertPoint = $scope.existingElements.list[$scope.input.selectedExistingElement];
+                    }
+
+                    //this tests for an insert point not on the root, where the immediate predecessor is a BBE with a multiplecity of 1 (careplan.activity.detail)
+                    ar.pop();       //pop off the segment we are inserting at
+                    var testPath = ar.join('.');
+                    var info = builderSvc.getEDInfoForPath(testPath);
+                    if (info.isBBE && ! info.isMultiple) {
+                        var segmentName = ar[ar.length-1];
+                        if (insertPoint[segmentName]) {
+                            insertPoint = insertPoint[segmentName]
+                        } else {
+                            insertPoint[segmentName] = {};
+                            insertPoint = insertPoint[segmentName]
+                        }
                     }
                 }
 
 
 
 
-                $scope.selectedContainer.isDirty = true;
                 if ($scope.supportedDt.indexOf(dt) > -1) {
+                    $scope.selectedContainer.isDirty = true;
                     delete $scope.input.dt;
                     $scope.resetValidation();
 
@@ -705,8 +719,11 @@ console.log($scope.libraryContainer)
 
             //if there is a cb (callback property) then execute it after retrieving the SD (as it is generally used for a new resource to add the patient reference)
             $scope.selectResource = function(entry,cb) {
-
-                var resource = entry.resource;
+                //right now, the 'entry' can be an entry or a resource (todo which I must fix!)
+                var resource = entry
+                if (entry.resource) {
+                    resource = entry.resource;
+                }
 
 
                 $scope.displayMode = 'view';
@@ -1105,7 +1122,13 @@ console.log($scope.libraryContainer)
 
 
             function drawResourceTree(resource) {
-                var treeData = resourceCreatorSvc.buildResourceTree(resource);
+
+                var r = angular.copy(resource);
+
+                var newResource =  angular.fromJson(angular.toJson(r));
+
+
+                var treeData = resourceCreatorSvc.buildResourceTree(newResource);
 
                 //show the tree of this version
                 $('#resourceTree').jstree('destroy');
