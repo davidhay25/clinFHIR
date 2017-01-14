@@ -39,6 +39,16 @@
          }
 
 
+        .pass {
+            color:green;
+        }
+        .fail {
+            color:red;
+        }
+
+
+
+
     </style>
 
     <script>
@@ -449,12 +459,31 @@
                             <div class="row">
                                 <div class="col-md-12 col-sm-12">
                                     <table class="table table-bordered table-condensed">
-                                        <tr><th>Type</th><th>Text</th></tr>
+                                        <tr><th>Type</th><th>Text</th><th>Valid</th></tr>
                                         <tr ng-repeat="entry in selectedContainer.bundle.entry">
-                                            <td><div class='clickable' ng-click="selectResource(entry.resource)">
+                                            <td><div class='clickable' ng-click="selectResource(entry)">
                                                 {{entry.resource.resourceType}}</div>
                                             </td>
                                             <td><p ng-bind-html="entry.resource.text.div"></p></td>
+                                            <td>
+                                                <div ng-switch on="entry.valid" ng-click="validate(entry)">    <!-- todo - not a real bundlemember-->
+                                                    <div ng-switch-when="yes">
+                                                        <i class="glyphicon glyphicon-ok pass"
+                                                           title="View Resource definition in spec">
+                                                        </i>
+                                                    </div>
+                                                    <div ng-switch-when="no">
+                                                        <i class="glyphicon glyphicon-remove fail"
+                                                           title="View Resource definition in spec">
+                                                        </i>
+                                                    </div>
+                                                    <div ng-switch-default>
+                                                        <i class="glyphicon glyphicon-question-sign"
+                                                           title="View Resource definition in spec">
+                                                        </i>
+                                                    </div>
+                                                </div>
+                                            </td>
                                         </tr>
                                     </table>
                                 </div>
@@ -828,7 +857,7 @@
                         </uib-tab>
 
 
-                        <uib-tab heading="Resource Summary">
+                        <uib-tab heading="Summary">
                             <br/>
 
                             <div class="row">
@@ -897,18 +926,57 @@
                             <hr/>
                         </uib-tab>
 
-                        <uib-tab heading="Resource Tree">
+                        <uib-tab heading="Tree">
                             <div id="resourceTree"></div>
 
                         </uib-tab>
 
-                        <uib-tab heading="Resource Json">
+                        <uib-tab heading="Json">
+                            <!--
                             <div class="row">
                                 <div class="col-md-12 col-sm-12">
                                     <button class="btn btn-link pull-right" ng-click="validate()">Validate</button>
                                 </div>
                             </div>
+                            -->
                             <pre>{{currentResource | json}}</pre>
+                        </uib-tab>
+                        <uib-tab heading="Errors/Warnings" ng-show="currentEntry.response.outcome">
+
+
+                            <uib-tabset>
+                                <br/>
+                                <uib-tab heading="issues">
+                                    <table class="table table-bordered">
+                                        <tr><th>Severity</th><th>Details/Diagnostics</th></tr>
+                                        <tr ng-repeat = "iss in currentEntry.response.outcome.issue">
+                                            <td>{{iss.severity}}</td>
+                                            <!--<td>{{iss.code}}</td>-->
+                                            <td>{{iss.details.text}}
+                                                <div>{{iss.diagnostics}}</div>
+                                            </td>
+                                            <!--
+                                            <td><div ng-repeat="loc in iss.location">{{loc}}</div></td>
+                                            -->
+                                        </tr>
+                                    </table>
+                                </uib-tab>
+
+                                <uib-tab heading="json">
+                                    <pre>{{currentEntry.response.outcome | json}}</pre>
+                                </uib-tab>
+
+
+                            </uib-tabset>
+
+
+
+
+
+
+
+
+
                         </uib-tab>
 
                     </uib-tabset>

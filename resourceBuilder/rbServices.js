@@ -1359,7 +1359,6 @@ console.log(summary);
             var config = appConfigSvc.config();
             serverUrl = serverUrl || config.servers.data;
 
-
             var qry = serverUrl + resource.resourceType + "/$validate";
 
             //var qry = appConfigSvc.getCurrentDataServerBase() + resource.resourceType + "/$validate";

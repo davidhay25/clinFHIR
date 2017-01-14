@@ -134,6 +134,50 @@ console.log($scope.libraryContainer)
                 })
             }
 
+            //note that the way we are recording validation is a non-compliant bundle...
+            $scope.resetValidation = function(){
+                //when a resource is altered, re-set the validation
+                $scope.selectedContainer.bundle.entry.forEach(function(entry){
+                    if (entry.resource.id == $scope.currentResource.id) {
+                        delete entry.valid;
+                    }
+                })
+
+            };
+
+            $scope.validate = function(entry) {
+                //console.log(entry);
+                $scope.selectResource(entry)
+
+
+                $scope.showWaiting = true;
+                Utilities.validate(entry.resource).then(
+                    function(data){
+                        var oo = data.data;
+                        console.log(data)
+                        entry.valid='yes'
+                        entry.response = {outcome:oo};
+
+
+                    },
+                    function(data) {
+                        var oo = data.data;
+                        entry.response = {outcome:oo};
+
+                       // console.log(oo)
+                        entry.valid='no'
+
+
+
+                    }
+                ).finally(function(){
+                    $scope.waiting = false;
+                })
+
+
+
+
+            }
 
             //------------------------------------------------
 
@@ -370,8 +414,8 @@ console.log($scope.libraryContainer)
             //displays the data entry screen for adding a datatype value
             $scope.addValueForDt = function(hashPath,dt) {
 
+                //if this is not adding to the root, check that there is a branch selected...
                 var ar = hashPath.path.split('.');
-
                 if (ar.length > 2 &&  $scope.existingElements.list.length == 0) {
                     var msg = 'Please create a reference to a resource on this branch. After that, you can add other datatypes and create new branches as desired';
                     modalService.showModal({}, {bodyText:msg});
@@ -406,6 +450,7 @@ console.log($scope.libraryContainer)
                 $scope.selectedContainer.isDirty = true;
                 if ($scope.supportedDt.indexOf(dt) > -1) {
                     delete $scope.input.dt;
+                    $scope.resetValidation();
 
                     $uibModal.open({
                         templateUrl: 'modalTemplates/addPropertyInBuilder.html',
@@ -614,6 +659,11 @@ console.log($scope.libraryContainer)
             }, 1000);
 
             $scope.removeReference = function(ref) {
+
+                alert("Sorry, there's a bug removing references - working on it...")
+                return;
+
+
                 $scope.selectedContainer.isDirty = true;
                 var path = ref.path;
                 var target = ref.targ;
@@ -639,7 +689,7 @@ console.log($scope.libraryContainer)
             }
 
             $scope.viewVS = function(uri) {
-                //var url = appConfigSvc
+
 
                 GetDataFromServer.getValueSet(uri).then(
                     function(vs) {
@@ -654,21 +704,24 @@ console.log($scope.libraryContainer)
 
 
             //if there is a cb (callback property) then execute it after retrieving the SD (as it is generally used for a new resource to add the patient reference)
-            $scope.selectResource = function(resource,cb) {
+            $scope.selectResource = function(entry,cb) {
+
+                var resource = entry.resource;
 
 
                 $scope.displayMode = 'view';
 
                 delete $scope.hashPath;
 
-                delete $scope.currentElementValue;
+                //delete $scope.currentElementValue;
                 delete $scope.existingElements;
-                delete $scope.currentElementValue;
+                //delete $scope.currentElementValue;
                 delete $scope.expandedValueSet;
                 delete $scope.currentElementValue;
 
 
-                $scope.currentResource = resource;
+                $scope.currentResource = resource;      //in theory we could use currentEntry...
+                $scope.currentEntry = entry;            //needed for validation
                 drawResourceTree(resource)
 
 
@@ -1048,10 +1101,6 @@ console.log($scope.libraryContainer)
                     $scope.waiting = false;
                 })
 
-            }
-
-            $scope.validate = function(){
-                alert('Resource Validation is not yet enabled. Sorry about that...')
             }
 
 
