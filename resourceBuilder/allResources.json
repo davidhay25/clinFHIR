@@ -63,7 +63,7 @@
   {"name": "ImagingObjectSelection"},
   {"name": "Goal"},
   {"name": "OperationDefinition","reference":true},
-  {"name": "NutritionOrder"},
+  {"name": "NutritionRequest"},
   {"name": "SearchParameter","reference":true},
   {"name": "ClaimResponse"},
   {"name": "ClinicalImpression"},
