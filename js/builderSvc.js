@@ -608,7 +608,7 @@ angular.module("sampleApp")
                             }
 
 
-                            if (value.cc.coding) {
+                            if (value.cc.coding && value.cc.coding.code) {
                                 cc.coding = [value.cc.coding]
                                 if (value.cc.coding.display) {
                                     text = value.cc.coding.display
@@ -989,10 +989,10 @@ angular.module("sampleApp")
                 var vo = {src:[],targ :[]}
                 gAllReferences.forEach(function(ref){
                     if (ref.src == url) {
-                        vo.src.push(ref)
+                        vo.src.push(ref)        //this refernece is a from this resource
                     }
                     if (ref.targ == url) {
-                        vo.targ.push(ref)
+                        vo.targ.push(ref)       //this refernece is to this resource
                     }
                 })
                 return vo;
@@ -1041,14 +1041,27 @@ angular.module("sampleApp")
                 }
 
             },
-            makeGraph : function(bundle) {
+            makeGraph : function(bundle,centralResource) {
                 //builds the model that has all the models referenced by the indicated SD, recursively...
                 //console.log(SD)
                 var that = this;
                 var allReferences = [];
                 gAllReferences.length = 0;
+/*
+                if (centralResource) {
+                    var url = centralResource.resourceType + "/" + centralResource.id;
+                    var allRefs = that.getSrcTargReferences(url)
+                    //create the list of resources references
+
+
+                    console.log(allRefs);
+
+
+                }
+                */
 
                 var allResources = {};  //all resources hash by id
+                var centralResourceNodeId;
 
                 var arNodes = [], arEdges = [];
                 var objNodes = {};
@@ -1057,11 +1070,22 @@ angular.module("sampleApp")
                 bundle.entry.forEach(function(entry){
 
                     var resource = entry.resource;
+                    var addToGraph = true;
                     var url = resource.resourceType+'/'+resource.id;
 
                     //add an entry to the node list for this resource...
                     var node = {id: arNodes.length +1, label: resource.resourceType, shape: 'box',url:url,cf : {resource:resource}};
                     node.title = resource.text.div;
+
+
+                    if (centralResource) {
+                        if (resource.resourceType == centralResource.resourceType &&  resource.id == centralResource.id) {
+                            centralResourceNodeId = node.id
+                        }
+                    }
+
+
+
 
                     if (objColours[resource.resourceType]) {
                         node.color = objColours[resource.resourceType];
@@ -1093,6 +1117,67 @@ angular.module("sampleApp")
 
                 });
 
+
+                //if there's a centralResource, then only include resources with a reference to or from it...
+                if (centralResource) {
+
+                    var centralUrl = centralResource.resourceType + "/" + centralResource.id;
+                    var allRefs = that.getSrcTargReferences(centralUrl)
+
+                    var hashNodes = {};
+
+                    //move through the nodes an find the references to & from the central node
+                    arNodes.forEach(function (node) {
+                        var include = false;
+                        var id = node.cf.resource.id;
+                        var url = node.cf.resource.resourceType + "/"+node.cf.resource.id;
+                        if (id == centralResource.id) {
+                            include = true
+                        } else {
+                            //does the node have a reference to the central one?
+                            //iterate though the references where this is the target
+                            allRefs.targ.forEach(function(targ){
+                                if (targ.src == url) {
+                                    //yes, this resource has a reference to the central one...
+                                    include = true;
+                                }
+                            });
+
+                            allRefs.src.forEach(function(src){
+                                if (src.targ == url) {
+                                    //yes, this resource has a reference to the central one...
+                                    include = true;
+                                }
+                            })
+
+                        }
+
+                        if (! include) {
+                            //hide the node
+                            node.hidden = true;
+                        } else {
+                            hashNodes[url] = true;
+                        }
+
+
+                    })
+
+                    //only show edges where either the source or the target in the central node
+                    arEdges.forEach(function (edge) {
+                        if (edge.from == centralResourceNodeId || edge.to == centralResourceNodeId) {
+
+                        } else {
+                            edge.hidden = true;
+                        }
+
+                    })
+
+                }
+
+
+
+
+
                 var nodes = new vis.DataSet(arNodes);
                 var edges = new vis.DataSet(arEdges);
 
@@ -1102,7 +1187,7 @@ angular.module("sampleApp")
                     edges: edges
                 };
 
-                return {graphData : data,allReferences:allReferences};
+                return {graphData : data, allReferences:allReferences};
 
                 //find elements of type refernce at this level
                 function findReferences(refs,node,nodePath,index) {

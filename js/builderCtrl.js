@@ -627,12 +627,26 @@ console.log($scope.libraryContainer)
 
             };
 
+            $scope.hideOthers = function() {
+                makeGraph($scope.currentResource)
+            }
+
+            $scope.showAllInGraph = function(){
+                makeGraph()
+            }
+
             //generate the graph of resources and references between them
-            makeGraph = function() {
+            makeGraph = function(centralResource) {
                 //if ($scope.resourcesBundle) {
+
+                $scope.filteredGraphView = false;
+                if (centralResource) {
+                    $scope.filteredGraphView = true;
+                }
+
                 if ($scope.selectedContainer && $scope.selectedContainer.bundle) {
-                    var vo = builderSvc.makeGraph($scope.selectedContainer.bundle)   //todo - may not be the right place...
-                    //var vo = builderSvc.makeGraph($scope.resourcesBundle)   //todo - may not be the right place...
+                    var vo = builderSvc.makeGraph($scope.selectedContainer.bundle,centralResource)   //todo - may not be the right place...
+
                     $scope.allReferences = vo.allReferences;                //all references in the entire set.
                     //console.log($scope.allReferences)
                     var container = document.getElementById('resourceGraph');
@@ -1015,7 +1029,7 @@ console.log($scope.libraryContainer)
                 builderSvc.insertReferenceAtPath($scope.currentResource,pth,resource,insertPoint)
 
                 makeGraph();    //this will update the list of all paths in this model...
-                //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle); //update the generated documen
+                drawResourceTree($scope.currentResource);
                 $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedContainer.bundle); //update the generated document
                 var url = $scope.currentResource.resourceType+'/'+$scope.currentResource.id;
                 $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
@@ -1086,6 +1100,7 @@ console.log($scope.libraryContainer)
                 $scope.selectResource(resource,function(){
                     $scope.waiting = false;
                     makeGraph();
+                    drawResourceTree(resource);
 
                     isaDocument();      //determine if this bundle is a document (has a Composition resource)
 
@@ -1094,7 +1109,7 @@ console.log($scope.libraryContainer)
                 });       //select the resource, indicating that it is a new resource...
 
 
-                //$scope.selectResource(node.cf.resource)
+
             };
 
             $scope.newTypeSelected = function(item) {
@@ -1123,8 +1138,8 @@ console.log($scope.libraryContainer)
 
             function drawResourceTree(resource) {
 
+                //make a copy to hide all the $$ properties that angular adds...
                 var r = angular.copy(resource);
-
                 var newResource =  angular.fromJson(angular.toJson(r));
 
 

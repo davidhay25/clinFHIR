@@ -107,7 +107,7 @@ angular.module("sampleApp")
 
                 getModelReferences(lst,SD,SD.url);      //recursively find all the references between models...
 
-                console.log(lst);
+                //console.log(lst);
 
                 //build the tree model...
 

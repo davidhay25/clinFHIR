@@ -614,11 +614,16 @@
                         <uib-tab heading="Graph" select="redrawChart()">
                             <div class="row">
                                 <div class="col-md-12 col-sm-12">
+                                     <span class="clickable iconSpacing pull-right" ng-show="filteredGraphView"
+                                           ng-click="showAllInGraph()">Show All</span>
+<!--
                                     <span class="clickable iconSpacing pull-right"
                                           ng-click="hidePatient()">Hide Patient</span>
+
+                                    -->
                                     <span class="clickable iconSpacing pull-right"
                                           ng-show = "currentResource"
-                                          ng-click="hideOthers()">Hide unconnected </span>
+                                          ng-click="hideOthers()">Show direct references to {{currentResource.resourceType}} only </span>
                                 </div>
                             </div>
                             <div id="resourceGraph"></div>
