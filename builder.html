@@ -81,6 +81,8 @@
     <script src="js/addPropertyInBuilderCtrl.js"></script>
     <script src="js/docBuilderCtrl.js"></script>
 
+    <script src="resourceBuilder/selectProfile.js"></script>
+    <script src="js/components/profileDisplayComp.js"></script>
     <script src="resourceBuilder/vsBrowser.js"></script>
 
     <!--
@@ -434,7 +436,6 @@
 
             <div class="col-md-5 col-sm-5 borderForGraph">
 
-
                 <div ng-hide="selectedContainer">
                     <div uib-alert class="alert-warning">
                         To edit a set of resources, you can either:
@@ -446,7 +447,6 @@
                 </div>
 
                 <div ng-show="selectedContainer">
-
 
                     <button ng-hide="displayMode == 'new'"
                             ng-click="displayMode = 'new'"
@@ -616,11 +616,11 @@
                                 <div class="col-md-12 col-sm-12">
                                      <span class="clickable iconSpacing pull-right" ng-show="filteredGraphView"
                                            ng-click="showAllInGraph()">Show All</span>
-<!--
+
                                     <span class="clickable iconSpacing pull-right"
                                           ng-click="hidePatient()">Hide Patient</span>
 
-                                    -->
+
                                     <span class="clickable iconSpacing pull-right"
                                           ng-show = "currentResource"
                                           ng-click="hideOthers()">Show direct references to {{currentResource.resourceType}} only </span>
@@ -989,7 +989,26 @@
 
 
                 <div ng-show="displayMode == 'new'">
-                    <h4>Add new Resource</h4>
+
+
+                    <div class="row">
+                        <div class="col-md-6 col-sm-6">
+                            <h4>Add new Resource</h4>
+                        </div>
+                        <div class="col-md-6 col-sm-6">
+                            <a target="_blank" class="pull-right"
+                               ng-href="{{fhirBasePath}}resourceguide.html">
+                                Overview of Resources in spec
+                            </a>
+                        </div>
+                    </div>
+
+
+
+
+
+
+
                     <div class="row">
                         <div class="col-md-3 col-sm-3">
                             Resource Type:
@@ -1071,6 +1090,8 @@
 
 
 
+                    <button class="btn btn-default" ng-click="findProfile()">Find Profile (Experimental)</button>
+
                 </div>
 
                 </div>
@@ -1082,6 +1103,15 @@
 
         <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
                     vs-selected="vsSelected"></vs-browser>
+
+
+        <!-- a directive that allows a profile to be selected - not just a base one... -->
+        <!---->
+        <select-profile trigger="showFindProfileDialog"
+                        all-resource-types="resources"
+                        profile-selected="selectedProfileFromDialog" type="'profile'">
+
+        </select-profile>
 
     </div>
 </body>

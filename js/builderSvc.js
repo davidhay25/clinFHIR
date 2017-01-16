@@ -332,6 +332,13 @@ angular.module("sampleApp")
                 console.log(user)
 
                 var bundle = bundleContainer.bundle;
+
+                //remove all the 'valid' propertis on entry...
+                bundle.entry.forEach(function (entry) {
+                    delete entry.valid;
+                });
+
+
                 var docref = {resourceType:'DocumentReference',id:bundle.id};
                 docref.type = {coding:[{system:'http://clinfhir.com/docs',code:'builderDoc'}]};
                 docref.status = 'current';
@@ -1155,6 +1162,7 @@ angular.module("sampleApp")
                         if (! include) {
                             //hide the node
                             node.hidden = true;
+                            node.physics=false;
                         } else {
                             hashNodes[url] = true;
                         }
@@ -1168,6 +1176,7 @@ angular.module("sampleApp")
 
                         } else {
                             edge.hidden = true;
+                            edge.physics=false;
                         }
 
                     })

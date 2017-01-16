@@ -11,45 +11,45 @@ angular.module("sampleApp")
 
 
 
+            //------- select a profile --------
+            $scope.showFindProfileDialog = {};
+            $scope.findProfile = function() {
+                $scope.showFindProfileDialog.open();    //note that this is defined in the parent controller...
+                //note that the function $scope.selectedProfile in the parent (resourceCreator) controller is invoked on successful selection...
+            };
+
+            $scope.selectedProfileFromDialog = function (profile) {
+                console.log(profile)
+
+                //just experimantal !
+                profileCreatorSvc.makeProfileDisplayFromProfile(profile).then(
+                    function(vo) {
+                        console.log(vo.treeData)
+                        $scope.displayMode = 'view';
+                        $('#SDtreeView').jstree('destroy');
+                        $('#SDtreeView').jstree(
+                            {
+                                'core': {
+                                    'multiple': false,
+                                    'data': vo.treeData,
+                                    'themes': {name: 'proton', responsive: true}
+                                }
+                            }
+                        )
+                    })
+
+
+
+            };
+
+
             var idPrefix = 'cf-';   //prefix for the id. todo should probably be related to the userid in some way...
             //load the library. todo THis will become slow with large numbers of sets...
             function refreshLibrary() {
                 builderSvc.loadLibrary($localStorage.builderBundles).then(
                     function(arContainer){
                         $scope.libraryContainer = arContainer;
-                        /*
 
-                        $scope.library = bundle;    //this is a bundle of DocumentReference resources...
-                        $scope.libraryContainer = [];   //use the container object
-
-                        console.log(bundle)
-
-                        //determine which are already stored loca
-                        var cache = {};
-                        builderBundles.forEach(function(bundle){
-                            cache[bundle.id] = true;
-                        })
-
-                        //add meta information for display. Makes it a non-lgal resource, but don't really care for this purpose...
-                        if ($scope.library && $scope.library.entry) {
-                            $scope.library.entry.forEach(function(entry){
-                                var dr = entry.resource;
-                                $scope.libraryContainer.push(builderSvc.getBundleContainerFromDocRef(dr));  //saves the doc as a container...
-
-                                //now see if the bundle in the DR is cached locally (the id of the dr is the same as the bundle
-                                //var cachedLocally = false;
-                                $localStorage.builderBundles.forEach(function (local) {
-                                    if (local.bundle.id == dr.id) {
-                                        dr.meta = dr.meta || {}
-                                        dr.meta.cachedLocally = true;
-                                    }
-                                })
-                            })
-                        }
-
-console.log($scope.libraryContainer)
-
-*/
                     }
                 );
             }
@@ -348,6 +348,14 @@ console.log($scope.libraryContainer)
 
                     if (! alreadyLocal) {
 
+
+                        //remove all the 'valid' propertis on entry...
+                        container.bundle.entry.forEach(function (entry) {
+                            delete entry.valid;
+                        });
+
+
+
                         $localStorage.builderBundles.push(container);
                         //$localStorage.builderBundles.push(newBundle);
                         // $scope.resourcesBundle = newBundle.bundle;
@@ -429,9 +437,6 @@ console.log($scope.libraryContainer)
                 var insertPoint = $scope.currentResource;
 
 
-
-
-
                 //if the immediate predecessor is a BBE with a multiplecity of 1, then adjust the insert point (careplan.activity.detail)
                 var ar = hashPath.path.split('.');
 
@@ -488,10 +493,10 @@ console.log($scope.libraryContainer)
                                 return $scope.expandedValueSet;
                             }
                         }
+                    }).result.then(function () {
+                        drawResourceTree($scope.currentResource);   //don't need to update the graph...
+
                     })
-
-
-
 
                 }
 
@@ -688,6 +693,7 @@ console.log($scope.libraryContainer)
 
             $scope.removeReference = function(ref) {
 
+                console.log(ref)
                 alert("Sorry, there's a bug removing references - working on it...")
                 return;
 
