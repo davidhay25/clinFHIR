@@ -713,24 +713,26 @@ angular.module("sampleApp")
                 }
 
 
+                builderSvc.setCurrentResource(resource);    //set the current resource in the service
+
                 $scope.displayMode = 'view';
 
                 delete $scope.hashPath;
-
-                //delete $scope.currentElementValue;
                 delete $scope.existingElements;
-                //delete $scope.currentElementValue;
                 delete $scope.expandedValueSet;
                 delete $scope.currentElementValue;
 
 
                 $scope.currentResource = resource;      //in theory we could use currentEntry...
                 $scope.currentEntry = entry;            //needed for validation
+
+
+
                 drawResourceTree(resource)
 
 
                 $scope.waiting = true;
-                builderSvc.getSD(resource.resourceType).then(
+                builderSvc.getSD(resource).then(
 
                     function(SD) {
 
@@ -971,7 +973,6 @@ angular.module("sampleApp")
 
 
             };
-
 
 
 
@@ -1376,15 +1377,36 @@ angular.module("sampleApp")
 
 
 
+
             //------- select a profile --------
             $scope.showFindProfileDialog = {};
             $scope.findProfile = function() {
-                $scope.showFindProfileDialog.open();    //note that this is defined in the parent controller...
-                //note that the function $scope.selectedProfile in the parent (resourceCreator) controller is invoked on successful selection...
+
+                GetDataFromServer.adHocFHIRQuery("http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/dhtest1profile").then(
+                    function(data) {
+                        console.log(data);
+                        var profile = data.data;
+
+
+                        builderSvc.makeLogicalModelFromSD(profile).then(
+                            function (lm) {
+                                console.log(lm);
+                                $scope.selectedProfileFromDialog(lm)
+                            }
+                        )
+                    }
+                )
+
+
+
+
+
             };
 
             $scope.selectedProfileFromDialog = function (profile) {
-                console.log(profile)
+                //console.log(profile)
+
+
 
                 var type = profile.snapshot.element[0].path;
                 $scope.selectedContainer.isDirty = true;
@@ -1394,10 +1416,13 @@ angular.module("sampleApp")
                 $scope.input.text = $scope.input.text || "";
 
                 resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text + builderSvc.getManualMarker())};
+                resource.meta = {profile:[profile.url]};
 
 
+//>>> add meta to resource
 
                 builderSvc.addResourceToAllResources(resource)
+                builderSvc.addSDtoCache(profile)
 
                 $scope.selectedContainer.bundle.entry.push({resource:resource});
                 //$scope.resourcesBundle.entry.push({resource:resource});

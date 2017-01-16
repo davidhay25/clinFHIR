@@ -10,6 +10,32 @@ angular.module("sampleApp")
         var showLog = false;
         var gAllResourcesThisSet = {};      //hash of all resources in the current set
         var manualMarkerString = "<a name='mm'/>";     //a marker string to separate manually entered text (above the marker) from generated text below
+        var baseHl7ConformanceUrl = "http://hl7.org/fhir/";
+        var gCurrentResource;       //the current resource being examined
+
+        //return the profile url of the current resource. This is needed for getEDInfoForPath() and assumes we're tracking the current resource...
+        var getProfileUrlCurrentResource = function() {
+            var profileUrl = baseHl7ConformanceUrl+"StructureDefinition/"+gCurrentResource.resourceType;
+            if (gCurrentResource && gCurrentResource.meta && gCurrentResource.meta.profile) {
+                profileUrl= gCurrentResource.meta.profile[0]
+            } else {
+
+            }
+            return profileUrl;
+
+        };
+
+        //get the url for the SD of a resource. Default to the 'core' spec, but check the meta element...
+        var getProfileUrlFromResource = function(resource) {
+            var profileUrl = baseHl7ConformanceUrl+"StructureDefinition/"+resource.resourceType;
+            if (resource && resource.meta && resource.meta.profile) {
+                profileUrl= resource.meta.profile[0]
+            } else {
+
+            }
+            return profileUrl;
+
+        };
 
         var objColours ={};
         objColours.Patient = '#93FF1A';
@@ -24,6 +50,93 @@ angular.module("sampleApp")
 
 
         return {
+            makeLogicalModelFromSD : function(profile){
+              //given a StructureDefinition which is a profile (ie has extensions) generate a logical model by de-referencing the extensions
+              //currently only working for simple extensions
+                var deferred = $q.defer();
+                if (profile && profile.snapshot && profile.snapshot.element) {
+
+                    var logicalModel = angular.copy(profile);       //this will be the logical model
+                    var queries = [];       //the queries to retrieve the extension definition
+                    logicalModel.snapshot.element.length = 0; //remove the current element definitions
+
+
+                    profile.snapshot.element.forEach(function (ed) {
+                        logicalModel.snapshot.element.push(ed)
+                        var path = ed.path;
+                        var ar = path.split('.');
+                        if (ar.indexOf('extension') > -1) {
+                            //this is an extension
+                            console.log(ed);
+                            if (ed.type) {
+                                var profileUrl = ed.type[0].profile;
+                                queries.push(GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
+                                    function (sdef) {
+                                        console.log(ed,sdef)
+                                        //locate the entry in the ED which is 'valueX' and update the ed. todo - need to accomodate complex extensions
+                                        if (sdef && sdef.snapshot && sdef.snapshot.element) {
+                                            sdef.snapshot.element.forEach(function (el) {
+                                                if (el.path.indexOf('.value') > -1) {
+                                                    ed.type = el.type;
+
+                                                    //now update the path
+
+                                                    var text = $filter('getLogicalID')(profileUrl);
+
+                                                    ed.path = ed.path.replace('extension',text)
+
+                                                }
+
+                                            })
+
+                                        }
+
+
+
+                                    }
+                                ))
+                            }
+
+                        }
+                        console.log(path)
+
+                    });
+
+                    if (queries.length > 0) {
+                        //yes - execute all the queries and resolve when all have been completed...
+                        $q.all(queries).then(
+                            function () {
+                                deferred.resolve(logicalModel);
+                            },
+                            function (err) {
+
+
+                                console.log( angular.toJson(err))
+
+
+                            }
+                        )
+
+                    } else {
+                        //no - we can return the list immediately...
+                        deferred.resolve(children)
+
+                    }
+
+
+
+                } else {
+                    deferred.reject();
+                }
+
+                return deferred.promise;
+
+            },
+            setCurrentResource : function(resource) {
+                gCurrentResource = resource;
+
+
+            },
             analyseInstanceForPath : function(resource,path){
                 //analyse the path. if it has an ancestor of type backbone element that is multiple, then show the current entries in the instance
                 var that = this;
@@ -609,6 +722,7 @@ angular.module("sampleApp")
                         if (value && value.cc) {
 
                             //when a CC is rendered as a set of radios the output is a json string...
+
                             if (angular.isString(value.cc)) {
                                 value.cc = {coding:angular.fromJson(value.cc)}
                                 delete value.cc.coding.extension;
@@ -626,12 +740,15 @@ angular.module("sampleApp")
                                 text = value.cc.text;
                             }
 
+                            //if there was enough data for a cc to be generated...
+                            if (cc.text || cc.coding) {
+                                simpleInsert(insertPoint,info,path,cc,dt);
 
-                            simpleInsert(insertPoint,info,path,cc,dt);
-
-                            if (text) {
-                                this.addStringToText(insertPoint, path + ": " + text)
+                                if (text) {
+                                    this.addStringToText(insertPoint, path + ": " + text)
+                                }
                             }
+
                         }
 
                         break;
@@ -911,7 +1028,41 @@ angular.module("sampleApp")
                 */
 
             },
-            getSD : function(type) {
+            addSDtoCache : function(profile) {
+                gSD[profile.url] = profile;
+            },
+            getSD : function(resource) {
+                //return the SD (profile) for a resource based on it's cannonical url...
+                var deferred = $q.defer();
+
+                //if this resource is a profiled resource, then there will be a meta.profile property. If not, assume a core resource
+                //var profileUrl = baseHl7ConformanceUrl+"StructureDefinition/"+resource.resourceType;
+
+                var profileUrl = getProfileUrlFromResource(resource); //getProfileUrlCurrentResource();
+/*
+                if (resource && resource.meta && resource.meta.profile) {
+
+                 } else {
+
+                }
+*/
+
+                if (gSD[profileUrl]) {
+                    deferred.resolve(gSD[profileUrl])
+                } else {
+                    //var uri = "http://hl7.org/fhir/StructureDefinition/"+type;
+                    GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
+                        function(SD) {
+                            gSD[profileUrl] = SD;
+                            deferred.resolve(SD);
+                        },function(err){
+                            deferred.reject(err)
+                        })
+                }
+
+                return deferred.promise;
+            },
+            getSDDEP : function(type) {
                 var deferred = $q.defer();
 
                 if (gSD[type]) {
@@ -932,7 +1083,15 @@ angular.module("sampleApp")
             getEDInfoForPath : function(path) {
                 var ar = path.split('.');
                 var type = ar[0];       //the resource type is the first segment in the path
-                var SD = gSD[type];     //it must have been read at this point...
+                var profileUrl = getProfileUrlCurrentResource();
+                var SD = gSD[profileUrl];     //it must have been read at this point...
+
+                if (!SD) {
+                    alert("whoops - can't find the profile for this resource - I cannot continue.")
+                    return {};
+                }
+
+                //var SD = gSD[type];     //it must have been read at this point...
                 var info = {path:path};          //this will be the info about this element...
 
                 //find the path
