@@ -778,7 +778,8 @@ angular.module("sampleApp")
                                 hierarchical: {
                                     direction: 'LR',
                                     nodeSpacing : 35,
-                                    sortMethod:'directed'
+                                    sortMethod:'directed',
+                                    parentCentralization : false
                                 }
                             },
                             physics:false

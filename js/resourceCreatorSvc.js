@@ -2812,7 +2812,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     var arParent = angular.copy(ar);
                     arParent.pop();
 
-                    var node = {id: inx, label: label, shape: 'box', ed: ed};
+                    var node = {id: inx, label: label, shape: 'box', ed: ed,color:'#FFFFCC'};
 
                     if (ed.max == '*') {
                         node.label += '*';
@@ -2834,6 +2834,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                     node.color = 'green';
                                     node.font = {color: 'white'};
                                     break;
+
                             }
                             //now see if this is a coded item....
                             if (['code', 'Coding', 'CodeableConcept'].indexOf(typ.code) > -1) {
