@@ -1513,6 +1513,8 @@ console.log(summary);
             vsLookup['Confidentiality'] = {id:'v2-0272',minLength:1,type:'list'};
             vsLookup['composition-status'] = {id:'composition-status',minLength:1,type:'list'};
             vsLookup['observation-status'] = {id:'observation-status',minLength:1,type:'list'};
+            vsLookup['observation-category'] = {id:'observation-category',minLength:1,type:'list'};
+
             vsLookup['condition-status'] = {id:'condition-status',minLength:1,type:'list'};
             vsLookup['administrative-gender'] = {id:'administrative-gender',minLength:1,type:'list'};
             vsLookup['reason-medication-not-given-codes'] = {type:'list'};

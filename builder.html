@@ -840,7 +840,29 @@
 
 
                                         </div>
-                                        <div></div>
+
+                                        <div ng-show="expandedValueSet">
+                                            <div><a href="#" ng-click="input.showCodeValues = ! input.showCodeValues" class="pull-right">
+                                                <span ng-show="showCodeValues">Hide</span><span ng-hide="showCodeValues">Show</span>
+                                                 values
+                                            </a>
+                                            </div>
+                                            <div ng-show ='input.showCodeValues'>
+                                                <table class="table table-condensed table-bordered">
+                                                    <tr ng-repeat="concept in expandedValueSet.expansion.contains">
+                                                        <td>{{concept.code}}</td>
+                                                        <td>{{concept.display}}</td>
+                                                        <td>{{concept.extension[0].valueString}}</td>
+
+                                                    </tr>
+                                                </table>
+
+
+                                            </div>
+                                        </div>
+
+
+
                                     </div>
                                     <hr/>
                                     {{hashPath.definition}}

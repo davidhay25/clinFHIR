@@ -670,8 +670,6 @@ angular.module("sampleApp")
 
                 var path = hashPath.path;
 
-               
-
                 switch (dt) {
 
                     case 'HumanName' :
@@ -794,7 +792,12 @@ angular.module("sampleApp")
                             var ext = {}
                             ext[dtValue] = insrt
                             //var ext = {valueString:insrt};
-                            Utilities.addExtensionOnceWithReplace(insertPoint,info.ed.builderMeta.extensionUrl,ext)
+                            if (angular.isObject(insertPoint)) {
+                                Utilities.addExtensionOnceWithReplace(insertPoint,info.ed.builderMeta.extensionUrl,ext)
+                            } else {
+
+
+                            }
 
 
                         } else {

@@ -448,11 +448,6 @@ angular.module("sampleApp")
                     }
 
 
-
-
-
-
-
                 }
 
                 if ($scope.supportedDt.indexOf(dt) > -1) {
@@ -1024,6 +1019,7 @@ angular.module("sampleApp")
                             delete $scope.expandedValueSet;
                             delete $scope.currentElementValue;
                             // $scope.input.selectedExistingElement = -1;
+                            $scope.input.showCodeValues = false;
 
 
                             if (data.node && data.node.data && data.node.data.ed) {
@@ -1064,7 +1060,7 @@ angular.module("sampleApp")
                                                     GetDataFromServer.getExpandedValueSet($scope.vsDetails.id).then(
                                                         function (vs) {
                                                             $scope.expandedValueSet = vs;
-                                                            //console.log(vs);
+                                                            console.log(vs);
                                                         }, function (err) {
                                                             alert(err + ' expanding ValueSet')
                                                         }
