@@ -394,7 +394,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             //node['a_attr'].style = 'text-decoration:line-through';
 
 
-                            if (item.myMeta.isExtension) {
+                            if (item.myMeta.isExtension || (item.builderMeta && item.builderMeta.isExtension)) {
                                 //todo - a class would be better, but this doesn't seem to render in the tree...
                                  node.a_attr.style='color:blueviolet'
                               }

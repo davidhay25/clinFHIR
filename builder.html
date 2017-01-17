@@ -1005,20 +1005,37 @@
 
 
 
+                    <uib-tabset>
+                        <uib-tab heading="Core resource">
+                            <br/>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3">
+                                    Resource Type:
+                                </div>
+                                <div class="col-md-6 col-sm-6">
+                                    <select ng-model="input.newResource" class="form-control"
+                                            ng-change="newTypeSelected(input.newResource)"
+                                            ng-options="resource.name for resource in resources"></select>
+                                </div>
+                            </div>
+                        </uib-tab>
+                        <uib-tab heading="Profile">
+                            <br/>
+                            <button class="btn btn-default" ng-click="findProfile()">Find Profile</button>
+                            <br/>
+                            <p>There are currently a number of limitations on the support for profiles in the Scenario Builder</p>
+                            <ul>
+                                <li>Only resources created by clinFHIR will work. Others might. but no guarantees</li>
+                                <li>Simple extensions only - ie extensions that have only a single value</li>
+                                <li>The extension can only have a single datatype</li>
+                                <li>The extension cannot be applied to primitive elements (like a string)</li>
+                                <li>Only one of each extension type can be in the resource</li>
+
+                            </ul>
+                        </uib-tab>
+                    </uib-tabset>
 
 
-
-
-                    <div class="row">
-                        <div class="col-md-3 col-sm-3">
-                            Resource Type:
-                        </div>
-                        <div class="col-md-6 col-sm-6">
-                            <select ng-model="input.newResource" class="form-control"
-                                    ng-change="newTypeSelected(input.newResource)"
-                                    ng-options="resource.name for resource in resources"></select>
-                        </div>
-                    </div>
 
 
 
@@ -1090,16 +1107,14 @@
 
 
 
-                    <button class="btn btn-default" ng-click="findProfile()">Find Profile (Experimental)</button>
+                    <br/><br/><br/><br/><br/>
+                    <button class="btn btn-default" ng-click="findProfile(true)">Find Profile (cheat)</button>
 
 
 
                 </div>
 
-                </div>
-
-
-
+            </div>
 
         </div>
 

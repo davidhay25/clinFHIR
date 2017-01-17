@@ -392,21 +392,26 @@ angular.module("sampleApp")
                 //if this is not adding to the root, check that there is a branch selected...
                 var ar = hashPath.path.split('.');
                 if (ar.length > 2 &&  $scope.existingElements.list.length == 0) {
-                    var msg = 'Please create a reference to a resource on this branch. After that, you can add other datatypes and create new branches as desired';
-                    modalService.showModal({}, {bodyText:msg});
-                    return;
+
+                    if (ar.length ==3 && hashPath.elementInfo.isExtension) {
+                        //this is a hack to allow extensions to be added to properties immediately off the root...
+                    } else {
+                        var msg = 'Please create a reference to a resource on this branch. ' +
+                            'After that, you can add other datatypes and create new branches as desired';
+                        modalService.showModal({}, {bodyText:msg});
+                        return;
+                    }
+
+
+
+
                 }
-
-
-
 
                 //set the insert point based on the path selected (if any)
                 var insertPoint = $scope.currentResource;
 
-
                 //if the immediate predecessor is a BBE with a multiplecity of 1, then adjust the insert point (careplan.activity.detail)
                 var ar = hashPath.path.split('.');
-
 
                 //if we're not inserting onto the root, then we need to set the insert point based on the path & selected index
                 if (ar.length > 2) {
@@ -419,8 +424,10 @@ angular.module("sampleApp")
                     ar.pop();       //pop off the segment we are inserting at
                     var testPath = ar.join('.');
                     var info = builderSvc.getEDInfoForPath(testPath);
+
+                    var segmentName = ar[ar.length-1];
                     if (info.isBBE && ! info.isMultiple) {
-                        var segmentName = ar[ar.length-1];
+                        //var segmentName = ar[ar.length-1];
                         if (insertPoint[segmentName]) {
                             insertPoint = insertPoint[segmentName]
                         } else {
@@ -428,10 +435,25 @@ angular.module("sampleApp")
                             insertPoint = insertPoint[segmentName]
                         }
                     }
+
+                    //if this is an extension, then the insertPoint moves down one...
+                    //todo - not that happy with this...
+                    if (hashPath.elementInfo.isExtension) {
+                        if (insertPoint[segmentName]) {
+                            insertPoint = insertPoint[segmentName]
+                        } else {
+                            insertPoint[segmentName] = {};
+                            insertPoint = insertPoint[segmentName]
+                        }
+                    }
+
+
+
+
+
+
+
                 }
-
-
-
 
                 if ($scope.supportedDt.indexOf(dt) > -1) {
                     $scope.selectedContainer.isDirty = true;
@@ -1025,6 +1047,7 @@ angular.module("sampleApp")
                                     //$scope.hashPath.max = ed.max;
                                     $scope.hashPath.definition = ed.definition;
                                     $scope.hashPath.comments = ed.comments;
+                                    $scope.hashPath.elementInfo = builderSvc.getEDInfoForPath(ed.path);
 
 
                                     //get the ValueSet if there is one bound...

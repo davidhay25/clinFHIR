@@ -48,7 +48,6 @@ angular.module("sampleApp")
         objColours.CareTeam = '#FFFFCC';
         objColours.Condition = '#cc9900';
 
-
         return {
             makeLogicalModelFromSD : function(profile){
               //given a StructureDefinition which is a profile (ie has extensions) generate a logical model by de-referencing the extensions
@@ -60,7 +59,6 @@ angular.module("sampleApp")
                     var queries = [];       //the queries to retrieve the extension definition
                     logicalModel.snapshot.element.length = 0; //remove the current element definitions
 
-
                     profile.snapshot.element.forEach(function (ed) {
                         logicalModel.snapshot.element.push(ed)
                         var path = ed.path;
@@ -70,31 +68,36 @@ angular.module("sampleApp")
                             console.log(ed);
                             if (ed.type) {
                                 var profileUrl = ed.type[0].profile;
-                                queries.push(GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
-                                    function (sdef) {
-                                        console.log(ed,sdef)
-                                        //locate the entry in the ED which is 'valueX' and update the ed. todo - need to accomodate complex extensions
-                                        if (sdef && sdef.snapshot && sdef.snapshot.element) {
-                                            sdef.snapshot.element.forEach(function (el) {
-                                                if (el.path.indexOf('.value') > -1) {
-                                                    ed.type = el.type;
+                                if (profileUrl) {
+                                    queries.push(GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
+                                        function (sdef) {
+                                            console.log(ed,sdef)
+                                            //locate the entry in the ED which is 'valueX' and update the ed. todo - need to accomodate complex extensions
+                                            if (sdef && sdef.snapshot && sdef.snapshot.element) {
+                                                sdef.snapshot.element.forEach(function (el) {
+                                                    if (el.path.indexOf('.value') > -1) {
+                                                        ed.type = el.type;
 
-                                                    //now update the path
+                                                        //now update the path and other key properties of the ed
+                                                        var text = $filter('getLogicalID')(profileUrl);
 
-                                                    var text = $filter('getLogicalID')(profileUrl);
+                                                        ed.path = ed.path.replace('extension',text)
+                                                        ed.builderMeta || {}
+                                                        ed.builderMeta = {isExtension : true};  //to colourize it, and help with the build..
+                                                        ed.builderMeta.extensionUrl = profileUrl;
 
-                                                    ed.path = ed.path.replace('extension',text)
+                                                        ed.comments = sdef.description;     //to be eble to show the description on the screen..
 
-                                                }
+                                                    }
 
-                                            })
+                                                })
+
+                                            }
 
                                         }
+                                    ))
+                                }
 
-
-
-                                    }
-                                ))
                             }
 
                         }
@@ -119,7 +122,7 @@ angular.module("sampleApp")
 
                     } else {
                         //no - we can return the list immediately...
-                        deferred.resolve(children)
+                        deferred.resolve(logicalModel)
 
                     }
 
@@ -672,7 +675,6 @@ angular.module("sampleApp")
                 switch (dt) {
 
                     case 'HumanName' :
-                       // console.log(value)
                         var insrt = {text:value.HumanName.text}
                         simpleInsert(insertPoint,info,path,insrt,dt);
                         this.addStringToText(insertPoint,path+": "+ insrt.text)
@@ -755,7 +757,6 @@ angular.module("sampleApp")
                 }
 
                 function simpleInsert(insertPoint,info,path,insrt,dt) {
-                    //var insertPoint = resource;
 
                     var elementInfo = that.getEDInfoForPath(path);  //information about the element we're about to insert...
 
@@ -773,7 +774,6 @@ angular.module("sampleApp")
                         angular.forEach(insertPoint,function(value,key){
                             //console.log(key,value)
                             if (key.substr(0,elementRoot.length) == elementRoot) {
-
                                 delete insertPoint[key]
                             }
 
@@ -786,8 +786,25 @@ angular.module("sampleApp")
                         insertPoint[propertyName] = insertPoint[propertyName] || []
                         insertPoint[propertyName].push(insrt)
                     } else {
-                        insertPoint[propertyName] =insrt;
+                        //is this an extension?
+                        if (info && info.isExtension) {
+
+
+                            var dtValue = 'value' + info.extensionType.substr(0,1).toUpperCase() + info.extensionType.substr(1);
+                            var ext = {}
+                            ext[dtValue] = insrt
+                            //var ext = {valueString:insrt};
+                            Utilities.addExtensionOnceWithReplace(insertPoint,info.ed.builderMeta.extensionUrl,ext)
+
+
+                        } else {
+                            insertPoint[propertyName] =insrt;
+                        }
+
+
                     }
+                     //   insertPoint[propertyName] =insrt;
+                }
 
 
 
@@ -795,7 +812,7 @@ angular.module("sampleApp")
 
                     return;
 
-
+/*
 
 
                    // var segmentPath = resource.resourceType;
@@ -861,6 +878,9 @@ angular.module("sampleApp")
                     } else {
                         insertPoint[path] =insrt;
                     }
+
+
+                    *?
                 }
             },
             removeReferenceAtPath : function(resource,path,inx) {
@@ -1034,27 +1054,29 @@ angular.module("sampleApp")
             getSD : function(resource) {
                 //return the SD (profile) for a resource based on it's cannonical url...
                 var deferred = $q.defer();
-
+                var that = this;
                 //if this resource is a profiled resource, then there will be a meta.profile property. If not, assume a core resource
-                //var profileUrl = baseHl7ConformanceUrl+"StructureDefinition/"+resource.resourceType;
 
                 var profileUrl = getProfileUrlFromResource(resource); //getProfileUrlCurrentResource();
-/*
-                if (resource && resource.meta && resource.meta.profile) {
-
-                 } else {
-
-                }
-*/
 
                 if (gSD[profileUrl]) {
                     deferred.resolve(gSD[profileUrl])
                 } else {
-                    //var uri = "http://hl7.org/fhir/StructureDefinition/"+type;
+
                     GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
                         function(SD) {
-                            gSD[profileUrl] = SD;
-                            deferred.resolve(SD);
+
+                            //I think it's always safe to call the 'convert to logical model' function...
+                            that.makeLogicalModelFromSD(SD).then(
+                                function (lm) {
+                                    gSD[profileUrl] = lm;
+                                    deferred.resolve(lm);
+                                }
+                            )
+
+
+
+
                         },function(err){
                             deferred.reject(err)
                         })
@@ -1101,6 +1123,17 @@ angular.module("sampleApp")
                         if (ed.path == path) {
                             //is this multiple?
                             info.max = ed.max;
+                            info.min = ed.min;
+                            info.depth = ar.length;     //the depth of this item in the
+                            info.ed = ed;       //never know when you might need it!
+                            if (ed.builderMeta && ed.builderMeta.isExtension) {
+                                info.isExtension = true;
+                                info.extensionType = 'string';      //default to string...
+                                if (ed.type) {
+                                    info.extensionType = ed.type[0].code;
+                                }
+
+                            }
                             if (ed.max == '*') {
                                 info.isMultiple = true
                             }
@@ -1111,6 +1144,9 @@ angular.module("sampleApp")
                                     if (typ.code == 'BackboneElement') {
                                         info.isBBE = true
                                     }
+
+
+
                                 })
                             }
 

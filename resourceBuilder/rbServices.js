@@ -1679,7 +1679,25 @@ console.log(summary);
             return deferred.promise;
 
         },
+        addExtensionOnceWithReplace : function(resource,url,value) {
+            //add the extension with this url if it does not already exist
+            var pos = -1;
+            resource.extension = resource.extension || []
 
+            resource.extension.forEach(function(ext,inx){
+                if (ext.url == url) {pos=inx;}
+            });
+
+            //remove any existing...
+            if (pos >  -1) {
+                resource.extension.splice(pos,1)
+            }
+
+            var ext = {url:url}
+            angular.extend(ext,value);
+            resource.extension.push(ext)
+
+        },
         addExtensionOnce : function(resource,url,value) {
             //add the extension with this url if it does not already exist
             var found = false;

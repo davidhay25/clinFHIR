@@ -341,6 +341,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 extensionDefinition.abstract= false;
                 extensionDefinition.publisher = $scope.input.publisher;
                 extensionDefinition.contextType = "resource";
+                extensionDefinition.description = comments;
 
                 //if no context defined, then allow all
 
@@ -438,7 +439,8 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
 
 
-                if (fhirVersion ==3 && extensionDefinition.snapshot && extensionDefinition.snapshot.element) {
+                if (fhirVersion ==3 && extensionDefinition.snapshot && extensionDefinition.snapshot.element
+                    && extensionDefinition.snapshot.element.length > 0) {
                     delete extensionDefinition.snapshot.element[0].type;
                 }
 
