@@ -192,7 +192,7 @@ angular.module("sampleApp")
 
 
             //datatypes for which there is an entry form
-            $scope.supportedDt = ['CodeableConcept','string','code','date','Period','dateTime','Address','HumanName']
+            $scope.supportedDt = ['CodeableConcept','string','code','date','Period','dateTime','Address','HumanName','Annotation']
 
             $scope.currentBundleIndex = 0;     //the index of the bundle currently being used
 
@@ -1435,25 +1435,19 @@ angular.module("sampleApp")
                 builderSvc.makeLogicalModelFromSD(profile).then(
                     function (lm) {
                         console.log(lm);
-                       // $scope.selectedProfileFromDialog(lm)
+                        selectLogicalModal(lm)
+                        /*
+
                         var type = lm.snapshot.element[0].path;
                         $scope.selectedContainer.isDirty = true;
-
                         var resource = {resourceType : type};
                         resource.id = idPrefix+new Date().getTime();
                         $scope.input.text = $scope.input.text || "";
-
                         resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text + builderSvc.getManualMarker())};
                         resource.meta = {profile:[lm.url]};
-
-
-
                         builderSvc.addResourceToAllResources(resource)
                         builderSvc.addSDtoCache(lm)
-
                         $scope.selectedContainer.bundle.entry.push({resource:resource});
-                        //$scope.resourcesBundle.entry.push({resource:resource});
-
                         $scope.selectedContainer.bundle.entry.sort(function(a,b){
                             //$scope.resourcesBundle.entry.sort(function(a,b){
                             if (a.resource.resourceType > b.resource.resourceType) {
@@ -1462,15 +1456,18 @@ angular.module("sampleApp")
                                 return -1
                             }
                         })
-
                         $scope.displayMode = 'view';
+                        $scope.selectResource(resource,function(){
+                            $scope.waiting = false;
+                            makeGraph();
+                            drawResourceTree(resource);
 
+                            isaDocument();      //determine if this bundle is a document (has a Composition resource)
 
+                            $rootScope.$emit('addResource',resource);
 
-
-                        processSD(resource,lm);
-
-
+                        });
+                        */
 
                     }
                 )
@@ -1482,6 +1479,84 @@ angular.module("sampleApp")
 
             };
 
+
+
+
+            //----- Logical model support
+
+            function selectLogicalModal(lm) {
+                var type = lm.snapshot.element[0].path;
+                $scope.selectedContainer.isDirty = true;
+                var resource = {resourceType : type};
+                resource.id = idPrefix+new Date().getTime();
+                $scope.input.text = $scope.input.text || "";
+                resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text + builderSvc.getManualMarker())};
+                resource.meta = {profile:[lm.url]};
+                resource.implicitRules = lm.implicitRules;
+
+                builderSvc.addResourceToAllResources(resource)
+                builderSvc.addSDtoCache(lm)
+                $scope.selectedContainer.bundle.entry.push({resource:resource});
+                $scope.selectedContainer.bundle.entry.sort(function(a,b){
+                    //$scope.resourcesBundle.entry.sort(function(a,b){
+                    if (a.resource.resourceType > b.resource.resourceType) {
+                        return 1
+                    } else {
+                        return -1
+                    }
+                })
+                $scope.displayMode = 'view';
+                $scope.selectResource(resource,function(){
+                    $scope.waiting = false;
+                    makeGraph();
+                    drawResourceTree(resource);
+
+                    isaDocument();      //determine if this bundle is a document (has a Composition resource)
+
+                    $rootScope.$emit('addResource',resource);
+
+                });
+            }
+
+            //load all the logical models. This won't scale...
+            logicalModelSvc.loadAllModels(appConfigSvc.getCurrentConformanceServer().url).then(
+                function (bundle) {
+                    $scope.allLogicalModelsBundle = bundle
+                    $scope.bundleLogicalModels = angular.copy($scope.allLogicalModelsBundle)
+                    console.log(bundle)
+                }, function (err) {
+                    alert(err)
+                }
+            );
+
+
+            //used to provide the filtering capability...
+            $scope.filterModelList = function(filter) {
+                filter = filter.toLowerCase();
+                $scope.bundleLogicalModels = {entry:[]};   //a mnimal bundle
+                $scope.allLogicalModelsBundle.entry.forEach(function(entry){
+                    if (entry.resource.id.toLowerCase().indexOf(filter) > -1) {
+                        $scope.bundleLogicalModels.entry.push(entry);
+                    }
+                })
+            };
+
+
+            $scope.selectLogicalModelFromList = function(entry,index){
+                var lm = entry.resource;
+                lm.implicitRules = 'isLogicalModel'
+
+/*
+                var url = 'baseType';   //todo - in appconfig
+
+                var dtValue = 'value' + info.extensionType.substr(0,1).toUpperCase() + info.extensionType.substr(1);
+                var ext = {}
+                ext[dtValue] = insrt
+
+                Utilities.addExtensionOnceWithReplace(insertPoint,info.ed.builderMeta.extensionUrl,ext)
+                */
+                selectLogicalModal(lm)
+            }
 
 
         });

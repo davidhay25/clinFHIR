@@ -47,6 +47,7 @@ angular.module("sampleApp")
         objColours.CarePlan = '#FF9900';
         objColours.CareTeam = '#FFFFCC';
         objColours.Condition = '#cc9900';
+        objColours.LogicalModel = '#cc0000';
 
         return {
             makeLogicalModelFromSD : function(profile){
@@ -358,7 +359,6 @@ angular.module("sampleApp")
 
 
             },
-
             makeDocumentText : function(composition,allResourcesBundle){
                 //construct the text representation of a document
                 // order is patient.text, composition.text, sections.text
@@ -671,6 +671,12 @@ angular.module("sampleApp")
                 var path = hashPath.path;
 
                 switch (dt) {
+
+                    case 'Annotation' :
+                        var insrt = {text:value.Annotation.text}
+                        simpleInsert(insertPoint,info,path,insrt,dt);
+                        this.addStringToText(insertPoint,path+": "+ insrt.text)
+                        break;
 
                     case 'HumanName' :
                         var insrt = {text:value.HumanName.text}
@@ -1247,7 +1253,7 @@ angular.module("sampleApp")
             },
             makeGraph : function(bundle,centralResource) {
                 //builds the model that has all the models referenced by the indicated SD, recursively...
-                //console.log(SD)
+
                 var that = this;
                 var allReferences = [];
                 gAllReferences.length = 0;
@@ -1296,6 +1302,13 @@ angular.module("sampleApp")
 
                     if (objColours[resource.resourceType]) {
                         node.color = objColours[resource.resourceType];
+                    }
+
+                    //if there are implicit rules, then assume a logical model //todo - might want a url for this...
+                    if (resource.implicitRules) {
+                        node.shape='ellipse';
+                        node.color = objColours['LogicalModel'];
+                        node.font = {color:'white'}
                     }
 
                     arNodes.push(node);

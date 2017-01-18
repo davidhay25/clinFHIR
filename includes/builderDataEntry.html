@@ -1,6 +1,11 @@
 <div>
 
 
+    <div ng-show="dataTypeBeingEntered == 'Annotation'">
+        <textarea  placeholder = 'Enter text' type="text" class="form-control" ng-model="input.Annotation.text"></textarea>
+
+    </div>
+
     <div ng-show="dataTypeBeingEntered == 'Period'">
         <div class="row">
             <div class="col-md-6  col-sm-6 ">
@@ -65,7 +70,10 @@
                 <div ng-hide="expandedValueSet.expansion.contains">
                     <div uib-alert class="alert-warning" >
                         This element is configured as a list, but there are no options. This is likely an issue
-                        with the Terminology server. Sorry about that...
+                        with the Terminology server. One possibility is that the Terminology server didn't have a chance
+                        to respond with the list of options, so you might want to try again.
+                        <br/> <br/>
+                        Sorry about that...
                     </div>
                 </div>
 

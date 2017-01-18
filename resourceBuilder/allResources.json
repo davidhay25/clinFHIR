@@ -14,7 +14,7 @@
   {"name": "ImmunizationRecommendation"},
   {"name": "Appointment"},
   {"name": "MedicationDispense"},
-  {"name": "MedicationOrder"},
+  {"name": "MedicationRequest"},
   {"name": "Slot"},
   {"name": "Contraindication"},
   {"name": "PaymentNotice","reference":true},

@@ -733,7 +733,7 @@
                                             <div class="col-sm-7 col-md-7">
                                                 <ul class="pagination">
                                                     <li  ng-repeat="element in existingElements.list" ng-class="{active:$index==input.selectedExistingElement}">
-                                                        <a href="#" ng-click="input.selectedExistingElement=$index">{{$index}}</a>
+                                                        <a href="#" ng-click="input.selectedExistingElement=$index">{{$index+1}}</a>
                                                     </li>
                                                 </ul>
 
@@ -868,13 +868,6 @@
                                     {{hashPath.definition}}
 
                                     {{hashPath.comments}}
-
-                                    <!--
-                                                                    <pre>{{currentResource | json}}</pre>
-                                    -->
-
-
-
 
 
                                 </div>
@@ -1059,6 +1052,51 @@
                             </div>
 
                         </uib-tab>
+
+
+                        <uib-tab heading="Logical Model">
+                            <br/>
+<!--
+                            <button class="btn btn-default" ng-click="findLogicalModel()">Find Logical Model</button>
+                            <br/><br/>
+                            -->
+                            <div style="margin-left: 30px">
+                                <h5>Notes on support of Logical Models.</h5>
+                                <p>Resources based on Logical models will be built and saved in the builder,
+                                    but cannot be persisted to a FHIR server as a discrete resource when that functionity
+                                is enabled</p>
+
+                            </div>
+
+
+                            <div><input type="text" class="form-control"
+                                        placeholder="Filter model list by id" ng-model="input.filter"
+                                        ng-change="filterModelList(input.filter)"/> </div>
+
+                            <ul class="list-group" style=" height:700px; overflow: auto;" >
+                                <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.type == entry.resource.type}"
+                                    ng-repeat="entry in bundleLogicalModels.entry"
+                                    ng-click="selectLogicalModelFromList(entry,$index)">
+
+                                    <div class="row">
+                                        <div class="col-md-9 col-sm-9">
+                                            <h4>{{entry.resource.name}}</h4>
+                                        </div>
+                                        <div class="col-md-3 col-sm-3">
+                                            <em class="pull-right">{{entry.resource.status}}</em>
+                                        </div>
+                                    </div>
+
+                                    {{entry.resource.description | limitTo : 200}}
+                                </li>
+                            </ul>
+
+
+
+
+                        </uib-tab>
+
+
                     </uib-tabset>
 
 

@@ -1164,7 +1164,7 @@ angular.module("sampleApp")
             $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();
             $scope.dataTypes.push({code: 'BackboneElement',description: 'BackboneElement'});
 
-
+/* hide for the moment...
             //add the v2 datatypes here. todo - perhaps there's a 'model source' property that selects from different data types?
             $scope.dataTypes.push({code: 'CE',description: 'v2 CE Coded Entity'});
             $scope.dataTypes.push({code: 'CM',description: 'v2 CM Composite'});
@@ -1184,7 +1184,7 @@ angular.module("sampleApp")
             $scope.dataTypes.push({code: 'XTN',description: 'v2 XTN Extended Telecommunications Number'});
 
 
-
+*/
 
 
             $scope.save = function() {

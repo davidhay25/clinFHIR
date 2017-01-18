@@ -99,13 +99,13 @@ angular.module("sampleApp")
 
         return {
 
-            makeReferencedMapsModel : function(SD,bundle) {
+            makeReferencedMapsModel: function (SD, bundle) {
                 //builds the model that has all the models referenced by the indicated SD, recursively...
                 //console.log(SD)
                 var that = this;
                 var lst = [];
 
-                getModelReferences(lst,SD,SD.url);      //recursively find all the references between models...
+                getModelReferences(lst, SD, SD.url);      //recursively find all the references between models...
 
                 //console.log(lst);
 
@@ -115,16 +115,16 @@ angular.module("sampleApp")
                 var objNodes = {};
 
 
-                lst.forEach(function(reference){
+                lst.forEach(function (reference) {
 
-                    var srcNode = getNodeByUrl(reference.src,reference.path,objNodes,arNodes);
-                    var targNode = getNodeByUrl(reference.targ,reference.path,objNodes,arNodes);
+                    var srcNode = getNodeByUrl(reference.src, reference.path, objNodes, arNodes);
+                    var targNode = getNodeByUrl(reference.targ, reference.path, objNodes, arNodes);
 
                     var ar = reference.path.split('.');
                     var label = ar.pop();
                     //ar.splice(0,1);
                     //var label = ar.join('.');
-                    arEdges.push({from: srcNode.id, to: targNode.id, label: label,arrows : {to:true}})
+                    arEdges.push({from: srcNode.id, to: targNode.id, label: label, arrows: {to: true}})
 
                 })
 
@@ -141,29 +141,25 @@ angular.module("sampleApp")
                 //construct an object that is indexed by nodeId (for the model selection from the graph
                 var nodeObj = {};
                 arAllModels = []; //construct an array of all the models references by this one
-                arNodes.forEach(function(node){
+                arNodes.forEach(function (node) {
                     nodeObj[node.id] = node;
-                    arAllModels.push({url:node.url})
+                    arAllModels.push({url: node.url})
                 });
 
 
+                return {references: lst, graphData: data, nodes: nodeObj, lstNodes: arAllModels};
 
-
-
-
-                return {references:lst,graphData:data, nodes : nodeObj,lstNodes : arAllModels};
-
-                function getNodeByUrl(url,label,nodes) {
+                function getNodeByUrl(url, label, nodes) {
                     if (nodes[url]) {
                         return nodes[url];
                     } else {
                         var ar = url.split('/')
                         //var label =
-                        var node = {id: arNodes.length +1, label: ar[ar.length-1], shape: 'box',url:url};
+                        var node = {id: arNodes.length + 1, label: ar[ar.length - 1], shape: 'box', url: url};
                         if (arNodes.length == 0) {
                             //this is the first node
                             node.color = 'green'
-                            node.font = {color:'white'}
+                            node.font = {color: 'white'}
                         }
 
 
@@ -174,31 +170,30 @@ angular.module("sampleApp")
                 }
 
 
-                function getModelReferences(lst,SD,srcUrl) {
+                function getModelReferences(lst, SD, srcUrl) {
                     var treeData = that.createTreeArrayFromSD(SD);
-                    
-                    treeData.forEach(function(item){
+
+                    treeData.forEach(function (item) {
 
                         if (item.data) {
                             //console.log(item.data.referenceUri);
                             if (item.data.referenceUri) {
-                                var ref = {src:srcUrl, targ:item.data.referenceUri, path: item.data.path}
+                                var ref = {src: srcUrl, targ: item.data.referenceUri, path: item.data.path}
                                 lst.push(ref);
-                                var newSD = that.getModelFromBundle(bundle,item.data.referenceUri);
+                                var newSD = that.getModelFromBundle(bundle, item.data.referenceUri);
                                 if (newSD) {
-                                    getModelReferences(lst,newSD,newSD.url)
+                                    getModelReferences(lst, newSD, newSD.url)
                                 }
 
                             }
                         }
                     })
-                    
+
                 }
-                
-                
+
 
             },
-            importFromProfile : function(){
+            importFromProfile: function () {
                 var that = this;
                 var deferred = $q.defer();
                 var serverUrl = "http://fhir.hl7.org.nz/dstu2/";
@@ -206,7 +201,7 @@ angular.module("sampleApp")
                 var queries = []
 
                 GetDataFromServer.adHocFHIRQuery(url).then(
-                    function(data){
+                    function (data) {
                         var profile = data.data;
 
                         var treeData = that.createTreeArrayFromSD(profile);
@@ -214,37 +209,36 @@ angular.module("sampleApp")
                         //now, pull out all the extensions and resolve the name and datatypes...
 
                         treeData.forEach(function (item) {
-                            if (item.text.substr(0,9) == 'extension') {
+                            if (item.text.substr(0, 9) == 'extension') {
                                 if (item.data) {
                                     var uri = item.data.referenceUri;
                                     if (uri) {
                                         //now retrieve the SD that describes this extension and update the tree. Assume it is on the same server...
-                                        queries.push(checkExtensionDef(uri,item));
+                                        queries.push(checkExtensionDef(uri, item));
                                     }
 
                                 }
                             }
 
                         });
-                        
+
 
                         $q.all(queries).then(
-                            function() {
+                            function () {
                                 console.log('DONE')
                                 deferred.resolve(treeData)
                             },
-                            function(err){
+                            function (err) {
                                 console.log('ERROR: ', err)
                             }
                         );
 
 
-
-                        function checkExtensionDef(extUrl,item){
+                        function checkExtensionDef(extUrl, item) {
                             var deferred = $q.defer();
                             var url = serverUrl + "StructureDefinition?url=" + extUrl;
                             GetDataFromServer.adHocFHIRQuery(url).then(
-                                function(data) {
+                                function (data) {
                                     var bundle = data.data;
                                     if (bundle && bundle.entry) {
                                         var extensionDef = bundle.entry[0].resource;     //should really only be one...
@@ -259,7 +253,7 @@ angular.module("sampleApp")
                                     //console.log(data.data)
                                     deferred.resolve();
                                 },
-                                function(err) {
+                                function (err) {
                                     deferred.reject();
                                 }
                             );
@@ -267,7 +261,7 @@ angular.module("sampleApp")
                         };
 
 
-                    },function (err) {
+                    }, function (err) {
                         console.log(err)
                     }
                 )
@@ -275,7 +269,7 @@ angular.module("sampleApp")
 
                 return deferred.promise;
             },
-            mergeModel : function(targetModel,pathToInsertAt,modelToMerge) {
+            mergeModel: function (targetModel, pathToInsertAt, modelToMerge) {
 
 
 
@@ -316,9 +310,9 @@ angular.module("sampleApp")
                     return false;
                 }
             },
-            
-            getModelFromBundle : function(bundle,url) {
-                for (var i=0; i<bundle.entry.length; i++) {
+
+            getModelFromBundle: function (bundle, url) {
+                for (var i = 0; i < bundle.entry.length; i++) {
                     var resource = bundle.entry[i].resource;
                     if (resource.url == url) {
                         return resource
@@ -327,7 +321,7 @@ angular.module("sampleApp")
                 }
             },
 
-            mapToFHIRBundle : function(input,model) {
+            mapToFHIRBundle: function (input, model) {
                 //map an incomming message to a FHIR bundle (using v2 input)
                 //assume v2 message is in JSON format
                 //strategy: locate patient first (as most resources have a reference to patient)
@@ -335,16 +329,12 @@ angular.module("sampleApp")
                 // use the mapping in the model to construct the resource.
 
 
-
-
-
             },
 
-            generateSample : function(treeObject) {
+            generateSample: function (treeObject) {
 
 
-
-                function processNode(resource,node) {
+                function processNode(resource, node) {
                     console.log(node, node.children);
 
 
@@ -352,17 +342,16 @@ angular.module("sampleApp")
 
 
                     if (node.children && node.children.length > 0) {
-                        node.children.forEach(function(lnode){
+                        node.children.forEach(function (lnode) {
 
 
                             if (lnode.children && lnode.children.length > 0) {
                                 var obj = {};
                                 resource[lnode.text] = obj;
-                                processNode(obj,lnode)
+                                processNode(obj, lnode)
                             } else {
                                 resource[lnode.text] = 'sample value';
                             }
-
 
 
                         })
@@ -373,13 +362,13 @@ angular.module("sampleApp")
                 }
 
                 var sample = {};
-                processNode(sample,treeObject[0])
+                processNode(sample, treeObject[0])
 
                 console.log(sample)
                 return sample;
             },
-            
-            getOptionsFromValueSet : function(element) {
+
+            getOptionsFromValueSet: function (element) {
                 //return the expanded set of options from the ValueSet
                 var deferred = $q.defer();
                 //console.log(element);
@@ -387,23 +376,23 @@ angular.module("sampleApp")
 
                 if (element && element.selectedValueSet && element.selectedValueSet.vs && element.selectedValueSet.vs.url) {
                     GetDataFromServer.getValueSet(element.selectedValueSet.vs.url).then(
-                        function(vs) {
+                        function (vs) {
                             //console.log(vs)
 
                             //the extension that indicates the vs (authored by CF) has direct concepts that are not snomed so can't be expanded
                             var extensionUrl = appConfigSvc.config().standardExtensionUrl.vsDirectConcept;
-                            var ext = Utilities.getSingleExtensionValue(vs,extensionUrl)
+                            var ext = Utilities.getSingleExtensionValue(vs, extensionUrl)
                             if (ext && ext.valueBoolean) {
                                 //first, create an array with all of the composed concepts...
                                 var ar = [];
-                                vs.compose.include.forEach(function(inc){
+                                vs.compose.include.forEach(function (inc) {
                                     ar = ar.concat(inc.concept)
                                 });
 
                                 //now create a filtered return array
                                 var returnArray = []
                                 if (ar && ar.length > 0) {
-                                    ar.forEach(function(item){
+                                    ar.forEach(function (item) {
                                         returnArray.push(item)
                                     });
                                 }
@@ -414,21 +403,21 @@ angular.module("sampleApp")
                                 var id = vs.id;
 
                                 GetDataFromServer.getExpandedValueSet(id).then(
-                                    function(data){
+                                    function (data) {
                                         if (data.expansion && data.expansion.contains) {
                                             deferred.resolve(data.expansion.contains);
 
                                         } else {
                                             deferred.resolve()
                                         }
-                                    }, function(err){
+                                    }, function (err) {
                                         deferred.reject(err)
                                     }
                                 )
                             }
 
                         },
-                        function(err) {
+                        function (err) {
                             deferred.reject(err);
                         }
                     )
@@ -440,60 +429,58 @@ angular.module("sampleApp")
 
 
             },
-            insertModel : function(element,insertModel) {
+            insertModel: function (element, insertModel) {
 
             },
-            addSimpleExtension : function(sd,url,value) {
+            addSimpleExtension: function (sd, url, value) {
                 //add a simple extension as a string;
                 sd.extension = sd.extension || []
-                sd.extension.push({url:url,valueString:value})
+                sd.extension.push({url: url, valueString: value})
             },
-            setCurrentUser : function(user) {
+            setCurrentUser: function (user) {
                 currentUser = user;
             },
-            getCurrentUser : function(){
+            getCurrentUser: function () {
                 return currentUser;
             },
-            getAllPathsForType : function(typeName){
+            getAllPathsForType: function (typeName) {
                 //return all the possible paths for a base type...
                 var deferred = $q.defer();
-                var url = "http://hl7.org/fhir/StructureDefinition/"+typeName;
+                var url = "http://hl7.org/fhir/StructureDefinition/" + typeName;
 
                 GetDataFromServer.findConformanceResourceByUri(url).then(
-                    function(SD){
+                    function (SD) {
                         if (SD && SD.snapshot && SD.snapshot.element) {
                             var lst = []
-                            SD.snapshot.element.forEach(function(ed) {
+                            SD.snapshot.element.forEach(function (ed) {
                                 lst.push(ed.path)
                             })
                             deferred.resolve(lst)
                         }
 
 
-                    },function(err) {
-                        alert("error qith query: "+url + "\n"+angular.toJson(err));
+                    }, function (err) {
+                        alert("error qith query: " + url + "\n" + angular.toJson(err));
                         deferred.reject();
                     }
                 )
                 return deferred.promise;
 
 
-
             },
-            clone : function(baseSD,rootName) {
+            clone: function (baseSD, rootName) {
                 //make a copy of the SD changing the rootName in the path...
                 var newSD = angular.copy(baseSD);
                 newSD.id = rootName;
                 var arUrl = newSD.url.split('/');
-                arUrl[arUrl.length-1] = rootName;
+                arUrl[arUrl.length - 1] = rootName;
                 newSD.url = arUrl.join('/');
                 newSD.name = rootName;
                 newSD.status = 'draft';
-                newSD.date =  moment().format()
-                
+                newSD.date = moment().format()
 
 
-                newSD.snapshot.element.forEach(function(ed) {
+                newSD.snapshot.element.forEach(function (ed) {
                     var path = ed.path;
                     var arPath = path.split('.');
                     arPath[0] = rootName;
@@ -502,16 +489,14 @@ angular.module("sampleApp")
                 return newSD;
 
             },
-            createFromBaseType : function(treeData,typeName,rootName,useStu2) {
-              //create a model from the base type, only bringing across stuff we want.
+            createFromBaseType: function (treeData, typeName, rootName, useStu2) {
+                //create a model from the base type, only bringing across stuff we want.
                 //todo - very similar to the logic in createTreeArrayFromSD() - ?call out to separate function...
                 var deferred = $q.defer();
-                var elementsToIgnore =['id','meta','implicitRules','language','text','contained','extension','modifierExtension'];
-                var url = "http://hl7.org/fhir/StructureDefinition/"+typeName;
+                var elementsToIgnore = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained', 'extension', 'modifierExtension'];
+                var url = "http://hl7.org/fhir/StructureDefinition/" + typeName;
 
                 var serverUrl;  //set this for STU-2 - will default to the current one if not set...
-
-
 
 
                 if (useStu2) {
@@ -523,10 +508,10 @@ angular.module("sampleApp")
                 }
 
 
-                GetDataFromServer.findConformanceResourceByUri(url,serverUrl).then(
-                    function(SD){
+                GetDataFromServer.findConformanceResourceByUri(url, serverUrl).then(
+                    function (SD) {
                         try {
-                            makeTreeData(SD,treeData);
+                            makeTreeData(SD, treeData);
 
                             console.log(treeData);
 
@@ -537,25 +522,22 @@ angular.module("sampleApp")
 
 
                     },
-                    function(err) {
+                    function (err) {
                         alert(angular.toJson(err))
                         deferred.reject(err)
                     }
                 )
 
 
-
-
-
                 return deferred.promise;
 
-                function makeTreeData(SD,treeData) {
+                function makeTreeData(SD, treeData) {
 
                     //The hAPI server is missing the snapshot element for some reason.
                     // Hopefully the differential is complete... - this was an issue with the SD ? todo needto d this
                     var elements = SD.snapshot || SD.differential;
 
-                    elements.element.forEach(function(ed){
+                    elements.element.forEach(function (ed) {
                         var path = ed.path;
                         var arPath = path.split('.');
 
@@ -590,14 +572,14 @@ angular.module("sampleApp")
 
                                 });
 
-                                if (! found) {
-                                    console.log('Missing parent element '+parentId)
-                                    throw 'Missing parent element '+parentId + '. This is because the model definition is incorrect, so I cannot use it.';
+                                if (!found) {
+                                    console.log('Missing parent element ' + parentId)
+                                    throw 'Missing parent element ' + parentId + '. This is because the model definition is incorrect, so I cannot use it.';
                                     return;
                                 }
 
 
-                                item.state = {opened:true};     //default to fully expanded
+                                item.state = {opened: true};     //default to fully expanded
 
                                 item.data.path = idThisElement;     //is the same as the path...
                                 item.data.name = item.text;
@@ -611,8 +593,8 @@ angular.module("sampleApp")
 
                                 //note that we don't retrieve the complete valueset...
                                 if (ed.binding) {
-                                    item.data.selectedValueSet = {strength:ed.binding.strength};
-                                    item.data.selectedValueSet.vs = {url:ed.binding.valueSetUri};
+                                    item.data.selectedValueSet = {strength: ed.binding.strength};
+                                    item.data.selectedValueSet.vs = {url: ed.binding.valueSetUri};
                                     item.data.selectedValueSet.vs.name = ed.binding.description;
 
 
@@ -625,13 +607,8 @@ angular.module("sampleApp")
                                 }
 
 
-
                                 treeData.push(item);
                             }
-
-
-
-
 
 
                         }
@@ -641,13 +618,12 @@ angular.module("sampleApp")
                 }
 
 
-
             },
-            getModelHistory : function(id){
+            getModelHistory: function (id) {
                 var url = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/" + id + "/_history";
                 return $http.get(url);
             },
-            createTreeArrayFromSD : function(sd) {
+            createTreeArrayFromSD: function (sd) {
                 //generate the array that the tree uses from the StructureDefinition
                 var mappingCommentUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
                 var mapToModelExtensionUrl = appConfigSvc.config().standardExtensionUrl.mapToModel;
@@ -657,21 +633,21 @@ angular.module("sampleApp")
                 var arTree = [];
                 if (sd && sd.snapshot && sd.snapshot.element) {
 
-                    sd.snapshot.element.forEach(function(ed){
+                    sd.snapshot.element.forEach(function (ed) {
                         var include = true;
 
                         var path = ed.path;     //this is always unique in a logical model...
                         var arPath = path.split('.');
                         var item = {}
                         item.id = path;
-                        item.text = arPath[arPath.length -1];   //the text will be the last entry in the path...
+                        item.text = arPath[arPath.length - 1];   //the text will be the last entry in the path...
 
                         //give a unique name if an extension...
                         if (item.text === 'extension') {
                             item.text = 'extension_' + cntExtension;
-                            item.id = path += "_"+cntExtension;
+                            item.id = path += "_" + cntExtension;
 
-                            cntExtension ++;
+                            cntExtension++;
 
 
                             //console.log(ed);
@@ -689,7 +665,7 @@ angular.module("sampleApp")
 
                         //show if an element is multiple...
                         if (ed.max == '*') {
-                         //    item.text += " *"
+                            //    item.text += " *"
                         }
 
                         item.data = {};
@@ -700,15 +676,15 @@ angular.module("sampleApp")
                             //now set the header data...
                             item.data.header = {};
                             item.data.header.name = sd.name;
-                            
+
                             //the name of the next 2 elements changed after baltimore, so look in both places until the other stu3 servrs catch up...
                             item.data.header.purpose = sd.purpose || sd.requirements;
-                            item.data.header.title = sd.title || sd.display;  
+                            item.data.header.title = sd.title || sd.display;
 
                             item.data.header.extension = sd.extension     //save any resource level extensions...
 
                             //see if this model has a base type
-                            var ext1 = Utilities.getSingleExtensionValue(sd,baseTypeForModel)
+                            var ext1 = Utilities.getSingleExtensionValue(sd, baseTypeForModel)
                             if (ext1 && ext1.valueString) {
                                 item.data.header.baseType = ext1.valueString;
 
@@ -722,7 +698,7 @@ angular.module("sampleApp")
                                 item.data.mapping = sd.mapping[0].comments;     //for the report & summary view...
                             }
                             if (sd.useContext) {
-                                item.header = {type :sd.useContext[0].valueCodeableConcept.code};
+                                item.header = {type: sd.useContext[0].valueCodeableConcept.code};
                             }
 
                         } else {
@@ -730,25 +706,25 @@ angular.module("sampleApp")
                             arPath.pop();//
                             item.parent = arPath.join('.');
                             if (ed.min == 1) {
-                                item['li_attr'] = {class : 'elementRequired'};
+                                item['li_attr'] = {class: 'elementRequired'};
                             }
 
                             if (ed.fixedString) {
-                                item['li_attr'] = {class : 'elementFixed'};
+                                item['li_attr'] = {class: 'elementFixed'};
                             }
 
 
                         }
-                        item.state = {opened:true};     //default to fully expanded
+                        item.state = {opened: true};     //default to fully expanded
 
 
-                        item.data.fixedString =ed.fixedString;      //todo, this should probably be a type compatible with this element
+                        item.data.fixedString = ed.fixedString;      //todo, this should probably be a type compatible with this element
                         item.data.path = path;
                         item.data.name = item.text;
                         item.data.short = ed.short;
                         item.data.description = ed.definition;
                         item.data.type = ed.type;
-                        
+
                         if (ed.type && ed.type[0].profile) {
                             item.data.referenceUri = ed.type[0].profile;
 
@@ -761,8 +737,8 @@ angular.module("sampleApp")
 
                         //determine if this is a coded or a reference type
                         if (ed.type) {
-                            ed.type.forEach(function(typ){
-                                if (['CodeableConcept','Coding','code'].indexOf(typ.code) > -1) {
+                            ed.type.forEach(function (typ) {
+                                if (['CodeableConcept', 'Coding', 'code'].indexOf(typ.code) > -1) {
                                     item.data.isCoded = true;
                                 }
 
@@ -782,12 +758,12 @@ angular.module("sampleApp")
                             item.data.mappingPath = mapItem.map;      //the identity is currently hard coded
                             if (mapItem.extension) {
                                 //there are extensions on this item - find the comment...
-                                var ext = Utilities.getSingleExtensionValue(mapItem,mappingCommentUrl)
+                                var ext = Utilities.getSingleExtensionValue(mapItem, mappingCommentUrl)
                                 if (ext && ext.valueString) {
                                     item.data.mapping = ext.valueString;
                                 }
 
-                                var ext1 = Utilities.getSingleExtensionValue(mapItem,mapToModelExtensionUrl)
+                                var ext1 = Utilities.getSingleExtensionValue(mapItem, mapToModelExtensionUrl)
                                 if (ext1 && ext1.valueUri) {
                                     item.data.mapToModelUrl = ext1.valueUri;
                                     item.data.referenceUri = ext1.valueUri;     //for the table dsplay...
@@ -796,31 +772,29 @@ angular.module("sampleApp")
 
 
                             }
-                            
-                            
+
+
                         }
-
-
 
 
                         item.data.comments = ed.comments;
 
                         //note that we don't retrieve the complete valueset...
                         if (ed.binding) {
-                            item.data.selectedValueSet = {strength:ed.binding.strength};
-                            item.data.selectedValueSet.vs = {url:ed.binding.valueSetUri};
+                            item.data.selectedValueSet = {strength: ed.binding.strength};
+                            item.data.selectedValueSet.vs = {url: ed.binding.valueSetUri};
                             item.data.selectedValueSet.vs.name = ed.binding.description;
                         }
-                        
-                       
-                        /*
-                        if (data.selectedValueSet) {
-                            ed.binding = {strength:data.selectedValueSet.strength};
-                            ed.binding.valueSetUri = data.selectedValueSet.vs.url;
-                            ed.binding.description = 'The bound valueset'
 
-                        }
-                        */
+
+                        /*
+                         if (data.selectedValueSet) {
+                         ed.binding = {strength:data.selectedValueSet.strength};
+                         ed.binding.valueSetUri = data.selectedValueSet.vs.url;
+                         ed.binding.description = 'The bound valueset'
+
+                         }
+                         */
 
 
                         if (include) {
@@ -833,31 +807,31 @@ angular.module("sampleApp")
                 }
                 return arTree;
             },
-            makeSD : function(scope,treeData) {     //todo - don't pass in scope...
+            makeSD: function (scope, treeData) {     //todo - don't pass in scope...
                 //create a StructureDefinition from the treeData
-                var header = treeData[0].data.header || {} ;     //the first node has the header informatiion
+                var header = treeData[0].data.header || {};     //the first node has the header informatiion
                 //console.log(header)
                 var mappingCommentUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
                 var mapToModelExtensionUrl = appConfigSvc.config().standardExtensionUrl.mapToModel;
                 var baseTypeForModelUrl = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
-                
+
                 //todo - should use Utile.addExtension...
-                var sd = {resourceType:'StructureDefinition'};
+                var sd = {resourceType: 'StructureDefinition'};
                 if (currentUser) {
-                    this.addSimpleExtension(sd,'http:www.clinfhir.com/StructureDefinition/userEmail',currentUser.email)
+                    this.addSimpleExtension(sd, 'http:www.clinfhir.com/StructureDefinition/userEmail', currentUser.email)
                 }
 
                 if (header.baseType) {
-                    Utilities.addExtensionOnce(sd,baseTypeForModelUrl,{valueString:header.baseType})
-                   // this.addSimpleExtension(sd,baseTypeForModel,header.baseType)
+                    Utilities.addExtensionOnce(sd, baseTypeForModelUrl, {valueString: header.baseType})
+                    // this.addSimpleExtension(sd,baseTypeForModel,header.baseType)
                 }
 
 
                 sd.id = scope.rootName;
-                sd.url = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/"+sd.id;
+                sd.url = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/" + sd.id;
                 sd.name = header.name;
                 sd.title = header.title;
-                sd.status='draft';
+                sd.status = 'draft';
                 sd.date = moment().format();
 
 
@@ -868,30 +842,40 @@ angular.module("sampleApp")
 
                 sd.publisher = scope.input.publisher;
                 //at the time of writing (Oct 12), the implementaton of stu3 varies wrt 'code' & 'keyword'. Remove this eventually...
-                sd.identifier = [{system:"http://clinfhir.com",value:"author"}]
-                sd.keyword = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
+                sd.identifier = [{system: "http://clinfhir.com", value: "author"}]
+                sd.keyword = [{system: 'http://fhir.hl7.org.nz/NamingSystem/application', code: 'clinfhir'}]
 
                 if (header.mapping) {
                     //mapping comments for the target resource as a whole...
-                    sd.mapping = [{identity:'fhir',name:'Model Mapping',comments:header.mapping}]
+                    sd.mapping = [{identity: 'fhir', name: 'Model Mapping', comments: header.mapping}]
                 }
 
                 if (header.type) {
-                    var uc = {code : {code:'logicalType',system:'http:www.hl7.org.nz/NamingSystem/logicalModelContext'}};
-                    uc.valueCodeableConcept = {coding:[{code:header.type,'system':'http:www.hl7.org.nz/NamingSystem/logicalModelContextType'}]}
+                    var uc = {
+                        code: {
+                            code: 'logicalType',
+                            system: 'http:www.hl7.org.nz/NamingSystem/logicalModelContext'
+                        }
+                    };
+                    uc.valueCodeableConcept = {
+                        coding: [{
+                            code: header.type,
+                            'system': 'http:www.hl7.org.nz/NamingSystem/logicalModelContextType'
+                        }]
+                    }
                     sd.useContext = [uc]
 
                 }
 
-                sd.kind='logical';
-                sd.abstract=false;
-                sd.baseDefinition ="http://hl7.org/fhir/StructureDefinition/Element";
+                sd.kind = 'logical';
+                sd.abstract = false;
+                sd.baseDefinition = "http://hl7.org/fhir/StructureDefinition/Element";
                 sd.type = scope.rootName;
                 sd.derivation = 'specialization';
 
-                sd.snapshot = {element:[]};
+                sd.snapshot = {element: []};
 
-                treeData.forEach(function(item){
+                treeData.forEach(function (item) {
                     var data = item.data;
                     // console.log(data);
                     var ed = {}
@@ -899,11 +883,11 @@ angular.module("sampleApp")
                     ed.path = data.path;
                     ed.short = data.short;
                     ed.definition = data.description || 'No description';
-                    ed.min=data.min;
+                    ed.min = data.min;
                     ed.max = data.max;
                     ed.comments = data.comments;
                     if (data.mappingPath) {         //the actual path in the target resource
-                        ed.mapping= [{identity:'fhir',map:data.mappingPath}]
+                        ed.mapping = [{identity: 'fhir', map: data.mappingPath}]
                     }
 
                     if (data.mapping) {
@@ -917,12 +901,12 @@ angular.module("sampleApp")
                         }
 
                         //adds an extension of this url once only to the specified node
-                        Utilities.addExtensionOnce(mappingNode,mappingCommentUrl,{valueString:data.mapping})
+                        Utilities.addExtensionOnce(mappingNode, mappingCommentUrl, {valueString: data.mapping})
                         //ed.mapping = ed.mapping || []
                         ed.mapping[0] = mappingNode;
                     }
 
-                    
+
                     if (data.mapToModelUrl) {
                         //this element will actually be mapped to another model (eventually another profile)
                         //also added as an extension to the first mapping node mapping
@@ -934,11 +918,9 @@ angular.module("sampleApp")
                         }
 
                         //adds an extension of this url once only to the specified node
-                        Utilities.addExtensionOnce(mapToModelNode,mapToModelExtensionUrl,{valueUri:data.mapToModelUrl})
+                        Utilities.addExtensionOnce(mapToModelNode, mapToModelExtensionUrl, {valueUri: data.mapToModelUrl})
                         ed.mapping = ed.mapping || []
                         ed.mapping[0] = mapToModelNode;
-
-
 
 
                     }
@@ -946,18 +928,18 @@ angular.module("sampleApp")
 
                     if (data.type) {
                         ed.type = [];
-                        data.type.forEach(function(typ) {
+                        data.type.forEach(function (typ) {
                             //actually, there will only ever be one type at the moment...
                             ed.type.push(typ);
                         })
                     }
 
                     ed.base = {
-                        path : ed.path, min:0,max:'1'
+                        path: ed.path, min: 0, max: '1'
                     };
 
                     if (data.selectedValueSet) {
-                        ed.binding = {strength:data.selectedValueSet.strength};
+                        ed.binding = {strength: data.selectedValueSet.strength};
                         ed.binding.valueSetUri = data.selectedValueSet.vs.url;
                         ed.binding.description = data.selectedValueSet.vs.name;
 
@@ -970,68 +952,69 @@ angular.module("sampleApp")
 
                 return sd;
             },
-            reOrderTree : function(treeData) {
+            reOrderTree: function (treeData) {
                 //ensure the elements in the tree array are sorted by parent / child
                 var arTree = [treeData[0]];
 
-                findChildren(treeData[0].data.path,treeData[0].id,arTree);
+                findChildren(treeData[0].data.path, treeData[0].id, arTree);
                 return arTree;
 
 
-                function findChildren(parentPath,parentId,arTree) {
-                    treeData.forEach(function(node){
+                function findChildren(parentPath, parentId, arTree) {
+                    treeData.forEach(function (node) {
                         if (node.parent == parentId) {
                             arTree.push(node);
                             var childPath = parentPath + '.' + node.data.name;
                             //console.log(childPath);
-                           // node.data.path = childPath;
-                            findChildren(childPath,node.id,arTree)
+                            // node.data.path = childPath;
+                            findChildren(childPath, node.id, arTree)
                         }
                     })
 
                 }
 
             },
-            generateChatDisplay : function(chatFromServer) {
-               
+            generateChatDisplay: function (chatFromServer) {
+
 
                 var ar = [];    //a list of all comments in display order
 
-                function parseComment(ar,lvl,comment,levelKey) {
+                function parseComment(ar, lvl, comment, levelKey) {
                     //lvl- display level, comment - the chat being examined
 
                     if (lvl == 1) {
                         levelKey = comment.id;
                     }
 
-                    var displayComment = {level:lvl,comment:comment,levelKey:levelKey}
+                    var displayComment = {level: lvl, comment: comment, levelKey: levelKey}
                     ar.push(displayComment);
                     //console.log(displayComment)
                     if (comment.children) {
                         lvl++;
-                        comment.children.forEach(function(childComment){
-                            parseComment(ar,lvl,childComment,levelKey)
+                        comment.children.forEach(function (childComment) {
+                            parseComment(ar, lvl, childComment, levelKey)
                         })
                     }
 
                 }
-                parseComment(ar,0,chatFromServer);
+
+                parseComment(ar, 0, chatFromServer);
 
                 console.log(ar)
 
                 return ar
 
 
-        },
-            resolveProfile : function(url) {
+            },
+            resolveProfile: function (url) {
                 //return a SD as a logical model from a profile that resolves extensions....
                 var deferred = $q.defer();
                 GetDataFromServer.findConformanceResourceByUri(url).then(
-                    function(SD) {
+                    function (SD) {
                         console.log(SD)
 
                         if (SD && SD.snapshot && SD.snapshot.element) {
-                            SD.snapshot.element.forEach(function(ed){
+                            SD.snapshot.element.forEach(function (ed) {
                                 console.log(ed.path)
                             })
 
@@ -1041,7 +1024,35 @@ angular.module("sampleApp")
                 )
                 return deferred.promise;
 
+            },
+            loadAllModels: function (conformanceServerUrl) {
+                //$scope.conformanceServer
+                var deferred = $q.defer();
+                var url = conformanceServerUrl + "StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
+
+                //var url="http://fhir3.healthintersections.com.au/open/StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
+                GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
+                    // $http.get(url).then(
+                    function (data) {
+                        var bundleModels = data.data
+                        bundleModels.entry = bundleModels.entry || [];    //in case there are no models
+                        bundleModels.entry.sort(function (ent1, ent2) {
+                            if (ent1.resource.id > ent2.resource.id) {
+                                return 1
+                            } else {
+                                return -1
+                            }
+                        })
+                        deferred.resolve(bundleModels);
+
+
+                    },
+                    function (err) {
+                        deferred.reject('Error loading models: ' + angular.toJson(err));
+                    }
+                )
+                return deferred.promise;
             }
 
-            }
+    }
         });
