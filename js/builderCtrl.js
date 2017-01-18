@@ -439,12 +439,19 @@ angular.module("sampleApp")
                     //if this is an extension, then the insertPoint moves down one...
                     //todo - not that happy with this...
                     if (hashPath.elementInfo.isExtension) {
-                        if (insertPoint[segmentName]) {
-                            insertPoint = insertPoint[segmentName]
+
+                        if (angular.isObject(insertPoint)) {
+                            if (insertPoint[segmentName]) {
+                                insertPoint = insertPoint[segmentName]
+                            } else {
+                                insertPoint[segmentName] = {};
+                                insertPoint = insertPoint[segmentName]
+                            }
                         } else {
-                            insertPoint[segmentName] = {};
-                            insertPoint = insertPoint[segmentName]
+
                         }
+
+
                     }
 
 
@@ -1399,88 +1406,77 @@ angular.module("sampleApp")
 
             //------- select a profile --------
             $scope.showFindProfileDialog = {};
-            $scope.findProfile = function() {
+            $scope.findProfile = function(cheat) {
 
-                GetDataFromServer.adHocFHIRQuery("http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/dhtest1profile").then(
-                    function(data) {
-                        console.log(data);
-                        var profile = data.data;
+                if (cheat) {
+                    GetDataFromServer.adHocFHIRQuery("http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/dhtest1profile").then(
+                        function(data) {
+                            console.log(data);
+                            //var profile = data.data;
+                            $scope.selectedProfileFromDialog(data.data)
+                            /*
+
+                            builderSvc.makeLogicalModelFromSD(profile).then(
+                                function (lm) {
+                                    console.log(lm);
+                                    $scope.selectedProfileFromDialog(lm)
+                                }
+                            )
+                            */
+                        }
+                    )
+                } else {
+                    $scope.showFindProfileDialog.open();
+                }
+            };
+
+            $scope.selectedProfileFromDialog = function (profile) {
+                //console.log(profile)
+                builderSvc.makeLogicalModelFromSD(profile).then(
+                    function (lm) {
+                        console.log(lm);
+                       // $scope.selectedProfileFromDialog(lm)
+                        var type = lm.snapshot.element[0].path;
+                        $scope.selectedContainer.isDirty = true;
+
+                        var resource = {resourceType : type};
+                        resource.id = idPrefix+new Date().getTime();
+                        $scope.input.text = $scope.input.text || "";
+
+                        resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text + builderSvc.getManualMarker())};
+                        resource.meta = {profile:[lm.url]};
 
 
-                        builderSvc.makeLogicalModelFromSD(profile).then(
-                            function (lm) {
-                                console.log(lm);
-                                $scope.selectedProfileFromDialog(lm)
+
+                        builderSvc.addResourceToAllResources(resource)
+                        builderSvc.addSDtoCache(lm)
+
+                        $scope.selectedContainer.bundle.entry.push({resource:resource});
+                        //$scope.resourcesBundle.entry.push({resource:resource});
+
+                        $scope.selectedContainer.bundle.entry.sort(function(a,b){
+                            //$scope.resourcesBundle.entry.sort(function(a,b){
+                            if (a.resource.resourceType > b.resource.resourceType) {
+                                return 1
+                            } else {
+                                return -1
                             }
-                        )
+                        })
+
+                        $scope.displayMode = 'view';
+
+
+
+
+                        processSD(resource,lm);
+
+
+
                     }
                 )
 
 
 
-
-
-            };
-
-            $scope.selectedProfileFromDialog = function (profile) {
-                //console.log(profile)
-
-
-
-                var type = profile.snapshot.element[0].path;
-                $scope.selectedContainer.isDirty = true;
-
-                var resource = {resourceType : type};
-                resource.id = idPrefix+new Date().getTime();
-                $scope.input.text = $scope.input.text || "";
-
-                resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text + builderSvc.getManualMarker())};
-                resource.meta = {profile:[profile.url]};
-
-
-//>>> add meta to resource
-
-                builderSvc.addResourceToAllResources(resource)
-                builderSvc.addSDtoCache(profile)
-
-                $scope.selectedContainer.bundle.entry.push({resource:resource});
-                //$scope.resourcesBundle.entry.push({resource:resource});
-
-                $scope.selectedContainer.bundle.entry.sort(function(a,b){
-                    //$scope.resourcesBundle.entry.sort(function(a,b){
-                    if (a.resource.resourceType > b.resource.resourceType) {
-                        return 1
-                    } else {
-                        return -1
-                    }
-                })
-
-                $scope.displayMode = 'view';
-
-
-
-
-                processSD(resource,profile);
-
-                //just experimantal !
-                /*
-                 profileCreatorSvc.makeProfileDisplayFromProfile(profile).then(
-                 function(vo) {
-                 console.log(vo.treeData)
-                 $scope.displayMode = 'view';
-                 $('#SDtreeView').jstree('destroy');
-                 $('#SDtreeView').jstree(
-                 {
-                 'core': {
-                 'multiple': false,
-                 'data': vo.treeData,
-                 'themes': {name: 'proton', responsive: true}
-                 }
-                 }
-                 )
-                 })
-
-                 */
 
 
 

@@ -65,13 +65,13 @@ angular.module("sampleApp")
                         var ar = path.split('.');
                         if (ar.indexOf('extension') > -1) {
                             //this is an extension
-                            console.log(ed);
+                            //console.log(ed);
                             if (ed.type) {
                                 var profileUrl = ed.type[0].profile;
                                 if (profileUrl) {
                                     queries.push(GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
                                         function (sdef) {
-                                            console.log(ed,sdef)
+                                            //console.log(ed,sdef)
                                             //locate the entry in the ED which is 'valueX' and update the ed. todo - need to accomodate complex extensions
                                             if (sdef && sdef.snapshot && sdef.snapshot.element) {
                                                 sdef.snapshot.element.forEach(function (el) {
@@ -101,7 +101,7 @@ angular.module("sampleApp")
                             }
 
                         }
-                        console.log(path)
+                        //console.log(path)
 
                     });
 
@@ -787,17 +787,16 @@ angular.module("sampleApp")
                         //is this an extension?
                         if (info && info.isExtension) {
 
-
                             var dtValue = 'value' + info.extensionType.substr(0,1).toUpperCase() + info.extensionType.substr(1);
                             var ext = {}
                             ext[dtValue] = insrt
                             //var ext = {valueString:insrt};
-                            if (angular.isObject(insertPoint)) {
+                         //   if (angular.isObject(insertPoint)) {
                                 Utilities.addExtensionOnceWithReplace(insertPoint,info.ed.builderMeta.extensionUrl,ext)
-                            } else {
+                           // } else {
 
-
-                            }
+                               // alert("Can't insert to simple ")
+                         //   }
 
 
                         } else {
@@ -1280,7 +1279,10 @@ angular.module("sampleApp")
 
                     //add an entry to the node list for this resource...
                     var node = {id: arNodes.length +1, label: resource.resourceType, shape: 'box',url:url,cf : {resource:resource}};
-                    node.title = resource.text.div;
+                    if (resource.text) {
+                        node.title = resource.text.div;
+                    }
+
 
 
                     if (centralResource) {

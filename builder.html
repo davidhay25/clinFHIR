@@ -453,7 +453,7 @@
                             class="btn btn-primary pull-right">Add Resource</button>
 
                     <uib-tabset>
-                        <uib-tab heading="All resources">
+                        <uib-tab heading="List">
                             <br/>
 
                             <div class="row">
@@ -843,7 +843,7 @@
 
                                         <div ng-show="expandedValueSet">
                                             <div><a href="#" ng-click="input.showCodeValues = ! input.showCodeValues" class="pull-right">
-                                                <span ng-show="showCodeValues">Hide</span><span ng-hide="showCodeValues">Show</span>
+                                                <span ng-show="input.showCodeValues">Hide</span><span ng-hide="input.showCodeValues">Show</span>
                                                  values
                                             </a>
                                             </div>
@@ -1044,16 +1044,20 @@
                         <uib-tab heading="Profile">
                             <br/>
                             <button class="btn btn-default" ng-click="findProfile()">Find Profile</button>
-                            <br/>
-                            <p>There are currently a number of limitations on the support for profiles in the Scenario Builder</p>
-                            <ul>
-                                <li>Only resources created by clinFHIR will work. Others might. but no guarantees</li>
-                                <li>Simple extensions only - ie extensions that have only a single value</li>
-                                <li>The extension can only have a single datatype</li>
-                                <li>The extension cannot be applied to primitive elements (like a string)</li>
-                                <li>Only one of each extension type can be in the resource</li>
+                            <br/><br/>
+                            <div style="margin-left: 30px">
+                                <h5>Notes on support of profiles resource types.</h5>
+                                <p>There are currently a number of limitations on the support for profiles in the Scenario Builder</p>
+                                <ul>
+                                    <li>Only resources created by clinFHIR will work. Others might. but no guarantees</li>
+                                    <li>Simple extensions only - ie extensions that have only a single value</li>
+                                    <li>The extension can only have a single datatype</li>
+                                    <li>The extension cannot be applied to primitive elements (like a string)</li>
+                                    <li>Only one of each extension type can be in the resource</li>
 
-                            </ul>
+                                </ul>
+                            </div>
+
                         </uib-tab>
                     </uib-tabset>
 
@@ -1130,8 +1134,9 @@
 
 
                     <br/><br/><br/><br/><br/>
+   <!--
                     <button class="btn btn-default" ng-click="findProfile(true)">Find Profile (cheat)</button>
-
+-->
 
 
                 </div>
