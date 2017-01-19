@@ -672,6 +672,12 @@ angular.module("sampleApp")
 
                 switch (dt) {
 
+                    case 'Identifier' :
+                        var insrt = {value:value.identifier.value,system:value.identifier.system}
+                        simpleInsert(insertPoint,info,path,insrt,dt);
+                        this.addStringToText(insertPoint,path+": "+ insrt.value)
+                        break;
+
                     case 'boolean' :
                        var v = value;
                         simpleInsert(insertPoint,info,path,value.boolean,dt);

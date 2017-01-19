@@ -1,6 +1,30 @@
 <div>
 
 
+    <div ng-show="dataTypeBeingEntered == 'Identifier'">
+
+
+        <div class="row">
+            <div class="col-md-3  col-sm-3 ">
+                Value
+            </div>
+            <div class="col-md-6  col-sm-6 ">
+                <input placeholder = 'Enter text value' type="text" class="form-control" ng-model="input.dt.identifier.value"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3  col-sm-3 ">
+                System
+            </div>
+            <div class="col-md-6  col-sm-6 ">
+                <input placeholder = 'Enter text value' type="text" class="form-control" ng-model="input.dt.identifier.system"/>
+            </div>
+        </div>
+
+
+    </div>
+
+
     <div ng-show="dataTypeBeingEntered == 'boolean'">
 
         <checkbox ng-model="input.dt.boolean"/>
