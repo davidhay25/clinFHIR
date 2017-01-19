@@ -1072,6 +1072,22 @@
                             <button class="btn btn-default" ng-click="findLogicalModel()">Find Logical Model</button>
                             <br/><br/>
                             -->
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3">
+                                    Model name:
+                                </div>
+                                <div class="col-md-6 col-sm-6">
+                                    <select ng-model="input.selectLM" class="form-control"
+                                            ng-change="selectLogicalModelFromList(input.selectLM,$index)"
+                                            ng-options="entry.resource.name for entry in bundleLogicalModels.entry"></select>
+                                </div>
+                            </div>
+
+
+
+
+                            <br/>
+
                             <div style="margin-left: 30px">
                                 <h5>Notes on support of Logical Models.</h5>
                                 <p>Resources based on Logical models will be built and saved in the builder,
@@ -1081,6 +1097,10 @@
                             </div>
 
 
+
+
+
+<!--
                             <div><input type="text" class="form-control"
                                         placeholder="Filter model list by id" ng-model="input.filter"
                                         ng-change="filterModelList(input.filter)"/> </div>
@@ -1102,7 +1122,7 @@
                                     {{entry.resource.description | limitTo : 200}}
                                 </li>
                             </ul>
-
+-->
 
 
 
@@ -1183,10 +1203,6 @@
 
 
 
-                    <br/><br/><br/><br/><br/>
-   <!--
-                    <button class="btn btn-default" ng-click="findProfile(true)">Find Profile (cheat)</button>
--->
 
 
                 </div>

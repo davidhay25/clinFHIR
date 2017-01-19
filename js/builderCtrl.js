@@ -396,10 +396,19 @@ angular.module("sampleApp")
                     if (ar.length ==3 && hashPath.elementInfo.isExtension) {
                         //this is a hack to allow extensions to be added to properties immediately off the root...
                     } else {
-                        var msg = 'Please create a reference to a resource on this branch. ' +
-                            'After that, you can add other datatypes and create new branches as desired';
-                        modalService.showModal({}, {bodyText:msg});
-                        return;
+
+                        //if the parent is not multiple, then it can go through (Encounter.hospitilization)
+                        var parentPath = ar;
+                        parentPath.pop();
+                        var parentInfo = builderSvc.getEDInfoForPath(parentPath.join('.'));
+                        if (parentInfo.isMultiple) {
+                            var msg = 'Please create a reference to a resource on this branch. ' +
+                                'After that, you can add other datatypes and create new branches as desired';
+                            modalService.showModal({}, {bodyText:msg});
+                            return;
+                        }
+
+
                     }
 
 
