@@ -1,8 +1,15 @@
 <div>
 
 
+    <div ng-show="dataTypeBeingEntered == 'boolean'">
+
+        <checkbox ng-model="input.dt.boolean"/>
+
+
+    </div>
+
     <div ng-show="dataTypeBeingEntered == 'Annotation'">
-        <textarea  placeholder = 'Enter text' type="text" class="form-control" ng-model="input.Annotation.text"></textarea>
+        <textarea  placeholder = 'Enter text' type="text" class="form-control" ng-model="input.dt.Annotation.text"></textarea>
 
     </div>
 

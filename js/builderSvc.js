@@ -672,8 +672,13 @@ angular.module("sampleApp")
 
                 switch (dt) {
 
+                    case 'boolean' :
+                       var v = value;
+                        simpleInsert(insertPoint,info,path,value.boolean,dt);
+                        this.addStringToText(insertPoint,path+": "+ v)
+                        break;
                     case 'Annotation' :
-                        var insrt = {text:value.Annotation.text}
+                        var insrt = {text:value.Annotation.text,time:moment().format()}
                         simpleInsert(insertPoint,info,path,insrt,dt);
                         this.addStringToText(insertPoint,path+": "+ insrt.text)
                         break;
@@ -1549,11 +1554,24 @@ angular.module("sampleApp")
             getResourcesOfType : function(type,bundle){
                 //get all the resources in the bundle of the given type
                 var ar = [];
+                var baseTypeForModel = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
                 bundle.entry.forEach(function(entry){
                     var resource = entry.resource;
+                    //core resource types
                     if (resource.resourceType == type || type == 'Resource') {
                         ar.push(resource);
+                    } else {
+                        //logical models based on a core resoruce
+                        var extensionValue = Utilities.getSingleExtensionValue(resource,baseTypeForModel);
+                        if (extensionValue && extensionValue.valueString == type) {
+                            ar.push(resource);
+                        }
                     }
+
+
+
+
+
                 })
                 return ar;
             },

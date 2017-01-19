@@ -192,7 +192,7 @@ angular.module("sampleApp")
 
 
             //datatypes for which there is an entry form
-            $scope.supportedDt = ['CodeableConcept','string','code','date','Period','dateTime','Address','HumanName','Annotation']
+            $scope.supportedDt = ['CodeableConcept','string','code','date','Period','dateTime','Address','HumanName','Annotation','boolean']
 
             $scope.currentBundleIndex = 0;     //the index of the bundle currently being used
 
@@ -713,20 +713,34 @@ angular.module("sampleApp")
 
             }
 
-            $scope.viewVS = function(uri) {
+            $scope.viewVS = function(binding) {
+
+                var uri;
+                if (binding.valueSetReference && binding.valueSetReference.reference) {
+                    uri = binding.valueSetReference.reference
+                } else if (binding.valueSetUri) {
+                    uri = binding.valueSetUri
+                }
 
 
-                GetDataFromServer.getValueSet(uri).then(
-                    function(vs) {
-                        //console.log(vs)
-                        $scope.showVSBrowserDialog.open(vs);
+                if (uri) {
+                    GetDataFromServer.getValueSet(uri).then(
+                        function(vs) {
+                            //console.log(vs)
+                            $scope.showVSBrowserDialog.open(vs);
 
-                    }
-                ).finally (function(){
-                    $scope.showWaiting = false;
-                });
+                        }
+                    ).finally (function(){
+                        $scope.showWaiting = false;
+                    });
+                } else {
+                    alert('Unable to locate ValueSet')
+                }
+
+
+
+
             };
-
 
             //if there is a cb (callback property) then execute it after retrieving the SD (as it is generally used for a new resource to add the patient reference)
             $scope.selectResource = function(entry,cb) {
@@ -735,7 +749,6 @@ angular.module("sampleApp")
                 if (entry.resource) {
                     resource = entry.resource;
                 }
-
 
                 builderSvc.setCurrentResource(resource);    //set the current resource in the service
 
@@ -750,10 +763,7 @@ angular.module("sampleApp")
                 $scope.currentResource = resource;      //in theory we could use currentEntry...
                 $scope.currentEntry = entry;            //needed for validation
 
-
-
                 drawResourceTree(resource)
-
 
                 $scope.waiting = true;
                 builderSvc.getSD(resource).then(
@@ -762,225 +772,6 @@ angular.module("sampleApp")
 
                         processSD(SD,resource);
 
-/*
-                        if (cb) {
-                            builderSvc.setPatient(resource,SD);     //set the patient reference (if there is a patient or subject property)
-                        }
-
-                        //set up the references after setting the patient...
-                        var url = resource.resourceType+'/'+resource.id;
-                        $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
-
-
-                        profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
-                            function(vo) {
-                                //console.log(vo.treeData)
-
-                                $('#SDtreeView').jstree('destroy');
-                                $('#SDtreeView').jstree(
-                                    {'core': {'multiple': false, 'data': vo.treeData, 'themes': {name: 'proton', responsive: true}}}
-                                ).on('select_node.jstree', function (e, data) {
-
-                                    $scope.hashReferences = {}      //a hash of type vs possible resources for that type
-                                    delete $scope.hashPath;
-                                    delete $scope.expandedValueSet;
-                                    delete $scope.currentElementValue;
-                                   // $scope.input.selectedExistingElement = -1;
-
-
-                                    if (data.node && data.node.data && data.node.data.ed) {
-                                        //$scope.currentElementED = data.node.data.ed;
-
-                                        var path = data.node.data.ed.path;
-
-                                        $scope.possibleReferences = [];
-                                        var ed = data.node.data.ed;
-
-                                        $scope.currentElementValue = builderSvc.getValueForPath($scope.currentResource,path);
-
-                                        //existing branches that could allow an element on this path...
-                                        $scope.existingElements = builderSvc.analyseInstanceForPath($scope.currentResource, path)
-
-
-                                        //get the type information
-                                        if (ed.type) {
-                                            $scope.hashPath = {path: ed.path};
-                                            $scope.hashPath.ed = ed;
-                                            //$scope.hashPath.max = ed.max;
-                                            $scope.hashPath.definition = ed.definition;
-                                            $scope.hashPath.comments = ed.comments;
-
-
-                                            //get the ValueSet if there is one bound...
-                                            if ($scope.hashPath.ed.binding && $scope.hashPath.ed.binding.valueSetReference &&
-                                                $scope.hashPath.ed.binding.valueSetReference.reference) {
-
-                                                var url = $scope.hashPath.ed.binding.valueSetReference.reference;
-                                                Utilities.getValueSetIdFromRegistry(url,function(vsDetails) {
-                                                    $scope.vsDetails = vsDetails;  //vsDetails = {id: type: resource: }
-                                                    //console.log(vsDetails);
-                                                    if ($scope.vsDetails) {
-                                                        if ($scope.vsDetails.type == 'list' || ed.type[0].code == 'code') {
-                                                            //this has been recognized as a VS that has only a small number of options...
-                                                            GetDataFromServer.getExpandedValueSet($scope.vsDetails.id).then(
-                                                                function (vs) {
-                                                                    $scope.expandedValueSet = vs;
-                                                                    //console.log(vs);
-                                                                }, function (err) {
-                                                                    alert(err + ' expanding ValueSet')
-                                                                }
-                                                            )
-                                                        }
-                                                    }
-
-                                                })
-                                            }
-
-
-
-                                            ed.type.forEach(function(typ){
-
-                                                //is this a resource reference?
-                                                var targetProfile = typ.profile || typ.targetProfile;       //different in STU2 & 3
-                                                if (typ.code == 'Reference' && targetProfile) {
-                                                    //get all the resources of this type  (that are not already referenced by this element
-                                                    $scope.hashPath.isReference = true;
-
-
-                                                    var type = $filter('getLogicalID')(targetProfile);
-
-
-                                                    var ar = builderSvc.getResourcesOfType(type,$scope.selectedContainer.bundle);
-
-                                                    if (ar.length > 0) {
-                                                        ar.forEach(function(resource){
-                                                            var reference = builderSvc.referenceFromResource(resource); //get the reference (type/id)
-
-                                                            //search all the references for ones from this path. Don't include them in the list
-                                                            //$scope.allReferences created when the graph is built...
-                                                            var alreadyReferenced = false;
-
-
-                                                            $scope.currentResourceRefs.src.forEach(function(item){
-                                                                if (item.path == path && item.targ == reference) {
-                                                                    alreadyReferenced = true;
-                                                                }
-                                                            });
-
-                                                            if (! alreadyReferenced) {
-                                                                type = resource.resourceType;   //allows for Reference
-                                                                $scope.hashReferences[type] = $scope.hashReferences[type] || []
-                                                                $scope.hashReferences[type].push(resource);
-                                                            }
-
-                                                        })
-                                                    }
-
-                                                } else {
-                                                    //if not a refernece, then peform the analysis of the instance - potentially rejecting the addition...
-
-                                                    //analyse the path. if it has an ancestor of type backbone element that is multiple, then show the current entries in the instance
-                                                    //returns {list: modelPoint:}
-                                                    //$scope.existingElements = builderSvc.analyseInstanceForPath($scope.currentResource, path)
-
-                                                    if ($scope.existingElements.list.length > 0) {
-                                                        //leave the selectedExistingElement alone unless it is greater than the length.
-
-                                                        if ($scope.existingElements.list.length == 1) {
-                                                            $scope.input.selectedExistingElement = 0;   //select it
-                                                        } else if ($scope.input.selectedExistingElement >= $scope.existingElements.list.length) {
-                                                            $scope.input.selectedExistingElement = 0;   //select the first
-                                                        }
-
-                                                    } else {
-                                                        //for the moment, use the resourcing linking functionity to set up the child nodes. todo fix
-                                                       // var msg = 'Please create a reference to a resource on this branch. After that, you can add other datatypes and create new branches as desired';
-                                                        //modalService.showModal({}, {bodyText:msg});
-                                                        //return;
-                                                    }
-
-
-                                                }
-
-
-
-
-
-                                            })
-
-
-                                        }
-
-
-                                    }
-
-                                    $scope.$digest();
-
-
-                                })
-
-                            }
-                        )
-
-                        var objReferences = {}      //a hash of path vs possible resources for that path
-
-                        var references = builderSvc.getReferences(SD); //a list of all possible references by path
-                        //console.log(references);
-                        $scope.bbNodes = [];        //backbone nodes to add
-                        $scope.l2Nodes = {};        //a hash of nodes off the root that can have refernces. todo: genaralize for more levels
-
-                        references.forEach(function(ref){
-                            var path = ref.path
-                            //now to determine if there is an object (or array) at the 'parent' of each node. If there
-                            //is, then add it to the list of potential resources to link to. If not, then create
-                            //an option that allows the user to add that parent
-                            var ar = path.split('.');
-
-                            if (ar.length == 2 ) {   //|| resource[parentPath]
-                                //so this is a reference off the root
-                                objReferences[path] = objReferences[path] || {resource:[],ref:ref}
-                                //now find all existing resources with this type
-                                var type = $filter('getLogicalID')(ref.profile);
-
-                                var ar = builderSvc.getResourcesOfType(type,$scope.selectedContainer.bundle);
-                                //var ar = builderSvc.getResourcesOfType(type,$scope.resourcesBundle);
-                                if (ar.length > 0) {
-                                    ar.forEach(function(resource){
-
-                                        //objReferences[path].ref = ref;
-                                        objReferences[path].resource.push(resource);
-                                    })
-                                }
-                            } else {
-                                if (ar.length == 3) {
-                                    //a node off the root...
-                                    var segmentName = ar[1];    //eg 'entry' in list
-                                    $scope.l2Nodes[segmentName] = $scope.l2Nodes[segmentName] || [];
-                                    var el = {path:path,name:ar[2]};    //the element that can be a reference
-
-                                    //we need to find out if the parent node for a reference at this path can repeat...
-                                    var parentPath = ar[0]+'.'+ar[1];       //I don;t really like this...
-
-                                    var info = builderSvc.getEDInfoForPath(parentPath);
-                                    el.info = info
-
-                                    $scope.l2Nodes[segmentName].push(el)
-
-                                    $scope.bbNodes.push({level:2,path:path});
-                                }
-                                //so this is a reference to an insert point where the parent does not yet exist
-
-                            }
-
-
-
-
-
-                        })
-
-                        //console.log(objReferences)
-                        $scope.objReferences = objReferences;
-                    */
                         if (cb) {
                             cb();
                         }
@@ -997,8 +788,6 @@ angular.module("sampleApp")
 
 
             };
-
-
 
             //----------------
             //process a StructureDefinition file -
@@ -1054,11 +843,27 @@ angular.module("sampleApp")
 
 
                                     //get the ValueSet if there is one bound...
-                                    if ($scope.hashPath.ed.binding && $scope.hashPath.ed.binding.valueSetReference &&
-                                        $scope.hashPath.ed.binding.valueSetReference.reference) {
+                                    var urlToValueSet;
+                                    if ($scope.hashPath.ed.binding && $scope.hashPath.ed.binding) {
+                                        //there is a binding - is it a reference or a uri? (The core types use reference - but it seems tobe a uri)
+                                        if ($scope.hashPath.ed.binding && $scope.hashPath.ed.binding.valueSetReference &&
+                                            $scope.hashPath.ed.binding.valueSetReference.reference) {
+                                            urlToValueSet = $scope.hashPath.ed.binding.valueSetReference.reference;
+                                        }
+                                        if ($scope.hashPath.ed.binding && $scope.hashPath.ed.binding.valueSetUri) {
+                                            urlToValueSet = $scope.hashPath.ed.binding && $scope.hashPath.ed.binding.valueSetUri;
+                                        }
+                                    }
 
-                                        var url = $scope.hashPath.ed.binding.valueSetReference.reference;
-                                        Utilities.getValueSetIdFromRegistry(url,function(vsDetails) {
+
+
+                                    if (urlToValueSet) {
+
+                                  //  if ($scope.hashPath.ed.binding && $scope.hashPath.ed.binding.valueSetReference &&
+                                     //   $scope.hashPath.ed.binding.valueSetReference.reference) {
+
+                                       // var url = $scope.hashPath.ed.binding.valueSetReference.reference;
+                                        Utilities.getValueSetIdFromRegistry(urlToValueSet,function(vsDetails) {
                                             $scope.vsDetails = vsDetails;  //vsDetails = {id: type: resource: }
                                             //console.log(vsDetails);
                                             if ($scope.vsDetails) {
@@ -1229,7 +1034,6 @@ angular.module("sampleApp")
 
             }
             //---------------------
-
 
             $scope.addBBE = function(){
                 //add a new BackBone element for the selected node
@@ -1494,6 +1298,18 @@ angular.module("sampleApp")
                 resource.meta = {profile:[lm.url]};
                 resource.implicitRules = lm.implicitRules;
 
+
+                //is this a lm based on a core resource? If so, add an extension to the resource so it can be a reference target...
+                var baseTypeForModel = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
+                var extensionValue = Utilities.getSingleExtensionValue(lm,baseTypeForModel);
+                if (extensionValue && extensionValue.valueString) {
+                    resource.extension = [extensionValue]
+                   // Utilities.addExtensionOnceWithReplace(resource,baseTypeForModel,extensionValue)
+                }
+
+
+
+
                 builderSvc.addResourceToAllResources(resource)
                 builderSvc.addSDtoCache(lm)
                 $scope.selectedContainer.bundle.entry.push({resource:resource});
@@ -1546,15 +1362,10 @@ angular.module("sampleApp")
                 var lm = entry.resource;
                 lm.implicitRules = 'isLogicalModel'
 
-/*
-                var url = 'baseType';   //todo - in appconfig
 
-                var dtValue = 'value' + info.extensionType.substr(0,1).toUpperCase() + info.extensionType.substr(1);
-                var ext = {}
-                ext[dtValue] = insrt
 
-                Utilities.addExtensionOnceWithReplace(insertPoint,info.ed.builderMeta.extensionUrl,ext)
-                */
+
+
                 selectLogicalModal(lm)
             }
 

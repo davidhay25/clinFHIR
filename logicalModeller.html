@@ -224,6 +224,31 @@
 
 
             <uib-tabset>
+                <uib-tab heading="All">
+
+                    <div><input type="text" class="form-control" placeholder="Filter model list by id" ng-model="input.filter" ng-change="filterModelList(input.filter)"/> </div>
+
+                    <ul class="list-group" style=" height:700px; overflow: auto;" >
+                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.type == entry.resource.type}"
+                            ng-repeat="entry in bundleModels.entry"
+                            ng-click="selectModel(entry,$index)">
+
+                            <div class="row">
+                                <div class="col-md-9 col-sm-9">
+                                    <h4>{{entry.resource.name}}</h4>
+                                </div>
+                                <div class="col-md-3 col-sm-3">
+                                    <em class="pull-right">{{entry.resource.status}}</em>
+                                </div>
+                            </div>
+
+                            {{entry.resource.description | limitTo : 200}}
+                        </li>
+                    </ul>
+
+
+
+                </uib-tab>
                 <uib-tab heading="Palette">
 
                     <ul class="list-group" style=" height:500px; overflow: auto;" >
@@ -264,31 +289,7 @@
 
 
                 </uib-tab>
-                <uib-tab heading="All">
 
-                    <div><input type="text" class="form-control" placeholder="Filter model list by id" ng-model="input.filter" ng-change="filterModelList(input.filter)"/> </div>
-
-                    <ul class="list-group" style=" height:700px; overflow: auto;" >
-                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.type == entry.resource.type}"
-                            ng-repeat="entry in bundleModels.entry"
-                            ng-click="selectModel(entry,$index)">
-
-                            <div class="row">
-                                <div class="col-md-9 col-sm-9">
-                                    <h4>{{entry.resource.name}}</h4>
-                                </div>
-                                <div class="col-md-3 col-sm-3">
-                                    <em class="pull-right">{{entry.resource.status}}</em>
-                                </div>
-                            </div>
-
-                            {{entry.resource.description | limitTo : 200}}
-                        </li>
-                    </ul>
-
-
-
-                </uib-tab>
 
             </uib-tabset>
 

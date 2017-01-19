@@ -777,12 +777,23 @@
                                         <div ng-show="type.code == 'Reference'">
                                             <div>
                                                 <div class="pull-right">
-                                                    <a target="_blank" ng-href="{{fhirBasePath}}{{type.profile | referenceType | lowercase}} ">
+
+                                                    <a ng-show="type.profile" target="_blank" ng-href="{{fhirBasePath}}{{type.profile | referenceType | lowercase}} ">
                                                         <i class="glyphicon glyphicon-globe"
                                                            title="View Resource in spec">
 
                                                         </i>
-                                                    </a></div>
+                                                    </a>
+
+                                                    <a ng-show="type.targetProfile" target="_blank" ng-href="{{fhirBasePath}}{{type.targetProfile | referenceType | lowercase}} ">
+                                                        <i class="glyphicon glyphicon-globe"
+                                                           title="View Resource in spec">
+
+                                                        </i>
+                                                    </a>
+
+
+                                                </div>
                                             </div>
                                             <!-- allow for stu2 & 3-->
                                             --> {{type.profile | referenceType}} {{type.targetProfile | referenceType}}
@@ -834,8 +845,9 @@
                                     <div ng-show="hashPath.ed.binding">
                                         <h5>ValueSet Binding ({{hashPath.ed.binding.strength}})</h5>
                                         <div>
-                                            <button class="btn btn-link" ng-click="viewVS(hashPath.ed.binding.valueSetReference.reference)">
+                                            <button class="btn btn-link" ng-click="viewVS(hashPath.ed.binding)">
                                                 {{hashPath.ed.binding.valueSetReference.reference}}
+                                                {{hashPath.ed.binding.valueSetUri}}
                                             </button>
 
 
