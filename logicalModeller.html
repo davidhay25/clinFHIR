@@ -384,28 +384,72 @@
 
                 <uib-tab heading="Mapping">
                     <br/>
-                    <table class="table table-bordered table-condensed">
-                        <tr><th></th><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th><th>Mapping notes</th></tr>
-                        <tr ng-repeat="ed in SD.snapshot.element">
-                            <td>{{$index}}</td>
-                            <td>
-                                <div  ng-click="selectNodeFromTable(ed.path)" class="clickable"
-                                      ng-style="{ 'padding-left': (ed.path | pathindent) }">{{ed.path | lastInPath}}</div>
-                            </td>
-                            <td>{{ed.type[0].code}}</td>
-                            <td>{{ed.min}}..{{ed.max}}</td>
-                            <td>{{ed.definition}}</td>
-                            <td>
-                                <div>{{ed.mapping[0].map}}</div>
-                                <div ng-repeat="ext in ed.mapping[0].extension">
-                                    {{ext.valueString}}
-                                    {{ext.valueUri | getLogicalID}}
-                                </div>
 
-                            </td>
-                        </tr>
+                    <uib-tabset>
 
-                    </table>
+                        <uib-tab heading="Differences from base" ng-show="differenceFromBase">
+                            <h5>Elements added to the base</h5>
+                            <table>
+                                <tr ng-repeat = "diff in differenceFromBase.added">
+                                <td>
+                                    {{diff.path}}
+                                </td>
+                                </tr>
+                            </table>
+                            <h5>Elements removed from the base</h5>
+                            <table>
+                                <tr ng-repeat = "diff in differenceFromBase.removed">
+                                    <td>
+                                        {{diff.path}}
+                                    </td>
+                                </tr>
+                            </table>
+                            <h5>Elements changed compared to the base</h5>
+                            <table>
+                                <tr ng-repeat = "diff in differenceFromBase.changed">
+                                    <td>
+                                        {{diff.ed.path}}
+                                    </td>
+                                    <td>
+                                        <ul>
+                                            <li ng-repeat="change in diff.list">
+                                                {{change.display}}
+                                            </li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </table>
+
+
+                        </uib-tab>
+
+                        <uib-tab heading="Mapping">
+                            <table class="table table-bordered table-condensed">
+                                <tr><th></th><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th><th>Mapping notes</th></tr>
+                                <tr ng-repeat="ed in SD.snapshot.element">
+                                    <td>{{$index}}</td>
+                                    <td>
+                                        <div  ng-click="selectNodeFromTable(ed.path)" class="clickable"
+                                              ng-style="{ 'padding-left': (ed.path | pathindent) }">{{ed.path | lastInPath}}</div>
+                                    </td>
+                                    <td>{{ed.type[0].code}}</td>
+                                    <td>{{ed.min}}..{{ed.max}}</td>
+                                    <td>{{ed.definition}}</td>
+                                    <td>
+                                        <div>{{ed.mapping[0].map}}</div>
+                                        <div ng-repeat="ext in ed.mapping[0].extension">
+                                            {{ext.valueString}}
+                                            {{ext.valueUri | getLogicalID}}
+                                        </div>
+
+                                    </td>
+                                </tr>
+
+                            </table>
+
+                        </uib-tab>
+                    </uib-tabset>
+
 
                 </uib-tab>
 

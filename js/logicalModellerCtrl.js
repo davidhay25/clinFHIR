@@ -48,8 +48,6 @@ angular.module("sampleApp")
             $scope.input.newCommentboxInxDEP = -1;
 
 
-
-
             //merge the referenced model into this one at this point
             $scope.mergeModel = function(url){
                 $scope.canSaveModel = false;        //to prevent the base model from being replaced... 
@@ -1318,7 +1316,9 @@ angular.module("sampleApp")
 
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
-                
+
+               // checkDifferences(entry.resource)
+
                 var vo = logicalModelSvc.makeReferencedMapsModel(entry.resource,$scope.bundleModels);   //todo - may not be the right place...
 
                 //so that we can draw a table with the references in it...
@@ -1473,6 +1473,19 @@ angular.module("sampleApp")
 
             }
 
+
+            //If based on a single FHIR resource, check for differences from that base
+            function checkDifferences(resource) {
+                delete $scope.differenceFromBase
+                logicalModelSvc.differenceFromBase(resource).then(
+                    function (analysis) {
+                        $scope.differenceFromBase = analysis;
+                    },
+                    function(err) {
+
+                    }
+                )
+            }
             //called when the graph tab is selected
             $scope.redrawReferencesChart = function () {
                 //alert('redraw')
@@ -1621,7 +1634,7 @@ angular.module("sampleApp")
 
                             logicalModelSvc.getAllPathsForType(baseType).then(
                                 function(listOfPaths) {
-                                    console.log(listOfPaths);
+                                    //console.log(listOfPaths);
                                     $scope.allPaths = listOfPaths;
                                 }
                             )
@@ -1893,7 +1906,7 @@ angular.module("sampleApp")
                 }).result.then(
                     function(result) {
 
-                        console.log(result)
+                        //console.log(result)
 
                         if (result.editNode) {
                             //editing an existing node - replace the data property in the node with the results......
@@ -1930,6 +1943,7 @@ angular.module("sampleApp")
                             if (node){
                                 node.data.type = [{code:'BackboneElement'}]
                             }
+
 
 
                             //}
@@ -2083,6 +2097,7 @@ angular.module("sampleApp")
                // logicalModelSvc.makeReferencedMapsModel($scope.SD);   //todo - may not be the right place...
                 
                 createGraphOfProfile();     //update the graph display...
+                checkDifferences($scope.SD)
 
             };
 

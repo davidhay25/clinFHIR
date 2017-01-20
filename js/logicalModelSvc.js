@@ -9,6 +9,20 @@ angular.module("sampleApp")
         var elementsToIgnore =['id','meta','implicitRules','language','text','contained','extension','modifierExtension'];
 
 
+        //set the first segment of a path to the supplied value. Used when determining differneces from the base type
+        String.prototype.setFirstSegment = function(firstSegment) {
+            var ar = this.split('.');
+            ar[0] = firstSegment;
+            return ar.join('.')
+        }
+
+        String.prototype.getLastSegment = function() {
+            var ar = this.split('.');
+            return ar[ar.length-1]
+        }
+
+
+
 
         function makeTreeDataElementDEP(rootName,ed,treeData) {
             //generate an item for the tree
@@ -1052,7 +1066,108 @@ angular.module("sampleApp")
                     }
                 )
                 return deferred.promise;
+            },
+
+            differenceFromBase : function(lm) {
+               // var elementsToIgnore = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained', 'extension', 'modifierExtension'];
+                var that = this;
+                var deferred = $q.defer();
+
+                var lmBaseType = lm.snapshot.element[0].path;       //always the first in the list...
+
+                //generate the differences between the Logical model and any base model defined
+                var baseTypeForModel = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
+                var extensionValue = Utilities.getSingleExtensionValue(lm,baseTypeForModel);
+                if (extensionValue && extensionValue.valueString) {
+                    var baseType = extensionValue.valueString;      //the type name of the core resource this one is based on.
+                    baseProfileUrl = "http://hl7.org/fhir/StructureDefinition/"+baseType
+                    var lmHash = getSDHash(lm);     //a hash keyed by path
+                    console.log(lmHash,baseType)
+                    GetDataFromServer.findConformanceResourceByUri(baseProfileUrl).then(
+                        function(SD) {
+                            var baseTypeHash = getSDHash(SD)
+                            //console.log(baseTypeHash)
+                            var analysis = {removed:[],added:[],changed:[]}
+                            //first, move through all the elements in the lm. If there is not a corresponding path in the base profile (allowing for name changes) then it was added...
+                            lm.snapshot.element.forEach(function(ed){
+                                var adjustedPath = ed.path.setFirstSegment(baseType)    //note the setFirstSegment function was added to the string prototype at the top of this service
+                                //console.log(adjustedPath)
+                                if (! baseTypeHash[adjustedPath]) {
+                                    analysis.added.push(ed);
+                                } else {
+                                    //so the element is still present, was it changed?
+                                    var lst = getDifferenceBetweenED(baseTypeHash[adjustedPath],ed)
+                                    if (lst.length > 0) {
+                                        analysis.changed.push({ed:ed,list:lst})
+                                    }
+                                }
+
+                            });
+
+                            //now move through the base profile. Any ed's not in the lm have been removed
+                            SD.snapshot.element.forEach(function(ed){
+                                var adjustedPath = ed.path.setFirstSegment(lmBaseType)    //note the setFirstSegment function was added to the string prototype at the top of this service
+
+                                if (! lmHash[adjustedPath]) {
+                                    //nope, gone. Do we care?
+                                    if (elementsToIgnore.indexOf(adjustedPath.getLastSegment()) == -1 ) {
+                                        //yes, we do...
+                                        analysis.removed.push(ed);
+                                    }
+                                }
+
+                            });
+
+
+
+
+                            console.log(analysis);
+                            deferred.resolve(analysis)
+
+                        },
+                        function(err) {
+                            deferred.reject(err)
+                        }
+                    )
+
+
+
+                } else {
+                    //this is not based on a single core resource type
+                }
+                return deferred.promise;
+
+                function getDifferenceBetweenED(EDSource,EDTarg) {
+                    var lst = []
+                    if (EDSource.min !== EDTarg.min) {
+                        lst.push({code:'minChanged',display: 'Minimum changed from '+ EDSource.min + ' to ' + EDTarg.min})
+                    }
+                    if (EDSource.max !== EDTarg.max) {
+                        lst.push({code:'maxChanged',display: 'Maximum changed from '+ EDSource.min + ' to ' + EDTarg.min})
+                    }
+
+                    if (EDSource.binding) {
+                        if (EDSource.binding.valueUri !== EDTarg.binding.valueUri) {
+                            lst.push({code:'bindingUriChanged',display: 'ValueSet changed from '+ EDSource.binding.valueUri + ' to ' + EDTarg.binding.valueUri})
+                        }
+                    }
+
+
+                    return lst;
+                }
+
+                function getSDHash(SD) {
+                    var hash = {};
+                    if (SD && SD.snapshot && SD.snapshot.element){
+                        SD.snapshot.element.forEach(function(ed){
+                            hash[ed.path] = ed;
+                        })
+
+                    }
+                    return hash;
+                }
+
             }
 
-    }
-        });
+        }
+    });
