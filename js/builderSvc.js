@@ -50,6 +50,16 @@ angular.module("sampleApp")
         objColours.LogicalModel = '#cc0000';
 
         return {
+            getPatientResource : function(){
+                var patient;
+                angular.forEach(gAllResourcesThisSet,function(res){
+                    if (res.resourceType == 'Patient') {
+                        patient = res;
+                    }
+                   // console.log(res);
+                })
+                return patient
+            },
             makeLogicalModelFromSD : function(profile){
               //given a StructureDefinition which is a profile (ie has extensions) generate a logical model by de-referencing the extensions
               //currently only working for simple extensions
@@ -441,6 +451,12 @@ angular.module("sampleApp")
             referenceFromResource : function(resource) {
                 //create the reference from the resource
                 return resource.resourceType + "/" + resource.id;
+            },
+            getLibraryCategories : function(){
+                //the categories on the current library server/ ?Use the DR.class propertu to record?
+
+                var lst = [];
+                lst.push({cateto:''})
             },
             saveToLibrary : function (bundleContainer,user) {
                 //save the bundle to the library. Note that the 'container' of the bundle (includes the name) is passed in...
@@ -1428,19 +1444,23 @@ angular.module("sampleApp")
 
                         //if it's an object, does it have a child called 'reference'?
 
-
                         if (angular.isArray(value)) {
                             value.forEach(function(obj,inx) {
                                 //examine each element in the array
-                                var lpath = nodePath + '.' + key;
-                                if (obj.reference) {
-                                    //this is a reference!
+                                if (obj) {  //somehow null's are getting into the array...
+                                    var lpath = nodePath + '.' + key;
+                                    if (obj.reference) {
+                                        //this is a reference!
 
-                                    refs.push({path: lpath, reference: obj.reference})
-                                } else {
-                                    //if it's not a reference, then does it have any children?
-                                    findReferences(refs,obj,lpath,inx)
+                                        refs.push({path: lpath, reference: obj.reference})
+                                    } else {
+                                        //if it's not a reference, then does it have any children?
+                                        findReferences(refs,obj,lpath,inx)
+                                    }
                                 }
+
+
+
                             })
                         } else
 

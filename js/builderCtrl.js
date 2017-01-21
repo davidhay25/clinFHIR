@@ -190,7 +190,6 @@ angular.module("sampleApp")
                 }
             });
 
-
             //datatypes for which there is an entry form
             $scope.supportedDt = ['Identifier','CodeableConcept','string','code','date','Period','dateTime','Address','HumanName','Annotation','boolean']
 
@@ -210,6 +209,7 @@ angular.module("sampleApp")
                    // $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
                     $scope.selectedContainer = $localStorage.builderBundles[$scope.currentBundleIndex];
                     builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
+                    $scope.currentPatient = builderSvc.getPatientResource();
                     isaDocument();
                 }
 
@@ -288,6 +288,9 @@ angular.module("sampleApp")
                 //$scope.selectedLibraryEntry.bundle =  angular.fromJson(atob(entry.resource.content[0].attachment.data));  //todo not safe
 
             };
+
+            //------------  Library functions ------------
+            $scope.libraries = [];
 
             $scope.downloadFromLibrary = function(inContainer){
                 //note that the entry is a DocumentReference with a bundle as an attachment...
@@ -375,6 +378,9 @@ angular.module("sampleApp")
                 //$scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
                 $scope.selectedContainer = $localStorage.builderBundles[$scope.currentBundleIndex];
                 builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
+                $scope.currentPatient = builderSvc.getPatientResource();
+
+                console.log($scope.currentPatient);
                 makeGraph();
                 delete $scope.currentResource;
                 isaDocument();      //determine if this bundle is a document (has a Composition resource)
