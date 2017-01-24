@@ -153,21 +153,27 @@
                         <div><label>Mapping path</label></div>
 
 
-                        <input type="text" ng-model="input.mappingPath"
+                        <uib-tabset>
+                            <uib-tab heading="FHIR">
+                                <br/>
+                                <input type="text" ng-model="input.mappingPath"
 
-                               uib-typeahead="path for path in allPaths | filter:$viewValue | limitTo:100" class="form-control">
-                        <!--
-                                                <select  class="form-control" ng-model="input.mappingPath"
-                                                         ng-options="path for path in allPaths"></select>
+                                       uib-typeahead="path for path in allPaths | filter:$viewValue | limitTo:100" class="form-control">
+                            </uib-tab>
+                            <uib-tab heading="v2">
+                                <br/>
+                                <input type="text" class="form-control" ng-model="input.mappingPathV2"/>
+                            </uib-tab>
+                            <uib-tab heading="CDA">
+                                <br/>
+                            </uib-tab>
+                            <uib-tab heading="Other">
+                                <br/>
+                            </uib-tab>
+                        </uib-tabset>
 
 
-                                                <input type="text" class="form-control" ng-model="input.mappingPath" placeholder="path in the target resource">
-                        -->
-                        <!--<div><label>Map to model</label></div>
 
-                        <select class="form-control" ng-model="input.mapToModelEnt"
-                                 ng-options="entry.resource.name for entry in references.entry"></select>
--->
                     </div>
 
 

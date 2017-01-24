@@ -132,12 +132,19 @@ angular.module("sampleApp")
                 lst.forEach(function (reference) {
 
                     var srcNode = getNodeByUrl(reference.src, reference.path, objNodes, arNodes);
+
+
                     var targNode = getNodeByUrl(reference.targ, reference.path, objNodes, arNodes);
+//
+                   // var targNode = getNodeByUrl(reference.targ + reference.src, reference.path, objNodes, arNodes);
+
+
+                    //If there's already a
+
 
                     var ar = reference.path.split('.');
                     var label = ar.pop();
-                    //ar.splice(0,1);
-                    //var label = ar.join('.');
+
                     arEdges.push({from: srcNode.id, to: targNode.id, label: label, arrows: {to: true}})
 
                 })
@@ -159,6 +166,7 @@ angular.module("sampleApp")
                     nodeObj[node.id] = node;
                     arAllModels.push({url: node.url})
                 });
+
 
 
                 return {references: lst, graphData: data, nodes: nodeObj, lstNodes: arAllModels};
@@ -747,7 +755,7 @@ angular.module("sampleApp")
                         if (ed.type && ed.type[0].profile) {
                             item.data.referenceUri = ed.type[0].profile;
 
-                            //in stu2 this is an array...
+                            //in stu2 this is an array - just grab the first one...
                             if (angular.isArray(item.data.referenceUri)) {
                                 item.data.referenceUri = item.data.referenceUri[0];
                             }
@@ -773,16 +781,17 @@ angular.module("sampleApp")
                         item.data.max = ed.max;
 
                         if (ed.mapping) {           //the mapping path in the target resource...
-                            var mapItem = ed.mapping[0];    //the actual map - assume only 1...
-                            item.data.mappingPath = mapItem.map;      //the identity is currently hard coded
-                            if (mapItem.extension) {
+
+
+                            //tofo get the extension, always on the first - I'm not sure this is correvt
+                            if (ed.mapping[0]) {
                                 //there are extensions on this item - find the comment...
-                                var ext = Utilities.getSingleExtensionValue(mapItem, mappingCommentUrl)
+                                var ext = Utilities.getSingleExtensionValue(ed.mapping[0], mappingCommentUrl)
                                 if (ext && ext.valueString) {
                                     item.data.mapping = ext.valueString;
                                 }
 
-                                var ext1 = Utilities.getSingleExtensionValue(mapItem, mapToModelExtensionUrl)
+                                var ext1 = Utilities.getSingleExtensionValue(ed.mapping[0], mapToModelExtensionUrl)
                                 if (ext1 && ext1.valueUri) {
                                     item.data.mapToModelUrl = ext1.valueUri;
                                     item.data.referenceUri = ext1.valueUri;     //for the table dsplay...
@@ -791,6 +800,27 @@ angular.module("sampleApp")
 
 
                             }
+
+
+                            ed.mapping.forEach(function(mapItem){
+
+                                switch (mapItem.identity) {
+                                    case 'fhir' :
+                                        //var mapItem = ed.mapping[0];    //the actual map - assume only 1...
+                                        item.data.mappingPath = mapItem.map;      //the identity is currently hard coded
+
+
+                                        break;
+                                    case 'hl7V2' :
+                                        item.data.mappingPathV2 = mapItem.map;      //the identity is currently hard coded
+                                        break;
+
+                                }
+
+
+                            })
+
+
 
 
                         }
@@ -909,11 +939,18 @@ angular.module("sampleApp")
                         ed.mapping = [{identity: 'fhir', map: data.mappingPath}]
                     }
 
+                    if (data.mappingPathV2) {         //the actual path in the target resource
+                        ed.mapping = ed.mapping || [];
+                        ed.mapping.push({identity: 'hl7V2', map: data.mappingPathV2});
+                    }
+
+
                     if (data.mapping) {
                         //comments about the mapping - added as an extension to the first mapping node mapping
+                        //todo - might want separate notes per
                         var mappingNode = {}
                         if (ed.mapping) {
-                            //just in case there is more than on emapping
+                            //just in case there is more than one mapping
                             mappingNode = ed.mapping[0]
                         } else {
                             ed.mapping = []
@@ -969,6 +1006,9 @@ angular.module("sampleApp")
                 });
 
                 return sd;
+
+
+
             },
             reOrderTree: function (treeData) {
                 //ensure the elements in the tree array are sorted by parent / child

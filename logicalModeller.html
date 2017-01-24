@@ -386,6 +386,36 @@
                     <br/>
 
                     <uib-tabset>
+                        <uib-tab heading="Mapping">
+                            <table class="table table-bordered table-condensed">
+                                <tr><th></th><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th><th>Mapping notes</th></tr>
+                                <tr ng-repeat="ed in SD.snapshot.element">
+                                    <td>{{$index}}</td>
+                                    <td>
+                                        <div  ng-click="selectNodeFromTable(ed.path)" class="clickable"
+                                              ng-style="{ 'padding-left': (ed.path | pathindent) }">{{ed.path | lastInPath}}</div>
+                                    </td>
+                                    <td>{{ed.type[0].code}}</td>
+                                    <td>{{ed.min}}..{{ed.max}}</td>
+                                    <td>{{ed.definition}}</td>
+                                    <td>
+                                        <div ng-repeat="map in ed.mapping">{{map.map}}</div>
+
+
+
+                                        <div ng-repeat="ext in ed.mapping[0].extension">
+                                            <em>
+                                            {{ext.valueString}}
+                                            {{ext.valueUri | getLogicalID}}
+                                            </em>
+                                        </div>
+
+                                    </td>
+                                </tr>
+
+                            </table>
+
+                        </uib-tab>
 
                         <uib-tab heading="Differences from base" ng-show="differenceFromBase">
                             <h5>Elements added to the base</h5>
@@ -423,31 +453,7 @@
 
                         </uib-tab>
 
-                        <uib-tab heading="Mapping">
-                            <table class="table table-bordered table-condensed">
-                                <tr><th></th><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th><th>Mapping notes</th></tr>
-                                <tr ng-repeat="ed in SD.snapshot.element">
-                                    <td>{{$index}}</td>
-                                    <td>
-                                        <div  ng-click="selectNodeFromTable(ed.path)" class="clickable"
-                                              ng-style="{ 'padding-left': (ed.path | pathindent) }">{{ed.path | lastInPath}}</div>
-                                    </td>
-                                    <td>{{ed.type[0].code}}</td>
-                                    <td>{{ed.min}}..{{ed.max}}</td>
-                                    <td>{{ed.definition}}</td>
-                                    <td>
-                                        <div>{{ed.mapping[0].map}}</div>
-                                        <div ng-repeat="ext in ed.mapping[0].extension">
-                                            {{ext.valueString}}
-                                            {{ext.valueUri | getLogicalID}}
-                                        </div>
 
-                                    </td>
-                                </tr>
-
-                            </table>
-
-                        </uib-tab>
                     </uib-tabset>
 
 
@@ -497,7 +503,7 @@
                                 </tr>
                             </table>
                         </uib-tab>
-                        <uib-tab heading="Map" select="redrawReferencesChart()">
+                        <uib-tab heading="Graph" select="redrawReferencesChart()">
                             <div id="refLogicalModel"></div>
                         </uib-tab>
                         <uib-tab heading="This model only">
@@ -574,7 +580,14 @@
                                 <tr><td width="20%">Model path</td><td>{{selectedNode.data.path}}</td></tr>
                                 <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
                                 <tr><td>Description</td><td>{{selectedNode.data.description}}</td></tr>
-                                <tr><td>Mapping Path</td><td>{{selectedNode.data.mappingPath}}</td></tr>
+                                <tr><td>Mapping</td>
+                                    <td>
+                                        <div ng-show="selectedNode.data.mappingPath">FHIR: {{selectedNode.data.mappingPath}}</div>
+                                        <div ng-show="selectedNode.data.mappingPathV2">V2: {{selectedNode.data.mappingPathV2}}</div>
+                                        <div ng-show="selectedNode.data.mapping"><em>{{selectedNode.data.mapping}}</em></div>
+
+                                    </td>
+                                </tr>
                                 <tr ng-show="selectedNode.data.referenceUri| getLogicalID">
                                     <td>Map to Model</td>
                                     <td>
@@ -656,16 +669,7 @@
 
 
                                 </tr>
-                                <tr ng-show="valueSetOptions">
-                                    <td>Options</td>
-                                    <td>
 
-                                        <ul>
-                                            <li ng-repeat="option in valueSetOptions">{{option.display}} ({{option.code}})</li>
-                                        </ul>
-
-                                    </td>
-                                </tr>
                                 <tr ng-show="selectedNode.data.mapping"><td>Mapping notes</td><td>
                                     {{selectedNode.data.mapping}}
 
@@ -728,7 +732,16 @@
 
 
                                 </td></tr>
+                                <tr ng-show="valueSetOptions">
+                                    <td>Options</td>
+                                    <td>
 
+                                        <ul>
+                                            <li ng-repeat="option in valueSetOptions">{{option.display}} ({{option.code}})</li>
+                                        </ul>
+
+                                    </td>
+                                </tr>
                             </table>
 
 

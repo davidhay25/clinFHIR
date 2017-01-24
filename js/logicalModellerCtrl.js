@@ -217,7 +217,8 @@ angular.module("sampleApp")
                                 $scope.valueSetOptions = lst;
                             },
                             function(err){
-                                $scope.valueSetOptions = [{code:'notExpanded',display:'Unable to get list, may be too long'}]
+                                //$scope.valueSetOptions = [{code:'notExpanded',display:'Unable to get list, may be too long'}]
+                                $scope.valueSetOptions = [{code:'notExpanded',display:err}]
                             }
                         )
                     }
@@ -722,6 +723,8 @@ angular.module("sampleApp")
                         console.log(vs)
                         $scope.showVSBrowserDialog.open(vs);
 
+                    }, function(err) {
+                        alert(err)
                     }
                 ).finally (function(){
                     $scope.showWaiting = false;
@@ -1062,6 +1065,7 @@ angular.module("sampleApp")
                                 rootNode.data.header = result;      //header based data. keep it in the first node...
                                 $scope.treeData =  [rootNode]
                                 $scope.isDirty = true;      //as this has not been saved;
+                                $scope.isInPalette = false;
 
                                 /*
                                 switch (result.modelType) {
@@ -1357,7 +1361,7 @@ angular.module("sampleApp")
 
 
                         var model = logicalModelSvc.getModelFromBundle($scope.bundleModels,node.url); //the model referenceed by this node
-                        selectEntry({resource:model});
+                        //temp - todo - do I really wantto do this?  selectEntry({resource:model});
 
 
                         $scope.$digest();
@@ -1653,6 +1657,7 @@ angular.module("sampleApp")
                             $scope.input.mapping = data.mapping;
                             $scope.input.mappingPath = data.mappingPath;
                             $scope.input.fixedString = data.fixedString;
+                            $scope.input.mappingPathV2 = data.mappingPathV2;
 
                             if (data.min == 0) {
                                 $scope.input.multiplicity = 'opt';
@@ -1729,6 +1734,7 @@ angular.module("sampleApp")
                             vo.comments = $scope.input.comments;
                             vo.mapping = $scope.input.mapping;
                             vo.mappingPath = $scope.input.mappingPath;
+                            vo.mappingPathV2 = $scope.input.mappingPathV2;
                             vo.type = [{code:$scope.input.dataType.code}];
                             vo.editNode = editNode;
                             vo.parentPath = parentPath;
@@ -1753,7 +1759,7 @@ angular.module("sampleApp")
                                 if ($scope.input.referenceFromIg) {
                                     vo.isReference = true;
                                     vo.referenceUri = $scope.input.referenceFromIg.resource.url; // for the reference table...
-                                    vo.type[0].profile = $scope.input.referenceFromIg.resource.url;
+                                   // (this is the older stu3 veriosn)  vo.type[0].profile = $scope.input.referenceFromIg.resource.url;
                                     vo.type[0].targetProfile = $scope.input.referenceFromIg.resource.url;   //not quite sure why we need both...
                                     console.log($scope.input.referenceFromIg)
                                 }

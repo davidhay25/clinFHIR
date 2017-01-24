@@ -450,8 +450,8 @@ angular.module("sampleApp").
                 if (resp) {
                     deferred.resolve(resp.resource);
                 } else {
-                    alert('Unable to load ValueSet: '+ ref);
-                    deferred.reject();
+                    // removed 24 jan 2017 alert('Unable to load ValueSet: '+ ref);
+                    deferred.reject('Unable to load ValueSet: '+ ref);
                 }
 
             });
@@ -1474,7 +1474,8 @@ console.log(summary);
                         cb(resp);
                     } else {
                         if (!noError) {
-                            alert('There is no ValueSet with a url of '+ uri + ' on the terminology server');
+
+                            // removed jan 24 2017 alert('There is no ValueSet with a url of '+ uri + ' on the terminology server');
                         }
                         //alert('There is no ValueSet with a url of '+ uri + ' on the terminology server');
                         cb(null);
