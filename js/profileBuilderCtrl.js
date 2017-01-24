@@ -4,7 +4,7 @@ angular.module("sampleApp")
                                         appConfigSvc,modalService,RenderProfileSvc,$uibModal,Utilities,$timeout){
 
 
-    //get the fhir version as so moch depends on it...
+    //get the fhir version as so much depends on it...
     $scope.fhirVersion = 2;
     var tmp = appConfigSvc.getCurrentConformanceServer();
     if (tmp.version == 3) {
@@ -500,7 +500,7 @@ angular.module("sampleApp")
                 $rootScope.$emit('profileSelected',clone);      //will cause the builder to be set up for the seelcted profile...
 
 
-                closeTheProfileEditor();    //close the editor and re-display the front page
+                // temp  closeTheProfileEditor();    //close the editor and re-display the front page
 
             },
             function(log) {
@@ -805,9 +805,10 @@ angular.module("sampleApp")
 
                 //construct the query to retrene extension defintions...
 
-
-                var qry = "StructureDefinition?";
                 var conformanceSvr = appConfigSvc.getCurrentConformanceServer();
+
+                var qry = conformanceSvr.url + "StructureDefinition?";
+
 
                 qry += 'type=Extension';
 
@@ -822,23 +823,15 @@ angular.module("sampleApp")
 
                 $scope.qry = qry;
                 
-  /*              
-                var qry = "StructureDefinition?context-type=resource&ext-context=Patient";  //v3
-                var conformanceSvr = appConfigSvc.getCurrentConformanceServer();
-                if (conformanceSvr.version == 2) {
-                    qry = "StructureDefinition?kind=datatype&type=Extension&ext-context="+$scope.resourceType;
-                    console.log('v2')
-                }
-*/
+
                 $scope.conformanceServerUrl = conformanceSvr.url;
 
-
-                //http://fhir2.healthintersections.com.au/open/StructureDefinition?kind=datatype&type=Extension&ext-context=Patient
-                //var qry = "StructureDefinition?url=http://hl7.org/fhir/StructureDefinition/patient-nationality"
-                //var qry = "StructureDefinition?context-type=resource&ext-context=Patient"
-               // http://fhir3.healthintersections.com.au/open/StructureDefinition?context-type=resource&ext-context=Patient
                 $scope.showWaiting = true;
-                GetDataFromServer.queryConformanceServer(qry).then(
+
+
+                GetDataFromServer.adHocFHIRQueryFollowingPaging(qry).then(
+
+               // GetDataFromServer.queryConformanceServer(qry).then(
                     function(data) {
                         //filter out the ones not for this resource type. Not sure if this can be done server side...
                         $scope.bundle = {entry:[]}

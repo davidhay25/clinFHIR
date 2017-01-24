@@ -605,6 +605,11 @@ angular.module("sampleApp")
 
                                 item.data.comments = ed.comments;
 
+                                //set the mapping
+                                item.data.mappingPath = path; //[{identity: 'fhir', map: path}]
+
+
+
                                 //note that we don't retrieve the complete valueset...
                                 if (ed.binding) {
                                     item.data.selectedValueSet = {strength: ed.binding.strength};
@@ -914,7 +919,7 @@ angular.module("sampleApp")
                             ed.mapping = []
                         }
 
-                        //adds an extension of this url once only to the specified node
+                        //adds an extension of this url once only to the specified node. Won't replace existing...
                         Utilities.addExtensionOnce(mappingNode, mappingCommentUrl, {valueString: data.mapping})
                         //ed.mapping = ed.mapping || []
                         ed.mapping[0] = mappingNode;
@@ -960,7 +965,6 @@ angular.module("sampleApp")
                     }
 
                     ed.fixedString = data.fixedString;  //todo needs to be a compatible type
-
                     sd.snapshot.element.push(ed)
                 });
 
@@ -1146,9 +1150,21 @@ angular.module("sampleApp")
                         lst.push({code:'maxChanged',display: 'Maximum changed from '+ EDSource.min + ' to ' + EDTarg.min})
                     }
 
+                    //todo check for both url and reference
                     if (EDSource.binding) {
-                        if (EDSource.binding.valueUri !== EDTarg.binding.valueUri) {
-                            lst.push({code:'bindingUriChanged',display: 'ValueSet changed from '+ EDSource.binding.valueUri + ' to ' + EDTarg.binding.valueUri})
+                        if (EDTarg.binding) {
+                            //the target has a binding - is it the same?
+                            if (EDSource.binding.valueUri !== EDTarg.binding.valueUri) {
+                                lst.push({code:'bindingUriChanged',display: 'ValueSet changed from '+ EDSource.binding.valueUri + ' to ' + EDTarg.binding.valueUri})
+                            }
+                        } else {
+                            lst.push({code:'bindingUriChanged',display: 'Source Binding removed.'})
+                        }
+
+                    } else {
+                        //the source has no binding, has the target?
+                        if (EDTarg.binding) {
+
                         }
                     }
 
