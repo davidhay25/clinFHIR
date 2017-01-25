@@ -1165,6 +1165,7 @@ angular.module("sampleApp")
 
             $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();
             $scope.dataTypes.push({code: 'BackboneElement',description: 'BackboneElement'});
+            //$scope.dataTypes.push({code: 'Extension',description: 'Extension'});
 
 /* hide for the moment...
             //add the v2 datatypes here. todo - perhaps there's a 'model source' property that selects from different data types?
@@ -1577,7 +1578,7 @@ angular.module("sampleApp")
                 logicalModelSvc.getModelHistory(id).then(
                     function(data){
                         //console.log(data.data)
-                        $scope.modelHistory = data.data;
+                        $scope.modelHistory =data.data;
                     },
                     function(err) {
                         alert(angular.toJson(err))
@@ -1688,9 +1689,12 @@ angular.module("sampleApp")
 
                             $scope.selectedValueSet = data.selectedValueSet;
 
+
+
+
                             //if this is a reference, set the initial reference
                             if (dt == 'Reference') {
-                                var profileUrl =  data.type[0].profile;     //only the first datatype (we only support 1 right now)
+                                var profileUrl = data.type[0].targetProfile || data.type[0].profile;     //only the first datatype (we only support 1 right now)
                                 $scope.references.entry.forEach(function(ent){
                                     if (ent.resource.url == profileUrl) {
                                         $scope.input.referenceFromIg = ent;
@@ -1795,7 +1799,11 @@ angular.module("sampleApp")
                             if (dt.isCoded) {
                                 $scope.isCoded = true;
                             }
-                            
+/*
+                            if (dt.code == 'Extension') {
+                                $scope.isExtension = true;
+                            }
+                            */
                             
                         }
                         

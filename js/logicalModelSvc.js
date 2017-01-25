@@ -647,8 +647,12 @@ angular.module("sampleApp")
 
             },
             getModelHistory: function (id) {
+
+
                 var url = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/" + id + "/_history";
-                return $http.get(url);
+                return GetDataFromServer.adHocFHIRQueryFollowingPaging(url)
+
+                //return $http.get(url);
             },
             createTreeArrayFromSD: function (sd) {
                 //generate the array that the tree uses from the StructureDefinition
@@ -752,8 +756,22 @@ angular.module("sampleApp")
                         item.data.description = ed.definition;
                         item.data.type = ed.type;
 
+
+
+
+                        //in STU3 type.profile became type.targetProfile - should be able to drop 'profile' eventually...
                         if (ed.type && ed.type[0].profile) {
                             item.data.referenceUri = ed.type[0].profile;
+
+                            //in stu2 this is an array - just grab the first one...
+                            if (angular.isArray(item.data.referenceUri)) {
+                                item.data.referenceUri = item.data.referenceUri[0];
+                            }
+
+                        }
+
+                        if (ed.type && ed.type[0].targetProfile) {
+                            item.data.referenceUri = ed.type[0].targetProfile;
 
                             //in stu2 this is an array - just grab the first one...
                             if (angular.isArray(item.data.referenceUri)) {

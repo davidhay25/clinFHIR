@@ -102,6 +102,13 @@
             border-radius: 2px;
         }
 
+
+
+        .designerScroll {
+            height: 600px;
+            overflow-y: scroll;
+        }
+
     </style>
 
 </head>
@@ -334,7 +341,7 @@
 
 
 
-                <div id="lmTreeView"></div>
+                <div class="designerScroll" id="lmTreeView"></div>
 
 
 
@@ -588,6 +595,8 @@
 
                                     </td>
                                 </tr>
+
+<!--
                                 <tr ng-show="selectedNode.data.referenceUri| getLogicalID">
                                     <td>Map to Model</td>
                                     <td>
@@ -610,6 +619,8 @@
                                         </span>
                                     </td>
                                 </tr>
+                                -->
+
                                 <tr><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>
                                 <tr><td>Multiplicity</td><td>{{selectedNode.data.min}}..{{selectedNode.data.max}}</td></tr>
                                 <tr ng-show="selectedNode.data.analysis">
@@ -632,13 +643,13 @@
 
                                         <!-- Show any profile. If a reference, then hyperlink to the 'display' functionality... -->
                                         <span ng-show="typ.code == 'Reference'" class="pull-right">
-                                            <span class="clickable" ng-click="viewReferencedModel(typ.profile)">View</span>
+                                            <span class="clickable" ng-click="viewReferencedModel(selectedNode.data.referenceUri)">View</span>
 
 
 
 
 
-                                            <span ng-hide="isDirty" class="clickable" ng-click="loadReferencedModel(typ.profile)">Load</span>
+                                            <span ng-hide="isDirty" class="clickable" ng-click="loadReferencedModel(selectedNode.data.referenceUri)">Load</span>
                                         </span>
 
                                         <div>{{typ.profile}}{{typ.targetProfile}}</div>
