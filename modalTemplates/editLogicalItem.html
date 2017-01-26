@@ -14,7 +14,7 @@
             </div>
             <div class="col-md-3">
                 <div class="pull-right">
-                    <button class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
+                    <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
                     <button class="btn btn-success" ng-show="canSave" ng-click="save()">Save</button>
                 </div>
             </div>
@@ -193,8 +193,20 @@
                         <uib-tabset>
                             <uib-tab heading="FHIR">
                                 <br/>
-                                <input type="text" ng-model="input.mappingPath"
-                                       uib-typeahead="path for path in allPaths | filter:$viewValue | limitTo:100" class="form-control">
+                                <input type="text" typeahead-on-select="fhirMapping(input.mappingPath)" ng-model="input.mappingPath"
+                                       uib-typeahead="path for path in allPaths | filter:$viewValue | limitTo:100" class="form-control"/>
+
+                                <div ng-show="isExtension">
+                                    <div class="form-group">
+                                        <br/>
+                                        <div class="row">
+                                            <div class="col-md-12 col-sm-12">
+                                                <input type="text" placeholder="Enter the Url of the extension definition"
+                                                       ng-model="input.fhirMappingExtensionUrl" class="form-control"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </uib-tab>
                             <uib-tab heading="v2">
                                 <br/>

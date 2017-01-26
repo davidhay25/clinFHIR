@@ -1520,6 +1520,7 @@ console.log(summary);
             vsLookup['administrative-gender'] = {id:'administrative-gender',minLength:1,type:'list'};
             vsLookup['reason-medication-not-given-codes'] = {type:'list'};
             vsLookup['care-plan-activity-category'] = {type:'list'};
+            vsLookup['location-physical-type'] = {type:'list'};
             var ar = uri.split('/');
             var vsName = ar[ar.length - 1];
 

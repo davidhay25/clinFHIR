@@ -1633,7 +1633,12 @@ angular.module("sampleApp")
                         
 
                         $scope.input.multiplicity = 'opt';
-
+                        $scope.fhirMapping = function(map) {
+                            $scope.isExtension = false;
+                            if (map && map.indexOf('xtension') > -1) {
+                                $scope.isExtension = true;
+                            }
+                        };
 
                         if (baseType) {
 
@@ -1657,8 +1662,11 @@ angular.module("sampleApp")
                             $scope.input.comments = data.comments;
                             $scope.input.mapping = data.mapping;
                             $scope.input.mappingPath = data.mappingPath;
+                            $scope.fhirMapping(data.mappingPath);       //check for an extension
                             $scope.input.fixedString = data.fixedString;
                             $scope.input.mappingPathV2 = data.mappingPathV2;
+
+                            $scope.input.fhirMappingExtensionUrl = data.fhirMappingExtensionUrl;
 
                             if (data.min == 0) {
                                 $scope.input.multiplicity = 'opt';
@@ -1690,8 +1698,6 @@ angular.module("sampleApp")
                             $scope.selectedValueSet = data.selectedValueSet;
 
 
-
-
                             //if this is a reference, set the initial reference
                             if (dt == 'Reference') {
                                 var profileUrl = data.type[0].targetProfile || data.type[0].profile;     //only the first datatype (we only support 1 right now)
@@ -1715,6 +1721,8 @@ angular.module("sampleApp")
 
                         }
 
+
+
                         $scope.checkName = function(){
                             $scope.canSave = true;
                             if (! $scope.input.name || $scope.input.name.indexOf('0') > -1) {
@@ -1737,7 +1745,13 @@ angular.module("sampleApp")
                             vo.description = $scope.input.description || 'definition';
                             vo.comments = $scope.input.comments;
                             vo.mapping = $scope.input.mapping;
-                            vo.mappingPath = $scope.input.mappingPath;
+                            vo.mappingPath = $scope.input.mappingPath;      //this is the FHIR path
+
+                            //if mapping to an extension, the include the oath to the extension
+                            if (vo.mappingPath && vo.mappingPath.indexOf('xtension') > -1) {
+                                vo.fhirMappingExtensionUrl = $scope.input.fhirMappingExtensionUrl
+                            }
+
                             vo.mappingPathV2 = $scope.input.mappingPathV2;
                             vo.type = [{code:$scope.input.dataType.code}];
                             vo.editNode = editNode;
@@ -1920,8 +1934,6 @@ angular.module("sampleApp")
                 }).result.then(
                     function(result) {
 
-                        //console.log(result)
-
                         if (result.editNode) {
                             //editing an existing node - replace the data property in the node with the results......
                             $scope.treeData.forEach(function (item, index) {
@@ -1949,22 +1961,12 @@ angular.module("sampleApp")
 
 
                             //the currently selected parent node type should now be set to 'BackBone element'
-
-                            //vo.type = [{code:$scope.input.dataType.code}];
-                           // if ($scope.selectedNode && $scope.selectedNode.data) {
-                            //the parent type should be backbone element...
                             var node = findNodeWithPath(parentPath);
                             if (node){
                                 node.data.type = [{code:'BackboneElement'}]
                             }
 
 
-
-                            //}
-
-//delete $scope.selectedNode;
-
-                          //  $scope.selectedNode = newNode;
 
                         }
 

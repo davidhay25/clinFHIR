@@ -93,7 +93,7 @@ angular.module("sampleApp")
                                                         var text = $filter('getLogicalID')(profileUrl);
 
                                                         ed.path = ed.path.replace('extension',text)
-                                                        ed.builderMeta || {}
+                                                        //ed.builderMeta || {}
                                                         ed.builderMeta = {isExtension : true};  //to colourize it, and help with the build..
                                                         ed.builderMeta.extensionUrl = profileUrl;
 

@@ -794,8 +794,6 @@ angular.module("sampleApp")
             return;
         }
 
-
-
         $uibModal.open({
 
             templateUrl: 'modalTemplates/searchForExtension.html',
@@ -920,11 +918,6 @@ angular.module("sampleApp")
                     ed.type = [{code:'Extension',profile:[extensionDef.url]}];       
                 }
 
-
-
-
-
-
                 //this is a property against the component that will add the ed to the tree view
                 $scope.newNodeToAdd = ed;       //<<<<<<  here is the add function... see the defintiion link  in profileEditor.html
                 
@@ -938,7 +931,7 @@ angular.module("sampleApp")
             }
         );
 
-    }
+    };
 
     //the user wants to restore an element that was removed from the base type
     $scope.RestoreFromDiff = function(inx) {

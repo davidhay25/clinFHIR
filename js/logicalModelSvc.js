@@ -659,6 +659,7 @@ angular.module("sampleApp")
                 var mappingCommentUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
                 var mapToModelExtensionUrl = appConfigSvc.config().standardExtensionUrl.mapToModel;
                 var baseTypeForModel = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
+                var simpleExtensionUrl = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl;
 
                 var cntExtension = 0;
                 var arTree = [];
@@ -757,6 +758,11 @@ angular.module("sampleApp")
                         item.data.type = ed.type;
 
 
+
+                        var extSimpleExt = Utilities.getSingleExtensionValue(ed, simpleExtensionUrl);
+                        if (extSimpleExt) {
+                            item.data.fhirMappingExtensionUrl = extSimpleExt.valueString;
+                        }
 
 
                         //in STU3 type.profile became type.targetProfile - should be able to drop 'profile' eventually...
@@ -881,12 +887,15 @@ angular.module("sampleApp")
                 var mappingCommentUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
                 var mapToModelExtensionUrl = appConfigSvc.config().standardExtensionUrl.mapToModel;
                 var baseTypeForModelUrl = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
+                var simpleExtensionUrl = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl;
 
                 //todo - should use Utile.addExtension...
                 var sd = {resourceType: 'StructureDefinition'};
                 if (currentUser) {
                     this.addSimpleExtension(sd, 'http:www.clinfhir.com/StructureDefinition/userEmail', currentUser.email)
                 }
+
+
 
                 if (header.baseType) {
                     Utilities.addExtensionOnce(sd, baseTypeForModelUrl, {valueString: header.baseType})
@@ -929,7 +938,7 @@ angular.module("sampleApp")
                             code: header.type,
                             'system': 'http:www.hl7.org.nz/NamingSystem/logicalModelContextType'
                         }]
-                    }
+                    };
                     sd.useContext = [uc]
 
                 }
@@ -946,6 +955,11 @@ angular.module("sampleApp")
                     var data = item.data;
                     // console.log(data);
                     var ed = {}
+                    //this element is mapped to a simple extension. Do this first so the extensions are at the top...
+                    if (data.fhirMappingExtensionUrl) {
+                        Utilities.addExtensionOnce(ed, simpleExtensionUrl, {valueString: data.fhirMappingExtensionUrl})
+                    }
+
                     ed.id = data.path;
                     ed.path = data.path;
                     ed.short = data.short;
@@ -961,6 +975,8 @@ angular.module("sampleApp")
                         ed.mapping = ed.mapping || [];
                         ed.mapping.push({identity: 'hl7V2', map: data.mappingPathV2});
                     }
+
+
 
 
                     if (data.mapping) {
@@ -981,6 +997,9 @@ angular.module("sampleApp")
                     }
 
 
+
+
+                    //todo - not sure about this..
                     if (data.mapToModelUrl) {
                         //this element will actually be mapped to another model (eventually another profile)
                         //also added as an extension to the first mapping node mapping

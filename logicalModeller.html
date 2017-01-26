@@ -231,6 +231,27 @@
 
 
             <uib-tabset>
+
+                <uib-tab heading="Palette">
+
+                    <ul class="list-group" style=" height:500px; overflow: auto;" >
+                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.id == entry.item.display}"
+                            ng-repeat="entry in lmPalette.entry"
+                            ng-click="selectFromPalette(entry.item)">
+
+                            <div class="row">
+                                <div class="col-md-9 col-sm-9">
+                                    <h4>{{entry.item.reference | getLogicalID}}</h4>
+                                </div>
+
+                            </div>
+
+                            {{entry.resource.description | limitTo : 200}}
+                        </li>
+                    </ul>
+
+
+                </uib-tab>
                 <uib-tab heading="All">
 
                     <div><input type="text" class="form-control" placeholder="Filter model list by id" ng-model="input.filter" ng-change="filterModelList(input.filter)"/> </div>
@@ -253,26 +274,6 @@
                         </li>
                     </ul>
 
-
-
-                </uib-tab>
-                <uib-tab heading="Palette">
-
-                    <ul class="list-group" style=" height:500px; overflow: auto;" >
-                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.id == entry.item.display}"
-                            ng-repeat="entry in lmPalette.entry"
-                            ng-click="selectFromPalette(entry.item)">
-
-                            <div class="row">
-                                <div class="col-md-9 col-sm-9">
-                                    <h4>{{entry.item.reference | getLogicalID}}</h4>
-                                </div>
-
-                            </div>
-
-                            {{entry.resource.description | limitTo : 200}}
-                        </li>
-                    </ul>
 
 
                 </uib-tab>
