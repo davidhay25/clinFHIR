@@ -11,6 +11,10 @@ angular.module("sampleApp")
             $scope.vsDetails = vsDetails;
             $scope.expandedValueSet = expandedValueSet;
             $scope.input = {};
+            $scope.input = {dt: {contactpoint: {use:'home',system:'phone'}}};
+
+
+
 
             var path = hashPath.path;
 

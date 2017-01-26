@@ -3,6 +3,18 @@
 
     <div ng-show="dataTypeBeingEntered == 'ContactPoint'">
         <div class="row">
+
+            <div class="col-md-3  col-sm-3 ">
+                <select class="form-control" ng-model="input.dt.contactpoint.use">
+                    <option value="home">Home</option>
+                    <option value="work">Work</option>
+                    <option value="temp">Temp</option>
+                    <option value="mobile">Mobile</option>
+
+                </select>
+
+
+            </div>
             <div class="col-md-3  col-sm-3 ">
                 <select class="form-control" ng-model="input.dt.contactpoint.system">
                     <option value="phone">Phone</option>

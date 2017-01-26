@@ -688,6 +688,11 @@ angular.module("sampleApp")
 
                 switch (dt) {
 
+                    case 'ContactPoint':
+                        var insrt = {value:value.contactpoint.value,system:value.contactpoint.system,use:value.contactpoint.use}
+                        simpleInsert(insertPoint,info,path,insrt,dt);
+                        this.addStringToText(insertPoint,path+": "+ insrt.value)
+                        break;
                     case 'Identifier' :
                         var insrt = {value:value.identifier.value,system:value.identifier.system}
                         simpleInsert(insertPoint,info,path,insrt,dt);

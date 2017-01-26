@@ -191,7 +191,7 @@ angular.module("sampleApp")
             });
 
             //datatypes for which there is an entry form
-            $scope.supportedDt = ['Identifier','CodeableConcept','string','code','date','Period','dateTime','Address','HumanName','Annotation','boolean']
+            $scope.supportedDt = ['ContactPoint','Identifier','CodeableConcept','string','code','date','Period','dateTime','Address','HumanName','Annotation','boolean']
 
             $scope.currentBundleIndex = 0;     //the index of the bundle currently being used
 
