@@ -248,6 +248,7 @@
     <script src="js/components/extensionDirective.js"></script>
     <script src="js/components/edDirectives.js"></script>
     <script src="js/newProfile.js"></script>
+    <script src="js/queryCtrl.js"></script>
     <title>clinFHIR</title>
 
     <style type="text/css">
@@ -543,6 +544,7 @@
 
 
                                         <!-- has the same server requirements as logical modeller-->
+                                        <!--
                                         <li ng-show="showLogicalModeller()" >
                                             <a href="ImplementationGuide.html" target="_blank"
                                                uib-popover="Load the Implementation Guide designer"
@@ -550,7 +552,7 @@
                                                popover-trigger="'mouseenter'">Implementation Guide
                                                 <img class="pull-right" src="icons/external.png"/> </a>
                                         </li>
-
+-->
 
 
 
@@ -822,22 +824,8 @@
             </div>
 
 
-            <div ng-show="runningLocally">
-                <button class="btn btn-link" ng-click="displayMode = 'consult'">ConsultBuilder</button>
 
-                <button class="btn btn-info" ng-click="editExistingResource()">
-                    edit</button>
-
-            </div>
-
-
-
-
-<!--
-            <div ng-show="displayMode == 'consult'" ng-controller="consultbuilderCtrl">
-                <ng-include src="'/includes/consultBuilder.html'"></ng-include>
-            </div>
--->
+            <button class="btn btn-default" ng-click="showQuery()">Query</button>
 
             <!-- A directive for browsing value sets-->
             <vs-browser trigger="showVSBrowserDialog"></vs-browser>

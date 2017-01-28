@@ -3195,7 +3195,7 @@ angular.module("sampleApp")
 
 
 })
-    .controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,
+    .controller('queryCtrlDEP',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,
                                      profileCreatorSvc,GetDataFromServer){
 
         $scope.config = $localStorage.config;
@@ -3209,7 +3209,6 @@ angular.module("sampleApp")
         }
         
         setDefaultInput();
-       // $scope.input.server = config.allKnownServers[0]
 
 
         $localStorage.queryHistory = $localStorage.queryHistory || [];
@@ -3290,9 +3289,51 @@ angular.module("sampleApp")
             delete $scope.input.selectedType;
 
             $scope.server =server;
-            $scope.buildQuery();
+
+            $scope.waiting = true;
+            resourceCreatorSvc.getConformanceResource($scope.server.url).then(
+                function (data) {
+                    $scope.conformanceForQuery = data.data;
+                    console.log($scope.conformanceForQuery);
+                    //analyseConformance(data.data);      //figure out the server capabi
+
+                },function (err) {
+                    alert('Error loading conformance resource:'+angular.toJson(err));
+                }
+            ).finally(function(){
+                $scope.waiting = false;
+            })
+
+
+
+            $scope.buildQuery();        //builds the query from the params on screen
 
         };
+
+        $scope.typeSelected = function(type) {
+
+            var ar = $scope.conformanceForQuery.rest[0].resource;
+
+            for (var i = 0; i < ar.length ; i++) {
+                if (ar[i].type == type) {
+                    //this is the definition of the type...
+                    var t = ar[i];
+                    $scope.queryParam = t.searchParam;
+                    console.log($scope.queryParam);
+
+                    break;
+                }
+            }
+
+            $scope.buildQuery();
+        }
+
+        $scope.addParamToQuery = function(param,value) {
+            if ($scope.input.parameters) {
+                $scope.input.parameters = $scope.input.parameters + '&'
+            }
+            $scope.input.parameters += param.name + '=' + value;
+        }
 
         $scope.buildQuery = function() {
             delete $scope.anonQuery;
@@ -3349,7 +3390,7 @@ angular.module("sampleApp")
                 resourceCreatorSvc.getConformanceResource($scope.server.url).then(
                     function (data) {
 
-                        $scope.conformance = data.data
+                        $scope.conformance = data.data      //setting the conformance variable shows the de
                     },function (err) {
                         alert('Error loading conformance resource:'+angular.toJson(err));
                     }
