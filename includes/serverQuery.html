@@ -128,13 +128,19 @@
 
                             <div class="row">
                                 <div class="col-md-2 col-sm-2">
+                                    Resource Type
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-2 col-sm-2">
 
                                     <select class="form-control" ng-model="input.selectedType"
                                             ng-change="typeSelected(input.selectedType)"
                                             ng-options="type.name for type in standardResourceTypes"/>
                                 </div>
 
-                                <div class="col-md-3 col-sm-3">
+                                <div class="col-md-5 col-sm-5">
                                     <div class="row">
                                         <div class="col-md-11 col-sm-11">
                                             <textarea ng-show="input.selectedType"
@@ -152,8 +158,9 @@
                                     </div>
 
                                 </div>
-
+<!--
                                 <div class="col-md-6 col-sm-6"> {{query}}</div>
+                                -->
 <!--
                                 <div class="col-md-1 col-sm-1">
                                     <button class="btn btn-default" ng-click="doit()">Run</button>
@@ -165,7 +172,7 @@
 
 
 
-                            <div class="row rounded-box" ng-show="query">
+                            <div class="row rounded-box" ng-show="type && query">
                                 <div class="col-md-1 col-sm-1">
                                     <button class="btn btn-primary" ng-click="doit()">Execute</button>
                                 </div>
@@ -208,7 +215,7 @@
                                                 <div class="list-group"  style="height:600px; overflow-y: auto;">
                                                     <div ng-class="{'list-group-item':true,'list-group-item-info':result.selectedEntry.fullUrl == entry.fullUrl}"
                                                          ng-repeat="entry in response.data.entry">
-                                                        <div ng-click="result.selectedEntry = entry" style="cursor: pointer">
+                                                        <div  ng-click="selectEntry(entry)"  ng-clickDEP="result.selectedEntry = entry" style="cursor: pointer">
                                                             {{entry.resource.resourceType}}
                                                             <div>{{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}</div>
                                                         </div>
@@ -216,7 +223,24 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-9 col-sm-9">
-                                                <pre>{{result.selectedEntry | json}}</pre>
+
+
+
+
+                                                <uib-tabset>
+                                                    <uib-tab heading="Json">
+                                                        <pre>{{result.selectedEntry | json}}</pre>
+                                                    </uib-tab>
+                                                    <uib-tab heading="Tree">
+                                                        <div id="queryResourceTree"></div>
+
+                                                    </uib-tab>
+                                                </uib-tabset>
+
+
+
+
+
                                             </div>
                                         </div>
 

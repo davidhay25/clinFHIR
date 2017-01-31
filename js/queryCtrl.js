@@ -1,5 +1,5 @@
 angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,
-                                 profileCreatorSvc,GetDataFromServer,ResourceUtilsSvc){
+                                 profileCreatorSvc,GetDataFromServer,ResourceUtilsSvc,RenderProfileSvc){
 
     $scope.config = $localStorage.config;
     $scope.operationsUrl = $scope.config.baseSpecUrl + "operations.html";
@@ -13,6 +13,14 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     }
 
     setDefaultInput();
+
+    //get all the standard resource types - the one defined in the fhir spec. Used for the select profile modal...
+    RenderProfileSvc.getAllStandardResourceTypes().then(
+        function(standardResourceTypes) {
+            $scope.standardResourceTypes = standardResourceTypes ;
+
+        }
+    );
 
 
 
@@ -101,6 +109,15 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                // $scope.conformanceForQuery = data.data;
                 $scope.conformance = data.data;
                 console.log($scope.conformance);
+
+                $scope.hashResource = {};
+
+                data.data.rest[0].resource.forEach(function(res){
+                    //console.log(res)
+                    $scope.hashResource[res.type] = res;
+                })
+
+
                 //analyseConformance(data.data);      //figure out the server capabi
 
             },function (err) {
@@ -121,19 +138,9 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     //whan a resource tye is selected
     $scope.typeSelected = function(type) {
+        $scope.type = type;
+        $scope.buildQuery();
 
-        var ar = $scope.conformance.rest[0].resource;
-
-        for (var i = 0; i < ar.length ; i++) {
-            if (ar[i].type == type.name) {
-                //this is the definition of the type...
-                var t = ar[i];
-                $scope.queryParam = t.searchParam;
-                console.log($scope.queryParam);
-                $scope.buildQuery();
-                break;
-            }
-        }
 
 
     }
@@ -142,10 +149,18 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     $scope.addParamToQuery = function(modelUrl) {
         $uibModal.open({
             templateUrl: 'modalTemplates/queryParam.html',
-            //size: 'lg',
-            controller: function ($scope,paramList) {
-                $scope.paramList = paramList;
+            //size: 'sm',
+            controller: function ($scope,paramList,hashResource,type) {
+                $scope.paramList = hashResource[type.name].searchParam; // paramList;
                 $scope.input = {};
+
+
+                //find all the resources referenced by this type...
+                var refs = []
+                $scope.paramList.forEach(function(param){
+                    console.log(param)
+                })
+
 
                 $scope.close = function() {
                     $scope.$close({param:$scope.input.param,value:$scope.input.paramValue})
@@ -154,6 +169,12 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
             },
             resolve : {
+                type : function(){
+                    return $scope.type;
+                },
+                hashResource : function(){
+                    return $scope.hashResource;
+                },
                 paramList: function () {          //the default config
                     console.log($scope.queryPara)
                     return $scope.queryParam;
@@ -410,9 +431,26 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
             }
         ).finally(function(){
             $scope.waiting = false;
-            setDefaultInput();
+            //temp setDefaultInput();
         })
     }
+
+
+    $scope.selectEntry = function(entry){
+
+        $scope.result.selectedEntry = entry;
+
+        var r = angular.copy(entry.resource);
+        var newResource =  angular.fromJson(angular.toJson(r));
+        var treeData = resourceCreatorSvc.buildResourceTree(newResource);
+
+        //show the tree of this version
+        $('#queryResourceTree').jstree('destroy');
+        $('#queryResourceTree').jstree(
+            {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+        )
+
+    };
 
     $scope.server = appConfigSvc.getCurrentDataServer();
     $scope.selectServer($scope.server)
