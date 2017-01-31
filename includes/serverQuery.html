@@ -4,6 +4,12 @@
         color: blue;
         font-weight: bold;
     }
+    .hide: {
+        display: none;
+    }
+
+
+
 </style>
 
 
@@ -71,171 +77,169 @@
     <hr/>
     <div class="col-sm-12 col-md-12">
 
-        <div class="pull-right">
-            <button class="btn btn-link">Show History</button>
 
-        </div>
 
         <uib-tabset>
             <uib-tab heading="Query">
-                <br/>
+                <div class="pull-right">
+                    <button class="btn btn-link" ng-click="showHistory = ! showHistory">
+                        <span ng-show="showHistory">Hide History</span>
+                        <span ng-show="! showHistory">Show History</span>
+                    </button>
 
-                <div class="row" ng-show="showHistory">
-                    <div class="col-md-12 col-sm-12">
-                        <h4>Previous Queries</h4>
-
-                        <div class="list-group">
-                            <a href="#" class="list-group-item"
-                               ng-repeat="hx in queryHistory"
-                               ng-model="input.hx" ng-click = "selectFromHistory(hx)">
-                                <div ng-class="{thisServer:hx.server.url == server.url}">{{hx.anonQuery}}</div>
-
-
-
-                            </a>
-                        </div>
-                    </div>
                 </div>
 
 
-                <div>
+                <div class="row">
+                    <div ng-class="{'col-md-4 col-sm-4':showHistory, hide: !showHistory}" >
+                        <div class="col-md-12 col-sm-12">
+                            <h4>Previous Queries</h4>
+
+                            <div class="list-group">
+                                <a href="#" class="list-group-item"
+                                   ng-repeat="hx in queryHistory"
+                                   ng-model="input.hx" ng-click = "selectFromHistory(hx)">
+                                    <div ng-class="{thisServer:hx.server.url == server.url}">{{hx.anonQuery}}</div>
 
 
-                    <div ng-show="server">
-                        <div class="row">
-                            <div class="col-md-2 col-sm-2">Verb</div>
-                            <div class="col-md-3 col-sm-3">Resource Type</div>
-                            <div class="col-md-4 col-sm-6">
-                                Parameters
-                                <!--
-                                <input type="radio" ng-model="input.category" value="parameters"> Parameters
-                                <input type="radio" ng-model="input.category" value="id"> Id
-                                -->
 
+                                </a>
                             </div>
-                            <div class="col-md-1 col-sm-1"></div>
                         </div>
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-2 col-sm-2">
-                                <select class="form-control" ng-model="input.verb">
-                                    <option value="GET">GET</option>
-                                    <option value="PUT">PUT</option>
-                                    <option value="POST">POST</option>
-                                    <option value="DELETE">DELETE</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3 col-sm-3">
-                                <input type="text" ng-model="input.selectedType"
-                                       uib-typeahead="type.name for type in standardResourceTypes | filter:$viewValue " class="form-control"
-                                       ng-blur="typeSelected(input.selectedType)">
-                            </div>
 
-                            <div class="col-md-6 col-sm-6">
+                    <div  ng-class="{'col-md-8 col-sm-8':showHistory,'col-md-12 col-sm-12':!showHistory}">
 
-                                <div class="row" ng-show="queryParam">
-                                    <div class="col-md-5 col-sm-5">
-                                        <select class="form-control" ng-model="input.param"
-                                                ng-options="opt.name for opt in queryParam"/>
-                                    </div>
-                                    <div class="col-md-6 col-sm-6">
-                                        <input type="text" class="form-control" ng-model="input.paramValue" placeholder="Value of {{input.param.name}}"/>
-                                    </div>
-                                    <div class="col-md-1 col-sm-1">
-                                        <i class="glyphicon glyphicon-cloud-download"
-                                           title="Add to parameter"
-                                           ng-click="addParamToQuery(input.param,input.paramValue)" style="cursor: pointer">
 
-                                        </i>
-                                    </div>
+                        <div ng-show="server">
+                            <!--
+                            <div class="row">
+                                <div class="col-md-2 col-sm-2">Verb</div>
+                                <div class="col-md-3 col-sm-3">Resource Type</div>
+                                <div class="col-md-6 col-sm-6">
+                                    Parameters
+
                                 </div>
-
-
-                                <textarea ng-model="input.parameters" class="form-control"
-                                          ng-change="buildQuery()"></textarea>
-
-                                <!--
-                                <input ng-show="input.category=='id'" type="text" class="form-control"
-                                       ng-model="input.id" ng-change="buildQuery()"/>
-
-                                -->
-
+                                <div class="col-md-1 col-sm-1"></div>
                             </div>
-                            <div class="col-md-1 col-sm-1">
-                                <button class="btn btn-default" ng-click="doit()">Run</button>
-                            </div>
-                        </div>
+                            -->
 
-
-
-
-
-                        <div class="row">
-                            <div class="col-md-12 col-sm-12"><strong>Query:</strong> {{query}}</div>
-                        </div>
-
-                    </div>
-
-
-
-                    <div class="row" ng-show="err">
-                        <div class="col-md-12 col-sm-12">
-                            <div><strong>StatusCode:{{err.status}}</strong></div>
-                            <pre>{{err.data | json}}</pre>
-                        </div>
-                    </div>
-
-                    <div class="row" ng-show="response">
-                        <div class="col-md-12 col-sm-12">
 
                             <div class="row">
-                                <div class="col-md-4 col-sm-4">
-                                    <div><strong>StatusCode:</strong>{{response.status}}</div>
+                                <div class="col-md-2 col-sm-2">
+
+                                    <select class="form-control" ng-model="input.selectedType"
+                                            ng-change="typeSelected(input.selectedType)"
+                                            ng-options="type.name for type in standardResourceTypes"/>
                                 </div>
-                                <div class="col-md-4 col-sm-4">
-                                    <div><strong>Count:</strong>{{response.data.entry.length}}</div>
+
+                                <div class="col-md-3 col-sm-3">
+                                    <div class="row">
+                                        <div class="col-md-11 col-sm-11">
+                                            <textarea ng-show="input.selectedType"
+                                                      placeholder="Query parameters"
+                                                      ng-model="input.parameters" class="form-control"
+                                                      ng-change="buildQuery()"></textarea>
+                                        </div>
+                                        <div class="col-md-1 col-sm-1">
+                                            <i ng-show="input.selectedType" class="glyphicon glyphicon-plus"
+                                               title="Add to parameter"
+                                               ng-click="addParamToQuery()" style="cursor: pointer">
+
+                                            </i>
+                                        </div>
+                                    </div>
+
                                 </div>
+
+                                <div class="col-md-6 col-sm-6"> {{query}}</div>
+<!--
+                                <div class="col-md-1 col-sm-1">
+                                    <button class="btn btn-default" ng-click="doit()">Run</button>
+                                </div>
+                                -->
                             </div>
 
 
 
-                            <uib-tabset>
-                                <uib-tab heading="Contents">
 
-                                    <div class="row">
-                                        <div class="col-md-3 col-sm-3">
-                                            <div class="list-group"  style="height:600px; overflow-y: auto;">
-                                                <div ng-class="{'list-group-item':true,'list-group-item-info':result.selectedEntry.fullUrl == entry.fullUrl}"
-                                                     ng-repeat="entry in response.data.entry">
-                                                    <div ng-click="result.selectedEntry = entry" style="cursor: pointer">
-                                                        {{entry.resource.resourceType}}
-                                                        <div>{{entry.resource.id}}</div>
+
+                            <div class="row rounded-box" ng-show="query">
+                                <div class="col-md-1 col-sm-1">
+                                    <button class="btn btn-primary" ng-click="doit()">Execute</button>
+                                </div>
+                                <div class="col-md-11 col-sm-11">
+                                    <h5>{{query}}</h5>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="row" ng-show="err">
+                            <div class="col-md-12 col-sm-12">
+                                <div><strong>StatusCode:{{err.status}}</strong></div>
+                                <pre>{{err.data | json}}</pre>
+                            </div>
+                        </div>
+
+                        <div class="row" ng-show="response">
+                            <div class="col-md-12 col-sm-12">
+
+                                <div class="row">
+                                    <div class="col-md-4 col-sm-4">
+                                        <div><strong>StatusCode:</strong>{{response.status}}</div>
+                                    </div>
+                                    <div class="col-md-4 col-sm-4">
+                                        <div><strong>Count:</strong>{{response.data.entry.length}}</div>
+                                    </div>
+                                </div>
+
+
+
+                                <uib-tabset>
+                                    <uib-tab heading="Contents">
+
+                                        <div class="row">
+                                            <div class="col-md-3 col-sm-3">
+                                                <div class="list-group"  style="height:600px; overflow-y: auto;">
+                                                    <div ng-class="{'list-group-item':true,'list-group-item-info':result.selectedEntry.fullUrl == entry.fullUrl}"
+                                                         ng-repeat="entry in response.data.entry">
+                                                        <div ng-click="result.selectedEntry = entry" style="cursor: pointer">
+                                                            {{entry.resource.resourceType}}
+                                                            <div>{{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}</div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="col-md-9 col-sm-9">
+                                                <pre>{{result.selectedEntry | json}}</pre>
+                                            </div>
                                         </div>
-                                        <div class="col-md-9 col-sm-9">
-                                            <pre>{{result.selectedEntry | json}}</pre>
-                                        </div>
-                                    </div>
 
 
 
-                                </uib-tab>
+                                    </uib-tab>
 
-                                <uib-tab heading="Json">
-                                    <pre>{{response.data | json}}</pre>
-                                </uib-tab>
-                            </uib-tabset>
+                                    <uib-tab heading="Json">
+                                        <pre>{{response.data | json}}</pre>
+                                    </uib-tab>
+                                </uib-tabset>
 
 
 
 
+                            </div>
                         </div>
+
+
                     </div>
 
-
                 </div>
+
 
             </uib-tab>
             <uib-tab heading="Server Capabilities">
@@ -248,8 +252,10 @@
 
                             <table class="table">
                                 <tr>
-                                    <td valign="top" width="15%"><strong>Name</strong></td><td width="35%">{{conformance.name}}</td>
-                                    <td valign="top" width="15%"><strong>FHIR version</strong></td><td width="35%">{{conformance.fhirVersion}}</td>
+                                    <td valign="top" width="15%"><strong>Name</strong></td>
+                                    <td width="35%">{{conformance.name}}{{conformance.software.name}}</td>
+                                    <td valign="top" width="15%"><strong>FHIR version</strong></td>
+                                    <td width="35%">{{conformance.fhirVersion}}</td>
                                 </tr>
                                 <tr>
                                     <td valign="top"><strong>Description</strong></td><td>{{conformance.description}}</td>

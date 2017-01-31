@@ -1,10 +1,11 @@
 angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,
-                                 profileCreatorSvc,GetDataFromServer){
+                                 profileCreatorSvc,GetDataFromServer,ResourceUtilsSvc){
 
     $scope.config = $localStorage.config;
     $scope.operationsUrl = $scope.config.baseSpecUrl + "operations.html";
     $scope.input = {serverType:'known'};  //serverType allows select from known servers or enter ad-hoc
     $scope.result = {selectedEntry:{}}
+    $scope.ResourceUtilsSvc = ResourceUtilsSvc;
 
     $scope.queryHistory = $localStorage.queryHistory;
     $scope.makeUrl = function(type) {
@@ -12,6 +13,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     }
 
     setDefaultInput();
+
 
 
     $localStorage.queryHistory = $localStorage.queryHistory || [];
@@ -98,7 +100,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
             function (data) {
                // $scope.conformanceForQuery = data.data;
                 $scope.conformance = data.data;
-                console.log($scope.conformanceForQuery);
+                console.log($scope.conformance);
                 //analyseConformance(data.data);      //figure out the server capabi
 
             },function (err) {
@@ -114,28 +116,77 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     };
 
+
+
+
     //whan a resource tye is selected
     $scope.typeSelected = function(type) {
 
         var ar = $scope.conformance.rest[0].resource;
 
         for (var i = 0; i < ar.length ; i++) {
-            if (ar[i].type == type) {
+            if (ar[i].type == type.name) {
                 //this is the definition of the type...
                 var t = ar[i];
                 $scope.queryParam = t.searchParam;
                 console.log($scope.queryParam);
-
+                $scope.buildQuery();
                 break;
             }
         }
 
-        $scope.buildQuery();
+
     }
 
-    $scope.addParamToQuery = function(param,value) {
+
+    $scope.addParamToQuery = function(modelUrl) {
+        $uibModal.open({
+            templateUrl: 'modalTemplates/queryParam.html',
+            //size: 'lg',
+            controller: function ($scope,paramList) {
+                $scope.paramList = paramList;
+                $scope.input = {};
+
+                $scope.close = function() {
+                    $scope.$close({param:$scope.input.param,value:$scope.input.paramValue})
+                }
+
+
+            },
+            resolve : {
+                paramList: function () {          //the default config
+                    console.log($scope.queryPara)
+                    return $scope.queryParam;
+                }
+            }}).result.then(function(vo) {
+                console.log(vo)
+                if (vo) {
+                    delete $scope.response;
+
+                    if ($scope.input.parameters) {
+                        $scope.input.parameters = $scope.input.parameters + '&'
+                    } else {
+                        $scope.input.parameters =""
+                    }
+                    $scope.input.parameters += vo.param.name + '=' + vo.value;
+                    $scope.buildQuery()
+                }
+
+
+
+        })
+    };
+
+
+
+    $scope.addParamToQueryDEP = function(param,value) {
+
+        delete $scope.response;
+
         if ($scope.input.parameters) {
             $scope.input.parameters = $scope.input.parameters + '&'
+        } else {
+            $scope.input.parameters =""
         }
         $scope.input.parameters += param.name + '=' + value;
     }
@@ -144,10 +195,11 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     $scope.buildQuery = function() {
         delete $scope.anonQuery;
         delete $scope.query;
+        delete $scope.response;
         var qry = '';//$scope.server.url;
 
         if ($scope.input.selectedType){
-            qry += $scope.input.selectedType;
+            qry += $scope.input.selectedType.name;
         }
 
 
@@ -179,7 +231,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         if ($scope.server) {
 
             delete $scope.conformance;
-            $scope.input.selectedType = hx.type;
+            $scope.input.selectedType = {name:hx.type};
             $scope.input.parameters = hx.parameters;
             $scope.input.verb = hx.verb;
             $scope.buildQuery();
@@ -257,6 +309,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         });
     };
 
+    /*
     //when the user selects a reference to a profiled resource....
     $scope.showReferencedProfileDEP = function(uri) {
 
@@ -274,6 +327,8 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         )
 
     };
+
+    */
 
     //when a resource type is selected in the list
     $scope.showType = function(type){
@@ -327,6 +382,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         $scope.buildQuery();        //always make sure the query is correct;
         delete $scope.response;
         delete $scope.err;
+        delete $scope.result.selectedEntry;
         $scope.waiting = true;
         resourceCreatorSvc.executeQuery('GET',$scope.query).then(
             function(data){
@@ -336,7 +392,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
                 var hx = {
                     anonQuery:$scope.anonQuery,
-                    type:$scope.input.selectedType,
+                    type:$scope.input.selectedType.name,
                     parameters:$scope.input.parameters,
                     server : $scope.server,
                    // id:$scope.input.id,
@@ -357,6 +413,10 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
             setDefaultInput();
         })
     }
+
+    $scope.server = appConfigSvc.getCurrentDataServer();
+    $scope.selectServer($scope.server)
+
 
     //when the page was invoked, a conformance url was specified so display that...
     //assume the conformance url is on the NZ server...
