@@ -132,12 +132,23 @@
                                 </div>
                             </div>
 
+
+
                             <div class="row">
                                 <div class="col-md-2 col-sm-2">
 
                                     <select class="form-control" ng-model="input.selectedType"
                                             ng-change="typeSelected(input.selectedType)"
                                             ng-options="type.name for type in standardResourceTypes"/>
+                                </div>
+
+                                <div class="col-md-1 col-sm-1" ng-show="type">
+                                    <a target="_blank" ng-href="{{fhirBasePath}}{{type.name | getLogicalID | lowercase}}.html">
+                                        <i class="glyphicon glyphicon-globe"
+                                           title="View Resource definition in spec">
+                                        </i>
+
+                                    </a>
                                 </div>
 
                                 <div class="col-md-5 col-sm-5">

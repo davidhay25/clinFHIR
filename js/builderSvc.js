@@ -578,7 +578,12 @@ angular.module("sampleApp")
 
                 var deferred = $q.defer();
                 var url = appConfigSvc.getCurrentDataServer().url + 'DocumentReference?type=http://clinfhir.com/docs|builderDoc';
-                $http.get(url).then(
+
+
+
+                GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
+
+                //$http.get(url).then(
                     function (data) {
                         //console.log(data.data)
                         var bundle = data.data;

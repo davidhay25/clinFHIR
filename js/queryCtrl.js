@@ -92,6 +92,12 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
             server = {name:'Ad Hoc server',url:url}
         }
 
+        $scope.fhirBasePath="http://hl7.org/fhir/";
+        if (server.version == 3) {
+            $scope.fhirBasePath="http://build.fhir.org/";
+        }
+
+
 
 
         $scope.input.parameters = "";
@@ -100,6 +106,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         delete $scope.err;
         delete $scope.conformance;
         delete $scope.input.selectedType;
+        delete $scope.standardResourceTypes;
 
         $scope.server =server;
 
@@ -111,9 +118,10 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                 console.log($scope.conformance);
 
                 $scope.hashResource = {};
-
+                $scope.standardResourceTypes= []
                 data.data.rest[0].resource.forEach(function(res){
                     //console.log(res)
+                    $scope.standardResourceTypes.push({name:res.type})
                     $scope.hashResource[res.type] = res;
                 })
 
@@ -126,8 +134,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         ).finally(function(){
             $scope.waiting = false;
         })
-
-
 
         $scope.buildQuery();        //builds the query from the params on screen
 
