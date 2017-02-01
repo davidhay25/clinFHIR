@@ -50,6 +50,84 @@ angular.module("sampleApp")
         objColours.LogicalModel = '#cc0000';
 
         return {
+            sendToFHIRServer : function(bundle) {
+                //create a new bundle to submit as a transaction. excludes logical models
+               // var deferred = $q.defer();
+                var transBundle = {resourceType:'Bundle',type:'transaction',entry:[]}
+                bundle.entry.forEach(function(entry) {
+
+                    if (entry.isLogical) {
+                        console.log('Ignoring Logical Model: ' + resource.resourceType)
+                    } else {
+                        var transEntry = {resource:entry.resource};
+                        transEntry.request = {method:'PUT',url:entry.resource.resourceType+'/'+entry.resource.id}
+                        transBundle.entry.push(transEntry)
+                    }
+                });
+
+                console.log(transBundle)
+
+
+                var url = appConfigSvc.getCurrentDataServer().url;
+                return $http.post(url,transBundle)
+
+
+             //   deferred.resolve()
+
+               // return deferred.promise
+
+            },
+            validateAll : function(bundle) {
+                var deferred = $q.defer();
+                var queries = [];
+
+                bundle.entry.forEach(function(entry){
+
+                    if (entry.isLogical) {
+                        console.log('Ignoring Logical Model: '+resource.resourceType)
+                    } else {
+                        queries.push(
+                            Utilities.validate(entry.resource).then(
+                                function(data){
+                                    var oo = data.data;
+                                    console.log(data)
+                                    entry.valid='yes'
+                                    entry.response = {outcome:oo};
+
+
+                                },
+                                function(data) {
+                                    var oo = data.data;
+                                    entry.response = {outcome:oo};
+                                    // console.log(oo)
+                                    entry.valid='no'
+
+                                }
+                            )
+                        )
+                    }
+
+
+
+                })
+
+                $q.all(queries).then(
+                    function () {
+                        deferred.resolve();
+                    },
+                    function (err) {
+
+
+                        console.log( angular.toJson(err))
+                        deferred.reject()
+
+
+                    }
+                )
+
+                return deferred.promise;
+
+            },
             getPatientResource : function(){
                 var patient;
                 angular.forEach(gAllResourcesThisSet,function(res){

@@ -101,6 +101,55 @@ angular.module("sampleApp")
                 })
             }
 
+
+
+            $scope.findPatient = function(){
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
+                    keyboard: false,       //same as above.
+                    templateUrl: 'modalTemplates/searchForPatient.html',
+                    size:'lg',
+                    controller: 'findPatientCtrl'
+                }).result.then(
+                        function(resource){
+                            console.log(resource)
+
+
+                            $scope.currentPatient = resource;
+                            builderSvc.addResourceToAllResources(resource)
+                            $scope.selectedContainer.bundle.entry.push({resource:resource});
+                            $scope.selectedContainer.bundle.entry.sort(function(a,b){
+                                //$scope.resourcesBundle.entry.sort(function(a,b){
+                                if (a.resource.resourceType > b.resource.resourceType) {
+                                    return 1
+                                } else {
+                                    return -1
+                                }
+                            })
+                            $scope.displayMode = 'view';
+
+
+                            $scope.selectResource(resource,function(){
+                                $scope.waiting = false;
+                                makeGraph();
+                                drawResourceTree(resource);
+                                isaDocument();      //determine if this bundle is a document (has a Composition resource)
+
+                                $rootScope.$emit('addResource',resource);
+
+                            });       //select the resource, indicating that it is a new resource...
+
+
+
+                        }
+                )
+            }
+
+
+
+
+
+
             //note that the way we are recording validation is a non-compliant bundle...
             $scope.resetValidation = function(){
                 //when a resource is altered, re-set the validation
@@ -110,6 +159,44 @@ angular.module("sampleApp")
                     }
                 })
 
+            };
+
+            $scope.validateAll = function(){
+                var bundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+                console.log(bundle);
+                $scope.waiting = true;
+                builderSvc.validateAll(bundle).then(
+                    function(data){
+                        console.log(data.data)
+
+
+
+                    },function(err){
+                        console.log(err)
+
+                    }
+                ).finally(function(){
+                    $scope.waiting = false;
+                })
+
+
+
+            }
+
+            $scope.saveToFHIRServer =function() {
+                var bundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+                console.log(bundle);
+                $scope.waiting = true;
+                builderSvc.sendToFHIRServer(bundle).then(
+                    function(data){
+                        console.log(data.data)
+                    },
+                    function(err) {
+                        console.log(err)
+                    }
+                ).finally(function(){
+                    $scope.waiting = false;
+                })
             };
 
             $scope.validate = function(entry) {
@@ -130,7 +217,6 @@ angular.module("sampleApp")
                     function(data) {
                         var oo = data.data;
                         entry.response = {outcome:oo};
-
                        // console.log(oo)
                         entry.valid='no'
 
@@ -1323,11 +1409,9 @@ angular.module("sampleApp")
                 }
 
 
-
-
                 builderSvc.addResourceToAllResources(resource)
                 builderSvc.addSDtoCache(lm)
-                $scope.selectedContainer.bundle.entry.push({resource:resource});
+                $scope.selectedContainer.bundle.entry.push({resource:resource,isLogical:true});
                 $scope.selectedContainer.bundle.entry.sort(function(a,b){
                     //$scope.resourcesBundle.entry.sort(function(a,b){
                     if (a.resource.resourceType > b.resource.resourceType) {
