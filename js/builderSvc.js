@@ -3,7 +3,7 @@ angular.module("sampleApp")
 //also holds the current patient and all their resources...
 //note that the current profile is maintained by resourceCreatorSvc
 
-    .service('builderSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities,$filter) {
+    .service('builderSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities,$filter,supportSvc) {
 
         var gAllReferences = []
         var gSD = {};   //a has of all SD's reas this session by type
@@ -50,6 +50,30 @@ angular.module("sampleApp")
         objColours.LogicalModel = '#cc0000';
 
         return {
+            getExistingDataFromServer : function(patient,container) {
+                var deferred = $q.defer();
+                supportSvc.getAllData(patient.id).then(
+                    function(data) {
+                        var newBundle = {};
+                        angular.forEach(data, function (bundle,type) {
+                            newBundle[type] = {resourceType:'Bundle',entry:[],total:0}
+                            bundle.entry.forEach(function(entry){
+                                var resource = entry.resource;
+                                var id = resource.resourceType + "/"+ resource.id;
+                                if (! gAllResourcesThisSet[id]) {
+                                    newBundle[type].entry.push(entry)
+                                    newBundle[type].total++;
+                                }
+                            })
+
+                        });
+
+
+                        deferred.resolve(newBundle)
+                    }
+                )
+                return deferred.promise;
+            },
             sendToFHIRServer : function(bundle) {
                 //create a new bundle to submit as a transaction. excludes logical models
                // var deferred = $q.defer();
@@ -65,7 +89,7 @@ angular.module("sampleApp")
                     }
                 });
 
-                console.log(transBundle)
+               // console.log(transBundle)
 
 
                 var url = appConfigSvc.getCurrentDataServer().url;

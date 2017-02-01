@@ -150,10 +150,11 @@
 
                 </div>
 
-                <div class="col-md-2 col-sm-2">
+                <div class="col-md-3 col-sm-3">
 
                     <div class="navbar-text">
-                        <p ng-bind-html="currentPatient.text.div"></p>
+                        <p>{{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}}</p>
+                        <!--<p ng-bind-html="currentPatient.text.div"></p> -->
                     </div>
 
                     <!--
@@ -195,31 +196,31 @@
                 </div>
 
 
-
+<!--
                 <div class="col-md-1 col-sm-1">
-                    <!--
-                    <div class="navbar-text">
-                        <span ng-hide="libraryVisible" class="clickable" ng-click="saveToLibrary()">Save to Library</span>
-                    </div>
-                    -->
+
                     <div class="pull-right navbar-form" ng-show="waiting">
                         <img src="css/ajax_loader_blue_32.gif"/>
                     </div>
                 </div>
-
+-->
                 <div class="col-md-1 col-sm-1">
+                    <div class="pull-right navbar-form" ng-show="waiting">
+                        <img src="css/ajax_loader_blue_32.gif"/>
+                    </div>
 
-                    <div class="nav navbar-form navbar-right" ng-hide="firebase.auth().currentUser">
+                    <div ng-hide="waiting">
+                        <div class="nav navbar-form navbar-right" ng-hide="firebase.auth().currentUser">
                         <span style="font-size:1.8em; cursor: pointer">
                             <div ng-click="login()">
                                 <i class="glyphicon glyphicon-log-in"></i>
                             </div>
                         </span>
-                    </div>
+                        </div>
 
 
 
-                    <div class="nav navbar-form navbar-right" ng-show="firebase.auth().currentUser">
+                        <div class="nav navbar-form navbar-right" ng-show="firebase.auth().currentUser">
                         <span style="font-size:1.8em; cursor: pointer"
                               uib-popover="{{firebase.auth().currentUser.email}}"
                               popover-placement="left"
@@ -227,7 +228,12 @@
 
                             <div href="#" ng-click="logout()"> <i class="glyphicon glyphicon-log-out"></i></div>
                         </span>
+                        </div>
                     </div>
+
+
+
+
                 </div>
 
             </div>
@@ -528,7 +534,10 @@
                             <br/>
 
                             <div ng-hide="currentPatient">
-                                <button class="btn btn-link pull-right" ng-click="findPatient()">Find Patient</button>
+                                There is no patient resource.
+                                Click <a href="#" class="rounded-box" ng-click="findPatient()">here</a> to find or add one.
+
+                                <hr/>
                             </div>
 
                             <form class="form-horizontal" role="form">
@@ -1158,6 +1167,69 @@
                                 </li>
                             </ul>
 -->
+
+
+
+                        </uib-tab>
+
+                        <uib-tab heading="Existing resources" ng-show="resourcesFromServer">
+
+
+
+                            <div class="row">
+
+                                <div class="col-md-5 col-sm-5">
+                                    <h4>Resource Types</h4>
+                                    <div class="list-group">
+                                        <a href="#"  ng-click="input.selectedTypeFromServer = key"
+                                           ng-class="{'list-group-item':true,'active':key == input.selectedTypeFromServer}"
+                                           ng-repeat="(key,value) in resourcesFromServer">
+                                            {{key}}
+                                            <span class="pull-right badge">{{value.total}}</span>
+                                        </a>
+                                    </div>
+
+
+                                </div>
+
+                                <div class="col-md-7 col-sm-7">
+
+                                    <h4>{{input.selectedTypeFromServer}} resources</h4>
+
+                                    <div class="list-group">
+                                        <div
+                                           ng-class="{'list-group-item':true,'active':entry.resource.id == outcome.selectedResource.id}"
+                                           ng-repeat="entry in resourcesFromServer[input.selectedTypeFromServer].entry">
+
+
+                                                <div class="row">
+                                                    <div class="col-md-10 col-sm-10">
+                                                        {{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}
+                                                    </div>
+                                                    <div class="col-md-2 col-sm-2">
+                                                        <i class="glyphicon glyphicon-plus"
+                                                           ng-click="resourceFromServerSelected(
+                                                           resourcesFromServer[input.selectedTypeFromServer],$index)"
+                                                           style="cursor: pointer">
+
+                                                        </i>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <!--
+                                                <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
+
+                                                -->
+
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
 
 
 

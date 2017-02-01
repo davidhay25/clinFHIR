@@ -3,11 +3,12 @@ angular.module("sampleApp")
     .controller('builderCtrl',
         function ($scope,$http,appConfigSvc,$q,GetDataFromServer,resourceCreatorSvc,RenderProfileSvc,builderSvc,
                   $timeout,$localStorage,$filter,profileCreatorSvc,modalService,Utilities,$uibModal,$rootScope,
-                  $firebaseObject,logicalModelSvc) {
+                  $firebaseObject,logicalModelSvc,ResourceUtilsSvc) {
 
             $scope.input = {};
             $scope.input.dt = {};   //data entered as part of populating a datatype
             $scope.appConfigSvc = appConfigSvc;
+            $scope.ResourceUtilsSvc = ResourceUtilsSvc;     //for the 1 line summary..
 
 
             var idPrefix = 'cf-';   //prefix for the id. todo should probably be related to the userid in some way...
@@ -101,9 +102,22 @@ angular.module("sampleApp")
                 })
             }
 
-
+            function addExistingResource(resource) {
+                builderSvc.addResourceToAllResources(resource)
+                $scope.selectedContainer.bundle.entry.push({resource:resource});
+                $scope.selectedContainer.bundle.entry.sort(function(a,b){
+                    //$scope.resourcesBundle.entry.sort(function(a,b){
+                    if (a.resource.resourceType > b.resource.resourceType) {
+                        return 1
+                    } else {
+                        return -1
+                    }
+                })
+                makeGraph();
+            }
 
             $scope.findPatient = function(){
+                delete $scope.resourcesFromServer;
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
                     keyboard: false,       //same as above.
@@ -113,39 +127,54 @@ angular.module("sampleApp")
                 }).result.then(
                         function(resource){
                             console.log(resource)
+                            if (resource) {
+                                $scope.currentPatient = resource;
 
+                                addExistingResource(resource)
 
-                            $scope.currentPatient = resource;
-                            builderSvc.addResourceToAllResources(resource)
-                            $scope.selectedContainer.bundle.entry.push({resource:resource});
-                            $scope.selectedContainer.bundle.entry.sort(function(a,b){
-                                //$scope.resourcesBundle.entry.sort(function(a,b){
-                                if (a.resource.resourceType > b.resource.resourceType) {
-                                    return 1
-                                } else {
-                                    return -1
-                                }
-                            })
-                            $scope.displayMode = 'view';
+                                /*
+                                builderSvc.addResourceToAllResources(resource)
+                                $scope.selectedContainer.bundle.entry.push({resource:resource});
+                                $scope.selectedContainer.bundle.entry.sort(function(a,b){
+                                    //$scope.resourcesBundle.entry.sort(function(a,b){
+                                    if (a.resource.resourceType > b.resource.resourceType) {
+                                        return 1
+                                    } else {
+                                        return -1
+                                    }
+                                })
+                                */
+                                $scope.displayMode = 'view';
 
+                                //load any existing resources for this patient...
+                                getExistingData(resource)
+                                /*
+                                supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
+                                    //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
+                                    function(data){
+                                        $scope.resourcesFromServer = data;
+                                        console.log($scope.resourcesFromServer);
+                                    },
+                                    function(err){
+                                        console.log(err)
+                                })
 
-                            $scope.selectResource(resource,function(){
-                                $scope.waiting = false;
-                                makeGraph();
-                                drawResourceTree(resource);
-                                isaDocument();      //determine if this bundle is a document (has a Composition resource)
+                                */
 
-                                $rootScope.$emit('addResource',resource);
+                                $scope.selectResource(resource,function(){
+                                    $scope.waiting = false;
+                                    makeGraph();
+                                    drawResourceTree(resource);
+                                    isaDocument();      //determine if this bundle is a document (has a Composition resource)
 
-                            });       //select the resource, indicating that it is a new resource...
+                                    $rootScope.$emit('addResource',resource);
 
-
+                                });       //select the resource, indicating that it is a new resource...
+                            }
 
                         }
                 )
             }
-
-
 
 
 
@@ -167,7 +196,7 @@ angular.module("sampleApp")
                 $scope.waiting = true;
                 builderSvc.validateAll(bundle).then(
                     function(data){
-                        console.log(data.data)
+                        //console.log(data.data)
 
 
 
@@ -279,6 +308,24 @@ angular.module("sampleApp")
             //datatypes for which there is an entry form
             $scope.supportedDt = ['ContactPoint','Identifier','CodeableConcept','string','code','date','Period','dateTime','Address','HumanName','Annotation','boolean']
 
+            function getExistingData(patient) {
+                if (patient) {
+                    //load any existing resources for this patient. Remove any resources currently in the scenario..
+
+                    var container = $localStorage.builderBundles[$scope.currentBundleIndex]
+                    builderSvc.getExistingDataFromServer(patient,container).then(
+                    //supportSvc.getAllData(patient.id).then(
+                        //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
+                        function(data){
+                            $scope.resourcesFromServer = data;
+                            console.log($scope.resourcesFromServer);
+                        },
+                        function(err){
+                            console.log(err)
+                        })
+                }
+            }
+
             $scope.currentBundleIndex = 0;     //the index of the bundle currently being used
 
             if (! $localStorage.builderBundles) {
@@ -296,10 +343,20 @@ angular.module("sampleApp")
                     $scope.selectedContainer = $localStorage.builderBundles[$scope.currentBundleIndex];
                     builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
                     $scope.currentPatient = builderSvc.getPatientResource();
+                    getExistingData( $scope.currentPatient)
                     isaDocument();
                 }
 
             }
+
+            $scope.resourceFromServerSelected = function(bundle, inx) {
+                console.log(bundle, inx)
+
+                addExistingResource(bundle.entry[inx].resource);
+                bundle.entry.splice(inx,1)
+                bundle.total --;
+            }
+
 
             $scope.builderBundles = $localStorage.builderBundles;   //all the bundles cached locally...
 
@@ -356,6 +413,7 @@ angular.module("sampleApp")
 
                         makeGraph();
                         delete $scope.currentResource;
+                        delete $scope.currentPatient
                         $rootScope.$emit('newSet',newBundleContainer);
                     }
                 });
@@ -460,11 +518,27 @@ angular.module("sampleApp")
             };
 
             $scope.selectBundle = function(inx){
+                delete $scope.resourcesFromServer;
                 $scope.currentBundleIndex = inx;
                 //$scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
                 $scope.selectedContainer = $localStorage.builderBundles[$scope.currentBundleIndex];
                 builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
                 $scope.currentPatient = builderSvc.getPatientResource();
+
+                getExistingData($scope.currentPatient)
+/*
+                if ($scope.currentPatient) {
+                    supportSvc.getAllData($scope.currentPatient.id).then(
+                        //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
+                        function(data){
+                            $scope.resourcesFromServer = data;
+                            console.log($scope.resourcesFromServer);
+                        },
+                        function(err){
+                            console.log(err)
+                        })
+                }
+                */
 
                 console.log($scope.currentPatient);
                 makeGraph();
