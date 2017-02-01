@@ -312,8 +312,8 @@ angular.module("sampleApp")
                 if (patient) {
                     //load any existing resources for this patient. Remove any resources currently in the scenario..
 
-                    var container = $localStorage.builderBundles[$scope.currentBundleIndex]
-                    builderSvc.getExistingDataFromServer(patient,container).then(
+                    //var container = $localStorage.builderBundles[$scope.currentBundleIndex]
+                    builderSvc.getExistingDataFromServer(patient).then(
                     //supportSvc.getAllData(patient.id).then(
                         //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
                         function(data){

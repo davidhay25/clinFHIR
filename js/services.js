@@ -944,7 +944,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                         deferred.resolve(allResources);
                     },
                     function(err){
-                        alert("error loading all patient data:\n\n"+ angular.toJson(err));
+                        //alert("error loading all patient data:\n\n"+ angular.toJson(err));
                         deferred.reject(err);
                     }
                 );

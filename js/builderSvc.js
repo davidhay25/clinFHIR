@@ -50,7 +50,7 @@ angular.module("sampleApp")
         objColours.LogicalModel = '#cc0000';
 
         return {
-            getExistingDataFromServer : function(patient,container) {
+            getExistingDataFromServer : function(patient) {
                 var deferred = $q.defer();
                 supportSvc.getAllData(patient.id).then(
                     function(data) {
@@ -70,8 +70,12 @@ angular.module("sampleApp")
 
 
                         deferred.resolve(newBundle)
+                    },
+                    function(err) {
+                        console.log(err);
+                        deferred.reject(err);
                     }
-                )
+                );
                 return deferred.promise;
             },
             sendToFHIRServer : function(bundle) {
