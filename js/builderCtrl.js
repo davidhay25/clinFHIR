@@ -176,7 +176,10 @@ angular.module("sampleApp")
                 )
             }
 
-
+            function createDownLoad(container){
+                $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(container.bundle, true)], {type: "text/text"}));
+                $scope.downloadLinkJsonName = 'Scenario'; //container.name;
+            }
 
 
             //note that the way we are recording validation is a non-compliant bundle...
@@ -522,6 +525,8 @@ angular.module("sampleApp")
                 $scope.currentBundleIndex = inx;
                 //$scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
                 $scope.selectedContainer = $localStorage.builderBundles[$scope.currentBundleIndex];
+                createDownLoad($scope.selectedContainer)
+
                 builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
                 $scope.currentPatient = builderSvc.getPatientResource();
 

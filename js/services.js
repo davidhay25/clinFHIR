@@ -126,7 +126,14 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
             var patient = {"resourceType": "Patient"};
             var nameText = input.fname + " " +input.lname;
-            patient.name = [{use:'official',family:[input.lname],given:[input.fname],text:nameText}];
+            //multiplicity of famly name changed in stu 3
+            if (appConfigSvc.getCurrentDataServerBase().version ==2) {
+                patient.name = [{use:'official',family:[input.lname],given:[input.fname],text:nameText}];
+            } else {
+                patient.name = [{use:'official',family:input.lname,given:[input.fname],text:nameText}];
+            }
+
+
             patient.gender = input.gender;
             patient.birthDate= moment(input.dob).format('YYYY-MM-DD');
             if (input.identifier) {
