@@ -46,6 +46,25 @@
             color:red;
         }
 
+        .profile {
+            color: #4cae4c;
+            float:right;
+            margin :0px;
+            padding:0px;
+            padding-left : 3px;
+            padding-right : 3px;
+
+        }
+
+        .logical {
+            color: #ce8483;
+            float:right;
+            margin :0px;
+            padding:0px;
+            padding-left : 3px;
+            padding-right : 3px;
+        }
+
 
 
 
@@ -85,7 +104,7 @@
     <script src="resourceBuilder/selectProfile.js"></script>
     <script src="js/components/profileDisplayComp.js"></script>
     <script src="resourceBuilder/vsBrowser.js"></script>
-
+    <script src="js/setServers.js"></script>
     <!--
     <script src="js/newVSFinder.js"></script>
 
@@ -143,7 +162,7 @@
                     </a>
                 </div>
                 <div class="col-md-3 col-sm-3">
-                    <div class="navbar-text">
+                    <div class="navbar-text" ng-click="setServers()" style="cursor: pointer">
                         Conformance server: {{appConfigSvc.getCurrentConformanceServer().name}}
                         <div>Data server: {{appConfigSvc.getCurrentDataServer().name}}</div>
                     </div>
@@ -498,12 +517,30 @@
                                     <table class="table table-bordered table-condensed">
                                         <tr><th>Type</th><th>Text</th><th>Valid</th></tr>
                                         <tr ng-repeat="entry in selectedContainer.bundle.entry">
-                                            <td><div class='clickable' ng-click="selectResource(entry)">
-                                                {{entry.resource.resourceType}}</div>
+                                            <td width="30%">
+                                                <div class='clickable' ng-click="selectResource(entry)">
+                                                    {{entry.resource.resourceType}}
+
+                                                    <span ng-show="entry.isProfile"
+                                                          uib-popover="{{entry.profile}}"
+                                                          popover-placement="right"
+                                                          popover-trigger="'mouseenter'"
+
+                                                          class="rounded-box profile">profile
+                                                    </span>
+                                                    <span ng-show="entry.isLogical"
+                                                          uib-popover="Logical models cannot be saved on the FHIR server"
+                                                          popover-placement="right"
+                                                          popover-trigger="'mouseenter'"
+                                                          class="rounded-box logical">logical
+                                                    </span>
+
+                                                </div>
+
                                             </td>
                                             <td><p ng-bind-html="entry.resource.text.div"></p></td>
                                             <td>
-                                                <div ng-switch on="entry.valid" ng-click="validate(entry)">    <!-- todo - not a real bundlemember-->
+                                                <div ng-hide="entry.isLogical" ng-switch on="entry.valid" ng-click="validate(entry)">    <!-- todo - not a real bundlemember-->
                                                     <div ng-switch-when="yes">
                                                         <i class="glyphicon glyphicon-ok clickable pass"
                                                            title="View Resource definition in spec">
@@ -530,122 +567,138 @@
 
 
                         </uib-tab>
-                        <uib-tab heading="Scenario Summary">
+                        <uib-tab heading="Scenario">
                             <br/>
 
-                            <div ng-hide="currentPatient">
-                                There is no patient resource.
-                                Click <a href="#" class="rounded-box" ng-click="findPatient()">here</a> to find or add one.
+                            <uib-tabset>
+                                <uib-tab heading = "Summary">
+                                    <div ng-hide="currentPatient">
+                                        There is no patient resource.
+                                        Click <a href="#" class="rounded-box" ng-click="findPatient()">here</a> to find or add one.
 
-                                <hr/>
-                            </div>
-<!-- temp
-                            <div>
-                                <a class=" rounded-box pull-right" ng-show="downloadLinkJsonContent" download="{{downloadLinkJsonName}}.json"
-                                   href="{{downloadLinkJsonContent}}"> Download scenario
-                                </a>
-
-                            </div>
-                            -->
-
-
-
-                            <form class="form-horizontal" role="form">
-                            <div class="form-group">
-                                <div class="col-md-3 col-sm-3">
-                                    <strong>Name</strong>
-                                </div>
-                                <div class="col-md-3 col-sm-3">
-                                    {{selectedContainer.name}}
-                                </div>
-
-                                <div class="col-md-6 col-sm-6">
-                                    <div class="alert alert-warning" role="alert"
-                                         ng-show="selectedContainer.isDirty">
-
-
-
-                                        There are changes that are saved locally, but not yet updated to the Library
+                                        <hr/>
                                     </div>
-                                </div>
+                                    <!-- temp
+                                                                <div>
+                                                                    <a class=" rounded-box pull-right" ng-show="downloadLinkJsonContent" download="{{downloadLinkJsonName}}.json"
+                                                                       href="{{downloadLinkJsonContent}}"> Download scenario
+                                                                    </a>
 
-                            </div>
-
-<!--
-                            <div class="row">
-                                <div class="col-sm-6 col-md-6">
-                                    <strong>Name: </strong>
-                                    <span>{{selectedContainer.name}}</span>
-                                </div>
-                                <div class="col-sm-6 col-md-6">
-                                    <div class="alert alert-warning" role="alert"
-                                         ng-show="selectedContainer.isDirty">
+                                                                </div>
+                                                                -->
 
 
 
-                                        There are changes that are saved locally, but not yet updated to the Library
+                                    <form class="form-horizontal" role="form">
+                                        <div class="form-group">
+                                            <div class="col-md-3 col-sm-3">
+                                                <strong>Name</strong>
+                                            </div>
+                                            <div class="col-md-3 col-sm-3">
+                                                {{selectedContainer.name}}
+                                            </div>
+
+                                            <div class="col-md-6 col-sm-6">
+                                                <div class="alert alert-warning" role="alert"
+                                                     ng-show="selectedContainer.isDirty">
+
+
+
+                                                    There are changes that are saved locally, but not yet updated to the Library
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <!--
+                                                                    <div class="row">
+                                                                        <div class="col-sm-6 col-md-6">
+                                                                            <strong>Name: </strong>
+                                                                            <span>{{selectedContainer.name}}</span>
+                                                                        </div>
+                                                                        <div class="col-sm-6 col-md-6">
+                                                                            <div class="alert alert-warning" role="alert"
+                                                                                 ng-show="selectedContainer.isDirty">
+
+
+
+                                                                                There are changes that are saved locally, but not yet updated to the Library
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                        -->
+
+                                        <div class="form-group">
+                                            <div class="col-md-3 col-sm-3">
+                                                <strong>Description</strong>
+                                            </div>
+                                            <div class="col-md-9 col-sm-9">
+                                                <textarea class="form-control" ng-change="setDirty()" ng-model = 'selectedContainer.description'></textarea>
+                                            </div>
+                                        </div>
+
+
+
+
+
+
+
+
+
+                                        <div class="form-group">
+                                            <div class="col-md-3 col-sm-3">
+
+                                                <strong>Url</strong>
+                                            </div>
+                                            <div class="col-md-9 col-sm-9">
+                                                {{selectedContainer.url}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group" ng-repeat = "author in selectedContainer.author">
+                                            <div class="col-md-3 col-sm-3">
+
+                                                <strong>Author</strong>
+                                            </div>
+                                            <div class="col-md-9 col-sm-9">
+                                                {{author.display}}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="col-md-3 col-sm-3">
+
+                                                <strong>Last Updated</strong>
+                                            </div>
+                                            <div class="col-md-9 col-sm-9">
+                                                {{selectedContainer.lastUpdated}}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-3 col-sm-3">
+
+                                                <strong>Version</strong>
+                                            </div>
+                                            <div class="col-md-9 col-sm-9">
+                                                {{selectedContainer.version}}
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                </uib-tab>
+                                <uib-tab heading = "Json">
+                                    <div>
+                                        <a class=" rounded-box pull-right" ng-show="downloadLinkJsonContent" download="{{downloadLinkJsonName}}.json"
+                                           href="{{downloadLinkJsonContent}}"> Download scenario
+                                        </a>
+
                                     </div>
-                                </div>
-                            </div>
-
--->
-
-                            <div class="form-group">
-                                <div class="col-md-3 col-sm-3">
-                                    <strong>Description</strong>
-                                </div>
-                                <div class="col-md-9 col-sm-9">
-                                    <textarea class="form-control" ng-change="setDirty()" ng-model = 'selectedContainer.description'></textarea>
-                                </div>
-                            </div>
+                                    <pre>{{selectedContainer.bundle | bundleDisplay | json}}</pre>
+                                </uib-tab>
+                            </uib-tabset>
 
 
-
-
-
-
-
-
-
-                            <div class="form-group">
-                                <div class="col-md-3 col-sm-3">
-
-                                    <strong>Url</strong>
-                                </div>
-                                <div class="col-md-9 col-sm-9">
-                                    {{selectedContainer.url}}
-                                </div>
-                            </div>
-
-                            <div class="form-group" ng-repeat = "author in selectedContainer.author">
-                                <div class="col-md-3 col-sm-3">
-
-                                    <strong>Author</strong>
-                                </div>
-                                <div class="col-md-9 col-sm-9">
-                                    {{author.display}}
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="col-md-3 col-sm-3">
-
-                                    <strong>Last Updated</strong>
-                                </div>
-                                <div class="col-md-9 col-sm-9">
-                                    {{selectedContainer.lastUpdated}}
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="col-md-3 col-sm-3">
-
-                                    <strong>Version</strong>
-                                </div>
-                                <div class="col-md-9 col-sm-9">
-                                    {{selectedContainer.version}}
-                                </div>
-                            </div>
-                        </form>
 
                             <!--
 
@@ -805,7 +858,7 @@
                                     </div>
 
 
-                                    <h5 ng-show="hashPath">DataType/s  (click to add)</h5>
+                                    <h5 ng-show="hashPath">DataType/s  (click to add data)</h5>
                                     <div ng-repeat="type in hashPath.ed.type">
                                         <div ng-hide="type.code == 'Reference'">
 

@@ -116,6 +116,20 @@ angular.module("sampleApp")
                 makeGraph();
             }
 
+
+            //view and change servers
+            $scope.setServers = function(){
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/setServers.html',
+                    //size: 'lg',
+                    controller: 'setServersCtrl'
+                    }).result.then(function () {
+
+                        refreshLibrary();   //as the data server may have changed
+                })
+            }
+
+
             $scope.findPatient = function(){
                 delete $scope.resourcesFromServer;
                 $uibModal.open({
@@ -909,6 +923,10 @@ angular.module("sampleApp")
                             //console.log(vs)
                             $scope.showVSBrowserDialog.open(vs);
 
+                        },
+                        function(err) {
+                            modalService.showModal({}, {bodyText:err});
+                            //console.log(err)
                         }
                     ).finally (function(){
                         $scope.showWaiting = false;
@@ -1419,47 +1437,11 @@ angular.module("sampleApp")
                 builderSvc.makeLogicalModelFromSD(profile).then(
                     function (lm) {
                         console.log(lm);
-                        selectLogicalModal(lm)
-                        /*
+                        selectLogicalModal(lm,profile.url)
 
-                        var type = lm.snapshot.element[0].path;
-                        $scope.selectedContainer.isDirty = true;
-                        var resource = {resourceType : type};
-                        resource.id = idPrefix+new Date().getTime();
-                        $scope.input.text = $scope.input.text || "";
-                        resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text + builderSvc.getManualMarker())};
-                        resource.meta = {profile:[lm.url]};
-                        builderSvc.addResourceToAllResources(resource)
-                        builderSvc.addSDtoCache(lm)
-                        $scope.selectedContainer.bundle.entry.push({resource:resource});
-                        $scope.selectedContainer.bundle.entry.sort(function(a,b){
-                            //$scope.resourcesBundle.entry.sort(function(a,b){
-                            if (a.resource.resourceType > b.resource.resourceType) {
-                                return 1
-                            } else {
-                                return -1
-                            }
-                        })
-                        $scope.displayMode = 'view';
-                        $scope.selectResource(resource,function(){
-                            $scope.waiting = false;
-                            makeGraph();
-                            drawResourceTree(resource);
-
-                            isaDocument();      //determine if this bundle is a document (has a Composition resource)
-
-                            $rootScope.$emit('addResource',resource);
-
-                        });
-                        */
 
                     }
                 )
-
-
-
-
-
 
             };
 
@@ -1468,7 +1450,7 @@ angular.module("sampleApp")
 
             //----- Logical model support
 
-            function selectLogicalModal(lm) {
+            function selectLogicalModal(lm,profileUrl) {
                 var type = lm.snapshot.element[0].path;
                 $scope.selectedContainer.isDirty = true;
                 var resource = {resourceType : type};
@@ -1490,7 +1472,15 @@ angular.module("sampleApp")
 
                 builderSvc.addResourceToAllResources(resource)
                 builderSvc.addSDtoCache(lm)
-                $scope.selectedContainer.bundle.entry.push({resource:resource,isLogical:true});
+
+                var item = {resource:resource};
+                if (profileUrl) {
+                    item.isProfile=true
+                    item.profile = profileUrl;
+                } else {
+                    item.isLogical = true
+                }
+                $scope.selectedContainer.bundle.entry.push(item);
                 $scope.selectedContainer.bundle.entry.sort(function(a,b){
                     //$scope.resourcesBundle.entry.sort(function(a,b){
                     if (a.resource.resourceType > b.resource.resourceType) {

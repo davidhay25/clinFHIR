@@ -212,7 +212,23 @@ angular.module("sampleApp")
     return function(text) {
         return text;
     }
-})
+    }).filter('bundleDisplay',function(){
+        //return a display version of the bundle
+        return function(bundle) {
+            var response = {resourceType:'Bundle',entry:[]}
+            if (bundle && bundle.entry) {
+                bundle.entry.forEach(function(entry){
+                    var resource =entry.resource;
+                    if (resource.extension && resource.extension.length == 0) {
+                        delete resource.extension;
+                    }
+                    response.entry.push({resource:resource})
+                })
+
+            }
+            return response;
+        }
+    })
 
     .directive('autoFocus', function($timeout) {
         return {

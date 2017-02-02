@@ -48,6 +48,27 @@ angular.module("sampleApp")
             $scope.input.newCommentboxInxDEP = -1;
 
 
+            //view and change servers
+            $scope.setServers = function(){
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/setServers.html',
+                    //size: 'lg',
+                    controller: 'setServersCtrl'
+                }).result.then(function () {
+
+
+                    if (appConfigSvc.getCurrentConformanceServer().url !== appConfigSvc.getCurrentDataServer().url) {
+                        modalService.showModal({}, {bodyText: "The Conformance and Data servers should really be the same. Odd things will occur otherwise."});
+                    }
+
+
+                    getPalette($scope.Practitioner);       //get the palette of logical models
+                    $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
+                    loadAllModels();
+
+                })
+            }
+
             //merge the referenced model into this one at this point
             $scope.mergeModel = function(url){
                 $scope.canSaveModel = false;        //to prevent the base model from being replaced... 
@@ -648,7 +669,7 @@ angular.module("sampleApp")
 
             //load all the logical models created by clinFHIR
             loadAllModels = function() {
-                //$scope.conformanceServer
+
 
 
 
@@ -658,8 +679,6 @@ angular.module("sampleApp")
 
                 //var url="http://fhir3.healthintersections.com.au/open/StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
                 GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
-
-               // $http.get(url).then(
                     function(data) {
                         $scope.bundleModels = data.data
                         $scope.bundleModels.entry = $scope.bundleModels.entry || [];    //in case there are no models
