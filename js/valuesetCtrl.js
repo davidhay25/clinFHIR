@@ -4,7 +4,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
 
         //register that the application has been started... (for reporting)
-        GetDataFromServer.registerAccess();
+        GetDataFromServer.registerAccess('vsBuilder');
 
         var snomedSystem = "http://snomed.info/sct";
 
@@ -12,7 +12,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
         $scope.input = {};
         $scope.state = 'find';      // edit / new / find
 
-        $scope.cheat = function() {
+        $scope.cheatDEP = function() {
             snomedSystem = "http://fhir.hl7.org.nz/NamingSystem/cheat";
             createNewValueSet('cheat')
             $scope.state='new';
@@ -72,6 +72,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
         var termServ = config.servers.terminology;      //the currently configured terminology server
         $scope.serverRoot = config.servers.terminology;
 
+
+
         $scope.terminologyServers = [];
         config.terminologyServers.forEach(function(svr){
             if (svr.version == 3) {
@@ -83,7 +85,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
         });
 
 
-        //theses are the root concepts used in the concept selector. It may be a good idea to move to an external config file...
+        //theses are the SNOMED root concepts used in the concept selector. It may be a good idea to move to an external config file...
         $scope.rootConcepts = [];
         $scope.rootConcepts.push({display:'Clinical Finding',name:'cfClinfinding',concept:'404684003'});
         $scope.rootConcepts.push({display:'Procedures',name:'cfProcedure',concept:'71388002'});
@@ -99,6 +101,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
         $scope.input.rootConcept = $scope.rootConcepts[0];   //the initial root concept
 
         //check for commands in the url - specifically a valueset url to edit or view...
+        //todo - do I still ant to do this?
         var params = $location.search();
         if (params) {
             $scope.startupParams = params;
@@ -144,11 +147,11 @@ angular.module("sampleApp").controller('valuesetCtrl',
         //called (at least) when the
         $scope.setRootConcept = function (item) {
             $scope.showWaiting = true;
-            console.log(item);
+            //console.log(item);
             var url = 'http://clinfhir.com/fhir/ValueSet/'+item.name;
             Utilities.getValueSetIdFromRegistry(url,function(vsDetails) {
                     $scope.vsDetails = vsDetails;  //vsDetails = {id: type: resource: }
-                    console.log(vsDetails);
+                    //console.log(vsDetails);
 
                 if (!vsDetails) {
                     var modalOptions = {
@@ -164,7 +167,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
                             item.url = url;     //the url of the valueset will reference the clinfhir domain - not the actual perminology server
                             profileCreatorSvc.createISAValueSet(item,$scope.serverRoot).then(
                                 function(data){
-                                    console.log(data);
+                                    //console.log(data);
                                     var idOnTerminologyServer = "clinFHIR-" + item.name;    //this is what the 'profileCreatorSvc.createISAValueSet' function will use as the local id...
                                     $scope.vsDetails = {id:idOnTerminologyServer}
                                     checkForInitialVs()
@@ -209,6 +212,28 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
 
         };
+
+
+
+
+        //check the terminology server version
+
+        $scope.terminologyServer = appConfigSvc.getCurrentTerminologyServer();
+        if ($scope.terminologyServer.version < 3 ) {
+            modalService.showModal({},
+                {bodyText:"Warning: this application works best with a Terminology Server supporting version 3 of FHIR. Some functionality will not be available"}).
+            then(function (result) {
+                //this is the 'yes'
+                $scope.displayMode = 'front';
+                delete $scope.serverRoot;       //will disable edit controls....
+            })
+        }
+        $scope.setRootConcept($scope.rootConcepts[0]);  //set to the first root concept in the array - chacking that it exists
+
+
+
+
+/*
 
         //if there is a terminal server specified in the call, then check it exists then set the defaul ts to that one.
         //checking the root concept valueset must occur after that.
@@ -273,6 +298,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
             }
 
         }
+
+        */
 
         //check that the initial root concept actually exists on the defined terminal server
       //  $scope.setRootConcept($scope.rootConcepts[0]);  //set to the first root concept in the array - chacking that it exists

@@ -22,35 +22,42 @@
     </div>
     <div class="modal-body">
 
-        <form>
-            <div class="form-group">
-                <label>Data Server</label>
-                <div>
-                    <select ng-model="input.dataServer" class="form-control"
-                            ng-options="item.name for item in allServers">
+        <div ng-controller="setServersCtrl">
 
-                    </select>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Conformance Server</label>
-                <div>
-                    <select ng-model="input.confServer" class="form-control"
-                            ng-options="item.name for item in allServers">
+            <form>
+                <div class="form-group">
+                    <label>Data Server</label>
+                    <div>
+                        <select ng-model="input.dataServer" class="form-control"
+                                ng-options="item.name for item in allServers">
 
-                    </select>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label>Terminology Server</label>
-                <div>
-                    <select ng-model="input.termServer" class="form-control"
-                            ng-options="item.name for item in allServers">
+                <div class="form-group">
+                    <label>Conformance Server</label>
+                    <div>
+                        <select ng-model="input.confServer" class="form-control"
+                                ng-options="item.name for item in allServers">
 
-                    </select>
+                        </select>
+                    </div>
                 </div>
-            </div>
-        </form>
+                <div class="form-group">
+                    <label>Terminology Server</label>
+                    <div>
+                        <select ng-model="input.termServer" class="form-control"
+                                ng-options="item.name for item in terminologyServers">
+
+                        </select>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+
+
+
     </div>
 
 

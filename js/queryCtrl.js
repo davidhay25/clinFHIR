@@ -22,7 +22,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         }
     );
 
-
+    GetDataFromServer.registerAccess('query');
 
     $localStorage.queryHistory = $localStorage.queryHistory || [];
 
@@ -411,7 +411,10 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         delete $scope.err;
         delete $scope.result.selectedEntry;
         $scope.waiting = true;
-        resourceCreatorSvc.executeQuery('GET',$scope.query).then(
+
+        GetDataFromServer.adHocFHIRQueryFollowingPaging($scope.query).then(
+
+        //resourceCreatorSvc.executeQuery('GET',$scope.query).then(
             function(data){
 
                 $scope.response = data;

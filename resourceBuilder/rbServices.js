@@ -651,9 +651,9 @@ angular.module("sampleApp").
 
 
         },
-        registerAccess : function(){
+        registerAccess : function(module){
             //register access for the logs...
-            $http.post('/stats/login',{}).then(
+            $http.post('/stats/login',{module:module}).then(
                 function(data){
                     //console.log(data);
                 },
@@ -2727,6 +2727,12 @@ console.log(summary);
             //fhirVersion = fhirVersion || 3;
             if (resource) {
                 switch (resource.resourceType) {
+                    case "StructureDefinition" :
+                    case "ValueSet":
+                    case "NamingSystem" :
+                    case "CodeSystem" :
+
+                        return resource.name || resource.description || resource.resourceType
                     case "MedicationStatement" :
                         var txt="";
                         if (resource.medicationCodeableConcept) {

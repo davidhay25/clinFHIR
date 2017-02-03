@@ -10,6 +10,7 @@ angular.module("sampleApp")
             $scope.appConfigSvc = appConfigSvc;
             $scope.ResourceUtilsSvc = ResourceUtilsSvc;     //for the 1 line summary..
 
+            GetDataFromServer.registerAccess('scnBld');
 
             var idPrefix = 'cf-';   //prefix for the id. todo should probably be related to the userid in some way...
             //load the library. todo THis will become slow with large numbers of sets...

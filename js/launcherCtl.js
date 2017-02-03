@@ -1,0 +1,88 @@
+
+angular.module("sampleApp")
+    .controller('launcherCtrl',
+        function ($scope,modalService,$firebaseObject,GetDataFromServer,$uibModal,appConfigSvc) {
+
+            GetDataFromServer.registerAccess('launcher');
+
+            if (appConfigSvc.checkConfigVersion()) {
+                var txt = 'The default configuration has been updated (including the patient data and conformance server). Please re-load the page for it to take effect.';
+                //todo txt += " (Note that you will need to re-enter any direct servers you have added via the 'gear' icon)"
+                modalService.showModal({}, {bodyText: txt})
+
+            }
+
+
+            //---------- login stuff
+            //called whenever the auth state changes - eg login/out, initial load, create user etc.
+            firebase.auth().onAuthStateChanged(function(user) {
+
+
+                if (user) {
+                    $scope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+                    //logicalModelSvc.setCurrentUser(user);
+
+
+                    //return the practitioner resource that corresponds to the current user (the service will create if absent)
+                    GetDataFromServer.getPractitionerByLogin(user).then(
+                        function(practitioner){
+                            //console.log(practitioner)
+                            $scope.Practitioner = practitioner;
+
+                        },function (err) {
+                            alert(err)
+                        }
+                    );
+
+                    delete $scope.showNotLoggedIn;
+
+
+                } else {
+                    console.log('no user')
+                    logicalModelSvc.setCurrentUser(null);
+                    $scope.showNotLoggedIn = true;
+                    delete $scope.Practitioner;
+
+                }
+            });
+
+            $scope.firebase = firebase;
+
+            $scope.login=function(){
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop.
+                    keyboard: false,       //same as above.
+                    templateUrl: 'modalTemplates/login.html',
+                    controller: 'loginCtrl'
+                })
+            };
+
+            $scope.logout=function(){
+                firebase.auth().signOut().then(function() {
+                    delete $rootScope.userProfile;
+                    modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
+
+                }, function(error) {
+                    modalService.showModal({}, {bodyText: 'Sorry, there was an error lgging out - please try again'})
+                });
+
+            };
+
+
+            $scope.$on('serverUpdate',function() {
+
+
+                var version = appConfigSvc.getCurrentDataServer().version;
+                if (appConfigSvc.getCurrentTerminologyServer().version !== version ||
+                    appConfigSvc.getCurrentConformanceServer().version !== version ) {
+
+                    modalService.showModal({}, {bodyText:'You have selected servers with different FHIR versions. I strongly suggest that you fix that.'});
+                } else {
+                    modalService.showModal({}, {bodyText:'The servers that clinFHIR will access has been updated for all modules.'});
+                }
+
+
+
+        })
+
+    })

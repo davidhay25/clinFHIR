@@ -4,21 +4,30 @@ angular.module("sampleApp")
     .controller('setServersCtrl',
         function ($scope,appConfigSvc) {
 
-            $scope.allServers = appConfigSvc.getAllServers()
+            $scope.allServers = appConfigSvc.getAllServers();
+            $scope.terminologyServers = appConfigSvc.getAllTerminologyServers();
+
             $scope.input = {}
 
             $scope.input.dataServer = setCurrent(appConfigSvc.getCurrentDataServer());
             $scope.input.confServer = setCurrent(appConfigSvc.getCurrentConformanceServer());
             $scope.input.termServer = setCurrent(appConfigSvc.getCurrentTerminologyServer());
 
-            console.log($scope.allServers)
+            //console.log($scope.allServers)
 
             $scope.save = function(){
-                console.log($scope.input)
+                //console.log($scope.input)
                 appConfigSvc.setServerType('data',$scope.input.dataServer.url);
                 appConfigSvc.setServerType('conformance',$scope.input.confServer.url);
                 appConfigSvc.setServerType('terminology',$scope.input.termServer.url);
-                $scope.$close()
+
+                //$close only exists when being called as a dialog. This controller is also used from the launcher...
+                if ($scope.$close) {
+                    $scope.$close()
+                } else {
+                    $scope.$emit('serverUpdate')
+                }
+
             }
 
             function setCurrent(svr){

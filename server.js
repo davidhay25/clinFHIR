@@ -82,7 +82,8 @@ proxy.on('proxyReq', function (proxyRes, req, res) {
 
 
 
-function recordAccess(req) {
+function recordAccess(req,data) {
+    console.log(data)
     var clientIp = req.headers['x-forwarded-for'] ||
         req.connection.remoteAddress ||
         req.socket.remoteAddress ||
@@ -90,6 +91,8 @@ function recordAccess(req) {
 
     if (db) {
         var audit = {ip:clientIp,date:new Date().getTime()};
+        audit.data = data;
+
         db.collection("accessAudit").insert(audit, function (err, result) {
             if (err) {
                 console.log('Error logging access ',audit)
@@ -139,8 +142,26 @@ app.get('/createExample',function(req,res){
 //when a user navigates to cf
 app.post('/stats/login',function(req,res){
     //console.log('access')
-    recordAccess(req);
-    res.end();
+
+    var body = '';
+    req.on('data', function (data) {
+        body += data;
+        console.log("Partial body: " + body);
+    });
+
+    req.on('end', function () {
+        var jsonBody = {};
+        //just swallow errors for now
+        try {
+            jsonBody = JSON.parse(body);
+        } catch (ex) {}
+
+        recordAccess(req,jsonBody);
+        res.end();
+    });
+
+    //recordAccess(req);
+    //res.end();
 });
 
 

@@ -6,16 +6,13 @@ angular.module("sampleApp")
 
             $scope.input = {param:'hl7',searchParam:'publisher',searchStatus:'all'};
 
-
+            GetDataFromServer.registerAccess('extension');
 
             $scope.$watch('input.searchParam',function(){
                // alert('c')
                 delete $scope.extensionsArray;
                 delete $scope.selectedExtension;
             })
-
-
-
 
 
             RenderProfileSvc.getAllStandardResourceTypes().then(

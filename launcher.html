@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/firebase.js"></script>
+    <script src="js/libs/angularfire.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+
+    <title>clinFHIR Launcher</title>
+
+    <style>/*https://css-tricks.com/snippets/css/css-box-shadow/*/
+        .myBox {
+            margin-top: 10px;
+            box-shadow: 0 0 8px black;
+            padding:12px;
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
+
+        }
+        .clickable {
+            color: rgb(79, 155, 214);
+            cursor: pointer;
+        }
+
+    </style>
+
+    <script>
+
+
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+
+
+    </script>
+
+    <script>
+        var config = {
+            apiKey: "AIzaSyBNMohLbPiSKwpGwfARopdeW_6LLXujcUo",
+            authDomain: "clinfhir.firebaseapp.com",
+            databaseURL: "https://clinfhir.firebaseio.com",
+            storageBucket: ""
+        };
+
+        if (firebase) {
+            firebase.initializeApp(config);
+
+        }
+    </script>
+
+    <script src="js/appConfigSvc.js"></script>
+    <script src="js/launcherCtl.js"></script>
+    <script src="js/setServers.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/modalDialogSvc.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
+
+</head>
+<body style="padding: 8px;padding-top: 80px">
+
+
+<div ng-app="sampleApp" ng-controller="launcherCtrl" class="container-fluid">
+
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="col-md-11 col-sm-11">
+            <a class="navbar-brand" href="#">clinFHIR Launcher</a>
+        </div>
+
+        <div class="col-md-1 col-sm-1">
+            <div class="pull-right navbar-form" ng-show="waiting">
+                <img src="css/ajax_loader_blue_32.gif"/>
+            </div>
+
+            <div ng-hide="waiting">
+                <div class="nav navbar-form navbar-right" ng-hide="firebase.auth().currentUser">
+                        <span style="font-size:1.8em; cursor: pointer">
+                            <div ng-click="login()">
+                                <i class="glyphicon glyphicon-log-in"></i>
+                            </div>
+                        </span>
+                </div>
+
+
+
+                <div class="nav navbar-form navbar-right" ng-show="firebase.auth().currentUser">
+                        <span style="font-size:1.8em; cursor: pointer"
+                              uib-popover="{{firebase.auth().currentUser.email}}"
+                              popover-placement="left"
+                              popover-trigger="'mouseenter'">
+
+                            <div href="#" ng-click="logout()"> <i class="glyphicon glyphicon-log-out"></i></div>
+                        </span>
+                </div>
+            </div>
+
+
+
+
+        </div>
+
+    </nav>
+
+    <!--
+<p>The following table describes the modules that are part of clinFHIR and provides a link to load them. The link will
+open the module in a new browser tab. Multiple copies of a module can be open at the same time, though this can cause confusion
+so is discouraged.</p>
+-->
+    <div class="row">
+        <div class="col-md-8 col-sm-8">
+
+
+            <div class="myBox">
+                <h5>Modules (open in new tab)</h5>
+                <table class="table width='100%'">
+                    <tr>
+                        <td><a target="_blank" href="builder.html">Scenario Builder</a></td>
+                        <td>
+                            <p>The Scenario Builder is used to join together the resources needed to represent a specific clinical scenario.
+                                It can use Core Resource types, Profiles and Logical models as it does this. The intention is to help people understand
+                                how resources can tell a clinical story, and to validate that the resource types available (including profiles) are
+                                sufficient.</p>
+                            <p>Note that the builder still has issues with more complex resource types - this is a work in progress</p>
+                        </td>
+                        <td>
+                            Patient information is on the Data Server. Profiles on the Conformance server.
+                            ValueSets on the Terminology server.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="15%">
+                            <a target="_blank" href="logicalModeller.html">Logical Modeller</a>
+                        </td>
+                        <td>
+                            The Logical modeller allows the creation of a model that represents a particular interoperability requirement
+                            in a format that is easy to use. It uses FHIR datatypes, and can be based on an existing resource type or completely
+                            'ad hoc'. It is intended to act as a 'bridge' between Modeller and User, and can act as the basis for the generation
+                            of the profiling components required by FHIR
+                        </td>
+                        <td>
+                            Models are saved on the Conformance Server. Can reference ValueSets from the Terminology server.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a target="_blank" href="EDBuilder.html">Extension Definition builder</a>
+                        </td>
+                        <td>
+                            Views and builds extension definitions. These can be defined and applied to the Logical Model, which will
+                            allow them to be included in the generated Profile <em>(Functionality to be developed)</em>
+                        </td>
+                        <td>
+                            Extension definitions are saved on the Confirmance Server
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <a target="_blank" href="query.html">Query Tool</a>
+                        </td>
+                        <td>
+                            Allows ad hoc queries against any FHIR server
+                        </td>
+                        <td>
+                            Can access any compliant FHIR server
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <a target="_blank" href="valuesetCreator.html">ValueSet builder</a>
+                        </td>
+                        <td>
+                            Lets you build a ValueSet. Works best with SNOMED.
+                        </td>
+                        <td>ValueSets are stored on the Terminology Server</td>
+                    </tr>
+
+                    <!--
+                    <tr>
+                        <td>
+                            <a target="_blank" href="logicalModeller.html">Profile builder</a>
+                        </td>
+                    </tr>
+                    -->
+                </table>
+            </div>
+
+
+
+            <!--
+            <uib-tabset>
+                <uib-tab heading="clinFHIR modules">
+                    <br/>
+
+                </uib-tab>
+                <uib-tab heading="IG Process">
+                    <br/>
+                    errwerwe
+                </uib-tab>
+            </uib-tabset>
+            -->
+        </div>
+        <div class="col-md-4 col-sm-4">
+
+            <div class="myBox">
+                <h5>Servers. </h5>
+                    <hr/>
+
+                <div ng-controller="setServersCtrl">
+                    <form>
+
+                        <div class="form-group" >
+
+                            <label>Data Server</label>
+                            <div class="row">
+                                <div class="col-sm-11 col-md-11">
+                                    <select ng-model="input.dataServer" class="form-control"
+                                            ng-options="item.name for item in allServers">
+
+                                    </select>
+                                </div>
+                                <div class="col-sm-1 col-md-1">
+                                    <i class="glyphicon glyphicon-question-sign clickable"
+                                          uib-popover="The data server holds most resources apart from the Conformance ones"
+                                          popover-placement="left"
+                                          popover-trigger="'mouseenter'"></i>
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        <div class="form-group">
+                            <label>Conformance Server</label>
+                            <div class="row">
+                                <div class="col-sm-11 col-md-11">
+
+                                    <select ng-model="input.confServer" class="form-control"
+                                            ng-options="item.name for item in allServers">
+
+                                    </select>
+                                </div>
+                                    <div class="col-sm-1 col-md-1">
+                                        <i class="glyphicon glyphicon-question-sign clickable"
+                                           uib-popover="The data conformance server holds Profiles, Extension Definitions and other conformance resources"
+                                           popover-placement="left"
+                                           popover-trigger="'mouseenter'"></i>
+                                    </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="form-group">
+                            <label>Terminology Server</label>
+                            <div class="row">
+                                <div class="col-sm-11 col-md-11">
+
+                                    <select ng-model="input.termServer" class="form-control"
+                                            ng-options="item.name for item in terminologyServers">
+
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-1 col-md-1">
+                                    <i class="glyphicon glyphicon-question-sign clickable"
+                                       uib-popover="The terminology server holds ValueSets, and exposes terminology operations"
+                                       popover-placement="left"
+                                       popover-trigger="'mouseenter'"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+
+                    <div>
+                        <button class="btn btn-primary pull-right" ng-click="save()">Save</button>
+                        <em>Should all be the same FHIR version</em>
+
+                    </div>
+                    <br/>
+
+
+
+                </div>
+            </div>
+            <div class="myBox">
+                <h5>Links (open in new tab)</h5>
+                <ul class="list-unstyled">
+                    <li><a target="_blank" href="http://hl7.org/fhir/index.html">STU-2 Specification</a></li>
+                    <li><a target="_blank" href="http://hl7.org/fhir/2017Jan/index.html">STU-3 Specification</a></li>
+                </ul>
+
+
+
+
+            </div>
+
+
+        </div>
+    </div>
+
+
+
+
+</div>
+</body>
+</html>

@@ -8,7 +8,7 @@ angular.module("sampleApp").controller('vsFinderCtrl',
         $scope.termServer = appConfigSvc.getCurrentTerminologyServer().url;//  config.servers.terminology;
         //$scope.valueSetRoot = config.servers.terminology + "ValueSet/";
 
-        $scope.input.arStrength = ['extensible','preferred','example'];
+        $scope.input.arStrength = ['required','extensible','preferred','example'];
 
         $scope.input.strength = currentBinding.strength;
         $scope.input.description = currentBinding.description;

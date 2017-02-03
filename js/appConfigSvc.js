@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-01-26';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-02-03';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};
@@ -95,14 +95,14 @@ angular.module("sampleApp")
 
 
 
-        defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://fhir2.healthintersections.com.au/open/",version:2,everythingOperation:true});
-        defaultConfig.allKnownServers.push({name:"Grahame STU3 server",url:"http://fhir3.healthintersections.com.au/open/",version:3,everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://fhir2.healthintersections.com.au/open/",version:2,everythingOperation:true,isTerminology:true});
+        defaultConfig.allKnownServers.push({name:"Grahame STU3 server",url:"http://fhir3.healthintersections.com.au/open/",version:3,everythingOperation:true,isTerminology:true});
         
         //defaultConfig.allKnownServers.push({name:"Grahame STU3 server (Proxy)",url:"grahamv3/",version:3,everythingOperation:true,realUrl:'http://fhir3.healthintersections.com.au/open/'});
         //defaultConfig.allKnownServers.push({name:"Grahame STU2 server (Proxy)",url:"grahamv2/",version:2,everythingOperation:true,realUrl:'http://fhir2.healthintersections.com.au/open/'});
         
         defaultConfig.allKnownServers.push({name:"Public HAPI STU2 server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2,everythingOperation:true});
-        defaultConfig.allKnownServers.push({name:"Public HAPI STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:"Public HAPI STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true,isTerminology:true});
 
         defaultConfig.allKnownServers.push({name:'SNapp STU3',version:3,url:"http://snapp.clinfhir.com:8080/baseDstu3/",everythingOperation:true});
 
@@ -110,11 +110,11 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:"HealthConnex STU3 server",url:"http://sqlonfhir-may.azurewebsites.net/fhir/",version:3,everythingOperation:true});
 
         defaultConfig.allKnownServers.push({name:"Local HAPI STU2 server",url:"http://localhost:8080/baseDstu2/",version:2,everythingOperation:true});
-        defaultConfig.allKnownServers.push({name:"Local HAPI STU3 server",url:"http://localhost:8080/baseDstu3/",version:3,everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:"Local HAPI STU3 server",url:"http://localhost:8080/baseDstu3/",version:3,everythingOperation:true,isTerminology:true});
 
 
         defaultConfig.allKnownServers.push({name:"HL7 New Zealand STU2 server",url:"http://fhir.hl7.org.nz/baseDstu2/",version:2});
-        defaultConfig.allKnownServers.push({name:'Ontoserver STU3',version:3,url:"http://52.63.0.196:8080/fhir/"});
+        defaultConfig.allKnownServers.push({name:'Ontoserver STU3',version:3,url:"http://52.63.0.196:8080/fhir/",isTerminology:true});
         defaultConfig.allKnownServers.push({name:'MiHIN STU2',version:2,url:"http://52.72.172.54:8080/fhir/baseDstu2/"});
         defaultConfig.allKnownServers.push({name:'Simplifier STU2',version:2,url:"https://simplifier.net/api/fhir/"});
         defaultConfig.allKnownServers.push({name:'Aegis WildFHIR STU3',version:3,url:" http://wildfhir.aegis.net/fhir1-6-0/"});
@@ -261,6 +261,19 @@ angular.module("sampleApp")
             getAllServers : function() {
                 //console.log(config.allKnownServers)
               return defaultConfig.allKnownServers;
+            },
+            getAllTerminologyServers : function(){
+                var lst = [];
+                defaultConfig.allKnownServers.forEach(function(svr){
+                    if (svr.isTerminology) {
+                        lst.push(svr)
+                    }
+                })
+                return lst;
+
+
+
+                //return defaultConfig.terminologyServers;
             },
             setCurrentDataServerDEP : function(sb) {
                 //set the current data server...

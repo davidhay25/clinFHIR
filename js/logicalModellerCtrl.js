@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
-
+            GetDataFromServer.registerAccess('logical');
             /*
             //testing...
             logicalModelSvc.importFromProfile().then(
