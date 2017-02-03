@@ -68,17 +68,27 @@
 <body style="padding: 8px;padding-top: 80px">
 
 
-<div ng-app="sampleApp" ng-controller="launcherCtrl" class="container-fluid">
+<div ng-app="sampleApp" ng-controller="launcherCtrl" class="container-fluid" ng-cloak>
 
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-        <div class="col-md-11 col-sm-11">
+        <div class="col-md-9 col-sm-9">
             <a class="navbar-brand" href="#">clinFHIR Launcher</a>
         </div>
 
+
+        <div class="col-md-2 col-sm-2">
+            <div class="navbar-text pull-right">
+                {{firebase.auth().currentUser.email}}
+            </div>
+
+        </div>
+
         <div class="col-md-1 col-sm-1">
+            <!--
             <div class="pull-right navbar-form" ng-show="waiting">
                 <img src="css/ajax_loader_blue_32.gif"/>
             </div>
+            -->
 
             <div ng-hide="waiting">
                 <div class="nav navbar-form navbar-right" ng-hide="firebase.auth().currentUser">
@@ -162,6 +172,18 @@ so is discouraged.</p>
                         </td>
                     </tr>
 
+
+
+                    <tr>
+                        <td>
+                            <a target="_blank" href="valuesetCreator.html">ValueSet builder</a>
+                        </td>
+                        <td>
+                            Lets you build a ValueSet. Works best with SNOMED.
+                        </td>
+                        <td>ValueSets are stored on the Terminology Server</td>
+                    </tr>
+
                     <tr>
                         <td>
                             <a target="_blank" href="query.html">Query Tool</a>
@@ -172,16 +194,6 @@ so is discouraged.</p>
                         <td>
                             Can access any compliant FHIR server
                         </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <a target="_blank" href="valuesetCreator.html">ValueSet builder</a>
-                        </td>
-                        <td>
-                            Lets you build a ValueSet. Works best with SNOMED.
-                        </td>
-                        <td>ValueSets are stored on the Terminology Server</td>
                     </tr>
 
                     <!--
@@ -212,96 +224,137 @@ so is discouraged.</p>
         <div class="col-md-4 col-sm-4">
 
             <div class="myBox">
-                <h5>Servers. </h5>
-                    <hr/>
+
+
+                <div class="pull-right" ng-click="showServers = !showServers">
+                    <span ng-show="showServers">Cancel</span>
+                    <span ng-hide="showServers">Edit</span>
+                </div>
+                <h5>Current servers </h5>
+
+
 
                 <div ng-controller="setServersCtrl">
-                    <form>
 
-                        <div class="form-group" >
+                    <div ng-hide = "showServers">
+                        <table class="table width='100%'">
+                            <tr><td><strong>Data Server</strong></td><td>{{input.dataServer.name}}</td></tr>
+                            <tr><td><strong>Conformance Server</strong></td><td>{{input.confServer.name}}</td></tr>
+                            <tr><td><strong>Terminology Server</strong></td><td>{{input.termServer.name}}</td></tr>
+                        </table>
+                    </div>
 
-                            <label>Data Server</label>
-                            <div class="row">
-                                <div class="col-sm-11 col-md-11">
-                                    <select ng-model="input.dataServer" class="form-control"
-                                            ng-options="item.name for item in allServers">
+                    <div ng-show = "showServers">
+                        <form>
 
-                                    </select>
+                            <div class="form-group" >
+
+                                <label>Data Server</label>
+                                <div class="row">
+                                    <div class="col-sm-11 col-md-11">
+                                        <select ng-model="input.dataServer" class="form-control"
+                                                ng-options="item.name for item in allServers"
+                                                ng-change="serverDirty = true">
+
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-1 col-md-1">
+                                        <i class="glyphicon glyphicon-question-sign clickable"
+                                              uib-popover="The data server holds most resources apart from the Conformance ones"
+                                              popover-placement="left"
+                                              popover-trigger="'mouseenter'"></i>
+                                    </div>
+
                                 </div>
-                                <div class="col-sm-1 col-md-1">
-                                    <i class="glyphicon glyphicon-question-sign clickable"
-                                          uib-popover="The data server holds most resources apart from the Conformance ones"
-                                          popover-placement="left"
-                                          popover-trigger="'mouseenter'"></i>
-                                </div>
+
 
                             </div>
 
 
-                        </div>
 
+                            <div class="form-group">
+                                <label>Conformance Server</label>
+                                <div class="row">
+                                    <div class="col-sm-11 col-md-11">
 
+                                        <select ng-model="input.confServer" class="form-control"
+                                                ng-options="item.name for item in allServers"
+                                                ng-change="serverDirty = true">
 
-                        <div class="form-group">
-                            <label>Conformance Server</label>
-                            <div class="row">
-                                <div class="col-sm-11 col-md-11">
-
-                                    <select ng-model="input.confServer" class="form-control"
-                                            ng-options="item.name for item in allServers">
-
-                                    </select>
+                                        </select>
+                                    </div>
+                                        <div class="col-sm-1 col-md-1">
+                                            <i class="glyphicon glyphicon-question-sign clickable"
+                                               uib-popover="The data conformance server holds Profiles, Extension Definitions and other conformance resources"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'"></i>
+                                        </div>
                                 </div>
+                            </div>
+
+
+
+                            <div class="form-group">
+                                <label>Terminology Server</label>
+                                <div class="row">
+                                    <div class="col-sm-11 col-md-11">
+
+                                        <select ng-model="input.termServer" class="form-control"
+                                                ng-options="item.name for item in terminologyServers"
+                                                ng-change="serverDirty = true">
+
+                                        </select>
+                                    </div>
+
                                     <div class="col-sm-1 col-md-1">
                                         <i class="glyphicon glyphicon-question-sign clickable"
-                                           uib-popover="The data conformance server holds Profiles, Extension Definitions and other conformance resources"
+                                           uib-popover="The terminology server holds ValueSets, and exposes terminology operations"
                                            popover-placement="left"
                                            popover-trigger="'mouseenter'"></i>
                                     </div>
+                                </div>
                             </div>
+
+                        </form>
+
+                        <div>
+                            <button ng-show="serverDirty" class="btn btn-primary pull-right" ng-click="save()">Save</button>
+                            <em>Should all be the same FHIR version</em>
+
                         </div>
 
 
-
-                        <div class="form-group">
-                            <label>Terminology Server</label>
-                            <div class="row">
-                                <div class="col-sm-11 col-md-11">
-
-                                    <select ng-model="input.termServer" class="form-control"
-                                            ng-options="item.name for item in terminologyServers">
-
-                                    </select>
-                                </div>
-
-                                <div class="col-sm-1 col-md-1">
-                                    <i class="glyphicon glyphicon-question-sign clickable"
-                                       uib-popover="The terminology server holds ValueSets, and exposes terminology operations"
-                                       popover-placement="left"
-                                       popover-trigger="'mouseenter'"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                    </form>
-
-                    <div>
-                        <button class="btn btn-primary pull-right" ng-click="save()">Save</button>
-                        <em>Should all be the same FHIR version</em>
-
+                        <br/>
                     </div>
-                    <br/>
-
 
 
                 </div>
             </div>
             <div class="myBox">
                 <h5>Links (open in new tab)</h5>
-                <ul class="list-unstyled">
-                    <li><a target="_blank" href="http://hl7.org/fhir/index.html">STU-2 Specification</a></li>
-                    <li><a target="_blank" href="http://hl7.org/fhir/2017Jan/index.html">STU-3 Specification</a></li>
-                </ul>
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <ul class="list-unstyled">
+                            <li><a target="_blank" href="http://hl7.org/fhir/index.html">STU-2 Specification</a></li>
+                            <li><a target="_blank" href="http://hl7.org/fhir/2017Jan/index.html">STU-3 Specification</a></li>
+                            <li><a target="_blank" href="http://wiki.hl7.org/index.php?title=FHIR">FHIR wiki</a></li>
+
+
+
+
+                        </ul>
+                    </div>
+                    <div class="col-md-6 col-sm-6">
+                        <ul class="list-unstyled">
+                            <li><a target="_blank" href="https://fhirblog.com/">Hay on FHIR</a></li>
+                            <li><a target="_blank" href="https://chat.fhir.org/">FHIR Chat</a></li>
+                            <li><a target="_blank" href="http://www.fhir.org/">FHIR.org</a></li>
+
+
+                        </ul>
+                    </div>
+                </div>
+
 
 
 

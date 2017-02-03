@@ -160,13 +160,13 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                 $scope.paramList = hashResource[type.name].searchParam; // paramList;
                 $scope.input = {};
 
-
+/*
                 //find all the resources referenced by this type...
                 var refs = []
                 $scope.paramList.forEach(function(param){
                     console.log(param)
                 })
-
+*/
 
                 $scope.close = function() {
                     $scope.$close({param:$scope.input.param,value:$scope.input.paramValue})
@@ -393,6 +393,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
             GetDataFromServer.findConformanceResourceByUri(uri).then(
                 function(profile){
                     $scope.selectedProfile = profile;
+                  //  $rootScope.selectedProfile = profile;
                     $scope.filteredProfile = profileCreatorSvc.makeProfileDisplayFromProfile(profile)
                 },
                 function(err) {

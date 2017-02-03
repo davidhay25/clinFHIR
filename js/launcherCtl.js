@@ -5,6 +5,8 @@ angular.module("sampleApp")
 
             GetDataFromServer.registerAccess('launcher');
 
+            $scope.showServers = false;
+
             if (appConfigSvc.checkConfigVersion()) {
                 var txt = 'The default configuration has been updated (including the patient data and conformance server). Please re-load the page for it to take effect.';
                 //todo txt += " (Note that you will need to re-enter any direct servers you have added via the 'gear' icon)"
