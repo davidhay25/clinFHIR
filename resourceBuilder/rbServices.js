@@ -437,8 +437,8 @@ angular.module("sampleApp").
 
                 },
                 function(err) {
-                    alert('error getting practitioner ' + angular.toJson(err));
-                    deferred.reject();
+                   // alert('error getting practitioner ' + angular.toJson(err));
+                    deferred.reject('error getting practitioner ' + angular.toJson(err));
                 }
             )
 

@@ -2299,8 +2299,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         getLookupForCode: function (system, code) {
             //lookup the current terminology server for the given code and system
-            var config = appConfigSvc.config();
-            var svr = appConfigSvc.getServerByUrl(config.servers.terminology);
+           // var config = appConfigSvc.config();
+           // var svr = appConfigSvc.getServerByUrl(config.servers.terminology);
+            var svr = appConfigSvc.getCurrentTerminologyServer();
             if (svr) {
                 if (svr.version < 3) {
                     //just don't do the lookupin an earlier version

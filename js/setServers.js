@@ -9,9 +9,19 @@ angular.module("sampleApp")
 
             $scope.input = {}
 
-            $scope.input.dataServer = setCurrent(appConfigSvc.getCurrentDataServer());
-            $scope.input.confServer = setCurrent(appConfigSvc.getCurrentConformanceServer());
-            $scope.input.termServer = setCurrent(appConfigSvc.getCurrentTerminologyServer());
+
+
+            function showConfig(){
+                $scope.input.dataServer = setCurrent(appConfigSvc.getCurrentDataServer());
+                $scope.input.confServer = setCurrent(appConfigSvc.getCurrentConformanceServer());
+                $scope.input.termServer = setCurrent(appConfigSvc.getCurrentTerminologyServer());
+            }
+            showConfig();
+
+            //when the user selects the 'default' option from the launcher...
+            $scope.$on('setDefault',function(){
+                showConfig();
+            })
 
             //console.log($scope.allServers)
 

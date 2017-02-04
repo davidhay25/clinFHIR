@@ -863,7 +863,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 },
                 function(err) {
                     //this will generally occur when using stu-2 - so ignore...
-                    alert(angular.toJson(err));
+                    //alert(angular.toJson(err));
                 }
             );
 
@@ -944,25 +944,33 @@ angular.module("sampleApp").controller('valuesetCtrl',
         //use the terminology operation CodeSystem/$lookup to get details of the code / system when manually entered
         $scope.lookupCode = function(system,code) {
 
-            resourceCreatorSvc.getLookupForCode(system,code).then(
-                function(data) {
-                    console.log(data);
-                    $scope.lookupResult = data.data;
-                    $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
-                    $scope.results.ccDirectDisplay = $scope.terminologyLookup.display;
+
+            if (appConfigSvc.getCurrentTerminologyServer().version < 3) {
+                modalService.showModal({},{bodyText:"Sorry, Lookup only works for STU3 Terminology servers"})
+
+            } else {
+                resourceCreatorSvc.getLookupForCode(system,code).then(
+                    function(data) {
+                        console.log(data);
+                        $scope.lookupResult = data.data;
+                        $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
+                        $scope.results.ccDirectDisplay = $scope.terminologyLookup.display;
 
 
-                    //set results.cc as that will enable the buttons - and will also be the code that is saved
-                    $scope.results.cc = {code:code,system:system,display:$scope.terminologyLookup.display}
-                    //$scope.results.cc.code,display:$scope.results.cc.display
+                        //set results.cc as that will enable the buttons - and will also be the code that is saved
+                        $scope.results.cc = {code:code,system:system,display:$scope.terminologyLookup.display}
+                        //$scope.results.cc.code,display:$scope.results.cc.display
 
-                    //console.log($scope.terminologyLookup);
+                        //console.log($scope.terminologyLookup);
 
-                },
-                function(err) {
-                    alert(angular.toJson(err));
-                }
-            )
+                    },
+                    function(err) {
+                        alert(angular.toJson(err));
+                    }
+                )
+            }
+
+
         };
 
 

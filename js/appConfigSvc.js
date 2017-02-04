@@ -144,6 +144,11 @@ angular.module("sampleApp")
 
 
         return {
+            setToDefault : function(){
+                this.setServerType('terminology',"http://fhir3.healthintersections.com.au/open/");
+                this.setServerType('data',"http://fhirtest.uhn.ca/baseDstu3/");
+                this.setServerType('conformance',"http://fhirtest.uhn.ca/baseDstu3/");
+            },
             addServer : function(svr,isTerminology) {
                 $localStorage.config.allKnownServers.push(svr)
                 if (isTerminology) {

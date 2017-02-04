@@ -27,6 +27,12 @@
             color: rgb(79, 155, 214);
             cursor: pointer;
         }
+        .pass {
+            color:green;
+        }
+        .fail {
+            color:red;
+        }
 
     </style>
 
@@ -227,8 +233,8 @@ so is discouraged.</p>
 
 
                 <div class="pull-right" ng-click="showServers = !showServers">
-                    <span ng-show="showServers">Cancel</span>
-                    <span ng-hide="showServers">Edit</span>
+                    <span class="clickable" ng-show="showServers">Cancel</span>
+                    <span class="clickable" ng-hide="showServers">Edit</span>
                 </div>
                 <h5>Current servers </h5>
 
@@ -236,14 +242,106 @@ so is discouraged.</p>
 
                 <div ng-controller="setServersCtrl">
 
-                    <div ng-hide = "showServers">
-                        <table class="table width='100%'">
-                            <tr><td><strong>Data Server</strong></td><td>{{input.dataServer.name}}</td></tr>
-                            <tr><td><strong>Conformance Server</strong></td><td>{{input.confServer.name}}</td></tr>
-                            <tr><td><strong>Terminology Server</strong></td><td>{{input.termServer.name}}</td></tr>
-                        </table>
-                    </div>
 
+                        <table class="table width='100%'">
+                            <tr><td><strong>Data Server</strong></td><td>
+
+                                <div ng-hide = "showServers">{{input.dataServer.name}}</div>
+                                <div ng-show="showServers">
+                                    <select ng-model="input.dataServer" class="form-control"
+                                            ng-options="item.name for item in allServers"
+                                            ng-change="serverDirty = true">
+
+                                    </select>
+                                </div>
+
+                            </td>
+                            <td>
+                                <span ng-hide="showServers">
+                                    <i class="glyphicon glyphicon-question-sign clickable"
+                                       ng-click="testServer('Data')"
+                                       uib-popover="The data server holds most resources apart from the Conformance ones. Click to test."
+                                       popover-placement="left"
+                                       popover-trigger="'mouseenter'"> </i>
+
+
+                                <i ng-show="testing.testData.ok" class="glyphicon glyphicon-ok pass"></i>
+                                <i ng-show="testing.testData.fail" class="glyphicon glyphicon-remove fail"></i>
+                                </span>
+
+
+                            </td>
+
+                            </tr>
+                            <tr><td><strong>Conformance Server</strong></td>
+                                <td>
+                                    <div ng-hide = "showServers">{{input.confServer.name}}</div>
+                                    <div ng-show="showServers">
+                                        <select ng-model="input.confServer" class="form-control"
+                                                ng-options="item.name for item in allServers"
+                                                ng-change="serverDirty = true">
+
+                                        </select>
+                                    </div>
+
+                                </td>
+                                <td>
+                                     <span ng-hide="showServers">
+                                        <i class="glyphicon glyphicon-question-sign clickable"
+                                           ng-click="testServer('Conformance')"
+                                           uib-popover="The data conformance server holds Profiles, Extension Definitions and other conformance resources. Click to test."
+                                           popover-placement="left"
+                                           popover-trigger="'mouseenter'"></i>
+
+                                            <i ng-show="testing.testConformance.ok" class="glyphicon glyphicon-ok pass"></i>
+                                            <i ng-show="testing.testConformance.fail" class="glyphicon glyphicon-remove fail"></i>
+                                     </span>
+
+
+
+                                </td>
+
+                            </tr>
+                            <tr><td><strong>Terminology Server</strong></td>
+                                <td>
+                                    <div ng-hide = "showServers">{{input.termServer.name}}</div>
+                                    <div ng-show="showServers">
+                                        <select ng-model="input.termServer" class="form-control"
+                                                ng-options="item.name for item in allServers"
+                                                ng-change="serverDirty = true">
+
+                                        </select>
+                                    </div>
+                                </td>
+                            <td>
+                                 <span ng-hide="showServers">
+                                <i class="glyphicon glyphicon-question-sign clickable"
+                                   ng-click="testServer('Terminology')"
+                                   uib-popover="The terminology server holds ValueSets, and exposes terminology operations. Click to test."
+                                   popover-placement="left"
+                                   popover-trigger="'mouseenter'"></i>
+
+                                     <i ng-show="testing.testTerminology.ok" class="glyphicon glyphicon-ok pass"></i>
+                                    <i ng-show="testing.testTerminology.fail" class="glyphicon glyphicon-remove fail"></i>
+                                 </span>
+                            </td>
+                            </tr>
+                        </table>
+
+                    {{message}} {{elapsed}}
+
+                        <div ng-show="showServers">
+
+                            <button ng-show="serverDirty" class="btn btn-primary pull-right" ng-click="save()">Save</button>
+                            <button class="btn btn-link pull-right" ng-click="setToDefault()">Default</button>
+                            <em>Should all be the same FHIR version</em>
+
+                            <br/> <br/>
+                        </div>
+
+
+
+<!--
                     <div ng-show = "showServers">
                         <form>
 
@@ -327,6 +425,8 @@ so is discouraged.</p>
                         <br/>
                     </div>
 
+
+                    -->
 
                 </div>
             </div>

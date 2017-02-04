@@ -1,19 +1,18 @@
 
 angular.module("sampleApp")
     .controller('launcherCtrl',
-        function ($scope,modalService,$firebaseObject,GetDataFromServer,$uibModal,appConfigSvc) {
+        function ($scope,modalService,$firebaseObject,GetDataFromServer,$uibModal,appConfigSvc,$interval,$http) {
 
             GetDataFromServer.registerAccess('launcher');
 
+            $scope.testing = {};
             $scope.showServers = false;
 
             if (appConfigSvc.checkConfigVersion()) {
                 var txt = 'The default configuration has been updated (including the patient data and conformance server). Please re-load the page for it to take effect.';
                 //todo txt += " (Note that you will need to re-enter any direct servers you have added via the 'gear' icon)"
                 modalService.showModal({}, {bodyText: txt})
-
             }
-
 
             //---------- login stuff
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
@@ -32,7 +31,8 @@ angular.module("sampleApp")
                             $scope.Practitioner = practitioner;
 
                         },function (err) {
-                            alert(err)
+                            //just swallow any error
+                            //alert(err)
                         }
                     );
 
@@ -65,14 +65,75 @@ angular.module("sampleApp")
                     modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
 
                 }, function(error) {
-                    modalService.showModal({}, {bodyText: 'Sorry, there was an error lgging out - please try again'})
+                    modalService.showModal({}, {bodyText: 'Sorry, there was an error logging out - please try again'})
                 });
 
             };
 
 
+            $scope.testServer = function(type) {
+                var opn = 'getCurrent'+type + 'Server'
+                var svr = appConfigSvc[opn]()
+//console.log(svr)
+                $scope.testing = {testData : {}, testConformance:{}, textTerminology:{}};
+                //console.log(server,type);
+                $scope.message = 'Reading the capabilityStatement from '+ svr.url + ' Please wait...';
+
+
+                //Display a countdown timer so the user knows something is happenning
+                var stop;
+                $scope.elapsed= 15;     //this timeout is set in the resourceCreatorSvc.getConformanceResource as well...
+                timer = function() {
+
+                    if ( angular.isDefined(stop) ) return;      //only have 1 at a time...
+
+                    stop = $interval(function() {
+                        $scope.elapsed --;
+                        //$scope.$apply();
+                        //console.log($scope.elapsed);
+                        if ($scope.elapsed < 0) {
+                            //stopTimer();
+                            $interval.cancel(stop);
+                        }
+                    }, 1000);
+                };
+
+                timer();        //Start the timer...
+
+
+                $scope.testing['test'+type] = {loading : true};
+
+
+
+                var url = svr.url + "metadata"
+                $http.get(url, {timeout: 10000}).then(
+
+                    function(data) {
+                        $scope.testing['test'+type] = {ok:true}
+                    },
+                    function(err) {
+                        $scope.testing['test'+type] = {fail:true}
+                    }
+                ).then(function(){
+                    delete $scope.message;
+                    delete $scope.elapsed;
+                    $interval.cancel(stop);
+                });
+
+            };
+
+
+            $scope.setToDefault = function(){
+                $scope.testing = {};
+                appConfigSvc.setToDefault();
+
+                $scope.$broadcast('setDefault');
+                $scope.showServers = false;
+            }
+
             $scope.$on('serverUpdate',function() {
 
+                $scope.testing = {};
 
                 var version = appConfigSvc.getCurrentDataServer().version;
                 if (appConfigSvc.getCurrentTerminologyServer().version !== version ||
@@ -83,8 +144,8 @@ angular.module("sampleApp")
                     modalService.showModal({}, {bodyText:'The servers that clinFHIR will access has been updated for all modules.'});
                 }
 
+                $scope.showServers = false;
 
-
-        })
+            })
 
     })
