@@ -640,7 +640,16 @@
 
 
 
-
+                                        <div class="form-group">
+                                            <div class="col-md-3 col-sm-3">
+                                                <strong>Tags</strong>
+                                            </div>
+                                            <div class="col-md-9 col-sm-9">
+                                                <span ng-repeat="tag in selectedContainer.tags">
+                                                    {{tag.code}}&nbsp;
+                                                </span>
+                                            </div>
+                                        </div>
 
 
 
@@ -695,6 +704,15 @@
 
                                     </div>
                                     <pre>{{selectedContainer.bundle | bundleDisplay | json}}</pre>
+                                </uib-tab>
+                                <uib-tab heading = "JsonContainer">
+                                    <div>
+                                        <a class=" rounded-box pull-right" ng-show="downloadLinkJsonContent" download="{{downloadLinkJsonName}}.json"
+                                           href="{{downloadLinkJsonContent}}"> Download scenario
+                                        </a>
+
+                                    </div>
+                                    <pre>{{selectedContainer | containerMeta  | json}}</pre>
                                 </uib-tab>
                             </uib-tabset>
 

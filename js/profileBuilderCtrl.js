@@ -494,7 +494,10 @@ angular.module("sampleApp")
                 var clone = angular.copy(vo.profile);
                 appConfigSvc.addToRecentProfile(clone,true);  //add to the list, replacing any existing..
                 //resourceCreatorSvc.setCurrentProfile(clone);
-                $scope.recent.profile = appConfigSvc.getRecentProfile();    //re-establish the recent profile list
+                if ($scope.recent) {
+                    $scope.recent.profile = appConfigSvc.getRecentProfile();    //re-establish the recent profile list
+                }
+
 
                 //added tuesday nov-8
                 $rootScope.$emit('profileSelected',clone);      //will cause the builder to be set up for the seelcted profile...
@@ -945,4 +948,36 @@ angular.module("sampleApp")
       //  $scope.tabIndexActive = '0'
     }
 
-})
+}).filter('shortUrl',function(){
+        return function(input) {
+
+            if (input) {
+                var ar = input.split('/');
+                if (ar.length > 2) {
+                    return ar[ar.length-2]+'/'+ar[ar.length-1]
+                } else {
+                    return input
+                }
+            } else {
+                return input
+            }
+
+        }
+    }
+).filter('showUrlId',function() {
+        //show the id component of a url
+        return function (input) {
+
+            if (input) {
+                var ar = input.split('/');
+                if (ar.length > 2) {
+                    return ar[ar.length - 1]
+                } else {
+                    return input
+                }
+            } else {
+                return input
+            }
+
+        }
+    }    )

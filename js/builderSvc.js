@@ -167,10 +167,12 @@ angular.module("sampleApp")
                 return patient
             },
             makeLogicalModelFromSD : function(profile){
-              //given a StructureDefinition which is a profile (ie has extensions) generate a logical model by de-referencing the extensions
+              //given a StructureDefinition which is a profile (ie potentially has extensions) generate a logical model by de-referencing the extensions
               //currently only working for simple extensions
                 var deferred = $q.defer();
                 if (profile && profile.snapshot && profile.snapshot.element) {
+
+                    console.log(profile.url)
 
                     var logicalModel = angular.copy(profile);       //this will be the logical model
                     var queries = [];       //the queries to retrieve the extension definition
@@ -189,6 +191,54 @@ angular.module("sampleApp")
                                     queries.push(GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
                                         function (sdef) {
                                             //console.log(ed,sdef)
+
+                                            var analysis = Utilities.analyseExtensionDefinition3(sdef);
+console.log(analysis)
+                                            if (! analysis.isComplexExtension) {
+
+
+                                                ed.type = analysis.type;
+                                                ed.binding = analysis.binding;
+                                                //now update the path and other key properties of the ed
+                                                var text = $filter('getLogicalID')(profileUrl);
+
+                                                ed.path = ed.path.replace('extension',text)
+                                                //ed.builderMeta || {}
+                                                ed.builderMeta = {isExtension : true};  //to colourize it, and help with the build..
+                                                ed.builderMeta.extensionUrl = profileUrl;
+
+                                                ed.comments = sdef.description;
+
+/*
+                                                //locate the entry in the ED which is 'valueX' and update the ed.
+                                                if (sdef && sdef.snapshot && sdef.snapshot.element) {
+                                                    sdef.snapshot.element.forEach(function (el) {
+                                                        if (el.path.indexOf('.value') > -1) {
+                                                            ed.type = el.type;
+                                                            ed.binding = analysis.binding;
+                                                            //now update the path and other key properties of the ed
+                                                            var text = $filter('getLogicalID')(profileUrl);
+
+                                                            ed.path = ed.path.replace('extension',text)
+                                                            //ed.builderMeta || {}
+                                                            ed.builderMeta = {isExtension : true};  //to colourize it, and help with the build..
+                                                            ed.builderMeta.extensionUrl = profileUrl;
+
+                                                            ed.comments = sdef.description;     //to be eble to show the description on the screen..
+
+                                                        }
+
+                                                    })
+
+                                                }
+                                                */
+                                            } else {
+
+                                            }
+
+                                            console.log(analysis);
+
+                                            /*
                                             //locate the entry in the ED which is 'valueX' and update the ed. todo - need to accomodate complex extensions
                                             if (sdef && sdef.snapshot && sdef.snapshot.element) {
                                                 sdef.snapshot.element.forEach(function (el) {
@@ -210,6 +260,7 @@ angular.module("sampleApp")
                                                 })
 
                                             }
+                                            */
 
                                         }
                                     ))
@@ -605,6 +656,14 @@ angular.module("sampleApp")
 
                 if (dr && dr.content && dr.content[0] && dr.content[0].attachment && dr.content[0].attachment.data) {
                     var container = {};
+
+                    //scenario tags are saved as tags against the
+                    if (dr.meta && dr.meta.tags) {
+                        container.tags = dr.meta.tags
+                    }
+
+
+                    //the bundle of resources that makes up the scenario. stores as a b64 encoded attachment in the DR
                     container.bundle = angular.fromJson(atob(dr.content[0].attachment.data));
 
                     //create the summary of resources in the container

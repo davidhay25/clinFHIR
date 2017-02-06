@@ -16,7 +16,6 @@ angular.module("sampleApp")
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(lst) {
                     $scope.allResourceTypes = lst;
-                    //console.log($scope.allResourceTypes);
                     $scope.input.resourceType = lst[0]
                 }
             );
@@ -24,10 +23,14 @@ angular.module("sampleApp")
             //called to display the editing and details screen - from the 'eye'...
             $scope.showProfileDetails = function() {
 
-                var profile = angular.copy($scope.selectedProfile)
 
+
+                $scope.displayMode = 'profileEditor'
+
+                var profile = angular.copy($scope.selectedProfile)
                 $rootScope.$broadcast('profileSelected',profile);       //allows components to initalise with the profile
                 $rootScope.$broadcast('setDisplayMode',{newMode:'profileEditor',currentMode: 'profiles'});  //display the profile editor page
+
 
             };
 

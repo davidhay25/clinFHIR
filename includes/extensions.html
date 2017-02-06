@@ -5,46 +5,43 @@
         <div class="alert alert-warning" role="alert">Accessing server, please wait...</div>
     </div>
 
-    <div>
-        <div class="row rounded-box">
-
-            <!--
-            <div class="col-md-4 col-sm-4">
-                <button ng-click="changeMode('extension')"
-                        ng-class="{btn:true,'btn-default':true,active:mode=='extension'}">Extension Definitions</button>
-                <button  ng-click="changeMode('profile')"
-                        ng-class="{btn:true,'btn-default':true,active:mode=='profile'}">Profiles</button>
-            </div>
--->
-
-            <div class="col-md-8 col-sm-8">
-                <div>
 
 
-                    <span class="lead">Extension Definition explorer</span> on {{appConfigSvc.getCurrentConformanceServer().name }}
-                ({{appConfigSvc.getCurrentConformanceServer().url}})</div>
-            </div>
 
 
-            <div class="col-md-2 col-sm-2">
-
-            </div>
-
-            <div class="col-md-2 col-sm-2">
-                <button class="btn btn-default pull-right"
-
-                        ng-click="newExtension()">New Extension Definition</button>
-<!--
-                <button class="btn btn-default pull-right"
-                        ng-show="userProfile.extDef.permissions.canCreate"
-                        ng-click="newExtension()">New Extension Definition</button>
-                -->
-            </div>
-
-
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="col-md-4 col-sm-4">
+            <a class="navbar-brand" href="#">clinFHIR Extension Definition Manager</a>
         </div>
-    </div>
-    <hr/>
+
+
+            <div class="col-md-4 col-sm-4">
+
+
+
+                    <span class="navbar-text">{{appConfigSvc.getCurrentConformanceServer().name }}</span>
+
+            </div>
+
+
+            <div class="col-md-2 col-sm-2">
+
+            </div>
+
+            <div class="col-md-2 col-sm-2">
+                <form class="navbar-form navbar-right">
+                    <button class=" btn btn-primary"
+
+                            ng-click="newExtension()">New Extension Definition</button>
+                </form>
+
+
+
+            </div>
+
+
+    </nav>
+
     <div class="row">
 
         <div class="col-md-4 col-sm-4 col-xs-4">

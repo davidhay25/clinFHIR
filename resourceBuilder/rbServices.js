@@ -1048,6 +1048,8 @@ angular.module("sampleApp").
             vo.url = SD.url;
             vo.description = SD.description;
 
+            //console.log(vo.url)
+
             //vo.eds = [];     //a suppary of element definitions - so I can see them in the UI
             var discriminator;      //if this is sliced, then a discriminator will be set...
             var complex = false;    //will be true if this is a
@@ -1066,6 +1068,8 @@ angular.module("sampleApp").
                 SD.snapshot.element.forEach(function (element,inx) {
                     if (element.path) {
                         var arPath = element.path.split('.')
+
+                        //console.log(element.slicing)
                         if (element.slicing) {
                             vo.isComplexExtension = true;
                         }
@@ -1104,7 +1108,8 @@ angular.module("sampleApp").
 
             }
 
-
+  //          console.log(vo)
+//console.log('----------')
             return vo;
 
             //process a complex extension. Will only handle a single level hierarchy - ie a list of child extensions
@@ -1117,7 +1122,7 @@ angular.module("sampleApp").
                     if (element.path) {
                         var arPath = element.path.split('.');
                         if (arPath.length == 2) {
-                            //this is defining the start of a new child. create a new object and add it to the choldren array
+                            //this is defining the start of a new child. create a new object and add it to the children array
                             child = {min: element.min, max: element.max};
                             child.ed = element;     //Hopefully this is the representative ED
                             child.ed.myMeta = {};
@@ -1169,6 +1174,7 @@ angular.module("sampleApp").
 
                         //look at the 'type' property to see the supported data types
                         if (element.type) {
+                            vo.type = element.type;
                             element.type.forEach(function (typ) {
                                 var code = typ.code;        //the datatype code
                                 if (code) {
@@ -1199,14 +1205,7 @@ angular.module("sampleApp").
                             vo.binding = element.binding;
                         }
 
-
-
-
                     }
-
-
-
-
 
                 })
             }

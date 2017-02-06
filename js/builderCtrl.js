@@ -359,6 +359,8 @@ angular.module("sampleApp")
                 if ($localStorage.builderBundles.length > 0) {
                    // $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
                     $scope.selectedContainer = $localStorage.builderBundles[$scope.currentBundleIndex];
+
+                    //create a hash (based on url) of all the resources in the
                     builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
                     $scope.currentPatient = builderSvc.getPatientResource();
                     getExistingData( $scope.currentPatient)
@@ -452,7 +454,7 @@ angular.module("sampleApp")
             };
 
             //------------  Library functions ------------
-            $scope.libraries = [];
+            //$scope.libraries = [];
 
             $scope.downloadFromLibrary = function(inContainer){
                 //note that the entry is a DocumentReference with a bundle as an attachment...
@@ -534,6 +536,8 @@ angular.module("sampleApp")
                 );
 
             };
+
+            //---------
 
             $scope.selectBundle = function(inx){
                 delete $scope.resourcesFromServer;

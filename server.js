@@ -103,7 +103,6 @@ function recordAccess(req,data) {
                     updateLocation(result[0],clientIp);
 
                 }
-
             }
         });
 
@@ -146,7 +145,7 @@ app.post('/stats/login',function(req,res){
     var body = '';
     req.on('data', function (data) {
         body += data;
-        console.log("Partial body: " + body);
+       // console.log("Partial body: " + body);
     });
 
     req.on('end', function () {
