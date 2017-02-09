@@ -856,15 +856,24 @@ angular.module("sampleApp")
                     $scope.chart = new vis.Network(container, vo.graphData, options);
                     $scope.chart.on("click", function (obj) {
 
+                        console.log(obj)
+
                         var nodeId = obj.nodes[0];  //get the first node
 
 
+                            var node = vo.graphData.nodes.get(nodeId);
 
-                        var node = vo.graphData.nodes.get(nodeId);
+                            if (node.cf) {
+                                $scope.selectResource(node.cf.resource)
+                            } else {
+                                var edgeId = obj.edges[0];
+                                var edge = vo.graphData.edges.get(edgeId);
+                                console.log(edge)
+                                $scope.selectReference(edge,vo.nodes)
+                            }
 
-                        if (node.cf) {
-                            $scope.selectResource(node.cf.resource)
-                        }
+
+
 
 
                         $scope.$digest();
@@ -875,13 +884,13 @@ angular.module("sampleApp")
 
 
 
-            }
+            };
 
             $timeout(function(){
                 makeGraph()
             }, 1000);
 
-            $scope.removeReference = function(ref) {
+            $scope.removeReferenceDEP = function(ref) {
 
                 console.log(ref)
                 alert("Sorry, there's a bug removing references - working on it...")
@@ -945,6 +954,62 @@ angular.module("sampleApp")
 
             };
 
+            //NOT WORKING
+            $scope.removeReference = function(fromResource,toResource,path) {
+
+                modalService.showModal({}, {bodyText:'Sorry, still working on this. Removing either of the resources will remove the reference. (A bit brutal I admit)'});
+                return
+
+                //remove a reference from a resource. currently has limitations...
+                if (path.indexOf('.') > 1) {
+                    modalService.showModal({}, {bodyText:'Sorry, at the moment I can only remove references from the root'});
+                    return;
+                }
+
+                var reference = fromResource.resourceType + '/' + fromResource.id;
+                var resource = builderSvc.resourceFromReference(reference)
+                delete resource[path];
+                $scope.selectResource(resource,function(){
+                    $scope.waiting = false;
+                    makeGraph();
+                    drawResourceTree(resource);
+                    isaDocument();      //determine if this bundle is a document (has a Composition resource)
+
+                    //$rootScope.$emit('addResource',resource);
+
+                });
+
+
+                /*
+                console.log(fromResource,toResource,path)
+                var element = builderSvc.analyseInstanceForPath(fromResource,path)
+                if (element.modelPoint) {
+                    delete element.modelPoint
+                }
+                */
+            };
+
+            $scope.selectReference = function(edge,nodes) {
+                $scope.currentReference = {edge:edge};
+                var fromNode = findNode(nodes,edge.from);
+
+                $scope.currentReference.from = fromNode;// builderSvc.resourceFromReference();//  fromNode;
+                $scope.currentReference.fromPath = edge.label; //fromNode.cf.resource.resourceType + '.' + edge.label; //todo needs better validtion
+                $scope.currentReference.to = findNode(nodes,edge.to);
+                delete $scope.currentResource;
+
+                function findNode(nodes,id) {
+                    for (var i=0; i< nodes.length; i++) {
+                        var node = nodes[i]
+                        if (node.id == id) {
+                            return node;
+                            break;
+                        }
+                    }
+                }
+
+            };
+
             //if there is a cb (callback property) then execute it after retrieving the SD (as it is generally used for a new resource to add the patient reference)
             $scope.selectResource = function(entry,cb) {
                 //right now, the 'entry' can be an entry or a resource (todo which I must fix!)
@@ -961,6 +1026,7 @@ angular.module("sampleApp")
                 delete $scope.existingElements;
                 delete $scope.expandedValueSet;
                 delete $scope.currentElementValue;
+                delete $scope.currentReference;
 
 
                 $scope.currentResource = resource;      //in theory we could use currentEntry...

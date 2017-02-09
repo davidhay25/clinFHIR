@@ -333,17 +333,11 @@ console.log(analysis)
                             response.isMultipleBbe = true;          //indicates that this element does belonge to a repreating bbe (even if the list is currently empty)
                             if (currentTestPoint) {
                                 currentTestPoint = currentTestPoint[segment]
-
                             }
                         } else {
                             // ?? do what
                         }
-
                     }
-
-
-
-
 
                 }
 
@@ -1529,7 +1523,7 @@ console.log(analysis)
                     var targetNode = objNodes[ref.targ];
                     if (targetNode) {
                         var label = $filter('dropFirstInPath')(ref.path);
-                        arEdges.push({from: ref.src.id, to: targetNode.id, label: label,arrows : {to:true}})
+                        arEdges.push({id: 'e' + arEdges.length +1,from: ref.src.id, to: targetNode.id, label: label,arrows : {to:true}})
                     } else {
                         console.log('>>>>>>> error Node Id '+ref.targ + ' is not present')
                     }
@@ -1608,7 +1602,7 @@ console.log(analysis)
                     edges: edges
                 };
 
-                return {graphData : data, allReferences:allReferences};
+                return {graphData : data, allReferences:allReferences, nodes: arNodes};
 
                 //find elements of type refernce at this level
                 function findReferences(refs,node,nodePath,index) {

@@ -1,4 +1,5 @@
 
+/*This is a reall bad name! It's actually a profile editor...*/
 angular.module("sampleApp")
 .controller('logicalModelCtrl',function($scope,$rootScope,profileCreatorSvc,resourceCreatorSvc,GetDataFromServer,
                                         appConfigSvc,modalService,RenderProfileSvc,$uibModal,Utilities,$timeout){
@@ -511,6 +512,7 @@ angular.module("sampleApp")
             }
         ).finally(function(){
             $rootScope.$broadcast('setWaitingFlag',false);
+            $rootScope.$emit('profileEditComplete');        //6 feb 2017 - will hide the edit screen.  This all needs refactoring...
         });
     };
 

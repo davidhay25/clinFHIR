@@ -82,7 +82,10 @@
 <div ng-app="sampleApp" ng-controller="profilesCtrl" class="container-fluid">
 
 
-    <ng-include src="'/includes/profiles.html'"></ng-include>
+    <div ng-hide="displayMode == 'profileEditor'">
+        <ng-include src="'/includes/profiles.html'"></ng-include>
+    </div>
+
 
 
     <div ng-show="displayMode == 'profileEditor'" ng-controller="logicalModelCtrl">

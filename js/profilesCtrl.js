@@ -12,7 +12,14 @@ angular.module("sampleApp")
                 delete $scope.profilesArray;
                 delete $scope.selectedProfile;
             })
-            
+
+
+            //called when editing a profile is completed (saved) or cancelled. This requires refactoring...
+            $rootScope.$on('profileEditComplete',function(){
+                delete $scope.displayMode;
+            });
+
+
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(lst) {
                     $scope.allResourceTypes = lst;

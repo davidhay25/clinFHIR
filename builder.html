@@ -782,6 +782,26 @@
             <div class="col-md-5 col-sm-5">
 
                 <div ng-show="displayMode == 'view'">
+
+                    <div ng-show="currentReference">
+                        <h5>Reference</h5>
+                        <div><strong>From: </strong>{{currentReference.from.cf.resource.resourceType}}</div>
+                        <div><strong>To: </strong>{{currentReference.to.cf.resource.resourceType}}</div>
+                        <div><strong>Path: </strong>{{currentReference.fromPath}}</div>
+
+
+                        <div>
+                            <button class="btn btn-danger pull-right"
+                                    ng-click="removeReference(currentReference.from.cf.resource,currentReference.to.cf.resource,currentReference.fromPath)">
+                                Remove</button>
+                        </div>
+
+<!--
+                        <pre>{{currentReference | json}}</pre>
+                        -->
+                    </div>
+
+
                     <uib-tabset ng-show="currentResource">
 
                         <uib-tab heading="Structure & Reference">

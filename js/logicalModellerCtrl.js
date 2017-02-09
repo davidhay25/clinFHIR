@@ -1793,6 +1793,11 @@ angular.module("sampleApp")
                             //for a reference type...
                             if ($scope.input.dataType.code == 'Reference') {
                                 //vo.referenceUri = $scope.input.referenceFromIg.resource.url;
+
+                                //set the default to any...
+                                vo.referenceUri = "http://hl7.org/fhir/StructureDefinition/Resource";
+                                vo.type[0].targetProfile = vo.referenceUri;
+
                                 if ($scope.input.referenceFromIg) {
                                     vo.isReference = true;
                                     vo.referenceUri = $scope.input.referenceFromIg.resource.url; // for the reference table...
