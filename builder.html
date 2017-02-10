@@ -105,6 +105,9 @@
     <script src="js/components/profileDisplayComp.js"></script>
     <script src="resourceBuilder/vsBrowser.js"></script>
     <script src="js/setServers.js"></script>
+    <script src="js/resourceViewerCtl.js"></script>
+    <script src="js/observationsDisplayCtrl.js"></script>
+    <script src="js/libs/vis.min.js"></script>
     <!--
     <script src="js/newVSFinder.js"></script>
 
@@ -172,15 +175,12 @@
                 <div class="col-md-3 col-sm-3">
 
                     <div class="navbar-text">
-                        <p>{{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}}</p>
-                        <!--<p ng-bind-html="currentPatient.text.div"></p> -->
+                        <p class='clickable' ng-click="togglePatientDisplay()">
+                            {{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}}
+                        </p>
+
                     </div>
 
-                    <!--
-                    <div class="navbar-text pull-right">
-                        STU version: {{appConfigSvc.getCurrentConformanceServer().version}}
-                    </div>
-                    -->
 
                 </div>
 
@@ -257,6 +257,12 @@
 
             </div>
         </nav>
+
+
+        <div ng-show="displayMode=='patient'" ng-controller="resourceViewerCtrl">
+            <ng-include src="'/includes/resourceViewer.html'"></ng-include>
+        </div>
+
 
 
         <div class="row" ng-show="libraryVisible">

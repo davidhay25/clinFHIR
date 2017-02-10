@@ -9,6 +9,7 @@ angular.module("sampleApp")
             $scope.input.dt = {};   //data entered as part of populating a datatype
             $scope.appConfigSvc = appConfigSvc;
             $scope.ResourceUtilsSvc = ResourceUtilsSvc;     //for the 1 line summary..
+            $scope.displayMode = '';
 
             GetDataFromServer.registerAccess('scnBld');
 
@@ -76,6 +77,15 @@ angular.module("sampleApp")
             $scope.setPrivate = function(isPrivate){
                 $scope.selectedContainer.isPrivate = ! isPrivate;
             };
+
+            $scope.togglePatientDisplay = function(){
+                if ($scope.displayMode == 'patient') {
+                    $scope.displayMode = 'scenario'
+                } else {
+                    $scope.displayMode = 'patient'
+                }
+            }
+
 
             //---------- related to document builder -------
             $rootScope.$on('docUpdated',function(event,composition){
