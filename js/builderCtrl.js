@@ -171,7 +171,7 @@ angular.module("sampleApp")
                     controller: 'findPatientCtrl'
                 }).result.then(
                         function(resource){
-                            console.log(resource)
+                            //console.log(resource)
                             if (resource) {
                                 $scope.currentPatient = resource;
 
@@ -478,13 +478,64 @@ angular.module("sampleApp")
             //called when a library entry is selected to view. may be redundant...
             $scope.selectLibraryContainer = function(container,inx){
 
-               // console.log(container);
+                delete $scope.canDeleteLibraryEntry;
+
                 $scope.currentLibraryIndex = inx;
                 $scope.selectedLibraryContainer = container;
 
-                //$scope.selectedLibraryEntry.bundle =  angular.fromJson(atob(entry.resource.content[0].attachment.data));  //todo not safe
+                var user = logicalModelSvc.getCurrentUser();
+                if (user) {
+                    //as don't have to log in to see scenarios
+
+                    //todo - just for now. Eventually need some kind of security infrastructure...
+                    if (user.email == 'david.hay25@gmail.com') {
+                        $scope.canDeleteLibraryEntry = true;
+                        return;
+                    }
+
+                    //if the author of the scenario is the same as the user then can delete
+                    if (container.author && container.author.length > 0) {
+                        if (container.author[0].display == user.email) {
+                            $scope.canDeleteLibraryEntry = true;
+                        }
+                    }
+                }
+
 
             };
+
+            $scope.deleteScenario = function(container){
+
+                console.log(container);
+
+                var modalOptions = {
+                    closeButtonText: "No, I changed my mind",
+                    actionButtonText: 'Yes, please remove it',
+                    headerText: 'Remove Library entry',
+                    bodyText: 'Are you sure you wish to remove this scenario from the Library? Retrieving it is possible, but messy. '
+                };
+
+                modalService.showModal({}, modalOptions).then(
+                    function (){
+
+                        builderSvc.deleteLibraryEntry(container).then(
+                            function(data){
+                                var msg = "The library entry has been deleted. It's still there in the history of the entry, but you'll need to recover it using REST. Contact David Hay for details."
+                                modalService.showModal({}, {bodyText:msg});
+                                refreshLibrary();
+                            },
+                            function(err) {
+                                var msg = "Sorry, there was a error deleting the entry. Details:" + angular.toJson(err)
+                                modalService.showModal({}, {bodyText:msg});
+                            }
+                        )
+                    }
+                )
+
+
+
+
+            }
 
             //------------  Library functions ------------
             //$scope.libraries = [];
@@ -556,14 +607,14 @@ angular.module("sampleApp")
             $scope.saveToLibrary = function(){
 
                 var user = logicalModelSvc.getCurrentUser();
-                console.log(user)
+                //console.log(user)
                 if (! user) {
                     modalService.showModal({}, {bodyText:'You must be loghed in to save to the Library.'});
                     return;
                 }
 
                 var container = $localStorage.builderBundles[$scope.currentBundleIndex];
-                console.log(container)
+                //console.log(container)
                 if (container.author && container.author.length > 0) {
                     //There's an auther so make sure this author is one of them. Allow..
                     if (user.email !== container.author[0].display) {
@@ -792,7 +843,7 @@ angular.module("sampleApp")
                     closeButtonText: "No, I changed my mind",
                     actionButtonText: 'Yes, please remove',
                     headerText: 'Remove resource set',
-                    bodyText: 'Are you sure you wish to remove this resource set from the local cache?'
+                    bodyText: 'Are you sure you wish to remove this scenario from the local cache?'
                 };
 
                 if ($scope.selectedContainer.isDirty) {

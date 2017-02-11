@@ -733,16 +733,10 @@ console.log(analysis)
                     });
                 }
 
-
-
                 var deferred = $q.defer();
                 var url = appConfigSvc.getCurrentDataServer().url + 'DocumentReference?type=http://clinfhir.com/docs|builderDoc';
 
-
-
                 GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
-
-                //$http.get(url).then(
                     function (data) {
                         //console.log(data.data)
                         var bundle = data.data;
@@ -754,21 +748,25 @@ console.log(analysis)
                                 if (cache[dr.id]) {
                                     container.cachedLocally = true;
                                 }
-
                                 arContainer.push(container);  //saves the doc as a container...
-
-                                //now see if the bundle in the DR is cached locally (the id of the dr is the same as the bundle
-                                //var cachedLocally = false;
-                                /*$localStorage.builderBundles.forEach(function (local) {
-                                    if (local.bundle.id == dr.id) {
-                                        dr.meta = dr.meta || {}
-                                        dr.meta.cachedLocally = true;
-                                    }
-                                })
-                                */
                             })
                         }
 
+                        //sort by scenario name - shouldalways be a name. but just tobesure, wrap in an extension...
+                        try {
+                            arContainer.sort(function(a,b){
+
+
+
+                                if (a.name.toUpperCase() > b.name.toUpperCase()) {
+                                    return 1
+                                } else {
+                                    return -1
+                                }
+                            })
+                        } catch (ex) {
+                            console.log('Error sorting library entries. Is there an empty name?')
+                        }
 
 
 
@@ -783,6 +781,10 @@ console.log(analysis)
 
 
                 return deferred.promise;
+            },
+            deleteLibraryEntry : function(container){
+                //delete an entry from the library.
+                return $http.delete(container.url)
             },
             getValueForPath : function(resource,inPath) {
                 //return a string display for a path value. root only at this stage...

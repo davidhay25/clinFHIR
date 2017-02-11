@@ -286,11 +286,9 @@
                                         </i>
                                     </div>
 
-
                                 </div>
 
                             </div>
-
 
                         </li>
                     </ul>
@@ -298,15 +296,12 @@
 
                 </div>
 
-
-
-
                 <div class="col-md-10 col-sm-10">
 
 
                     <div class="row">
                         <div class="col-md-6 col-sm-6">
-                            <h5>Details</h5>
+                            <h4>Details</h4>
                             <div class="row">
                                 <div class="col-md-3 col-sm-3">
                                     Name:
@@ -356,11 +351,18 @@
                                     {{selectedLibraryContainer.version}}
                                 </div>
                             </div>
+
+
+                            <div ng-show="canDeleteLibraryEntry">
+                                <button ng-click="deleteScenario(selectedLibraryContainer)" class="pull-right btn btn-danger">Delete Scenario</button>
+                            </div>
+
+
                         </div>
 
 
                         <div class="col-md-6 col-sm-6">
-                            <h5>Resources</h5>
+                            <h4>Resources</h4>
                             <ul class="list-group">
                                 <li class="list-group-item" ng-repeat= "item in selectedLibraryContainer.resources">
 
@@ -534,62 +536,33 @@
 
                             <uib-tabset>
                                 <uib-tab heading = "Summary">
-                                    <div ng-hide="currentPatient">
-                                        There is no patient resource.
-                                        Click <a href="#" class="rounded-box" ng-click="findPatient()">here</a> to find or add one.
 
-                                        <hr/>
-                                    </div>
+                                   <br/>
+
                                     <!-- temp
-                                                                <div>
-                                                                    <a class=" rounded-box pull-right" ng-show="downloadLinkJsonContent" download="{{downloadLinkJsonName}}.json"
-                                                                       href="{{downloadLinkJsonContent}}"> Download scenario
-                                                                    </a>
+                                    <div>
+                                        <a class=" rounded-box pull-right" ng-show="downloadLinkJsonContent" download="{{downloadLinkJsonName}}.json"
+                                           href="{{downloadLinkJsonContent}}"> Download scenario
+                                        </a>
 
-                                                                </div>
-                                                                -->
-
-
+                                    </div>
+                                    -->
 
                                     <form class="form-horizontal" role="form">
+
                                         <div class="form-group">
                                             <div class="col-md-3 col-sm-3">
-                                                <strong>Name</strong>
+                                                <strong>Scenario name</strong>
                                             </div>
                                             <div class="col-md-3 col-sm-3">
                                                 {{selectedContainer.name}}
                                             </div>
 
                                             <div class="col-md-6 col-sm-6">
-                                                <div class="alert alert-warning" role="alert"
-                                                     ng-show="selectedContainer.isDirty">
 
-
-
-                                                    There are changes that are saved locally, but not yet updated to the Library
-                                                </div>
                                             </div>
 
                                         </div>
-
-                                        <!--
-                                                                    <div class="row">
-                                                                        <div class="col-sm-6 col-md-6">
-                                                                            <strong>Name: </strong>
-                                                                            <span>{{selectedContainer.name}}</span>
-                                                                        </div>
-                                                                        <div class="col-sm-6 col-md-6">
-                                                                            <div class="alert alert-warning" role="alert"
-                                                                                 ng-show="selectedContainer.isDirty">
-
-
-
-                                                                                There are changes that are saved locally, but not yet updated to the Library
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                        -->
 
                                         <div class="form-group">
                                             <div class="col-md-3 col-sm-3">
@@ -601,7 +574,37 @@
                                         </div>
 
 
+                                        <div class="form-group" >
+                                            <div class="col-md-3 col-sm-3">
+                                                <strong>Patient</strong>
+                                            </div>
+                                            <div class="col-md-9 col-sm-9">
 
+                                                <div ng-show="currentPatient">
+
+                                                    <div ng-show="resourcesFromServer">
+                                                        {{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}}
+                                                    </div>
+
+                                                    <div ng-hide="resourcesFromServer">
+                                                        There is a Patient resource in the scenario, but it was not retrieved
+                                                        from the server (ie it's been created locally for this scenario either by
+                                                        you, or by the scenario author if downloaded from the Library).
+                                                    </div>
+
+
+                                                </div>
+
+                                                <div ng-hide="currentPatient">
+                                                    There is no patient resource.
+                                                    Click <a href="#" class="rounded-box" ng-click="findPatient()">here</a>
+                                                    to find or add one from the server.</textarea>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+<!--
                                         <div class="form-group">
                                             <div class="col-md-3 col-sm-3">
                                                 <strong>Tags</strong>
@@ -612,7 +615,7 @@
                                                 </span>
                                             </div>
                                         </div>
-
+-->
 
 
 
@@ -655,6 +658,21 @@
                                                 {{selectedContainer.version}}
                                             </div>
                                         </div>
+
+
+                                        <div class="form-group">
+                                            <div class="col-md-12 col-sm-12">
+                                                <div class="alert alert-warning" role="alert"
+                                                     ng-show="selectedContainer.isDirty">
+                                                    There are changes that are saved locally, but not yet updated to the Library
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+
+
                                     </form>
 
                                 </uib-tab>
