@@ -9,7 +9,7 @@ angular.module("sampleApp")
             $scope.input.dt = {};   //data entered as part of populating a datatype
             $scope.appConfigSvc = appConfigSvc;
             $scope.ResourceUtilsSvc = ResourceUtilsSvc;     //for the 1 line summary..
-            $scope.displayMode = '';
+            $scope.thingToDisplay = 'scenario';
 
             GetDataFromServer.registerAccess('scnBld');
 
@@ -79,10 +79,10 @@ angular.module("sampleApp")
             };
 
             $scope.togglePatientDisplay = function(){
-                if ($scope.displayMode == 'patient') {
-                    $scope.displayMode = 'scenario'
+                if ($scope.thingToDisplay == 'patient') {
+                    $scope.thingToDisplay = 'scenario'
                 } else {
-                    $scope.displayMode = 'patient'
+                    $scope.thingToDisplay = 'patient'
                 }
             }
 
@@ -337,6 +337,7 @@ angular.module("sampleApp")
             $scope.supportedDt = ['ContactPoint','Identifier','CodeableConcept','string','code','date','Period','dateTime','Address','HumanName','Annotation','boolean']
 
             function getExistingData(patient) {
+                delete $scope.resourcesFromServer;
                 if (patient) {
                     //load any existing resources for this patient. Remove any resources currently in the scenario..
 
@@ -346,7 +347,9 @@ angular.module("sampleApp")
                         //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
                         function(data){
                             $scope.resourcesFromServer = data;
+
                             console.log($scope.resourcesFromServer);
+                            $scope.$broadcast('patientSelected',data);   //so the patient display controller knows
                         },
                         function(err){
                             console.log(err)
@@ -486,7 +489,8 @@ angular.module("sampleApp")
                             // $scope.resourcesBundle = item.bundle;
                             $scope.selectedContainer = item;
                             $scope.currentBundleIndex= inx;
-                            $scope.libraryVisible = false;
+                            //$scope.libraryVisible = false;
+                            $scope.thingToDisplay='scenario'
                         }
                     });
 
@@ -510,7 +514,8 @@ angular.module("sampleApp")
                         builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);  //needed for the 'resource from reference' functionity
                         makeGraph();
                         delete $scope.currentResource;      //so the previous resource details aren't being shown...
-                        $scope.libraryVisible = false;      //hide the library
+                        //$scope.libraryVisible = false;      //hide the library
+                        $scope.thingToDisplay='scenario'
                         isaDocument();      //see if this set is a document (has a Composition resource)
                         modalService.showModal({}, {bodyText:'The set has been downloaded from the Library. You can now edit it locally.'});
 

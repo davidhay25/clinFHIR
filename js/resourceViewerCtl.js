@@ -7,131 +7,115 @@ angular.module("sampleApp")
             $scope.outcome = {};
             $scope.graph = {};
 
+            //when a new scenario is selected with a patient from the server. passes in all data for that patient
+            $scope.$on('patientSelected',function(event,patientData){
+                renderPatientDetails(patientData);
+            });
 
-            function loadPatientDetails(id,cb) {
+            function renderPatientDetails(allResources) {
                 $scope.hasVitals = false;
                 delete $scope.vitalsTable;
                 delete $scope.outcome.selectedResource;
 
-                supportSvc.getAllData(id).then(
-                    //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
-                    function (allResources) {
-                        //the order is significant - allResources must be set first...
-                        appConfigSvc.setAllResources(allResources);
+                //console.log(allResources)
 
-                        // console.log(allResources);
-                        $scope.allResources = allResources;
-                        //all conditions is used by the timeline display to
-                        //var allConditions = allResources['Condition'];
-                        //todo - all this stuff should be in a service somewhere...
-                        $scope.outcome.resourceTypes = [];
-                        angular.forEach(allResources, function (bundle, type) {
-
-                            if (bundle && bundle.total > 0) {
-                                $scope.outcome.resourceTypes.push({type: type, bundle: bundle});
-                                if (type == 'Observation') {
-                                    //if there are Obervations, then may be able to build a Vitals table...
-                                    $scope.hasVitals = true;
-                                }
-                            }
-
-                        });
-
-                        $scope.outcome.resourceTypes.sort(function (a, b) {
-                            if (a.type > b.type) {
-                                return 1
-                            } else {
-                                return -1
-                            }
-                        });
+                //the order is significant - allResources must be set first...
+                appConfigSvc.setAllResources(allResources);
 
 
-                        //for the reference navigator we need a plain list of resources...
-                        $scope.allResourcesAsList = [];
-                        $scope.allResourcesAsDict = {};
-                        angular.forEach(allResources, function (bundle, type) {
+                $scope.allResources = allResources;
+                //all conditions is used by the timeline display to
+                $scope.outcome.resourceTypes = [];
+                angular.forEach(allResources, function (bundle, type) {
 
-                            if (bundle.entry) {
-                                bundle.entry.forEach(function (entry) {
-
-
-                                    //not here as there are duplaications (resources referenced by others)
-                                    //$scope.allResourcesAsList.push(entry.resource);
-
-
-                                    var hash = entry.resource.resourceType + "/" + entry.resource.id;
-                                    $scope.allResourcesAsDict[hash] = entry.resource;
-
-                                })
-                            }
-
-                            //also need to add the reference resources to the dictionary (so thay can be found in outgoing references)
-                            supportSvc.getReferenceResources().forEach(function (resource) {
-                                var hash = resource.resourceType + "/" + resource.id;
-                                $scope.allResourcesAsDict[hash] = resource;
-                            });
-
-                            //and finally the patient!
-                            /* ?temp
-                            var patient = appConfigSvc.getCurrentPatient();
-                            var hash = "Patient/" + patient.id;
-                            $scope.allResourcesAsDict[hash] = patient;
-*/
-
-                        });
-
-                        //need to do this after the hash has been created to avoid duplications...
-                        angular.forEach($scope.allResourcesAsDict,function(res){
-                            $scope.allResourcesAsList.push(res);
-                        });
-
-
-                        //create and draw the graph representation...
-                        var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList);
-                        var container = document.getElementById('mynetwork');
-                        var network = new vis.Network(container, graphData, {});
-                        $scope.graph['mynetwork'] = network;
-                        network.on("click", function (obj) {
-                            // console.log(obj)
-                            var nodeId = obj.nodes[0];  //get the first node
-                            var node = graphData.nodes.get(nodeId);
-                            //console.log(node);
-                            $scope.selectedGraphNode = graphData.nodes.get(nodeId);
-                            //console.log($scope.selectedGraphNode)
-                            $scope.$digest();
-                        });
-
-                       // $rootScope.$broadcast('patientObservations',allResources['Observation']);//used to draw the observation charts...
-
-
-
-                        //create and draw the timeline. The service will display the number of encounters for each condition
-                        var timelineData =resourceCreatorSvc.createTimeLine($scope.allResourcesAsList,allResources['Condition']);
-
-                        //console.log(timelineData)
-                        $('#timeline').empty();     //otherwise the new timeline is added below the first...
-                        var tlContainer = document.getElementById('timeline');
-
-                        var timeline = new vis.Timeline(tlContainer);
-                        timeline.setOptions({});
-                        timeline.setGroups(timelineData.groups);
-                        timeline.setItems(timelineData.items);
-
-                        timeline.on('select', function(properties){
-                            timeLineItemSelected(properties,timelineData.items)
-                        });
-
-                        $scope.conditions = timelineData.conditions;
-
-                    }
-                )
-                    .finally(function () {
-
-                        if (cb) {
-                            cb()
+                    if (bundle && bundle.total > 0) {
+                        $scope.outcome.resourceTypes.push({type: type, bundle: bundle});
+                        if (type == 'Observation') {
+                            //if there are Obervations, then may be able to build a Vitals table...
+                            $scope.hasVitals = true;
                         }
+                    }
+
+                });
+
+                $scope.outcome.resourceTypes.sort(function (a, b) {
+                    if (a.type > b.type) {
+                        return 1
+                    } else {
+                        return -1
+                    }
+                });
+
+
+                //for the reference navigator we need a plain list of resources...
+                $scope.allResourcesAsList = [];
+                $scope.allResourcesAsDict = {};
+                angular.forEach(allResources, function (bundle, type) {
+
+                    if (bundle.entry) {
+                        bundle.entry.forEach(function (entry) {
+                            var hash = entry.resource.resourceType + "/" + entry.resource.id;
+                            $scope.allResourcesAsDict[hash] = entry.resource;
+
+                        })
+                    }
+
+                    //also need to add the reference resources to the dictionary (so thay can be found in outgoing references)
+                    supportSvc.getReferenceResources().forEach(function (resource) {
+                        var hash = resource.resourceType + "/" + resource.id;
+                        $scope.allResourcesAsDict[hash] = resource;
                     });
+
+
+
+                });
+
+                //need to do this after the hash has been created to avoid duplications...
+                angular.forEach($scope.allResourcesAsDict,function(res){
+                    $scope.allResourcesAsList.push(res);
+                });
+
+
+                //create and draw the graph representation...
+                var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList);
+                var container = document.getElementById('mynetwork');
+                var network = new vis.Network(container, graphData, {});
+                $scope.graph['mynetwork'] = network;
+                network.on("click", function (obj) {
+                    // console.log(obj)
+                    var nodeId = obj.nodes[0];  //get the first node
+                    var node = graphData.nodes.get(nodeId);
+                    //console.log(node);
+                    $scope.selectedGraphNode = graphData.nodes.get(nodeId);
+                    //console.log($scope.selectedGraphNode)
+                    $scope.$digest();
+                });
+
+
+
+
+                //create and draw the timeline. The service will display the number of encounters for each condition
+                var timelineData =resourceCreatorSvc.createTimeLine($scope.allResourcesAsList,allResources['Condition']);
+
+                //console.log(timelineData)
+                $('#timeline').empty();     //otherwise the new timeline is added below the first...
+                var tlContainer = document.getElementById('timeline');
+
+                var timeline = new vis.Timeline(tlContainer);
+                timeline.setOptions({});
+                timeline.setGroups(timelineData.groups);
+                timeline.setItems(timelineData.items);
+
+                timeline.on('select', function(properties){
+                    timeLineItemSelected(properties,timelineData.items)
+                });
+
+                $scope.conditions = timelineData.conditions;
+
+
+
             }
+
 
             //=========== these functions support the 'view resources' display. todo - ?move to a separate controller???
             $scope.typeSelected = function(vo) {
@@ -172,10 +156,6 @@ angular.module("sampleApp")
                         $scope.resourceSelected({resource:node.resource});
                         $scope.$digest();
                     })
-
-
-
-
 
                 });
             }
@@ -218,8 +198,6 @@ angular.module("sampleApp")
                         $scope.loadVersions(resource);  //load all the versions for this resource...
                     }
 
-
-                    //create and draw the graph representation for this single resource...
 
                     createGraphOneResource(resource,'resourcenetwork')
 
@@ -284,7 +262,7 @@ angular.module("sampleApp")
 
 
 
-            loadPatientDetails(6082)
+
 
 
     });
