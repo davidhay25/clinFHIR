@@ -74,6 +74,26 @@ angular.module("sampleApp")
 
             $scope.firebase = firebase;
 
+            $scope.login=function(){
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop.
+                    keyboard: false,       //same as above.
+                    templateUrl: 'modalTemplates/login.html',
+                    controller: 'loginCtrl'
+                })
+            };
+
+            $scope.logout=function(){
+                firebase.auth().signOut().then(function() {
+
+                    modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
+
+                }, function(error) {
+                    modalService.showModal({}, {bodyText: 'Sorry, there was an error logging out - please try again'})
+                });
+
+            };
+
             $scope.setPrivate = function(isPrivate){
                 $scope.selectedContainer.isPrivate = ! isPrivate;
             };
@@ -348,7 +368,7 @@ angular.module("sampleApp")
                         function(data){
                             $scope.resourcesFromServer = data;
 
-                            console.log($scope.resourcesFromServer);
+
                             $scope.$broadcast('patientSelected',data);   //so the patient display controller knows
                         },
                         function(err){
@@ -532,10 +552,26 @@ angular.module("sampleApp")
 
             };
 
+            //save the current scenario to the library
             $scope.saveToLibrary = function(){
 
-                //console.log($localStorage.builderBundles[$scope.currentBundleIndex])
+                var user = logicalModelSvc.getCurrentUser();
+                console.log(user)
+                if (! user) {
+                    modalService.showModal({}, {bodyText:'You must be loghed in to save to the Library.'});
+                    return;
+                }
 
+                var container = $localStorage.builderBundles[$scope.currentBundleIndex];
+                console.log(container)
+                if (container.author && container.author.length > 0) {
+                    //There's an auther so make sure this author is one of them. Allow..
+                    if (user.email !== container.author[0].display) {
+                        modalService.showModal({}, {bodyText:'Only the author of the scenario can update it to the Library.'});
+                        return;
+                    }
+
+                }
 
                 builderSvc.saveToLibrary($localStorage.builderBundles[$scope.currentBundleIndex],$scope.user).then(
                     function (data) {
@@ -557,7 +593,7 @@ angular.module("sampleApp")
             $scope.selectBundle = function(inx){
                 delete $scope.resourcesFromServer;
                 $scope.currentBundleIndex = inx;
-                //$scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
+
                 $scope.selectedContainer = $localStorage.builderBundles[$scope.currentBundleIndex];
                 createDownLoad($scope.selectedContainer)
 
@@ -1593,7 +1629,7 @@ angular.module("sampleApp")
                 function (bundle) {
                     $scope.allLogicalModelsBundle = bundle
                     $scope.bundleLogicalModels = angular.copy($scope.allLogicalModelsBundle)
-                    console.log(bundle)
+
                 }, function (err) {
                     alert(err)
                 }

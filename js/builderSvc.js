@@ -616,7 +616,7 @@ console.log(analysis)
 
                 var bundle = bundleContainer.bundle;
 
-                //remove all the 'valid' propertis on entry...
+                //remove all the 'valid' propertis on entry (generated during validation...
                 bundle.entry.forEach(function (entry) {
                     delete entry.valid;
                 });

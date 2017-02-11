@@ -1,7 +1,7 @@
 
 angular.module("sampleApp")
     .controller('launcherCtrl',
-        function ($scope,modalService,$firebaseObject,GetDataFromServer,$uibModal,appConfigSvc,$interval,$http) {
+        function ($scope,modalService,$firebaseObject,GetDataFromServer,$uibModal,appConfigSvc,$interval,$http,logicalModelSvc) {
 
             GetDataFromServer.registerAccess('launcher');
 
@@ -61,7 +61,7 @@ angular.module("sampleApp")
 
             $scope.logout=function(){
                 firebase.auth().signOut().then(function() {
-                    delete $rootScope.userProfile;
+
                     modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
 
                 }, function(error) {

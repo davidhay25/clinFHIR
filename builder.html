@@ -65,7 +65,10 @@
             padding-right : 3px;
         }
 
-
+        .libraryScroll {
+            height: 600px;
+            overflow-y: scroll;
+        }
 
 
     </style>
@@ -108,6 +111,7 @@
     <script src="js/resourceViewerCtl.js"></script>
     <script src="js/observationsDisplayCtrl.js"></script>
     <script src="js/libs/vis.min.js"></script>
+    <script src="js/loginCtrl.js"></script>
     <!--
     <script src="js/newVSFinder.js"></script>
 
@@ -180,15 +184,14 @@
                         </p>
 
                     </div>
-
-
                 </div>
 
                 <div class="col-md-2 col-sm-2">
                     <div class="navbar-text">
 
                         <!-- Show the 'save to library' only in scenario mode, when there are changes-->
-                        <div ng-show="thingToDisplay=='scenario' &&  selectedContainer.isDirty" class="clickable" ng-click="saveToLibrary()">Save to Library</div>
+                        <div ng-show="thingToDisplay=='scenario' && selectedContainer.isDirty"
+                             class="clickable" ng-click="saveToLibrary()">Save to Library</div>
 
                         <!-- display a 'show library' link, unless the library is already shown -->
                         <div ng-hide="thingToDisplay=='library'">
@@ -200,13 +203,6 @@
                             <span class="clickable" ng-click="thingToDisplay = 'scenario'">Hide Library</span>
                         </div>
 
-
-                        <!--
-                        <span class="clickable" ng-click="libraryVisible = ! libraryVisible">
-                            <span ng-show="libraryVisible">Hide </span>
-                            <span ng-hide="libraryVisible">View </span>
-                            Library</span>
-                        -->
                     </div>
                 </div>
 
@@ -216,17 +212,7 @@
                     <div class="navbar-text">
                         <div class="clickable" ng-click="validateAll()">Validate All</div>
                         <div class="clickable" ng-click="saveToFHIRServer()">Update Server</div>
-
-
-
                     </div>
-
-                    <!--
-                    <div class="navbar-text pull-right">
-                        STU version: {{appConfigSvc.getCurrentConformanceServer().version}}
-                    </div>
-                    -->
-
                 </div>
 
                 <div class="col-md-1 col-sm-1">
@@ -261,24 +247,26 @@
         </nav>
 
 
+        <!-- The 3 display modes - Library, Scenario Builder, Patient data  -->
         <div ng-show="thingToDisplay=='patient'" ng-controller="resourceViewerCtrl">
             <div class="banner">
                 Showing resources for this patient that are on the Data Server
-                <div style="font-weight:normal">(Click the name again to hide)</div>
+                <div style="font-weight:normal">(Click the name again to return to the Scenario Builder)</div>
             </div>
             <ng-include src="'/includes/resourceViewer.html'"></ng-include>
         </div>
 
-
-
         <div class="row" ng-show="thingToDisplay=='library'">
 
-            <h4>Library</h4>
+            <div class="banner">
+                The Library of all Scenarios. Saved on the Data Server as DocumentReference resources.
+                <div style="font-weight:normal">(Click the Hide Library link to return to the Scenario Builder)</div>
+            </div>
             <div class="row">
                 <div class="col-md-2 col-sm-2">
 
-
-                    <ul class="list-group" >
+                    <div class="libraryScroll">
+                        <ul class="list-group" >
                         <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':$index == currentLibraryIndex}"
                             ng-repeat="container in libraryContainer"
                             ng-click="selectLibraryContainer(container,$index)">
@@ -290,11 +278,6 @@
                                     <div><em>{{container.description | limitTo: 20}}</em></div>
                                 </div>
                                 <div class="col-md-2 col-sm-2">
-                                    <!--
-                                    <div ng-show="container.cachedLocally">
-                                        C
-                                    </div>
-                                    -->
                                     <div ng-hide="container.cachedLocally">
                                         <i class="glyphicon glyphicon-cloud-download"
                                            title="Download"
@@ -311,40 +294,7 @@
 
                         </li>
                     </ul>
-                    
-                    
-<!--
-                    <ul class="list-group" >
-                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':$index == currentLibraryIndex}"
-                            ng-repeat="entry in library.entry"
-                            ng-click="selectLibraryEntry(entry,$index)">
-
-                            <div class="row">
-                                <div class="col-md-10 col-sm-10">
-                                    <strong>{{entry.resource.description}}</strong>
-                                    <div>{{entry.resource.id}}</div>
-                                </div>
-                                <div class="col-md-2 col-sm-2">
-                                    <div ng-show="entry.resource.meta.cachedLocally">
-                                        C
-                                    </div>
-                                    <div ng-hide="entry.resource.meta.cachedLocally">
-                                        <i class="glyphicon glyphicon-cloud-download"
-                                           title="Download"
-                                           ng-click="downloadFromLibrary(entry,$index)" style="cursor: pointer">
-
-                                        </i>
-                                    </div>
-
-
-                                </div>
-
-                            </div>
-
-
-                        </li>
-                    </ul>
-                    -->
+                    </div>
 
                 </div>
 
@@ -395,7 +345,7 @@
                                     Last Updated:
                                 </div>
                                 <div class="col-md-9 col-sm-9">
-                                    {{selectedLibraryContainer.lastUpdated}}
+                                    {{selectedLibraryContainer.lastUpdated | date:'EEE MMM d, H:mm'}}
                                 </div>
                             </div>
                             <div class="row">
@@ -1433,14 +1383,14 @@
 
 
 
-
+        <!-- Sceario Builder support directives  -->
 
         <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
                     vs-selected="vsSelected"></vs-browser>
 
 
         <!-- a directive that allows a profile to be selected - not just a base one... -->
-        <!---->
+
         <select-profile trigger="showFindProfileDialog"
                         all-resource-types="resources"
                         profile-selected="selectedProfileFromDialog" type="'profile'">
