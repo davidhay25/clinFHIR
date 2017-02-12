@@ -50,6 +50,20 @@ angular.module("sampleApp")
         objColours.LogicalModel = '#cc0000';
 
         return {
+            getLibraryCategories : function(){
+                //get the codesystem resource that represents the categories. Needs to be more robust...
+                //todo - need to implement a 'getByUrl for CodeSystems' This will do for now...
+                var deferred = $q.defer();
+
+                var url = appConfigSvc.getCurrentTerminologyServer().url+'CodeSystem/cfLibraryCategories';
+                $http.get(url).then(
+                    function(data){
+                        deferred.resolve(data.data)
+                    }
+                );
+                return deferred.promise;
+
+            },
             getExistingDataFromServer : function(patient) {
                 var deferred = $q.defer();
                 supportSvc.getAllData(patient.id).then(
@@ -603,12 +617,7 @@ console.log(analysis)
                 //create the reference from the resource
                 return resource.resourceType + "/" + resource.id;
             },
-            getLibraryCategories : function(){
-                //the categories on the current library server/ ?Use the DR.class propertu to record?
 
-                var lst = [];
-                lst.push({cateto:''})
-            },
             saveToLibrary : function (bundleContainer,user) {
                 //save the bundle to the library. Note that the 'container' of the bundle (includes the name) is passed in...
 
@@ -624,6 +633,9 @@ console.log(analysis)
 
                 var docref = {resourceType:'DocumentReference',id:bundle.id};
                 docref.type = {coding:[{system:'http://clinfhir.com/docs',code:'builderDoc'}]};
+                //bundleContainer.category is a Coding datatype
+                docref.class = {coding:[bundleContainer.category]};
+
                 docref.status = 'current';
                 docref.indexed = moment().format();
                 docref.description = bundleContainer.name;  //yes, I know these names are confusing...
@@ -650,12 +662,21 @@ console.log(analysis)
 
                 if (dr && dr.content && dr.content[0] && dr.content[0].attachment && dr.content[0].attachment.data) {
                     var container = {};
+                    if (dr.class) {
+                        container.category = dr.class.coding[0];    //category is a Coding
+                    } else {
+                        //default class to 'default'. This is just transitional...
+                        container.category = {code:'default',display:'Default'};
+                        container.category.system = 'http://clinfhir.com/fhir/CodeSystem/LibraryCategories';   //todo get from appConfig
+                    }
 
+
+                    /*
                     //scenario tags are saved as tags against the
                     if (dr.meta && dr.meta.tags) {
                         container.tags = dr.meta.tags
                     }
-
+*/
 
                     //the bundle of resources that makes up the scenario. stores as a b64 encoded attachment in the DR
                     container.bundle = angular.fromJson(atob(dr.content[0].attachment.data));

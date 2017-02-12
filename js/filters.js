@@ -4,6 +4,14 @@
 
 
 angular.module("sampleApp")
+
+    .filter('libraryCategory', function() {
+        return function(selectedCategory,container) {
+            console.log(selectedCategory,container)
+            return false;
+        }
+    })
+
     .filter('resourceTextFromReference',['builderSvc',function(builderSvc){
         return function(reference) {
 

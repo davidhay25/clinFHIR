@@ -94,8 +94,33 @@ angular.module("sampleApp")
 
             };
 
-            $scope.setPrivate = function(isPrivate){
-                $scope.selectedContainer.isPrivate = ! isPrivate;
+            //retrieve the categories for a sceanrio (will be the value of the DocumentReference.class
+            builderSvc.getLibraryCategories().then(
+               function(cs){
+                   $scope.libraryCategories = cs
+                   //problem with setting a default is that there are 2 dependany async operations...
+                   //$scope.input.selectedLibraryCategory = cs.concept[0];    //to set the default in the library
+                   //$scope.makeLibraryDisplayList($scope.input.selectedLibraryCategory);
+                       console.log(cs);
+               }
+            );
+
+            $scope.changeSelectedScenarioConcept = function(category){
+                $scope.selectedContainer.category = category;
+            }
+
+            $scope.makeLibraryDisplayList = function(category){
+                delete $scope.selectedLibraryContainer;
+                var code = category.code
+                $scope.selectedLibraryList = [];
+                $scope.libraryContainer.forEach(function(container){
+                    if (container.category && container.category.code) {
+                        if (container.category.code == code) {
+                            $scope.selectedLibraryList.push(container)
+                        }
+                    }
+                })
+
             };
 
             $scope.togglePatientDisplay = function(){
@@ -104,7 +129,7 @@ angular.module("sampleApp")
                 } else {
                     $scope.thingToDisplay = 'patient'
                 }
-            }
+            };
 
 
             //---------- related to document builder -------
@@ -225,7 +250,6 @@ angular.module("sampleApp")
                 $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(container.bundle, true)], {type: "text/text"}));
                 $scope.downloadLinkJsonName = 'Scenario'; //container.name;
             }
-
 
             //note that the way we are recording validation is a non-compliant bundle...
             $scope.resetValidation = function(){
@@ -433,10 +457,11 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/newSet.html',
 
-                    controller: function ($scope,GetDataFromServer,appConfigSvc) {
+                    controller: function ($scope,GetDataFromServer,appConfigSvc,categories) {
 
                         $scope.canSave = true;
-
+                        $scope.categories = categories;
+                        $scope.category = categories.concept[0];
                         $scope.server = appConfigSvc.getCurrentDataServer();
                         $scope.checkName = function(){
                             if ($scope.name) {
@@ -447,12 +472,23 @@ angular.module("sampleApp")
                         };
 
                         $scope.save = function(){
-                            $scope.$close({name:$scope.name,description:$scope.description})
+                            //represent the category as a Coding. $scope.category is a concept
+                            var cat = {code:$scope.category.code,display:$scope.category.display}
+                            cat.system = 'http://clinfhir.com/fhir/CodeSystem/LibraryCategories';   //todo get from appConfig
+
+
+                            $scope.$close({name:$scope.name,description:$scope.description,category:cat})
                         }
 
+                    },
+                    resolve : {
+                        categories: function () {          //the default config
+                            return $scope.libraryCategories;
+                        }
                     }
+
                 }).result.then(function(vo){
-                    //console.log(vo)
+                    console.log(vo)
                     if (vo.name) {
                         delete $scope.isaDocument
                         var newBundleContainer = {name:vo.name,bundle:{resourceType:'Bundle',entry:[]}};
@@ -460,9 +496,13 @@ angular.module("sampleApp")
                         newBundleContainer.bundle.id = idPrefix+new Date().getTime();
                         newBundleContainer.isDirty = true;
                         newBundleContainer.isPrivate = true;
+                        newBundleContainer.category = vo.category;
                         $localStorage.builderBundles.push(newBundleContainer);
                         $scope.selectedContainer = newBundleContainer;
                         $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
+
+                        console.log(newBundleContainer)
+
 
                         makeGraph();
                         delete $scope.currentResource;
@@ -522,6 +562,7 @@ angular.module("sampleApp")
                             function(data){
                                 var msg = "The library entry has been deleted. It's still there in the history of the entry, but you'll need to recover it using REST. Contact David Hay for details."
                                 modalService.showModal({}, {bodyText:msg});
+                                delete $scope.canDeleteLibraryEntry;
                                 refreshLibrary();
                             },
                             function(err) {
