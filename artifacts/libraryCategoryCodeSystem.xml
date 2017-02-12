@@ -32,6 +32,12 @@
         <display value="Reference"/>
         <definition value="A scenario that describes a particular way, or pattern, of representing a particualar clinical need. Should be retained indefinately."/>
     </concept>
+    
+    <concept>
+        <code value="cof"/>
+        <display value="Clinicians On FHIR"/>
+        <definition value="Used during the 'Clinicians on FHIR' events at the HL7 Working Group Meetings"/>
+    </concept>
 
     <concept>
         <code value="training"/>

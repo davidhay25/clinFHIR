@@ -2,7 +2,7 @@
 
 angular.module("sampleApp")
     .controller('docBuilderCtrl',
-        function ($scope,$rootScope,builderSvc,$uibModal,Utilities,GetDataFromServer) {
+        function ($scope,$rootScope,builderSvc,$uibModal,Utilities,GetDataFromServer,modalService) {
 
 
             //$scope.resourcesBundle - bundle representing current document - defined in parent Controller
@@ -39,6 +39,37 @@ angular.module("sampleApp")
             Utilities.getValueSetIdFromRegistry(vsUrl,function(vsDetails) {
 
                 if (vsDetails) {
+
+                    /*
+                    //we don't need to expand this set as we know that the codes are incldued in the VS.
+                    //$expand maybe safer, but requires LOINC to be loaded,
+
+                    GetDataFromServer.findConformanceResourceByUri(vsUrl,appConfigSvc.getCurrentTerminologyServer().url,'ValueSet').then(
+                        function (vs) {
+
+                            //system,code,display
+                            var system = vs.include[0].system
+                            vs.include[0].concept.forEach(function(concept){
+                                sectionCodes.push({system:system,code:concept.code})
+                            })
+
+
+                            sectionCodes = vs.expansion.contains;
+                            sectionCodes.sort(function(a,b){
+                                if (a.display > b.display) {
+                                    return 1;
+                                } else {
+                                    return -1
+                                }
+                            })
+                            //console.log(vs);
+                        }, function (err) {
+                            alert(err + ' expanding ValueSet:')
+                        }
+                    )
+
+                    */
+
                     GetDataFromServer.getExpandedValueSet(vsDetails.id).then(
                         function (vs) {
                             sectionCodes = vs.expansion.contains;
@@ -51,9 +82,17 @@ angular.module("sampleApp")
                             })
                             //console.log(vs);
                         }, function (err) {
-                            alert(err + ' expanding ValueSet')
+                            //get an error of the LOINC code is not included in the termnology server.
+                            var msg = 'The terminology service was unable to expand the Document section codes. ';
+                            msg += 'This generally means that the LOINC system is not loaded into the service. ';
+                            msg += "The impact is that when creating a document, you'll need to enter section type text manually. Sorry about that.";
+                            modalService.showModal({}, {bodyText:msg});
+
+                            //alert(err + ' expanding ValueSet:')
                         }
                     )
+
+
                 }
 
             })

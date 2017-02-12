@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-02-03';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-02-12a';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};
@@ -62,16 +62,28 @@ angular.module("sampleApp")
         defaultConfig.baseSpecUrl = "http://hl7.org/fhir/";     //the base for spec documentation
         defaultConfig.logLevel = 0;     //0 = no logging, 1 = log to console
         defaultConfig.enableCache = false;  //whether caching is supported
-        defaultConfig.servers.terminology = "http://fhir3.healthintersections.com.au/open/";//
+        //defaultConfig.servers.terminology = "http://fhir3.healthintersections.com.au/open/";//
+        defaultConfig.servers.terminology = "http://fhirtest.uhn.ca/baseDstu3/";//
         // defaultConfig.servers.terminology = "grahamv3/";
         //defaultConfig.servers.terminology = "http://fhir.hl7.org.nz/dstu2/";
         defaultConfig.servers.data = "http://fhirtest.uhn.ca/baseDstu3/";
         //defaultConfig.servers.conformance = "http://fhir2.healthintersections.com.au/open/";
-        defaultConfig.servers.conformance = "http://fhir3.healthintersections.com.au/open/";
+        //defaultConfig.servers.conformance = "http://fhir3.healthintersections.com.au/open/";
+        defaultConfig.servers.conformance = "http://fhirtest.uhn.ca/baseDstu3/";
+
+
+
+
         //defaultConfig.servers.conformance = "grahamv3/";
 
         //default to Grahames DSTU2 server when data and conformance servers are inconsistent...
-        defaultConfig.defaultTerminologyServerUrl = "http://fhir3.healthintersections.com.au/open/";
+        //defaultConfig.defaultTerminologyServerUrl = "http://fhir3.healthintersections.com.au/open/";
+        defaultConfig.defaultTerminologyServerUrl = "http://fhirtest.uhn.ca/baseDstu3/";
+
+
+
+
+
         //defaultConfig.defaultTerminologyServerUrl = "grahamv3/";
 
         //terminology servers. Order is significant as the first one will be selected by default...
