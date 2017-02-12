@@ -299,8 +299,18 @@ angular.module("sampleApp")
 
 
                     if (! isInSection && resource.resourceType !== 'Composition') {
+                        var refItem = {reference:builderSvc.referenceFromResource(resource)}
+                        if (resource.text) {
+                            refItem.display = resource.text.div;
+                        } else {
+                            refItem.display = resource.resourceType;
+                        }
+
+                        $scope.resourcesNotInThisSection.push(refItem)
+                        /*
                         $scope.resourcesNotInThisSection.push(
                             {reference:builderSvc.referenceFromResource(resource),display:resource.text.div});
+                        */
                     }
 
                 })
