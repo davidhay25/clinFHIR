@@ -97,9 +97,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
             $scope.fhirBasePath="http://build.fhir.org/";
         }
 
-
-
-
         $scope.input.parameters = "";
         delete $scope.filteredProfile;
         delete $scope.response;
@@ -155,7 +152,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     $scope.addParamToQuery = function(modelUrl) {
         $uibModal.open({
             templateUrl: 'modalTemplates/queryParam.html',
-            //size: 'sm',
             controller: function ($scope,paramList,hashResource,type) {
                 $scope.paramList = hashResource[type.name].searchParam; // paramList;
                 $scope.input = {};
@@ -182,7 +178,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                     return $scope.hashResource;
                 },
                 paramList: function () {          //the default config
-                    console.log($scope.queryPara)
+                    console.log($scope.queryParam)
                     return $scope.queryParam;
                 }
             }}).result.then(function(vo) {

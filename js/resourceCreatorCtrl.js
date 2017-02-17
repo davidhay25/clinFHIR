@@ -3321,6 +3321,9 @@ angular.module("sampleApp")
                     $scope.queryParam = t.searchParam;
                     console.log($scope.queryParam);
 
+
+
+
                     break;
                 }
             }

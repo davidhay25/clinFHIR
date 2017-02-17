@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <base href="/" />
+    <meta charset="UTF-8">
+
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+    <style>
+        .myLabel {
+            vertical-align: middle;
+        }
+    </style>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+        angular.module("sampleApp").constant("moment", moment);
+
+    </script>
+    <script src="js/codeSystem.js"></script>
+    <script src="js/modalDialogSvc.js"></script>
+    <script src="js/appConfigSvc.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/components/dataTypes.js"></script>
+    <!--
+    <script src="js/services.js"></script>
+    <script src="js/resourceCreatorSvc.js"></script>
+    <script src="js/filters.js"></script>
+    <script src="js/documentBuilder.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
+    <script src="js/reporterCtrl.js"></script>
+
+    <script src="js/libs/ngStorage.min.js"></script>
+
+
+
+    <script src="js/profileCreatorSvc.js"></script>
+    -->
+
+    <title>CodeSystem editor</title>
+
+</head>
+
+
+<body style="padding: 8px" >
+
+<div ng-app="sampleApp" ng-controller="codeSystemCtrl" class="container-fluid">
+
+<h3>CodeSystem</h3>
+
+<div class="row">
+
+    <div class="col-md-6 col-sm-6">
+        <div class="banner">Metadata</div>
+
+        <div class="row">
+            <div class="col-md-2 col-sm-2">
+                <div class="myLabel">Name</div>
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+                <input class="form-control" ng-model="cs.name"/>
+            </div>
+            <div class="col-md-2 col-sm-2">
+                <div class="myLabel">Description</div>
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+                <textarea class="form-control" ng-model="cs.description"></textarea>
+            </div>
+
+        </div>
+
+        <div class="row">
+
+
+
+
+        </div>
+    </div>
+
+    <div class="col-md-6 col-sm-6">
+        <div class="banner">Contents</div>
+
+        <table class="table table-bordered">
+            <tr ng-repeat="concept in cs.concept">
+                <td>{{concept.display}}</td>
+                <td>{{concept.code}}</td>
+                <td>{{concept.definition}}</td>
+                <td>
+                    <i class="glyphicon glyphicon-arrow-down" ng-show="$index < cs.concept.length-1"
+                       title="Move Down"
+                       ng-click="moveConcept($index,'dn')" style="cursor: pointer">
+
+                    </i>
+
+                    <i class="glyphicon glyphicon-arrow-up" ng-show="$index > 0"
+                       title="Move Up"
+                       ng-click="moveConcept($index,'up')" style="cursor: pointer">
+
+                    </i>
+                </td>
+            </tr>
+        </table>
+
+    </div>
+
+
+
+
+
+
+
+</div>
+    <br/>
+
+
+</div>
+</body>
+</html>

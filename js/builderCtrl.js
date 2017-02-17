@@ -650,7 +650,7 @@ angular.module("sampleApp")
                 var user = logicalModelSvc.getCurrentUser();
                 //console.log(user)
                 if (! user) {
-                    modalService.showModal({}, {bodyText:'You must be loghed in to save to the Library.'});
+                    modalService.showModal({}, {bodyText:'You must be logged in to save to the Library.'});
                     return;
                 }
 
