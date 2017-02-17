@@ -529,6 +529,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
             $scope.showWaiting = true;
             delete $scope.searchResultBundle;
             delete $scope.message;
+            delete $scope.input.vspreview;
             //var url = config.servers.terminology + "ValueSet?name="+filter;
 
             var url =  $scope.serverRoot+"ValueSet?name:contains="+filter;// $scope.valueSetRoot+"?name="+filter;

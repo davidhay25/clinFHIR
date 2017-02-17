@@ -34,12 +34,13 @@
     <script src="js/appConfigSvc.js"></script>
     <script src="js/libs/ngStorage.min.js"></script>
     <script src="js/components/dataTypes.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
     <!--
     <script src="js/services.js"></script>
     <script src="js/resourceCreatorSvc.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/documentBuilder.js"></script>
-    <script src="resourceBuilder/rbServices.js"></script>
+
     <script src="js/reporterCtrl.js"></script>
 
     <script src="js/libs/ngStorage.min.js"></script>
@@ -54,76 +55,172 @@
 </head>
 
 
-<body style="padding: 8px" >
+<body style="padding: 8px;padding-top:80px" >
 
 <div ng-app="sampleApp" ng-controller="codeSystemCtrl" class="container-fluid">
 
-<h3>CodeSystem</h3>
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 
-<div class="row">
+        <div class="container-fluid">
+            <div class="col-md-3 col-sm-3">
+                <a class="navbar-brand" href="#">
+                    clinFHIR CodeSystem Editor
+                </a>
+            </div>
+            <div class="col-md-3 col-sm-3">
 
-    <div class="col-md-6 col-sm-6">
-        <div class="banner">Metadata</div>
+            </div>
+            <div class="col-md-3 col-sm-3">
+            </div>
+            <div class="col-md-3 col-sm-3">
+                <form class="navbar-form navbar-right">
+                <div class="form-group">
+                    <button class="btn btn-primary pull-right" ng-hide="state=='find'" ng-click="state='find'">Find</button>
+                    <button class="btn btn-danger pull-right" ng-show="isDirty" ng-click="save()">Save</button>
+                    <button class="btn btn-default" ng-hide="isDirty" ng-click="newCS()">New</button>
+                </div>
+                </form>
 
-        <div class="row">
-            <div class="col-md-2 col-sm-2">
-                <div class="myLabel">Name</div>
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- -------------------------  Find ---------------------->
+    <div class="row" ng-show="state == 'find'">
+        <div class="col-md-6 col-sm-6">
+            <div>Search</div>
+            <div class="row">
+                <div class="col-md-9 col-sm-9">
+                    <input type="text" ng-model="input.searchName" class="form-control" placeholder="Enter search text for name"/>
+                </div>
+                <div class="col-md-3 col-sm-3">
+                    <button class="btn btn-link" ng-click="search(input.searchName)">Find</button>
+                </div>
             </div>
 
-            <div class="col-md-4 col-sm-4">
-                <input class="form-control" ng-model="cs.name"/>
-            </div>
-            <div class="col-md-2 col-sm-2">
-                <div class="myLabel">Description</div>
+            <br/>
+            <div uib-alert class="alert-warning" ng-show="message">
+                {{message}}
             </div>
 
-            <div class="col-md-4 col-sm-4">
-                <textarea class="form-control" ng-model="cs.description"></textarea>
+            <div uib-alert class="alert-info" ng-hide="searchResultBundle.entry">
+                Enter a search string into the text box above and click 'Find'.
+                The app will find all CodeSystems where the string you enter is in the name of the CodeSystem.
+                <br /><br />
+                Alternatively, click the 'New' button at the top right to create a new CodeSystem.
+
             </div>
+
+            <div class="row display-row" ng-repeat="entry in searchResultBundle.entry" style="margin-bottom: 5px">
+                <div class="col-md-8 col-sm-8">
+                    <div ng-click="selectVs(entry.resource)">
+                        {{entry.resource.name}} ({{entry.resource.id}})
+                        <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>
+                    </div>
+
+
+                </div>
+                <div class="col-md-4 col-sm-4">
+                    <button class="btn btn-link" ng-click="input.vspreview=entry.resource">JSON</button>
+                    <button class="btn btn-link" ng-click="selectCS(entry.resource)">Select</button>
+                </div>
+            </div>
+
 
         </div>
-
-        <div class="row">
-
-
-
-
+        <div class="col-md-6 col-sm-6">
+            <pre ng-show="input.vspreview">{{input.vspreview | json}}</pre>
         </div>
     </div>
 
-    <div class="col-md-6 col-sm-6">
-        <div class="banner">Contents</div>
 
-        <table class="table table-bordered">
-            <tr ng-repeat="concept in cs.concept">
-                <td>{{concept.display}}</td>
-                <td>{{concept.code}}</td>
-                <td>{{concept.definition}}</td>
-                <td>
-                    <i class="glyphicon glyphicon-arrow-down" ng-show="$index < cs.concept.length-1"
-                       title="Move Down"
-                       ng-click="moveConcept($index,'dn')" style="cursor: pointer">
+    <!-- -------------------------  Edit or show ---------------------->
+    <div class="row" ng-show="state=='edit' || state=='show'">
 
-                    </i>
+        <div class="col-md-6 col-sm-6">
+            <div class="banner">Metadata</div>
 
-                    <i class="glyphicon glyphicon-arrow-up" ng-show="$index > 0"
-                       title="Move Up"
-                       ng-click="moveConcept($index,'up')" style="cursor: pointer">
+            <div class="row">
+                <div class="col-md-2 col-sm-2">
+                    <div class="myLabel">Name</div>
+                </div>
 
-                    </i>
-                </td>
-            </tr>
-        </table>
+                <div class="col-md-4 col-sm-4">
+                    <input class="form-control" ng-model="cs.name"/>
+                </div>
+                <div class="col-md-2 col-sm-2">
+                    <div class="myLabel">Description</div>
+                </div>
+
+                <div class="col-md-4 col-sm-4">
+                    <textarea class="form-control" ng-model="cs.description"></textarea>
+                </div>
+
+            </div>
+
+            <div class="row">
+
+
+
+
+            </div>
+        </div>
+
+        <div class="col-md-6 col-sm-6">
+            <div class="banner">Contents</div>
+
+            <table class="table table-bordered">
+                <tr><th>Display</th><th>Code</th><th>Definition</th><th ng-show="isAuthoredByClinFhir">Action</th></tr>
+                <tr ng-repeat="concept in cs.concept">
+                    <td>{{concept.display}}</td>
+                    <td>{{concept.code}}</td>
+                    <td>{{concept.definition}}</td>
+                    <td ng-show="isAuthoredByClinFhir">
+                        <i class="glyphicon glyphicon-arrow-down" ng-show="$index < cs.concept.length-1"
+                           title="Move Down"
+                           ng-click="moveConcept($index,'dn')" style="cursor: pointer">
+
+                        </i>
+
+                        <i class="glyphicon glyphicon-arrow-up" ng-show="$index > 0"
+                           title="Move Up"
+                           ng-click="moveConcept($index,'up')" style="cursor: pointer">
+
+                        </i>
+
+                        <i class="glyphicon glyphicon-remove"
+                           title="Delete"
+                           ng-click="deleteConcept($index)" style="cursor: pointer">
+
+                        </i>
+                    </td>
+                </tr>
+                <tr  ng-show="isAuthoredByClinFhir">
+                    <td><input class="form-control" ng-model="input.code"/> </td>
+                    <td><input class="form-control" ng-model="input.display"/> </td>
+                    <td><textarea class="form-control" ng-model="input.definition"></textarea> </td>
+                    <td width="10%">
+                        <i class="glyphicon glyphicon-plus"
+                           title="Add concept"
+                           ng-click="addConcept()" style="cursor: pointer">
+
+                        </i>
+                    </td>
+                </tr>
+
+
+            </table>
+
+        </div>
+
+
+
+
+
+
 
     </div>
-
-
-
-
-
-
-
-</div>
     <br/>
 
 
