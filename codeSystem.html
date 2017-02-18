@@ -17,6 +17,9 @@
         .myLabel {
             vertical-align: middle;
         }
+        .myMargin {
+            margin-bottom: 8px;
+        }
     </style>
 
     <script>
@@ -33,6 +36,7 @@
     <script src="js/modalDialogSvc.js"></script>
     <script src="js/appConfigSvc.js"></script>
     <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/autoFocus.js"></script>
     <script src="js/components/dataTypes.js"></script>
     <script src="resourceBuilder/rbServices.js"></script>
     <!--
@@ -71,14 +75,22 @@
 
             </div>
             <div class="col-md-3 col-sm-3">
+                <div class="pull-right navbar-form" ng-show="waiting">
+                    <img src="css/ajax_loader_blue_32.gif"/>
+                </div>
             </div>
             <div class="col-md-3 col-sm-3">
                 <form class="navbar-form navbar-right">
-                <div class="form-group">
+                <div class="form-group"  ng-hide="isDirty" >
                     <button class="btn btn-primary pull-right" ng-hide="state=='find'" ng-click="state='find'">Find</button>
-                    <button class="btn btn-danger pull-right" ng-show="isDirty" ng-click="save()">Save</button>
                     <button class="btn btn-default" ng-hide="isDirty" ng-click="newCS()">New</button>
                 </div>
+
+                <div class="form-group" ng-show="isDirty" >
+                    <button class="btn btn-danger pull-right" ng-show="isDirty" ng-click="saveCS()">Save</button>
+                    <button class="btn btn-link" ng-click="cancelUpdate()">Cancel</button>
+                </div>
+
                 </form>
 
             </div>
@@ -141,30 +153,55 @@
         <div class="col-md-6 col-sm-6">
             <div class="banner">Metadata</div>
 
-            <div class="row">
-                <div class="col-md-2 col-sm-2">
-                    <div class="myLabel">Name</div>
-                </div>
+            <uib-tabset>
+                <uib-tab heading="Text">
+                <br/>
 
-                <div class="col-md-4 col-sm-4">
-                    <input class="form-control" ng-model="cs.name"/>
-                </div>
-                <div class="col-md-2 col-sm-2">
-                    <div class="myLabel">Description</div>
-                </div>
+                    <div class="row myMargin">
+                        <div class="col-md-3 col-sm-3">
+                            <div class="myLabel">CodeSystem Url</div>
+                        </div>
+                        <div class="col-md-9 col-sm-9">
+                            <div>{{cs.url}}</div>
+                        </div>
+                    </div>
 
-                <div class="col-md-4 col-sm-4">
-                    <textarea class="form-control" ng-model="cs.description"></textarea>
-                </div>
+                    <div class="row myMargin">
+                        <div class="col-md-3 col-sm-3">
+                            <div class="myLabel">ValueSet Url</div>
+                        </div>
+                        <div class="col-md-9 col-sm-9">
+                            <div>{{cs.valueSet}}</div>
+                        </div>
+                    </div>
 
-            </div>
+                    <div class="row myMargin">
+                        <div class="col-md-3 col-sm-3">
+                            <div class="myLabel">Name</div>
+                        </div>
+                        <div class="col-md-9 col-sm-9">
+                            <input class="form-control" ng-model="cs.name"/>
+                        </div>
+                    </div>
+                    <div class="row myMargin">
+                        <div class="col-md-3 col-sm-3">
+                            <div class="myLabel">Description</div>
+                        </div>
+                        <div class="col-md-9 col-sm-9">
+                            <textarea class="form-control" ng-model="cs.description"></textarea>
+                        </div>
+                    </div>
+                </uib-tab>
 
-            <div class="row">
+
+                <uib-tab heading="Json">
+                    <br/>
+                    <pre>{{cs | json}}</pre>
+                </uib-tab>
+            </uib-tabset>
 
 
 
-
-            </div>
         </div>
 
         <div class="col-md-6 col-sm-6">
@@ -191,16 +228,17 @@
 
                         <i class="glyphicon glyphicon-remove"
                            title="Delete"
-                           ng-click="deleteConcept($index)" style="cursor: pointer">
+                           ng-click="removeConcept($index)" style="cursor: pointer">
 
                         </i>
                     </td>
                 </tr>
                 <tr  ng-show="isAuthoredByClinFhir">
-                    <td><input class="form-control" ng-model="input.code"/> </td>
-                    <td><input class="form-control" ng-model="input.display"/> </td>
-                    <td><textarea class="form-control" ng-model="input.definition"></textarea> </td>
-                    <td width="10%">
+                    <td><input class="form-control" ng-model="input.display" placeholder="Display"/> </td>
+                    <td><input class="form-control" ng-model="input.code" placeholder="Code"/> </td>
+
+                    <td><textarea class="form-control" ng-model="input.definition" placeholder="Definition"></textarea> </td>
+                    <td width="15%">
                         <i class="glyphicon glyphicon-plus"
                            title="Add concept"
                            ng-click="addConcept()" style="cursor: pointer">

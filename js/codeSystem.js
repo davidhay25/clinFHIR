@@ -1,13 +1,66 @@
 
 angular.module("sampleApp")
     .controller('codeSystemCtrl',
-        function ($scope,appConfigSvc,GetDataFromServer,Utilities,modalService,$uibModal) {
+        function ($scope,appConfigSvc,GetDataFromServer,Utilities,modalService,$uibModal,SaveDataToServer) {
 
             $scope.input = {};
             $scope.cs = {concept:[]};     //the CodeSystem resource
             $scope.state = 'find';          //find, edit, show
 
             // modalService.showModal({}, modalOptions).then(
+
+
+            $scope.saveCS = function() {
+                $scope.waiting = true;
+                SaveDataToServer.saveResource($scope.cs,appConfigSvc.getCurrentTerminologyServer().url).then(
+                    function(data) {
+                        if ($scope.vs) {
+
+                            SaveDataToServer.saveResource($scope.vs,appConfigSvc.getCurrentTerminologyServer().url).then(
+                                function(data1) {
+                                    modalService.showModal({}, {bodyText:"CodeSystem and matching ValueSet resources have been updated"})
+                                },
+                                function(err1){
+                                    modalService.showModal({}, {bodyText:"The CodeSystem resource was created, but there was an error saving the ValueSet resource: "+angular.toJson(err1)})
+                                }
+                            )
+                        } else {
+                            modalService.showModal({}, {bodyText:"CodeSystem resource has been updated"})
+                        }
+
+
+
+
+                    },
+                    function(err) {
+                        modalService.showModal({}, {bodyText:"There was an error saving the CodeSystem resource: "+angular.toJson(err)})
+
+                    }
+                ).finally(function () {
+                    $scope.waiting = false;
+                })
+            };
+
+            $scope.cancelUpdate = function(){
+
+                var modalOptions = {
+                    closeButtonText: "No, I've changed my mind",
+                    actionButtonText: 'Yes, return to search',
+                    headerText: 'Cancel changes',
+                    bodyText: 'Are you sure you want to abandon the changes you have made to this CodeSystem?'
+                };
+
+                modalService.showModal({}, modalOptions).then(
+                    function(){
+                        delete $scope.cs;
+                        $scope.state = 'find';
+                        $scope.isAuthoredByClinFhir = false;
+                        $scope.isDirty = false;
+
+
+                    }
+                )
+            }
 
             //load the new extension page
             $scope.newCS = function() {
@@ -25,7 +78,7 @@ angular.module("sampleApp")
                         };
 
                         $scope.checkCSExists = function(name) {
-                            var url = appConfigSvc.getCurrentTerminologyServer() + "CodeSystem/"+name;
+                            var url = appConfigSvc.getCurrentTerminologyServer().url + "CodeSystem/"+name;
                             $scope.showWaiting = true;
                             GetDataFromServer.adHocFHIRQuery(url).then(
                                 function(data){
@@ -49,11 +102,41 @@ angular.module("sampleApp")
                     function(vo) {
                         //console.log(vo)
                         //create a new CS
-                        $scope.cs = {resourceType:'CodeSystem'}
-                        $scope.cs.url = appConfigSvc.getCurrentTerminologyServer().url + vo.name;
+                        var vsSuffix = '-cf-vs';
+                        $scope.cs = {resourceType:'CodeSystem',concept:[]}
+                        makeExample()   //temp !!!
+                        $scope.cs.url = appConfigSvc.getCurrentTerminologyServer().url + "CodeSystem/" + vo.name;
+                        //todo - should I check for the ValueSet or just create it?
+                        $scope.cs.valueSet = appConfigSvc.getCurrentTerminologyServer().url  + "ValueSet/" + vo.name + vsSuffix;
                         $scope.cs.title = vo.title;
                         $scope.cs.name = vo.name;
+                        $scope.cs.id = vo.name;
                         $scope.cs.description = vo.description;
+
+                        var isCFUrl = appConfigSvc.config().standardExtensionUrl.clinFHIRCreated;
+                        Utilities.addExtensionOnce($scope.cs,isCFUrl,{valueBoolean:true});
+
+                        //now create the matching ValueSet that will expand to include all concepts...
+                        $scope.vs = {resourceType:'ValueSet',status:'draft',compose:{include:[]}};
+                        $scope.vs.id = vo.name + vsSuffix;
+                        $scope.vs.name = vo.name;
+                        $scope.vs.url =  $scope.cs.valueSet;
+                        $scope.vs.description = "An automatically generated valueSet to provide complete binding to the " +vo.name+ " CodeSystem resource."
+                        $scope.vs.compose.include.push({system:$scope.cs.url})
+
+
+                        /*{
+                         "resourceType":"ValueSet",
+                         "id": "dhTest1-cf-vs",
+                         "status" : "draft",
+                         "compose" : {
+                         "include" : [
+                         {"system":"http://fhirtest.uhn.ca/baseDstu3/dhTest1"}
+                         ]
+                         }
+                         }*/
+
+
                         $scope.state = 'edit';
                         $scope.isDirty = true;
 
@@ -63,6 +146,7 @@ angular.module("sampleApp")
             };
 
             $scope.selectCS = function(cs) {
+                delete $scope.vs;
                 $scope.cs = cs;
                 $scope.state = 'show'
                 $scope.isAuthoredByClinFhir = false;
@@ -90,7 +174,7 @@ angular.module("sampleApp")
                 delete $scope.input.vspreview;
 
                 var url =  appConfigSvc.getCurrentTerminologyServer().url+"CodeSystem?name:contains="+filter;// $scope.valueSetRoot+"?name="+filter;
-
+                $scope.waiting = true;
                 GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
                     function(data){
                         $scope.searchResultBundle = data.data;
@@ -102,14 +186,28 @@ angular.module("sampleApp")
                         alert(angular.toJson(err))
                     }
                 ).finally(function(){
-                    $scope.showWaiting = false;
+                    $scope.waiting = false;
                 })
             };
 
-            $scope.addConcept = function(){
-                var concept = {code:$scope.input.code,display:$scope.input.display,definition:$scope.input.definition}
-                $scope.cs.concept.push(concept);
+            $scope.removeConcept = function(inx){
+                $scope.cs.concept.splice(inx,1);
                 $scope.isDirty = true;
+
+            };
+
+            $scope.addConcept = function(){
+
+                if (! $scope.input.code || ! $scope.input.display) {
+                    modalService.showModal({}, {bodyText:"Code and Display are needed"})
+                } else {
+                    var concept = {code:$scope.input.code,display:$scope.input.display,definition:$scope.input.definition}
+                    $scope.cs.concept.push(concept);
+                    $scope.isDirty = true;
+                }
+
+
+
             };
 
             $scope.moveConcept = function(inx,dirn) {

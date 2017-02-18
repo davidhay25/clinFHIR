@@ -1,0 +1,10 @@
+{
+  "resourceType":"ValueSet",
+  "id": "dhTest1-cf-vs",
+  "status" : "draft",
+  "compose" : {
+    "include" : [
+      {"system":"http://fhirtest.uhn.ca/baseDstu3/dhTest1"}
+    ]
+  }
+}

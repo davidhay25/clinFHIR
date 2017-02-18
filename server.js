@@ -1,7 +1,7 @@
 //simple server to serve static files...
 
 var static = require('node-static');
-var fileServer = new static.Server({ indexFile: "resourceCreator.html" });
+//var fileServer = new static.Server({ indexFile: "resourceCreator.html" });
 var request  = require('request');
 var moment = require('moment');
 
@@ -112,8 +112,8 @@ function recordAccess(req,data) {
 
 
 //return status pages, index is resourceCeator.html
-app.use('/', express.static(__dirname,{index:'/resourceCreator.html'}));
-
+//app.use('/', express.static(__dirname,{index:'/resourceCreator.html'}));
+app.use('/', express.static(__dirname,{index:'/launcher.html'}));
 
 //--- proxies for Grahames server. Could generalize this using - eg - headers,but will need to update allservices making $http calls...
 app.all('/grahamv3/*',function(req,res){
