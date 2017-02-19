@@ -1598,8 +1598,8 @@ angular.module("sampleApp")
                 var treeData = resourceCreatorSvc.buildResourceTree(newResource);
 
                 //show the tree of this version
-                $('#resourceTree').jstree('destroy');
-                $('#resourceTree').jstree(
+                $('#builderResourceTree').jstree('destroy');
+                $('#builderResourceTree').jstree(
                     {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
                 )
 
