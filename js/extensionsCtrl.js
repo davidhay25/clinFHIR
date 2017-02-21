@@ -196,16 +196,6 @@ angular.module("sampleApp")
 
                 query += "&type=Extension";     //this is the same for STU-2 & 3...
 
-/*
-                if ($scope.mode == 'extension') {
-                    query += "&type=Extension";      //this is foe an extension
-                } else {
-                    query += "&kind=resource"
-                }
-                */
-
-
-
                 getExtensions(query,downLoadName)
             }
 
@@ -239,18 +229,7 @@ angular.module("sampleApp")
 
 
                             });
-/*
-                            if (selectedExtension) {
-                                //this is an extension being edited. Find it in the bundle and re-set if...
-                                $scope.extensionsArray.forEach(function (entry) {
-                                    if (entry.resource.url == selectedExtension.url) {
-                                        $scope.selectExtension(entry);
 
-                                    }
-
-                                })
-                            }
-                            */
 
                             $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(bundle, true)], {type: "text/text"}));
                             $scope.downloadLinkJsonName = downLoadName;
@@ -431,35 +410,10 @@ angular.module("sampleApp")
                     );
                 }
 
-
-
-
             };
-/*
-            function isAuthoredByClinFhir(profile) {
-                // return true
-                var isAuthoredByClinFhir = false;
-                if (profile.code) {
-                    profile.code.forEach(function(coding){
-                        if (coding.system == 'http://fhir.hl7.org.nz/NamingSystem/application' &&
-                            coding.code == 'clinfhir') {
-                            isAuthoredByClinFhir = true;
-                        }
-                    })
-                }
+        }).config([ '$compileProvider',
+    //used for the download functionity - http://stackoverflow.com/questions/16342659/directive-to-create-adownload-button for download (bottom of page)
+    function($compileProvider) {
+        $compileProvider.aHrefSanitizationWhitelist(/^s*(https?|ftp|blob|mailto|chrome-extension):/);
 
-                if (!isAuthoredByClinFhir) {
-                    //used identifier in the past...
-                    if (profile.identifier) {
-                        profile.identifier.forEach(function(ident){
-                            if (ident.system == 'http://clinfhir.com' && ident.value=='author') {
-                                isAuthoredByClinFhir = true;
-                            }
-                        })
-                    }
-                }
-
-                return isAuthoredByClinFhir;
-            }
-*/
-        });
+    }]);

@@ -234,8 +234,19 @@ angular.module("sampleApp")
                         //console.log($scope.selectedNode)
                         logicalModelSvc.getOptionsFromValueSet($scope.selectedNode.data).then(
                             function(lst) {
-                                //console.log(lst);
+                                console.log(lst);
                                 $scope.valueSetOptions = lst;
+
+
+                                lst.sort(function(a,b){
+                                    if (a.display > b.display) {
+                                        return 1
+                                    } else {
+                                        return -1;
+                                    }
+                                })
+
+
                             },
                             function(err){
                                 //$scope.valueSetOptions = [{code:'notExpanded',display:'Unable to get list, may be too long'}]
