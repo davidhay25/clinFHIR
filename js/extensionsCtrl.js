@@ -367,6 +367,13 @@ angular.module("sampleApp")
             }
 
 
+            //  <vs-browser trigger="showVSBrowserDialog"></vs-browser> is defined in renderProfile.html
+            $scope.showVSBrowserDialog = {};
+            $scope.showVSBrowser = function(vs) {
+                $scope.showVSBrowserDialog.open(vs);        //the open method defined in the directive...
+            };
+
+
             //------- show valueset
             $scope.findValueSet = function(binding) {
                 var valueSetUri = binding.valueSetUri;
@@ -375,14 +382,21 @@ angular.module("sampleApp")
 
                     if (binding.valueSetReference) {
                         valueSetUri = binding.valueSetReference.reference;
-                        modalService.showModal({}, {bodyText:"I'm going to use a valueSetReference as if it were a Uri. It *should* still work..."}).then(
+                        modalService.showModal({}, {bodyText:"I'm going to use a valueSetReference ("+valueSetUri+ ") as if it were a Uri. It *should* still work..."}).then(
                             function(){},
                             function(){
                                 $scope.loading=true;
                                 Utilities.getValueSetIdFromRegistry(valueSetUri, function (vsDetails) {
 
                                         $scope.loading = false;
-                                        $scope.showVSBrowser(vsDetails.resource);
+                                        if (vsDetails) {
+                                            $scope.showVSBrowser(vsDetails.resource);
+                                        } else {
+                                            modalService.showModal({}, {bodyText:"Sorry, the ValueSet: "+valueSetUri+" was not found on the Terminology server"});
+                                        }
+
+
+
                                     }
                                 )
                             }

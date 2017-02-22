@@ -254,9 +254,10 @@
 
                                         </td>
                                         <td>
-                                            <a ng-click="findValueSet(comp.boundValueSet)"
+                                            <!--  fundValueSet() needs the real binding--->
+                                            <a ng-click="findValueSet(child.ed.binding)"
                                                href="#" title="Edit/View ValueSet">
-                                                {{comp.boundValueSet}}
+                                                {{child.boundValueSet}}
                                             </a>
 
 

@@ -1133,7 +1133,21 @@ angular.module("sampleApp").
                             var e = arPath[2];
                             if (e.indexOf('value') > -1) {
                                 //this is the value definition - ie what types
-                                child.ed.type = element.type
+                                child.ed.type = element.type;
+                                child.ed.binding = element.binding;     //the child.ed was set by the 'parent' and won't have the binding...
+
+
+                                //pull the bound ValueSet out for convenience...
+                                if (element.binding) {
+                                    if (element.binding.valueSetReference) {
+                                        //we may need to check whether this is a relative reference...
+                                        child.boundValueSet = element.binding.valueSetReference.reference;
+                                    }
+                                    if (element.binding.valueSetUri) {
+                                        child.boundValueSet = element.binding.valueSetUri;
+                                    }
+
+                                }
 
 
                                 //see if this is a complex dataType (so we can set the icon correctly)
