@@ -4,7 +4,7 @@ angular.module("sampleApp")
     .controller('extensionsCtrl',
         function ($rootScope,$scope,GetDataFromServer,appConfigSvc,Utilities,$uibModal,RenderProfileSvc,SaveDataToServer,modalService,$timeout) {
 
-            $scope.input = {param:'hl7',searchParam:'publisher',searchStatus:'all'};
+            $scope.input = {param:'Orion',searchParam:'publisher',searchStatus:'all'};
 
             GetDataFromServer.registerAccess('extension');
 
@@ -21,6 +21,16 @@ angular.module("sampleApp")
 
                 }
             );
+
+
+            //------- for now - allow anyone to read/write extensions authored by cf
+            //userProfile.extDef.permissions.canEdit
+            $scope.userProfile = {extDef : {permissions:{}}};
+            $scope.userProfile.extDef.permissions.canEdit = true;
+            $scope.userProfile.extDef.permissions.canDelete = true;
+            $scope.userProfile.extDef.permissions.canRetire = true;
+            $scope.userProfile.extDef.permissions.canActivate = true;
+
 
 
             $rootScope.$on('userLoggedIn',function(){
@@ -53,10 +63,15 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/newExtension.html',
                     size: 'lg',
-                    controller: "extensionDefCtrl"
+                    controller: "extensionDefCtrl",
+                    resolve : {
+                        currentExt: function () {          //the default extension
+                            return null;
+                        }
+                    }
                 }).result.then(
                     function(result) {
-
+                        $scope.search();
                     })
             };
 
@@ -89,7 +104,22 @@ angular.module("sampleApp")
             };
 
             $scope.editExtension = function () {
-                modalService.showModal({}, {bodyText : "Sorry, editing is not yet enabled"})
+
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/newExtension.html',
+                    size: 'lg',
+                    controller: "extensionDefCtrl",
+                    resolve : {
+                        currentExt: function () {          //the default extension
+                            return $scope.selectedExtension;
+                        }
+                    }
+                }).result.then(
+                    function(result) {
+                        $scope.search();
+                    })
+
+                ///modalService.showModal({}, {bodyText : "Sorry, editing is not yet enabled"})
             };
 
             $scope.retireExtension = function(){
@@ -138,7 +168,8 @@ angular.module("sampleApp")
                 )
             };
 
-            $scope.search = function(param) {
+            $scope.search = function() {
+                var param = $scope.input.param;
                 
                 var conformanceServer =  appConfigSvc.getCurrentConformanceServer();
                 var query = conformanceServer.url;
@@ -281,22 +312,7 @@ angular.module("sampleApp")
                 $scope.selectedExtension.localMeta.referenceStrength = vo.strength;
                 $scope.selectedExtension.localMeta.referenceReference = vo.valueSetReference;
                 $scope.selectedExtension.localMeta.valueSetUri = vo.valueSetUri;
-                
-                /*
-                if ($scope.selectedExtension.meta && $scope.selectedExtension.meta.tag) {
-                    for (var i=0; i< $scope.selectedExtension.meta.tag.length;i++){
-                        var tag = $scope.selectedExtension.meta.tag[i];
-                        if (tag.system == "http://clinfhir.com/user") {
-                            $scope.selectedExtension.lastEditedBy = tag.display;
-                            break;
-                        }
-                    }
 
-                };
-*/
-
-
-                //$scope.selectedExtensionJson = angular.toJson(entry.resource,true)
             };
 
 
@@ -374,7 +390,7 @@ angular.module("sampleApp")
             }
 
 
-            //  <vs-browser trigger="showVSBrowserDialog"></vs-browser> is defined in renderProfile.html
+
             $scope.showVSBrowserDialog = {};
             $scope.showVSBrowser = function(vs) {
                 $scope.showVSBrowserDialog.open(vs);        //the open method defined in the directive...

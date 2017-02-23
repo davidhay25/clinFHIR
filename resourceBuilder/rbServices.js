@@ -491,6 +491,7 @@ angular.module("sampleApp").
             var deferred = $q.defer();
             var bundle = Utilities.perfromQueryFollowingPaging(url).then(
                 function(bundle) {
+                    bundle.length =
                     deferred.resolve({data:bundle});
                 },function(err) {
                     deferred.reject(err)
@@ -1296,30 +1297,6 @@ angular.module("sampleApp").
 
 
 
-                                    /*
-                                     ele.dt = [];
-                                     if (element.type) {
-                                     element.type.forEach(function(typ){
-                                     var dt = {code:typ.code};
-
-                                     if (typ.profile) {
-                                     var p = typ.profile[0];     //only take the first one...
-                                     dt.profile = p;
-                                     var ar = p.split('/');
-                                     dt.type =ar[ar.length-1];
-                                     }
-                                     ele.dt.push(dt);
-                                     })
-
-                                     }
-                                     */
-                                    //var dtInName = segment2.replace('value','');
-
-                                    //ele.dt =  segment2.replace('value','');//.toLowerCase();
-
-
-
-
                                     //is there a binding?
                                     if (element.binding  && element.binding.valueSetReference) {
                                         ele.boundValueSet = element.binding.valueSetReference.reference;
@@ -1584,7 +1561,8 @@ console.log(summary);
 
         },
         isAuthoredByClinFhir : function(profile) {
-            // return true
+            // Has this artifact been authored by clinfhir - there were a number of ways of reording thod.
+
             var isAuthoredByClinFhir = false;
             if (profile.code) {
                 profile.code.forEach(function(coding){
@@ -1639,8 +1617,8 @@ console.log(summary);
             limit = limit || 500;           //absolute max of 500
 
 
-            var returnBundle = {entry:[]};
-
+            var returnBundle = {total:0,type:'searchset',link:[],entry:[]};
+            returnBundle.link.push({relation:'self',url:url})
             getPage(url);
 
             //get a single page of data

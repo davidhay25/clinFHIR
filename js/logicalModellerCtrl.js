@@ -17,18 +17,6 @@ angular.module("sampleApp")
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
             GetDataFromServer.registerAccess('logical');
-            /*
-            //testing...
-            logicalModelSvc.importFromProfile().then(
-                function(treeData){
-                    $scope.treeData = treeData
-                    console.log($scope.treeData)
-                    $scope.rootName = 'test';        //the id of the first element is the 'type' of the logical model
-                    drawTree();
-
-            })
-
-            */
 
             //for selecting a profile to import
             $scope.showFindProfileDialog = {};
@@ -53,6 +41,7 @@ angular.module("sampleApp")
                 logicalModelSvc.generateFHIRProfile($scope.SD).then(
                     function(profile) {
                         console.log(profile)
+                        modalService.showModal({}, {bodyText: "Profile has been created with the URL: "+ profile.url});
                     },function(err) {
                         modalService.showModal({}, {bodyText: err});
                     }
@@ -1052,11 +1041,15 @@ angular.module("sampleApp")
                                 vo.publisher = $scope.input.publisher;
                                 vo.purpose = $scope.input.purpose || $scope.input.name ;
                                 vo.SD = $scope.SD;
-                                if ($scope.input.baseType) {
-                                    vo.baseType = $scope.input.baseType.name;       //if a base type was selected
+
+                                if ($scope.input.baseTypeSelected) {
+                                    vo.baseType = $scope.input.baseTypeSelected.name;       //if a base type was selected
+                                } else if ($scope.baseType){
+                                    //set when editing
+                                    vo.baseType = $scope.baseType;
                                 }
 
-                                vo.baseType = $scope.baseType;
+
                                 vo.mapping = $scope.input.mapping;
                                 vo.createElementsFromBase = $scope.input.createElementsFromBase;
                                 vo.useV2ForCreateElementsFromBase = $scope.input.useV2ForCreateElementsFromBase;
@@ -1694,14 +1687,8 @@ angular.module("sampleApp")
                                 resolve : {
                                     resourceType: function () {          //the default config
 
-                                        var resourceType;
-                                        var ext = Utilities.getSingleExtensionValue($scope.SD, appConfigSvc.config().standardExtensionUrl.baseTypeForModel)
-                                        if (ext && ext.valueString) {
-                                            resourceType = ext.valueString
-                                        }
+                                        return baseType;
 
-
-                                        return resourceType;
                                     }
                                 }
                             }).result.then(

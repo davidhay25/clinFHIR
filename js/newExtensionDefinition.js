@@ -1,17 +1,59 @@
 /*has been deprectde - don't call make function - expensive! */
 
 angular.module("sampleApp").controller('extensionDefCtrl',
-        function ($rootScope,$scope,$uibModal,appConfigSvc,GetDataFromServer,Utilities,modalService,RenderProfileSvc,$http) {
+        function ($rootScope,$scope,$uibModal,appConfigSvc,GetDataFromServer,Utilities,modalService,RenderProfileSvc,$http,currentExt) {
 
             $scope.childElements = [];      //array of child elements
             $scope.input ={};
             $scope.input.multiplicity = 'opt';
             $scope.selectedResourceTypes = [];
+
+            if (currentExt) {
+                $scope.canSaveEd = true;
+                $scope.currentExt = currentExt;
+                $scope.input.name = currentExt.name;
+                $scope.input.description = currentExt.description;
+                $scope.input.short = currentExt.short;
+                $scope.input.publisher = currentExt.publisher;
+                if (currentExt.context) {
+                    if (currentExt.context[0] !== '*'){
+                        currentExt.context.forEach(function(ctx){
+                            $scope.selectedResourceTypes.push(ctx)
+                        })
+                    }
+                }
+
+                var analysis = Utilities.analyseExtensionDefinition3(currentExt);
+                if (analysis.isComplexExtension) {
+                    alert('Editing of complex extensions noy yet supported')
+                    $scope.canSaveEd = false;
+
+                } else {
+
+                    var item = {};
+                    item.code = analysis.name;
+                    item.description = analysis.description;
+                    item.short = analysis.short;
+                    var dt = analysis.dataTypes[0];         //there's only 1 for a simple extension...
+                    item.dataTypes = analysis.dataTypes;    //{code: description: isCoded:
+
+                    $scope.childElements.push({dataTypes: [{code: dt.code,description: dt.code}],
+                        description:item.description,
+                        isCoded:analysis.isCoded});
+                }
+
+
+
+                /*
+                
+                 */
+            }
+
             
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(standardResourceTypes) {
                     $scope.allResourceTypes = standardResourceTypes;       //use to define the context for an extension...
-                    //console.log($scope.allResourceTypes)
+
                 }
             )
 
@@ -48,8 +90,6 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                     var url = $scope.conformanceSvr.url + 'StructureDefinition/'+sd.id;
                     $http.put(url,sd).then(
                         function(data){
-                            //console.log(data)
-
 
                             modalService.showModal({}, {bodyText:"Extension has been saved."}).then(function (result) {
 
@@ -69,40 +109,11 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                         $scope.showWaiting = false;
                     });
 
-                    /*
-                    var url = $scope.conformanceSvr.url+ "StructureDefinition/$validate"
-                    $http.post(url,sd).then(
-                        function(data){
-                            console.log(data)
-                        }, function(err){
-                            console.log(err)
-                            $scope.validateResults = err.data;
-                        }
-                    )
-
-
-*/
 
 
 
 
-                    /*  ---- this is a validate operation
 
-                    Utilities.validate(sd,$scope.conformanceSvr.url).then(
-                        function(data){
-                            console.log(data)
-                            var config = {bodyText:''};
-                            modalService.showModal({}, config)
-
-                        },function(err){
-                            console.log(err)
-                            $scope.validateResults = err.data;
-                        }
-                    ).finally(function(){
-                        $scope.showWaiting = false;
-                    })
-
-*/
                 } else {
                     $scope.showWaiting = false;
                 }
@@ -130,16 +141,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 GetDataFromServer.adHocFHIRQuery(url).then(
                     function(data){
                         console.log(data);
-                        //if there is already an SDef - see if it authored by clinFHIR - todo
-/*
-                        if (data.status !== 410) {
-                            //410 indicates that the Sdef was deleted, od OK to overwrite
-                            var config = {bodyText:'Sorry, that name is already used on the Conformance server'};
-                            modalService.showModal({}, config)
-                        } else {
-                            $scope.canSaveEd = true;
-                        }
-*/
+
 
                         modalService.showModal({}, {bodyText:"Sorry, this name is already in use."})
 
@@ -257,7 +259,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                             var result = {};
                             result.code = $scope.code;
                             result.description = $scope.description;
-                            result.short = $scope.description;
+                          //  result.short = $scope.description;
                             result.dataTypes = $scope.selectedDataTypes;
                             $scope.$close(result);
 
@@ -310,23 +312,19 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
             //build the StructueDefinition that describes this extension
             makeSD = function() {
-
                 var extensionDefinition = {resourceType:'StructureDefinition'};
-
-
                 //the version of fhir that this SD is being deployed against...
                 var fhirVersion = $scope.conformanceSvr.version;        //get from the conformance server
                 var name = $scope.input.name;       //the name of the extension
                 var definition = $scope.input.description || $scope.input.name;       //the defintion of the extension. It is required...
                 var comments = $scope.input.description;       //the name of the extension
                 var short = $scope.input.short;
-
-
+                
                 extensionDefinition.id = name;
 
                 //to allow for proxied requests...
                 var cannonicalUrl =  $scope.conformanceSvr.realUrl || $scope.conformanceSvr.url;
-                extensionDefinition.url = cannonicalUrl + name;
+                extensionDefinition.url = cannonicalUrl + "StructureDefinition/"+name;
 
                 //the format for a simple extensionDefinition SD is different to a complex one...
                 var extensionTypeIsMultiple = false;
@@ -392,13 +390,8 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 if (extensionTypeIsMultiple) {
                     var ed1 = {path : 'Extension',name: name,short:short,definition:definition,
                         comments:comments,min:min,max:max,type:[{code:'Extension'}]};
-
-
+                    
                     ed1.id = ed1.path;
-
-
-
-
                     extensionDefinition.snapshot.element.push(ed1);
 
                     var edSlicing = {path : 'Extension.extension',name: name,short:short,definition:definition,
@@ -458,8 +451,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
             //build the ElementDefinitions for a single child
             function makeChildED(vo,isComplex,index){
-                //vo.name, vo.short, vo.definition, vo.comments, vo.min, vo.max, vo.code, vo.dataTypes[code,description]
-                //console.log(vo)
+
 
                 vo.description = vo.description || 'No Description'
 
