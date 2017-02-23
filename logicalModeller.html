@@ -332,13 +332,17 @@
 
             <uib-tabset ng-show="treeData.length > 0">
                 <uib-tab heading="Designer">
-                    <br/>
 
-                    <span class="pull-right">
-                        <button ng-hide="isInPalette" class="btn btn-link" ng-click="addToPalette()">Add to Palette</button>
-                        <button ng-show="isInPalette" class="btn btn-link" ng-click="removeFromPalette()">Remove from Palette</button>
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12">
+                             <span class="pull-right">
+                                <button ng-hide="isInPalette" class="btn btn-link" ng-click="addToPalette()">Add to Palette</button>
+                                <button ng-show="isInPalette" class="btn btn-link" ng-click="removeFromPalette()">Remove from Palette</button>
 
-                    </span>
+                            </span>
+                        </div>
+                    </div>
+
 
 
 
@@ -781,7 +785,10 @@
                                     <tr><td width="25%">Model Name</td><td>{{treeData[0].data.header.name}}</td></tr>
                                     <tr><td>Model Title</td><td>{{treeData[0].data.header.title}}</td></tr>
                                     <tr><td>Model Purpose</td><td>{{treeData[0].data.header.purpose}}</td></tr>
-                                    <tr ng-show="treeData[0].data.header.mapping"><td>Mapping</td><td>{{treeData[0].data.header.mapping}}</td></tr>
+                                    <tr ng-show="treeData[0].data.header.baseType">
+                                        <td>Base Resource Type</td><td>{{treeData[0].data.header.baseType}}</td></tr>
+                                    <tr ng-show="treeData[0].data.header.mapping">
+                                        <td>Mapping</td><td>{{treeData[0].data.header.mapping}}</td></tr>
                                 </table>
                             </uib-tab>
                             <uib-tab heading="History">
@@ -901,6 +908,12 @@
 
 
 
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12">
+                                <button class=" btn btn-link pull-right" ng-click="generateFHIRProfile()">Generate Profile</button>
+                            </div>
+                        </div>
+
                     </uib-tab>
                     <uib-tab heading="Comments" >
                         <br/>
@@ -963,30 +976,10 @@
                                 <pre ng-show="allComments">{{allComments | json}}</pre>
                             </uib-tab>
                         </uib-tabset>
-                        <!--
-
-                                    <h4>Your comments</h4>
-
-
-
-                                    <h4>All comments</h4>
-
-
-                                    <button class="btn btn-default" ng-click="createTask()">Add Task</button>
-
-                                    -->
-
-
-
-
-
-
-
-
 
 
                     </uib-tab>
-
+<!--
                     <uib-tab heading="Commands">
                         <br/>
                         <h4>Experimental commands</h4>
@@ -994,6 +987,7 @@
 
                         <pre>{{sample | json}}</pre>
                     </uib-tab>
+                    -->
 
 
                 </uib-tabset>
@@ -1012,10 +1006,10 @@
         </select-profile>
 
 
-    <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
+         <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
                 vs-selected="vsSelected"></vs-browser>
 
-</div>
+        </div>
     </div>
 </body>
 </html>

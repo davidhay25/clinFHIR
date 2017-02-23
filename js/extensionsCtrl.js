@@ -142,61 +142,68 @@ angular.module("sampleApp")
                 
                 var conformanceServer =  appConfigSvc.getCurrentConformanceServer();
                 var query = conformanceServer.url;
-                
-                //because I have to proxy Grahames server. Don't really like this...
-                $scope.conformanceServer = conformanceServer.realUrl || conformanceServer.url;  //for the detail display
-                var downLoadName = '';
-                switch ($scope.input.searchParam) {
 
-                    case 'publisher' :
-                        query += "StructureDefinition?publisher:contains="+param;
-                        downLoadName = 'publisher-'+param;
-                        break;
-                    case 'description' :
-                        query += "StructureDefinition?description:contains="+param;
-                        downLoadName = 'description-'+param;
-                        break;
-                    case 'name' :
-                        query += "StructureDefinition?name:contains="+param;
-                        downLoadName = 'name-'+param;
-                        break;
-                    case 'identifier' :
-                        var id = $scope.input.identifierId;
-                        var system = $scope.input.identifierSystem;
-                        var ident = id;
-                        if (!id) {
-                            alert("You need to enter an Id")
-                            return;
-                        }
-                        if (system) {
-                            ident = system + "|" + id;
-                        }
+                if ($scope.input.searchParam == 'url') {
+                    query += "StructureDefinition?url="+param;
+                } else {
+                    var downLoadName = '';
+                    switch ($scope.input.searchParam) {
 
-                        query += "StructureDefinition?identifier="+ident;
-                        downLoadName = 'identifier-'+ident;
-                        break;
-                    case 'resource' :
-                        param = $scope.input.resourceType;
-                        var t = param.name;
-                        //Both '*' and 'Resource' are used for 'any resource'
-                        if (t == '*') {
-                            t += ",Resource";
-                        }
-                        downLoadName = 'resource-'+param;
+                        case 'publisher' :
+                            query += "StructureDefinition?publisher:contains="+param;
+                            downLoadName = 'publisher-'+param;
+                            break;
+                        case 'description' :
+                            query += "StructureDefinition?description:contains="+param;
+                            downLoadName = 'description-'+param;
+                            break;
+                        case 'name' :
+                            query += "StructureDefinition?name:contains="+param;
+                            downLoadName = 'name-'+param;
+                            break;
+                        case 'identifier' :
+                            var id = $scope.input.identifierId;
+                            var system = $scope.input.identifierSystem;
+                            var ident = id;
+                            if (!id) {
+                                alert("You need to enter an Id")
+                                return;
+                            }
+                            if (system) {
+                                ident = system + "|" + id;
+                            }
 
-                        query += "StructureDefinition?ext-context:contains="+t;
+                            query += "StructureDefinition?identifier="+ident;
+                            downLoadName = 'identifier-'+ident;
+                            break;
+                        case 'resource' :
+                            param = $scope.input.resourceType;
+                            var t = param.name;
+                            //Both '*' and 'Resource' are used for 'any resource'
+                            if (t == '*') {
+                                t += ",Resource";
+                            }
+                            downLoadName = 'resource-'+param;
 
-                        break;
+                            query += "StructureDefinition?ext-context:contains="+t;
+
+                            break;
+                    }
+
+                    //if the status is not all...
+                    if ($scope.input.searchStatus !== 'all') {
+                        query += "&status="+$scope.input.searchStatus;
+                    }
+
+                    query += "&type=Extension";     //this is the same for STU-2 & 3...
+
+
                 }
-
-                //if the status is not all...
-                if ($scope.input.searchStatus !== 'all') {
-                    query += "&status="+$scope.input.searchStatus;
-                }
-
-                query += "&type=Extension";     //this is the same for STU-2 & 3...
-
                 getExtensions(query,downLoadName)
+
+                //because I have to proxy Grahames server. Don't really like this...
+               // $scope.conformanceServer = conformanceServer.realUrl || conformanceServer.url;  //for the detail display
+
             }
 
 

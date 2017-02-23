@@ -198,10 +198,11 @@ angular.module("sampleApp")
                         var ar = path.split('.');
                         if (ar.indexOf('extension') > -1) {
                             //this is an extension
-                            //console.log(ed);
+                            console.log('extension');
                             if (ed.type) {
                                 var profileUrl = ed.type[0].profile;
                                 if (profileUrl) {
+                                    console.log(profileUrl)
                                     queries.push(GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
                                         function (sdef) {
                                             //console.log(ed,sdef)
@@ -247,7 +248,7 @@ console.log(analysis)
                                                 }
                                                 */
                                             } else {
-
+                                                console.log(profileUrl + " is complex, not processed")
                                             }
 
                                             console.log(analysis);
@@ -276,6 +277,10 @@ console.log(analysis)
                                             }
                                             */
 
+                                        },
+                                        function(err) {
+                                            //unable to locate extension
+console.log(profileUrl + " not found")
                                         }
                                     ))
                                 }
@@ -295,7 +300,8 @@ console.log(analysis)
                             },
                             function (err) {
 
-
+                                //return the error and the incomplete model...
+                                deferred.reject({err:err,lm:logicalModel})
                                 console.log( angular.toJson(err))
 
 

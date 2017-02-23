@@ -3,7 +3,7 @@
 angular.module("sampleApp")
     .controller('logicalModellerCtrl',
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
-                  GetDataFromServer,$firebaseObject,$location,igSvc,SaveDataToServer,$window,RenderProfileSvc) {
+                  GetDataFromServer,$firebaseObject,$location,igSvc,SaveDataToServer,$window,RenderProfileSvc,Utilities) {
             $scope.input = {};
 
             $scope.code = {};
@@ -47,6 +47,18 @@ angular.module("sampleApp")
 
             $scope.input.newCommentboxInxDEP = -1;
 
+
+            //generate a real FHIR profile from the Logical model
+            $scope.generateFHIRProfile = function(){
+                logicalModelSvc.generateFHIRProfile($scope.SD).then(
+                    function(profile) {
+                        console.log(profile)
+                    },function(err) {
+                        modalService.showModal({}, {bodyText: err});
+                    }
+                );
+
+            };
 
             //view and change servers
             $scope.setServers = function(){
@@ -237,14 +249,17 @@ angular.module("sampleApp")
                                 console.log(lst);
                                 $scope.valueSetOptions = lst;
 
+                                if (lst) {
+                                    lst.sort(function(a,b){
+                                        if (a.display > b.display) {
+                                            return 1
+                                        } else {
+                                            return -1;
+                                        }
+                                    })
+                                }
 
-                                lst.sort(function(a,b){
-                                    if (a.display > b.display) {
-                                        return 1
-                                    } else {
-                                        return -1;
-                                    }
-                                })
+
 
 
                             },
@@ -353,19 +368,7 @@ angular.module("sampleApp")
             }
 
 
-/*
-            logicalModelSvc.resolveProfile('http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/renePatient').then(
-                function(sd) {
 
-                }
-            )
-            function importFromProfile() {
-                
-                //http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/renePatient
-                
-
-            }
-            */
             
             $scope.hideLMSelector = function(){
                 $scope.leftPaneClass = "hidden"
@@ -962,8 +965,15 @@ angular.module("sampleApp")
                                 $scope.SD = SD;
                                 $scope.input.name = SD.name;
                                 $scope.input.purpose = SD.purpose;
+
+                                //get the baseType (if any)
+                                var ext = Utilities.getSingleExtensionValue(SD, appConfigSvc.config().standardExtensionUrl.baseTypeForModel)
+                                if (ext && ext.valueString) {
+                                    $scope.baseType = ext.valueString
+                                }
                                
                                 $scope.input.title = SD.title;
+                                $scope.input.publisher = SD.publisher;
                                 $scope.canSave = true;
                                 $scope.isNew = false;
 
@@ -977,7 +987,7 @@ angular.module("sampleApp")
                                         if (item.code == ucCode) {
                                             input.type = item;
                                         }
-                                    })
+                                    });
                                     //
                                 }
                             } else {
@@ -985,7 +995,6 @@ angular.module("sampleApp")
                                 
                             }
 
-                            
                             $scope.checkName = function() {
                                 if ($scope.input.name) {
                                     var name = $scope.input.name;
@@ -997,8 +1006,7 @@ angular.module("sampleApp")
                                     $scope.input.name = name.charAt(0).toUpperCase()+name.substr(1);
                                 }
 
-
-                            }
+                            };
 
                             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
                             
@@ -1041,14 +1049,15 @@ angular.module("sampleApp")
                                 vo.modelType = $scope.input.modelType;
                                 vo.name = $scope.input.name;
                                 vo.title = $scope.input.title;
-                                vo.purpose = $scope.input.purpose || $scope.input.name ; //'purpose';
+                                vo.publisher = $scope.input.publisher;
+                                vo.purpose = $scope.input.purpose || $scope.input.name ;
                                 vo.SD = $scope.SD;
                                 if ($scope.input.baseType) {
                                     vo.baseType = $scope.input.baseType.name;       //if a base type was selected
                                 }
 
+                                vo.baseType = $scope.baseType;
                                 vo.mapping = $scope.input.mapping;
-                               // vo.type = $scope.input.type.code;
                                 vo.createElementsFromBase = $scope.input.createElementsFromBase;
                                 vo.useV2ForCreateElementsFromBase = $scope.input.useV2ForCreateElementsFromBase;
 
@@ -1281,62 +1290,7 @@ angular.module("sampleApp")
                     selectEntry(entry)
                 }
 
-                function selectEntryDEP(entry) {
-                    delete $scope.modelHistory;
-                    delete $scope.selectedNode;
-                    $scope.isDirty = false;
-                    $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
-                    console.log($scope.treeData)
-                    $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
-                    drawTree();
-                    makeSD();
-                    $scope.currentType = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
-                    loadHistory($scope.rootName);
 
-                    /*
-                    var refChat = firebase.database().ref().child("chat").child($scope.rootName);
-                    refChat.on('value', function(snapshot) {
-                        console.log(snapshot.val());
-                        var data = snapshot.val();
-                        if (! data) {
-                            //this will be the first chat for this model. Create the base..
-                            var key = $scope.rootName;      //the key for this particular models chat in the database
-                            var conv = {path : key,user: {email:'a@b'},children:[]}
-                            var update = {};
-                            update[key] = conv;
-
-                            firebase.database().ref().child("chat").update(update)
-
-                            $scope.input.newCommentboxInx = -1;
-                            $scope.input.modelChatData = conv;      //the format for storage
-                            $scope.input.modelChat = logicalModelSvc.generateChatDisplay(conv); //the format for display
-
-                        } else {
-                            $scope.input.newCommentboxInx = -1;
-                            $scope.input.modelChatData = data;
-                            $scope.input.modelChat = logicalModelSvc.generateChatDisplay(data);
-                        }
-
-                    });
-
-                    console.log(refChat);
-
-                    */
-
-                    /*
-                    logicalModelSvc.getModelHistory($scope.rootName).then(
-                        function(data){
-                            console.log(data.data)
-                            $scope.modelHistory = data.data;
-                        },
-                        function(err) {
-                            alert(angular.toJson(err))
-                        }
-                    )
-                    */
-
-
-                }
 
             };
 
@@ -1414,96 +1368,8 @@ angular.module("sampleApp")
                 checkForComments(entry.resource);
 
                 getAllComments();
-
                 checkInPalette();
-                /*
-                GetDataFromServer.getOutputsForModel($scope.currentSD).then(
-                    function(lst) {
-                        console.log(lst)
-                        $scope.allComments = lst;
-                    }, function (err) {
 
-                    }
-                )
-                */
-
-
-/*
-                //if there's a practitioner (ie a logged in user) then see if there is an active task to comment on this model
-                if ($scope.Practitioner) {
-                    var options = {active:true,focus:entry.resource}
-                    GetDataFromServer.getTasksForPractitioner($scope.Practitioner,options).then(
-                        function(listTasks) {
-                            console.log(listTasks)
-                            if (listTasks.length > 0) {
-                                $scope.commentTask = listTasks[0];  //should only be 1 active task for this practitioner for this model
-
-                                //now get any 'output' resources that exist for this task. Will only be Communications...
-                                GetDataFromServer.getOutputsForTask($scope.commentTask,'Communication').then(
-                                    function(lst){
-                                        $scope.taskOutputs = lst;
-                                        console.log(lst)
-
-                                        if (lst.length > 0 && lst[0].payload) {
-                                            //if there is at least 1 communication - set the text...
-                                            //todo - this only supports a single comment per practitioner....
-                                            $scope.input.mdComment = lst[0].payload[0].contentString;
-                                        }
-
-                                    },
-                                    function(err) {
-                                        alert('Error getting task outputs: '+angular.toJson(err))
-                                    }
-                                )
-
-                            }
-                        }
-
-                    )
-                }
-                */
-
-/*
-                var refChat = firebase.database().ref().child("chat").child($scope.rootName);
-                refChat.on('value', function(snapshot) {
-                    //console.log(snapshot.val());
-                    var data = snapshot.val();
-                    if (! data) {
-                        //this will be the first chat for this model. Create the base..
-                        var key = $scope.rootName;      //the key for this particular models chat in the database
-                        var conv = {path : key,user: {email:'a@b'},children:[]}
-                        var update = {};
-                        update[key] = conv;
-
-                        firebase.database().ref().child("chat").update(update)
-
-                        $scope.input.newCommentboxInx = -1;
-                        $scope.input.modelChatData = conv;      //the format for storage
-                        $scope.input.modelChat = logicalModelSvc.generateChatDisplay(conv); //the format for display
-
-                    } else {
-                        $scope.input.newCommentboxInx = -1;
-                        $scope.input.modelChatData = data;
-                        $scope.input.modelChat = logicalModelSvc.generateChatDisplay(data);
-                    }
-
-                });
-
-*/
-
-                //console.log(refChat);
-
-                /*
-                 logicalModelSvc.getModelHistory($scope.rootName).then(
-                 function(data){
-                 console.log(data.data)
-                 $scope.modelHistory = data.data;
-                 },
-                 function(err) {
-                 alert(angular.toJson(err))
-                 }
-                 )
-                 */
 
 
             }
@@ -1751,6 +1617,105 @@ angular.module("sampleApp")
 
                         }
 
+
+
+                        $scope.selectExistingExtension = function(){
+
+                            $uibModal.open({
+
+                                templateUrl: 'modalTemplates/searchForExtension.html',
+                                size:'lg',
+                                controller: function($scope,resourceType,GetDataFromServer,appConfigSvc,Utilities,resourceType){
+                                    $scope.resourceType = resourceType;
+                                    var conformanceSvr = appConfigSvc.getCurrentConformanceServer();
+                                    var qry = conformanceSvr.url + "StructureDefinition?";
+
+                                    qry += 'type=Extension';
+
+                                    $scope.qry = qry;
+
+
+                                    $scope.conformanceServerUrl = conformanceSvr.url;
+                                    $scope.showWaiting = true;
+                                    GetDataFromServer.adHocFHIRQueryFollowingPaging(qry).then(
+
+                                        function(data) {
+                                            //filter out the ones not for this resource type. Not sure if this can be done server side...
+                                            $scope.bundle = {entry:[]}
+                                            if (data.data && data.data.entry) {
+                                                data.data.entry.forEach(function(entry){
+                                                    var include = false;
+                                                    if (entry.resource) {
+                                                        if (! entry.resource.context) {
+                                                            include = true;
+                                                        } else  {
+                                                            entry.resource.context.forEach(function(ctx){
+                                                                if (ctx == '*' || ctx == 'Element' ||  ctx.indexOf(resourceType) > -1) {
+                                                                    include = true;
+                                                                }
+                                                            })
+                                                        }
+                                                    }
+
+
+                                                    if (include) {
+                                                        $scope.bundle.entry.push(entry)
+                                                    }
+
+                                                })
+                                            }
+
+                                            $scope.bundle.entry.sort(function(a,b){
+                                                if (a.resource && b.resource) {
+                                                    if (a.resource.name > b.resource.name) {
+                                                        return 1
+                                                    } else {
+                                                        return -1;
+                                                    }
+                                                } else {
+                                                    return 0
+                                                }
+
+                                            });
+
+                                            //$scope.bundle = data.data;
+                                            console.log($scope.bundle);
+                                        }
+                                    ).finally(function(){
+                                        $scope.showWaiting = false;
+                                    });
+
+                                    $scope.selectExtension = function(ent) {
+                                        $scope.selectedExtension = ent.resource
+                                        $scope.analyse = Utilities.analyseExtensionDefinition3($scope.selectedExtension)
+                                    }
+
+                                },
+                                resolve : {
+                                    resourceType: function () {          //the default config
+
+                                        var resourceType;
+                                        var ext = Utilities.getSingleExtensionValue($scope.SD, appConfigSvc.config().standardExtensionUrl.baseTypeForModel)
+                                        if (ext && ext.valueString) {
+                                            resourceType = ext.valueString
+                                        }
+
+
+                                        return resourceType;
+                                    }
+                                }
+                            }).result.then(
+                                function(extensionDef) {
+                                    //an extension definition was selected
+                                    console.log(extensionDef);
+                                    if (extensionDef && extensionDef.url) {
+                                        $scope.input.fhirMappingExtensionUrl = extensionDef.url;
+                                    }
+
+                                }
+                            );
+
+                        };
 
 
                         $scope.checkName = function(){
@@ -2141,11 +2106,9 @@ angular.module("sampleApp")
 
                 //sorts the tree array in parent/child order
                 var ar = logicalModelSvc.reOrderTree($scope.treeData);
-
-                //$scope.SD = logicalModelSvc.makeSD($scope,$scope.treeData);
                 $scope.SD = logicalModelSvc.makeSD($scope,ar);
 
-               // logicalModelSvc.makeReferencedMapsModel($scope.SD);   //todo - may not be the right place...
+
                 
                 createGraphOfProfile();     //update the graph display...
                 checkDifferences($scope.SD)

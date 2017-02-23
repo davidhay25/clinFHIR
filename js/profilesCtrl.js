@@ -99,7 +99,7 @@ angular.module("sampleApp")
                     closeButtonText: "No, don't Delete",
                     actionButtonText: 'Yes please',
                     headerText: 'Delete ' + $scope.selectedProfile.name,
-                    bodyText: 'Are you sure you want to delete this Extension Definition? (It MUST NEVER have been used in a resource instance)'
+                    bodyText: 'Are you sure you want to delete this Profile'
                 };
                 modalService.showModal({}, modalOptions).then(
                     function(){

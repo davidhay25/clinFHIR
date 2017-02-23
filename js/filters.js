@@ -239,10 +239,13 @@ angular.module("sampleApp")
     }).filter('containerMeta',function(){
     //return the metadata in the container
     return function(container) {
-        var t = angular.copy(container)
-        delete t.bundle;        //the bundle of resources
-        delete t.resources;     //an array added when viewing the scenario in the library
-        return t;
+        if (container) {
+            var t = angular.copy(container)
+            delete t.bundle;        //the bundle of resources
+            delete t.resources;     //an array added when viewing the scenario in the library
+            return t;
+        }
+
     }
 })
 

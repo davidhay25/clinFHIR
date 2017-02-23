@@ -50,6 +50,7 @@
                 <div class="col-md-5 col-sm-5 col-xs-5">
 
                     <select class="form-control" ng-model="input.searchParam">
+                        <option value="url">Url</option>
                         <option value="publisher">Publisher</option>
                         <option value="name">Name</option>
                         <option value="description">Description</option>
@@ -61,8 +62,12 @@
                 </div>
                 <div class="col-md-6 col-sm-6 col-xs-6">
 
-                    <input ng-hide="input.searchParam=='resource' || input.searchParam=='identifier'"
+
+
+
+                    <input ng-hide="input.searchParam=='resource' || input.searchParam=='identifier'|| input.searchParam=='url'"
                            class="form-control" type="text" placeholder="Publisher" ng-model="input.param">
+
 
                     <select ng-show="input.searchParam=='resource'" class="form-control" ng-model="input.resourceType"
 
@@ -94,9 +99,16 @@
                         <i class="glyphicon glyphicon-search" ></i></a>
                 </div>
             </div>
+            <div class="row" style="margin-bottom: 8px">
+                <div class="col-md-12 col-sm-12">
+                    <input ng-show="input.searchParam=='url'"
+                           class="form-control" type="text" placeholder="Url" ng-model="input.param">
+                </div>
+            </div>
+
 
             <div class="row" style="margin-bottom: 8px">
-                <div class="col-md-5 col-sm-5 col-xs-5">
+                <div class="col-md-5 col-sm-5 col-xs-5" ng-hide="input.searchParam=='url' ">
                     <select class="form-control" ng-model="input.searchStatus">
                         <option value="draft">Draft</option>
                         <option value="active">Active</option>
@@ -108,7 +120,8 @@
 
 
                     <a class="pull-right" ng-show="extensionsArray" download="{{downloadLinkJsonName}}.json"
-                       href="{{downloadLinkJsonContent}}"> <span class="badge"> {{extensionsArray.length}}</span> <i class="glyphicon glyphicon-cloud-download" ></i>
+                       href="{{downloadLinkJsonContent}}"> <span class="badge"> {{extensionsArray.length}}</span>
+                        <i class="glyphicon glyphicon-cloud-download" ></i>
                     </a>
                 </div>
 

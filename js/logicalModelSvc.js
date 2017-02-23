@@ -3,7 +3,7 @@ angular.module("sampleApp")
     //also holds the current patient and all their resources...
     //note that the current profile is maintained by resourceCreatorSvc
 
-    .service('logicalModelSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities) {
+    .service('logicalModelSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities,SaveDataToServer) {
 
         var currentUser;
         var elementsToIgnore =['id','meta','implicitRules','language','text','contained','extension','modifierExtension'];
@@ -112,6 +112,157 @@ angular.module("sampleApp")
 
 
         return {
+
+            generateFHIRProfile : function(internalLM) {
+                //generate a real FHIR profile from the logical model
+                var deferred = $q.defer();
+
+                console.log(internalLM);
+                var realProfile = angular.copy(internalLM);      //the profile that we will build...
+                realProfile.snapshot = {element:[]};            //get rid of the current element defintiions...
+                realProfile.id = realProfile.id+'-cf-profile';   //construct an id
+                realProfile.url = realProfile.url+'-cf-profile';   //and a url...
+                realProfile.kind = 'resource';
+
+
+                delete realProfile.extension;                   //and the extensions
+
+                //get the base type for the model.
+                var baseType;
+                var ext = Utilities.getSingleExtensionValue(internalLM, appConfigSvc.config().standardExtensionUrl.baseTypeForModel)
+                if (ext && ext.valueString) {
+                    baseType = ext.valueString
+                } else {
+                   // alert('No base type')
+                    deferred.reject('No base type. A profile cannot be generated.');
+                   // return;
+                }
+
+                //retrieve the base profile. We'll use that to ensure that the mappings are valid...
+               // var url = appConfigSvc.getCurrentConformanceServer().url + baseType;
+                var url = "http://hl7.org/fhir/StructureDefinition/"+ baseType;
+                realProfile.baseDefinition = url;
+
+                GetDataFromServer.findConformanceResourceByUri(url).then(
+                    function (SD) {
+                        if (SD && SD.snapshot && SD.snapshot.element) {
+                            makeFHIRProfile(SD);    //just to avoid hard to read nesting..
+                        } else {
+                            deferred.reject('Base profile (' + url + ') has no snapshot!');
+                        }
+
+                    },
+                    function(err) {
+                        deferred.reject('Base profile (' + url + ') not found');
+
+
+                    }
+                );
+
+                return deferred.promise;
+
+
+                function makeFHIRProfile(SD) {
+                    //create a hash of all the paths in the base resource type...
+                    var pathHash = {};
+                    SD.snapshot.element.forEach(function(ed){
+                        pathHash[ed.path] = ed;
+                    });
+
+                    var err = []
+
+                    //now work through the model. if there's no mapping, then an error. If an extension then insert the url...
+                    internalLM.snapshot.element.forEach(function(ed,inx){
+                        var newED = ed;
+
+                        if (inx == 0) {
+                            //this is the root element
+                            newED.path = baseType;
+                        } else {
+                            //get the path mapping for this element
+                            //var mappedPath;
+                            if (ed.mapping) {
+                                ed.mapping.forEach(function (map) {
+                                    if (map.identity=='fhir') {
+                                        // mappedPath = map;
+                                        newED.path = map.map
+                                    }
+                                })
+                            }
+                        }
+
+
+
+/*
+                        var path = ed.path;
+                        var ar = path.split('.');
+                        ar[0] = baseType;
+                        newED.path = ar.join('.')
+*/
+
+                        console.log(newED.path)
+
+                        //if this is an extension then we need to insert the url to the extension...
+                        if (newED.path.indexOf('extension') == -1) {
+
+                            if (!pathHash[newED.path]) {
+                                err.push("Path: "+newED.path + " is not valid for this resource type")
+                            } else {
+                                realProfile.snapshot.element.push(newED)
+                            }
+                        } else {
+                            //this is an extension...
+
+                            var ext = Utilities.getSingleExtensionValue(newED, appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl)
+                            if (ext && ext.valueString) {
+                                extensionUrl = ext.valueString;
+                                //need to set the type of the element to 'Extension' (In the LM it is the datatype)
+                                newED.type = {code:'Extension',profile:extensionUrl}
+                                realProfile.snapshot.element.push(newED)
+
+
+                            } else {
+                                err.push("Path: "+newED.path + " is an extension, but there is no extension url given")
+                            }
+
+
+                        }
+
+
+
+                    })
+
+                    if (err.length > 0) {
+                        var msg = err.join(' ');
+                        deferred.reject(msg);
+                    } else {
+
+                        //write out
+
+                        SaveDataToServer.saveResource(realProfile,appConfigSvc.getCurrentConformanceServer().url).then(
+                            function(data) {
+                                deferred.resolve(realProfile)
+                            },function (err) {
+                                deferred.reject(angular.toJson(err));
+                            }
+                        )
+
+                    }
+
+
+
+
+
+                }
+
+
+
+
+
+
+
+
+            },
 
             makeReferencedMapsModel: function (SD, bundle) {
                 //builds the model that has all the models referenced by the indicated SD, recursively...
@@ -712,8 +863,8 @@ angular.module("sampleApp")
                             //the name of the next 2 elements changed after baltimore, so look in both places until the other stu3 servrs catch up...
                             item.data.header.purpose = sd.purpose || sd.requirements;
                             item.data.header.title = sd.title || sd.display;
-
-                            item.data.header.extension = sd.extension     //save any resource level extensions...
+                            item.data.header.publisher = sd.publisher;
+                            item.data.header.extension = sd.extension;     //save any resource level extensions...
 
                             //see if this model has a base type
                             var ext1 = Utilities.getSingleExtensionValue(sd, baseTypeForModel)
@@ -897,6 +1048,7 @@ angular.module("sampleApp")
 
 
 
+
                 if (header.baseType) {
                     Utilities.addExtensionOnce(sd, baseTypeForModelUrl, {valueString: header.baseType})
                     // this.addSimpleExtension(sd,baseTypeForModel,header.baseType)
@@ -907,6 +1059,7 @@ angular.module("sampleApp")
                 sd.url = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/" + sd.id;
                 sd.name = header.name;
                 sd.title = header.title;
+                sd.publisher = header.publisher;
                 sd.status = 'draft';
                 sd.date = moment().format();
 
@@ -916,7 +1069,7 @@ angular.module("sampleApp")
                 sd.purpose = header.purpose;
                 sd.description = header.description;
 
-                sd.publisher = scope.input.publisher;
+                //sd.publisher = scope.input.publisher;
                 //at the time of writing (Oct 12), the implementaton of stu3 varies wrt 'code' & 'keyword'. Remove this eventually...
                 sd.identifier = [{system: "http://clinfhir.com", value: "author"}]
                 sd.keyword = [{system: 'http://fhir.hl7.org.nz/NamingSystem/application', code: 'clinfhir'}]

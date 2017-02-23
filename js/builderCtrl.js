@@ -461,7 +461,13 @@ angular.module("sampleApp")
 
                         $scope.canSave = true;
                         $scope.categories = categories;
-                        $scope.category = categories.concept[0];
+                        if (categories && categories.concept) {
+                            $scope.category = categories.concept[0];
+                        } else {
+                            $scope.category = {code:'default',display:'Default',definition:'Default'}
+
+                        }
+
                         $scope.server = appConfigSvc.getCurrentDataServer();
                         $scope.checkName = function(){
                             if ($scope.name) {
@@ -1647,13 +1653,21 @@ angular.module("sampleApp")
             };
 
             $scope.selectedProfileFromDialog = function (profile) {
-                //console.log(profile)
+
+                //return;
+
+                console.log(profile)
                 builderSvc.makeLogicalModelFromSD(profile).then(
                     function (lm) {
                         console.log(lm);
                         selectLogicalModal(lm,profile.url)
 
 
+                    },
+                    function(vo) {
+                        console.log(vo);
+                        //if cannot locate an extension. returns the error and the incomplete LM
+                        selectLogicalModal(vo.lm,profile.url)
                     }
                 )
 
