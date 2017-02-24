@@ -70,6 +70,7 @@
     <script src="js/libs/vis.min.js"></script>
     <script src="js/loginCtrl.js"></script>
     <script src="js/fileCopyCtrl.js"></script>
+    <script src="js/newExtensionDefinition.js"></script>
     <script src="resourceBuilder/vsBrowser.js"></script>
     <script src="js/modellerFilters.js"></script>
     <script src="js/igSvc.js"></script>
@@ -175,10 +176,11 @@
 
 
                     </form>
-
+<!--
                     <form ng-hide="currentSD && !loadedFromBookmark" class="navbar-form">
                         <button class="btn btn-warning pull-right" ng-click="findProfile()">Import</button>
                     </form>
+                    -->
 
                 </div>
 
@@ -603,6 +605,12 @@
                                     </td>
                                 </tr>
 
+                                <tr ng-show="selectedNode.data.fhirMappingExtensionUrl"><td>Extension Url</td>
+                                    <td>
+                                        <a href="#" ng-click="editExtension()">{{selectedNode.data.fhirMappingExtensionUrl}}</a>
+                                    </td>
+                                </tr>
+
 <!--
                                 <tr ng-show="selectedNode.data.referenceUri| getLogicalID">
                                     <td>Map to Model</td>
@@ -999,11 +1007,14 @@
 
         <!-- a directive that allows a profile to be selected - not just a base one... -->
         <!---->
+        <!--
         <select-profile trigger="showFindProfileDialog"
                         all-resource-types="allResourceTypes"
                         profile-selected="selectedProfileFromDialog" type="'profile'">
 
         </select-profile>
+
+        -->
 
 
          <vs-browser trigger="showVSBrowserDialog" hidesearch="true"

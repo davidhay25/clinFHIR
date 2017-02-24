@@ -355,7 +355,9 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                             //there should always be a name  - but just in case there isn't, grab the profile name...
                             if (text == 'extension') {
-                                if (item.name) {
+                                if (item.short) {
+                                    text = item.short;
+                                } else if (item.name) {
                                     text = item.name;
                                 } else if (item.type) {
                                     //this is a hack as the name element isn't in the Element Definition on the profile.

@@ -19,15 +19,15 @@ angular.module("sampleApp")
             GetDataFromServer.registerAccess('logical');
 
             //for selecting a profile to import
-            $scope.showFindProfileDialog = {};
+           // $scope.showFindProfileDialog = {};
             //all the base types for the selection...
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(data){
                     $scope.allResourceTypes = data;
                 });
 
-            $scope.findProfile = function() {
-                $scope.showFindProfileDialog.open();
+            $scope.findProfileDEP = function() {
+                //$scope.showFindProfileDialog.open();
             };
             
 
@@ -108,8 +108,6 @@ angular.module("sampleApp")
             };
 
             $scope.showCommentEntryDEP = function(comment,index) {
-                //console.log(comment,levelKey)
-
 
 
                 return ((comment.levelKey == $scope.currentLevelKey) || comment.level==1);
@@ -1483,6 +1481,38 @@ angular.module("sampleApp")
                 drawTree();
             };
 
+
+            $scope.editExtension = function () {
+                var extensionUrl = $scope.selectedNode.data.fhirMappingExtensionUrl;
+                console.log(extensionUrl)
+                GetDataFromServer.findConformanceResourceByUri(extensionUrl).then(
+                    function(resource) {
+                        $uibModal.open({
+                            templateUrl: 'modalTemplates/newExtension.html',
+                            size: 'lg',
+                            controller: "extensionDefCtrl",
+                            resolve : {
+                                currentExt: function () {          //the default extension
+                                    return resource;
+                                }
+                            }
+                        }).result.then(
+                            function(result) {
+
+                            })
+                    },
+                    function(err) {
+                        alert(angular.toJson(err))
+                    }
+                )
+
+
+
+
+            };
+
+
+
             $scope.addNode = function() {
                 var parentPath = $scope.selectedNode.data.path;
                 editNode(null,parentPath);         //will actually create a new node
@@ -1611,7 +1641,6 @@ angular.module("sampleApp")
                         }
 
 
-
                         $scope.selectExistingExtension = function(){
 
                             $uibModal.open({
@@ -1620,6 +1649,7 @@ angular.module("sampleApp")
                                 size:'lg',
                                 controller: function($scope,resourceType,GetDataFromServer,appConfigSvc,Utilities,resourceType){
                                     $scope.resourceType = resourceType;
+                                    //$scope.allDataTypes = allDataTypes;
                                     var conformanceSvr = appConfigSvc.getCurrentConformanceServer();
                                     var qry = conformanceSvr.url + "StructureDefinition?";
 
@@ -1681,7 +1711,29 @@ angular.module("sampleApp")
                                     $scope.selectExtension = function(ent) {
                                         $scope.selectedExtension = ent.resource
                                         $scope.analyse = Utilities.analyseExtensionDefinition3($scope.selectedExtension)
+                                        console.log($scope.analyse)
+
+                                        /*
+                                        //set the dataType
+                                        if ($scope.analyse && $scope.analyse.dataTypes && $scope.analyse.dataTypes.length > 0) {
+                                            //a simple element...
+                                            var dt = $scope.analyse.dataTypes[0].code; // the datatype as a string...
+                                            setDataType(dt);
+
+                                        }
+                                        */
+
                                     }
+/*
+                                    function setDataType(dtString) {
+                                        for (var i=0; i< $scope.allDataTypes.length; i++) {
+                                            if ($scope.allDataTypes[i].code == dtString) {
+                                                $scope.input.dataType = $scope.allDataTypes[i];
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    */
 
                                 },
                                 resolve : {
@@ -1689,6 +1741,9 @@ angular.module("sampleApp")
 
                                         return baseType;
 
+                                    },
+                                    allDataTypes : function(){
+                                        return $scope.allDataTypes;
                                     }
                                 }
                             }).result.then(
@@ -1697,6 +1752,25 @@ angular.module("sampleApp")
                                     console.log(extensionDef);
                                     if (extensionDef && extensionDef.url) {
                                         $scope.input.fhirMappingExtensionUrl = extensionDef.url;
+
+                                        var analyse = Utilities.analyseExtensionDefinition3(extensionDef)
+                                        if (analyse && analyse.dataTypes && analyse.dataTypes.length > 0) {
+                                            //a simple element...
+                                            var dt = analyse.dataTypes[0].code; // the datatype as a string...
+                                            setDataType(dt);
+
+                                        }
+
+
+                                        function setDataType(dtString) {
+                                            for (var i=0; i< $scope.allDataTypes.length; i++) {
+                                                if ($scope.allDataTypes[i].code == dtString) {
+                                                    $scope.input.dataType = $scope.allDataTypes[i];
+                                                    break;
+                                                }
+                                            }
+                                        }
+
                                     }
 
                                 }
@@ -1717,7 +1791,12 @@ angular.module("sampleApp")
                             if (duplicateNode) {
                                 $scope.canSave = false;
                                    modalService.showModal({},{bodyText:"This name is a duplicate of another and cannot be used. Try again."})
-                                } 
+                                }
+
+                            if ($scope.canSave) {
+                                //set the short element to the same as the name
+                                $scope.input.short = $scope.input.name;
+                            }
                         };
 
                         $scope.save = function() {

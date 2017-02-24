@@ -133,7 +133,7 @@ angular.module("sampleApp")
                 if (ext && ext.valueString) {
                     baseType = ext.valueString
                 } else {
-                   // alert('No base type')
+
                     deferred.reject('No base type. A profile cannot be generated.');
                    // return;
                 }
@@ -1112,6 +1112,7 @@ angular.module("sampleApp")
                     if (data.fhirMappingExtensionUrl) {
                         Utilities.addExtensionOnce(ed, simpleExtensionUrl, {valueString: data.fhirMappingExtensionUrl})
                     }
+
 
                     ed.id = data.path;
                     ed.path = data.path;

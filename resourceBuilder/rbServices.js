@@ -593,7 +593,8 @@ angular.module("sampleApp").
             typeOfConformanceResource = typeOfConformanceResource || 'StructureDefinition';
 
             //default to the conformance server...
-            serverUrl = serverUrl || config.servers.conformance;
+            //serverUrl = serverUrl || config.servers.conformance;
+            serverUrl = serverUrl || appConfigSvc.getCurrentConformanceServer().url;
 
             var qry = serverUrl  + typeOfConformanceResource + "?url=" + url;
 

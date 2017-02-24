@@ -91,11 +91,8 @@ angular.module("sampleApp")
 
                                 $scope.search();
 
-                               // $scope.extensionsArray.splice($scope.index,1);
                                 delete $scope.selectedExtension;
                                 delete $scope.index;
-
-
                             },
                             function(err) {
                                 alert('Error updating definition: '+angular.toJson(err))
@@ -106,7 +103,6 @@ angular.module("sampleApp")
             };
 
             $scope.editExtension = function () {
-
                 $uibModal.open({
                     templateUrl: 'modalTemplates/newExtension.html',
                     size: 'lg',
@@ -119,7 +115,7 @@ angular.module("sampleApp")
                 }).result.then(
                     function(result) {
                         $scope.search();
-                    })
+                    });
 
                 ///modalService.showModal({}, {bodyText : "Sorry, editing is not yet enabled"})
             };
