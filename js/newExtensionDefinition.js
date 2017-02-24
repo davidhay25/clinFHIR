@@ -25,7 +25,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
                 var analysis = Utilities.analyseExtensionDefinition3(currentExt);
                 if (analysis.isComplexExtension) {
-                    alert('Editing of complex extensions noy yet supported')
+                    alert('Editing of complex extensions not yet supported')
                     $scope.canSaveEd = false;
 
                 } else {
@@ -77,8 +77,12 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                         if (profile && profile.snapshot && profile.snapshot.element) {
                             profile.snapshot.element.forEach(function(ed){
                                 var path = ed.path;
+                                var ar = path.split('.')
+                                if (['id','meta','implicitRules','language','contained','extension','modifierExtension'].indexOf(ar[ar.length-1]) == -1){
+                                    $scope.paths.push(path);
+                                }
 
-                                $scope.paths.push(path);
+
 
                             })
                         }
@@ -397,17 +401,18 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 if (fhirVersion == 2) {
                     extensionDefinition.kind='datatype';
                     extensionDefinition.constrainedType = 'Extension';      //was set to 'kind' which is the search name!
-                    extensionDefinition.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
+                   // extensionDefinition.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
                     extensionDefinition.base = 'http://hl7.org/fhir/StructureDefinition/Extension';
                 } else if (fhirVersion ==3) {
                     extensionDefinition.kind='complex-type';
                     extensionDefinition.type='Extension';
-                    //extensionDefinition.baseType = 'Extension';
+
                     extensionDefinition.baseDefinition = 'http://hl7.org/fhir/StructureDefinition/Extension';
                     extensionDefinition.derivation = 'constraint';
-                    extensionDefinition.contextType = "resource";// "datatype";
-                    extensionDefinition.context=["Element"];
-                    extensionDefinition.keyword = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
+
+                   // extensionDefinition.contextType = "resource";// "datatype";
+                   // extensionDefinition.context=["Element"];
+                   // extensionDefinition.keyword = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
                 }
 
                 var min,max;
@@ -470,7 +475,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
 
 
-                if (fhirVersion ==3 && extensionDefinition.snapshot && extensionDefinition.snapshot.element
+                if (fhirVersion == 3 && extensionDefinition.snapshot && extensionDefinition.snapshot.element
                     && extensionDefinition.snapshot.element.length > 0) {
                     delete extensionDefinition.snapshot.element[0].type;
                 }
