@@ -1754,11 +1754,13 @@ angular.module("sampleApp")
                                         $scope.input.fhirMappingExtensionUrl = extensionDef.url;
 
                                         var analyse = Utilities.analyseExtensionDefinition3(extensionDef)
-                                        if (analyse && analyse.dataTypes && analyse.dataTypes.length > 0) {
+
+                                        if (analyse.isComplexExtension) {
+                                            setDataType('BackboneElement');
+                                        } else if (analyse && analyse.dataTypes && analyse.dataTypes.length > 0) {
                                             //a simple element...
                                             var dt = analyse.dataTypes[0].code; // the datatype as a string...
                                             setDataType(dt);
-
                                         }
 
 

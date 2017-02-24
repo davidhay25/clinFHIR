@@ -9,6 +9,12 @@
     <script src="js/libs/firebase.js"></script>
     <script src="js/libs/angularfire.min.js"></script>
 
+    <script src="js/libs/highstock.js"></script>
+    <script src="js/libs/highcharts-ng.min.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
 
     <title>clinFHIR Launcher</title>
@@ -39,12 +45,14 @@
     <script>
 
 
-        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase','highcharts-ng']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
             $locationProvider.hashPrefix('!');
         });
+
+        angular.module("sampleApp").constant("moment", moment);
 
 
     </script>
@@ -72,6 +80,10 @@
     <script src="js/logicalModelSvc.js"></script>
     <script src="js/loginCtrl.js"></script>
 
+    <script src="js/filters.js"></script>
+
+
+
 </head>
 <body style="padding: 8px;padding-top: 80px">
 
@@ -79,10 +91,9 @@
 <div ng-app="sampleApp" ng-controller="launcherCtrl" class="container-fluid" ng-cloak>
 
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-        <div class="col-md-9 col-sm-9">
+        <div class="col-md-8 col-sm-8">
             <a class="navbar-brand" href="#">clinFHIR Launcher</a>
         </div>
-
 
         <div class="col-md-2 col-sm-2">
             <div class="navbar-text pull-right">
@@ -90,6 +101,7 @@
             </div>
 
         </div>
+
 
         <div class="col-md-1 col-sm-1">
             <!--
@@ -125,6 +137,44 @@
 
         </div>
 
+
+
+
+        <div class="col-md-1 col-sm-1">
+            <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
+                <li uib-dropdown>
+
+                    <a href="#" uib-dropdown-toggle>
+                                        <span style="font-size:2em; cursor: pointer">
+                                            <i class="glyphicon glyphicon-cog"></i>
+                                        </span>
+                    </a>
+
+
+
+                    <ul class="dropdown-menu" role="menu">
+
+
+                        <li>
+                            <a href="#" ng-click="showChart()" ng-hide="displayMode=='access'"
+                               uib-popover="Show how many people are using clinFHIR"
+                               popover-placement="left"
+                               popover-trigger="'mouseenter'">Access statistics</a>
+                        </li>
+
+                        <li>
+                            <a href="#" ng-click="displayMode = 'front'" ng-hide="displayMode=='front'"
+                               uib-popover="Show the main Launcher screen"
+                               popover-placement="left"
+                               popover-trigger="'mouseenter'">Launcher</a>
+                        </li>
+
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+
     </nav>
 
     <!--
@@ -132,7 +182,7 @@
 open the module in a new browser tab. Multiple copies of a module can be open at the same time, though this can cause confusion
 so is discouraged.</p>
 -->
-    <div class="row">
+    <div class="row"  ng-show="displayMode == 'front'">
         <div class="col-md-8 col-sm-8">
 
 
@@ -239,19 +289,6 @@ so is discouraged.</p>
             </div>
 
 
-
-            <!--
-            <uib-tabset>
-                <uib-tab heading="clinFHIR modules">
-                    <br/>
-
-                </uib-tab>
-                <uib-tab heading="IG Process">
-                    <br/>
-                    errwerwe
-                </uib-tab>
-            </uib-tabset>
-            -->
         </div>
         <div class="col-md-4 col-sm-4">
 
@@ -491,6 +528,36 @@ so is discouraged.</p>
 
 
         </div>
+    </div>
+
+
+
+
+    <div ng-show="displayMode == 'access'">
+        <div>
+            Last access from {{accessAudit.lastAccess.location['country_name']}} on
+            {{accessAudit.lastAccess.date | date:'yyyy-MM-dd HH:mm'}} ({{accessAudit.lastAccess.date | getAgeSeconds}} ago.)
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <div style="height: 200px; width: 100%">
+                    <highchart id='hcAccessAudit' config="accessAudit.accessDays"></highchart>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-4">
+                <div style="height:400px; overflow-y: auto;" >
+                    <table class="table table-bordered">
+                        <tr><th>Country</th><th>Count</th></tr>
+                        <tr ng-repeat="c in accessAudit.countryList">
+                            <td>{{c.name}}</td>
+                            <td>{{c.cnt}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 

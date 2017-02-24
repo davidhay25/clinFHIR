@@ -1,12 +1,13 @@
 
 angular.module("sampleApp")
     .controller('launcherCtrl',
-        function ($scope,modalService,$firebaseObject,GetDataFromServer,$uibModal,appConfigSvc,$interval,$http,logicalModelSvc) {
+        function ($scope,modalService,$firebaseObject,GetDataFromServer,$uibModal,appConfigSvc,$interval,$http,logicalModelSvc,$timeout) {
 
             GetDataFromServer.registerAccess('launcher');
 
             $scope.testing = {};
             $scope.showServers = false;
+            $scope.displayMode = 'front';
 
             if (appConfigSvc.checkConfigVersion()) {
                 var txt = 'The default configuration has been updated (including the patient data and conformance server). Please re-load the page for it to take effect.';
@@ -69,6 +70,35 @@ angular.module("sampleApp")
                 });
 
             };
+
+
+            //data for the chart
+            GetDataFromServer.getAccessAudit().then(
+                function(log){
+                    $scope.accessAudit = log;
+                    //console.log(log)
+
+
+                },
+                function(err) {
+
+                }
+            );
+            $scope.showChart = function() {
+                if ($scope.displayMode == 'access') {
+                    $scope.displayMode = 'front'
+                } else {
+                    $scope.displayMode = 'access';
+                    //otherwise the chart is not full screen
+                    $timeout(function(){
+                        // $scope.accessAudit.tmp='s';
+                        $('#hcAccessAudit').highcharts().reflow();
+                    }, 0);
+
+
+                }
+            }
+
 
 
             $scope.testServer = function(type) {
