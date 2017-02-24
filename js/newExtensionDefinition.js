@@ -65,15 +65,50 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 $scope.input.publisher = $rootScope.userProfile.extDef.defaultPublisher;
             }
 
-            $scope.selectContext = function(context) {
-                console.log(context);
-                if ($scope.selectedResourceTypes.indexOf(context.name) == -1) {
-                    $scope.selectedResourceTypes.push(context.name)
 
-                    makeSD();
-                }
+            $scope.selectContextType = function(type) {
+                //get the paths for the given type...
+                delete $scope.paths;
+                var url = "http://hl7.org/fhir/StructureDefinition/"+type.name
+                console.log(url)
+                GetDataFromServer.findConformanceResourceByUri(url).then(
+                    function(profile) {
+                        $scope.paths = [];
+                        if (profile && profile.snapshot && profile.snapshot.element) {
+                            profile.snapshot.element.forEach(function(ed){
+                                var path = ed.path;
+
+                                $scope.paths.push(path);
+
+                            })
+                        }
+
+                    },
+                    function(err) {
+                        console.log(err)
+                    }
+                )
 
             };
+
+            $scope.selectContext = function(context) {
+                console.log(context);
+                if (context) {
+                    if ($scope.selectedResourceTypes.indexOf(context) == -1) {
+                        $scope.selectedResourceTypes.push(context)
+                        delete $scope.paths;
+                        delete $scope.input.type;
+                        makeSD();
+                    }
+                }
+
+
+
+            };
+
+
+
+
 
             $scope.removeResourceType = function(inx) {
                 $scope.selectedResourceTypes.splice(inx,1);
@@ -313,6 +348,9 @@ angular.module("sampleApp").controller('extensionDefCtrl',
             //build the StructueDefinition that describes this extension
             makeSD = function() {
                 var extensionDefinition = {resourceType:'StructureDefinition'};
+
+                Utilities.setAuthoredByClinFhir(extensionDefinition);      //adds the 'made by clinfhir' extension...
+
                 //the version of fhir that this SD is being deployed against...
                 var fhirVersion = $scope.conformanceSvr.version;        //get from the conformance server
                 var name = $scope.input.name;       //the name of the extension

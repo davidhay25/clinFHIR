@@ -491,7 +491,7 @@ angular.module("sampleApp").
             var deferred = $q.defer();
             var bundle = Utilities.perfromQueryFollowingPaging(url).then(
                 function(bundle) {
-                    bundle.length =
+                    bundle.total = bundle.entry.length;
                     deferred.resolve({data:bundle});
                 },function(err) {
                     deferred.reject(err)
@@ -1560,17 +1560,36 @@ console.log(summary);
            // }
 
         },
+        setAuthoredByClinFhir : function(resource) {
+            //set the extension that indicates that the resource is authored by clinFhir
+            if (resource) {
+                var extensionUrl = appConfigSvc.config().standardExtensionUrl.clinFHIRCreated;
+                this.addExtensionOnce(resource,extensionUrl,{valueBoolean:true})
+            }
+
+
+        },
         isAuthoredByClinFhir : function(profile) {
-            // Has this artifact been authored by clinfhir - there were a number of ways of reording thod.
+            // Has this artifact been authored by clinfhir - there were a number of ways of recording that.
 
             var isAuthoredByClinFhir = false;
-            if (profile.code) {
-                profile.code.forEach(function(coding){
-                    if (coding.system == 'http://fhir.hl7.org.nz/NamingSystem/application' &&
-                        coding.code == 'clinfhir') {
-                        isAuthoredByClinFhir = true;
-                    }
-                })
+
+
+            var ext = this.getSingleExtensionValue(profile, appConfigSvc.config().standardExtensionUrl.clinFHIRCreated)
+            if (ext && ext.valueBoolean) {
+                isAuthoredByClinFhir = ext.valueBoolean
+            }
+
+
+            if (!isAuthoredByClinFhir) {
+                if (profile.code) {
+                    profile.code.forEach(function (coding) {
+                        if (coding.system == 'http://fhir.hl7.org.nz/NamingSystem/application' &&
+                            coding.code == 'clinfhir') {
+                            isAuthoredByClinFhir = true;
+                        }
+                    })
+                }
             }
 
             if (!isAuthoredByClinFhir) {
@@ -1603,6 +1622,8 @@ console.log(summary);
             //Get all the resurces specified by a query, following any paging...
             //http://stackoverflow.com/questions/28549164/how-can-i-do-pagination-with-bluebird-promises
 
+            var returnBundle = {total:0,type:'searchset',link:[],entry:[]};
+            returnBundle.link.push({relation:'self',url:url})
 
             //add the count parameter
             if (url.indexOf('?') > -1) {
@@ -1614,11 +1635,11 @@ console.log(summary);
 
             var deferred = $q.defer();
 
-            limit = limit || 500;           //absolute max of 500
+            limit = limit || 100;
 
 
-            var returnBundle = {total:0,type:'searchset',link:[],entry:[]};
-            returnBundle.link.push({relation:'self',url:url})
+           // var returnBundle = {total:0,type:'searchset',link:[],entry:[]};
+            //returnBundle.link.push({relation:'self',url:url})
             getPage(url);
 
             //get a single page of data

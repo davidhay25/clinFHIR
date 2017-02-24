@@ -79,7 +79,7 @@ angular.module("sampleApp")
                 var modalOptions = {
                     closeButtonText: "No, don't Delete",
                     actionButtonText: 'Yes please',
-                    headerText: 'Activate ' + $scope.selectedExtension.name,
+                    headerText: 'Delete ' + $scope.selectedExtension.name + " (id= " + $scope.selectedExtension.id + ")",
                     bodyText: 'Are you sure you want to delete this Extension Definition? (It MUST NEVER have been used in a resource instance)'
                 };
                 modalService.showModal({}, modalOptions).then(
@@ -89,7 +89,9 @@ angular.module("sampleApp")
 
                                 modalService.showModal({}, {bodyText:'Definition is now deleted.'});
 
-                                $scope.extensionsArray.splice($scope.index,1);
+                                $scope.search();
+
+                               // $scope.extensionsArray.splice($scope.index,1);
                                 delete $scope.selectedExtension;
                                 delete $scope.index;
 

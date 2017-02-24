@@ -101,12 +101,15 @@
                                 </div>
 
 
-                                <select ng-change="selectContext(input.type)" ng-model="input.type" class="form-control"
+                                <select ng-change="selectContextType(input.type)" ng-model="input.type" class="form-control"
                                         style="margin-top: 8px"
                                         ng-options="type.name for type in allResourceTypes">
                                 </select>
 
-
+                                <select ng-show="paths" ng-change="selectContext(input.typePaths)" ng-model="input.typePaths" class="form-control"
+                                        style="margin-top: 8px"
+                                        ng-options="path for path in paths">
+                                </select>
 
 
                             </div>
