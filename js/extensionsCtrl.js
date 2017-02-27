@@ -2,7 +2,8 @@
 
 angular.module("sampleApp")
     .controller('extensionsCtrl',
-        function ($rootScope,$scope,GetDataFromServer,appConfigSvc,Utilities,$uibModal,RenderProfileSvc,SaveDataToServer,modalService,$timeout) {
+        function ($rootScope,$scope,GetDataFromServer,appConfigSvc,Utilities,$uibModal,RenderProfileSvc,
+                  SaveDataToServer,modalService,$timeout,securitySvc) {
 
             $scope.input = {param:'Orion',searchParam:'publisher',searchStatus:'all'};
 
@@ -25,6 +26,8 @@ angular.module("sampleApp")
 
             //------- for now - allow anyone to read/write extensions authored by cf
             //userProfile.extDef.permissions.canEdit
+
+
             $scope.userProfile = {extDef : {permissions:{}}};
             $scope.userProfile.extDef.permissions.canEdit = true;
             $scope.userProfile.extDef.permissions.canDelete = true;
@@ -33,15 +36,31 @@ angular.module("sampleApp")
 
 
 
+            firebase.auth().onAuthStateChanged(function(user) {
+                delete $scope.input.mdComment;
+
+                if (user) {
+                    console.log(user)
+                    //$rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+                    securitySvc.setCurrentUser(user);
+                }
+            });
+
+
+            //this.addSimpleExtension(sd, appConfigSvc.config().standardExtensionUrl.userEmail, currentUser.email)
+            /*
             $rootScope.$on('userLoggedIn',function(){
                 var userProfile = $rootScope.userProfile;
+
+
+                console.log(userProfile);
 
                 if (userProfile.extDef && userProfile.extDef.defaultPublisher) {
                     $scope.input = {param:userProfile.extDef.defaultPublisher,searchParam:'publisher',searchStatus:'all'};
 
                 }
             });
-
+*/
             $rootScope.$on('userLoggedOut',function() {
                 $scope.input = {param:'hl7',searchParam:'publisher',searchStatus:'all'};
             });

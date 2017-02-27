@@ -34,6 +34,9 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.docrefDescription = 'http://clinfhir.com/fhir/StructureDefinition/docrefDescription';
         defaultConfig.standardExtensionUrl.simpleExtensionUrl = 'http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl';
         defaultConfig.standardExtensionUrl.clinFHIRCreated = 'http://clinfhir.com/fhir/StructureDefinition/cfAuthor';
+        defaultConfig.standardExtensionUrl.userEmail = 'http:www.clinfhir.com/StructureDefinition/userEmail';
+
+
 
 
 

@@ -9,6 +9,9 @@
 
     <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
 
+    <script src="js/libs/firebase.js"></script>
+    <script src="js/libs/angularfire.min.js"></script>
+
     <script src="js/libs/moment.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
@@ -19,7 +22,7 @@
     <script src="js/libs/angular-sanitize.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage',"firebase"]).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -27,6 +30,21 @@
         });
         angular.module("sampleApp").constant("moment", moment);
 
+    </script>
+
+    <script>
+        var config = {
+            apiKey: "AIzaSyBNMohLbPiSKwpGwfARopdeW_6LLXujcUo",
+            authDomain: "clinfhir.firebaseapp.com",
+            databaseURL: "https://clinfhir.firebaseio.com",
+            storageBucket: ""
+        };
+
+        if (firebase) {
+            console.log('init')
+            firebase.initializeApp(config);
+
+        }
     </script>
 
     <script src="js/libs/ngStorage.min.js"></script>
@@ -40,6 +58,7 @@
     <script src="js/modalDialogSvc.js"></script>
     <script src="js/profileCreatorSvc.js"></script>
     <script src="js/resourceCreatorSvc.js"></script>
+    <script src="js/securitySvc.js"></script>
     <script src="resourceBuilder/rbServices.js"></script>
     <script src="js/resourceSvc.js"></script>
 

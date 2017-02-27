@@ -1043,7 +1043,7 @@ angular.module("sampleApp")
                 //todo - should use Utile.addExtension...
                 var sd = {resourceType: 'StructureDefinition'};
                 if (currentUser) {
-                    this.addSimpleExtension(sd, 'http:www.clinfhir.com/StructureDefinition/userEmail', currentUser.email)
+                    this.addSimpleExtension(sd, appConfigSvc.config().standardExtensionUrl.userEmail, currentUser.email)
                 }
 
 
