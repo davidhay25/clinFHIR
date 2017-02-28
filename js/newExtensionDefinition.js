@@ -1,7 +1,8 @@
 /*has been deprectde - don't call make function - expensive! */
 
 angular.module("sampleApp").controller('extensionDefCtrl',
-        function ($rootScope,$scope,$uibModal,appConfigSvc,GetDataFromServer,Utilities,modalService,RenderProfileSvc,$http,currentExt) {
+        function ($rootScope,$scope,$uibModal,appConfigSvc,GetDataFromServer,Utilities,modalService,
+                  RenderProfileSvc,$http,currentExt,securitySvc) {
 
             $scope.childElements = [];      //array of child elements
             $scope.input ={};
@@ -354,6 +355,16 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 var extensionDefinition = {resourceType:'StructureDefinition'};
 
                 Utilities.setAuthoredByClinFhir(extensionDefinition);      //adds the 'made by clinfhir' extension...
+
+                //in theory, there should always be a current user...
+                var currentUser = securitySvc.getCurrentUser();
+                if (currentUser) {
+                    Utilities.addExtensionOnce(extensionDefinition,
+                        appConfigSvc.config().standardExtensionUrl.userEmail,
+                        {valueString:currentUser.email})
+                }
+
+
 
                 //the version of fhir that this SD is being deployed against...
                 var fhirVersion = $scope.conformanceSvr.version;        //get from the conformance server

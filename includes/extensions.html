@@ -17,20 +17,25 @@
 
             <div class="col-md-4 col-sm-4">
 
-
-
                     <span class="navbar-text">{{appConfigSvc.getCurrentConformanceServer().name }}</span>
 
             </div>
 
 
             <div class="col-md-2 col-sm-2">
+                <div class="navbar-text" ng-show="securitySvc.getCurrentUser().email">
+                    {{securitySvc.getCurrentUser().email}}
+                </div>
+                <div  class="navbar-text" ng-hide="securitySvc.getCurrentUser().email">
+                    You need to log in to create or edit Extension Definitions
+                </div>
+
 
             </div>
 
             <div class="col-md-2 col-sm-2">
                 <form class="navbar-form navbar-right">
-                    <button class=" btn btn-primary"
+                    <button class=" btn btn-default" ng-show="securitySvc.getCurrentUser()"
 
                             ng-click="newExtension()">New Extension Definition</button>
                 </form>
@@ -165,6 +170,11 @@
                     <div class="row textRow" ng-show="isComplexExtension">
                         <div class="col-md-2"><strong>Extension Type</strong></div>
                         <div class="col-md-10 col-sm-10">Complex</div>
+                    </div>
+
+                    <div class="row textRow">
+                        <div class="col-md-2"><strong>Author</strong></div>
+                        <div class="col-md-10 col-sm-10">{{selectedExtension.localMeta.author.valueString}}</div>
                     </div>
 
                     <div class="row textRow">
@@ -441,19 +451,19 @@
                         <div class="col-md-12" ng-show="isAuthoredByClinFhir">
                             <div class="pull-right">
                                 <button class="btn btn-primary"
-                                        ng-show="userProfile.extDef.permissions.canEdit && selectedExtension.status == 'draft'"
+                                        ng-show="permissions.canEdit && selectedExtension.status == 'draft'"
                                         ng-click="editExtension()">Edit </button>
 
                                 <button class="btn btn-primary"
-                                        ng-show="userProfile.extDef.permissions.canRetire && selectedExtension.status == 'active'"
+                                        ng-show="permissions.canRetire && selectedExtension.status == 'active'"
                                         ng-click="retireExtension('retire')">Retire </button>
 
                                 <button class="btn btn-warning"
-                                        ng-show="userProfile.extDef.permissions.canDelete && selectedExtension.status == 'draft'"
+                                        ng-show="permissions.canDelete && selectedExtension.status == 'draft'"
                                         ng-click="deleteExtension()">Delete </button>
 
                                 <button class="btn btn-success"
-                                        ng-show="userProfile.extDef.permissions.canActivate && selectedExtension.status == 'draft'"
+                                        ng-show="permissions.canActivate && selectedExtension.status == 'draft'"
                                         ng-click="activateExtension('activate')">Activate </button>
 
 

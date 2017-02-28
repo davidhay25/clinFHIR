@@ -23,7 +23,9 @@ angular.module("sampleApp")
                 }
             );
 
+            $scope.securitySvc = securitySvc;
 
+            /*
             //------- for now - allow anyone to read/write extensions authored by cf
             //userProfile.extDef.permissions.canEdit
 
@@ -34,7 +36,7 @@ angular.module("sampleApp")
             $scope.userProfile.extDef.permissions.canRetire = true;
             $scope.userProfile.extDef.permissions.canActivate = true;
 
-
+*/
 
             firebase.auth().onAuthStateChanged(function(user) {
                 delete $scope.input.mdComment;
@@ -43,6 +45,10 @@ angular.module("sampleApp")
                     console.log(user)
                     //$rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
                     securitySvc.setCurrentUser(user);
+                    //$scope.currentUser = {email:user.email};
+
+                    //console.log($scope.currentUser)
+                    $scope.$digest() ;  //as this event occurs outside of angular apparently..
                 }
             });
 
@@ -310,16 +316,23 @@ angular.module("sampleApp")
                 $scope.errors.length=0;
 
                 $scope.selectedExtension = entry.resource;
+                $scope.permissions = securitySvc.getPermissons(entry.resource);     //what the current user can do with this resource...
 
                 $scope.isAuthoredByClinFhir = Utilities.isAuthoredByClinFhir($scope.selectedExtension);
+
+
+
                 
                 //extensionDefinition.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
                 
                 $scope.selectedExtension.localMeta = {};
+
+                $scope.selectedExtension.localMeta.author =
+                    Utilities.getSingleExtensionValue($scope.selectedExtension,appConfigSvc.config().standardExtensionUrl.userEmail)
+
                 var vo = getDataTypes($scope.selectedExtension);
                 $scope.analysis = vo;
                 $scope.isComplexExtension = vo.isComplexExtension;
-
 
                 $scope.selectedExtension.localMeta.datatypes = vo.dataTypes;
                 $scope.selectedExtension.localMeta.multiple = vo.multiple;
