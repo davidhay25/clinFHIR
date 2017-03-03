@@ -5,10 +5,10 @@ angular.module("sampleApp").service('securitySvc', function(Utilities,appConfigS
         return {
             setCurrentUser : function(user) {
                 currentUser = user;
-                console.log(currentUser)
+                //console.log(currentUser)
             },
             getCurrentUser : function(){
-                console.log(currentUser)
+                //console.log(currentUser)
                 return currentUser;
             },
             getPermissons : function(resource) {

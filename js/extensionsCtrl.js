@@ -3,7 +3,7 @@
 angular.module("sampleApp")
     .controller('extensionsCtrl',
         function ($rootScope,$scope,GetDataFromServer,appConfigSvc,Utilities,$uibModal,RenderProfileSvc,
-                  SaveDataToServer,modalService,$timeout,securitySvc) {
+                  SaveDataToServer,modalService,$timeout,securitySvc,$location,$firebaseObject,$window) {
 
             $scope.input = {param:'Orion',searchParam:'publisher',searchStatus:'all'};
 
@@ -24,6 +24,91 @@ angular.module("sampleApp")
             );
 
             $scope.securitySvc = securitySvc;
+
+
+            $scope.leftPane = "col-md-4 col-sm-4";
+            $scope.rightPane = "col-md-8 col-sm-8";
+
+
+
+            //-------- shortcut stuff....
+
+            //if a shortcut has been used there will be a hash so load that
+            var hash = $location.hash();
+            if (hash) {
+                console.log(hash)
+                $scope.leftPane = "hidden";
+                $scope.rightPane = "col-md-12 col-sm-12";
+
+                var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
+                sc.$loaded().then(
+                    function () {
+                        console.log(sc.config)
+                        var url =  sc.config.conformanceServer.url + "StructureDefinition/" +sc.config.model.id;
+                        console.log(url)
+                        $scope.loadedFromBookmarkUrl = url; //true;
+                        loadOneResource(url)
+                        /*
+                        GetDataFromServer.adHocFHIRQuery(url).then(
+                            function(data) {
+                                console.log(data)
+                                $scope.loadedFromBookmark = data.data; //true;
+                                $scope.leftPane = "hidden";
+                                $scope.rightPane = "col-md-12 col-sm-12";
+                                $scope.selectedExtension = data.data;
+                                $scope.permissions = securitySvc.getPermissons($scope.selectedExtension);
+                                $scope.isAuthoredByClinFhir = Utilities.isAuthoredByClinFhir($scope.selectedExtension);
+
+                            },
+                            function(err) {
+                                alert(angular.toJson(err))
+                            }
+                        )
+                        */
+
+                    },
+                    function(err) {
+                        alert(angular.toJson(err))
+                    }
+                )
+            }
+
+
+
+
+            function loadOneResource(url) {
+                GetDataFromServer.adHocFHIRQuery(url).then(
+                    function(data) {
+                        console.log(data)
+
+                        configureForExtensionDef(data.data);
+
+/*
+                        $scope.selectedExtension = data.data;
+                        $scope.permissions = securitySvc.getPermissons($scope.selectedExtension);
+                        $scope.isAuthoredByClinFhir = Utilities.isAuthoredByClinFhir($scope.selectedExtension);
+                        */
+
+                    },
+                    function(err) {
+                        alert(angular.toJson(err))
+                    }
+                )
+            }
+
+
+            $scope.generateShortCut = function() {
+                var hash = Utilities.generateHash();
+                var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
+                sc.config = {conformanceServer:appConfigSvc.getCurrentConformanceServer()};
+                sc.config.model = {id:$scope.selectedExtension.id}
+                sc.$save().then(
+                    function(){
+                        var shortCut = $window.location.href+"#"+hash;
+                        modalService.showModal({}, {bodyText: "The shortcut  " +  shortCut + "  has been generated for this extension"})
+                    }
+                )
+            };
 
             /*
             //------- for now - allow anyone to read/write extensions authored by cf
@@ -47,6 +132,8 @@ angular.module("sampleApp")
                     securitySvc.setCurrentUser(user);
                     //$scope.currentUser = {email:user.email};
 
+                   // $scope.permissions = securitySvc.getPermissons($scope.selectedExtension);
+//console.log($scope.permissions)
                     //console.log($scope.currentUser)
                     $scope.$digest() ;  //as this event occurs outside of angular apparently..
                 }
@@ -139,7 +226,13 @@ angular.module("sampleApp")
                     }
                 }).result.then(
                     function(result) {
-                        $scope.search();
+                        if ($scope.loadedFromBookmarkUrl) {
+                            loadOneResource($scope.loadedFromBookmarkUrl)
+                        } else {
+                            $scope.search();
+                        }
+
+
                     });
 
                 ///modalService.showModal({}, {bodyText : "Sorry, editing is not yet enabled"})
@@ -308,23 +401,25 @@ angular.module("sampleApp")
 
 
             delete $scope.selectedExtension;
-            
+
+
+
             $scope.selectExtension = function(entry,inx){
 
                 delete $scope.isComplexExtension;
                 $scope.index = inx;
                 $scope.errors.length=0;
 
-                $scope.selectedExtension = entry.resource;
-                $scope.permissions = securitySvc.getPermissons(entry.resource);     //what the current user can do with this resource...
 
-                $scope.isAuthoredByClinFhir = Utilities.isAuthoredByClinFhir($scope.selectedExtension);
+                configureForExtensionDef(entry.resource)
+            };
+
+            function configureForExtensionDef(ed) {
+                $scope.selectedExtension = ed ;
+                $scope.permissions = securitySvc.getPermissons(ed);     //what the current user can do with this resource...
+                $scope.isAuthoredByClinFhir = Utilities.isAuthoredByClinFhir(ed);
 
 
-
-                
-                //extensionDefinition.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
-                
                 $scope.selectedExtension.localMeta = {};
 
                 $scope.selectedExtension.localMeta.author =
@@ -342,8 +437,7 @@ angular.module("sampleApp")
                 $scope.selectedExtension.localMeta.referenceStrength = vo.strength;
                 $scope.selectedExtension.localMeta.referenceReference = vo.valueSetReference;
                 $scope.selectedExtension.localMeta.valueSetUri = vo.valueSetUri;
-
-            };
+            }
 
 
             function getDataTypes(extension) {

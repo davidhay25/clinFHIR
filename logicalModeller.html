@@ -79,6 +79,7 @@
     <script src="js/libs/angular-lightweight-markdown-editor.min.js"></script>
     <script src="resourceBuilder/selectProfile.js"></script>
     <script src="js/setServers.js"></script>
+    <script src="js/securitySvc.js"></script>
 
     <script>
         var config = {
@@ -168,11 +169,11 @@
                         <button ng-show="isDirty && canSaveModel" class="btn btn-success pull-right" ng-click="save()">Save model</button>
                     </form>
 
-                    <form ng-show="currentSD && !loadedFromBookmark" class="navbar-form">
-                        <button class="btn btn-warning pull-right" ng-click="generateShortCut()">Share</button>
-
+                    <form ng-show="SD && !loadedFromBookmark" class="navbar-form">
+                        <button class="btn btn-success pull-right iconSpacing" ng-click="generateShortCut()">Share</button>
+<!--
                         <button class="btn btn-warning pull-right" ng-click="copyFiles()">Copy</button>
-
+-->
 
 
                     </form>

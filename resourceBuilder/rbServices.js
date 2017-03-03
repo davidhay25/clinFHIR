@@ -621,7 +621,7 @@ angular.module("sampleApp").
             return deferred.promise;
 
         },
-        findResourceByUrl : function(type,profile,cb) {
+        findResourceByUrlDEP : function(type,profile,cb) {
             //get a resource of a given type from the server. This is used for
 
             alert('findResourceByUrl stub not implemented yet');
@@ -752,6 +752,15 @@ angular.module("sampleApp").
     service('Utilities', function($http,$q,$localStorage,appConfigSvc,modalService) {
     return {
 
+        generateHash : function(){
+            var hash = "";
+            var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+            for( var i=0; i < 5; i++ ) {
+                hash += possible.charAt(Math.floor(Math.random() * possible.length));
+            }
+            return hash;
+        },
         getConformanceResourceDEP : function(callback) {
             //return the conformance resource  (cached the first time ) in a simple callback for the current data server
             if ($localStorage.conformanceResource) {

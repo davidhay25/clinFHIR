@@ -16,8 +16,10 @@
   {"name": "MedicationDispense"},
   {"name": "MedicationRequest"},
   {"name": "Slot"},
-  {"name": "Contraindication"},
+  {"name": "Account","reference":true},
   {"name": "PaymentNotice","reference":true},
+  {"name": "AdverseEvent"},
+  {"name": "ChargeItem"},
   {"name": "AppointmentResponse"},
   {"name": "MedicationStatement"},
   {"name": "EpisodeOfCare"},
@@ -34,7 +36,7 @@
   {"name": "DocumentReference"},
   {"name": "Immunization"},
   {"name": "Subscription","reference":true},
-  {"name": "OrderResponse","reference":true},
+
   {"name": "ConceptMap","reference":true},
   {"name": "Practitioner","reference":true},
   {"name": "ImagingStudy"},
@@ -42,7 +44,7 @@
   {"name": "CarePlan"},
   {"name": "Device","reference":true},
   {"name": "StructureDefinition","reference":true},
-  {"name": "Order"},
+
   {"name": "Procedure"},
   {"name": "Substance","reference":true},
   {"name": "DeviceUseRequest"},
@@ -60,8 +62,11 @@
   {"name": "PaymentReconciliation"},
   {"name": "List"},
   {"name": "DeviceUseStatement"},
-  {"name": "ImagingObjectSelection"},
+  {"name": "ImagingManifest"},
+  {"name": "ImplementationGuide"},
   {"name": "Goal"},
+  {"name": "MeasureReport"},
+  {"name": "MessageDefinition"},
   {"name": "OperationDefinition","reference":true},
   {"name": "NutritionRequest"},
   {"name": "SearchParameter","reference":true},
@@ -93,21 +98,28 @@
   {"name": "SupplyDelivery","reference":true},
   {"name": "TestScript","reference":true},
   {"name": "Bundle","reference":true},
-  {"name": "DecisionSupportRule","reference":true,"version":"2.1"},
-  {"name": "DecisionSupportServiceModule","reference":true,"version":"2.1"},
-  {"name": "GuidanceRequest","reference":true,"version":"2.1"},
+
+
   {"name": "GuidanceResponse","reference":true,"version":"2.1"},
-  {"name": "ModuleMetadata","reference":true,"version":"2.1"},
-  {"name": "ModuleDefinition","reference":true,"version":"2.1"},
+  {"name": "NamingSystem","reference":true,"version":"2.1"},
   {"name": "Library","reference":true,"version":"2.1"},
-  {"name": "OrderSet","reference":true,"version":"2.1"},
+
   {"name": "Measure","reference":true,"version":"2.1"},
-  {"name": "DecisionSupportServiceModule","reference":true,"version":"2.1"},
+
   {"name": "ExpansionProfile","reference":true,"version":"2.1"},
   {"name": "Sequence","version":"2.1"},
   {"name": "Linkage","reference":true,"version":"2.1"},
   {"name": "Consent","reference":false,"version":"2.1"},
   {"name": "PlanDefinition","reference":false,"version":"2.1"},
+  {"name": "PractitionerRole","reference":false,"version":"2.1"},
+
+  {"name": "RequestGroup","reference":false,"version":"2.1"},
+  {"name": "ResearchStudy","reference":false,"version":"2.1"},
+  {"name": "ResearchSubject","reference":false,"version":"2.1"},
+  {"name": "StructureMap","reference":false,"version":"2.1"},
+  {"name": "Task","reference":false,"version":"2.1"},
+  {"name": "TestReport","reference":false,"version":"2.1"},
+
   {"name": "ActivityDefinition","reference":false,"version":"2.1"}
 ]
 

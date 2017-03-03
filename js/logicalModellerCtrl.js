@@ -3,7 +3,8 @@
 angular.module("sampleApp")
     .controller('logicalModellerCtrl',
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
-                  GetDataFromServer,$firebaseObject,$location,igSvc,SaveDataToServer,$window,RenderProfileSvc,Utilities) {
+                  GetDataFromServer,$firebaseObject,$location,igSvc,SaveDataToServer,$window,RenderProfileSvc,Utilities,
+                    securitySvc) {
             $scope.input = {};
 
             $scope.code = {};
@@ -405,6 +406,7 @@ angular.module("sampleApp")
                 if (user) {
                     $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
                     logicalModelSvc.setCurrentUser(user);
+                    securitySvc.setCurrentUser(user);
 
 
                     //return the practitioner resource that corresponds to the current user (the service will create if absent)
@@ -595,14 +597,18 @@ angular.module("sampleApp")
                 )
             };
 
+
+
             $scope.generateShortCut = function() {
+                var hash = Utilities.generateHash();
+  /*
                 var hash = "";
                 var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
 
                 for( var i=0; i < 5; i++ ) {
                     hash += possible.charAt(Math.floor(Math.random() * possible.length));
                 }
-
+*/
                 var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
                 sc.config = {conformanceServer:appConfigSvc.getCurrentConformanceServer()};
                 sc.config.model = {id:$scope.currentType.id}
@@ -612,9 +618,6 @@ angular.module("sampleApp")
                         modalService.showModal({}, {bodyText: "The shortcut  " +  shortCut + "  has been generated for this model"})
                     }
                 )
-
-
-
             };
 
             $scope.login=function(){
