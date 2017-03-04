@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-03-01';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-03-05a';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};
@@ -136,6 +136,8 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'Aegis WildFHIR STU3',version:3,url:" http://wildfhir.aegis.net/fhir1-6-0/"});
         defaultConfig.allKnownServers.push({name:'SNApp',version:3,url:"http://snapp.clinfhir.com:8080/baseDstu3/"});
         defaultConfig.allKnownServers.push({name:'123',version:3,url:"https://fhirsandbox1.tsysinteropsvcs.net/sites/123/"});
+
+        defaultConfig.allKnownServers.push({name:'GoFHIR',version:3,url:"https://syntheticmass.mitre.org/fhir/"});
 
         defaultConfig.allKnownServers.push({name:'HSPC',version:3,url:"https://api3.hspconsortium.org/fhirconnect14/open/",everythingOperation:true});
         //defaultConfig.allKnownServers.push({name:'hsp2',version:3,url:"https://api2.hspconsortium.org/careplan2/open/",everythingOperation:true});

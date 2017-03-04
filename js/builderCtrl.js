@@ -54,9 +54,8 @@ angular.module("sampleApp")
                             $scope.Practitioner = practitioner;
 
 
-
                         },function (err) {
-                            alert(err)
+                            //just swallow errors... alert(err)
                         }
                     );
 
@@ -359,7 +358,8 @@ angular.module("sampleApp")
                             $scope.user.practitioner = practitioner;
 
                         },function (err) {
-                            alert(err)
+
+                            // just swallow errors...alert(err)
                         }
                     );
 

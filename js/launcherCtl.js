@@ -32,6 +32,7 @@ angular.module("sampleApp")
                             $scope.Practitioner = practitioner;
 
                         },function (err) {
+                            console.log('Current data server cannot create Practitioners...')
                             //just swallow any error
                             //alert(err)
                         }

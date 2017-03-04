@@ -420,7 +420,7 @@ angular.module("sampleApp")
 
 
                         },function (err) {
-                            alert(err)
+                            //swallow errorsalert(err)
                         }
                     );
 

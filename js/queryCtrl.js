@@ -15,6 +15,8 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     setDefaultInput();
 
     //get all the standard resource types - the one defined in the fhir spec. Used for the select profile modal...
+
+    /*
     RenderProfileSvc.getAllStandardResourceTypes().then(
         function(standardResourceTypes) {
             $scope.standardResourceTypes = standardResourceTypes ;
@@ -22,11 +24,13 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         }
     );
 
+
+    */
+
     GetDataFromServer.registerAccess('query');
 
     $localStorage.queryHistory = $localStorage.queryHistory || [];
-
-
+    
     $scope.treeNodeSelected = function(item) {
 
         delete $scope.edFromTreeNode;
@@ -36,8 +40,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         }
 
     };
-
-
 
     //the profile is uri - ie it doesn't point directly to the resource
 
@@ -283,7 +285,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         delete  $scope.conformance;
     };
 
-
     //todo - allow the conformance to be selected - maybe a separate function...
     $scope.loadConformance = function(url) {
         $scope.waiting = true;
@@ -439,8 +440,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
             $scope.waiting = false;
             //temp setDefaultInput();
         })
-    }
-
+    };
 
     $scope.selectEntry = function(entry){
 
@@ -458,8 +458,10 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     };
 
+    //select the current data server
+    console.log(appConfigSvc.getCurrentDataServer());
     $scope.server = appConfigSvc.getCurrentDataServer();
-    $scope.selectServer($scope.server)
+    $scope.selectServer($scope.server);
 
 
     //when the page was invoked, a conformance url was specified so display that...

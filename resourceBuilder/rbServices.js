@@ -396,6 +396,7 @@ angular.module("sampleApp").
         },
         getPractitionerByLogin : function (user,details) {
             //return a Practitioner resource with an identifier that matches the login identifier. Create if not exists...
+            //**** if the data server does not support creating a Practitioner then return null
             var deferred = $q.defer();
 
             var loginIdentifier = user.uid;     //user is a firebase user
@@ -427,7 +428,8 @@ angular.module("sampleApp").
                                 deferred.resolve(pract);
                             },
                             function (err) {
-                                alert('error saving practitioner ' + angular.toJson(err));
+                                //If the server cannot create practitioner, just don't return one....
+                                //alert('error saving practitioner ' + angular.toJson(err));
                                 deferred.reject();
                             }
                         )
