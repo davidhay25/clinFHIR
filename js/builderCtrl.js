@@ -245,6 +245,8 @@ angular.module("sampleApp")
                 )
             }
 
+
+
             function createDownLoad(container){
                 $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(container.bundle, true)], {type: "text/text"}));
                 $scope.downloadLinkJsonName = 'Scenario'; //container.name;

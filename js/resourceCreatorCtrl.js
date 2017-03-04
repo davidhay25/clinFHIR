@@ -740,7 +740,7 @@ angular.module("sampleApp")
             });
     }
 
-    $scope.filterTimeLineByCondition = function(reference) {
+    $scope.filterTimeLineByConditionDEP = function(reference) {
         delete $scope.outcome.selectedResource;
         //console.log(reference);
         //create and draw the timeline. The service will display the number of encounters for each condition
@@ -764,7 +764,7 @@ angular.module("sampleApp")
 
 
     //when a single timeline entry is selected
-    var timeLineItemSelected = function(properties,items){
+    var timeLineItemSelectedDEP = function(properties,items){
         //console.log(properties);
        // console.log(items)
         var node = items.get(properties.items[0]);

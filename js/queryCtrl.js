@@ -30,7 +30,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     GetDataFromServer.registerAccess('query');
 
     $localStorage.queryHistory = $localStorage.queryHistory || [];
-    
+
     $scope.treeNodeSelected = function(item) {
 
         delete $scope.edFromTreeNode;

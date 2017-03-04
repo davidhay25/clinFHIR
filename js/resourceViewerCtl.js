@@ -1,16 +1,82 @@
 
 angular.module("sampleApp")
     .controller('resourceViewerCtrl',
-        function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,$timeout,GetDataFromServer) {
+        function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,
+                  $uibModal, $timeout,GetDataFromServer,modalService,ResourceUtilsSvc) {
 
         //outcome.resourceTypes
             $scope.outcome = {};
             $scope.graph = {};
 
+            $scope.ResourceUtilsSvc = ResourceUtilsSvc; //needed for 1 line summary
+            $scope.appConfigSvc = appConfigSvc;     //for displaying the patient json
+
             //when a new scenario is selected with a patient from the server. passes in all data for that patient
             $scope.$on('patientSelected',function(event,patientData){
                 renderPatientDetails(patientData);
             });
+
+
+
+            $scope.filterTimeLineByCondition = function(reference) {
+                delete $scope.outcome.selectedResource;
+                //console.log(reference);
+                //create and draw the timeline. The service will display the number of encounters for each condition
+                //todo - this code is (mostly) a copy from the function above - refactor..
+                var timelineData =resourceCreatorSvc.createTimeLine($scope.allResourcesAsList,$scope.allResources['Condition'],reference);
+
+                // console.log(timelineData)
+                $('#encTimeline').empty();     //otherwise the new timeline is added below the first...
+                var tlContainer = document.getElementById('encTimeline');
+
+                var timeline = new vis.Timeline(tlContainer);
+                timeline.setOptions({});
+                timeline.setGroups(timelineData.groups);
+                timeline.setItems(timelineData.items);
+
+                timeline.on('select', function(properties){
+                    timeLineItemSelected(properties,timelineData.items)
+                });
+               // $scope.$digest();
+
+            };
+
+            //used by patientViewer to select a patient to display
+            $scope.findPatient = function(){
+                delete $scope.resourcesFromServer;
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
+                    keyboard: false,       //same as above.
+                    templateUrl: 'modalTemplates/searchForPatient.html',
+                    size:'lg',
+                    controller: 'findPatientCtrl'
+                }).result.then(
+                    function(resource){
+                        console.log(resource)
+                        if (resource) {
+                            $scope.currentPatient = resource;
+                            //load the existing resources for this patient...
+                            appConfigSvc.setCurrentPatient(resource)
+
+                             supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
+                             //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
+                                function(data){
+                                    //$scope.resourcesFromServer = data;
+
+                                    renderPatientDetails(data)
+
+                                    console.log(data);
+                                 },
+                                 function(err){
+                                    console.log(err)
+                                 })
+
+                        }
+
+                    }
+                )
+            }
+
 
             function renderPatientDetails(allResources) {
                 $scope.hasVitals = false;
@@ -98,8 +164,8 @@ angular.module("sampleApp")
                 var timelineData =resourceCreatorSvc.createTimeLine($scope.allResourcesAsList,allResources['Condition']);
 
                 //console.log(timelineData)
-                $('#timeline').empty();     //otherwise the new timeline is added below the first...
-                var tlContainer = document.getElementById('timeline');
+                $('#encTimeline').empty();     //otherwise the new timeline is added below the first...
+                var tlContainer = document.getElementById('encTimeline');
 
                 var timeline = new vis.Timeline(tlContainer);
                 timeline.setOptions({});
@@ -116,6 +182,16 @@ angular.module("sampleApp")
 
             }
 
+            //when a single timeline entry is selected
+            var timeLineItemSelected = function(properties,items){
+                //console.log(properties);
+                // console.log(items)
+                var node = items.get(properties.items[0]);
+                // console.log(node)
+                $scope.outcome.selectedResource = node.resource;
+                createGraphOneResource(node.resource,'resourcenetworkgraphtl')
+                $scope.$digest();
+            }
 
             //=========== these functions support the 'view resources' display. todo - ?move to a separate controller???
             $scope.typeSelected = function(vo) {

@@ -30,7 +30,7 @@ angular.module('sampleApp').component('coding',{
 //period only
 .component('period',{
     bindings: {period:'<'},
-    template:"{{$ctrl.period.start}} -> {{$ctrl.period.end}}"
+    template:"{{$ctrl.period.start | date:long }} -> {{$ctrl.period.end | date:long }}"
 })
 
 //displays a polymorphic value -todo - currently hard coded to quandity...
