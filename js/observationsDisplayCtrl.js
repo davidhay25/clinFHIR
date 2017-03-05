@@ -2,33 +2,24 @@
 
 angular.module("sampleApp")
     .controller('observationsDisplayCtrl',
-        function ($rootScope,$scope,modalService,$timeout) {
+        function ($scope) {
 
+            //when an obeservation code is selected, draw the chart...
             $scope.obsSelected = function(key,value) {
-
-                console.log(key,value);
                 $('#observationsChart').empty();
                 var container = document.getElementById('observationsChart');
-                
                 var dataset = new vis.DataSet(value.list);
-
                 var options = {};
                 var graph2d = new vis.Graph2d(container, dataset, options);
-                //$scope.$digest();
-/*
-                $timeout(function(){
-                    graph2d.fit()
-                    console.log('fitting...')
-                },500)
-
-                */
             }
 
-            $rootScope.$on('patientObservations',function(event,obsBundle) {
+            //fired when a patient is selected, passing across the bundle of Boservations
+            $scope.$on('patientObservations',function(event,obsBundle) {
                 delete $scope.observations;
                 console.log(obsBundle)
                 if (obsBundle && obsBundle.entry) {
 
+                    //create a hash of unique observation codes, and actual observations for thay code
                     var obsCodes = {}
                     obsBundle.entry.forEach(function(entry){
                         var res = entry.resource;
@@ -38,43 +29,31 @@ angular.module("sampleApp")
                                 obsCodes[code] = {list:[],display:res.code.text}
                             }
 
-
                             //really only works for a quantity right now...
                             if (res.valueQuantity) {
                                 var da = res.effectiveDateTime;
                                 var v = res.valueQuantity.value;
                                 obsCodes[code].list.push({x:da,y:v})
                             }
-
-
-                            //console.log(res);
-
-                            //obsCodes[code].list.push(res)
-
                         }
 
                     });
-                    //console.log(obsCodes);
 
-                    $scope.observations = {}
+
+                    $scope.observations = {}    //a hash of the hash (!) to make seletion easier...
                     var cnt = 0
                     angular.forEach(obsCodes,function(value,code){
-
-                        //console.log(code,value)
                         if (value.list.length >0 ) {
                             $scope.observations[code] = value;
                             cnt++;
                         }
                     });
-                    
+
+                    //there are no numeric observations
                     if (cnt == 0) {
                         delete $scope.observations;
                     }
 
-
-
-
-                    //$scope.observations = obsCodes;
                 }
 
             })

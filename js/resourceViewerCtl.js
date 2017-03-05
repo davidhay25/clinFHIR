@@ -65,6 +65,10 @@ angular.module("sampleApp")
 
                                     renderPatientDetails(data)
 
+
+                                    $scope.$broadcast('patientObservations',data['Observation']);//used to draw the observation charts...
+
+
                                     console.log(data);
                                  },
                                  function(err){
@@ -179,6 +183,9 @@ angular.module("sampleApp")
                 $scope.conditions = timelineData.conditions;
 
 
+                $scope.resourceSelected();  //when called with no parameters will clear the display
+
+
 
             }
 
@@ -261,6 +268,7 @@ angular.module("sampleApp")
                 delete $scope.downloadLinkXmlContent;
                 delete $scope.downloadLinkXmlName;
                 delete $scope.resourceVersions;
+                delete $scope.outcome.allResourcesOfOneType;
 
                 if (entry && entry.resource) {
 
