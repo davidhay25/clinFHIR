@@ -116,16 +116,7 @@ angular.module("sampleApp")
             generateFHIRProfile : function(internalLM) {
                 //generate a real FHIR profile from the logical model
                 var deferred = $q.defer();
-
-                console.log(internalLM);
-                var realProfile = angular.copy(internalLM);      //the profile that we will build...
-                realProfile.snapshot = {element:[]};            //get rid of the current element defintiions...
-                realProfile.id = realProfile.id+'-cf-profile';   //construct an id
-                realProfile.url = realProfile.url+'-cf-profile';   //and a url...
-                realProfile.kind = 'resource';
-
-
-                delete realProfile.extension;                   //and the extensions
+                var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
 
                 //get the base type for the model.
                 var baseType;
@@ -135,13 +126,36 @@ angular.module("sampleApp")
                 } else {
 
                     deferred.reject('No base type. A profile cannot be generated.');
-                   // return;
+                    // return;
                 }
+
+
+                console.log(internalLM);
+                var realProfile = angular.copy(internalLM);      //the profile that we will build...
+                realProfile.snapshot = {element:[]};            //get rid of the current element defintiions...
+                realProfile.id = realProfile.id+'-cf-profile';   //construct an id
+                realProfile.url = realProfile.url+'-cf-profile';   //and a url...
+                realProfile.kind = 'resource';
+
+                var url = "http://hl7.org/fhir/StructureDefinition/"+ baseType;
+                //realProfile.baseDefinition = url;
+
+                if (fhirVersion == 2) {
+                    realProfile.base = url;
+                    realProfile.constrainedType = baseType;
+                } else {
+                    realProfile.baseDefinition = url;
+                    realProfile.type = baseType;
+                }
+
+                delete realProfile.extension;                   //and the extensions
+
+
 
                 //retrieve the base profile. We'll use that to ensure that the mappings are valid...
                // var url = appConfigSvc.getCurrentConformanceServer().url + baseType;
-                var url = "http://hl7.org/fhir/StructureDefinition/"+ baseType;
-                realProfile.baseDefinition = url;
+             //   var url = "http://hl7.org/fhir/StructureDefinition/"+ baseType;
+               // realProfile.baseDefinition = url;
 
                 GetDataFromServer.findConformanceResourceByUri(url).then(
                     function (SD) {
@@ -153,7 +167,8 @@ angular.module("sampleApp")
 
                     },
                     function(err) {
-                        deferred.reject('Base profile (' + url + ') not found');
+                       //deferred.reject('Base profile (' + url + ') not found');
+                        deferred.reject(angular.toJson(err));
 
 
                     }
@@ -163,6 +178,9 @@ angular.module("sampleApp")
 
 
                 function makeFHIRProfile(SD) {
+
+
+
                     //create a hash of all the paths in the base resource type...
                     var pathHash = {};
                     SD.snapshot.element.forEach(function(ed){
@@ -173,7 +191,7 @@ angular.module("sampleApp")
 
                     //now work through the model. if there's no mapping, then an error. If an extension then insert the url...
                     internalLM.snapshot.element.forEach(function(ed,inx){
-                        var newED = ed;
+                        var newED = angular.copy(ed);
 
                         if (inx == 0) {
                             //this is the root element
@@ -208,6 +226,8 @@ angular.module("sampleApp")
                             if (!pathHash[newED.path]) {
                                 err.push("Path: "+newED.path + " is not valid for this resource type")
                             } else {
+
+
                                 realProfile.snapshot.element.push(newED)
                             }
                         } else {
@@ -218,6 +238,7 @@ angular.module("sampleApp")
                                 extensionUrl = ext.valueString;
                                 //need to set the type of the element to 'Extension' (In the LM it is the datatype)
                                 newED.type = {code:'Extension',profile:extensionUrl}
+                                delete newED.extension; //this is the extension that holds the url
                                 realProfile.snapshot.element.push(newED)
 
 
@@ -666,7 +687,7 @@ angular.module("sampleApp")
                 //create a model from the base type, only bringing across stuff we want.
                 //todo - very similar to the logic in createTreeArrayFromSD() - ?call out to separate function...
                 var deferred = $q.defer();
-                var elementsToIgnore = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained', 'extension', 'modifierExtension'];
+                var elementsToIgnore = ['id', 'meta', 'implicitRules', 'language', 'contained', 'extension', 'modifierExtension'];
                 var url = "http://hl7.org/fhir/StructureDefinition/" + typeName;
 
                 var serverUrl;  //set this for STU-2 - will default to the current one if not set...
@@ -717,9 +738,17 @@ angular.module("sampleApp")
                         if (arPath.length > 1) { //skip the first one
 
                             arPath[0] = rootName;           //use the rootname of the Logical Model
+                            var include = true;
+                            //don't include the main text element
+                            if (arPath.length == 2) {
+                                if (arPath[1] == 'text') {
+                                    include = false;
+                                }
+                            }
+
                             var idThisElement = arPath.join('.')
                             var treeText = arPath.pop();//
-                            var include = true;
+
                             if (elementsToIgnore.indexOf(treeText) > -1) {
                                 include = false;
                             }

@@ -191,10 +191,9 @@ angular.module("sampleApp")
 
             //when a single timeline entry is selected
             var timeLineItemSelected = function(properties,items){
-                //console.log(properties);
-                // console.log(items)
+
                 var node = items.get(properties.items[0]);
-                // console.log(node)
+
                 $scope.outcome.selectedResource = node.resource;
                 createGraphOneResource(node.resource,'resourcenetworkgraphtl')
                 $scope.$digest();
