@@ -2,8 +2,8 @@
   "resourceType": "StructureDefinition",
   "id": "OhMedicationDispense-cf-profile",
   "meta": {
-    "versionId": "7",
-    "lastUpdated": "2017-03-05T21:49:15.673-05:00"
+    "versionId": "8",
+    "lastUpdated": "2017-03-06T14:24:14.339-05:00"
   },
   "url": "http://fhir.hl7.org.nz/baseDstu2/StructureDefinition/OhMedicationDispense-cf-profile",
   "identifier": [
@@ -14,7 +14,7 @@
   ],
   "name": "OhMedicationDispense",
   "status": "draft",
-  "date": "2017-03-06T15:48:12+13:00",
+  "date": "2017-03-07T08:22:55+13:00",
   "kind": "resource",
   "constrainedType": "MedicationDispense",
   "abstract": false,
@@ -327,6 +327,32 @@
         "max": "1",
         "base": {
           "path": "OhMedicationDispense.author",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Extension",
+            "profile": [
+              "http://fhir.hl7.org.nz/dstu2/StructureDefinition/agent"
+            ]
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "fhir",
+            "map": "MedicationDispense.extension"
+          }
+        ]
+      },
+      {
+        "path": "MedicationDispense.extension",
+        "short": "custodian",
+        "definition": "definition",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "OhMedicationDispense.custodian",
           "min": 0,
           "max": "1"
         },

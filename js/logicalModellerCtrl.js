@@ -940,7 +940,7 @@ angular.module("sampleApp")
                             $scope.input = {};
                             $scope.isNew = true;
                             $scope.allModels = allModels;
-                            console.log(allModels)
+                            //console.log(allModels)
 
                             //the list of all the base resource types in the spec...
                             RenderProfileSvc.getAllStandardResourceTypes().then(
@@ -1053,7 +1053,7 @@ angular.module("sampleApp")
 
                                 vo.mapping = $scope.input.mapping;
                                 vo.createElementsFromBase = $scope.input.createElementsFromBase;
-                                vo.useV2ForCreateElementsFromBase = $scope.input.useV2ForCreateElementsFromBase;
+                                //vo.useV2ForCreateElementsFromBase = $scope.input.useV2ForCreateElementsFromBase;
 
 
                                 
@@ -1170,7 +1170,7 @@ angular.module("sampleApp")
 
 
                                     logicalModelSvc.createFromBaseType($scope.treeData,result.baseType,
-                                        $scope.rootName,result.useV2ForCreateElementsFromBase).then(
+                                        $scope.rootName).then(
                                         function(){
                                             drawTree();
                                             makeSD();

@@ -208,6 +208,7 @@ angular.module("sampleApp")
                                 })
                             }
                         }
+                        newED.id = baseType + ':' + newED.path;
 
 
 
@@ -683,7 +684,7 @@ angular.module("sampleApp")
                 return newSD;
 
             },
-            createFromBaseType: function (treeData, typeName, rootName, useStu2) {
+            createFromBaseType: function (treeData, typeName, rootName) {
                 //create a model from the base type, only bringing across stuff we want.
                 //todo - very similar to the logic in createTreeArrayFromSD() - ?call out to separate function...
                 var deferred = $q.defer();
@@ -692,7 +693,7 @@ angular.module("sampleApp")
 
                 var serverUrl;  //set this for STU-2 - will default to the current one if not set...
 
-
+/*
                 if (useStu2) {
                     //for now get the st2 resources directly off HAPI server. todo - this needs to be configurable in some way...
                     serverUrl = "http://fhirtest.uhn.ca/baseDstu2/";
@@ -700,7 +701,7 @@ angular.module("sampleApp")
                     console.log('getting from STU-2')
 
                 }
-
+*/
 
                 GetDataFromServer.findConformanceResourceByUri(url, serverUrl).then(
                     function (SD) {
@@ -720,7 +721,7 @@ angular.module("sampleApp")
                         alert(angular.toJson(err))
                         deferred.reject(err)
                     }
-                )
+                );
 
 
                 return deferred.promise;
