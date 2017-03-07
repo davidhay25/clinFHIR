@@ -3,7 +3,8 @@
 angular.module("sampleApp")
     .controller('logicalModellerCtrl',
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
-                  GetDataFromServer,$firebaseObject,$location,igSvc,SaveDataToServer,$window,RenderProfileSvc,Utilities,
+                  GetDataFromServer,$firebaseObject,$firebaseArray,$location,igSvc,SaveDataToServer,$window,RenderProfileSvc,
+                  $q,Utilities,
                     securitySvc) {
             $scope.input = {};
 
@@ -15,6 +16,7 @@ angular.module("sampleApp")
                 controls: ["bold", "italic", "separator", "bullets","separator", "heading","separator", "preview"]
             };
 
+            $scope.appConfigSvc = appConfigSvc
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
             GetDataFromServer.registerAccess('logical');
@@ -601,24 +603,58 @@ angular.module("sampleApp")
 
             $scope.generateShortCut = function() {
                 var hash = Utilities.generateHash();
-  /*
-                var hash = "";
-                var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
+                var shortCut = $window.location.href+"#"+hash
 
-                for( var i=0; i < 5; i++ ) {
-                    hash += possible.charAt(Math.floor(Math.random() * possible.length));
-                }
-*/
                 var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
+                sc.modelId = $scope.currentType.id;     //this should make it possible to query below...
                 sc.config = {conformanceServer:appConfigSvc.getCurrentConformanceServer()};
                 sc.config.model = {id:$scope.currentType.id}
+                sc.shortCut = shortCut;     //the full shortcut
                 sc.$save().then(
                     function(){
-                        var shortCut = $window.location.href+"#"+hash
+                        $scope.treeData.shortCut = sc;
                         modalService.showModal({}, {bodyText: "The shortcut  " +  shortCut + "  has been generated for this model"})
+
                     }
                 )
             };
+
+
+
+
+            //find a shortcut for a model. Note there may be more that one (as could have the same id on different servers
+            function findShortCutForModel(id) {
+                var deferred = $q.defer();
+                //var seriesRef = new Firebase(fbUrl+'/series');
+                var scCollection = $firebaseArray(firebase.database().ref().child("shortCut"));
+
+                //seriesCollection.$ref().orderByChild("config.model.id").equalTo('ADR').once("value", function(dataSnapshot){
+                scCollection.$ref().orderByChild("modelId").equalTo(id).once("value", function(dataSnapshot){
+                    var series = dataSnapshot.val();
+                    if(series){
+                        //so there's at least 1 shortcut for a model with this id, now check the server
+                        console.log("Found", series);
+
+                        angular.forEach(series,function(v,k){
+                            console.log(k,v)
+                            if (v.config.conformanceServer.url == appConfigSvc.getCurrentConformanceServer().url) {
+                                deferred.resolve(v)
+                            }
+                        })
+                        deferred.reject()
+
+                        $scope.series = series;
+                    } else {
+                        deferred.reject()
+                    }
+
+                })
+                return deferred.promise;
+
+            }
+
+            findShortCutForModel('OhEncounter');
+
 
             $scope.login=function(){
                 $uibModal.open({
@@ -1299,6 +1335,12 @@ angular.module("sampleApp")
 
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
+
+                findShortCutForModel(entry.resource.id).then(
+                    function(vo) {
+                        $scope.treeData.shortCut = vo;  //safe to put here as it will be ignored...
+                    }
+                )
 
                // checkDifferences(entry.resource)
 

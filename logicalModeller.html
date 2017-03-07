@@ -141,7 +141,7 @@
                 </div>
                 <div class="col-md-2 col-sm-2">
 
-                    <span style="cursor:pointer" ng-click='setServers()' class="navbar-text pull-right"> {{conformanceServer.name}}</span>
+                    <span style="cursor:pointer" ng-click='setServers()' class="navbar-text pull-right"> {{appConfigSvc.getCurrentConformanceServer().name}}</span>
 
 
                 </div>
@@ -170,7 +170,7 @@
                         <button ng-show="isDirty && canSaveModel" class="btn btn-success pull-right" ng-click="save()">Save model</button>
                     </form>
 
-                    <form ng-show="SD && !loadedFromBookmark" class="navbar-form">
+                    <form ng-show="SD && !loadedFromBookmark && !treeData.shortCut.shortCut" class="navbar-form">
                         <button class="btn btn-success pull-right iconSpacing" ng-click="generateShortCut()">Share</button>
 <!--
                         <button class="btn btn-warning pull-right" ng-click="copyFiles()">Copy</button>
@@ -279,8 +279,6 @@
                             {{entry.resource.description | limitTo : 200}}
                         </li>
                     </ul>
-
-
 
                 </uib-tab>
                 <uib-tab heading="Current">
@@ -795,6 +793,9 @@
                                     <tr><td width="25%">Model Name</td><td>{{treeData[0].data.header.name}}</td></tr>
                                     <tr><td>Model Title</td><td>{{treeData[0].data.header.title}}</td></tr>
                                     <tr><td>Model Purpose</td><td>{{treeData[0].data.header.purpose}}</td></tr>
+                                    <tr ng-show="treeData.shortCut.shortCut"><td>Shortcut</td><td>{{treeData.shortCut.shortCut}}</td></tr>
+
+
                                     <tr ng-show="treeData[0].data.header.baseType">
                                         <td>Base Resource Type</td><td>{{treeData[0].data.header.baseType}}</td></tr>
                                     <tr ng-show="treeData[0].data.header.mapping">
