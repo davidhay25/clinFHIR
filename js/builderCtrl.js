@@ -292,8 +292,10 @@ angular.module("sampleApp")
                 builderSvc.sendToFHIRServer(bundle).then(
                     function(data){
                         console.log(data.data)
+                        modalService.showModal({}, {bodyText:'All the resources have been updated on the server.'});
                     },
                     function(err) {
+                        modalService.showModal({}, {bodyText:'There was an error:'+angular.toJson(err)});
                         console.log(err)
                     }
                 ).finally(function(){
@@ -1334,11 +1336,11 @@ angular.module("sampleApp")
                                                         }
                                                     });
 
-                                                    if (! alreadyReferenced) {
+                                                   //todo - trouble is that the search is by resource type not instance... if (! alreadyReferenced) {
                                                         type = resource.resourceType;   //allows for Reference
                                                         $scope.hashReferences[type] = $scope.hashReferences[type] || []
                                                         $scope.hashReferences[type].push(resource);
-                                                    }
+                                                    //}
 
                                                 })
                                             }
