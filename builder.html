@@ -168,15 +168,15 @@
                         Scenario Builder
                     </a>
                 </div>
-                <div class="col-md-4 col-sm-4">
+                <div class="col-md-3 col-sm-3">
                     <div class="navbar-text" ng-click="setServers()" style="cursor: pointer">
-                        Conformance server: {{appConfigSvc.getCurrentConformanceServer().name}}
-                        <div>Data server: {{appConfigSvc.getCurrentDataServer().name}}</div>
+                        Conformance: {{appConfigSvc.getCurrentConformanceServer().name}}
+                        <div>Data: {{appConfigSvc.getCurrentDataServer().name}}</div>
                     </div>
 
                 </div>
 
-                <div class="col-md-2 col-sm-2">
+                <div class="col-md-3 col-sm-3">
 
                     <div class="navbar-text">
                         <p class='clickable' ng-show="resourcesFromServer" ng-click="togglePatientDisplay()">

@@ -901,7 +901,12 @@ console.log(profileUrl + " not found")
                         break;
 
                     case 'HumanName' :
-                        var insrt = {text:value.HumanName.text}
+                        var insrt = {}
+                        addIfNotEmpty(value.HumanName.family,insrt,'family');
+                        addIfNotEmpty(value.HumanName.given,insrt,'given');
+                        addIfNotEmpty(value.HumanName.text,insrt,'text');
+
+                        //var insrt.text:value.HumanName.text}
                         simpleInsert(insertPoint,info,path,insrt,dt);
                         this.addStringToText(insertPoint,path+": "+ insrt.text)
                         break;
@@ -981,6 +986,13 @@ console.log(profileUrl + " not found")
 
                         break;
                 }
+
+                function addIfNotEmpty(value,obj,prop) {
+                    if (value) {
+                        obj[prop] = value;
+                    }
+                }
+
 
                 function simpleInsert(insertPoint,info,path,insrt,dt) {
 

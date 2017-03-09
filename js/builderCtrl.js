@@ -307,7 +307,7 @@ angular.module("sampleApp")
                 builderSvc.sendToFHIRServer(bundle).then(
                     function(data){
                         console.log(data.data)
-                        
+
                         bundle.entry.forEach(function(entry){
                             entry.valid='saved'
                         })
