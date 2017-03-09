@@ -26,11 +26,26 @@ angular.module("sampleApp")
 
             refreshLibrary();       //initial load...
 
+
+            $scope.showSelector = true;
+            $scope.toggleSelector = function(){
+                if ($scope.showSelector) {
+                    $scope.leftPaneClass = "col-sm-2 col-md-2"
+                    $scope.midPaneClass = "col-md-5 col-sm-5"
+                    $scope.rightPaneClass = "col-md-5 col-sm-5";
+                } else {
+                    $scope.leftPaneClass = "hidden"
+                    $scope.midPaneClass = "col-md-7 col-sm-7"
+                    $scope.rightPaneClass = "col-md-5 col-sm-5";
+                }
+                $scope.showSelector = !$scope.showSelector
+            }
+
+            $scope.toggleSelector()
+
             /*
              $scope.showLibrary = function(){
-             $scope.leftPaneClass = "col-sm-2 col-md-2"
-             $scope.midPaneClass = "col-md-5 col-sm-5"
-             $scope.rightPaneClass = "col-md-5 col-sm-5";
+
              $scope.libraryVisible = true;
              };
 
@@ -292,6 +307,13 @@ angular.module("sampleApp")
                 builderSvc.sendToFHIRServer(bundle).then(
                     function(data){
                         console.log(data.data)
+                        
+                        bundle.entry.forEach(function(entry){
+                            entry.valid='saved'
+                        })
+
+
+
                         modalService.showModal({}, {bodyText:'All the resources have been updated on the server.'});
                     },
                     function(err) {

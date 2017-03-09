@@ -183,6 +183,10 @@
                             {{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}}
                         </p>
 
+
+                        <a ng-show = "showSelector" href="#" ng-click="toggleSelector()">Show Selector</a>
+                        <a ng-hide = "showSelector" href="#" ng-click="toggleSelector()">Hide Selector</a>
+
                     </div>
                 </div>
 
@@ -407,7 +411,7 @@
         <div class="row" ng-show="thingToDisplay=='scenario'">
 
 
-            <div class="col-md-2 col-sm-2">
+            <div ng-class="leftPaneClass" classDEP="col-md-2 col-sm-2">
 
                 <button class="btn btn-link pull-right" ng-click="newBundle()">New Scenario</button>
                 <h4>Local Scenarios</h4>
@@ -448,8 +452,7 @@
 
 
             </div>
-
-            <div class="col-md-5 col-sm-5 borderForGraph">
+            <div ng-class="midPaneClass" classDEP="col-md-5 col-sm-5 borderForGraph">
 
                 <div ng-hide="selectedContainer">
                     <div uib-alert class="alert-warning">
@@ -469,7 +472,7 @@
 
                     <uib-tabset>
 
-                        <uib-tab heading="Scenario">
+                        <uib-tab heading="Description">
                             <br/>
 
                             <uib-tabset>
@@ -706,17 +709,22 @@
                                                 <div ng-hide="entry.isLogical" ng-switch on="entry.valid" ng-click="validate(entry)">    <!-- todo - not a real bundlemember-->
                                                     <div ng-switch-when="yes">
                                                         <i class="glyphicon glyphicon-ok clickable pass"
-                                                           title="View Resource definition in spec">
+                                                           title="Resource is valid">
                                                         </i>
                                                     </div>
                                                     <div ng-switch-when="no">
                                                         <i class="glyphicon glyphicon-remove clickable fail"
-                                                           title="View Resource definition in spec">
+                                                           title="Resource is not valid">
+                                                        </i>
+                                                    </div>
+                                                    <div ng-switch-when="saved">
+                                                        <i class="glyphicon glyphicon-thumbs-up pass"
+                                                           title="Resource is not valid">
                                                         </i>
                                                     </div>
                                                     <div ng-switch-default>
                                                         <i class="glyphicon glyphicon-question-sign clickable"
-                                                           title="View Resource definition in spec">
+                                                           title="Validity not yet checked">
                                                         </i>
                                                     </div>
                                                 </div>
@@ -773,8 +781,7 @@
 
             </div>
 
-
-            <div class="col-md-5 col-sm-5">
+            <div ng-class="rightPaneClass" classDEP="col-md-5 col-sm-5">
 
                 <div ng-show="displayMode == 'view'">
 
