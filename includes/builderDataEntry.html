@@ -99,13 +99,131 @@
     </div>
 
     <div ng-show="dataTypeBeingEntered == 'Address'">
+
+
+        <div class="row">
+            <div class="col-sm-1 col-md-1">
+                Use
+            </div>
+            <div class="col-sm-2 col-md-2">
+                <select ng-model="input.dt.Address.use" class="form-control">
+                    <option code="home">Home</option>
+                    <option code="work">Work</option>
+                    <option code="temp">Temp</option>
+                    <option code="old">Old</option>
+
+                </select>
+            </div>
+            <div class="col-sm-1 col-md-1">
+                Type
+            </div>
+            <div class="col-sm-2 col-md-2">
+                <select ng-model="input.dt.Address.type" class="form-control">
+                    <option code="postal">Postal</option>
+                    <option code="physical">Physical</option>
+                    <option code="both">Both</option>
+                </select>
+            </div>
+        </div>
+
+        <br/>
+
+        <div class="row">
+
+            <div class="col-sm-4 col-md-4">
+                <input placeholder = 'First line' type="text" class="form-control" ng-model="input.dt.Address.line1"/>
+            </div>
+
+            <div class="col-sm-4 col-md-4">
+                <input placeholder = 'Second line' type="text" class="form-control" ng-model="input.dt.Address.line2"/>
+            </div>
+
+            <div class="col-sm-4 col-md-4">
+                <input placeholder = 'Third line' type="text" class="form-control" ng-model="input.dt.Address.line3"/>
+            </div>
+
+        </div>
+        <br/>
+
+
+        <div class="row">
+
+            <div class="col-sm-3 col-md-3">
+                <input placeholder = 'City' type="text" class="form-control" ng-model="input.dt.Address.city"/>
+            </div>
+
+            <div class="col-sm-3 col-md-3">
+                <input placeholder = 'District' type="text" class="form-control" ng-model="input.dt.Address.district"/>
+            </div>
+
+            <div class="col-sm-3 col-md-3">
+                <input placeholder = 'State' type="text" class="form-control" ng-model="input.dt.Address.state"/>
+            </div>
+
+            <div class="col-sm-3 col-md-3">
+                <input placeholder = 'Postal code' type="text" class="form-control" ng-model="input.dt.Address.postalCode"/>
+            </div>
+
+        </div>
+        <br/>
+
+        <div class="row">
+            <div class="col-sm-3 col-md-3">
+                <input placeholder = 'Country' type="text" class="form-control" ng-model="input.dt.Address.country"/>
+            </div>
+        </div>
+
+        <br/>
+
         <input placeholder = 'Enter text value of Address' type="text" class="form-control" ng-model="input.dt.Address.text"/>
     </div>
 
     <div ng-show="dataTypeBeingEntered == 'HumanName'">
-        <input placeholder = 'Given Name' type="text" class="form-control" ng-model="input.dt.HumanName.given"/>
+
+        <div class="row">
+            <div class="col-sm-1 col-md-1">
+                Use
+            </div>
+            <div class="col-sm-2 col-md-2">
+                <select ng-model="input.dt.HumanName.use" class="form-control">
+                    <option code="usual">Usual</option>
+                    <option code="official">Official</option>
+                    <option code="temp">Temp</option>
+                    <option code="nickname">Nickname</option>
+                    <option code="anonymous">Anonymous</option>
+                    <option code="old">Old</option>
+                    <option code="maiden">Maiden</option>
+                </select>
+            </div>
+        </div>
         <br/>
-        <input placeholder = 'Family Name' type="text" class="form-control" ng-model="input.dt.HumanName.family"/>
+
+        <div class="row">
+            <div class="col-sm-1 col-md-1">
+                <input placeholder = 'Pfx' type="text" class="form-control" ng-model="input.dt.HumanName.prefix"/>
+            </div>
+            <div class="col-sm-3 col-md-3">
+                <input placeholder = 'Given Name' type="text" class="form-control" ng-model="input.dt.HumanName.given"/>
+            </div>
+
+            <div class="col-sm-3 col-md-3">
+                <input placeholder = 'Middle' type="text" class="form-control" ng-model="input.dt.HumanName.middle"/>
+            </div>
+
+            <div class="col-sm-3 col-md-3">
+                <input placeholder = 'Family Name' type="text" class="form-control" ng-model="input.dt.HumanName.family"/>
+            </div>
+
+            <div class="col-sm-2 col-md-2">
+                <input placeholder = 'Suffix' type="text" class="form-control" ng-model="input.dt.HumanName.suffix"/>
+            </div>
+
+        </div>
+
+
+
+        <br/>
+
         <br/>
         <input placeholder = 'Text value of Name' type="text" class="form-control" ng-model="input.dt.HumanName.text"/>
     </div>

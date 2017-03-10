@@ -49,6 +49,11 @@ angular.module("sampleApp")
         objColours.Condition = '#cc9900';
         objColours.LogicalModel = '#cc0000';
 
+        objColours.Organization = '#FF9900';
+        objColours.ProviderRole = '#FFFFCC';
+        objColours.Location = '#cc9900';
+
+
         return {
             getLibraryCategories : function(){
                 //get the codesystem resource that represents the categories. Needs to be more robust...
@@ -107,7 +112,7 @@ angular.module("sampleApp")
                     }
                 });
 
-               // console.log(transBundle)
+
 
 
                 var url = appConfigSvc.getCurrentDataServer().url;
@@ -132,7 +137,7 @@ angular.module("sampleApp")
                             Utilities.validate(entry.resource).then(
                                 function(data){
                                     var oo = data.data;
-                                    console.log(data)
+
                                     entry.valid='yes'
                                     entry.response = {outcome:oo};
 
@@ -141,7 +146,7 @@ angular.module("sampleApp")
                                 function(data) {
                                     var oo = data.data;
                                     entry.response = {outcome:oo};
-                                    // console.log(oo)
+
                                     entry.valid='no'
 
                                 }
@@ -160,8 +165,8 @@ angular.module("sampleApp")
                     function (err) {
 
 
-                        console.log( angular.toJson(err))
-                        deferred.reject()
+
+                        deferred.reject(err)
 
 
                     }
@@ -176,7 +181,7 @@ angular.module("sampleApp")
                     if (res.resourceType == 'Patient') {
                         patient = res;
                     }
-                   // console.log(res);
+
                 })
                 return patient
             },
@@ -186,7 +191,7 @@ angular.module("sampleApp")
                 var deferred = $q.defer();
                 if (profile && profile.snapshot && profile.snapshot.element) {
 
-                    console.log(profile.url)
+
 
                     var logicalModel = angular.copy(profile);       //this will be the logical model
                     var queries = [];       //the queries to retrieve the extension definition
@@ -198,17 +203,17 @@ angular.module("sampleApp")
                         var ar = path.split('.');
                         if (ar.indexOf('extension') > -1) {
                             //this is an extension
-                            console.log('extension');
+
                             if (ed.type) {
                                 var profileUrl = ed.type[0].profile;
                                 if (profileUrl) {
-                                    console.log(profileUrl)
+
                                     queries.push(GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
                                         function (sdef) {
-                                            //console.log(ed,sdef)
+
 
                                             var analysis = Utilities.analyseExtensionDefinition3(sdef);
-console.log(analysis)
+
                                             if (! analysis.isComplexExtension) {
 
 
@@ -251,7 +256,7 @@ console.log(analysis)
                                                 console.log(profileUrl + " is complex, not processed")
                                             }
 
-                                            console.log(analysis);
+
 
                                             /*
                                             //locate the entry in the ED which is 'valueX' and update the ed. todo - need to accomodate complex extensions
@@ -280,7 +285,7 @@ console.log(analysis)
                                         },
                                         function(err) {
                                             //unable to locate extension
-console.log(profileUrl + " not found")
+                                            console.log(profileUrl + " not found")
                                         }
                                     ))
                                 }
@@ -288,7 +293,7 @@ console.log(profileUrl + " not found")
                             }
 
                         }
-                        //console.log(path)
+
 
                     });
 
@@ -302,7 +307,7 @@ console.log(profileUrl + " not found")
 
                                 //return the error and the incomplete model...
                                 deferred.reject({err:err,lm:logicalModel})
-                                console.log( angular.toJson(err))
+
 
 
                             }
@@ -431,11 +436,11 @@ console.log(profileUrl + " not found")
                 //immediate children. Otherwise just use the text of the resource.
 
                 //generate the text for a section. todo - needs to become recursive...
-                //console.log(gAllReferences)
+
                 var html = "";
                 var that = this;
                 section.entry.forEach(function(entry){
-                    //console.log(entry)
+
                     var resource = that.resourceFromReference(entry.reference);
 
                     if (resource) {
@@ -511,7 +516,7 @@ console.log(profileUrl + " not found")
                 var that = this;
                 var Patient = null;
                 angular.forEach(gAllResourcesThisSet,function(value,key){
-                    //console.log(value,key)
+
                     if (value.resourceType == 'Patient') {
                         Patient = value;
                     }
@@ -524,7 +529,7 @@ console.log(profileUrl + " not found")
                             var ed =  SD.snapshot.element[i];
                             var path = ed.path;
                             if (path.substr(-7) == 'subject' || path.substr(-7) == 'patient') {
-                                //console.log(path);
+
                                 that.insertReferenceAtPath(resource,path,Patient)
                                 break;
                             }
@@ -557,7 +562,7 @@ console.log(profileUrl + " not found")
                     //add generated text from resources...
                     var references = ['subject','encounter','author','custodian']
                     angular.forEach(composition,function(value,key){
-                        //console.log(value,key);
+
                         var arResources = [];
 
                         if (references.indexOf(key) > -1) {
@@ -598,7 +603,7 @@ console.log(profileUrl + " not found")
                     html += "<h3>Sections</h3>";
 
                     composition.section.forEach(function(section){
-                        //console.log(section);
+
 
 
                         html += "<h4>"+section.title+"</h4>";
@@ -627,7 +632,7 @@ console.log(profileUrl + " not found")
             saveToLibrary : function (bundleContainer,user) {
                 //save the bundle to the library. Note that the 'container' of the bundle (includes the name) is passed in...
 
-                console.log(user)
+
 
                 var bundle = bundleContainer.bundle;
 
@@ -765,7 +770,7 @@ console.log(profileUrl + " not found")
 
                 GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
                     function (data) {
-                        //console.log(data.data)
+
                         var bundle = data.data;
                         if (bundle && bundle.entry) {
                             var arContainer = []
@@ -800,7 +805,7 @@ console.log(profileUrl + " not found")
                         deferred.resolve(arContainer)
 
                     },function (err) {
-                        console.log(err)
+
                         deferred.reject(err);
                     }
                 )
@@ -901,19 +906,54 @@ console.log(profileUrl + " not found")
                         break;
 
                     case 'HumanName' :
+                        var fhirVersion = appConfigSvc.getCurrentDataServer().version; //format changed between versions
+
                         var insrt = {}
-                        addIfNotEmpty(value.HumanName.family,insrt,'family');
-                        addIfNotEmpty(value.HumanName.given,insrt,'given');
+
+                        addIfNotEmpty(value.HumanName.use,insrt,'use');
+                        addIfNotEmpty(value.HumanName.prefix,insrt,'prefix',true);
+                        addIfNotEmpty(value.HumanName.given,insrt,'given',true);
+                        addIfNotEmpty(value.HumanName.middle,insrt,'given',true);
+                        if (fhirVersion == 2) {
+                            addIfNotEmpty(value.HumanName.family,insrt,'family',true);
+                        } else {
+                            addIfNotEmpty(value.HumanName.family,insrt,'family');
+                        }
+
+
+                        addIfNotEmpty(value.HumanName.suffix,insrt,'suffix',true);
                         addIfNotEmpty(value.HumanName.text,insrt,'text');
 
-                        //var insrt.text:value.HumanName.text}
                         simpleInsert(insertPoint,info,path,insrt,dt);
+
                         this.addStringToText(insertPoint,path+": "+ insrt.text)
                         break;
 
                     case 'Address' :
+                        var insrt = {}
 
-                        var insrt = {text:value.Address.text}
+                        addIfNotEmpty(value.Address.use,insrt,'use');
+                        addIfNotEmpty(value.Address.type,insrt,'type');
+
+                        addIfNotEmpty(value.Address.line1,insrt,'line',true);
+                        addIfNotEmpty(value.Address.line2,insrt,'line',true);
+                        addIfNotEmpty(value.Address.line3,insrt,'line',true);
+
+                        addIfNotEmpty(value.Address.city,insrt,'city');
+                        addIfNotEmpty(value.Address.district,insrt,'district');
+                        addIfNotEmpty(value.Address.state,insrt,'state');
+                        addIfNotEmpty(value.Address.postalCode,insrt,'postalCode');
+
+                        addIfNotEmpty(value.Address.country,insrt,'country');
+
+
+
+
+
+
+                        addIfNotEmpty(value.Address.text,insrt,'text');
+
+                        //var insrt = {text:value.Address.text}
                         simpleInsert(insertPoint,info,path,insrt,dt);
                         this.addStringToText(insertPoint,path+": "+ insrt.text)
                         break;
@@ -987,9 +1027,18 @@ console.log(profileUrl + " not found")
                         break;
                 }
 
-                function addIfNotEmpty(value,obj,prop) {
+                function addIfNotEmpty(value,obj,prop,isArray) {
                     if (value) {
-                        obj[prop] = value;
+                        if (isArray) {
+                            obj[prop] = obj[prop] || []
+                            obj[prop].push(value);
+
+                        } else {
+                            obj[prop] = value;
+                        }
+
+
+
                     }
                 }
 
@@ -1010,7 +1059,7 @@ console.log(profileUrl + " not found")
 
                         //delete any existing elements with this root
                         angular.forEach(insertPoint,function(value,key){
-                            //console.log(key,value)
+
                             if (key.substr(0,elementRoot.length) == elementRoot) {
                                 delete insertPoint[key]
                             }
@@ -1030,13 +1079,9 @@ console.log(profileUrl + " not found")
                             var dtValue = 'value' + info.extensionType.substr(0,1).toUpperCase() + info.extensionType.substr(1);
                             var ext = {}
                             ext[dtValue] = insrt
-                            //var ext = {valueString:insrt};
-                         //   if (angular.isObject(insertPoint)) {
-                                Utilities.addExtensionOnceWithReplace(insertPoint,info.ed.builderMeta.extensionUrl,ext)
-                           // } else {
 
-                               // alert("Can't insert to simple ")
-                         //   }
+                                Utilities.addExtensionOnceWithReplace(insertPoint,info.ed.builderMeta.extensionUrl,ext)
+
 
 
                         } else {
@@ -1045,157 +1090,14 @@ console.log(profileUrl + " not found")
 
 
                     }
-                     //   insertPoint[propertyName] =insrt;
-                }
-
-
-
-
-
-                    return;
-
-/*
-
-
-                   // var segmentPath = resource.resourceType;
-                    var path = $filter('dropFirstInPath')(path);
-
-
-                    if (path.substr(-3) == '[x]') {
-                        var elementRoot = path.substr(0,path.length-3);
-                        path = elementRoot + dt.substr(0,1).toUpperCase() + dt.substr(1);
-
-                        //delete any elements with this root
-                        angular.forEach(insertPoint,function(value,key){
-                            //console.log(key,value)
-                            if (key.substr(0,elementRoot.length) == elementRoot) {
-                                //console.log(key)
-                                delete insertPoint[key]
-                            }
-
-                        })
-
-                    }
-
-                   // console.log(path)
-                    //return;
-
-
-                    var segmentInfo;
-                    var ar = path.split('.');
-                    if (ar.length > 0) {
-                        for (var i=0; i < ar.length-1; i++) {
-                            //not the last one... -
-                            var segment = ar[i];
-
-                            segmentPath += '.'+segment;
-                            //console.log(segmentPath)
-
-                            //segmentInfo = getInfo(segmentPath);
-                            segmentInfo = that.getEDInfoForPath(segmentPath);
-
-
-
-                            if (segmentInfo.isMultiple) {
-                                insertPoint[segment] = insertPoint[segment] || []  // todo,need to allow for arrays
-                                var node = {};
-                                insertPoint[segment].push(node)
-                                insertPoint = node
-                            } else {
-                                insertPoint[segment] = insertPoint[segment] || {}  // todo,need to allow for arrays
-                                insertPoint = insertPoint[segment]
-                            }
-
-
-
-
-                        }
-                        path = ar[ar.length-1];       //this will be the property on the 'last'segment
-                    }
-
-                    if (info.isMultiple) {
-
-                        insertPoint[path] = insertPoint[path] || []
-                        insertPoint[path].push(insrt)
-                    } else {
-                        insertPoint[path] =insrt;
-                    }
-
-
-                    *?
-                }
-            },
-            removeReferenceAtPath : function(resource,path,inx) {
-                //find where the reference is that we want to remove
-
-                var ar = path.split('.');
-                ar.splice(0,1);
-
-                if (ar.length > 1) {
-                    ar.pop();
-                }
-                path = ar.join('.')
-
-
-                // var path = $filter('dropFirstInPath')(path);
-                //path.pop();
-                //console.log(resource,path,inx);
-                if (inx !== undefined) {
-                    var ptr = resource[path]
-                    //delete ptr[inx]
-                    ptr.splice(inx,1);
-                } else {
-                    delete resource[path]
-                }
-
-
-
-
-
-                /*
-                 var info = this.getEDInfoForPath(path);
-
-                 var segmentPath = resource.resourceType;
-                 //var rootPath = $filter('dropFirstInPath')(path);
-                 var path = $filter('dropFirstInPath')(path);
-                 var deletePoint = resource;
-                 var ar = path.split('.');
-                 if (ar.length > 0) {
-                 for (var i=0; i < ar.length-1; i++) {
-                 //not the last one... -
-                 var segment = ar[i];
-
-                 segmentPath += '.'+segment;
-                 console.log(segmentPath)
-
-                 var segmentInfo = this.getEDInfoForPath(segmentPath);
-
-                 if (segmentInfo.isMultiple) {
-                 deletePoint[segment] = deletePoint[segment] || []  // todo,need to allow for arrays
-                 var node = {};
-                 deletePoint[segment].push(node)
-                 deletePoint = node
-                 } else {
-                 deletePoint[segment] = deletePoint[segment] || {}  // todo,need to allow for arrays
-                 deletePoint = deletePoint[segment]
-                 }
-
-
-
-
-                 }
-                 path = ar[ar.length-1];       //this will be the property on the 'last'segment
-                 }
-
-
-
-                 console.log(insertPoint)
-
-                 */
-
-                if (inx) {
 
                 }
+
+
+
+
+
+
 
             },
             insertReferenceAtPath : function(resource,path,referencedResource,insertPoint) {
@@ -1401,6 +1303,7 @@ console.log(profileUrl + " not found")
                 return info;
 
             },
+
             getDetailsByPathForResource : function(resource) {
                 //return a hash by path for the given resource indicating multiplicty at that point. Used for creating references...
                 //var type = resource.resourceType;
@@ -1408,7 +1311,7 @@ console.log(profileUrl + " not found")
                 var uri = "http://hl7.org/fhir/StructureDefinition/" + resource.resourceType;
                 GetDataFromServer.findConformanceResourceByUri(uri).then(
                     function (SD) {
-                        //console.log(SD);
+
                         var hash = {}
                         if (SD && SD.snapshot && SD.snapshot.element) {
                             SD.snapshot.element.forEach(function (ed) {
@@ -1423,7 +1326,7 @@ console.log(profileUrl + " not found")
 
                     },
                     function (err) {
-                        console.log(err);
+
                         deferred.reject(err)
                     })
                 return deferred.promise;
@@ -1449,12 +1352,12 @@ console.log(profileUrl + " not found")
                 //find elements of type refernce at this level
                 function findReferences(refs,node,nodePath) {
                     angular.forEach(node,function(value,key){
-                        //console.log(key,value);
+
                         //if it's an object, does it have a child called 'reference'?
                         if (angular.isObject(value)) {
                             if (value.reference) {
                                 //this is a reference!
-                                //console.log('>>>>>>>>'+value.reference)
+
                                 var lpath = nodePath + '.' + key;
                                 refs.push({path:lpath,reference : value.reference})
                             } else {
@@ -1468,7 +1371,7 @@ console.log(profileUrl + " not found")
 
                                 if (obj.reference) {
                                     //this is a reference!
-                                    //console.log('>>>>>>>>'+value.reference)
+
                                     var lpath = nodePath + '.' + key;
                                     refs.push({path:lpath,reference : obj.reference})
                                 } else {
@@ -1690,98 +1593,7 @@ console.log(profileUrl + " not found")
                 }
 
 
-                /*
 
-                 getModelReferences(lst,SD,SD.url);      //recursively find all the references between models...
-
-                 console.log(lst);
-
-                 //build the tree model...
-
-
-
-
-                 lst.forEach(function(reference){
-
-                 var srcNode = getNodeByUrl(reference.src,reference.path,objNodes,arNodes);
-                 var targNode = getNodeByUrl(reference.targ,reference.path,objNodes,arNodes);
-
-                 var ar = reference.path.split('.');
-                 var label = ar.pop();
-                 //ar.splice(0,1);
-                 //var label = ar.join('.');
-                 arEdges.push({from: srcNode.id, to: targNode.id, label: label,arrows : {to:true}})
-
-                 })
-
-
-                 var nodes = new vis.DataSet(arNodes);
-                 var edges = new vis.DataSet(arEdges);
-
-                 // provide the data in the vis format
-                 var data = {
-                 nodes: nodes,
-                 edges: edges
-                 };
-
-                 //construct an object that is indexed by nodeId (for the model selection from the graph
-                 var nodeObj = {};
-                 arAllModels = []; //construct an array of all the models references by this one
-                 arNodes.forEach(function(node){
-                 nodeObj[node.id] = node;
-                 arAllModels.push({url:node.url})
-                 });
-
-
-
-
-
-
-                 return {references:lst,graphData:data, nodes : nodeObj,lstNodes : arAllModels};
-
-                 function getNodeByUrl(url,label,nodes) {
-                 if (nodes[url]) {
-                 return nodes[url];
-                 } else {
-                 var ar = url.split('/')
-                 //var label =
-                 var node = {id: arNodes.length +1, label: ar[ar.length-1], shape: 'box',url:url};
-                 if (arNodes.length == 0) {
-                 //this is the first node
-                 node.color = 'green'
-                 node.font = {color:'white'}
-                 }
-
-
-                 nodes[url] = node;
-                 arNodes.push(node);
-                 return node;
-                 }
-                 }
-
-
-                 function getModelReferences(lst,SD,srcUrl) {
-                 var treeData = that.createTreeArrayFromSD(SD);
-
-                 treeData.forEach(function(item){
-
-                 if (item.data) {
-                 //console.log(item.data.referenceUri);
-                 if (item.data.referenceUri) {
-                 var ref = {src:srcUrl, targ:item.data.referenceUri, path: item.data.path}
-                 lst.push(ref);
-                 var newSD = that.getModelFromBundle(bundle,item.data.referenceUri);
-                 if (newSD) {
-                 getModelReferences(lst,newSD,newSD.url)
-                 }
-
-                 }
-                 }
-                 })
-
-                 }
-
-                 */
 
             },
             getResourcesOfType : function(type,bundle){

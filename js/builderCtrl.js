@@ -78,7 +78,7 @@ angular.module("sampleApp")
 
 
                 } else {
-                    console.log('no user')
+                    //console.log('no user')
                     logicalModelSvc.setCurrentUser(null);
                     $scope.showNotLoggedIn = true;
                     delete $scope.Practitioner;
@@ -115,7 +115,7 @@ angular.module("sampleApp")
                    //problem with setting a default is that there are 2 dependany async operations...
                    //$scope.input.selectedLibraryCategory = cs.concept[0];    //to set the default in the library
                    //$scope.makeLibraryDisplayList($scope.input.selectedLibraryCategory);
-                       console.log(cs);
+                      // console.log(cs);
                }
             );
 
@@ -280,7 +280,7 @@ angular.module("sampleApp")
 
             $scope.validateAll = function(){
                 var bundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
-                console.log(bundle);
+               // console.log(bundle);
                 $scope.waiting = true;
                 builderSvc.validateAll(bundle).then(
                     function(data){
@@ -302,11 +302,11 @@ angular.module("sampleApp")
 
             $scope.saveToFHIRServer =function() {
                 var bundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
-                console.log(bundle);
+                //console.log(bundle);
                 $scope.waiting = true;
                 builderSvc.sendToFHIRServer(bundle).then(
                     function(data){
-                        console.log(data.data)
+                        //console.log(data.data)
 
                         bundle.entry.forEach(function(entry){
                             entry.valid='saved'
@@ -318,7 +318,7 @@ angular.module("sampleApp")
                     },
                     function(err) {
                         modalService.showModal({}, {bodyText:'There was an error:'+angular.toJson(err)});
-                        console.log(err)
+                        //console.log(err)
                     }
                 ).finally(function(){
                     $scope.waiting = false;
@@ -334,7 +334,7 @@ angular.module("sampleApp")
                 Utilities.validate(entry.resource).then(
                     function(data){
                         var oo = data.data;
-                        console.log(data)
+                        //console.log(data)
                         entry.valid='yes'
                         entry.response = {outcome:oo};
 
@@ -453,7 +453,7 @@ angular.module("sampleApp")
             }
 
             $scope.resourceFromServerSelected = function(bundle, inx) {
-                console.log(bundle, inx)
+               // console.log(bundle, inx)
 
                 addExistingResource(bundle.entry[inx].resource);
                 bundle.entry.splice(inx,1)
@@ -520,7 +520,7 @@ angular.module("sampleApp")
                     }
 
                 }).result.then(function(vo){
-                    console.log(vo)
+                    //console.log(vo)
                     if (vo.name) {
                         delete $scope.isaDocument
                         var newBundleContainer = {name:vo.name,bundle:{resourceType:'Bundle',entry:[]}};
@@ -533,7 +533,7 @@ angular.module("sampleApp")
                         $scope.selectedContainer = newBundleContainer;
                         $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
 
-                        console.log(newBundleContainer)
+                       // console.log(newBundleContainer)
 
 
                         makeGraph();
@@ -578,7 +578,7 @@ angular.module("sampleApp")
 
             $scope.deleteScenario = function(container){
 
-                console.log(container);
+
 
                 var modalOptions = {
                     closeButtonText: "No, I changed my mind",
@@ -664,7 +664,7 @@ angular.module("sampleApp")
                         modalService.showModal({}, {bodyText:'The set has been downloaded from the Library. You can now edit it locally.'});
 
                         refreshLibrary();       //so the download link is disabled...
-                        //console.log($scope.selectedContainer)
+
 
                     } 
                 } else {
@@ -680,14 +680,14 @@ angular.module("sampleApp")
             $scope.saveToLibrary = function(){
 
                 var user = logicalModelSvc.getCurrentUser();
-                //console.log(user)
+
                 if (! user) {
                     modalService.showModal({}, {bodyText:'You must be logged in to save to the Library.'});
                     return;
                 }
 
                 var container = $localStorage.builderBundles[$scope.currentBundleIndex];
-                //console.log(container)
+
                 if (container.author && container.author.length > 0) {
                     //There's an auther so make sure this author is one of them. Allow..
                     if (user.email !== container.author[0].display) {
@@ -703,7 +703,7 @@ angular.module("sampleApp")
                         $scope.selectedContainer.isDirty = false;
                         modalService.showModal({}, {bodyText:'The set has been updated in the Library. You can continue editing.'});
                         refreshLibrary();
-                        //console.log(data)
+
                     },function (err) {
                         modalService.showModal({}, {bodyText:'Sorry, there was an error updating the library:' + angular.toJson(err)})
                         console.log(err)
@@ -725,21 +725,9 @@ angular.module("sampleApp")
                 $scope.currentPatient = builderSvc.getPatientResource();
 
                 getExistingData($scope.currentPatient)
-/*
-                if ($scope.currentPatient) {
-                    supportSvc.getAllData($scope.currentPatient.id).then(
-                        //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
-                        function(data){
-                            $scope.resourcesFromServer = data;
-                            console.log($scope.resourcesFromServer);
-                        },
-                        function(err){
-                            console.log(err)
-                        })
-                }
-                */
 
-                console.log($scope.currentPatient);
+
+
                 makeGraph();
                 delete $scope.currentResource;
                 isaDocument();      //determine if this bundle is a document (has a Composition resource)
@@ -873,7 +861,7 @@ angular.module("sampleApp")
             $scope.editResource = function(resource){
                 $scope.selectedContainer.isDirty = true;
                 var vo = builderSvc.splitNarrative(resource.text.div)  //return manual & generated text
-                //console.log(vo)
+
 
                 var modalOptions = {
                     closeButtonText: "Cancel",
@@ -887,7 +875,7 @@ angular.module("sampleApp")
 
                 modalService.showModal({}, modalOptions).then(
                     function (result) {
-                        //console.log(result)
+
                         if (result.userText) {
                             //create the text and add the manual marker (to separate this from generated text)
                             var narrative = builderSvc.addGeneratedText(result.userText,vo.generated);
@@ -944,7 +932,7 @@ angular.module("sampleApp")
 
 
                         refreshLibrary();       //so the download link is disabled...
-                                                //console.log($scope.selectedContainer)
+
 
                     }
                 );
@@ -1018,7 +1006,7 @@ angular.module("sampleApp")
                     var vo = builderSvc.makeGraph($scope.selectedContainer.bundle,centralResource)   //todo - may not be the right place...
 
                     $scope.allReferences = vo.allReferences;                //all references in the entire set.
-                    //console.log($scope.allReferences)
+
                     var container = document.getElementById('resourceGraph');
                     var options = {
                         physics: {
@@ -1031,7 +1019,7 @@ angular.module("sampleApp")
                     $scope.chart = new vis.Network(container, vo.graphData, options);
                     $scope.chart.on("click", function (obj) {
 
-                        console.log(obj)
+
 
                         var nodeId = obj.nodes[0];  //get the first node
 
@@ -1043,7 +1031,7 @@ angular.module("sampleApp")
                             } else {
                                 var edgeId = obj.edges[0];
                                 var edge = vo.graphData.edges.get(edgeId);
-                                console.log(edge)
+
                                 $scope.selectReference(edge,vo.nodes)
                             }
 
@@ -1067,7 +1055,7 @@ angular.module("sampleApp")
 
             $scope.removeReferenceDEP = function(ref) {
 
-                console.log(ref)
+
                 alert("Sorry, there's a bug removing references - working on it...")
                 return;
 
@@ -1089,7 +1077,7 @@ angular.module("sampleApp")
                 $timeout(function(){
                     if ($scope.chart) {
                         $scope.chart.fit();
-                        //console.log('fitting...')
+
                     }
 
                 },1000)
@@ -1109,13 +1097,13 @@ angular.module("sampleApp")
                 if (uri) {
                     GetDataFromServer.getValueSet(uri).then(
                         function(vs) {
-                            //console.log(vs)
+
                             $scope.showVSBrowserDialog.open(vs);
 
                         },
                         function(err) {
                             modalService.showModal({}, {bodyText:err});
-                            //console.log(err)
+
                         }
                     ).finally (function(){
                         $scope.showWaiting = false;
@@ -1155,13 +1143,7 @@ angular.module("sampleApp")
                 });
 
 
-                /*
-                console.log(fromResource,toResource,path)
-                var element = builderSvc.analyseInstanceForPath(fromResource,path)
-                if (element.modelPoint) {
-                    delete element.modelPoint
-                }
-                */
+
             };
 
             $scope.selectReference = function(edge,nodes) {
@@ -1247,7 +1229,7 @@ angular.module("sampleApp")
 
                 profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
                     function(vo) {
-                        //console.log(vo.treeData)
+
 
                         $('#SDtreeView').jstree('destroy');
                         $('#SDtreeView').jstree(
@@ -1303,20 +1285,17 @@ angular.module("sampleApp")
 
                                     if (urlToValueSet) {
 
-                                  //  if ($scope.hashPath.ed.binding && $scope.hashPath.ed.binding.valueSetReference &&
-                                     //   $scope.hashPath.ed.binding.valueSetReference.reference) {
 
-                                       // var url = $scope.hashPath.ed.binding.valueSetReference.reference;
                                         Utilities.getValueSetIdFromRegistry(urlToValueSet,function(vsDetails) {
                                             $scope.vsDetails = vsDetails;  //vsDetails = {id: type: resource: }
-                                            //console.log(vsDetails);
+
                                             if ($scope.vsDetails) {
                                                 if ($scope.vsDetails.type == 'list' || ed.type[0].code == 'code') {
                                                     //this has been recognized as a VS that has only a small number of options...
                                                     GetDataFromServer.getExpandedValueSet($scope.vsDetails.id).then(
                                                         function (vs) {
                                                             $scope.expandedValueSet = vs;
-                                                            console.log(vs);
+
                                                         }, function (err) {
                                                             alert(err + ' expanding ValueSet')
                                                         }
@@ -1416,7 +1395,7 @@ angular.module("sampleApp")
                 var objReferences = {}      //a hash of path vs possible resources for that path
 
                 var references = builderSvc.getReferences(SD); //a list of all possible references by path
-                //console.log(references);
+
                 $scope.bbNodes = [];        //backbone nodes to add
                 $scope.l2Nodes = {};        //a hash of nodes off the root that can have refernces. todo: genaralize for more levels
 
@@ -1469,7 +1448,7 @@ angular.module("sampleApp")
 
                 })
 
-                //console.log(objReferences)
+
                 $scope.objReferences = objReferences;
                // if (cb) {
                   //  cb();
@@ -1562,7 +1541,7 @@ angular.module("sampleApp")
 
                 resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text + builderSvc.getManualMarker())};
 
-                //console.log(resource);
+
 
                 builderSvc.addResourceToAllResources(resource)
 
@@ -1603,10 +1582,10 @@ angular.module("sampleApp")
                 var uri = "http://hl7.org/fhir/StructureDefinition/"+type;
                 GetDataFromServer.findConformanceResourceByUri(uri).then(
                     function(data) {
-                        //console.log(data);
+
                         $scope.currentType = data;
                         $scope.references = builderSvc.getReferences($scope.currentType)
-                        //console.log($scope.references);
+
 
                     },
                     function(err) {
@@ -1659,18 +1638,9 @@ angular.module("sampleApp")
                 if (cheat) {
                     GetDataFromServer.adHocFHIRQuery("http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/dhtest1profile").then(
                         function(data) {
-                            console.log(data);
-                            //var profile = data.data;
-                            $scope.selectedProfileFromDialog(data.data)
-                            /*
 
-                            builderSvc.makeLogicalModelFromSD(profile).then(
-                                function (lm) {
-                                    console.log(lm);
-                                    $scope.selectedProfileFromDialog(lm)
-                                }
-                            )
-                            */
+                            $scope.selectedProfileFromDialog(data.data)
+
                         }
                     )
                 } else {
@@ -1680,18 +1650,15 @@ angular.module("sampleApp")
 
             $scope.selectedProfileFromDialog = function (profile) {
 
-                //return;
-
-                console.log(profile)
                 builderSvc.makeLogicalModelFromSD(profile).then(
                     function (lm) {
-                        console.log(lm);
+
                         selectLogicalModal(lm,profile.url)
 
 
                     },
                     function(vo) {
-                        console.log(vo);
+
                         //if cannot locate an extension. returns the error and the incomplete LM
                         selectLogicalModal(vo.lm,profile.url)
                     }

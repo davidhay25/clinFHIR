@@ -105,6 +105,7 @@
   {"name": "Library","reference":true,"version":"2.1"},
 
   {"name": "Measure","reference":true,"version":"2.1"},
+  {"name": "Endpoint","reference":true,"version":"2.1"},
 
   {"name": "ExpansionProfile","reference":true,"version":"2.1"},
   {"name": "Sequence","version":"2.1"},
