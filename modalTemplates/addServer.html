@@ -105,9 +105,10 @@
             <div class="pull-right"  >
 
                 <div>
+                    <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
                     <button ng-hide="input.valid || ! input.url" class="btn btn-primary" ng-click="test()">Test</button>
                     <button ng-show="input.valid && input.name && input.version" class="btn btn-success" ng-click="add()">Add</button>
-                    <button class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
+
 
                 </div>
 

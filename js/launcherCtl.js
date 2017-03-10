@@ -73,6 +73,9 @@ angular.module("sampleApp")
             };
 
 
+
+
+
             //data for the chart
             GetDataFromServer.getAccessAudit().then(
                 function(log){

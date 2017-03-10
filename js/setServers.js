@@ -2,13 +2,74 @@
 
 angular.module("sampleApp")
     .controller('setServersCtrl',
-        function ($scope,appConfigSvc) {
+        function ($scope,appConfigSvc,$uibModal,GetDataFromServer) {
 
             $scope.allServers = appConfigSvc.getAllServers();
             $scope.terminologyServers = appConfigSvc.getAllTerminologyServers();
 
             $scope.input = {}
 
+            console.log($scope.allServers)
+
+
+            $scope.addServer = function(){
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop.
+                    keyboard: false,       //same as above.
+                    templateUrl: 'modalTemplates/addServer.html',
+                    size:'lg',
+                    controller: function($scope,appConfigSvc,modalService){
+                        $scope.input={version:"2"}
+                        $scope.input.valid = false;
+
+                        $scope.add = function() {
+                            var svr = {name:$scope.input.name,url:$scope.input.url,
+                                version:parseInt($scope.input.version,10),everythingOperation:$scope.input.everything}
+
+
+
+                            console.log(svr);
+                            appConfigSvc.addServer(svr,$scope.input.terminology);
+                            $scope.$close();
+
+                        };
+
+                        $scope.test = function() {
+
+                            var svr = appConfigSvc.getServerByUrl($scope.input.url);
+                            if (svr) {
+                                modalService.showModal({}, {bodyText: 'That URL is already defined as '+svr.name + ' and cannot be added again.'})
+                                $scope.input.valid = false;
+                                return;
+                            }
+
+
+                            var qry = $scope.input.url + "metadata";
+                            $scope.waiting=true;
+                            GetDataFromServer.adHocFHIRQuery(qry).then(
+                                function(data){
+                                    modalService.showModal({}, {bodyText: 'Conformance resource returned. Server can be added'})
+                                    $scope.input.valid = true;
+
+                                    //get the fhir version from the conformance resource
+                                    $scope.fhirVersion = data.data.fhirVersion;
+
+
+                                },
+                                function(err){
+                                    modalService.showModal({}, {bodyText: 'There is no valid FHIR server at this URL:'+qry})
+
+                                }
+                            ).finally(function(){
+                                $scope.waiting=false;
+                            })
+
+                        }
+
+                    }
+
+                })
+            }
 
 
             function showConfig(){

@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-03-05a';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-03-10a';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};
@@ -118,6 +118,8 @@ angular.module("sampleApp")
         //defaultConfig.allKnownServers.push({name:"Grahame STU2 server (Proxy)",url:"grahamv2/",version:2,everythingOperation:true,realUrl:'http://fhir2.healthintersections.com.au/open/'});
         
         defaultConfig.allKnownServers.push({name:"Public HAPI STU2 server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2,everythingOperation:true});
+
+
         defaultConfig.allKnownServers.push({name:"Public HAPI STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true,isTerminology:true});
 
         defaultConfig.allKnownServers.push({name:'SNapp STU3',version:3,url:"http://snapp.clinfhir.com:8080/baseDstu3/",everythingOperation:true});
@@ -135,7 +137,7 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'Simplifier STU2',version:2,url:"https://simplifier.net/api/fhir/"});
         defaultConfig.allKnownServers.push({name:'Aegis WildFHIR STU3',version:3,url:" http://wildfhir.aegis.net/fhir1-6-0/"});
         defaultConfig.allKnownServers.push({name:'SNApp',version:3,url:"http://snapp.clinfhir.com:8080/baseDstu3/"});
-        defaultConfig.allKnownServers.push({name:'123',version:3,url:"https://fhirsandbox1.tsysinteropsvcs.net/sites/123/"});
+        //defaultConfig.allKnownServers.push({name:'123',version:3,url:"https://fhirsandbox1.tsysinteropsvcs.net/sites/123/"});
 
         defaultConfig.allKnownServers.push({name:'GoFHIR',version:3,url:"https://syntheticmass.mitre.org/fhir/"});
 
@@ -283,11 +285,21 @@ angular.module("sampleApp")
             },
             getAllServers : function() {
                 //console.log(config.allKnownServers)
-              return defaultConfig.allKnownServers;
+                if (! $localStorage.config) {
+                    $localStorage.config = defaultConfig;
+                }
+              return $localStorage.config.allKnownServers;
             },
             getAllTerminologyServers : function(){
+
+                if (! $localStorage.config) {
+                    $localStorage.config = defaultConfig;
+                }
+
+
+
                 var lst = [];
-                defaultConfig.allKnownServers.forEach(function(svr){
+                $localStorage.config.allKnownServers.forEach(function(svr){
                     if (svr.isTerminology) {
                         lst.push(svr)
                     }

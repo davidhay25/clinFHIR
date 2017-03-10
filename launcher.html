@@ -419,94 +419,12 @@ so is discouraged.</p>
                             <br/> <br/>
                         </div>
 
-
-
-<!--
-                    <div ng-show = "showServers">
-                        <form>
-
-                            <div class="form-group" >
-
-                                <label>Data Server</label>
-                                <div class="row">
-                                    <div class="col-sm-11 col-md-11">
-                                        <select ng-model="input.dataServer" class="form-control"
-                                                ng-options="item.name for item in allServers"
-                                                ng-change="serverDirty = true">
-
-                                        </select>
-                                    </div>
-                                    <div class="col-sm-1 col-md-1">
-                                        <i class="glyphicon glyphicon-question-sign clickable"
-                                              uib-popover="The data server holds most resources apart from the Conformance ones"
-                                              popover-placement="left"
-                                              popover-trigger="'mouseenter'"></i>
-                                    </div>
-
-                                </div>
-
-
-                            </div>
+                    <a href="#" ng-click="addServer()">Add Server</a>
+                    <br/>
 
 
 
-                            <div class="form-group">
-                                <label>Conformance Server</label>
-                                <div class="row">
-                                    <div class="col-sm-11 col-md-11">
 
-                                        <select ng-model="input.confServer" class="form-control"
-                                                ng-options="item.name for item in allServers"
-                                                ng-change="serverDirty = true">
-
-                                        </select>
-                                    </div>
-                                        <div class="col-sm-1 col-md-1">
-                                            <i class="glyphicon glyphicon-question-sign clickable"
-                                               uib-popover="The data conformance server holds Profiles, Extension Definitions and other conformance resources"
-                                               popover-placement="left"
-                                               popover-trigger="'mouseenter'"></i>
-                                        </div>
-                                </div>
-                            </div>
-
-
-
-                            <div class="form-group">
-                                <label>Terminology Server</label>
-                                <div class="row">
-                                    <div class="col-sm-11 col-md-11">
-
-                                        <select ng-model="input.termServer" class="form-control"
-                                                ng-options="item.name for item in terminologyServers"
-                                                ng-change="serverDirty = true">
-
-                                        </select>
-                                    </div>
-
-                                    <div class="col-sm-1 col-md-1">
-                                        <i class="glyphicon glyphicon-question-sign clickable"
-                                           uib-popover="The terminology server holds ValueSets, and exposes terminology operations"
-                                           popover-placement="left"
-                                           popover-trigger="'mouseenter'"></i>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </form>
-
-                        <div>
-                            <button ng-show="serverDirty" class="btn btn-primary pull-right" ng-click="save()">Save</button>
-                            <em>Should all be the same FHIR version</em>
-
-                        </div>
-
-
-                        <br/>
-                    </div>
-
-
-                    -->
 
                 </div>
             </div>
