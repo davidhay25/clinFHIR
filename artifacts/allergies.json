@@ -1,1 +1,36 @@
-{"servers":{"terminology":"http://fhir3.healthintersections.com.au/open/","data":"http://fhirtest.uhn.ca/baseDstu3/","conformance":"http://fhirtest.uhn.ca/baseDstu3/"},"lastUpdated":"2017-03-05a","standardExtensionUrl":{"vsDirectConcept":"http://clinfhir.com/fhir/StructureDefinition/vsDirectConcept","edMappingComment":"http://clinfhir.com/fhir/StructureDefinition/edMappingComment","mapToModel":"http://clinfhir.com/fhir/StructureDefinition/mapToModel","baseTypeForModel":"http://clinfhir.com/fhir/StructureDefinition/baseTypeForModel","docrefDescription":"http://clinfhir.com/fhir/StructureDefinition/docrefDescription","simpleExtensionUrl":"http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl","clinFHIRCreated":"http://clinfhir.com/fhir/StructureDefinition/cfAuthor","userEmail":"http:www.clinfhir.com/StructureDefinition/userEmail"},"standardSystem":{"identifierSystem":"http://clinfhir.com/fhir/NamingSystem/identifier","practitionerIdentifierSystem":"http://clinfhir.com/fhir/NamingSystem/practitioner","listTypes":"http://clinfhir.com/fhir/CodeSystem/listTypes"},"standardCode":{"lmPalette":"http://clinfhir.com/fhir/CodeSystem/listTypes|lmPalette"},"baseSpecUrl":"http://hl7.org/fhir/","logLevel":0,"enableCache":false,"defaultTerminologyServerUrl":"http://fhirtest.uhn.ca/baseDstu3/","terminologyServers":[{"name":"Grahames STU2 Server","version":2,"url":"http://fhir2.healthintersections.com.au/open/"},{"name":"Grahames STU3 Server","version":3,"url":"http://fhir3.healthintersections.com.au/open/"},{"name":"Public HAPI STU3 server","version":3,"url":"http://fhirtest.uhn.ca/baseDstu3/"},{"name":"Ontoserver","version":3,"url":"http://52.63.0.196:8080/fhir/"},{"name":"Local HAPI STU3","url":"http://localhost:8080/baseDstu3/","version":3}],"allKnownServers":[{"name":"Grahames STU2 server","url":"http://fhir2.healthintersections.com.au/open/","version":2,"everythingOperation":true,"isTerminology":true},{"name":"Grahame STU3 server","url":"http://fhir3.healthintersections.com.au/open/","version":3,"everythingOperation":true,"isTerminology":true},{"name":"Public HAPI STU2 server","url":"http://fhirtest.uhn.ca/baseDstu2/","version":2,"everythingOperation":true},{"name":"Public HAPI STU3 server","url":"http://fhirtest.uhn.ca/baseDstu3/","version":3,"everythingOperation":true,"isTerminology":true},{"name":"SNapp STU3","version":3,"url":"http://snapp.clinfhir.com:8080/baseDstu3/","everythingOperation":true},{"name":"HealthConnex STU2 server","url":"http://sqlonfhir-dstu2.azurewebsites.net/fhir/","version":2,"everythingOperation":true},{"name":"HealthConnex STU3 server","url":"http://sqlonfhir-may.azurewebsites.net/fhir/","version":3,"everythingOperation":true},{"name":"Local HAPI STU2 server","url":"http://localhost:8080/baseDstu2/","version":2,"everythingOperation":true},{"name":"Local HAPI STU3 server","url":"http://localhost:8080/baseDstu3/","version":3,"everythingOperation":true,"isTerminology":true},{"name":"HL7 New Zealand STU2 server","url":"http://fhir.hl7.org.nz/baseDstu2/","version":2},{"name":"Ontoserver STU3","version":3,"url":"http://52.63.0.196:8080/fhir/","isTerminology":true},{"name":"MiHIN STU2","version":2,"url":"http://52.72.172.54:8080/fhir/baseDstu2/"},{"name":"Simplifier STU2","version":2,"url":"https://simplifier.net/api/fhir/"},{"name":"Aegis WildFHIR STU3","version":3,"url":" http://wildfhir.aegis.net/fhir1-6-0/"},{"name":"SNApp","version":3,"url":"http://snapp.clinfhir.com:8080/baseDstu3/"},{"name":"123","version":3,"url":"https://fhirsandbox1.tsysinteropsvcs.net/sites/123/"},{"name":"GoFHIR","version":3,"url":"https://syntheticmass.mitre.org/fhir/"},{"name":"HSPC","version":3,"url":"https://api3.hspconsortium.org/fhirconnect14/open/","everythingOperation":true},{"name":"localPubHap","url":"http://fhirtest.uhn.ca/baseDstu3/","version":3},{"name":"xx","url":"http://fhirtest.uhn.ca/baseDstu3/","version":3},{"name":"xx","url":"http://fhirtest.uhn.ca/baseDstu3/","version":2},{"name":"xx","url":"http://fhirtest.uhn.ca/baseDstu3/","version":2}]}
+{
+  "resourceType": "Organization",
+  "id": "cf-1488989192317",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Good Health Clinicname: Good Health Clinicname: daves clinic<a name='mm'/></div>"
+  },
+  "name": "daves clinic",
+  "contact": [
+    {
+      "purpose": {
+        "coding": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-definition",
+                "valueString": "Contact details for administrative enquiries."
+              }
+            ],
+            "system": "http://hl7.org/fhir/contactentity-type",
+            "code": "ADMIN",
+            "display": "Administrative"
+          }
+        ]
+      },
+      "name": {
+        "use": "Usual",
+        "given": [
+          "John",
+          "Doe"
+        ]
+      }
+    },
+    {}
+  ]
+}

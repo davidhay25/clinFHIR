@@ -1132,7 +1132,7 @@ angular.module("sampleApp")
             };
 
             //NOT WORKING
-            $scope.removeReference = function(fromResource,toResource,path) {
+            $scope.removeReferenceDEP = function(fromResource,toResource,path) {
 
                 modalService.showModal({}, {bodyText:'Sorry, still working on this. Removing either of the resources will remove the reference. (A bit brutal I admit)'});
                 return

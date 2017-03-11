@@ -813,15 +813,16 @@
 
 
                     <uib-tabset ng-show="currentResource">
+                        <br/>
 
-                        
+                        <uib-tabset>
 
-                        <uib-tab heading="Structure & Reference">
+                            <uib-tab heading="Structure & Reference">
 
-                            <div class="row">
-                                <div class="col-sm-5 col-md-5">
-                                    <br />
-                                    <span class="pull-right">
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5">
+                                        <br />
+                                        <span class="pull-right">
                                         <a target="_blank" ng-href="{{fhirBasePath}}{{currentResource.resourceType | getLogicalID | lowercase}}.html">
                                             <i class="glyphicon glyphicon-globe"
                                                title="View Resource definition in spec">
@@ -831,149 +832,149 @@
                                     </span>
 
 
-                                    <div id="SDtreeView"></div>
+                                        <div id="SDtreeView"></div>
 
 
-                                </div>
-
-
-
-                                <div class="col-sm-7 col-md-7">
-
-
-                                    <br/>
-
-                                    <div class="row">
-                                        <div class="col-md-9 col-sm-9">
-                                            <div class="rounded-box"><p ng-bind-html="currentResource.text.div"></p></div>
-                                        </div>
-                                        <div class="col-md-3 col-sm-3">
-                                            <i class="glyphicon glyphicon-edit iconSpacing pull-right"
-                                               title="Edit text"
-                                               ng-click="editResource(currentResource)" style="cursor: pointer">
-
-                                            </i>
-
-
-                                            <br />
-                                            <i class="glyphicon glyphicon-remove iconSpacing pull-right"
-                                               title="Delete resource"
-                                               ng-click="removeResource(currentResource)" style="cursor: pointer">
-
-                                            </i>
-
-
-                                        </div>
                                     </div>
 
 
 
-
-                                    <br/>
-                                    <div class="banner" ng-show="hashPath">{{hashPath.path}}</div>
-
-                                    <div ng-show="currentElementValue.display">
-                                        <h5>Current Value</h5>
-                                        <div>{{currentElementValue.display}}</div>
-                                        <br/>
-                                    </div>
+                                    <div class="col-sm-7 col-md-7">
 
 
-                                    <!-- show any existing elements that are parents of this element-->
-                                    <div ng-show="existingElements.isMultipleBbe">
                                         <br/>
 
                                         <div class="row">
-                                            <div class="col-sm-3 col-md-3">
-                                                <h5>Parent branches created</h5>
+                                            <div class="col-md-9 col-sm-9">
+                                                <div class="rounded-box"><p ng-bind-html="currentResource.text.div"></p></div>
                                             </div>
-                                            <div class="col-sm-7 col-md-7">
-                                                <ul class="pagination">
-                                                    <li  ng-repeat="element in existingElements.list" ng-class="{active:$index==input.selectedExistingElement}">
-                                                        <a href="#" ng-click="input.selectedExistingElement=$index">{{$index+1}}</a>
-                                                    </li>
-                                                </ul>
+                                            <div class="col-md-3 col-sm-3">
+                                                <i class="glyphicon glyphicon-edit iconSpacing pull-right"
+                                                   title="Edit text"
+                                                   ng-click="editResource(currentResource)" style="cursor: pointer">
+
+                                                </i>
+
+
+                                                <br />
+                                                <i class="glyphicon glyphicon-remove iconSpacing pull-right"
+                                                   title="Delete resource"
+                                                   ng-click="removeResource(currentResource)" style="cursor: pointer">
+
+                                                </i>
+
 
                                             </div>
-                                            <div class="col-sm-2 col-md-2">
-                                                <div><button class="btn btn-link" ng-click="addBBE()">Add</button> </div>
-                                            </div>
-
                                         </div>
 
 
 
-                                        <pre>{{existingElements.list[input.selectedExistingElement] | json}}</pre>
 
-                                    </div>
+                                        <br/>
+                                        <div class="banner" ng-show="hashPath">{{hashPath.path}}</div>
+
+                                        <div ng-show="currentElementValue.display">
+                                            <h5>Current Value</h5>
+                                            <div>{{currentElementValue.display}}</div>
+                                            <br/>
+                                        </div>
 
 
-                                    <h5 ng-show="hashPath">DataType/s  (click to add data)</h5>
-                                    <div ng-repeat="type in hashPath.ed.type">
-                                        <div ng-hide="type.code == 'Reference'">
+                                        <!-- show any existing elements that are parents of this element-->
+                                        <div ng-show="existingElements.isMultipleBbe">
+                                            <br/>
 
-                                            <div>
-                                                <div class="pull-right">
-                                                    <a target="_blank" ng-href="{{fhirBasePath}}datatypes.html#{{type.code}}">
-                                                        <i class="glyphicon glyphicon-globe"
-                                                           title="View Datatype in spec">
+                                            <div class="row">
+                                                <div class="col-sm-3 col-md-3">
+                                                    <h5>Parent branches created</h5>
+                                                </div>
+                                                <div class="col-sm-7 col-md-7">
+                                                    <ul class="pagination">
+                                                        <li  ng-repeat="element in existingElements.list" ng-class="{active:$index==input.selectedExistingElement}">
+                                                            <a href="#" ng-click="input.selectedExistingElement=$index">{{$index+1}}</a>
+                                                        </li>
+                                                    </ul>
 
-                                                        </i>
+                                                </div>
+                                                <div class="col-sm-2 col-md-2">
+                                                    <div><button class="btn btn-link" ng-click="addBBE()">Add</button> </div>
+                                                </div>
 
-                                                    </a></div>
                                             </div>
 
-                                            <span ng-class="{clickable:supportedDt.indexOf(type.code)>-1}"
-                                                    ng-click="addValueForDt(hashPath,type.code)">
+
+
+                                            <pre>{{existingElements.list[input.selectedExistingElement] | json}}</pre>
+
+                                        </div>
+
+
+                                        <h5 ng-show="hashPath">DataType/s  (click to add data)</h5>
+                                        <div ng-repeat="type in hashPath.ed.type">
+                                            <div ng-hide="type.code == 'Reference'">
+
+                                                <div>
+                                                    <div class="pull-right">
+                                                        <a target="_blank" ng-href="{{fhirBasePath}}datatypes.html#{{type.code}}">
+                                                            <i class="glyphicon glyphicon-globe"
+                                                               title="View Datatype in spec">
+
+                                                            </i>
+
+                                                        </a></div>
+                                                </div>
+
+                                                <span ng-class="{clickable:supportedDt.indexOf(type.code)>-1}"
+                                                      ng-click="addValueForDt(hashPath,type.code)">
 
                                                 {{type.code}}
                                             </span>
 
 
-                                        </div>
-                                        <div ng-show="type.code == 'Reference'">
-                                            <div>
-                                                <div class="pull-right">
-
-                                                    <a ng-show="type.profile" target="_blank" ng-href="{{fhirBasePath}}{{type.profile | referenceType | lowercase}} ">
-                                                        <i class="glyphicon glyphicon-globe"
-                                                           title="View Resource in spec">
-
-                                                        </i>
-                                                    </a>
-
-                                                    <a ng-show="type.targetProfile" target="_blank" ng-href="{{fhirBasePath}}{{type.targetProfile | referenceType | lowercase}} ">
-                                                        <i class="glyphicon glyphicon-globe"
-                                                           title="View Resource in spec">
-
-                                                        </i>
-                                                    </a>
-
-
-                                                </div>
                                             </div>
-                                            <!-- allow for stu2 & 3-->
-                                            --> {{type.profile | referenceType}} {{type.targetProfile | referenceType}}
+                                            <div ng-show="type.code == 'Reference'">
+                                                <div>
+                                                    <div class="pull-right">
+
+                                                        <a ng-show="type.profile" target="_blank" ng-href="{{fhirBasePath}}{{type.profile | referenceType | lowercase}} ">
+                                                            <i class="glyphicon glyphicon-globe"
+                                                               title="View Resource in spec">
+
+                                                            </i>
+                                                        </a>
+
+                                                        <a ng-show="type.targetProfile" target="_blank" ng-href="{{fhirBasePath}}{{type.targetProfile | referenceType | lowercase}} ">
+                                                            <i class="glyphicon glyphicon-globe"
+                                                               title="View Resource in spec">
+
+                                                            </i>
+                                                        </a>
+
+
+                                                    </div>
+                                                </div>
+                                                <!-- allow for stu2 & 3-->
+                                                --> {{type.profile | referenceType}} {{type.targetProfile | referenceType}}
+                                            </div>
+
                                         </div>
 
-                                    </div>
+                                        <div ng-show="hashPath.isReference">
 
-                                    <div ng-show="hashPath.isReference">
+                                            <h5>Potential References</h5>
 
-                                        <h5>Potential References</h5>
-
-                                        <table class="table table-condensed table-bordered">
-                                            <tr><th>Type</th><th>Potential resources</th></tr>
-                                            <tr ng-repeat="(key,data) in hashReferences">
-                                                <td>{{key}}</td>
-                                                <td>
-                                                    <table width="100%">
-                                                        <tr ng-repeat = "resource in data">
-                                                            <td>
-                                                                <div title="{{resource.resourceType}}" ng-bind-html="resource.text.div"></div>
-                                                            </td>
-                                                            <td>
-                                                                <div class="pull-right">
+                                            <table class="table table-condensed table-bordered">
+                                                <tr><th>Type</th><th>Potential resources</th></tr>
+                                                <tr ng-repeat="(key,data) in hashReferences">
+                                                    <td>{{key}}</td>
+                                                    <td>
+                                                        <table width="100%">
+                                                            <tr ng-repeat = "resource in data">
+                                                                <td>
+                                                                    <div title="{{resource.resourceType}}" ng-bind-html="resource.text.div"></div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="pull-right">
 
                                                                     <span>
                                                                         <i class="glyphicon glyphicon-plus"
@@ -981,198 +982,186 @@
 
                                                                         </i>
                                                                     </span>
-                                                                </div>
-                                                            </td>
+                                                                    </div>
+                                                                </td>
+
+                                                            </tr>
+                                                        </table>
+
+
+                                                    </td>
+
+                                                </tr>
+                                            </table>
+
+                                        </div>
+
+
+
+                                        <br/>
+
+                                        <div ng-show="hashPath.ed.binding">
+                                            <h5>ValueSet Binding ({{hashPath.ed.binding.strength}})</h5>
+                                            <div>
+                                                <button class="btn btn-link" ng-click="viewVS(hashPath.ed.binding)">
+                                                    {{hashPath.ed.binding.valueSetReference.reference}}
+                                                    {{hashPath.ed.binding.valueSetUri}}
+                                                </button>
+
+
+                                            </div>
+
+                                            <div ng-show="expandedValueSet">
+                                                <div><a href="#" ng-click="input.showCodeValues = ! input.showCodeValues" class="pull-right">
+                                                    <span ng-show="input.showCodeValues">Hide</span><span ng-hide="input.showCodeValues">Show</span>
+                                                    values
+                                                </a>
+                                                </div>
+                                                <div ng-show ='input.showCodeValues'>
+                                                    <table class="table table-condensed table-bordered">
+                                                        <tr ng-repeat="concept in expandedValueSet.expansion.contains">
+                                                            <td>{{concept.code}}</td>
+                                                            <td>{{concept.display}}</td>
+                                                            <td>{{concept.extension[0].valueString}}</td>
 
                                                         </tr>
                                                     </table>
 
 
-                                                </td>
+                                                </div>
+                                            </div>
 
+
+
+                                        </div>
+                                        <hr/>
+                                        {{hashPath.definition}}
+
+                                        {{hashPath.comments}}
+
+
+                                    </div>
+                                </div>
+
+
+                            </uib-tab>
+
+
+                            <uib-tab heading="Current resource views">
+                                <br/>
+                                <uib-tabset>
+
+
+                                    <uib-tab heading="Tree">
+                                        <br/>
+                                        <button ng-show="canDeletePath()" class="btn btn-danger pull-right"
+                                                ng-click="removeResourceNode(displayResourceTreeDeletePath)">Delete</button>
+
+                                        <div id="builderResourceTree"></div>
+
+
+
+
+                                    </uib-tab>
+
+                                    <uib-tab heading="Json">
+                                        <br/>
+                                        <pre>{{currentResource | json}}</pre>
+                                    </uib-tab>
+
+                                    <uib-tab heading="Summary">
+                                        <br/>
+
+                                        <div class="row">
+                                            <div class="col-md-6 col-sm-6">
+                                                <strong>Resource Type: </strong>{{currentResource.resourceType}}
+                                            </div>
+
+                                            <div class="col-md-6 col-sm-6">
+                                                <strong>ID: </strong>{{currentResource.id}}
+                                            </div>
+
+
+                                        </div>
+
+
+                                        <div class="rounded-box"><p ng-bind-html="currentResource.text.div"></p></div>
+
+                                        <h4>Current References</h4>
+
+                                        <div>
+                                            <strong>From this resource</strong>
+                                            <table class="table table-condensed table-bordered">
+                                                <tr><th>Path</th><th>Target resource</th></tr>
+                                                <tr ng-repeat="ref in currentResourceRefs.src">
+                                                    <td>{{ref.path}}</td>
+                                                    <td>{{ref.targ}}</td>
+
+                                                </tr>
+                                            </table>
+
+                                            <strong>To this resource</strong>
+                                            <table class="table table-condensed table-bordered">
+                                                <tr><th>From</th><th>Source path</th></tr>
+                                                <tr ng-repeat="ref in currentResourceRefs.targ">
+                                                    <td>{{ref.src}}</td>
+                                                    <td>{{ref.path}}</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+
+                                        <hr/>
+                                    </uib-tab>
+
+                                </uib-tabset>
+
+                            </uib-tab>
+
+
+                            <uib-tab heading="Errors/Warnings" ng-show="currentEntry.response.outcome">
+
+
+                                <uib-tabset>
+                                    <br/>
+                                    <uib-tab heading="issues">
+                                        <table class="table table-bordered">
+                                            <tr><th>Severity</th><th>Details/Diagnostics</th></tr>
+                                            <tr ng-repeat = "iss in currentEntry.response.outcome.issue">
+                                                <td>{{iss.severity}}</td>
+                                                <!--<td>{{iss.code}}</td>-->
+                                                <td>{{iss.details.text}}
+                                                    <div>{{iss.diagnostics}}</div>
+                                                </td>
+                                                <!--
+                                                <td><div ng-repeat="loc in iss.location">{{loc}}</div></td>
+                                                -->
                                             </tr>
                                         </table>
+                                    </uib-tab>
 
-                                    </div>
+                                    <uib-tab heading="json">
+                                        <pre>{{currentEntry.response.outcome | json}}</pre>
+                                    </uib-tab>
 
 
+                                </uib-tabset>
 
-                                    <br/>
 
-                                    <div ng-show="hashPath.ed.binding">
-                                        <h5>ValueSet Binding ({{hashPath.ed.binding.strength}})</h5>
-                                        <div>
-                                            <button class="btn btn-link" ng-click="viewVS(hashPath.ed.binding)">
-                                                {{hashPath.ed.binding.valueSetReference.reference}}
-                                                {{hashPath.ed.binding.valueSetUri}}
-                                            </button>
 
 
-                                        </div>
 
-                                        <div ng-show="expandedValueSet">
-                                            <div><a href="#" ng-click="input.showCodeValues = ! input.showCodeValues" class="pull-right">
-                                                <span ng-show="input.showCodeValues">Hide</span><span ng-hide="input.showCodeValues">Show</span>
-                                                 values
-                                            </a>
-                                            </div>
-                                            <div ng-show ='input.showCodeValues'>
-                                                <table class="table table-condensed table-bordered">
-                                                    <tr ng-repeat="concept in expandedValueSet.expansion.contains">
-                                                        <td>{{concept.code}}</td>
-                                                        <td>{{concept.display}}</td>
-                                                        <td>{{concept.extension[0].valueString}}</td>
 
-                                                    </tr>
-                                                </table>
 
 
-                                            </div>
-                                        </div>
 
+                            </uib-tab>
 
 
-                                    </div>
-                                    <hr/>
-                                    {{hashPath.definition}}
 
-                                    {{hashPath.comments}}
+                        </uib-tabset>
 
 
-                                </div>
-                            </div>
 
-
-                        </uib-tab>
-
-
-                        <uib-tab heading="Summary">
-                            <br/>
-
-                            <div class="row">
-                                <div class="col-md-6 col-sm-6">
-                                    Resource Type: <strong>{{currentResource.resourceType}}</strong>
-                                </div>
-
-                                <div class="col-md-6 col-sm-6">
-
-                                    <!--
-
-                                    <i class="glyphicon glyphicon-remove iconSpacing pull-right"
-                                       title="Delete resource"
-                                       ng-click="removeResource(currentResource)" style="cursor: pointer">
-
-                                    </i>
-
-                                    <i class="glyphicon glyphicon-edit iconSpacing pull-right"
-                                       title="Edit text"
-                                       ng-click="editResource(currentResource)" style="cursor: pointer">
-
-                                    </i>
-
-                                    -->
-
-                                </div>
-
-
-                            </div>
-
-
-
-
-
-                            <div class="rounded-box"><p ng-bind-html="currentResource.text.div"></p></div>
-
-
-
-                            <h4>Current References</h4>
-
-
-                            <div>
-                                <strong>From this resource</strong>
-                                <table class="table table-condensed table-bordered">
-                                    <tr><th>Path</th><th>Target resource</th><th></th></tr>
-                                    <tr ng-repeat="ref in currentResourceRefs.src">
-                                        <td>{{ref.path}}</td>
-                                        <td>{{ref.targ}}</td>
-                                        <td><i class="glyphicon glyphicon-remove"
-                                               ng-click="removeReference(ref)" style="cursor: pointer">
-
-                                        </i></td>
-                                    </tr>
-                                </table>
-
-                                <strong>To this resource</strong>
-                                <table class="table table-condensed table-bordered">
-                                    <tr><th>From</th><th>Source path</th></tr>
-                                    <tr ng-repeat="ref in currentResourceRefs.targ">
-                                        <td>{{ref.src}}</td>
-                                        <td>{{ref.path}}</td>
-                                    </tr>
-                                </table>
-                            </div>
-
-                            <hr/>
-                        </uib-tab>
-
-                        <uib-tab heading="Tree">
-                            <button ng-show="canDeletePath()" class="btn btn-danger pull-right"
-                                    ng-click="removeResourceNode(displayResourceTreeDeletePath)">Delete</button>
-
-                            <div id="builderResourceTree"></div>
-
-
-
-
-                        </uib-tab>
-
-                        <uib-tab heading="Json">
-                            <!--
-                            <div class="row">
-                                <div class="col-md-12 col-sm-12">
-                                    <button class="btn btn-link pull-right" ng-click="validate()">Validate</button>
-                                </div>
-                            </div>
-                            -->
-                            <pre>{{currentResource | json}}</pre>
-                        </uib-tab>
-                        <uib-tab heading="Errors/Warnings" ng-show="currentEntry.response.outcome">
-
-
-                            <uib-tabset>
-                                <br/>
-                                <uib-tab heading="issues">
-                                    <table class="table table-bordered">
-                                        <tr><th>Severity</th><th>Details/Diagnostics</th></tr>
-                                        <tr ng-repeat = "iss in currentEntry.response.outcome.issue">
-                                            <td>{{iss.severity}}</td>
-                                            <!--<td>{{iss.code}}</td>-->
-                                            <td>{{iss.details.text}}
-                                                <div>{{iss.diagnostics}}</div>
-                                            </td>
-                                            <!--
-                                            <td><div ng-repeat="loc in iss.location">{{loc}}</div></td>
-                                            -->
-                                        </tr>
-                                    </table>
-                                </uib-tab>
-
-                                <uib-tab heading="json">
-                                    <pre>{{currentEntry.response.outcome | json}}</pre>
-                                </uib-tab>
-
-
-                            </uib-tabset>
-
-
-
-
-
-
-
-
-
-                        </uib-tab>
 
                     </uib-tabset>
                 </div>
