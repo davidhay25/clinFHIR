@@ -1661,6 +1661,7 @@ angular.module("sampleApp")
                     function (){
                         delete $scope.currentResource[path]
                         drawResourceTree($scope.currentResource)
+                        makeGraph();    //in case it was a reference that was removed...
 
                     }
                 );
