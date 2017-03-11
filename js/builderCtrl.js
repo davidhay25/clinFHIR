@@ -150,6 +150,89 @@ angular.module("sampleApp")
             };
 
 
+            $scope.importResource = function() {
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/importResource.html',
+                    //size: 'lg',
+                    controller: function($scope,modalService,resources) {
+                        $scope.input = {};
+
+                        $scope.import = function() {
+                            try {
+                                var res = angular.fromJson($scope.input.raw)
+                            } catch (ex) {
+                                modalService.showModal({}, {bodyText:'This is not valid JSON'});
+                                return;
+                            }
+
+                            delete res.id;      //we'll create our own
+                            if (! res.resourceType) {
+                                modalService.showModal({}, {bodyText:"The element 'resourceType' must exist."});
+                                return;
+                            }
+
+
+                            var isValidResourceType;
+                            resources.forEach(function(type){
+                                if (res.resourceType == type.name) {
+                                    isValidResourceType = true
+                                }
+                            })
+                            if (! isValidResourceType) {
+                                modalService.showModal({}, {bodyText:"The element 'resourceType' must be a valid resource type."});
+                                return;
+                            }
+
+                            $scope.$close(res);     //close the dialog, passing across the resource
+
+                        }
+
+                    },
+                    resolve : {
+                        resources: function () {          //the default config
+                            return $scope.resources;
+                        }
+                    }
+                }).result.then(function (res) {
+
+                    $scope.waiting = true;
+                    $scope.addNewResource(res.resourceType,res);
+                    
+                    /*
+                    return;
+
+
+                    var uri = "http://hl7.org/fhir/StructureDefinition/"+res.resourceType;
+                    GetDataFromServer.findConformanceResourceByUri(uri).then(
+                        function(data) {
+
+                            $scope.addNewResource(type,importedResource)
+
+                            //$scope.currentType = data;
+                            //$scope.references = builderSvc.getReferences($scope.currentType)
+
+
+
+
+                        },
+                        function(err) {
+                            modalService.showModal({}, {bodyText:"Sorry, I couldn't find the profile for the '"+type+"' resource on the Conformance Server ("+appConfigSvc.getCurrentConformanceServer().name+")"});
+                            $scope.setDisplayMode('view')
+                        }
+                    ).finally(function(){
+                        $scope.waiting = false;
+                    })
+
+
+
+                    console.log(res);
+                    */
+                })
+
+            }
+
+
+
             //---------- related to document builder -------
             $rootScope.$on('docUpdated',function(event,composition){
                 //console.log(composition)
@@ -1527,7 +1610,8 @@ angular.module("sampleApp")
 
             }
 
-            $scope.addNewResource = function(type) {
+            $scope.addNewResource = function(type,importedResource) {
+                //if the property resource is passed in, then this is a resource imported manually...
 
                 if (type == 'Composition') {
                     if ($scope.isaDocument) {
@@ -1542,18 +1626,25 @@ angular.module("sampleApp")
 
                 $scope.selectedContainer.isDirty = true;
 
+
                 var resource = {resourceType : type};
-                resource.id = idPrefix+new Date().getTime();
-                $scope.input.text = $scope.input.text || "";
+                if (importedResource) {
+                    resource = importedResource;
+                    var manualText = resource.text.div;
+                    resource.text = {status:'generated',div:  $filter('addTextDiv')(manualText + builderSvc.getManualMarker())};
 
-                resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text + builderSvc.getManualMarker())};
+                } else {
+                    //only the type has been selected...
+                    $scope.input.text = $scope.input.text || "";
+                    resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text + builderSvc.getManualMarker())};
 
+                }
 
+                resource.id = idPrefix+new Date().getTime();        //always assign a new id..
 
                 builderSvc.addResourceToAllResources(resource)
-
                 $scope.selectedContainer.bundle.entry.push({resource:resource});
-                //$scope.resourcesBundle.entry.push({resource:resource});
+
 
                 $scope.selectedContainer.bundle.entry.sort(function(a,b){
                 //$scope.resourcesBundle.entry.sort(function(a,b){

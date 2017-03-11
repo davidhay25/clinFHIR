@@ -1,0 +1,35 @@
+<div>
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+
+                <h3>Import Resource from text</h3>
+
+            </div>
+            <div class="col-md-4 col-sm-4">
+
+               <div class="pull-right">
+                   <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+                   <button ng-show="input.raw" class="btn btn-success" ng-click="import()">Import</button>
+               </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-body">
+
+        <div class="row">
+            <div class="col-sm-12 col-md-12">
+                <textarea ng-model="input.raw" class="form-control" rows="15"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+
+
+        <em>Paste the Json into the box and clicl Import. The Json must be a valid FHIR resource.</em>
+    </div>
+</div>
