@@ -1127,9 +1127,21 @@ angular.module("sampleApp")
                             if (segmentInfo.isMultiple) {
 
                                 insertPoint[segment] = insertPoint[segment] || []  // todo,need to allow for arrays
-                                var node = {};
-                                insertPoint[segment].push(node)
-                                insertPoint = node
+
+                                //todo this used to always add  a node - ? should it???
+                                //var node = {};
+                                //insertPoint[segment].push(node)
+                                //insertPoint = node
+
+                                if (insertPoint[segment].length == 0) {
+                                    var node = {};
+                                    insertPoint[segment].push(node)
+
+                                    insertPoint = node
+                                } else {
+                                    insertPoint = insertPoint[segment][0]
+                                }
+
                             } else {
                                 insertPoint[segment] = insertPoint[segment] || {}  // todo,need to allow for arrays
                                 insertPoint = insertPoint[segment]

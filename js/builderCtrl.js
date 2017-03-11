@@ -338,9 +338,10 @@ angular.module("sampleApp")
                 Utilities.validate(entry.resource).then(
                     function(data){
                         var oo = data.data;
-                        //console.log(data)
+
                         entry.valid='yes'
-                        entry.response = {outcome:oo};
+                        delete entry.response;  //don't need the response if it passed validation...
+                        //entry.response = {outcome:oo};
 
 
                     },
@@ -806,9 +807,6 @@ angular.module("sampleApp")
                                 insertPoint = insertPoint[segmentName][0]
                             }
                         }
-
-
-
 
                     }
 
@@ -1298,7 +1296,6 @@ angular.module("sampleApp")
                                     //if there's a ValueSet then get the details, and display the contents if small (ie is a list)
                                     if (urlToValueSet) {
 
-
                                         Utilities.getValueSetIdFromRegistry(urlToValueSet,function(vsDetails) {
                                             $scope.vsDetails = vsDetails;  //vsDetails = {id: type: resource: }
 
@@ -1635,6 +1632,7 @@ angular.module("sampleApp")
 
             }
 
+            //returns true if the selected path in the tree view of the current resource can be deleted...
             $scope.canDeletePath = function() {
                 if (!$scope.displayResourceTreeDeletePath) {
                     return false;
@@ -1644,7 +1642,7 @@ angular.module("sampleApp")
                     return true;
                 }
                 return false;
-            }
+            };
 
             $scope.removeResourceNode = function(path){
                 //can remove top level nodes only...  (for now)
@@ -1665,9 +1663,6 @@ angular.module("sampleApp")
 
                     }
                 );
-
-
-
 
             };
 
