@@ -28,9 +28,8 @@ angular.module("sampleApp")
 
 
             $scope.displayServers = "Conformance: " + appConfigSvc.getCurrentConformanceServer().name
-                + "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>";
-
-
+                + "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>"
+                + "<div>Term: " + appConfigSvc.getCurrentTerminologyServer().name + "</div>";
 
             $scope.showSelector = true;
             $scope.toggleSelector = function(){
