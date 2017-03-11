@@ -353,9 +353,6 @@ angular.module("sampleApp")
                     $scope.waiting = false;
                 })
 
-
-
-
             }
 
             //------------------------------------------------
@@ -752,21 +749,22 @@ angular.module("sampleApp")
 
                         //if the parent is not multiple, then it can go through (Encounter.hospitilization)
                         var parentPath = ar;
-                        parentPath.pop();
+                        var parentName = parentPath.pop();
                         var parentInfo = builderSvc.getEDInfoForPath(parentPath.join('.'));
                         if (parentInfo.isMultiple) {
+                            //we need to create a branch to add this to...
+
+                            //todo this assumes that is off the root - FIX !!!
+                            var vo = builderSvc.makeInsertPoint($scope.currentResource,hashPath.path);//,insertPoint);
+                            //vo.insertPoint[parentPath[parentPath.length-1]] = {};
+                            /* TODO DON'T REMOVE YET!!
                             var msg = 'Please create a reference to a resource on this branch. ' +
                                 'After that, you can add other datatypes and create new branches as desired';
                             modalService.showModal({}, {bodyText:msg});
                             return;
+                            */
                         }
-
-
                     }
-
-
-
-
                 }
 
                 //set the insert point based on the path selected (if any)
@@ -788,14 +786,26 @@ angular.module("sampleApp")
                     var info = builderSvc.getEDInfoForPath(testPath);
 
                     var segmentName = ar[ar.length-1];
-                    if (info.isBBE && ! info.isMultiple) {
-                        //var segmentName = ar[ar.length-1];
-                        if (insertPoint[segmentName]) {
-                            insertPoint = insertPoint[segmentName]
+                    if (info.isBBE) {
+
+                        if (! info.isMultiple) {
+                            //var segmentName = ar[ar.length-1];
+                            if (insertPoint[segmentName]) {
+                                insertPoint = insertPoint[segmentName]
+                            } else {
+                                insertPoint[segmentName] = {};
+                                insertPoint = insertPoint[segmentName]
+                            }
                         } else {
-                            insertPoint[segmentName] = {};
-                            insertPoint = insertPoint[segmentName]
+                            //eg Organization.contact
+                            if (insertPoint[segmentName]) {
+                                insertPoint = insertPoint[segmentName][0]
+                            }
                         }
+
+
+
+
                     }
 
                     //if this is an extension, then the insertPoint moves down one...
@@ -1240,12 +1250,10 @@ angular.module("sampleApp")
                             delete $scope.hashPath;
                             delete $scope.expandedValueSet;
                             delete $scope.currentElementValue;
-                            // $scope.input.selectedExistingElement = -1;
+
                             $scope.input.showCodeValues = false;
 
-
                             if (data.node && data.node.data && data.node.data.ed) {
-                                //$scope.currentElementED = data.node.data.ed;
 
                                 var path = data.node.data.ed.path;
 
@@ -1283,6 +1291,7 @@ angular.module("sampleApp")
 
 
 
+                                    //if there's a ValueSet then get the details, and display the contents if small (ie is a list)
                                     if (urlToValueSet) {
 
 
@@ -1305,7 +1314,6 @@ angular.module("sampleApp")
 
                                         })
                                     }
-
 
 
                                     ed.type.forEach(function(typ){
@@ -1461,13 +1469,15 @@ angular.module("sampleApp")
             $scope.addBBE = function(){
                 //add a new BackBone element for the selected node
 
-                //returns {list: modelPoint:}
-                if ($scope.existingElements.modelPoint) {
+                //the parent must have already been created...
+                if ($scope.existingElements.modelPoint && angular.isArray($scope.existingElements.modelPoint)) {
                     //this is the 'parent' root for the currently selected element...
                     $scope.existingElements.modelPoint.push({});        //add a new element to the resource instance...
                     $scope.existingElements.list = $scope.existingElements.modelPoint;      //so the list is still pointing to the instance
                     $scope.input.selectedExistingElement = $scope.existingElements.list.length -1;
 
+                } else {
+                    alert('cannot add new branch');
                 }
 
             }
@@ -1612,7 +1622,10 @@ angular.module("sampleApp")
                 $('#builderResourceTree').jstree('destroy');
                 $('#builderResourceTree').jstree(
                     {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
-                )
+                ).on('select_node.jstree', function (e, data) {
+                    console.log(data.node.data)
+                    $scope.$digest();
+                })
 
             }
 

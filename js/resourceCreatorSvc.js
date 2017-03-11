@@ -3469,20 +3469,20 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 if (angular.isArray(element)) {
 
                     var aNodeId1 = getId()
-                    var newNode1 = {id: aNodeId1, parent: parentId, text: key, state: {opened: true, selected: false}};
+                    var data = {key:key, element:element}
+                    var newNode1 = {id: aNodeId1, parent: parentId, data:data, text: key, state: {opened: true, selected: false}};
                     tree.push(newNode1);
 
                     element.forEach(function (child, inx) {
                         processNode(tree, aNodeId1, child, '[' + inx + ']');
-
-                        //processNode(newNode1, aNodeId1, child, '[' + inx + ']');
 
                     })
 
                 } else if (angular.isObject(element)) {
 
                     var oNodeId = getId();
-                    var newNode2 = {id: oNodeId, parent: parentId, text: key, state: {opened: true, selected: false}};
+                    var data = {key:key, element:element}
+                    var newNode2 = {id: oNodeId, parent: parentId, data: data, text: key, state: {opened: true, selected: false}};
                     tree.push(newNode2);
 
                     angular.forEach(element, function (child, key) {
@@ -3496,10 +3496,12 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     if (key == 'div') {
 
                     } else {
-                        var display = key + " " + '<strong>' + element + '</strong>'
+                        var display = key + " " + '<strong>' + element + '</strong>';
+                        var data = {key:key, element:element}
                         var newNode = {
                             id: getId(),
                             parent: parentId,
+                            data:data,
                             text: display,
                             state: {opened: true, selected: false}
                         };

@@ -1100,11 +1100,11 @@ angular.module("sampleApp")
 
 
             },
-            insertReferenceAtPath : function(resource,path,referencedResource,insertPoint) {
-                //insert a reference to a resource from a resource. If the insert point is passed in, then
+
+            makeInsertPoint : function(resource,path,insertPoint) {
+                //construct an insertion point,If the insert point is passed in, then
                 //add the reference at that point. Otherwise, start from the root of the resource and traverse
                 //the path, adding parent elements (array or object) as required
-
                 var info = this.getEDInfoForPath(path);
                 var elementName;
                 var path;
@@ -1115,7 +1115,57 @@ angular.module("sampleApp")
                 } else {
                     var segmentPath = resource.resourceType;
 
-                    //var rootPath = $filter('dropFirstInPath')(path);
+                    path = $filter('dropFirstInPath')(path);
+                    insertPoint = resource;
+                    var ar = path.split('.');
+                    if (ar.length > 0) {
+                        for (var i=0; i < ar.length-1; i++) {
+                            //not the last one... -
+                            var segment = ar[i];
+                            segmentPath += '.'+segment;
+                            var segmentInfo = this.getEDInfoForPath(segmentPath);
+                            if (segmentInfo.isMultiple) {
+
+                                insertPoint[segment] = insertPoint[segment] || []  // todo,need to allow for arrays
+                                var node = {};
+                                insertPoint[segment].push(node)
+                                insertPoint = node
+                            } else {
+                                insertPoint[segment] = insertPoint[segment] || {}  // todo,need to allow for arrays
+                                insertPoint = insertPoint[segment]
+                            }
+                        }
+                        //path = ar[ar.length-1];       //this will be the property on the 'last'segment
+                        elementName = ar[ar.length-1];
+                    }
+
+                }
+                return {insertPoint: insertPoint,elementName:elementName};
+            },
+
+            insertReferenceAtPath : function(resource,path,referencedResource,insertPoint) {
+                //insert a reference to a resource from a resource. If the insert point is passed in, then
+                //add the reference at that point. Otherwise, start from the root of the resource and traverse
+                //the path, adding parent elements (array or object) as required
+
+                //sat var info = this.getEDInfoForPath(path);
+                var originalPath = path;
+                var vo = this.makeInsertPoint(resource,path,insertPoint)
+                var insertPoint = vo.insertPoint;
+                var elementName = vo.elementName;
+
+
+                /* abstracting this to a separate function
+                //DON'T REMOVE UNTIL SURE IT IT WORKING
+                var elementName;
+                var path;
+                if (insertPoint) {
+                    //the element name will be the last se
+                    var ar = path.split('.');
+                    elementName = ar[ar.length-1]
+                } else {
+                    var segmentPath = resource.resourceType;
+
                     path = $filter('dropFirstInPath')(path);
                     insertPoint = resource;
                     var ar = path.split('.');
@@ -1142,11 +1192,11 @@ angular.module("sampleApp")
 
                 }
 
-
+                */
 
 
                 //now actually add the reference. this will be at insertPoint[elementName]
-
+                var info = this.getEDInfoForPath(originalPath);
                 if (info.max == 1) {
                     insertPoint[elementName] = {reference:referencedResource.resourceType+'/'+referencedResource.id}
                 }
@@ -1167,29 +1217,6 @@ angular.module("sampleApp")
                     }
 
                 }
-                /*
-
-                if (info.max == 1) {
-                    insertPoint[path] = {reference:referencedResource.resourceType+'/'+referencedResource.id}
-                }
-                if (info.max =='*') {
-                    insertPoint[path] = insertPoint[path] || []
-
-                    var reference = referencedResource.resourceType+'/'+referencedResource.id;
-                    //make sure there isn't already a reference to this resource
-                    var alreadyReferenced = false;
-                    insertPoint[path].forEach(function(ref){
-                        if (ref.reference == reference) {
-                            alreadyReferenced = true;
-                        }
-                    })
-
-                    if (! alreadyReferenced) {
-                        insertPoint[path].push({reference:reference})
-                    }
-
-                }
-                */
 
             },
             addSDtoCache : function(profile) {
