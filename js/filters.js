@@ -5,6 +5,18 @@
 
 angular.module("sampleApp")
 
+    .filter('manualText',['builderSvc',function(builderSvc){
+        return function(resource) {
+
+            if (resource) {
+                var vo = builderSvc.splitNarrative(resource.text.div)
+                return vo.manual;
+            }
+
+
+        }
+    }])
+
     .filter('libraryCategory', function() {
         return function(selectedCategory,container) {
             console.log(selectedCategory,container)

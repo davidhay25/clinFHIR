@@ -52,6 +52,7 @@ angular.module("sampleApp")
         objColours.Organization = '#FF9900';
         objColours.ProviderRole = '#FFFFCC';
         objColours.Location = '#cc9900';
+        objColours.HealthcareService = '#FFFFCC';
 
 
         return {
@@ -853,6 +854,8 @@ angular.module("sampleApp")
 
             },
             addStringToText : function(resource,txt) {
+
+                return;     //todo - fix 'undefined' errors
                 //add the txt to the resource.text.div element...
                 if (resource.text && resource.text.div) {
 

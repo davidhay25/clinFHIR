@@ -804,11 +804,19 @@
 
 
                     <uib-tabset ng-show="currentResource">
-                        <br/>
 
+                        <div class="banner">
+                            <div>{{currentResource | manualText}}</div>
+                            <div style="font-weight: 200"><em>{{currentResource.resourceType}} {{currentResource.id}}</em></div>
+
+                            <!--
+                            <span ng-bind-html="currentResource | manualText"></span>
+                            -->
+                        </div>
                         <uib-tabset>
 
                             <uib-tab heading="Structure & Reference">
+
 
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5">
