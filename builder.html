@@ -1112,7 +1112,13 @@
                         </uib-tab>
 
                         <uib-tab heading="Tree">
+                            <button ng-show="canDeletePath()" class="btn btn-danger pull-right"
+                                    ng-click="removeResourceNode(displayResourceTreeDeletePath)">Delete</button>
+
                             <div id="builderResourceTree"></div>
+
+
+
 
                         </uib-tab>
 

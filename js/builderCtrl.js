@@ -1384,10 +1384,6 @@ angular.module("sampleApp")
 
                                         }
 
-
-
-
-
                                     })
 
 
@@ -1622,17 +1618,57 @@ angular.module("sampleApp")
 
                 var treeData = resourceCreatorSvc.buildResourceTree(newResource);
 
-                //show the tree of this version
+                //show the tree structure of this resource version
                 $('#builderResourceTree').jstree('destroy');
                 $('#builderResourceTree').jstree(
                     {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
                 ).on('select_node.jstree', function (e, data) {
                     console.log(data.node.data)
+                    delete $scope.displayResourceTreeDeletePath;
+                    if (data.node.data.level == 1) {
+                        //a top level node that can be deleted
+                        $scope.displayResourceTreeDeletePath = data.node.data.key;
+                    }
+
                     $scope.$digest();
                 })
 
             }
 
+            $scope.canDeletePath = function() {
+                if (!$scope.displayResourceTreeDeletePath) {
+                    return false;
+                }
+
+                if (['id','resourceType','text'].indexOf($scope.displayResourceTreeDeletePath) == -1) {
+                    return true;
+                }
+                return false;
+            }
+
+            $scope.removeResourceNode = function(path){
+                //can remove top level nodes only...  (for now)
+                console.log(path)
+
+                var modalOptions = {
+                    closeButtonText: "No, I changed my mind",
+                    actionButtonText: 'Yes, please remove it',
+                    headerText: 'Remove element',
+                    bodyText: 'Are you sure you wish to delete this element. '
+                };
+
+                modalService.showModal({}, modalOptions).then(
+                    function (){
+                        delete $scope.currentResource[path]
+                        drawResourceTree($scope.currentResource)
+
+                    }
+                );
+
+
+
+
+            };
 
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(lst) {

@@ -3464,40 +3464,40 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var tree = [];
             var idRoot = 0;
             //console.log(resource)
-            function processNode(tree, parentId, element, key) {
+            function processNode(tree, parentId, element, key, level) {
 
                 if (angular.isArray(element)) {
-
                     var aNodeId1 = getId()
-                    var data = {key:key, element:element}
+                    var newLevel = level++;
+                    var data = {key:key, element:element,level:newLevel}
                     var newNode1 = {id: aNodeId1, parent: parentId, data:data, text: key, state: {opened: true, selected: false}};
                     tree.push(newNode1);
 
+                    newLevel++
                     element.forEach(function (child, inx) {
-                        processNode(tree, aNodeId1, child, '[' + inx + ']');
-
+                        processNode(tree, aNodeId1, child, '[' + inx + ']',newLevel);
                     })
 
                 } else if (angular.isObject(element)) {
-
+                    var newLevel = level++;
                     var oNodeId = getId();
-                    var data = {key:key, element:element}
+                    var data = {key:key, element:element,level:newLevel}
                     var newNode2 = {id: oNodeId, parent: parentId, data: data, text: key, state: {opened: true, selected: false}};
                     tree.push(newNode2);
 
+                    //var newLevel = level++;
+                    newLevel++
                     angular.forEach(element, function (child, key) {
-                        processNode(tree, oNodeId, child, key);
+                        processNode(tree, oNodeId, child, key,newLevel);
 
                     })
                 } else {
                     //a simple element
-
-
                     if (key == 'div') {
 
                     } else {
                         var display = key + " " + '<strong>' + element + '</strong>';
-                        var data = {key:key, element:element}
+                        var data = {key:key, element:element,level:level}
                         var newNode = {
                             id: getId(),
                             parent: parentId,
@@ -3507,11 +3507,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         };
                         tree.push(newNode);
                     }
-
-
                 }
-
-
             }
 
 
@@ -3520,12 +3516,10 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             tree.push(rootItem);
 
             angular.forEach(resource, function (element, key) {
-                processNode(tree, rootId, element, key);
+                processNode(tree, rootId, element, key, 1);
             });
 
-            var parentId = '#';
-
-
+            //var parentId = '#';
             return tree;
 
             //generate a new ID for an element in the tree...
