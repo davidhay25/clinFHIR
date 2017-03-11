@@ -27,6 +27,11 @@ angular.module("sampleApp")
             refreshLibrary();       //initial load...
 
 
+            $scope.displayServers = "Conformance: " + appConfigSvc.getCurrentConformanceServer().name
+                + "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>";
+
+
+
             $scope.showSelector = true;
             $scope.toggleSelector = function(){
                 if ($scope.showSelector) {

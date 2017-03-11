@@ -164,10 +164,15 @@
 
             <div class="container-fluid row">
                 <div class="col-md-1 col-sm-1">
-                    <a class="navbar-brand" href="#">
+                    <a class="navbar-brand" href="#"
+                       uib-popover-html="displayServers"
+                       popover-placement="right">
                         Scenario Builder
                     </a>
                 </div>
+                <div class="col-md-3 col-sm-3">
+                </div>
+                <!--
                 <div class="col-md-3 col-sm-3">
                     <div class="navbar-text" ng-click="setServers()" style="cursor: pointer">
                         Conformance: {{appConfigSvc.getCurrentConformanceServer().name}}
@@ -175,6 +180,7 @@
                     </div>
 
                 </div>
+                -->
 
                 <div class="col-md-3 col-sm-3">
 
