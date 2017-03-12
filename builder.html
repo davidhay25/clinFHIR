@@ -170,15 +170,7 @@
                         Scenario Builder
                     </a>
                 </div>
-                <div class="col-md-3 col-sm-3">
-                    <div class="navbar-text">
-                        <a href="#" ng-click="importResource()">Import resource</a>
-                    </div>
 
-
-
-
-                </div>
                 <!--
                 <div class="col-md-3 col-sm-3">
                     <div class="navbar-text" ng-click="setServers()" style="cursor: pointer">
@@ -188,6 +180,8 @@
 
                 </div>
                 -->
+
+
 
                 <div class="col-md-3 col-sm-3">
 
@@ -202,6 +196,13 @@
 
                     </div>
                 </div>
+                <div class="col-md-3 col-sm-3">
+                    <div class="navbar-text">
+                        <a href="#" ng-click="importResource()">Import resource</a>
+                    </div>
+
+                </div>
+
 
                 <div class="col-md-2 col-sm-2">
                     <div class="navbar-text">
@@ -813,7 +814,7 @@
                     <uib-tabset ng-show="currentResource">
 
                         <div class="banner">
-                            <div>{{currentResource | manualText}}</div>
+                            <div>{{currentResource | manualText | limitTo:75}}</div>
                             <div style="font-weight: 200"><em>{{currentResource.resourceType}} {{currentResource.id}}</em></div>
 
                             <!--

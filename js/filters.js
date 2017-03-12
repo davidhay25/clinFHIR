@@ -194,17 +194,21 @@ angular.module("sampleApp")
     .filter('cleanTextDiv',function(){
         //remove the <div  xmlns='http://www.w3.org/1999/xhtml'>{texthere}</div> tgs...
         return function(textDiv) {
-            var startDiv = "<div xmlns='http://www.w3.org/1999/xhtml'>";
-            if (textDiv.indexOf(startDiv) > -1) {
-                textDiv = textDiv.replace(startDiv,"");
+            console.log(textDiv)
+            if (textDiv) {
+                var startDiv = "<div xmlns='http://www.w3.org/1999/xhtml'>";
+                if (textDiv.indexOf(startDiv) > -1) {
+                    textDiv = textDiv.replace(startDiv,"");
 
-                textDiv = textDiv.substr(0,textDiv.length - 6);
+                    textDiv = textDiv.substr(0,textDiv.length - 6);
+                }
+
+
+
+
+                return textDiv;
             }
 
-
-
-
-            return textDiv;
 
         }
     })

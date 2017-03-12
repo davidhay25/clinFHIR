@@ -197,7 +197,7 @@ angular.module("sampleApp")
 
                     $scope.waiting = true;
                     $scope.addNewResource(res.resourceType,res);
-                    
+
                     /*
                     return;
 
@@ -489,7 +489,7 @@ angular.module("sampleApp")
             });
 
             //datatypes for which there is an entry form
-            $scope.supportedDt = ['ContactPoint','Identifier','CodeableConcept','string','code','date','Period','dateTime','Address','HumanName','Annotation','boolean']
+            $scope.supportedDt = ['Coding','uri','ContactPoint','Identifier','CodeableConcept','string','code','date','Period','dateTime','Address','HumanName','Annotation','boolean']
 
             function getExistingData(patient) {
                 delete $scope.resourcesFromServer;

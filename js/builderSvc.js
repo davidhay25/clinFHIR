@@ -886,6 +886,12 @@ angular.module("sampleApp")
 
                 switch (dt) {
 
+                    case 'uri' :
+                        simpleInsert(insertPoint,info,path,value.uri,dt);
+
+                        //this.addStringToText(insertPoint,path+": "+ value.string)
+                        break;
+
                     case 'ContactPoint':
                         var insrt = {value:value.contactpoint.value,system:value.contactpoint.system,use:value.contactpoint.use}
                         simpleInsert(insertPoint,info,path,insrt,dt);
@@ -1025,6 +1031,14 @@ angular.module("sampleApp")
                                 }
                             }
 
+                        }
+
+                        break;
+                    case "Coding" :
+                        //value is an object that can have properties code, system, display, text
+                        var cc = {},text="";
+                        if (value && value.coding) {
+                            simpleInsert(insertPoint,info,path,value.coding,dt);
                         }
 
                         break;
