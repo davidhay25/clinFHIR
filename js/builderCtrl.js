@@ -399,6 +399,11 @@ angular.module("sampleApp")
                             entry.valid='saved'
                         })
 
+                        //re-load the resources list if there's a patient...
+                        if ($scope.currentPatient) {
+                            getExistingData($scope.currentPatient)
+                        }
+
 
 
                         modalService.showModal({}, {bodyText:'All the resources have been updated on the server.'});
@@ -504,7 +509,7 @@ angular.module("sampleApp")
                             $scope.resourcesFromServer = data;
 
 
-                            $scope.$broadcast('patientSelected',data);   //so the patient display controller knows
+                            $scope.$broadcast('patientSelected',data);   //so the patient display controller (resourceViewerCtl) knows
                         },
                         function(err){
                             console.log(err)

@@ -1523,6 +1523,9 @@ console.log(summary);
             vsLookup['reason-medication-not-given-codes'] = {type:'list'};
             vsLookup['care-plan-activity-category'] = {type:'list'};
             vsLookup['location-physical-type'] = {type:'list'};
+
+            vsLookup['endpoint-connection-type'] = {type:'list'};
+
             var ar = uri.split('/');
             var vsName = ar[ar.length - 1];
 

@@ -14,6 +14,7 @@ angular.module("sampleApp")
             //when a new scenario is selected with a patient from the server. passes in all data for that patient
             $scope.$on('patientSelected',function(event,patientData){
                 renderPatientDetails(patientData);
+                console.log(patientData)
             });
 
 
@@ -267,7 +268,7 @@ angular.module("sampleApp")
                 delete $scope.downloadLinkXmlContent;
                 delete $scope.downloadLinkXmlName;
                 delete $scope.resourceVersions;
-                delete $scope.outcome.allResourcesOfOneType;
+                //delete $scope.outcome.allResourcesOfOneType; - leave the list of this type of resource intact...
 
                 if (entry && entry.resource) {
 

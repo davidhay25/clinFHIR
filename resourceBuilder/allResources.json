@@ -15,6 +15,7 @@
   {"name": "Appointment"},
   {"name": "MedicationDispense"},
   {"name": "MedicationRequest"},
+  {"name": "MedicationOrder","version":"1.0"},
   {"name": "Slot"},
   {"name": "Account","reference":true},
   {"name": "PaymentNotice","reference":true},

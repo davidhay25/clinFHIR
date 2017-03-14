@@ -1734,15 +1734,21 @@ angular.module("sampleApp")
                                             }
 
                                             $scope.bundle.entry.sort(function(a,b){
-                                                if (a.resource && b.resource) {
-                                                    if (a.resource.name > b.resource.name) {
-                                                        return 1
+                                                try {
+                                                    if (a.resource && b.resource) {
+                                                        if (a.resource.name.toUpperCase() > b.resource.name.toUpperCase()) {
+                                                            return 1
+                                                        } else {
+                                                            return -1;
+                                                        }
                                                     } else {
-                                                        return -1;
+                                                        return 0
                                                     }
-                                                } else {
-                                                    return 0
+                                                } catch (ex) {
+                                                    return 0;
                                                 }
+
+
 
                                             });
 
