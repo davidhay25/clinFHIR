@@ -2754,6 +2754,23 @@ console.log(summary);
             //fhirVersion = fhirVersion || 3;
             if (resource) {
                 switch (resource.resourceType) {
+                    case  "MedicationRequest":
+                        var txt = "";
+                        if (resource.medicationCodeableConcept) {
+                            txt +=  getCCSummary(resource.medicationCodeableConcept);
+                        } else {
+                            txt =  resource.resourceType;
+                        }
+                        return txt;
+                        break;
+
+                    case  "Immunization":
+                        if (resource.vaccineCode) {
+                            return getCCSummary(resource.vaccineCode);
+                        } else {
+                            return resource.resourceType;
+                        }
+                        break;
                     case "StructureDefinition" :
                     case "ValueSet":
                     case "NamingSystem" :

@@ -1,6 +1,7 @@
 angular.module("sampleApp")
     .controller('findPatientCtrl',
-            function($scope,ResourceUtilsSvc,resourceSvc,supportSvc,resourceCreatorSvc,appConfigSvc,modalService){
+            function($scope,ResourceUtilsSvc,resourceSvc,supportSvc,resourceCreatorSvc,appConfigSvc,GetDataFromServer,
+                     modalService){
 
                 $scope.input={mode:'find',gender:'male'};   //will be replaced by name randomizer
                 $scope.input.dob = new Date(1982,9,31);     //will be replaced by name randomizer
@@ -49,6 +50,33 @@ angular.module("sampleApp")
 
                     $scope.$close(patient);
                 };
+
+
+
+                //directly load a patient based on their id
+                $scope.loadPatient = function(id) {
+                    var url = appConfigSvc.getCurrentDataServer().url + "Patient/"+id;
+                    GetDataFromServer.adHocFHIRQuery(url).then(
+                        function(data){
+                            var patient = data.data;
+                            if (patient) {
+                                appConfigSvc.setCurrentPatient(patient);
+
+                                $scope.$close(patient);
+
+                            }
+                        },
+                        function(err){
+                            modalService.showModal({}, {bodyText: 'No patient with that Id found.'})
+
+                        }
+                    )
+
+                };
+
+
+
+
 
                 $scope.searchForPatient = function(name) {
                     $scope.nomatch=false;   //if there were no matching patients
