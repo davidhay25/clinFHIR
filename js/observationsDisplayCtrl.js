@@ -2,7 +2,7 @@
 
 angular.module("sampleApp")
     .controller('observationsDisplayCtrl',
-        function ($scope) {
+        function ($scope,ResourceUtilsSvc) {
 
             //when an obeservation code is selected, draw the chart...
             $scope.obsSelected = function(key,value) {
@@ -26,7 +26,8 @@ angular.module("sampleApp")
                         if (res.code && res.code.coding) {
                             var code = res.code.coding[0].system + '|' + res.code.coding[0].code //the code
                             if (! obsCodes[code]) {
-                                obsCodes[code] = {list:[],display:res.code.text}
+                                obsCodes[code] = {list:[]}
+                                obsCodes[code].display = ResourceUtilsSvc.getCCSummary(res.code)
                             }
 
                             //really only works for a quantity right now...

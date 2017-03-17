@@ -2746,6 +2746,26 @@ console.log(summary);
     }
 
     return {
+        getCCSummary : function(data) {
+            //being able to summarize a codeableconcept is useful. todo - refactor to use this...
+            if (!data) {
+                return "";
+            }
+            var txt = "";
+
+            if (data.text) {
+                return data.text;
+            } else {
+                if (data.coding && data.coding.length > 0) {
+                    //if (data.text) {txt += data.text + " ";}
+                    var c = data.coding[0];     //only look at the first one...
+                    var d = c.display || '';
+                    txt += d;// + " ["+ c.code + "]";
+
+                }
+                return txt;
+            }
+        },
         getOneLineSummaryOfResource : function(resource,fhirVersionDEP) {
 
             var fhirVersion = appConfigSvc.getCurrentFhirVersion(); //defaults to 3 unless both data and conformance servers are on 2...
