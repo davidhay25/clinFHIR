@@ -94,6 +94,14 @@
 
     </div>
 
+    <div ng-show="dataTypeBeingEntered == 'integer'">
+        <input placeholder = 'Enter integer value' type="text" class="form-control" ng-model="input.dt.integer"/>
+    </div>
+
+    <div ng-show="dataTypeBeingEntered == 'decimal'">
+        <input placeholder = 'Enter decimal value' type="text" class="form-control" ng-model="input.dt.integer"/>
+    </div>
+
     <div ng-show="dataTypeBeingEntered == 'string'">
         <input placeholder = 'Enter text value' type="text" class="form-control" ng-model="input.dt.string"/>
     </div>

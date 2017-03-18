@@ -886,6 +886,13 @@ angular.module("sampleApp")
                 var path = hashPath.path;
 
                 switch (dt) {
+                    case 'integer' :
+                        simpleInsert(insertPoint,info,path,parseInt(value.integer,10),dt);
+                        break;
+
+                    case 'decimal' :
+                        simpleInsert(insertPoint,info,path,parseFloat(value.integer),dt);
+                        break;
 
                     case 'uri' :
                         simpleInsert(insertPoint,info,path,value.uri,dt);
