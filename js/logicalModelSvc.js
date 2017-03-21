@@ -113,6 +113,113 @@ angular.module("sampleApp")
 
         return {
 
+            generateDoc : function(tree) {
+                var deferred = $q.defer();
+                //var simpleExtensionUrl = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl;
+                var arDoc = []
+                var arQueries = [];
+
+                tree.forEach(function (branch) {
+                    var data = branch.data;
+
+                    var path = data.path;     //this is the
+                    var ar = path.split('.');
+                    if (ar.length == 1) {
+                        //this is the first node. Has 'model level' data...
+                        if (data.header) {
+                            var title = data.header.title || data.header.name;
+
+                            arDoc.push("# "+title);
+                            arDoc.push("");
+
+                            addTextIfNotEmpty(arDoc,data.header.purpose);
+
+                            if (data.header.baseType){
+                                arDoc.push("Base type is " + data.header.baseType);
+                                arDoc.push("");
+                            }
+
+                        }
+
+
+                    } else {
+                        //this is an 'ordinary node
+                        ar.splice(0,1);
+
+
+                        var hdr = "## "+ar.join(".")    //the name of the element in the model
+
+                        if (data.fhirMappingExtensionUrl) {
+
+                            //This is an extension...
+                            hdr += " (Extension)";
+
+                        } else if (data.type) {
+                            hdr += " (";
+                            data.type.forEach(function(typ,inx){
+                                if (inx > 0) {
+                                    hdr += " ";
+                                }
+                                hdr += typ.code;
+                            });
+                            hdr += ")"
+
+                            hdr += " ["+ data.min + '..' + data.max+']';
+
+                        }
+
+                        //the header...
+                        arDoc.push("");
+                        arDoc.push(hdr)
+                        arDoc.push("");
+
+                        //todo - not sure about this... addTextIfNotEmpty(arDoc,data.short);
+                        addTextIfNotEmpty(arDoc,data.description);
+                        addTextIfNotEmpty(arDoc,data.comments);
+
+                        if (data.fhirMappingExtensionUrl) {
+                            arDoc.push("Extension Url: "+data.fhirMappingExtensionUrl);
+                        }
+
+                        if (data.selectedValueSet && data.selectedValueSet.vs) {
+                            var vs = "ValueSet: " + data.selectedValueSet.vs.url;
+                            if (data.selectedValueSet.strength) {
+                                vs += " ("+data.selectedValueSet.strength + ")"
+                            }
+                            addTextIfNotEmpty(arDoc,vs);
+
+                        }
+
+
+                    }
+
+                })
+
+                if (arQueries.length > 0) {
+                    $q.all(queries).then(
+                        function () {
+                            console.log('DONE')
+                            deferred.resolve(treeData)
+                        },
+                        function (err) {
+                            console.log('ERROR: ', err)
+                            deferred.reject(err)
+                        }
+                    );
+                } else {
+                    deferred.resolve(arDoc.join('\n'));
+                }
+
+
+                return deferred.promise;
+
+                function addTextIfNotEmpty(ar,txt) {
+                    if (txt) {
+                        ar.push(txt);
+                        ar.push("")
+                    }
+                }
+            },
             generateFHIRProfile : function(internalLM) {
                 //generate a real FHIR profile from the logical model
                 var deferred = $q.defer();

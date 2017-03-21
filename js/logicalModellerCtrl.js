@@ -4,8 +4,7 @@ angular.module("sampleApp")
     .controller('logicalModellerCtrl',
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
                   GetDataFromServer,$firebaseObject,$firebaseArray,$location,igSvc,SaveDataToServer,$window,RenderProfileSvc,
-                  $q,Utilities,
-                    securitySvc) {
+                  $q,Utilities, securitySvc) {
             $scope.input = {};
 
             $scope.code = {};
@@ -226,6 +225,15 @@ angular.module("sampleApp")
 
             };
 
+            $scope.updateDoc = function(){
+                logicalModelSvc.generateDoc($scope.treeData).then(
+                    function(doc) {
+                        $scope.mdDoc = doc;
+                    }
+                )
+
+            };
+
             
             //if the selected node changes, look to see if we can expand any binding...
             $scope.$watch(
@@ -356,8 +364,6 @@ angular.module("sampleApp")
                 $scope.rightPaneClass = "col-md-5 col-sm-5";
                 $scope.LMSelectorVisible = true;
             }
-
-
 
             
             $scope.hideLMSelector = function(){
@@ -1565,7 +1571,11 @@ angular.module("sampleApp")
             };
 
             $scope.editNode = function() {
+
+                
                 var parentPath = $scope.selectedNode.data.path;
+
+
                 editNode($scope.selectedNode,parentPath);         //will edit the node
                 //$scope.isDirty = true;
             };

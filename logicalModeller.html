@@ -549,6 +549,17 @@
                     <pre>{{error | json}}</pre>
                 </uib-tab>
 
+                <uib-tab heading="Doc">
+                    <br/>
+                    <div class="pull-right">
+                        <button class="btn btn-link " ng-click="updateDoc()">Update</button>
+                    </div>
+
+                    <div>
+                        <pre>{{mdDoc}}</pre>
+                    </div>
+                </uib-tab>
+
                 <uib-tab heading="Dev">
                     <br />
                     <uib-tabset>
@@ -611,30 +622,7 @@
                                     </td>
                                 </tr>
 
-<!--
-                                <tr ng-show="selectedNode.data.referenceUri| getLogicalID">
-                                    <td>Map to Model</td>
-                                    <td>
-                                        {{selectedNode.data.referenceUri | getLogicalID}}
 
-
-                                        <span ng-hide="isDirty" class="clickable pull-right"
-                                              ng-click="loadReferencedModel(selectedNode.data.referenceUri)">
-                                            Load
-                                        </span>
-
-                                          <span ng-hide="isDirty" style="margin-right: 8px" class="clickable pull-right"
-                                                ng-click="mergeModel(selectedNode.data.referenceUri)">
-                                                Merge
-                                          </span>
-
-                                        <span style="margin-right: 8px" class="clickable pull-right"
-                                              ng-click="viewReferencedModel(selectedNode.data.referenceUri)">
-                                            View
-                                        </span>
-                                    </td>
-                                </tr>
-                                -->
 
                                 <tr><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>
                                 <tr><td>Multiplicity</td><td>{{selectedNode.data.min}}..{{selectedNode.data.max}}</td></tr>
@@ -668,11 +656,6 @@
                                         </span>
 
                                         <div>{{typ.profile}}{{typ.targetProfile}}</div>
-                                        <!--
-                                                                     <div ng-hide="typ.code == 'Reference'">
-                                                                         <div>{{typ.profile}}</div>
-                                                                     </div>
-                                     -->
 
                                     </div>
                                     <!-- If there's a ValueSet defined, allow it to be selected... -->
@@ -682,13 +665,6 @@
                                             ({{selectedNode.data.selectedValueSet.strength}})
 
                                     </span>
-
-
-                                    <!--
-                                                             <span ng-show="selectedNode.data.referenceUri">
-                                                                 {{selectedNode.data.referenceUri}}
-                                                             </span>
-                                 -->
 
 
                                 </td>
