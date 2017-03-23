@@ -56,6 +56,38 @@ angular.module("sampleApp")
 
 
         return {
+            importResource : function(resource,scope,idPrefix){
+                //import a resource or resource bundle //todo - add document check later...
+                var that = this;
+                var importedResource;
+                if (resource.type == 'Bundle') {
+
+                } else {
+                    resource.id = idPrefix+new Date().getTime();        //always assign a new id..
+                    importOneResource(resource,scope);
+                    importedResource = resource;
+                }
+
+                sortBundle(scope.selectedContainer.bundle);
+
+                return importedResource;     //not strictly necessary, but makes it clear...
+
+                function importOneResource(resource,scope) {
+                    that.addResourceToAllResources(resource);
+                    scope.selectedContainer.bundle.entry.push({resource:resource});
+                }
+
+                function sortBundle(bundle){
+                    bundle.entry.sort(function(a,b){
+                        if (a.resource.resourceType > b.resource.resourceType) {
+                            return 1
+                        } else {
+                            return -1
+                        }
+                    })
+                }
+
+            },
             getLibraryCategories : function(){
                 //get the codesystem resource that represents the categories. Needs to be more robust...
                 //todo - need to implement a 'getByUrl for CodeSystems' This will do for now...

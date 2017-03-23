@@ -54,13 +54,13 @@
             <div class="col-md-2 col-sm-2 col-xs-2">
                 <div>FHIR Version</div>
             </div>
-            <div class="col-md-4 col-sm-4 col-xs-4">
+            <div class="col-md-3 col-sm-3 col-xs-3">
                 <select class='form-control' ng-model="input.version">
                     <option value="2">STU-2</option>
                     <option value="3">STU-3</option>
                 </select>
             </div>
-            <div class="col-md-6 col-sm-6 col-xs-6">
+            <div class="col-md-7 col-sm-7">
                 The version of FHIR that the server supports
             </div>
 
@@ -74,8 +74,8 @@
 
                 <input type="checkbox" class="form-control" ng-model="input.everything"/>
             </div>
-            <div class="col-md-offset-3 col-sm-offset-3 col-md-6 col-sm-6">
-                Check if this server supports the $everything operation against Patient
+            <div class="col-md-offset-2 col-sm-offset-2 col-md-7 col-sm-7">
+                Set true if this server supports the $everything operation against Patient (Needed for Patient Data viewer)
             </div>
 
         </div>
@@ -88,8 +88,8 @@
 
                 <input type="checkbox" class="form-control" ng-model="input.terminology"/>
             </div>
-            <div class="col-md-offset-3 col-sm-offset-3 col-md-6 col-sm-6">
-                Check if this server supports Terminology services
+            <div class="col-md-offset-2 col-sm-offset-2 col-md-7 col-sm-7">
+                Set true if this server supports Terminology services (especially $expand)
             </div>
 
         </div>
@@ -119,5 +119,16 @@
 
         </div>
     </div>
+
+</div>
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-12 col-sm-6 col-xs-12">
+                <strong>Note that the server must support
+                    <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS" target="_blank">CORS</a>  as clinFHIR is a web application</strong>
+            </div>
+        </div>
 
 </div>

@@ -1572,7 +1572,7 @@ angular.module("sampleApp")
 
             $scope.editNode = function() {
 
-                
+
                 var parentPath = $scope.selectedNode.data.path;
 
 

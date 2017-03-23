@@ -194,39 +194,22 @@ angular.module("sampleApp")
                         }
                     }
                 }).result.then(function (res) {
-
-                    $scope.waiting = true;
-                    $scope.addNewResource(res.resourceType,res);
-
-                    /*
-                    return;
-
-
-                    var uri = "http://hl7.org/fhir/StructureDefinition/"+res.resourceType;
-                    GetDataFromServer.findConformanceResourceByUri(uri).then(
-                        function(data) {
-
-                            $scope.addNewResource(type,importedResource)
-
-                            //$scope.currentType = data;
-                            //$scope.references = builderSvc.getReferences($scope.currentType)
+                    //the importer will return a resource that is the one to be selected...  (might have been a bundle)
+                    var res = builderSvc.importResource(res,$scope,idPrefix);
+                    $scope.displayMode = 'view';
+                    if (res) {
+                        $scope.selectResource(res,function(){
+                            makeGraph();
+                            drawResourceTree(res);
+                            isaDocument();      //determine if this bundle is a document (has a Composition resource)
+                            $rootScope.$emit('addResource',res);
+                        });       //select the resource, indicating that it is a new resource...
+                    }
 
 
 
+                    //temp $scope.addNewResource(res.resourceType,res);
 
-                        },
-                        function(err) {
-                            modalService.showModal({}, {bodyText:"Sorry, I couldn't find the profile for the '"+type+"' resource on the Conformance Server ("+appConfigSvc.getCurrentConformanceServer().name+")"});
-                            $scope.setDisplayMode('view')
-                        }
-                    ).finally(function(){
-                        $scope.waiting = false;
-                    })
-
-
-
-                    console.log(res);
-                    */
                 })
 
             }
@@ -1642,14 +1625,11 @@ angular.module("sampleApp")
                     //only the type has been selected...
                     $scope.input.text = $scope.input.text || "";
                     resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text + builderSvc.getManualMarker())};
-
                 }
 
                 resource.id = idPrefix+new Date().getTime();        //always assign a new id..
-
                 builderSvc.addResourceToAllResources(resource)
                 $scope.selectedContainer.bundle.entry.push({resource:resource});
-
 
                 $scope.selectedContainer.bundle.entry.sort(function(a,b){
                 //$scope.resourcesBundle.entry.sort(function(a,b){
