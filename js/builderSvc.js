@@ -65,6 +65,13 @@ angular.module("sampleApp")
 
                     resource.entry.forEach(function(ent){
                         var res = ent.resource;
+                        if (! res.id) {
+                            if (ent.fullUrl) {
+                                res.id = ent.fullUrl;
+                            } else {
+                                res.id = idPrefix+new Date().getTime();
+                            }
+                        }
                       //  if (res.id) {
                         //    map[res.id] = res;
                        // }
@@ -1281,15 +1288,31 @@ angular.module("sampleApp")
                 */
 
 
+                //if the id of thee referenced resource is a uuid, then don't add the resourceType prefix...
+                var reference = referencedResource.resourceType+'/'+referencedResource.id;
+                if (referencedResource.id.lastIndexOf('urn:uuid:', 0) === 0) {
+                    reference = referencedResource.id;
+                }
+
                 //now actually add the reference. this will be at insertPoint[elementName]
                 var info = this.getEDInfoForPath(originalPath);
                 if (info.max == 1) {
-                    insertPoint[elementName] = {reference:referencedResource.resourceType+'/'+referencedResource.id}
+                    insertPoint[elementName] = {reference:reference}
+                    //insertPoint[elementName] = {reference:referencedResource.resourceType+'/'+referencedResource.id}
                 }
                 if (info.max =='*') {
                     insertPoint[elementName] = insertPoint[elementName] || []
 
+/*
+                    //if the id of thee referenced resource is a uuid, then don't add the resourceType prefix...
                     var reference = referencedResource.resourceType+'/'+referencedResource.id;
+                    if (referencedResource.id.lastIndexOf('urn:uuid:', 0) === 0) {
+                        reference = referencedResource.id;
+                    }
+
+*/
+
+
                     //make sure there isn't already a reference to this resource
                     var alreadyReferenced = false;
                     insertPoint[elementName].forEach(function(ref){
@@ -1531,7 +1554,16 @@ angular.module("sampleApp")
 
                     var resource = entry.resource;
                     var addToGraph = true;
+
                     var url = resource.resourceType+'/'+resource.id;
+                    //if this is a uuid (starts with 'urn:uuid:' then don't add the resourceType as a prefix.
+                    //added to support importing bundles with uuids...
+                    if (resource.id.lastIndexOf('urn:uuid:', 0) === 0) {
+                        url = resource.id;
+                    }
+
+
+
 
                     //add an entry to the node list for this resource...
                     var node = {id: arNodes.length +1, label: resource.resourceType, shape: 'box',url:url,cf : {resource:resource}};
