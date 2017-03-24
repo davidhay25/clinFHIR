@@ -8,7 +8,7 @@ angular.module("sampleApp")
     .filter('manualText',['builderSvc',function(builderSvc){
         return function(resource) {
 
-            if (resource) {
+            if (resource && resource.text) {
                 var vo = builderSvc.splitNarrative(resource.text.div)
                 return vo.manual;
             }

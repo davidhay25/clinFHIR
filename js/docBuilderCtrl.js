@@ -16,7 +16,13 @@ angular.module("sampleApp")
             $rootScope.$on('addResource',function(event,resource){
 
                 var reference =  builderSvc.referenceFromResource(resource)
-                $scope.resourcesNotInThisSection.push({reference:reference,display:resource.text.div})
+
+                var text = "No text";
+                if (resource.text.div && resource.text.div) {
+                    text = resource.text.div;
+                }
+
+                $scope.resourcesNotInThisSection.push({reference:reference,display:text})
 
             });
 
