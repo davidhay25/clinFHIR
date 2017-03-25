@@ -154,12 +154,71 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/importResource.html',
                     //size: 'lg',
-                    controller: function($scope,modalService,resources) {
+                    controller: function($scope,modalService,resources,supportSvc,appConfigSvc) {
                         $scope.input = {};
 
+
                         $scope.import = function() {
+                            var raw = $scope.input.raw;
+
+                            var g = raw.indexOf('xmlns="http://hl7.org/fhir"') || raw.indexOf("xmlns='http://hl7.org/fhir'");
+                            if (g > -1) {
+                                //this is Xml (I think!) Use the Bundle endpoint
+                                $scope.waiting = true;
+                                var url = appConfigSvc.getCurrentConformanceServer().url+"Bundle";
+
+                                var config = {headers:{'content-type':'application/fhir+xml'}}
+                                $http.post(url,raw,config).then(
+                                    function(data) {
+                                        //the bundle was saved - now read it back form the server in Json format...
+                                        var id = supportSvc.getResourceIdFromHeaders(data.headers)
+                                        console.log(id)
+                                        if (id) {
+                                            url += "/"+id;
+                                            config = {headers:{'accept':'application/fhir+json'}};
+                                            $http.get(url).then(
+                                                function(data){
+                                                    //now we can import the bundle
+                                                    importFromJson(data.data);
+                                                }, function (err) {
+                                                    var msg = "The bundle was saved Ok, but couldn't be retrieved from the server";
+                                                    modalService.showModal({}, {bodyText:msg});
+                                                    //$scope.$cancel()
+                                                }
+                                            ).finally(function(){
+                                                $scope.waiting = false;
+                                            });
+
+                                        } else {
+                                            var msg = "The bundle was saved Ok, but I couldn't determine which Id was assigned to it, so cannot impoty it. Sorry about that."
+                                            modalService.showModal({}, {bodyText:msg});
+                                        }
+                                    },
+                                    function(err) {
+
+                                        var msg = "The server couldn't process the Xml. Is it valid FHIR and a valid bundle?";
+                                        var config = {bodyText:msg}
+                                        try {
+                                            var oo = angular.fromJson(err.data);
+                                            console.log(oo);
+                                            config.oo = oo;
+                                        } catch (ex){
+                                            msg += angular.toJson(err);
+                                        }
+
+                                        modalService.showModal({}, config);
+                                        $scope.waiting = false;
+                                    }
+                                )
+                            } else {
+                                importFromJson($scope.input.raw);
+                            }
+
+                        };
+
+                        importFromJson = function(json) {
                             try {
-                                var res = angular.fromJson($scope.input.raw)
+                                var res = angular.fromJson(json)
                             } catch (ex) {
                                 modalService.showModal({}, {bodyText:'This is not valid JSON'});
                                 return;
@@ -171,13 +230,13 @@ angular.module("sampleApp")
                                 return;
                             }
 
-
                             var isValidResourceType;
                             resources.forEach(function(type){
                                 if (res.resourceType == type.name) {
                                     isValidResourceType = true
                                 }
-                            })
+                            });
+
                             if (! isValidResourceType) {
                                 modalService.showModal({}, {bodyText:"The element 'resourceType' must be a valid resource type."});
                                 return;

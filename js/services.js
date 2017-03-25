@@ -36,15 +36,10 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
         if (! serverId) {
             serverId = headers('Location');
         }
-
-
-        console.log(serverId);
-
         if (! serverId) {
             return null;
         }
         //the is is (or should be) of the format: [base]/[type]/[id]/_history/[vid] - so get the 3rd frm the end...
-
         var ar = serverId.split('/');
 
         if (serverId.indexOf('_history') > -1) {
@@ -53,19 +48,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             //not version specific
             return ar[ar.length-1];
         }
-
-        /*
-        if (ar.length ==3) {
-            //return null;
-            //this is not version specific...
-            return ar[ar.length-1];
-        }
-
-
-
-
-        return ar[ar.length-3];
-        */
 
     }
 
@@ -107,6 +89,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
     setUpReferenceResources(fhirVersion);
 
     return {
+        getResourceIdFromHeaders : getResourceIdFromHeaders,
         resetResourceReferences : function() {
             setUpReferenceResources();
         },

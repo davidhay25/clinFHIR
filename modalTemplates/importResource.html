@@ -2,11 +2,18 @@
     <div class="modal-header">
 
         <div class="row">
-            <div class="col-md-8 col-sm-8">
+            <div class="col-md-7 col-sm-7">
 
-                <h3>Import Resource from text</h3>
+                <h3>Import Resource/s from text</h3>
 
             </div>
+
+            <div class="col-md-1 col-sm-1">
+                <div class="pull-right navbar-form" ng-show="waiting">
+                    <img src="css/ajax_loader_blue_32.gif"/>
+                </div>
+            </div>
+
             <div class="col-md-4 col-sm-4">
 
                <div class="pull-right">
@@ -27,9 +34,11 @@
         </div>
     </div>
 
-    <div class="modal-footer">
-
-
-        <em>Paste the Json into the box and clicl Import. The Json must be a valid FHIR resource.</em>
+    <div class="modal-header">
+        <ul>
+            <li><em>Paste the XML or Json into the box and click Import.</em></li>
+            <li><em>Json can either be a single resource or a bundle. Bundle must have 'fullUrl' set on each resource</em></li>
+            <li><em>XML must be a bundle, with a type of 'collection', no Bundle Id,  and the conformance server must support the Bundle endpoint for both Json and XML</em></li>
+        </ul>
     </div>
 </div>

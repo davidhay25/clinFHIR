@@ -1551,7 +1551,7 @@ angular.module("sampleApp")
 
                 //for each entry in the bundle, find the resource that it references
                 bundle.entry.forEach(function(entry){
-
+                    //should always be a resource.id  todo? should I check
                     var resource = entry.resource;
                     var addToGraph = true;
 
@@ -1561,9 +1561,6 @@ angular.module("sampleApp")
                     if (resource.id.lastIndexOf('urn:uuid:', 0) === 0) {
                         url = resource.id;
                     }
-
-
-
 
                     //add an entry to the node list for this resource...
                     var node = {id: arNodes.length +1, label: resource.resourceType, shape: 'box',url:url,cf : {resource:resource}};

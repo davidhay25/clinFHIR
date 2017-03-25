@@ -194,7 +194,7 @@ angular.module("sampleApp")
     .filter('cleanTextDiv',function(){
         //remove the <div  xmlns='http://www.w3.org/1999/xhtml'>{texthere}</div> tgs...
         return function(textDiv) {
-            console.log(textDiv)
+            //console.log(textDiv)
             if (textDiv) {
                 var startDiv = "<div xmlns='http://www.w3.org/1999/xhtml'>";
                 if (textDiv.indexOf(startDiv) > -1) {
@@ -202,9 +202,6 @@ angular.module("sampleApp")
 
                     textDiv = textDiv.substr(0,textDiv.length - 6);
                 }
-
-
-
 
                 return textDiv;
             }
