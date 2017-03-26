@@ -29,10 +29,7 @@ angular.module("sampleApp")
                         }
 
 
-                       // if ($scope.uniqueEmails.indexOf(email) == -1) {
-                         //   $scope.uniqueEmails.push(email);
-                       // }
-                   // }
+
                 })
 
 

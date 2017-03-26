@@ -2312,7 +2312,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 }
             }
 
-            var url = config.servers.terminology + 'CodeSystem/$lookup?code=' + code + "&system=" + system;
+            var url = appConfigSvc.getCurrentTerminologyServer().url + 'CodeSystem/$lookup?code=' + code + "&system=" + system;
+            //var url = config.servers.terminology + 'CodeSystem/$lookup?code=' + code + "&system=" + system;
             //console.log(url)
             return $http.get(url);
         },

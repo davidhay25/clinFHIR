@@ -60,11 +60,7 @@
                 <div class="col-md-2 col-sm-2">
                     <div class="navbar-text">
                         {{terminologyServer.name}}
-                        <!--
-                    <select disabled="disabled"  class="form-control" ng-change="changeTerminologyServer(termServer)"
-                            ng-options="value.name for value in terminologyServers track by value.name"
-                            ng-model="termServer"></select>
-                        -->
+
 
                     </div>
                 </div>
@@ -170,26 +166,117 @@
 
 
 
+                <ul class="list-group">
+                    <li ng-class="{'list-group-item':true}" style="cursor: hand" ng-repeat="entry in searchResultBundle.entry"
+                        ng-click="input.vspreview=entry.resource">
+                        {{entry.resource.name}} ({{entry.resource.id}})
+                        <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>
+                    </li>
+                </ul>
 
-                <div class="row display-row" ng-repeat="entry in searchResultBundle.entry" style="margin-bottom: 5px">
-                    <div class="col-md-9 col-sm-9">
-                        <div ng-click="selectVs(entry.resource)">
-                            {{entry.resource.name}} ({{entry.resource.id}})
-                            <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>
-                        </div>
+                <!--
+                               <div class="row display-row" ng-repeat="entry in searchResultBundle.entry" style="margin-bottom: 5px">
+                                   <div class="col-md-9 col-sm-9">
+                                       <div ng-click="input.vspreview=entry.resource">
+                                           {{entry.resource.name}} ({{entry.resource.id}})
+                                           <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>
+                                       </div>
 
 
-                    </div>
-                    <div class="col-md-3 col-sm-3">
-                        <button class="btn btn-link" ng-click="input.vspreview=entry.resource">Preview</button>
-                        <button class="btn btn-link" ng-click="selectVs(entry.resource)">Select</button>
-                    </div>
-                </div>
+                                   </div>
 
+
+                                   <div class="col-md-3 col-sm-3">
+                                       <button class="btn btn-link" ng-click="input.vspreview=entry.resource">Preview</button>
+                                       <button class="btn btn-link" ng-click="selectVs(entry.resource)">Select</button>
+                                   </div>
+
+
+                               </div>
+               -->
 
             </div>
             <div class="col-md-6 col-sm-6">
-                <pre ng-show="input.vspreview">{{input.vspreview | json}}</pre>
+                <button class="btn btn-link pull-right" ng-click="selectVs(entry.resource)">Edit</button>
+                <uib-tabset>
+                    <uib-tab heading="Contents">
+                        <br/>
+                        <div class="banner">{{entry.resource.name}} definition</div>
+                        <div ng-repeat="inc in input.vspreview.compose.include">
+                            <div class="row">
+                                <div class="col-md-6 col-sm-6">
+                                    <strong>System Url: </strong>{{inc.system}}
+                                </div>
+                                <div class="col-md-6 col-sm-6">
+                                    <strong>Version: </strong>{{inc.version}}
+                                </div>
+                            </div>
+
+                            <h4 ng-show="inc.concept">Concepts</h4>
+                            <table class="table table-bordered">
+                                <tr ng-repeat="concept in inc.concept">
+                                    <td>{{concept.code}}</td>
+                                    <td>{{concept.display}}</td>
+                                </tr>
+                            </table>
+
+                            <h4 ng-show="inc.filter">Filters</h4>
+                            <table class="table table-bordered">
+                                <tr ng-repeat="filter in inc.filter">
+                                    <td>{{filter.property}}</td>
+                                    <td>{{filter.op}}</td>
+                                    <td>{{filter.value}}</td>
+                                </tr>
+                            </table>
+                            <hr/>
+                        </div>
+
+                            <div class="banner">Expand</div>
+                            <div class="row">
+                                <div class="col-md-6 col-sm-6">
+                                    <input type="text" class="form-control" ng-model="input.newFilter"
+                                    placeholder="Enter the filter text" />
+                                </div>
+                                <div class="col-md-6 col-sm-6">
+                                    <button class="btn btn-success" ng-click="newExpand(input.vspreview,input.newFilter)">
+                                        Expand
+                                    </button>
+                                </div>
+                            </div>
+
+                            <br/>
+                            <table class="table table-condensed table-bordered">
+                                <tr>
+                                    <th>Code</th><th>Display</th><th>System</th>
+                                </tr>
+                                <tr ng-repeat="concept in expansion.contains">
+                                    <td>{{concept.code}}</td>
+                                    <td>{{concept.display}}</td>
+                                    <td>{{concept.system}}</td>
+                                </tr>
+                            </table>
+
+                            <div ng-hide="expansion.contains.length > 1">
+                                <h5>Nothing in expansion</h5>
+                            </div>
+
+
+                            <em>{{queryUrl}}</em>
+
+
+
+
+
+
+
+                    </uib-tab>
+                    <uib-tab heading="Json">
+                        <pre>{{vs | json}}</pre>
+                        <pre ng-show="input.vspreview">{{input.vspreview | json}}</pre>
+                    </uib-tab>
+                </uib-tabset>
+
+
             </div>
         </div>
 

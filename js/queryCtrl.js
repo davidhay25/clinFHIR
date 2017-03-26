@@ -114,7 +114,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
             function (data) {
                // $scope.conformanceForQuery = data.data;
                 $scope.conformance = data.data;
-                console.log($scope.conformance);
+                //console.log($scope.conformance);
 
                 $scope.hashResource = {};
                 $scope.standardResourceTypes= []
@@ -154,8 +154,11 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     $scope.addParamToQuery = function(modelUrl) {
         $uibModal.open({
             templateUrl: 'modalTemplates/queryParam.html',
-            controller: function ($scope,paramList,hashResource,type) {
+            controller: function ($scope,paramListDEP,hashResource,type) {
                 $scope.paramList = hashResource[type.name].searchParam; // paramList;
+
+               // console.log($scope.paramList);
+
                 $scope.input = {};
 
 /*
@@ -179,7 +182,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                 hashResource : function(){
                     return $scope.hashResource;
                 },
-                paramList: function () {          //the default config
+                paramListDEP: function () {          //the default config
                     console.log($scope.queryParam)
                     return $scope.queryParam;
                 }
