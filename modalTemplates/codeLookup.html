@@ -1,0 +1,62 @@
+<div>
+
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                <h3 class="modal-title">Code Lookup: {{concept.display}}</h3>
+            </div>
+            <div class="col-md-1 col-sm-1">
+                <div ng-show="showWaiting">
+                    <img src="css/ajax_loader_blue_32.gif"/>
+                </div>
+            </div>
+            <div class="col-md-7 col-sm-7">
+                <div class="pull-right">
+                    <button class="btn btn-link" ng-click="$dismiss()">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-body">
+
+
+        {{concept.display}} ({{concept.code}})
+
+        <h5>Parents</h5>
+        <table class="table table-bordered table-condensed">
+            <tr ng-repeat="concept in parsed.parent">
+                <td>{{concept.value}}</td>
+                <td>{{concept.description}}</td>
+            </tr>
+        </table>
+
+        <h5>Children</h5>
+        <table class="table table-bordered table-condensed">
+            <tr ng-repeat="concept in parsed.children">
+                <td>{{concept.value}}</td>
+                <td>{{concept.description}}</td>
+            </tr>
+        </table>
+
+
+
+
+    </div>
+
+    <div class="modal-header">
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+
+                <em class="pull-right">{{server.name}}</em>
+
+            </div>
+
+        </div>
+
+
+
+    </div>
+</div>

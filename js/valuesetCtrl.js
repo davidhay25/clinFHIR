@@ -20,6 +20,61 @@ angular.module("sampleApp").controller('valuesetCtrl',
         };
 
 
+
+        $scope.newLookup = function(concept) {
+
+
+            var qry = appConfigSvc.getCurrentTerminologyServer().url +
+                'CodeSystem/$lookup?code=' + concept.code + "&system=" + concept.system;
+            console.log(qry);
+
+            $scope.showWaiting = true;
+            GetDataFromServer.adHocFHIRQuery(qry).then(
+                function(data){
+                    console.log(data)
+                    var parsed = resourceCreatorSvc.parseCodeLookupResponse(data.data);
+                    console.log(parsed)
+
+
+
+                    $uibModal.open({
+                        backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
+                        keyboard: false,       //same as above.
+                        templateUrl: 'modalTemplates/codeLookup.html',
+                        controller: function($scope,parsed,concept){
+                            $scope.parsed = parsed
+                            $scope.concept = concept;
+
+
+                        }, resolve : {
+                            parsed: function () {          //the default config
+                                return parsed;
+
+                            },
+                            concept : function() {
+                                return concept;
+                            }
+                        }
+                    })
+
+
+
+
+                },
+                function(err){
+                    //alert(angular.toJson(err))
+                    $scope.queryError = err.data;
+                }
+            ).finally(function(){
+                $scope.showWaiting = false;
+            });
+
+
+
+
+
+        }
+
         $scope.newExpand = function(vs,filter){
             delete $scope.expansion;
             delete $scope.queryError;

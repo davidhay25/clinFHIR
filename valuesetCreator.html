@@ -76,9 +76,6 @@
                         </div>
                     </div>
 
-
-
-
                 </div>
 
 
@@ -167,33 +164,14 @@
 
 
                 <ul class="list-group">
-                    <li ng-class="{'list-group-item':true}" style="cursor: hand" ng-repeat="entry in searchResultBundle.entry"
+                    <li ng-class="{'list-group-item':true,active:entry.resource.id == input.vspreview.id}"
+                        style="cursor: hand" ng-repeat="entry in searchResultBundle.entry"
                         ng-click="input.vspreview=entry.resource">
                         {{entry.resource.name}} ({{entry.resource.id}})
                         <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>
                     </li>
                 </ul>
 
-                <!--
-                               <div class="row display-row" ng-repeat="entry in searchResultBundle.entry" style="margin-bottom: 5px">
-                                   <div class="col-md-9 col-sm-9">
-                                       <div ng-click="input.vspreview=entry.resource">
-                                           {{entry.resource.name}} ({{entry.resource.id}})
-                                           <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>
-                                       </div>
-
-
-                                   </div>
-
-
-                                   <div class="col-md-3 col-sm-3">
-                                       <button class="btn btn-link" ng-click="input.vspreview=entry.resource">Preview</button>
-                                       <button class="btn btn-link" ng-click="selectVs(entry.resource)">Select</button>
-                                   </div>
-
-
-                               </div>
-               -->
 
             </div>
             <div class="col-md-6 col-sm-6">
@@ -201,7 +179,7 @@
                 <uib-tabset>
                     <uib-tab heading="Contents">
                         <br/>
-                        <div class="banner">{{entry.resource.name}} definition</div>
+                        <div class="banner">{{input.vspreview.name}} definition</div>
                         <div ng-repeat="inc in input.vspreview.compose.include">
                             <div class="row">
                                 <div class="col-md-6 col-sm-6">
@@ -250,7 +228,7 @@
                                     <th>Code</th><th>Display</th><th>System</th>
                                 </tr>
                                 <tr ng-repeat="concept in expansion.contains">
-                                    <td>{{concept.code}}</td>
+                                    <td><a ng-click="newLookup(concept)"> {{concept.code}}</a></td>
                                     <td>{{concept.display}}</td>
                                     <td>{{concept.system}}</td>
                                 </tr>
