@@ -24,7 +24,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
             delete $scope.queryUrl;
             delete $scope.expansion;
             $scope.input.vspreview=vs;
-        }
+        };
 
 
         $scope.newLookup = function(concept) {
@@ -38,6 +38,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
             GetDataFromServer.adHocFHIRQuery(qry).then(
                 function(data){
                     //console.log(data)
+                    var raw = data.data;
                     var parsed = resourceCreatorSvc.parseCodeLookupResponse(data.data);
                     //console.log(parsed)
 
@@ -45,19 +46,21 @@ angular.module("sampleApp").controller('valuesetCtrl',
                         backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
                         keyboard: false,       //same as above.
                         templateUrl: 'modalTemplates/codeLookup.html',
-                        controller: function($scope,parsed,concept,resourceCreatorSvc,GetDataFromServer,appConfigSvc){
+                        controller: function($scope,parsed,concept,resourceCreatorSvc,GetDataFromServer,appConfigSvc,raw){
                             $scope.parsed = parsed
                             $scope.concept = concept;
+                            $scope.raw = raw;
 
                             $scope.selectCode = function (item) {
                                 var qry = appConfigSvc.getCurrentTerminologyServer().url +
                                     'CodeSystem/$lookup?code=' + item.value + "&system=" + concept.system;
-                                console.log(qry);
+                                //console.log(qry);
 
                                 $scope.showWaiting = true;
                                 GetDataFromServer.adHocFHIRQuery(qry).then(
                                     function(data) {
                                         console.log(data)
+                                        $scope.raw = data.data
                                         $scope.parsed = resourceCreatorSvc.parseCodeLookupResponse(data.data);
                                         console.log($scope.parsed)
                                         $scope.concept.code = item.value;
@@ -66,10 +69,6 @@ angular.module("sampleApp").controller('valuesetCtrl',
                                 ).finally(function(){
                                     $scope.showWaiting = false;
                                 });
-
-
-
-
                             }
 
 
@@ -80,6 +79,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
                             },
                             concept : function() {
                                 return concept;
+                            },
+                            raw : function() {
+                                return raw;
                             }
                         }
                     })
@@ -121,7 +123,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
                     },
                     function(err){
                         //alert(angular.toJson(err))
-                        $scope.queryError = err.data;
+                        modalService.showModal({}, {bodyText:'Error performing expansion '+ angular.toJson(err)})
+                        //$scope.queryError = err.data;
                     }
                 ).finally(function(){
                     $scope.showWaiting = false;
@@ -139,8 +142,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
                     },
                     function(err){
                         //alert(angular.toJson(err))
-
-                        $scope.queryError = err.data;
+                        modalService.showModal({}, {bodyText:'Error performing expansion '+ angular.toJson(err)})
+                        //$scope.queryError = err.data;
 
 
                     }

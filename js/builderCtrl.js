@@ -1135,8 +1135,13 @@ angular.module("sampleApp")
                 makeGraph()
             }
 
+            $scope.hidePatient = function() {
+                makeGraph($scope.currentPatient,true)
+
+            }
+
             //generate the graph of resources and references between them
-            makeGraph = function(centralResource) {
+            makeGraph = function(centralResource,hideMe) {
                 //if ($scope.resourcesBundle) {
 
                 $scope.filteredGraphView = false;
@@ -1145,7 +1150,7 @@ angular.module("sampleApp")
                 }
 
                 if ($scope.selectedContainer && $scope.selectedContainer.bundle) {
-                    var vo = builderSvc.makeGraph($scope.selectedContainer.bundle,centralResource)   //todo - may not be the right place...
+                    var vo = builderSvc.makeGraph($scope.selectedContainer.bundle,centralResource,hideMe) ;  //todo - may not be the right place...
 
                     $scope.allReferences = vo.allReferences;                //all references in the entire set.
 
@@ -1158,6 +1163,19 @@ angular.module("sampleApp")
                             }
                         }
                     };
+
+                    var optionsDEP = {
+                        physics: {
+                            enabled: true,
+                            barnesHut: {
+                                gravitationalConstant: -10000,
+                            },
+                            stabilization : {
+                                enabled : false
+                            }
+                        }
+                    };
+
                     $scope.chart = new vis.Network(container, vo.graphData, options);
                     $scope.chart.on("click", function (obj) {
 

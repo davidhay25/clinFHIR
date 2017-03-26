@@ -45,6 +45,7 @@ angular.module("sampleApp")
         objColours.Practitioner = '#FFBB99';
         objColours.MedicationStatement = '#ffb3ff';
         objColours.CarePlan = '#FF9900';
+        objColours.Sequence = '#FF9900';
         objColours.CareTeam = '#FFFFCC';
         objColours.Condition = '#cc9900';
         objColours.LogicalModel = '#cc0000';
@@ -56,6 +57,16 @@ angular.module("sampleApp")
 
 
         return {
+            getLinkingUrlFromId : function(resource) {
+                //return the url used for referencing. If a Uuid then just return it - otherwise make a relatibe
+
+                if (resource.id.lastIndexOf('urn:uuid:', 0) === 0) {
+                    return resource.id;
+                } else {
+                    return resource.resourceType + "/" + resource.id;
+                }
+
+            },
             importResource : function(resource,scope,idPrefix){
                 //import a resource or resource bundle //todo - add document check later...
                 var that = this;
@@ -136,6 +147,8 @@ angular.module("sampleApp")
                             bundle.entry.forEach(function(entry){
                                 var resource = entry.resource;
                                 var id = resource.resourceType + "/"+ resource.id;
+
+
                                // temp - removed mar15 2017 - not sure why I'm doing this. Did I want to exclude the resources that may not be in the server??
                                 // if (! gAllResourcesThisSet[id]) {
                                     newBundle[type].entry.push(entry)
@@ -240,7 +253,7 @@ angular.module("sampleApp")
                         patient = res;
                     }
 
-                })
+                });
                 return patient
             },
             makeLogicalModelFromSD : function(profile){
@@ -1524,24 +1537,14 @@ angular.module("sampleApp")
                 }
 
             },
-            makeGraph : function(bundle,centralResource) {
+            makeGraph : function(bundle,centralResource,hideMe) {
                 //builds the model that has all the models referenced by the indicated SD, recursively...
+                //if hideMe is true, then hide the central node and all references to it
 
                 var that = this;
                 var allReferences = [];
                 gAllReferences.length = 0;
-/*
-                if (centralResource) {
-                    var url = centralResource.resourceType + "/" + centralResource.id;
-                    var allRefs = that.getSrcTargReferences(url)
-                    //create the list of resources references
 
-
-                    console.log(allRefs);
-
-
-                }
-                */
 
                 var allResources = {};  //all resources hash by id
                 var centralResourceNodeId;
@@ -1555,12 +1558,18 @@ angular.module("sampleApp")
                     var resource = entry.resource;
                     var addToGraph = true;
 
+
+
+                    var url = that.getLinkingUrlFromId(resource);
+
+/*
                     var url = resource.resourceType+'/'+resource.id;
                     //if this is a uuid (starts with 'urn:uuid:' then don't add the resourceType as a prefix.
                     //added to support importing bundles with uuids...
                     if (resource.id.lastIndexOf('urn:uuid:', 0) === 0) {
                         url = resource.id;
                     }
+                    */
 
                     //add an entry to the node list for this resource...
                     var node = {id: arNodes.length +1, label: resource.resourceType, shape: 'box',url:url,cf : {resource:resource}};
@@ -1569,10 +1578,17 @@ angular.module("sampleApp")
                     }
 
 
-
+                    //the id of the centralResource (if any)
                     if (centralResource) {
-                        if (resource.resourceType == centralResource.resourceType &&  resource.id == centralResource.id) {
+                        if (resource.resourceType == centralResource.resourceType && resource.id == centralResource.id) {
                             centralResourceNodeId = node.id
+
+                            if (hideMe) {
+                                //hide the node
+                                node.hidden = true;
+                                node.physics=false;
+                            }
+
                         }
                     }
 
@@ -1617,10 +1633,24 @@ angular.module("sampleApp")
                 });
 
 
-                //if there's a centralResource, then only include resources with a reference to or from it...
-                if (centralResource) {
+                //if hideMe is set, then don't show references to the centralResource (which will have been hidden)
+                if (hideMe) {
+                    arEdges.forEach(function (edge) {
+                        if (edge.from == centralResourceNodeId || edge.to == centralResourceNodeId) {
+                            edge.hidden = true;
+                            edge.physics=false;
+                        }
 
-                    var centralUrl = centralResource.resourceType + "/" + centralResource.id;
+                    })
+                }
+
+                //if there's a centralResource - and not hideMe - , then only include resources with a reference to or from it...
+                if (centralResource && ! hideMe) {
+
+
+                   // var centralUrl = centralResource.resourceType + "/" + centralResource.id;
+                    var centralUrl = that.getLinkingUrlFromId(centralResource);
+
                     var allRefs = that.getSrcTargReferences(centralUrl)
 
                     var hashNodes = {};
@@ -1629,7 +1659,8 @@ angular.module("sampleApp")
                     arNodes.forEach(function (node) {
                         var include = false;
                         var id = node.cf.resource.id;
-                        var url = node.cf.resource.resourceType + "/"+node.cf.resource.id;
+                        //var url = node.cf.resource.resourceType + "/"+node.cf.resource.id;
+                        var url = that.getLinkingUrlFromId(node.cf.resource);
                         if (id == centralResource.id) {
                             include = true
                         } else {

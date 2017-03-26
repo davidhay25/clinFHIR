@@ -22,24 +22,41 @@
     </div>
     <div class="modal-body">
 
+        <div class="banner">
+            {{concept.display}} ({{concept.code}})
+        </div>
+        <strong></strong>
 
-        {{concept.display}} ({{concept.code}})
+        <uib-tabset>
+            <uib-tab heading="Relations">
+                <h5>Parents</h5>
+                <table class="table table-bordered table-condensed">
+                    <tr ng-repeat="concept in parsed.parent">
+                        <td><div class="clickable" ng-click="selectCode(concept)"> {{concept.value}}</div></td>
+                        <td>{{concept.description}}</td>
+                    </tr>
+                </table>
 
-        <h5>Parents</h5>
-        <table class="table table-bordered table-condensed">
-            <tr ng-repeat="concept in parsed.parent">
-                <td><div class="clickable" ng-click="selectCode(concept)"> {{concept.value}}</div></td>
-                <td>{{concept.description}}</td>
-            </tr>
-        </table>
+                <h5>Children</h5>
+                <table class="table table-bordered table-condensed">
+                    <tr ng-repeat="concept in parsed.children">
+                        <td><div class="clickable" ng-click="selectCode(concept)"> {{concept.value}}</div></td>
+                        <td>{{concept.description}}</td>
+                    </tr>
+                </table>
+            </uib-tab>
 
-        <h5>Children</h5>
-        <table class="table table-bordered table-condensed">
-            <tr ng-repeat="concept in parsed.children">
-                <td><div class="clickable" ng-click="selectCode(concept)"> {{concept.value}}</div></td>
-                <td>{{concept.description}}</td>
-            </tr>
-        </table>
+
+            <uib-tab heading="Raw lookup">
+                <pre>{{raw | json}}</pre>
+            </uib-tab>
+
+        </uib-tabset>
+
+
+
+
+
 
     </div>
 
