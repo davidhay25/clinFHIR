@@ -165,7 +165,8 @@
 
                 <ul class="list-group">
                     <li ng-class="{'list-group-item':true,active:entry.resource.id == input.vspreview.id}"
-                        style="cursor: hand" ng-repeat="entry in searchResultBundle.entry"
+                        style="cursor: pointer" ng-repeat="entry in searchResultBundle.entry"
+
                         ng-click="input.vspreview=entry.resource">
                         {{entry.resource.name}} ({{entry.resource.id}})
                         <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>

@@ -35,15 +35,34 @@ angular.module("sampleApp").controller('valuesetCtrl',
                     var parsed = resourceCreatorSvc.parseCodeLookupResponse(data.data);
                     console.log(parsed)
 
-
-
                     $uibModal.open({
                         backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
                         keyboard: false,       //same as above.
                         templateUrl: 'modalTemplates/codeLookup.html',
-                        controller: function($scope,parsed,concept){
+                        controller: function($scope,parsed,concept,resourceCreatorSvc,GetDataFromServer,appConfigSvc){
                             $scope.parsed = parsed
                             $scope.concept = concept;
+
+                            $scope.selectCode = function (newCode) {
+                                var qry = appConfigSvc.getCurrentTerminologyServer().url +
+                                    'CodeSystem/$lookup?code=' + newCode + "&system=" + concept.system;
+                                console.log(qry);
+
+                                $scope.showWaiting = true;
+                                GetDataFromServer.adHocFHIRQuery(qry).then(
+                                    function(data) {
+                                        console.log(data)
+                                        $scope.parsed = resourceCreatorSvc.parseCodeLookupResponse(data.data);
+                                        console.log($scope.parsed)
+                                    }
+                                ).finally(function(){
+                                    $scope.showWaiting = false;
+                                });
+
+                                $scope.concept.code = newCode.code;
+
+
+                            }
 
 
                         }, resolve : {
