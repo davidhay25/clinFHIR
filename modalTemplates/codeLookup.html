@@ -28,7 +28,7 @@
         <h5>Parents</h5>
         <table class="table table-bordered table-condensed">
             <tr ng-repeat="concept in parsed.parent">
-                <td><div class="clickable" ng-click="selectCode(concept.value)"> {{concept.value}}</div></td>
+                <td><div class="clickable" ng-click="selectCode(concept)"> {{concept.value}}</div></td>
                 <td>{{concept.description}}</td>
             </tr>
         </table>
@@ -36,13 +36,10 @@
         <h5>Children</h5>
         <table class="table table-bordered table-condensed">
             <tr ng-repeat="concept in parsed.children">
-                <td><div class="clickable" ng-click="selectCode(concept.value)"> {{concept.value}}</div></td>
+                <td><div class="clickable" ng-click="selectCode(concept)"> {{concept.value}}</div></td>
                 <td>{{concept.description}}</td>
             </tr>
         </table>
-
-
-
 
     </div>
 
@@ -50,7 +47,7 @@
         <div class="row">
             <div class="col-md-12 col-sm-12">
 
-                <em class="pull-right">{{server.name}}</em>
+                <em>Note that this functionality only really works for SNOMED at the moment...</em>
 
             </div>
 

@@ -20,20 +20,26 @@ angular.module("sampleApp").controller('valuesetCtrl',
         };
 
 
+        $scope.newSelect = function(vs) {
+            delete $scope.queryUrl;
+            delete $scope.expansion;
+            $scope.input.vspreview=vs;
+        }
+
 
         $scope.newLookup = function(concept) {
 
 
             var qry = appConfigSvc.getCurrentTerminologyServer().url +
                 'CodeSystem/$lookup?code=' + concept.code + "&system=" + concept.system;
-            console.log(qry);
+            //console.log(qry);
 
             $scope.showWaiting = true;
             GetDataFromServer.adHocFHIRQuery(qry).then(
                 function(data){
-                    console.log(data)
+                    //console.log(data)
                     var parsed = resourceCreatorSvc.parseCodeLookupResponse(data.data);
-                    console.log(parsed)
+                    //console.log(parsed)
 
                     $uibModal.open({
                         backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
@@ -43,9 +49,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
                             $scope.parsed = parsed
                             $scope.concept = concept;
 
-                            $scope.selectCode = function (newCode) {
+                            $scope.selectCode = function (item) {
                                 var qry = appConfigSvc.getCurrentTerminologyServer().url +
-                                    'CodeSystem/$lookup?code=' + newCode + "&system=" + concept.system;
+                                    'CodeSystem/$lookup?code=' + item.value + "&system=" + concept.system;
                                 console.log(qry);
 
                                 $scope.showWaiting = true;
@@ -54,12 +60,14 @@ angular.module("sampleApp").controller('valuesetCtrl',
                                         console.log(data)
                                         $scope.parsed = resourceCreatorSvc.parseCodeLookupResponse(data.data);
                                         console.log($scope.parsed)
+                                        $scope.concept.code = item.value;
+                                        $scope.concept.display = item.description;
                                     }
                                 ).finally(function(){
                                     $scope.showWaiting = false;
                                 });
 
-                                $scope.concept.code = newCode.code;
+
 
 
                             }
@@ -98,6 +106,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
             delete $scope.expansion;
             delete $scope.queryError;
             delete $scope.queryUrl;
+            //delete $scope.queryUrl
             $scope.showWaiting = true;
             if (filter){
                 //var qry = $scope.valueSetRoot+$scope.vs.id + "/$expand?filter="+filter;

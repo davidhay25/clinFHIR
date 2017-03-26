@@ -163,24 +163,25 @@
 
 
 
-                <ul class="list-group">
-                    <li ng-class="{'list-group-item':true,active:entry.resource.id == input.vspreview.id}"
+                <div class="list-group">
+
+                    <a href="#"  ng-class="{'list-group-item':true, active:entry.resource.id == input.vspreview.id}"
                         style="cursor: pointer" ng-repeat="entry in searchResultBundle.entry"
 
-                        ng-click="input.vspreview=entry.resource">
+                        ng-click="newSelect(entry.resource)">
                         {{entry.resource.name}} ({{entry.resource.id}})
                         <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>
-                    </li>
-                </ul>
+                    </a>
+                </div>
 
 
             </div>
-            <div class="col-md-6 col-sm-6">
+            <div class="col-md-6 col-sm-6" ng-show="input.vspreview">
                 <button class="btn btn-link pull-right" ng-click="selectVs(entry.resource)">Edit</button>
                 <uib-tabset>
                     <uib-tab heading="Contents">
                         <br/>
-                        <div class="banner">{{input.vspreview.name}} definition</div>
+                        <div class="banner">{{input.vspreview.name}}: definition</div>
                         <div ng-repeat="inc in input.vspreview.compose.include">
                             <div class="row">
                                 <div class="col-md-6 col-sm-6">
@@ -207,10 +208,10 @@
                                     <td>{{filter.value}}</td>
                                 </tr>
                             </table>
-                            <hr/>
+
                         </div>
 
-                            <div class="banner">Expand</div>
+                        <div class="banner">{{input.vspreview.name}}: expansion</div>
                             <div class="row">
                                 <div class="col-md-6 col-sm-6">
                                     <input type="text" class="form-control" ng-model="input.newFilter"
@@ -224,18 +225,19 @@
                             </div>
 
                             <br/>
-                            <table class="table table-condensed table-bordered">
+                            <hr/>
+                            <table class="table table-condensed table-bordered" ng-show="expansion.contains.length > 1">
                                 <tr>
                                     <th>Code</th><th>Display</th><th>System</th>
                                 </tr>
                                 <tr ng-repeat="concept in expansion.contains">
-                                    <td><a ng-click="newLookup(concept)"> {{concept.code}}</a></td>
+                                    <td><div class="clickable" ng-click="newLookup(concept)"> {{concept.code}}</div></td>
                                     <td>{{concept.display}}</td>
                                     <td>{{concept.system}}</td>
                                 </tr>
                             </table>
 
-                            <div ng-hide="expansion.contains.length > 1">
+                            <div ng-show="expansion.contains.length == 0">
                                 <h5>Nothing in expansion</h5>
                             </div>
 
