@@ -261,6 +261,7 @@ angular.module("sampleApp")
                             makeGraph();
                             drawResourceTree(res);
                             isaDocument();      //determine if this bundle is a document (has a Composition resource)
+                            $scope.currentPatient = builderSvc.getPatientResource();
                             $rootScope.$emit('addResource',res);
                         });       //select the resource, indicating that it is a new resource...
                     }
