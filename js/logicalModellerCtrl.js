@@ -1265,7 +1265,7 @@ angular.module("sampleApp")
 */
 
 
-            $scope.save = function() {
+            $scope.saveModel = function() {
                 
                 var url = $scope.conformanceServer.url + "StructureDefinition/" + $scope.SD.id;
                 $scope.showWaiting = true;
@@ -1274,13 +1274,15 @@ angular.module("sampleApp")
                 
                 //this is a hack as only grahames server is on the latest (post baltimore) version of stu3.
                 //it can be removed when the others (ie hapi) are confrmant also...
-                if (url.indexOf('tersections') == -1) {
+               /* if (url.indexOf('tersections') == -1) {
                     SDToSave.requirements = SDToSave.purpose;
                     SDToSave.display = SDToSave.title;
                     delete SDToSave.purpose;
                     delete SDToSave.title
 
                 }
+
+                */
                 
                 $http.put(url,SDToSave).then(
                     function(data) {
