@@ -149,6 +149,47 @@ angular.module("sampleApp")
                 }
             };
 
+            $scope.addExtensionDirectly = function() {
+                console.log($scope.hashPath)
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/addExtension.html',
+                   // size: 'lg',
+                    controller: 'addExtensionCtrl',
+                    resolve : {
+                        resource: function () {          //the default config
+                            return $scope.currentResource;
+                        }
+                    }
+                }).result.then(function(vo){
+
+                    console.log(vo);
+                    var hp = angular.copy($scope.hashPath);
+                    if (vo.isModifier) {
+                        hp.path += '.modifierExtension';
+                    } else {
+                        hp.path += '.extension';
+                    }
+
+
+                    var insertPoint = $scope.currentResource;
+
+                    builderSvc.addPropertyValue(insertPoint,
+                        hp,
+                        'extension',
+                        {extValue:vo.extValue})
+                    return;
+                })
+
+
+
+
+
+
+
+                /*
+                * */
+            }
+
 
             $scope.importResource = function() {
                 $uibModal.open({

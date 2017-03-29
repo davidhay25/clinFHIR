@@ -1,0 +1,82 @@
+<div>
+
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-7 col-sm-7">
+                <h3 class="modal-title">Add Extension directly</h3>
+            </div>
+            <div class="col-md-1 col-sm-1">
+                <div ng-show="showWaiting">
+                    <img src="css/ajax_loader_blue_32.gif"/>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-4">
+                <div class="pull-right">
+                    <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+                    <button class="btn btn-success" ng-show="analyse && input.value" ng-click="select()">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-body">
+
+       <div class="row">
+           <div class="col-md-6 col-sm-6">
+               <select ng-model="input.extension" class="form-control"
+                       ng-options="ext.name for ext in extensions"
+                       ng-change="selectExtDef(input.extension)"></select>
+
+               <br/>
+                <div>{{analyse.description}}</div>
+               <br>
+               <!--
+               Contexts of use
+               <ul>
+                   <li ng-repeat="ctx in analyse.context">
+                       {{ctx}}
+                   </li>
+               </ul>
+
+               -->
+
+
+
+           </div>
+           <div class="col-md-6 col-sm-6">
+               <input ng-show="analyse" class="form-control" ng-model="input.value" placeholder="Value of extension"/>
+
+               <br/>
+
+               <div ng-show="analyse" class="pull-right"
+                    uib-popover="Check if the extension changes the meaning of the resource"
+                    popover-placement="left"
+                    popover-trigger="'mouseenter'">
+                   <span>Is a Modifier (changes the meaning)</span>
+                   <checkbox  ng-model="input.isModifier"/>
+               </div>
+
+           </div>
+       </div>
+
+
+
+
+    </div>
+
+    <div class="modal-header">
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+
+                <em>Add an extension to the resource that is not present in the profile being used</em>
+
+            </div>
+
+        </div>
+
+
+
+    </div>
+</div>

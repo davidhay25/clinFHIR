@@ -112,6 +112,7 @@
     <script src="js/observationsDisplayCtrl.js"></script>
     <script src="js/libs/vis.min.js"></script>
     <script src="js/loginCtrl.js"></script>
+    <script src="js/addExtensionCtrl.js"></script>
     <!--
     <script src="js/newVSFinder.js"></script>
 
@@ -965,6 +966,16 @@
                                             </div>
 
                                         </div>
+
+
+                                        <div ng-show="hashPath.ed.type[0].code == 'DomainResource'">
+                                            <br/>
+                                            <div>
+                                                <span class="clickable" ng-click="addExtensionDirectly()">Add Extension</span>
+                                            </div>
+
+                                        </div>
+
 
                                         <div ng-show="hashPath.isReference">
 
