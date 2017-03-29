@@ -177,7 +177,9 @@ angular.module("sampleApp")
                         hp,
                         'extension',
                         {extValue:vo.extValue})
-                    return;
+
+                    drawResourceTree($scope.currentResource)
+
                 })
 
 
@@ -1459,6 +1461,15 @@ angular.module("sampleApp")
 
 
                                 //get the type information
+                                console.log(ed)
+
+                                if (!ed.type) {
+                                    //R3 seems to have no type for the root element in the resource. I need it for the extension adding...
+                                    if (ed.path && ed.path.indexOf('.')== -1) {
+                                        ed.type = [{code:'DomainResource'}]
+                                    }
+                                }
+
                                 if (ed.type) {
                                     $scope.hashPath = {path: ed.path};
                                     $scope.hashPath.ed = ed;
@@ -1480,8 +1491,6 @@ angular.module("sampleApp")
                                             urlToValueSet = $scope.hashPath.ed.binding && $scope.hashPath.ed.binding.valueSetUri;
                                         }
                                     }
-
-
 
                                     //if there's a ValueSet then get the details, and display the contents if small (ie is a list)
                                     if (urlToValueSet) {
@@ -1505,7 +1514,6 @@ angular.module("sampleApp")
 
                                         })
                                     }
-
 
                                     ed.type.forEach(function(typ){
 
