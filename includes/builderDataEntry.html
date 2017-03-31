@@ -1,53 +1,107 @@
-<div>
+<div ng-controller="dataTypeCtrl">
 
 
     <div ng-show="dataTypeBeingEntered == 'DosageInstruction'">
 
 
-        <div class="row">
-            <div class="col-md-2  col-sm-2 ">
+        <div class="row" style="margin-bottom: 8px">
+            <div class="col-md-1  col-sm-1 ">
                 Sequence
             </div>
-            <div class="col-md-4  col-sm-4 ">
-                <input placeholder = 'Enter value' type="text" class="form-control" ng-model="input.dt.dosage.sequence"/>
+            <div class="col-md-5  col-sm-5 ">
+                <input placeholder = 'Sequence' type="text" class="form-control" ng-model="input.dt.dosage.sequence"/>
             </div>
-            <div class="col-md-2  col-sm-2 ">
+            <div class="col-md-1  col-sm-1 ">
 
             </div>
-            <div class="col-md-4  col-sm-4 ">
+            <div class="col-md-5  col-sm-5 ">
 
+            </div>
+        </div>
+
+
+        <div class="row" style="margin-bottom: 8px">
+            <div class="col-md-1  col-sm-1 ">
+                Dose Quantity
+            </div>
+            <div class="col-md-5  col-sm-5 ">
+                <div class="row">
+                    <div class="col-md-6  col-sm-6 ">
+                        <input placeholder = 'Amount' type="text" class="form-control" ng-model="input.dt.dosage.dose.value"/>
+                    </div>
+                    <div class="col-md-6  col-sm-6 ">
+                        <input placeholder = 'Unit' type="text" class="form-control" ng-model="input.dt.dosage.dose.unit"/>
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="col-md-1  col-sm-1 ">
+                Route
+            </div>
+            <div class="col-md-5  col-sm-5 ">
+                <input type="text" ng-model="input.dt.dosage.route.coding"
+                       uib-popover="Search is 'starts with' - eg 'ora' or 'int'"
+                       popover-placement="top"
+                       popover-trigger="'mouseenter'"
+
+                       typeahead-min-length="3"
+                       typeahead-wait-ms="1000"
+                       typeahead-on-select="selectCCfromList($item, $model, $label)"
+                       uib-typeahead="opt as opt.display for opt in vsLookup($viewValue,routeCodes)"
+                       class="form-control"/>
             </div>
         </div>
 
 
 
 
-        <div class="row">
-            <div class="col-md-2  col-sm-2 ">
+        <div class="row" style="margin-bottom: 8px">
+            <div class="col-md-1  col-sm-1 ">
                 Text
             </div>
-            <div class="col-md-4  col-sm-4 ">
+            <div class="col-md-5  col-sm-5 ">
                 <textarea class="form-control" ng-model="input.dt.dosage.text"></textarea>
             </div>
-            <div class="col-md-2  col-sm-2 ">
+            <div class="col-md-1  col-sm-1 ">
                 Patient Instructions
             </div>
-            <div class="col-md-4  col-sm-4 ">
+            <div class="col-md-5  col-sm-5 ">
                 <textarea class="form-control" ng-model="input.dt.dosage.patientInstructions"></textarea>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-md-2  col-sm-2 ">
+            <div class="col-md-1  col-sm-1 ">
+                Timing
+            </div>
+            <div class="col-md-5  col-sm-5 ">
+                <ng-include src="'/prTemplates/timing.html'"></ng-include>
+            </div>
+            <div class="col-md-1  col-sm-1 ">
+                As Needed
+            </div>
+            <div class="col-md-5  col-sm-5 ">
+                <input placeholder = 'Reason to take' type="text" class="form-control" ng-model="input.dt.dosage.prn.reason"/>
+            </div>
+
+        </div>
+
+
+
+
+        <div class="row">
+            <div class="col-md-1  col-sm-1 ">
 
             </div>
-            <div class="col-md-4  col-sm-4 ">
+            <div class="col-md-5  col-sm-5 ">
 
             </div>
-            <div class="col-md-2  col-sm-2 ">
+            <div class="col-md-1  col-sm-1 ">
 
             </div>
-            <div class="col-md-4  col-sm-4 ">
+            <div class="col-md-5  col-sm-5 ">
 
             </div>
         </div>

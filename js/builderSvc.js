@@ -963,11 +963,28 @@ angular.module("sampleApp")
                 switch (dt) {
                     case 'DosageInstruction' :
                         var insrt = {};
+                        //addIfNotEmpty(value.HumanName.use,insrt,'use');
+
                         insrt.text = value.dosage.text;
                         insrt.sequence = value.dosage.sequence;
                         insrt.patientInstruction = value.dosage.patientInstructions;
+                        insrt.timing =  value.dosage.timing;
 
-                        //var insrt = {value:value.contactpoint.value,system:value.contactpoint.system,use:value.contactpoint.use}
+                        if (value.dosage.route) {
+                            insrt.route = value.dosage.route
+                        }
+                        if (value.dosage.dose) {
+                            insrt.doseQuantity = {value: value.dosage.dose.value}
+                            insrt.doseQuantity.unit = value.dosage.dose.unit;
+                        }
+                        if (value.dosage.prn) {
+                            if (value.dosage.prn.reason) {
+                                insrt.asNeededCodeableConcept = {text:value.dosage.prn.reason} 
+                            }
+
+                        }
+
+
                         simpleInsert(insertPoint,info,path,insrt,dt);
                         break;
                     case 'extension' :
