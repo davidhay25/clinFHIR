@@ -582,6 +582,9 @@ angular.module("sampleApp")
             //datatypes for which there is an entry form
             $scope.supportedDt = ['decimal','integer','Coding','uri','ContactPoint','Identifier','CodeableConcept','string','code','date','Period','dateTime','Address','HumanName','Annotation','boolean']
 
+
+            $scope.supportedDt.push('DosageInstruction');
+
             function getExistingData(patient) {
                 delete $scope.resourcesFromServer;
                 if (patient) {

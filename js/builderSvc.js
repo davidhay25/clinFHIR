@@ -961,6 +961,15 @@ angular.module("sampleApp")
                 var path = hashPath.path;
 
                 switch (dt) {
+                    case 'DosageInstruction' :
+                        var insrt = {};
+                        insrt.text = value.dosage.text;
+                        insrt.sequence = value.dosage.sequence;
+                        insrt.patientInstruction = value.dosage.patientInstructions;
+
+                        //var insrt = {value:value.contactpoint.value,system:value.contactpoint.system,use:value.contactpoint.use}
+                        simpleInsert(insertPoint,info,path,insrt,dt);
+                        break;
                     case 'extension' :
                         simpleInsert(insertPoint,info,path,value.extValue,dt);
 

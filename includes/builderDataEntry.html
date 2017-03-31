@@ -1,6 +1,62 @@
 <div>
 
 
+    <div ng-show="dataTypeBeingEntered == 'DosageInstruction'">
+
+
+        <div class="row">
+            <div class="col-md-2  col-sm-2 ">
+                Sequence
+            </div>
+            <div class="col-md-4  col-sm-4 ">
+                <input placeholder = 'Enter value' type="text" class="form-control" ng-model="input.dt.dosage.sequence"/>
+            </div>
+            <div class="col-md-2  col-sm-2 ">
+
+            </div>
+            <div class="col-md-4  col-sm-4 ">
+
+            </div>
+        </div>
+
+
+
+
+        <div class="row">
+            <div class="col-md-2  col-sm-2 ">
+                Text
+            </div>
+            <div class="col-md-4  col-sm-4 ">
+                <textarea class="form-control" ng-model="input.dt.dosage.text"></textarea>
+            </div>
+            <div class="col-md-2  col-sm-2 ">
+                Patient Instructions
+            </div>
+            <div class="col-md-4  col-sm-4 ">
+                <textarea class="form-control" ng-model="input.dt.dosage.patientInstructions"></textarea>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2  col-sm-2 ">
+
+            </div>
+            <div class="col-md-4  col-sm-4 ">
+
+            </div>
+            <div class="col-md-2  col-sm-2 ">
+
+            </div>
+            <div class="col-md-4  col-sm-4 ">
+
+            </div>
+        </div>
+
+
+
+
+    </div>
+
     <div ng-show="dataTypeBeingEntered == 'ContactPoint'">
         <div class="row">
 
