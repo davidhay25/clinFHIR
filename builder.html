@@ -1059,6 +1059,8 @@
                                         {{hashPath.comments}}
 
 
+
+
                                     </div>
                                 </div>
 
@@ -1136,6 +1138,22 @@
 
                             </uib-tab>
 
+                            <uib-tab heading="Dev Views">
+                                <h3>Views for clinFHIR developer</h3>
+                                <em>This is development information used for debugging. Just ignore it...</em>
+
+                                <uib-tabset>
+                                    <uib-tab heading="ed">
+                                        <pre>{{hashPath.ed | json}}</pre>
+                                    </uib-tab>
+                                    <uib-tab heading="hashPath">
+                                        <pre>{{hashPath | json}}</pre>
+                                    </uib-tab>
+                                </uib-tabset>
+
+
+
+                            </uib-tab>
 
                             <uib-tab heading="Errors/Warnings" ng-show="currentEntry.response.outcome">
 
@@ -1301,8 +1319,6 @@
 
                         <uib-tab heading="Existing resources" ng-show="resourcesFromServer">
 
-
-
                             <div class="row">
 
                                 <div class="col-md-5 col-sm-5">
@@ -1344,11 +1360,6 @@
                                                 </div>
 
 
-
-                                                <!--
-                                                <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
-
-                                                -->
 
                                         </div>
                                     </div>

@@ -262,8 +262,6 @@ angular.module("sampleApp")
                 var deferred = $q.defer();
                 if (profile && profile.snapshot && profile.snapshot.element) {
 
-
-
                     var logicalModel = angular.copy(profile);       //this will be the logical model
                     var queries = [];       //the queries to retrieve the extension definition
                     logicalModel.snapshot.element.length = 0; //remove the current element definitions
@@ -289,9 +287,12 @@ angular.module("sampleApp")
 
                                             if (! analysis.isComplexExtension) {
 
-                                                console.log(ed)
+                                                console.log(ed,analysis)
 
                                                 //ed.short = analysis.name;   //will become the tree name
+                                                if (! ed.name) {
+                                                    ed.name = analysis.name;
+                                                }
 
                                                 ed.type = analysis.type;
                                                 ed.binding = analysis.binding;
