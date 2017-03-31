@@ -23,7 +23,7 @@
     </style>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','ngSanitize']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -59,17 +59,28 @@
 </head>
 
 
-<body style="padding: 8px;padding-top:80px" >
+<body style="padding: 8px;padding-top:80px">
 
 <div ng-app="sampleApp" ng-controller="codeSystemCtrl" class="container-fluid">
 
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 
-        <div class="container-fluid">
+        <div class="container-fluid-row">
             <div class="col-md-3 col-sm-3">
+
+
+                    <span class="navbar-brand" href="#"
+                       uib-popover-html="displayServers"
+                       popover-trigger="'mouseenter'"
+                       popover-placement="right">
+                        CodeSystem Builder
+                    </span>
+
+                <!--
                 <a class="navbar-brand" href="#">
                     clinFHIR CodeSystem Editor
                 </a>
+                -->
             </div>
             <div class="col-md-3 col-sm-3">
 
@@ -82,8 +93,11 @@
             <div class="col-md-3 col-sm-3">
                 <form class="navbar-form navbar-right">
                 <div class="form-group"  ng-hide="isDirty" >
-                    <button class="btn btn-primary pull-right" ng-hide="state=='find'" ng-click="state='find'">Find</button>
-                    <button class="btn btn-default" ng-hide="isDirty" ng-click="newCS()">New</button>
+                    <button class="btn btn-primary pull-right" ng-hide="state=='find' || state=='preview'"
+                            ng-click="state='find'">Find</button>
+                    <button class="btn btn-default" ng-show="state=='find' || state=='preview'" ng-click="newCS()">New</button>
+
+                   <!-- <button class="btn btn-default" ng-hide="isDirty" ng-click="newCS()">New</button>-->
                 </div>
 
                 <div class="form-group" ng-show="isDirty" >
@@ -99,21 +113,46 @@
 
 
     <!-- -------------------------  Find ---------------------->
-    <div class="row" ng-show="state == 'find'">
+    <div class="row" ng-show="state == 'find' || state == 'preview'">
         <div class="col-md-6 col-sm-6">
-            <div>Search</div>
+            <h5>Find CodeSystem</h5>
+
             <div class="row">
-                <div class="col-md-9 col-sm-9">
+                <div class="col-md-5 col-sm-5">
+                    <strong>Name</strong>
+                </div>
+
+                <div class="col-md-5 col-sm-5">
+                    <strong>Publisher</strong>
+                </div>
+
+
+                <div class="col-md-2 col-sm-2">
+
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-5 col-sm-5">
                     <input type="text" ng-model="input.searchName"
                            autocapitalize="off"
-                           class="form-control" placeholder="Enter search text for name"/>
+                           class="form-control" placeholder="Search text for name"/>
                 </div>
-                <div class="col-md-3 col-sm-3">
-                    <button class="btn btn-link" ng-click="search(input.searchName)">Find</button>
+
+                <div class="col-md-5 col-sm-5">
+                    <input type="text" ng-model="input.searchPublisher"
+                           autocapitalize="off"
+                           class="form-control" placeholder="Search text for publisher"/>
+                </div>
+
+
+                <div class="col-md-2 col-sm-2">
+                    <button class="btn btn-link" ng-click="searchForCS(input.searchName,input.searchPublisher)">Find</button>
                 </div>
             </div>
 
             <br/>
+            <div>{{url}}</div>
             <div uib-alert class="alert-warning" ng-show="message">
                 {{message}}
             </div>
@@ -126,6 +165,21 @@
 
             </div>
 
+
+
+            <div class="list-group">
+
+                <div href="#"  ng-class="{'list-group-item':true, active:entry.resource.id == input.cs.id}"
+                   style="cursor: pointer" ng-repeat="entry in searchResultBundle.entry"
+
+                   ng-click="previewCS(entry.resource)">
+                    {{entry.resource.name}} ({{entry.resource.id}})
+                    <div style="margin-left: 10px"><em>{{entry.resource.description}}</em></div>
+                </div>
+            </div>
+
+
+<!--
             <div class="row display-row" ng-repeat="entry in searchResultBundle.entry" style="margin-bottom: 5px">
                 <div class="col-md-8 col-sm-8">
                     <div ng-click="selectVs(entry.resource)">
@@ -140,11 +194,51 @@
                     <button class="btn btn-link" ng-click="selectCS(entry.resource)">Select</button>
                 </div>
             </div>
+            -->
 
 
         </div>
         <div class="col-md-6 col-sm-6">
-            <pre ng-show="input.vspreview">{{input.vspreview | json}}</pre>
+
+            <button ng-show="isAuthoredByClinFhir" ng-click="editCS()" class="btn btn-link pull-right">Edit</button>
+            <uib-tabset ng-show="cs.concept.length > 0">
+                <uib-tab heading="Contents">
+                    <table class="table table-bordered">
+                        <tr><th>Code</th><th>Display</th><th>Definition</th></tr>
+                        <tr ng-repeat="concept in cs.concept">
+                            <td>{{concept.code}}</td>
+                            <td>{{concept.display}}</td>
+                            <td>{{concept.definition}}</td>
+                        </tr>
+                    </table>
+                </uib-tab>
+                <uib-tab heading="Json">
+                    <pre>{{cs| json}}</pre>
+                </uib-tab>
+
+                <uib-tab heading="Version 2 ValueSet">
+
+                    <div class="row" style="padding: 8px">
+                        <div class="col-md-3 col-sm-3">
+                            <strong>Copy to v2 server</strong>
+                        </div>
+                        <div class="col-md-6 col-sm-6">
+                            <select class="form-control" ng-model="input.v2server"
+                                    ng-options="svr.name for svr in appConfigSvc.getAllServers(2)">
+
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-sm-3">
+                            <button class="btn btn-danger" ng-show="input.v2server" ng-click="copyV2VS(input.v2server)">Copy ValueSet</button>
+                        </div>
+                    </div>
+
+
+                    <pre>{{v2ValueSet | json}}</pre>
+                </uib-tab>
+            </uib-tabset>
+
+
         </div>
     </div>
 
@@ -182,7 +276,8 @@
                             <div class="myLabel">Name</div>
                         </div>
                         <div class="col-md-9 col-sm-9">
-                            <input class="form-control" ng-model="cs.name"/>
+                            <div>{{cs.name}}</div>
+                            <!--<input class="form-control" ng-model="cs.name"/>-->
                         </div>
                     </div>
                     <div class="row myMargin">
@@ -190,7 +285,7 @@
                             <div class="myLabel">Description</div>
                         </div>
                         <div class="col-md-9 col-sm-9">
-                            <textarea class="form-control" ng-model="cs.description"></textarea>
+                            <textarea class="form-control" ng-model="cs.description" ng-blur="changeDescription()"></textarea>
                         </div>
                     </div>
                 </uib-tab>
@@ -210,10 +305,11 @@
             <div class="banner">Contents</div>
 
             <table class="table table-bordered">
-                <tr><th>Display</th><th>Code</th><th>Definition</th><th ng-show="isAuthoredByClinFhir">Action</th></tr>
+                <tr><th>Code</th><th>Display</th><th>Definition</th><th ng-show="isAuthoredByClinFhir">Action</th></tr>
                 <tr ng-repeat="concept in cs.concept">
-                    <td>{{concept.display}}</td>
+
                     <td>{{concept.code}}</td>
+                    <td>{{concept.display}}</td>
                     <td>{{concept.definition}}</td>
                     <td ng-show="isAuthoredByClinFhir">
                         <i class="glyphicon glyphicon-arrow-down" ng-show="$index < cs.concept.length-1"
@@ -236,8 +332,9 @@
                     </td>
                 </tr>
                 <tr  ng-show="isAuthoredByClinFhir">
-                    <td><input class="form-control" ng-model="input.display" placeholder="Display"/> </td>
                     <td><input class="form-control" ng-model="input.code" placeholder="Code"/> </td>
+                    <td><input class="form-control" ng-model="input.display" placeholder="Display"/> </td>
+
 
                     <td><textarea class="form-control" ng-model="input.definition" placeholder="Definition"></textarea> </td>
                     <td width="15%">

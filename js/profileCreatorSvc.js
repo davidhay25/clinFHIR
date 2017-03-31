@@ -147,6 +147,9 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 if (profile && profile.snapshot && profile.snapshot.element) {
 
                     profile.snapshot.element.forEach(function (item,inx) {
+
+                        var text = "";
+
                         item.myMeta = item.myMeta || {};
 
                         var include = true;
@@ -309,7 +312,13 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                 }
 
                                 id = item.path;
-                                text = getLastNameInPath(item.path);
+                                if (item.name) {
+                                    text = item.name
+                                } else {
+                                    text = getLastNameInPath(item.path);
+                                }
+
+
                             }
 
 
@@ -325,7 +334,15 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                             arTree.pop();
                             parent = arTree.join('.');
-                            text = getLastNameInPath(item.path);
+                            if (item.name) {
+                                text = item.name
+                            //} else if (item.short) {
+                              //  text = item.short
+                            } else {
+                                text = getLastNameInPath(item.path);
+                            }
+
+                            //text = getLastNameInPath(item.path);
                         }
 
                         addLog(item.path + ' ' +include)

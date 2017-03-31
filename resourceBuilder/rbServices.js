@@ -1076,6 +1076,9 @@ angular.module("sampleApp").
                     vo.multiple = true;
                 }
 
+
+
+
                 //next, let's figure out if this is a simple or a complex extension.
                 var arElements = [];
                 SD.snapshot.element.forEach(function (element,inx) {
@@ -1083,9 +1086,19 @@ angular.module("sampleApp").
                         var arPath = element.path.split('.')
 
                         //console.log(element.slicing)
+                        /*
+                        The genomics extensions have a slicing element even for a 'simple' extension
+                        so, change the criteria to a path >= 3 segments
+                        changed March 30, 2107
                         if (element.slicing) {
                             vo.isComplexExtension = true;
                         }
+                        */
+                        if (arPath.length > 2) {
+                            vo.isComplexExtension = true;
+                        }
+
+
                         //get rid of the id elements and the first one - just to simplify the code...
                         var include = true;
                         if (inx == 0 || arPath[arPath.length-1] == 'id' || element.slicing) {include = false}
@@ -1094,10 +1107,10 @@ angular.module("sampleApp").
                         if (arPath.length == 2) {
                             //updated as was not getting details for simple extensions...
                             if (arPath[1] == 'url') {include = false}
-                            if (vo.isComplexExtension && arPath[1].indexOf('value')>-1){include = false}    //THIS is the parent...
 
-                            //if (arPath[1] == 'url' || arPath[1].indexOf('value')>-1) {include = false}
-
+                            if (vo.isComplexExtension && arPath[1].indexOf('value')>-1){
+                                include = false
+                            }    //THIS is the parent...
 
 
                         }
@@ -1109,6 +1122,10 @@ angular.module("sampleApp").
                     }
 
                 });
+
+                //vo.isComplexExtension = false;      //temp
+
+
 
                 if (vo.isComplexExtension) {
                     //process as if it was a simple extension

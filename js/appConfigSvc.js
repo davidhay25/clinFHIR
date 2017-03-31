@@ -284,12 +284,25 @@ angular.module("sampleApp")
                 } 
 
             },
-            getAllServers : function() {
-                //console.log(config.allKnownServers)
+            getAllServers : function(version) {
+                //return all the servers. can specify a FHIR version...
                 if (! $localStorage.config) {
                     $localStorage.config = defaultConfig;
                 }
-              return $localStorage.config.allKnownServers;
+                if (version) {
+                    var lst = []
+                    $localStorage.config.allKnownServers.forEach(function(svr){
+                        if (svr.version == version) {
+                            lst.push(svr)
+                        }
+                    })
+                    return lst;
+                } else {
+                    return $localStorage.config.allKnownServers;
+                }
+
+
+
             },
             getAllTerminologyServers : function(){
 

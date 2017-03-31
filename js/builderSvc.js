@@ -281,12 +281,17 @@ angular.module("sampleApp")
 
                                     queries.push(GetDataFromServer.findConformanceResourceByUri(profileUrl).then(
                                         function (sdef) {
-
-
                                             var analysis = Utilities.analyseExtensionDefinition3(sdef);
+
+
+                                            //analysis.isComplexExtension = false;        //<<<<<
+
 
                                             if (! analysis.isComplexExtension) {
 
+                                                console.log(ed)
+
+                                                //ed.short = analysis.name;   //will become the tree name
 
                                                 ed.type = analysis.type;
                                                 ed.binding = analysis.binding;
@@ -1038,9 +1043,6 @@ angular.module("sampleApp")
 
 
 
-
-
-
                         addIfNotEmpty(value.Address.text,insrt,'text');
 
                         //var insrt = {text:value.Address.text}
@@ -1303,6 +1305,14 @@ angular.module("sampleApp")
                 }
 
                 */
+
+
+                //for polymorphic references...
+                if (elementName.substr(-3) == '[x]') {
+                    var elementRoot = elementName.substr(0,elementName.length-3);     //the propertyname with the [x] removed
+                    elementName = elementRoot + 'Reference';   //the new property name
+                }
+
 
 
                 //if the id of thee referenced resource is a uuid, then don't add the resourceType prefix...
