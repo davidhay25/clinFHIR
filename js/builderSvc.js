@@ -54,7 +54,8 @@ angular.module("sampleApp")
         objColours.ProviderRole = '#FFFFCC';
         objColours.Location = '#cc9900';
         objColours.HealthcareService = '#FFFFCC';
-
+        objColours.MedicationDispense = '#FFFFCC';
+        objColours.Medication = '#FF9900';
 
         return {
             getLinkingUrlFromId : function(resource) {

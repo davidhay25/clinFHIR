@@ -1,0 +1,112 @@
+<resource>
+    <MedicationDispense xmlns="http://hl7.org/fhir">
+        <id value="f26f33c948a685a50b44cdef6361db39ef366af71c071de273fd244ba7eaf25d"></id>
+        <contained>
+            <MedicationOrder xmlns="http://hl7.org/fhir">
+                <id value="1"></id>
+                <identifier>
+                    <system value="http://www.SYS_A/SYS_A"></system>
+                    <value value="875521"></value>
+                </identifier>
+                <identifier>
+                    <system value="http://www.SYS_A/SYS_A"></system>
+                    <value value="875521"></value>
+                </identifier>
+                <dateWritten value="2006-01-04T18:13:51.000+00:00"></dateWritten>
+                <prescriber>
+                    <reference value="#2"></reference>
+                </prescriber>
+                <medicationReference>
+                    <reference value="#3"></reference>
+                </medicationReference>
+            </MedicationOrder>
+        </contained>
+        <contained>
+            <Practitioner xmlns="http://hl7.org/fhir">
+                <id value="2"></id>
+                <identifier>
+                    <system value="SYS_A"></system>
+                    <value value="875521"></value>
+                </identifier>
+            </Practitioner>
+        </contained>
+        <contained>
+            <Medication xmlns="http://hl7.org/fhir">
+                <id value="3"></id>
+                <code>
+                    <coding>
+                        <system value="http://www.SYS_A/ULM"></system>
+                        <code value="10048291000116102"></code>
+                        <display value="Pimecrolimus 10 MG"></display>
+                    </coding>
+                </code>
+            </Medication>
+        </contained>
+        <contained>
+            <Medication xmlns="http://hl7.org/fhir">
+                <id value="4"></id>
+                <code>
+                    <coding>
+                        <system value="http://www.SYS_A/ULM"></system>
+                        <code value="10048291000116102"></code>
+                        <display value="Pimecrolimus 10 MG"></display>
+                    </coding>
+                </code>
+            </Medication>
+        </contained>
+        <extension url="http://fhir.hl7.org.nz/dstu2/StructureDefinition/agent">
+            <extension url="role">
+                <valueCoding>
+                    <system value="http://hl7.org/fhir/provenance-participant-role"></system>
+                    <code value="author"></code>
+                    <display value="Author"></display>
+                </valueCoding>
+            </extension>
+            <extension url="actorId">
+                <valueIdentifier>
+                    <value value="OHCP"></value>
+                </valueIdentifier>
+            </extension>
+        </extension>
+        <extension url="http://fhir.hl7.org.nz/dstu2/StructureDefinition/agent">
+            <extension url="role">
+                <valueCoding>
+                    <system value="http://hl7.org/fhir/provenance-participant-role"></system>
+                    <code value="custodian"></code>
+                    <display value="Custodian"></display>
+                </valueCoding>
+            </extension>
+            <extension url="actorId">
+                <valueIdentifier>
+                    <value value="SYS_A"></value>
+                </valueIdentifier>
+            </extension>
+        </extension>
+        <status value="completed"></status>
+        <patient>
+            <reference value="Patient/KBJFAMJWGYYUAU2ZKNPUC"></reference>
+            <display value="PRP1661|SYS_A"></display>
+        </patient>
+        <authorizingPrescription>
+            <reference value="#1"></reference>
+        </authorizingPrescription>
+        <quantity>
+            <value value="90.0"></value>
+            <code value="tab"></code>
+        </quantity>
+        <medicationReference>
+            <reference value="#4"></reference>
+        </medicationReference>
+        <whenHandedOver value="2006-01-04T18:13:51.000+00:00"></whenHandedOver>
+        <dosageInstruction>
+            <text value="1 tab in the morning"></text>
+            <route>
+                <coding>
+                    <system value="http://www.SYS_A/SYS_A"></system>
+                    <code value="Oral"></code>
+                    <display value="Oral"></display>
+                </coding>
+            </route>
+        </dosageInstruction>
+    </MedicationDispense>
+</resource>

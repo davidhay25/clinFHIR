@@ -6,6 +6,7 @@
     <script src="js/libs/jquery-1.9.0.min.js"></script>
     <script src="js/libs/angular.min1-5.js"></script>
     <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
 
     <script src="js/libs/moment.min.js"></script>
 
@@ -38,7 +39,12 @@
 
     <script src="js/profileCreatorSvc.js"></script>
     <script src="js/resourceSvc.js"></script>
+    <script src="js/builderSvc.js"></script>
     <script src="js/services.js"></script>
+    <script src="js/filters.js"></script>
+
+    <script src="js/libs/vis.min.js"></script>
+
     <!--
 
 
@@ -61,7 +67,16 @@
   <script src="js/profileCreatorSvc.js"></script>
   -->
 
-    <title>Query AMadeus</title>
+
+    <style>
+        #resourceGraph {
+            width: 100%;
+            height: 600px;
+            border: 1px solid lightgray;
+        }
+
+</style>
+        <title>Query AMadeus</title>
 
 </head>
 
@@ -70,13 +85,39 @@
 
 <div ng-app="sampleApp" ng-controller="workflowCtrl" class="container-fluid">
 
-<h3>Query Amadeus</h3>
+<h3 class="banner">Query Amadeus FHIR API</h3>
 
+
+
+    <button ng-click="test()">test</button>
 
 
     <div class="row">
         <div class="col-md-1 col-sm-1">
-            NHI
+           <p style="padding-top: 8px">Portal User</p>
+        </div>
+        <div class="col-md-3 col-sm-3">
+            <input type="text" disabled class="form-control" ng-model="user"/>
+
+        </div>
+        <div class="col-md-3 col-sm-3">
+
+
+        </div>
+
+        <div class="col-md-1 col-sm-1" >
+
+        </div>
+
+        <div class="col-md-4 col-sm-4">
+
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-1 col-sm-1">
+            <p style="padding-top: 8px">NHI</p>
         </div>
         <div class="col-md-3 col-sm-3">
             <input type="text" class="form-control" ng-model="nhi"/>
@@ -97,13 +138,16 @@
         </div>
     </div>
 
+    <hr/>
 
-    <uib-tabset>
+    <uib-tabset ng-show="medicationDispense" >
         <uib-tab heading="Table of meds">
+            <br/>
             <div class="row">
                 <div class="col-md-6 col-sm-6">
 
                     <table class="table table-bordered">
+                        <tr><th>Date</th><th>Medication</th><th>Dose</th><th>Route</th><th>Quantity</th></tr>
                         <tr ng-repeat="disp in medicationDispense">
                             <td>{{disp.dispensed | date:'yyyy-mm-dd'}}</td>
                             <td valign="top">
@@ -134,9 +178,15 @@
 
                 <div class="col-md-6 col-sm-6">
                     <uib-tabset ng-show="selectedResource">
+                        <br/>
                         <uib-tab heading="Tree">
                             <div id="builderResourceTree"></div>
                         </uib-tab>
+                        <uib-tab heading="Graph">
+                            <div id="resourceGraph"></div>
+                        </uib-tab>
+
+
                         <uib-tab heading="Json">
                             <pre>{{selectedResource | json}}</pre>
                         </uib-tab>
@@ -156,7 +206,7 @@
 
 
 
-
+    <div id="resourceGraphDEP"></div>
 
 
 

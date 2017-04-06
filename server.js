@@ -140,6 +140,9 @@ app.get('/createExample',function(req,res){
 
 //======== temp ======= for Orion calling the medication dispense endpoint
 app.get('/orion/:nhi',function(req,res){
+
+    //res.serveFile("./orionMD.xml")
+
     console.log(req.params['nhi'])
     var nhi = req.params['nhi'];
     if (nhi) {
