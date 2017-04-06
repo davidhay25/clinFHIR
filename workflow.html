@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <base href="/" />
+    <meta charset="UTF-8">
+
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+        angular.module("sampleApp").constant("moment", moment);
+
+    </script>
+    <script src="js/workflowCtl.js"></script>
+    <script src="js/modalDialogSvc.js"></script>
+    <script src="js/appConfigSvc.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
+    <script src="js/components/dataTypes.js"></script>
+    <!--
+    <script src="js/services.js"></script>
+    <script src="js/resourceCreatorSvc.js"></script>
+    <script src="js/filters.js"></script>
+    <script src="js/documentBuilder.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
+    <script src="js/reporterCtrl.js"></script>
+
+    <script src="js/libs/ngStorage.min.js"></script>
+
+
+
+    <script src="js/profileCreatorSvc.js"></script>
+    -->
+
+    <title>Workflow</title>
+
+</head>
+
+
+<body style="padding: 8px" >
+
+<div ng-app="sampleApp" ng-controller="workflowCtrl" class="container-fluid">
+
+<h3>WorkFlow</h3>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3">
+        <h3>Tasks</h3>
+        <div class="list-group">
+
+            <div  ng-class="{'list-group-item':true, active:entry.resource.id == currentTask.id}"
+               style="cursor: pointer" ng-repeat="entry in tasks.entry"
+
+               ng-click="selectTask(entry.resource)">
+                <div>{{entry.resource.description}}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9 col-sm-9">
+        <uib-tabset>
+            <uib-tab heading="Json">
+                <pre>{{currentTask | json}}</pre>
+            </uib-tab>
+        </uib-tabset>
+    </div>
+
+
+
+
+
+
+
+
+</div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3">
+
+        </div>
+        <div class="col-md-3 col-sm-3">
+
+        </div>
+    </div>
+
+
+
+</div>
+</body>
+</html>

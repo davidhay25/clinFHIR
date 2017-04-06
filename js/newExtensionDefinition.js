@@ -13,6 +13,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 $scope.canSaveEd = true;
                 $scope.currentExt = currentExt;
                 $scope.input.name = currentExt.name;
+                $scope.input.url = currentExt.url;
                 $scope.input.description = currentExt.description;
                 $scope.input.short = currentExt.short;
                 $scope.input.publisher = currentExt.publisher;
@@ -50,22 +51,18 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                  */
             }
 
-            
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(standardResourceTypes) {
                     $scope.allResourceTypes = standardResourceTypes;       //use to define the context for an extension...
 
                 }
-            )
-
-            
+            );
 
             $scope.conformanceSvr = appConfigSvc.getCurrentConformanceServer();
 
             if ($rootScope.userProfile && $rootScope.userProfile.extDef) {
                 $scope.input.publisher = $rootScope.userProfile.extDef.defaultPublisher;
             }
-
 
             $scope.selectContextType = function(type) {
                 //get the paths for the given type...
@@ -82,8 +79,6 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                                 if (['id','meta','implicitRules','language','contained','extension','modifierExtension'].indexOf(ar[ar.length-1]) == -1){
                                     $scope.paths.push(path);
                                 }
-
-
 
                             })
                         }
@@ -106,9 +101,6 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                         makeSD();
                     }
                 }
-
-
-
             };
 
 
@@ -176,6 +168,12 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
             //?? should do this when about to save as well
             $scope.checkEDExists = function(name) {
+                if (name.indexOf(' ') > -1) {
+                    modalService.showModal({}, {bodyText:"Sorry, no spaces in the name."})
+                    return;
+                }
+
+
                 var url = $scope.conformanceSvr.url + "StructureDefinition/"+name;
                 $scope.showWaiting = true;
                 GetDataFromServer.adHocFHIRQuery(url).then(
@@ -190,7 +188,12 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                         //as long as the status is 404 or 410, it's save to create a new one...
                         if (err.status == 404 || err.status == 410) {
                             $scope.canSaveEd = true;
-                            
+
+                            var cannonicalUrl =  $scope.conformanceSvr.realUrl || $scope.conformanceSvr.url;
+                            $scope.input.url = cannonicalUrl + "StructureDefinition/"+name;
+                            makeSD();
+
+
                         } else {
                             var config = {bodyText:'Sorry, there was an unknown error: '+angular.toJson(err,true)};
                             modalService.showModal({}, config)
@@ -374,10 +377,11 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 var short = $scope.input.short;
                 
                 extensionDefinition.id = name;
+                extensionDefinition.url = $scope.input.url;
 
                 //to allow for proxied requests...
-                var cannonicalUrl =  $scope.conformanceSvr.realUrl || $scope.conformanceSvr.url;
-                extensionDefinition.url = cannonicalUrl + "StructureDefinition/"+name;
+                //var cannonicalUrl =  $scope.conformanceSvr.realUrl || $scope.conformanceSvr.url;
+                //extensionDefinition.url = cannonicalUrl + "StructureDefinition/"+name;
 
                 //the format for a simple extensionDefinition SD is different to a complex one...
                 var extensionTypeIsMultiple = false;

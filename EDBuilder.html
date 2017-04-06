@@ -22,7 +22,7 @@
     <script src="js/libs/angular-sanitize.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage',"firebase"]).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage',"firebase",'ngSanitize']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);

@@ -1,7 +1,6 @@
 //simple server to serve static files...
 
 var static = require('node-static');
-//var fileServer = new static.Server({ indexFile: "resourceCreator.html" });
 var request  = require('request');
 var moment = require('moment');
 
@@ -137,6 +136,57 @@ app.get('/createExample',function(req,res){
     //res.sendFile("builder.html", { root: __dirname  })
     res.sendFile("resourceCreator.html", { root: __dirname  })
 });
+
+
+//======== temp ======= for Orion calling the medication dispense endpoint
+app.get('/orion/:nhi',function(req,res){
+    console.log(req.params['nhi'])
+    var nhi = req.params['nhi'];
+    if (nhi) {
+        var options = {
+            method:'GET',
+            rejectUnauthorized: false,
+            uri : "https://frontend1.solution-nzmoh-dataset-leahr-graviton-jump-host-auckland.graviton.odl.io/fhir/1.0/MedicationDispense?patient.identifier=SYS_A|"+nhi,
+            auth : {
+                'user':'level1.sys_a',
+                'password':'Orionsy5!?'
+            },headers: {
+                'Accept': 'application/json+fhir'
+            }
+        };
+
+
+
+
+        console.log(options)
+        request(options,function(error,response,body){
+
+            console.log('error:', error); // Print the error if one occurred
+            console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+            console.log('body:', body); // Print the HTML for the Google homepage.
+
+            if (body) {
+                console.log(body)
+                if (response) {
+                    res.status(response.statusCode)
+                }
+                res.end(body);
+            }
+
+            if (error) {
+                if (response) {
+                    res.status(response.statusCode)
+                }
+                res.end(error);
+            }
+
+        });
+    } else {
+
+    }
+
+});
+
 
 //when a user navigates to cf
 app.post('/stats/login',function(req,res){

@@ -79,7 +79,16 @@
                     </div>
                     <div class="col-md-6 col-sm-6">
 
-                            <div class="form-group">
+                        <div class="form-group">
+                            <!--<label>Name</label>-->
+                            <input type="text" class="form-control" ng-model="input.url" placeholder="Url for this Extension"
+                                   uib-popover="The canonical url. Generally you can leave this alone."
+                                   popover-placement="left"
+                                   popover-trigger="'mouseenter'">
+                        </div>
+
+
+                        <div class="form-group">
                                 <!--<label>Name</label>-->
                                 <input type="text" class="form-control" ng-model="input.publisher" placeholder="Publisher">
                             </div>
@@ -102,11 +111,17 @@
 
 
                                 <select ng-change="selectContextType(input.type)" ng-model="input.type" class="form-control"
+                                        uib-popover="Select the resource type in this dropdown, then the path in the next dropdown"
+                                        popover-placement="left"
+                                        popover-trigger="'mouseenter'"
                                         style="margin-top: 8px"
                                         ng-options="type.name for type in allResourceTypes">
                                 </select>
 
                                 <select ng-show="paths" ng-change="selectContext(input.typePaths)" ng-model="input.typePaths" class="form-control"
+                                        uib-popover="Select the path in this resource where the extension should go"
+                                        popover-placement="left"
+                                        popover-trigger="'mouseenter'"
                                         style="margin-top: 8px"
                                         ng-options="path for path in paths">
                                 </select>

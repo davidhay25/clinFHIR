@@ -10,28 +10,24 @@ angular.module("sampleApp")
             GetDataFromServer.registerAccess('extension');
 
             $scope.$watch('input.searchParam',function(){
-               // alert('c')
                 delete $scope.extensionsArray;
                 delete $scope.selectedExtension;
-            })
-
+            });
 
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(lst) {
                     $scope.allResourceTypes = lst;
-
                 }
             );
 
+            $scope.displayServers = "Conformance: " + appConfigSvc.getCurrentConformanceServer().name
+                + "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>"
+                + "<div>Term: " + appConfigSvc.getCurrentTerminologyServer().name + "</div>";
+
             $scope.securitySvc = securitySvc;
-
-
             $scope.leftPane = "col-md-4 col-sm-4";
             $scope.rightPane = "col-md-8 col-sm-8";
 
-
-
-            //-------- shortcut stuff....
 
             //if a shortcut has been used there will be a hash so load that
             var hash = $location.hash();
@@ -43,29 +39,11 @@ angular.module("sampleApp")
                 var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
                 sc.$loaded().then(
                     function () {
-                        console.log(sc.config)
+                        //console.log(sc.config)
                         var url =  sc.config.conformanceServer.url + "StructureDefinition/" +sc.config.model.id;
-                        console.log(url)
+                        //console.log(url)
                         $scope.loadedFromBookmarkUrl = url; //true;
                         loadOneResource(url)
-                        /*
-                        GetDataFromServer.adHocFHIRQuery(url).then(
-                            function(data) {
-                                console.log(data)
-                                $scope.loadedFromBookmark = data.data; //true;
-                                $scope.leftPane = "hidden";
-                                $scope.rightPane = "col-md-12 col-sm-12";
-                                $scope.selectedExtension = data.data;
-                                $scope.permissions = securitySvc.getPermissons($scope.selectedExtension);
-                                $scope.isAuthoredByClinFhir = Utilities.isAuthoredByClinFhir($scope.selectedExtension);
-
-                            },
-                            function(err) {
-                                alert(angular.toJson(err))
-                            }
-                        )
-                        */
-
                     },
                     function(err) {
                         alert(angular.toJson(err))
@@ -73,22 +51,11 @@ angular.module("sampleApp")
                 )
             }
 
-
-
-
             function loadOneResource(url) {
                 GetDataFromServer.adHocFHIRQuery(url).then(
                     function(data) {
                         console.log(data)
-
                         configureForExtensionDef(data.data);
-
-/*
-                        $scope.selectedExtension = data.data;
-                        $scope.permissions = securitySvc.getPermissons($scope.selectedExtension);
-                        $scope.isAuthoredByClinFhir = Utilities.isAuthoredByClinFhir($scope.selectedExtension);
-                        */
-
                     },
                     function(err) {
                         alert(angular.toJson(err))
@@ -110,18 +77,7 @@ angular.module("sampleApp")
                 )
             };
 
-            /*
-            //------- for now - allow anyone to read/write extensions authored by cf
-            //userProfile.extDef.permissions.canEdit
 
-
-            $scope.userProfile = {extDef : {permissions:{}}};
-            $scope.userProfile.extDef.permissions.canEdit = true;
-            $scope.userProfile.extDef.permissions.canDelete = true;
-            $scope.userProfile.extDef.permissions.canRetire = true;
-            $scope.userProfile.extDef.permissions.canActivate = true;
-
-*/
 
             firebase.auth().onAuthStateChanged(function(user) {
                 delete $scope.input.mdComment;
@@ -130,30 +86,10 @@ angular.module("sampleApp")
                     console.log(user)
                     //$rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
                     securitySvc.setCurrentUser(user);
-                    //$scope.currentUser = {email:user.email};
-
-                   // $scope.permissions = securitySvc.getPermissons($scope.selectedExtension);
-//console.log($scope.permissions)
-                    //console.log($scope.currentUser)
                     $scope.$digest() ;  //as this event occurs outside of angular apparently..
                 }
             });
 
-
-            //this.addSimpleExtension(sd, appConfigSvc.config().standardExtensionUrl.userEmail, currentUser.email)
-            /*
-            $rootScope.$on('userLoggedIn',function(){
-                var userProfile = $rootScope.userProfile;
-
-
-                console.log(userProfile);
-
-                if (userProfile.extDef && userProfile.extDef.defaultPublisher) {
-                    $scope.input = {param:userProfile.extDef.defaultPublisher,searchParam:'publisher',searchStatus:'all'};
-
-                }
-            });
-*/
             $rootScope.$on('userLoggedOut',function() {
                 $scope.input = {param:'hl7',searchParam:'publisher',searchStatus:'all'};
             });
@@ -444,73 +380,9 @@ angular.module("sampleApp")
                 delete $scope.complexExtension;
 
                 var extAnalysis = Utilities.analyseExtensionDefinition3(extension);  //was the original service...
-              //  if (extAnalysis.complexExtension) {
-                   // $scope.complexExtension = extAnalysis.complexExtension;
-               // }
                 return extAnalysis;
 
-/*
-                var vo = {dataTypes : [],multiple:false}
-                var discriminator;      //if this is sliced, then a discriminator will be set...
-                if (extension.snapshot) {
-                    extension.snapshot.element.forEach(function(element) {
 
-                        //this is the root extension
-                        if (element.path === 'Extension') {
-                            if (element.max == '*') {
-                                vo.multiple = true;
-                            }
-                        }
-
-                        if (element.slicing) {
-                            discriminator = element.slicing.discriminator[0];
-                        }
-
-                        if (element.path.indexOf('Extension.value')>-1) {
-                            //vo.element = element;
-                            var dt = element.path.replace('Extension.value','').toLowerCase();
-                            vo.dataTypes.push(dt);
-                            if (dt == 'reference') {
-                                //if this is a reference, then need the list of types
-                                vo.referenceTypes = [];
-                                if (element.type) {
-                                    element.type.forEach(function(t){
-                                        var p = t.profile;
-                                        if (p) {
-                                            var ar = p[0].split('/');       //only the first
-                                            vo.referenceTypes.push(ar[ar.length-1]);
-                                        }
-                                    })
-                                }
-                            }
-
-
-
-                            if (element.binding) {
-
-                                vo.strength = element.binding.strength;
-                                if (element.binding.valueSetReference) {
-                                    vo.valueSetReference = element.binding.valueSetReference.reference;
-                                }
-
-                                if (element.binding.valueSetUri) {
-                                    vo.valueSetUri = element.binding.valueSetUri;
-                                }
-
-                            }
-
-                        }
-                    })
-                }
-
-                //if a discriminator has been set, then this is a complex extension so create a summary object...
-                if (discriminator) {
-                    $scope.complexExtension = Utilities.processComplexExtension(extension,discriminator)
-                }
-
-                return vo;
-
-                */
             }
 
 
