@@ -3532,6 +3532,58 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
         },
+        convertContainedToBundle : function(res) {
+            //convert a resource with contained resources to a bundle of resources...
+            //Used for the Orion queries currently...
+            var resource = angular.copy(res)
+
+            var hash = {}
+            var bundle = {resourceType:'Bundle',entry:[]}
+
+            //add contained resources to the bundle, updating the id...
+            if (resource.contained) {
+                resource.contained.forEach(function(resource1){
+                    resource1.id = '#' + resource1.id;
+                    hash[resource1.id] = resource1;
+                    bundle.entry.push({resource:resource1});
+                })
+            }
+
+            //update all the ref on the main resource - note these should be recursive...
+            processOneResource(resource)
+
+
+            bundle.entry.push({resource:resource});      //<<< the 'parent' resource
+
+
+            if (resource.contained) {
+                resource.contained.forEach(function (resource2) {
+                    processOneResource(resource2)
+                })
+            }
+
+            return bundle;
+
+            //update all the references on a single resource. top level only. make recursive if needed...
+            function processOneResource(res) {
+                angular.forEach(res,function(value,key){
+                    var element = res[key]
+
+                    if (angular.isArray(element)) {
+                        element = element[0]
+                    }
+                    if (element['reference']) {
+                        var v = element['reference'];
+                        var r = hash[element['reference']]
+                        if (r) {
+                            element['reference'] = r.resourceType+"/"+v
+                        }
+
+                    }
+                });
+            }
+
+        },
         registerSuccessfulResourceCreated: function (resourceId,resource,patient,user) {
             $localStorage.createdResources = $localStorage.createdResources || [];
             var date = new moment().format();

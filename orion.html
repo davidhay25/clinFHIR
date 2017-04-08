@@ -76,7 +76,7 @@
         }
 
 </style>
-        <title>Query AMadeus</title>
+        <title>Query Amadeus</title>
 
 </head>
 
@@ -89,7 +89,7 @@
 
 
 
-    <button ng-click="test()">test</button>
+
 
 
     <div class="row">
@@ -176,13 +176,14 @@
 
                 </div>
 
-                <div class="col-md-6 col-sm-6">
-                    <uib-tabset ng-show="selectedResource">
+                <div class="col-md-6 col-sm-6" ng-show="selectedResource">
+                    <div class="banner">{{selectedInternal.medication.display}}</div>
+                    <uib-tabset>
                         <br/>
                         <uib-tab heading="Tree">
                             <div id="builderResourceTree"></div>
                         </uib-tab>
-                        <uib-tab heading="Graph">
+                        <uib-tab heading="Graph" select="redrawChart()">
                             <div id="resourceGraph"></div>
                         </uib-tab>
 

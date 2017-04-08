@@ -145,9 +145,9 @@
                 <li uib-dropdown>
 
                     <a href="#" uib-dropdown-toggle>
-                                        <span style="font-size:2em; cursor: pointer">
-                                            <i class="glyphicon glyphicon-cog"></i>
-                                        </span>
+                        <span style="font-size:2em; cursor: pointer">
+                            <i class="glyphicon glyphicon-cog"></i>
+                        </span>
                     </a>
 
 
@@ -503,6 +503,19 @@ so is discouraged.</p>
                 </div>
             </div>
             <div class="col-md-4 col-sm-4">
+
+
+                <table class="table table-bordered">
+                    <tr><th>Module</th><th>Count</th></tr>
+                    <tr ng-repeat = "m in accessAudit.moduleList">
+                        <td>{{m.name}}</td>
+                        <td>{{m.cnt}}</td>
+
+
+                    </tr>
+                </table>
+
+
                 <div style="height:400px; overflow-y: auto;" >
                     <table class="table table-bordered">
                         <tr><th>Country</th><th>Count</th></tr>

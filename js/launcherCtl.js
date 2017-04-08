@@ -73,21 +73,40 @@ angular.module("sampleApp")
             };
 
 
-
-
-
             //data for the chart
-            GetDataFromServer.getAccessAudit().then(
+
+            //var setByDate = function(min,)
+
+            // an event that is called after the date range is changed in the graph...
+            var evt = function(min,max){
+                //console.log('invoked',min,max)
+                //re- call the summary endpoint, but only update the moduleList and countryList properties...
+                GetDataFromServer.getAccessAudit(null,min,max).then(
+                    function(log){
+                        $scope.accessAudit.moduleList = log.moduleList;
+                        $scope.accessAudit.countryList = log.countryList;
+                        //console.log(log)
+                    },
+                    function(err) {
+
+                    }
+                );
+
+
+            };
+
+            GetDataFromServer.getAccessAudit(evt).then(
                 function(log){
                     $scope.accessAudit = log;
                     //console.log(log)
-
-
                 },
                 function(err) {
 
                 }
             );
+
+
+
             $scope.showChart = function() {
                 if ($scope.displayMode == 'access') {
                     $scope.displayMode = 'front'
@@ -108,7 +127,6 @@ angular.module("sampleApp")
             $scope.testServer = function(type) {
                 var opn = 'getCurrent'+type + 'Server'
                 var svr = appConfigSvc[opn]()
-//console.log(svr)
                 $scope.testing = {testData : {}, testConformance:{}, textTerminology:{}};
                 //console.log(server,type);
                 $scope.message = 'Reading the capabilityStatement from '+ svr.url + ' Please wait...';

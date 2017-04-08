@@ -9,7 +9,7 @@ angular.module("sampleApp")
 
             $scope.input = {}
 
-            console.log($scope.allServers)
+            //console.log($scope.allServers)
 
 
             $scope.addServer = function(){

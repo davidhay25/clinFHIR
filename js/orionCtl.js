@@ -1,13 +1,13 @@
 
 angular.module("sampleApp")
     .controller('workflowCtrl',
-        function ($scope,$http,modalService,resourceCreatorSvc,builderSvc) {
+        function ($scope,$http,modalService,resourceCreatorSvc,builderSvc,$timeout) {
 
             $scope.nhi="WER4568";
             $scope.item = {};       //hash of items based on resource.id
             $scope.user = "level1.sys_a";
 
-
+/*
             $scope.test = function(){
 
 
@@ -22,14 +22,25 @@ angular.module("sampleApp")
                 );
 
             }
-
+*/
 
             $scope.selectItem = function(id) {
-                console.log(id);
+
 
                 $scope.selectedResource = $scope.mdResource[id];
                 $scope.selectedInternal = $scope.hashMedicationDispense[id];
 
+                $scope.redrawChart = function(){
+                    //$scope.chart.fit();
+                    $timeout(function(){
+                        if ($scope.chart) {
+                            $scope.chart.fit();
+
+                        }
+
+                    },1000)
+
+                }
 
                 //-------- make tree
                 var treeData = resourceCreatorSvc.buildResourceTree($scope.selectedResource);
@@ -50,24 +61,23 @@ angular.module("sampleApp")
 
 
 
-            }
+            };
 
             $scope.read = function(nhi) {
                 delete $scope.sealed;
                 delete $scope.selectedResource;
                 delete $scope.medicationDispense;
 
-                console.log(nhi)
+
                 if (nhi) {
-                   // var url = "https://frontend1.solution-nzmoh-dataset-leahr-graviton-jump-host-auckland.graviton.odl.io/fhir/1.0/";
-                   // url += "MedicationDispense?patient.identifier=SYS_A|WER4568";
+
                     $scope.waiting = true;
 
                     var url = '/orion/'+nhi.toUpperCase();
                     //url = "./orionMD.xml"
                     $http.get(url).then(
                         function (data) {
-                            console.log(data)
+
                             var length = 0;
                             if (data.data && data.data.entry) {
                                 length = data.data.entry.length
@@ -104,72 +114,11 @@ angular.module("sampleApp")
 
             }
 
-            function makeGraph(resource) {
-                //first, convert the resource to a bundle
-                var hash = {}
-                var bundle = {resourceType:'Bundle',entry:[]}
-                console.log(resource)
-             //   bundle.entry.push({resource:resource});      //<<< the 'parent' resource
+            function makeGraph(res) {
 
-                if (resource.contained) {
-                    resource.contained.forEach(function(resource1){
-
-                        resource1.id = '#' + resource1.id;
-                        hash[resource1.id] = resource1;
-                        console.log(resource1)
-                        bundle.entry.push({resource:resource1});
-
-                    })
-                }
-
-
-                //update all the ref - note these need to be recursive...
-                angular.forEach(resource,function(value,key){
-                    var element = resource[key]
-                    console.log(element)
-                    if (angular.isArray(element)) {
-                        element = element[0]
-                    }
-                    if (element['reference']) {
-                        var v = element['reference'];
-                        var r = hash[element['reference']]
-                        if (r) {
-                            element['reference'] = r.resourceType+"/"+v
-                        }
-                         console.log()
-                    }
-                })
-
-                bundle.entry.push({resource:resource});      //<<< the 'parent' resource
-
-
-
-                resource.contained.forEach(function(resource2) {
-                    angular.forEach(resource2, function (value, key) {
-                        var element = resource2[key]
-                        console.log(element)
-                        if (angular.isArray(element)) {
-                            element = element[0]
-                        }
-                        if (element['reference']) {
-                            var v = element['reference'];
-                            var r = hash[element['reference']]
-                            if (r) {
-                                element['reference'] = r.resourceType + "/" + v
-                            }
-                            console.log()
-                        }
-                    })
-                })
-
-
-
-
-
-                console.log(bundle)
+                var bundle = resourceCreatorSvc.convertContainedToBundle(res);
 
                 var vo = builderSvc.makeGraph(bundle) ;  //todo - may not be the right place...
-
 
                 var container = document.getElementById('resourceGraph');
                 var options = {

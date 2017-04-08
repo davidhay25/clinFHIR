@@ -92,6 +92,7 @@ function recordAccess(req,data) {
         var audit = {ip:clientIp,date:new Date().getTime()};
         audit.data = data;
 
+
         db.collection("accessAudit").insert(audit, function (err, result) {
             if (err) {
                 console.log('Error logging access ',audit)
@@ -114,6 +115,7 @@ function recordAccess(req,data) {
 //app.use('/', express.static(__dirname,{index:'/resourceCreator.html'}));
 app.use('/', express.static(__dirname,{index:'/launcher.html'}));
 
+/*
 //--- proxies for Grahames server. Could generalize this using - eg - headers,but will need to update allservices making $http calls...
 app.all('/grahamv3/*',function(req,res){
     //console.log(req.url)
@@ -128,6 +130,9 @@ app.all('/grahamv2/*',function(req,res){
 });
 
 
+*/
+
+
 //this is used for the re-direct from simplifier
 app.get('/createExample',function(req,res){
     var cookies = new Cookies( req, res )
@@ -140,10 +145,6 @@ app.get('/createExample',function(req,res){
 
 //======== temp ======= for Orion calling the medication dispense endpoint
 app.get('/orion/:nhi',function(req,res){
-
-    //res.serveFile("./orionMD.xml")
-
-    console.log(req.params['nhi'])
     var nhi = req.params['nhi'];
     if (nhi) {
         var options = {
@@ -158,18 +159,13 @@ app.get('/orion/:nhi',function(req,res){
             }
         };
 
-
-
-
-        console.log(options)
         request(options,function(error,response,body){
 
-            console.log('error:', error); // Print the error if one occurred
-            console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-            console.log('body:', body); // Print the HTML for the Google homepage.
+            //console.log('error:', error); // Print the error if one occurred
+            //console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+            //console.log('body:', body); // Print the HTML for the Google homepage.
 
             if (body) {
-                console.log(body)
                 if (response) {
                     res.status(response.statusCode)
                 }
@@ -185,7 +181,7 @@ app.get('/orion/:nhi',function(req,res){
 
         });
     } else {
-
+        res.end({"error":"No NHI"});
     }
 
 });
@@ -226,17 +222,47 @@ app.get('/stats/summary',function(req,res){
         return;
     }
 
-    db.collection("accessAudit").find({$query: {}}).toArray(function(err,doc){
+    var query = {};
+
+    var min = req.query.min;
+    var max = req.query.max;
+
+    if (min) {
+        console.log('min=',min)
+        //var minDate = new Date(parseFloat(min))
+        console.log(new Date(parseFloat(max)))
+        query.date = {$gte : parseInt(min),$lte:parseInt(max)}
+    }
+
+
+
+    console.log(query)
+
+    db.collection("accessAudit").find({$query: query}).toArray(function(err,doc){
         if (err) {
             res.status(500);
             res.json({err:err});
         } else {
-            var rtn = {cnt:doc.length,item:[],country:{},lastAccess : {date:0}};
+            var rtn = {cnt:doc.length,item:[],country:{},lastAccess : {date:0},module:{}};
             var daySum = {};
+
+            console.log(doc.length)
 
             doc.forEach(function(d,inx){
 
                 //console.log(d.date,rtn.lastAccess.date)
+
+                if (d.data) {
+                    if (d.data.module) {
+                        var m = d.data.module;
+                        if (rtn.module[m]) {
+                            rtn.module[m].cnt++
+                        } else {
+                            rtn.module[m] = {cnt:1}
+                        }
+
+                    }
+                }
 
                 if (d.date > rtn.lastAccess.date) {
                     rtn.lastAccess = d;
@@ -289,10 +315,6 @@ app.get('/stats/summary',function(req,res){
             }
 
             //and sort it...
-
-
-
-
             rtn.countryList.sort(function(a,b){
                 if (a.cnt < b.cnt) {
                     return 1
@@ -300,6 +322,20 @@ app.get('/stats/summary',function(req,res){
                     return -1
                 }
             });
+
+            rtn.moduleList = []
+            for (var m in rtn.module) {
+                rtn.moduleList.push({name:m,cnt : rtn.module[m].cnt})
+            }
+            rtn.moduleList.sort(function(a,b){
+                if (a.cnt < b.cnt) {
+                    return 1
+                } else {
+                    return -1
+                }
+            });
+
+
 
             //add the number of profiles being accesses...
           //  getProfileUsage(rtn,function(){

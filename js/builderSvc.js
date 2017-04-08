@@ -72,7 +72,7 @@ angular.module("sampleApp")
                 //import a resource or resource bundle //todo - add document check later...
                 var that = this;
                 var importedResource;
-             //   var map = {};       //mapping of resource by original id...
+
                 if (resource.resourceType == 'Bundle') {
 
                     resource.entry.forEach(function(ent){
@@ -84,11 +84,7 @@ angular.module("sampleApp")
                                 res.id = idPrefix+new Date().getTime();
                             }
                         }
-                      //  if (res.id) {
-                        //    map[res.id] = res;
-                       // }
 
-                       // res.id = idPrefix+new Date().getTime();        //todo - need to
                         importOneResource(res,scope);
                         if (! importedResource) {
                             //make the first resource in the bundle the selected one...

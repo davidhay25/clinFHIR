@@ -162,7 +162,7 @@ angular.module("sampleApp").
     }
 
 }).
-    service('GetDataFromServer', function($http,$q,appConfigSvc,Utilities,$localStorage) {
+    service('GetDataFromServer', function($http,$q,appConfigSvc,Utilities,$localStorage,$timeout) {
     return {
         getListForPractitioner : function(practitioner,type) {
             var deferred = $q.defer();
@@ -667,13 +667,22 @@ angular.module("sampleApp").
             );
 
         },
-        getAccessAudit : function() {
+        getAccessAudit : function(evt,min,max) {
             var that = this;
+
             var url = "/stats/summary";
+            if (min) {
+                url += "?min="+min+"&max="+max;
+            }
+
+
             var deferred = $q.defer();
+            var afterChange;
             $http.get(url)
                 .success(function(data) {
-                    that.registerAccess();      //register access AFTER reading history to lastAcess is accurate...
+                    //that.registerAccess();      //register access AFTER reading history to lastAcess is accurate...
+
+                    //console.log(data)
 
                     //todo - create a list by country that is sorted...
 
@@ -707,17 +716,10 @@ angular.module("sampleApp").
                     };
 
 
-                //    data.profileAccess.forEach(function(p){
-                  //      chart.series[0].data.push({name: p.profile,y: p.cnt})
-                   // });
-
                     data.pieChartData = chart;
 
 
                     var chart1 = {
-
-
-
                         series: [
                             { name: 'Count',
                                 data:[],
@@ -727,7 +729,30 @@ angular.module("sampleApp").
                         titleX: {
                             text: 'Daily Access'
                         },
-                        useHighStocks: true
+                        useHighStocks: true,
+                        xAxis : {
+                            events: {
+                                afterSetExtremes: function () {
+
+                                    if (afterChange) {
+                                        $timeout.cancel(afterChange)
+                                    }
+                                    afterChange = $timeout(1000);
+                                    afterChange.then(function(ok){
+                                       // console.log(ok)
+                                        if (evt) {
+                                            evt(ctx.min,ctx.max)
+                                        }
+                                    },function(err){
+                                        console.log(err)
+                                    })
+                                    var ctx = this;
+
+                                    //console.log(Highcharts.dateFormat('%Y-%m-%d',this.min));
+                                    //console.log(Highcharts.dateFormat('%Y-%m-%d',this.max));
+                                }
+                            }
+                        },
                         
 
                     };
@@ -743,9 +768,15 @@ angular.module("sampleApp").
 
                     deferred.resolve(data);
                 }).error(function(oo, statusCode) {
-                deferred.reject({msg:Utilities.getOOText(oo),statusCode:statusCode});
+                deferred.reject({msg:angular.toJson(oo),statusCode:statusCode});
             });
             return deferred.promise;
+
+
+
+
+
+
         }
     }
 

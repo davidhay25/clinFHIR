@@ -182,14 +182,6 @@ angular.module("sampleApp")
 
                 })
 
-
-
-
-
-
-
-                /*
-                * */
             }
 
 
