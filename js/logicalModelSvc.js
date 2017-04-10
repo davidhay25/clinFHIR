@@ -37,7 +37,10 @@ angular.module("sampleApp")
                     var treeText = arPath.pop();//
                     var include = true;
                     if (elementsToIgnore.indexOf(treeText) > -1) {
-                        include = false;
+                        if (arPath.length == 2) {
+                            include = false;
+                        }
+
                     }
 
                     if (include) {
@@ -857,10 +860,13 @@ angular.module("sampleApp")
                             var idThisElement = arPath.join('.')
                             var treeText = arPath.pop();//
 
-                            if (elementsToIgnore.indexOf(treeText) > -1) {
+                            if ((elementsToIgnore.indexOf(treeText) > -1) && (arPath.length == 1)) { //note that the first segment of the path has been popped off...
                                 include = false;
                             }
 
+                            if (treeText == 'extension' || treeText == 'modifierExtension') {
+                                include = false;
+                            }
 
                             if (include) {
                                 console.log(idThisElement);

@@ -146,11 +146,16 @@ app.get('/createExample',function(req,res){
 //======== temp ======= for Orion calling the medication dispense endpoint
 app.get('/orion/:nhi',function(req,res){
     var nhi = req.params['nhi'];
+
+    //var url = "https://frontend1.solution-nzmoh-dataset-leahr-graviton-jump-host-auckland.graviton.odl.io/fhir/1.0/MedicationDispense?patient.identifier=SYS_A|"+nhi
+    var url = "https://35.162.186.149/fhir/1.0/MedicationDispense?patient.identifier=SYS_A|"+nhi
+
+
     if (nhi) {
         var options = {
             method:'GET',
             rejectUnauthorized: false,
-            uri : "https://frontend1.solution-nzmoh-dataset-leahr-graviton-jump-host-auckland.graviton.odl.io/fhir/1.0/MedicationDispense?patient.identifier=SYS_A|"+nhi,
+            uri : url,
             auth : {
                 'user':'level1.sys_a',
                 'password':'Orionsy5!?'
@@ -289,8 +294,6 @@ app.get('/stats/summary',function(req,res){
             });
 
             rtn.daySum = [];
-
-
 
 
             for (var day in daySum) {
