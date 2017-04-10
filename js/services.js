@@ -377,6 +377,13 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
         },
         buildAllergiesList : function(patientId,options) {
+
+            var deferred = $q.defer();
+            deferred.resolve();
+            return deferred.promise;
+
+            
+
             var today = moment().format();
             var allergyList = {resourceType : 'List',title:'Allergies List', entry:[], date : today,
                 subject : {reference:'Patient/'+patientId},
@@ -384,7 +391,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 mode: 'snapshot',
                 code : {coding : [{code:'allergies',system:'http://hl7.org/fhir/list-example-use-codes'}]}};
 
-            var deferred = $q.defer();
+
             var url = "artifacts/allergies.json";     //the reference list of medications to add to the list
             var bundle = {resourceType:'Bundle',type:'transaction',entry:[]};
             var listBundleEntry = {resource : allergyList,request:{method:'POST',url:'List/'}};
