@@ -864,7 +864,7 @@ angular.module("sampleApp")
                                 include = false;
                             }
 
-                            if (treeText == 'extension' || treeText == 'modifierExtension') {
+                            if (treeText == 'extension' || treeText == 'modifierExtension' || treeText == 'id') {
                                 include = false;
                             }
 
