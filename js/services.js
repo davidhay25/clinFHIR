@@ -382,7 +382,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             deferred.resolve();
             return deferred.promise;
 
-            
+
 
             var today = moment().format();
             var allergyList = {resourceType : 'List',title:'Allergies List', entry:[], date : today,

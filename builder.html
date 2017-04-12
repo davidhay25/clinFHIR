@@ -28,16 +28,16 @@
     <style>
         #resourceGraph {
             width: 100%;
-            height: 600px;
+            height: 550px;
             border: 1px solid lightgray;
         }
 
-
-         .borderForGraph {
+/*
+         .borderForGraphDEP {
              border-left: thin solid darkgrey;
              border-right: thin solid darkgrey;
          }
-
+*/
 
         .pass {
             color:green;
@@ -451,7 +451,7 @@
 
 
             </div>
-            <div ng-class="midPaneClass" classDEP="col-md-5 col-sm-5 borderForGraph">
+            <div ng-class="midPaneClass">
 
                 <div ng-hide="selectedContainer">
                     <div uib-alert class="alert-warning">
@@ -674,7 +674,7 @@
                         <uib-tab heading="List">
                             <br/>
 
-                            <div class="row">
+                            <div class="row"  style="height:550px; overflow-y: auto;" >
                                 <div class="col-md-12 col-sm-12">
 
 
@@ -774,6 +774,27 @@
 
 
                     </uib-tabset>
+
+
+                    <div class="row">
+                        <div class="col-md-11 col-sm-11">
+                            <ul class="pagination" style="margin-top:1px;margin-bottom:1px">
+                                <li><a href="#"><strong>Versions:</strong></a></li>
+
+                                <li ng-repeat="hx in selectedContainer.history">
+                                    <a href="#" ng-click="selectScenarioVersion($index)">{{$index}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-1 col-sm-1">
+                            <i class="glyphicon glyphicon-plus"
+                               ng-click="setNewScenarioVersion()" style="cursor: pointer">
+
+                            </i>
+                        </div>
+                    </div>
+
+
 
                 </div>
 

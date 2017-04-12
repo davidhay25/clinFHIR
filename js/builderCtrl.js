@@ -27,6 +27,35 @@ angular.module("sampleApp")
             refreshLibrary();       //initial load...
 
 
+            //scenario versioning
+            $scope.setNewScenarioVersion = function(){
+                //set the current bundle as a version...
+                var currentBundle = angular.copy($scope.selectedContainer.bundle);
+                $scope.selectedContainer.history = $scope.selectedContainer.history || []
+                $scope.selectedContainer.history.push({bundle:currentBundle})
+                return;
+
+            }
+
+            $scope.selectScenarioVersion = function(inx) {
+
+                console.log(inx);
+
+                //the .bundle property is always the bundle version being displayed.
+                //.index is where it is in the history. if it is the same as history.length-1 then it is editable...
+                if ($scope.selectedContainer.history) {
+                    $scope.selectedContainer.index = inx;
+                    $scope.selectedContainer.bundle = $scope.selectedContainer.history[inx]
+                }
+                //
+              
+               // $scope.selectedContainer.bundle = hx.bundle;   //todo - need to save current bundle + prevent updates!!!
+                makeGraph();
+            }
+
+
+
+
             $scope.displayServers = "Conformance: " + appConfigSvc.getCurrentConformanceServer().name
                 + "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>"
                 + "<div>Term: " + appConfigSvc.getCurrentTerminologyServer().name + "</div>";
@@ -323,15 +352,13 @@ angular.module("sampleApp")
 
                 $scope.selectedContainer.bundle.entry.forEach(function(entry){
 
-               // }
-                //$scope.resourcesBundle.entry.forEach(function(entry){
                     if (entry.resource.resourceType =='Composition') {
                         entry.resource.section = entry.resource.section || [];
                         $scope.compositionResource = entry.resource;
                         $scope.isaDocument= true;
 
                         $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedContainer.bundle);
-                        //console.log(html)
+
 
                     }
                 })
@@ -381,34 +408,12 @@ angular.module("sampleApp")
 
                                 addExistingResource(resource)
 
-                                /*
-                                builderSvc.addResourceToAllResources(resource)
-                                $scope.selectedContainer.bundle.entry.push({resource:resource});
-                                $scope.selectedContainer.bundle.entry.sort(function(a,b){
-                                    //$scope.resourcesBundle.entry.sort(function(a,b){
-                                    if (a.resource.resourceType > b.resource.resourceType) {
-                                        return 1
-                                    } else {
-                                        return -1
-                                    }
-                                })
-                                */
+
                                 $scope.displayMode = 'view';
 
                                 //load any existing resources for this patient...
                                 getExistingData(resource)
-                                /*
-                                supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
-                                    //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
-                                    function(data){
-                                        $scope.resourcesFromServer = data;
-                                        console.log($scope.resourcesFromServer);
-                                    },
-                                    function(err){
-                                        console.log(err)
-                                })
 
-                                */
 
                                 $scope.selectResource(resource,function(){
                                     $scope.waiting = false;
@@ -581,10 +586,7 @@ angular.module("sampleApp")
                 delete $scope.resourcesFromServer;
                 if (patient) {
                     //load any existing resources for this patient. Remove any resources currently in the scenario..
-
-                    //var container = $localStorage.builderBundles[$scope.currentBundleIndex]
                     builderSvc.getExistingDataFromServer(patient).then(
-                    //supportSvc.getAllData(patient.id).then(
                         //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
                         function(data){
                             $scope.resourcesFromServer = data;
@@ -606,12 +608,8 @@ angular.module("sampleApp")
                 $localStorage.builderBundles = []
                 $scope.currentBundleIndex = -1;
 
-                // var newBundle = {name:'Default',bundle:{resourceType:'Bundle',entry:[]}}
-                // newBundle.bundle.id = idPrefix +new Date().getTime();
-                // $localStorage.builderBundles = [newBundle]
             } else {
                 if ($localStorage.builderBundles.length > 0) {
-                   // $scope.resourcesBundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
                     $scope.selectedContainer = $localStorage.builderBundles[$scope.currentBundleIndex];
 
                     //create a hash (based on url) of all the resources in the
@@ -624,8 +622,6 @@ angular.module("sampleApp")
             }
 
             $scope.resourceFromServerSelected = function(bundle, inx) {
-               // console.log(bundle, inx)
-
                 addExistingResource(bundle.entry[inx].resource);
                 bundle.entry.splice(inx,1)
                 bundle.total --;
@@ -889,6 +885,7 @@ angular.module("sampleApp")
                 delete $scope.resourcesFromServer;
                 $scope.currentBundleIndex = inx;
 
+                //get the container from the local store... 'builderBundles' would be better named 'builderContainers'
                 $scope.selectedContainer = $localStorage.builderBundles[$scope.currentBundleIndex];
                 createDownLoad($scope.selectedContainer)
 
@@ -1143,8 +1140,6 @@ angular.module("sampleApp")
                     function (result) {
                         var inx = -1;
                         for (var i=0; i < $scope.selectedContainer.bundle.entry.length; i++) {
-                        //for (var i=0; i < $scope.resourcesBundle.entry.length; i++) {
-                            //var r = $scope.resourcesBundle.entry[i].resource;
                             var r = $scope.selectedContainer.bundle.entry[i].resource;
                             if (r.resourceType == resource.resourceType && r.id == resource.id) {
                                 inx = i;
@@ -1152,7 +1147,6 @@ angular.module("sampleApp")
                             }
                         }
                         if (inx > -1) {
-                           // $scope.resourcesBundle.entry.splice(inx,1);
                             $scope.selectedContainer.bundle.entry.splice(inx,1);
 
                             makeGraph();
