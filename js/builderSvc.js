@@ -58,6 +58,35 @@ angular.module("sampleApp")
         objColours.Medication = '#FF9900';
 
         return {
+            updateMostRecentVersion : function(container,bundle) {
+                //when editing - make sure the most current history is updated as well...
+                if (!container.history) {       //when migrating from existing scenarios...
+                    container.history = []
+                    container.index = 0;
+                }
+
+                container.history[container.index] = {bundle:bundle};    //todo ?should this be a copy??
+
+            },
+            setMostRecentVersionActive : function(container) {
+                //set the most recent bundle in the container to be the actibe one (.bundle)
+                if (container.history) {
+                    container.index = container.history.length -1;
+                    container.bundle = container.history[container.index].bundle;
+                }
+            },
+            isVersionMostRecent : function(container) {
+                //return true if the bundle currently being viewed is the most recent one
+                if (! container.history) {
+                    return true;
+                } else {
+                    if (container.index == container.history.length-1 ) {
+                        return true
+                    } else {
+                        return false;
+                    }
+                }
+            },
             getLinkingUrlFromId : function(resource) {
                 //return the url used for referencing. If a Uuid then just return it - otherwise make a relatibe
 

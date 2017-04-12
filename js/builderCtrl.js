@@ -33,7 +33,8 @@ angular.module("sampleApp")
                 var currentBundle = angular.copy($scope.selectedContainer.bundle);
                 $scope.selectedContainer.history = $scope.selectedContainer.history || []
                 $scope.selectedContainer.history.push({bundle:currentBundle})
-                return;
+
+                $scope.selectedContainer.index = $scope.selectedContainer.history.length -1;
 
             }
 
@@ -43,12 +44,13 @@ angular.module("sampleApp")
 
                 //the .bundle property is always the bundle version being displayed.
                 //.index is where it is in the history. if it is the same as history.length-1 then it is editable...
+                //when selecting a container we'll set the index to the last version (the editable one)
                 if ($scope.selectedContainer.history) {
                     $scope.selectedContainer.index = inx;
-                    $scope.selectedContainer.bundle = $scope.selectedContainer.history[inx]
+                    $scope.selectedContainer.bundle = $scope.selectedContainer.history[inx].bundle
                 }
                 //
-              
+
                // $scope.selectedContainer.bundle = hx.bundle;   //todo - need to save current bundle + prevent updates!!!
                 makeGraph();
             }
@@ -364,18 +366,24 @@ angular.module("sampleApp")
                 })
             }
 
+            //add a resource that was already on the server
             function addExistingResource(resource) {
-                builderSvc.addResourceToAllResources(resource)
-                $scope.selectedContainer.bundle.entry.push({resource:resource});
-                $scope.selectedContainer.bundle.entry.sort(function(a,b){
-                    //$scope.resourcesBundle.entry.sort(function(a,b){
-                    if (a.resource.resourceType > b.resource.resourceType) {
-                        return 1
-                    } else {
-                        return -1
-                    }
-                })
-                makeGraph();
+                if (builderSvc.isVersionMostRecent($scope.selectedContainer)) {
+                    builderSvc.addResourceToAllResources(resource)
+                    $scope.selectedContainer.bundle.entry.push({resource:resource});
+                    $scope.selectedContainer.bundle.entry.sort(function(a,b){
+                        //$scope.resourcesBundle.entry.sort(function(a,b){
+                        if (a.resource.resourceType > b.resource.resourceType) {
+                            return 1
+                        } else {
+                            return -1
+                        }
+                    })
+                    makeGraph();
+                } else {
+                    alert('not the current version')
+                }
+
             }
 
 
@@ -602,6 +610,8 @@ angular.module("sampleApp")
 
             $scope.currentBundleIndex = 0;     //the index of the bundle currently being used
 
+
+            //select the initial container
             if (! $localStorage.builderBundles) {
 
                 //modalService.showModal({}, {bodyText:'To get started, either create a new set or download one from the Library.'});
@@ -612,6 +622,16 @@ angular.module("sampleApp")
                 if ($localStorage.builderBundles.length > 0) {
                     $scope.selectedContainer = $localStorage.builderBundles[$scope.currentBundleIndex];
 
+
+                    //set the .bundle property to the most recent version
+                    builderSvc.setMostRecentVersionActive($scope.selectedContainer)
+/*
+
+                    if ($scope.selectedContainer.history) {
+                        $scope.selectedContainer.index = $scope.selectedContainer.history.length -1;
+                        $scope.selectedContainer.bundle = $scope.selectedContainer.history[$scope.selectedContainer.index]
+                    }
+*/
                     //create a hash (based on url) of all the resources in the
                     builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
                     $scope.currentPatient = builderSvc.getPatientResource();
@@ -625,8 +645,7 @@ angular.module("sampleApp")
                 addExistingResource(bundle.entry[inx].resource);
                 bundle.entry.splice(inx,1)
                 bundle.total --;
-            }
-
+            };
 
             $scope.builderBundles = $localStorage.builderBundles;   //all the bundles cached locally...
 
@@ -690,12 +709,17 @@ angular.module("sampleApp")
                     //console.log(vo)
                     if (vo.name) {
                         delete $scope.isaDocument
-                        var newBundleContainer = {name:vo.name,bundle:{resourceType:'Bundle',entry:[]}};
+                        var newBundle = {resourceType:'Bundle',entry:[]};
+                        newBundle.id = idPrefix+new Date().getTime();
+
+                        var newBundleContainer = {name:vo.name,bundle:newBundle};
                         newBundleContainer.description = vo.description;
-                        newBundleContainer.bundle.id = idPrefix+new Date().getTime();
+                        //newBundleContainer.bundle.id = idPrefix+new Date().getTime();
                         newBundleContainer.isDirty = true;
                         newBundleContainer.isPrivate = true;
                         newBundleContainer.category = vo.category;
+                        newBundleContainer.history = [{bundle:newBundle}];
+                        newBundleContainer.index = 0;
                         $localStorage.builderBundles.push(newBundleContainer);
                         $scope.selectedContainer = newBundleContainer;
                         $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
@@ -784,10 +808,13 @@ angular.module("sampleApp")
                 //note that the entry is a DocumentReference with a bundle as an attachment...
                 if (inContainer) {
 
-
-
-
                     var container = angular.copy(inContainer);
+
+                    //always set the .bundle to the most recent history..
+                    if (container.history) {
+                        container.index = container.history.length -1;
+                        container.bundle = container.history[container.index].bundle;
+                    }
 
                     var id = container.bundle.id;
 
@@ -800,7 +827,7 @@ angular.module("sampleApp")
                             // $scope.resourcesBundle = item.bundle;
                             $scope.selectedContainer = item;
                             $scope.currentBundleIndex= inx;
-                            //$scope.libraryVisible = false;
+
                             $scope.thingToDisplay='scenario'
                         }
                     });
@@ -881,12 +908,16 @@ angular.module("sampleApp")
 
             //---------
 
+            //select a bundle from the local list
             $scope.selectBundle = function(inx){
                 delete $scope.resourcesFromServer;
                 $scope.currentBundleIndex = inx;
 
                 //get the container from the local store... 'builderBundles' would be better named 'builderContainers'
                 $scope.selectedContainer = $localStorage.builderBundles[$scope.currentBundleIndex];
+
+                builderSvc.setMostRecentVersionActive( $scope.selectedContainer);
+
                 createDownLoad($scope.selectedContainer)
 
                 builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
@@ -1095,7 +1126,7 @@ angular.module("sampleApp")
                         $rootScope.$emit('newSet');     //clears the current section...
 
                         delete $scope.currentResource;
-                        $localStorage.builderBundles.splice(inx,1)   //delete the bundle
+                        $localStorage.builderBundles.splice(inx,1)   //delete the bundle from local storage
                         $scope.currentBundleIndex = 0; //set the current bundle to the first (default) one
                         if ($localStorage.builderBundles.length == 0) {
                             //no bundles left
@@ -1148,7 +1179,7 @@ angular.module("sampleApp")
                         }
                         if (inx > -1) {
                             $scope.selectedContainer.bundle.entry.splice(inx,1);
-
+                            builderSvc.updateMostRecentVersion( $scope.selectedContainer,$scope.selectedContainer.bundle)
                             makeGraph();
                             delete $scope.currentResource;
                             isaDocument();      //may not still be a document...
@@ -1175,7 +1206,6 @@ angular.module("sampleApp")
 
             //generate the graph of resources and references between them
             makeGraph = function(centralResource,hideMe) {
-                //if ($scope.resourcesBundle) {
 
                 $scope.filteredGraphView = false;
                 if (centralResource) {
@@ -1411,9 +1441,9 @@ angular.module("sampleApp")
             //----------------
             //process a StructureDefinition file -
             function processSD(SD,resource){
-               // if (cb) {
-                    builderSvc.setPatient(resource,SD);     //set the patient reference (if there is a patient or subject property)
-               // }
+
+                builderSvc.setPatient(resource,SD);     //set the patient reference (if there is a patient or subject property)
+
 
                 //set up the references after setting the patient...
                 var url = resource.resourceType+'/'+resource.id;
@@ -1727,7 +1757,6 @@ angular.module("sampleApp")
                 }
 
                 $scope.waiting = true;
-
                 $scope.selectedContainer.isDirty = true;
 
 
@@ -1755,6 +1784,9 @@ angular.module("sampleApp")
                         return -1
                     }
                 })
+
+                //update the copy of this bundle in the container history
+                builderSvc.updateMostRecentVersion( $scope.selectedContainer,$scope.selectedContainer.bundle)
 
                 $scope.displayMode = 'view';
 
