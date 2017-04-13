@@ -10,6 +10,7 @@ angular.module("sampleApp")
             $scope.appConfigSvc = appConfigSvc;
             $scope.ResourceUtilsSvc = ResourceUtilsSvc;     //for the 1 line summary..
             $scope.thingToDisplay = 'scenario';
+            $scope.builderSvc = builderSvc;
 
             GetDataFromServer.registerAccess('scnBld');
 
@@ -30,13 +31,24 @@ angular.module("sampleApp")
             //scenario versioning
             $scope.setNewScenarioVersion = function(){
                 //set the current bundle as a version...
-                var currentBundle = angular.copy($scope.selectedContainer.bundle);
-                $scope.selectedContainer.history = $scope.selectedContainer.history || []
-                $scope.selectedContainer.history.push({bundle:currentBundle})
 
-                $scope.selectedContainer.index = $scope.selectedContainer.history.length -1;
+                var modalOptions = {
+                    closeButtonText: "No, I changed my mind",
+                    actionButtonText: 'Yes, please create a version',
+                    headerText: 'Save as a version',
+                    bodyText: 'This will save the current scenario as a version. You can continue to change the scenario. '
+                };
 
-            }
+                modalService.showModal({}, modalOptions).then(
+                    function (){
+                        var currentBundle = angular.copy($scope.selectedContainer.bundle);
+                        // var currentBundle = $scope.selectedContainer.bundle;
+                        $scope.selectedContainer.history = $scope.selectedContainer.history || []
+                        $scope.selectedContainer.history.push({bundle:currentBundle})
+                        $scope.selectedContainer.index = $scope.selectedContainer.history.length -1;
+                    }
+                )
+            };
 
             $scope.selectScenarioVersion = function(inx) {
 
@@ -47,15 +59,30 @@ angular.module("sampleApp")
                 //when selecting a container we'll set the index to the last version (the editable one)
                 if ($scope.selectedContainer.history) {
                     $scope.selectedContainer.index = inx;
-                    $scope.selectedContainer.bundle = $scope.selectedContainer.history[inx].bundle
+                    $scope.selectedContainer.bundle = angular.copy($scope.selectedContainer.history[inx].bundle)
+
+                    //if the current resource is in the selected container, then set it as the new current version (tracks the display nicely)
+                    if ($scope.currentResource && $scope.selectedContainer.bundle.entry) {
+                        var resourceId = $scope.currentResource.id;
+                        delete $scope.currentResource;
+                        var bundle = $scope.selectedContainer.bundle;
+
+                        for (var i=0; i< bundle.entry.length; i++) {
+                            var r = bundle.entry[i].resource;
+                            if (r.id == resourceId) {
+                                $scope.currentResource = r;
+                                drawResourceTree(r)
+                                break;
+                            }
+                        }
+                    }
+
                 }
                 //
 
                // $scope.selectedContainer.bundle = hx.bundle;   //todo - need to save current bundle + prevent updates!!!
                 makeGraph();
             }
-
-
 
 
             $scope.displayServers = "Conformance: " + appConfigSvc.getCurrentConformanceServer().name
@@ -78,13 +105,6 @@ angular.module("sampleApp")
 
             $scope.toggleSelector()
 
-            /*
-             $scope.showLibrary = function(){
-
-             $scope.libraryVisible = true;
-             };
-
-             */
 
 
             //---------- login stuff
@@ -1057,7 +1077,7 @@ angular.module("sampleApp")
                         }
                     }).result.then(function () {
                         drawResourceTree($scope.currentResource);   //don't need to update the graph...
-
+                        builderSvc.updateMostRecentVersion( $scope.selectedContainer,$scope.selectedContainer.bundle)
                     })
 
                 }
@@ -1442,7 +1462,8 @@ angular.module("sampleApp")
             //process a StructureDefinition file -
             function processSD(SD,resource){
 
-                builderSvc.setPatient(resource,SD);     //set the patient reference (if there is a patient or subject property)
+                //don't *think* we eant to do that here...
+               // builderSvc.setPatient(resource,SD);     //set the patient reference (if there is a patient or subject property)
 
 
                 //set up the references after setting the patient...
@@ -1708,8 +1729,8 @@ angular.module("sampleApp")
                 var insertPoint;        //if we want to set the insert point...
 
                 //set the insert point based on the path selected (if any)
-                 //var insertPoint = $scope.currentResource;
-                 if ($scope.input.selectedExistingElement > -1) {
+
+                if ($scope.input.selectedExistingElement > -1) {
                     insertPoint = $scope.existingElements.list[$scope.input.selectedExistingElement];
                  }
 
@@ -1721,11 +1742,11 @@ angular.module("sampleApp")
                 var url = $scope.currentResource.resourceType+'/'+$scope.currentResource.id;
                 $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
 
+                //need to update the history as well...
+                builderSvc.updateMostRecentVersion( $scope.selectedContainer,$scope.selectedContainer.bundle)
 
 
                 //now remove the reference from the list of possibilities...
-
-
                 var type = resource.resourceType;   //allows for Reference
                 var pos = -1;
                 $scope.hashReferences[type].forEach(function(res,inx){
@@ -1785,8 +1806,20 @@ angular.module("sampleApp")
                     }
                 })
 
-                //update the copy of this bundle in the container history
-                builderSvc.updateMostRecentVersion( $scope.selectedContainer,$scope.selectedContainer.bundle)
+                //get the SD, thenset any references to the Patient (if it exists)
+                builderSvc.getSD(resource).then(
+                    function(SD) {
+                        builderSvc.setPatient(resource,SD);     //set the patient reference (if there is a patient or subject property)
+
+                        //update the copy of this bundle in the container history
+                        builderSvc.updateMostRecentVersion( $scope.selectedContainer,$scope.selectedContainer.bundle)
+                    },
+                    function(err) {
+                        alert(angular.toJson(err))
+                    }
+                );
+
+
 
                 $scope.displayMode = 'view';
 
@@ -1802,7 +1835,7 @@ angular.module("sampleApp")
 
                 });       //select the resource, indicating that it is a new resource...
 
-
+                $scope.currentPatient = builderSvc.getPatientResource();
 
             };
 

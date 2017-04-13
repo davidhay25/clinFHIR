@@ -465,9 +465,32 @@
 
                 <div ng-show="selectedContainer">
 
-                    <button ng-hide="displayMode == 'new'"
+
+                    <div class="row">
+                        <div class="col-md-11 col-sm-11">
+                            <ul class="pagination" style="margin-top:1px;margin-bottom:1px">
+                                <li><a href="#"><strong>Versions:</strong></a></li>
+
+                                <li ng-class="{active:selectedContainer.index == $index}" ng-repeat="hx in selectedContainer.history">
+                                    <a    href="#" ng-click="selectScenarioVersion($index)">{{$index}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-1 col-sm-1">
+                            <i class="glyphicon glyphicon-plus" ng-show="builderSvc.isVersionMostRecent(selectedContainer)"
+                               ng-click="setNewScenarioVersion()" style="cursor: pointer">
+
+                            </i>
+                        </div>
+                    </div>
+
+                    <button ng-hide="displayMode == 'new' || ! builderSvc.isVersionMostRecent(selectedContainer)"
                             ng-click="displayMode = 'new'"
                             class="btn btn-primary pull-right">Add Resource</button>
+
+                    <div ng-show="! builderSvc.isVersionMostRecent(selectedContainer)" class="pull-right">
+                        Read only (version {{selectedContainer.index}})
+                    </div>
 
                     <uib-tabset>
 
@@ -776,23 +799,7 @@
                     </uib-tabset>
 
 
-                    <div class="row">
-                        <div class="col-md-11 col-sm-11">
-                            <ul class="pagination" style="margin-top:1px;margin-bottom:1px">
-                                <li><a href="#"><strong>Versions:</strong></a></li>
 
-                                <li ng-repeat="hx in selectedContainer.history">
-                                    <a  class="active"  href="#" ng-click="selectScenarioVersion($index)">{{$index}}</a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="col-md-1 col-sm-1">
-                            <i class="glyphicon glyphicon-plus"
-                               ng-click="setNewScenarioVersion()" style="cursor: pointer">
-
-                            </i>
-                        </div>
-                    </div>
 
 
 
@@ -802,6 +809,10 @@
             </div>
 
             <div ng-class="rightPaneClass" >
+
+<!--
+                <pre>{{selectedContainer.history | json}}</pre>
+-->
 
                 <div ng-show="displayMode == 'view'">
 
@@ -829,10 +840,10 @@
                         </div>
                         <uib-tabset>
 
-                            <uib-tab heading="Structure & Reference">
+                            <uib-tab  ng-show="builderSvc.isVersionMostRecent(selectedContainer)"    heading="Structure & Reference">
 
 
-                                <div class="row">
+                                <div class="row"  ng-show="builderSvc.isVersionMostRecent(selectedContainer)" >
                                     <div class="col-sm-5 col-md-5">
                                         <br />
                                         <span class="pull-right">
@@ -914,8 +925,6 @@
                                                 </div>
 
                                             </div>
-
-
 
                                             <pre>{{existingElements.list[input.selectedExistingElement] | json}}</pre>
 

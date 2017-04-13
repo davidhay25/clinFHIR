@@ -65,7 +65,8 @@ angular.module("sampleApp")
                     container.index = 0;
                 }
 
-                container.history[container.index] = {bundle:bundle};    //todo ?should this be a copy??
+                container.history[container.history.length-1] = {bundle:angular.copy(bundle)};
+                //container.history[container.index] = {bundle:angular.copy(bundle)};    //todo ?should this be a copy??
 
             },
             setMostRecentVersionActive : function(container) {
@@ -77,15 +78,18 @@ angular.module("sampleApp")
             },
             isVersionMostRecent : function(container) {
                 //return true if the bundle currently being viewed is the most recent one
-                if (! container.history) {
-                    return true;
-                } else {
-                    if (container.index == container.history.length-1 ) {
-                        return true
+                if (container) {
+                    if (! container.history) {
+                        return true;
                     } else {
-                        return false;
+                        if (container.index == container.history.length-1 ) {
+                            return true
+                        } else {
+                            return false;
+                        }
                     }
                 }
+
             },
             getLinkingUrlFromId : function(resource) {
                 //return the url used for referencing. If a Uuid then just return it - otherwise make a relatibe
