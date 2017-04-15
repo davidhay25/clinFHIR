@@ -28,7 +28,13 @@ angular.module("sampleApp")
             refreshLibrary();       //initial load...
 
 
-            //scenario versioning
+            //------------ scenario versioning
+
+            $scope.toggleVersion = function(){
+                $scope.selectedContainer.showVersion = ! $scope.selectedContainer.showVersion;
+                console.log($scope.selectedContainer.showVersion)
+            }
+
             $scope.setNewScenarioVersion = function(){
                 //set the current bundle as a version...
 
@@ -829,12 +835,14 @@ angular.module("sampleApp")
                 if (inContainer) {
 
                     var container = angular.copy(inContainer);
-
+/*
                     //always set the .bundle to the most recent history..
                     if (container.history) {
                         container.index = container.history.length -1;
                         container.bundle = container.history[container.index].bundle;
                     }
+
+                    */
 
                     var id = container.bundle.id;
 
@@ -1227,13 +1235,15 @@ angular.module("sampleApp")
             //generate the graph of resources and references between them
             makeGraph = function(centralResource,hideMe) {
 
+                var showText = true;
+
                 $scope.filteredGraphView = false;
                 if (centralResource) {
                     $scope.filteredGraphView = true;
                 }
 
                 if ($scope.selectedContainer && $scope.selectedContainer.bundle) {
-                    var vo = builderSvc.makeGraph($scope.selectedContainer.bundle,centralResource,hideMe) ;  //todo - may not be the right place...
+                    var vo = builderSvc.makeGraph($scope.selectedContainer.bundle,centralResource,hideMe,showText) ;  //todo - may not be the right place...
 
                     $scope.allReferences = vo.allReferences;                //all references in the entire set.
 

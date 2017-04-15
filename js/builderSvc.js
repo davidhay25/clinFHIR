@@ -767,10 +767,21 @@ angular.module("sampleApp")
                 var extensionUrl = appConfigSvc.config().standardExtensionUrl.docrefDescription;
                 Utilities.addExtensionOnce(docref,extensionUrl,{valueString:bundleContainer.description})
 
+
+
+
                 if (bundleContainer.isPrivate) {
                     docref.meta = {security : [{code:'R',system:'http://hl7.org/fhir/v3/Confidentiality'}]}
                 }
                 docref.content = [{attachment:{data:btoa(angular.toJson(bundle))}}]
+
+
+                //add any history - as an object to allow for later expansion...
+                if (bundleContainer.history && bundleContainer.history.length > 1) {
+                    var dr = {history:bundleContainer.history}
+                    docref.content.push({attachment:{data:btoa(angular.toJson(dr))}})
+                }
+
                 var url = appConfigSvc.getCurrentDataServer().url + 'DocumentReference/'+docref.id;
                 return $http.put(url,docref);
 
@@ -798,6 +809,21 @@ angular.module("sampleApp")
 
                     //the bundle of resources that makes up the scenario. stores as a b64 encoded attachment in the DR
                     container.bundle = angular.fromJson(atob(dr.content[0].attachment.data));
+
+
+                    //get the history (if any)
+                    if (dr.content.length > 1) {
+                        var hx = angular.fromJson(atob(dr.content[1].attachment.data))
+                        container.history = hx.history;
+                        container.showVersion = true;       //displays the version bar..
+                    }
+
+                   // if (bundleContainer.history && bundleContainer.history.length > 1) {
+                     //   var dr = {history:bundleContainer.history}
+                       // docref.content.push({attachment:{data:btoa(angular.toJson(dr))}})
+                   // }
+
+
 
                     //create the summary of resources in the container
                     container.resources = [];       //this will be a sorted list (by type) ...
@@ -853,6 +879,9 @@ angular.module("sampleApp")
                             }
                         })
                     }
+
+
+
                     return container;
 
 
@@ -884,6 +913,7 @@ angular.module("sampleApp")
                             bundle.entry.forEach(function(entry){
                                 var dr = entry.resource;
                                 var container = that.getBundleContainerFromDocRef(dr)
+                                console.log(container);
                                 if (cache[dr.id]) {
                                     container.cachedLocally = true;
                                 }
@@ -894,7 +924,8 @@ angular.module("sampleApp")
                         //sort by scenario name - shouldalways be a name. but just tobesure, wrap in an extension...
                         try {
                             arContainer.sort(function(a,b){
-
+                                a.name = a.name || 'No Name!'
+                                b.name = b.name || 'No Name!'
 
 
                                 if (a.name.toUpperCase() > b.name.toUpperCase()) {
@@ -1608,7 +1639,7 @@ angular.module("sampleApp")
                 }
 
             },
-            makeGraph : function(bundle,centralResource,hideMe) {
+            makeGraph : function(bundle,centralResource,hideMe,showText) {
                 //builds the model that has all the models referenced by the indicated SD, recursively...
                 //if hideMe is true, then hide the central node and all references to it
 
@@ -1646,6 +1677,14 @@ angular.module("sampleApp")
                     var node = {id: arNodes.length +1, label: resource.resourceType, shape: 'box',url:url,cf : {resource:resource}};
                     if (resource.text) {
                         node.title = resource.text.div;
+                        if (showText) {
+
+                            var labelText = $filter('manualText')(resource);
+                            if (labelText) {
+                                node.label += "\n"+labelText.substr(0,20);
+                            }
+
+                        }
                     }
 
 

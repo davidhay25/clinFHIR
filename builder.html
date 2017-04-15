@@ -183,7 +183,11 @@
                 </div>
                 <div class="col-md-3 col-sm-3">
                     <div class="navbar-text">
-                        <a href="#" ng-click="importResource()">Import resource</a>
+                        <div><a href="#" ng-click="importResource()">Import resource</a></div>
+                        <div ng-show="selectedContainer.showVersion"><a href="#" ng-click="toggleVersion()">Hide version</a></div>
+                        <div ng-hide="!selectedContainer || selectedContainer.showVersion">
+                            <a href="#" ng-click="toggleVersion()">Show version</a>
+                        </div>
                     </div>
 
                 </div>
@@ -441,9 +445,6 @@
                             </div>
                         </div>
 
-
-
-
                     </li>
                 </ul>
 
@@ -465,24 +466,27 @@
 
                 <div ng-show="selectedContainer">
 
+                    <div ng-show="selectedContainer.showVersion">
+                        <div class="row" >
+                            <div class="col-md-11 col-sm-11">
+                                <ul class="pagination" style="margin-top:1px;margin-bottom:1px">
+                                    <li><a href="#"><strong>Versions:</strong></a></li>
 
-                    <div class="row">
-                        <div class="col-md-11 col-sm-11">
-                            <ul class="pagination" style="margin-top:1px;margin-bottom:1px">
-                                <li><a href="#"><strong>Versions:</strong></a></li>
+                                    <li ng-class="{active:selectedContainer.index == $index}" ng-repeat="hx in selectedContainer.history">
+                                        <a    href="#" ng-click="selectScenarioVersion($index)">{{$index}}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-1 col-sm-1">
+                                <i class="glyphicon glyphicon-plus" ng-show="builderSvc.isVersionMostRecent(selectedContainer)"
+                                   ng-click="setNewScenarioVersion()" style="cursor: pointer">
 
-                                <li ng-class="{active:selectedContainer.index == $index}" ng-repeat="hx in selectedContainer.history">
-                                    <a    href="#" ng-click="selectScenarioVersion($index)">{{$index}}</a>
-                                </li>
-                            </ul>
+                                </i>
+                            </div>
                         </div>
-                        <div class="col-md-1 col-sm-1">
-                            <i class="glyphicon glyphicon-plus" ng-show="builderSvc.isVersionMostRecent(selectedContainer)"
-                               ng-click="setNewScenarioVersion()" style="cursor: pointer">
-
-                            </i>
-                        </div>
+                        <hr/>
                     </div>
+
 
                     <button ng-hide="displayMode == 'new' || ! builderSvc.isVersionMostRecent(selectedContainer)"
                             ng-click="displayMode = 'new'"
