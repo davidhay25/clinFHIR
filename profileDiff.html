@@ -117,7 +117,7 @@
                         <uib-tab heading="Model">
                             <div class="myScroll">
                                 <table class="table">
-                                    <tr ng-repeat="item in primary.cannonical.item"
+                                    <tr ng-repeat="item in primary.canonical.item"
                                         ng-class="{myRequired:item.min==1,extension:item.extension}">
                                         <td  ng-click="showED(item.ed)" style="cursor: pointer">{{item.path}}</td>
                                         <td>{{item.min}}..{{item.max}}</td>
@@ -153,7 +153,7 @@
 
                             <div class="myScroll">
                                 <table class="table">
-                                    <tr ng-repeat="item in secondary.cannonical.item "
+                                    <tr ng-repeat="item in secondary.canonical.item "
                                     ng-class="{myRequired:item.min==1,extension:item.extension}" >
                                         <td  style="cursor: pointer" ng-click="showED(item.ed)">{{item.path}}</td>
                                         <td>{{item.min}}..{{item.max}}</td>
@@ -169,6 +169,16 @@
                                             <div ng-show="item.coded.valueSetUri">Uri: {{item.coded.valueSetUri}}</div>
                                             <div ng-show="item.coded.valueSetReference">Ref: {{item.coded.valueSetReference}}</div>
                                             <div>{{item.coded.strength}}</div>
+                                        </td>
+                                        <td>
+                                            <span ng-show="item.difference.nip" title="Not in primary">
+                                                <i class="glyphicon glyphicon-remove"></i></span>
+                                            <span ng-show="item.difference.brk" title="Not in primary - required field">
+                                                <i class="glyphicon glyphicon-remove-sign"></i></span>
+                                            <span ng-show="item.difference.mc" title="Multiplicity is different">
+                                                <i class="glyphicon glyphicon-random"></i></span>
+                                            <span ng-show="item.difference.vsd" title="ValueSet is different">
+                                                <i class="glyphicon glyphicon-chevron-down"></i></span>
                                         </td>
                                     </tr>
                                 </table>

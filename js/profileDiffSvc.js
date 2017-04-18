@@ -4,9 +4,9 @@ angular.module("sampleApp").service('profileDiffSvc',
 
 
     return {
-        makeCannonicalObj : function(SD) {
+        makeCanonicalObj : function(SD) {
             if (SD && SD.snapshot && SD.snapshot.element) {
-                var cannonical = {item:[]}      //the cannonical object...
+                var canonical = {item:[]}      //the canonical object...
                 var excludeRoots = []           //roots which have been excluded...
                 SD.snapshot.element.forEach(function(ed){
                     var include = true;
@@ -16,10 +16,13 @@ angular.module("sampleApp").service('profileDiffSvc',
 
 
                     var item = {path:arPath.join('.')};
+                    item.originalPath = path;
                     item.ed = ed;
                     item.min = ed.min;
                     item.max = ed.max;
+                    item.multiplicity = ed.min + ".."+ed.max;
                     item.type = ed.type;
+                    item.difference = {};       //a # of differences
 
                     //if multiplicity is 0, then add to the exclude roots
                     if (item.max == 0) {
@@ -43,9 +46,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                                 //this is a coded element, add the bound valueset
                                 if (ed.binding) {
                                     item.coded = {strength:ed.binding.strength}
-                                    if (ed.binding.valueSetReference) {
 
-                                    }
                                     if ( ed.binding.valueSetReference) {
                                         item.coded.valueSetReference = ed.binding.valueSetReference.reference;
                                     }
@@ -71,19 +72,80 @@ angular.module("sampleApp").service('profileDiffSvc',
                                     } else {
                                         item.extension.url = typ.profile
                                     }
+                                    item.originalPath += '_'+item.extension.url;    //to make it unique
 
                                 }
                             })
                         }
                     }
                     if (include) {
-                        cannonical.item.push(item)
+                        canonical.item.push(item)
                     }
 
 
                 });
-                return cannonical;
+                return canonical;
             }
+
+        },
+        analyseDiff : function(primary,secondary) {
+            //pass in the canonical model (NOT the SD or ED)
+            //var analysis = {};
+
+            var primaryHash = {};
+            primary.item.forEach(function(item){
+                var path = item.originalPath;   //extensions will be made unique
+                primaryHash[path]= item
+            });
+
+            console.log(primaryHash)
+            //fields in secondary, not in primary
+            //analysis.notInPrimary = []
+            secondary.item.forEach(function (item) {
+                if (!primaryHash[item.originalPath] ) {
+                    //analysis.notInPrimary.push(item)
+                    if (item.min !== 0) {
+                        item.difference.brk = true;         //breaking change
+                    } else {
+                        item.difference.nip = true;         //not in primary
+                    }
+
+                } else {
+                    var primaryItem = primaryHash[item.originalPath];
+                    //the path is in both, has it changed? First the multiplicity
+                    if (primaryItem.multiplicity !== item.multiplicity ){
+                        item.difference.mc = true;         //multiplicity changed
+                    }
+
+                    if (item.coded) {
+                        //the secondary is coded
+                        if (! primaryItem.coded) {
+
+                            item.difference.vsd = true;     //the primary is not!
+                        } else {
+                            if (item.coded.valueSetReference) {
+                                if (primaryItem.coded.valueSetReference !== item.coded.valueSetReference) {
+                                    item.difference.vsd = true;
+                                }
+                            }
+
+                            if (item.coded.valueSetUri !== primaryItem.coded.valueSetUri) {
+                                item.difference.vsd = true;
+                            }
+
+                        }
+
+
+
+
+                    }
+
+                }
+
+                })
+
+            //console.log(analysis)
+
 
         }
     }

@@ -1,7 +1,7 @@
 
 angular.module("sampleApp")
     .controller('profileDiffCtrl',
-        function ($scope,$http,profileDiffSvc,$uibModal) {
+        function ($scope,$q,$http,profileDiffSvc,$uibModal) {
 
 
 
@@ -55,7 +55,7 @@ angular.module("sampleApp")
                 function(data){
                     console.log(data)
                     $scope.primary = {json: data.data};
-                    $scope.primary.cannonical = profileDiffSvc.makeCannonicalObj($scope.primary.json)
+                    $scope.primary.canonical = profileDiffSvc.makeCanonicalObj($scope.primary.json)
                     $scope.primary.display = "Orion Patient"
                     console.log($scope.primary)
                 }
@@ -66,7 +66,7 @@ angular.module("sampleApp")
                 function(data){
                     console.log(data)
                     $scope.secondary = {json:data.data};
-                    $scope.secondary.cannonical = profileDiffSvc.makeCannonicalObj($scope.secondary.json)
+                    $scope.secondary.canonical = profileDiffSvc.makeCanonicalObj($scope.secondary.json)
                     $scope.secondary.display = "Argonaut Patient"
                 }
             )
@@ -76,25 +76,33 @@ angular.module("sampleApp")
         function loadPair(pair) {
             //load all the current tasks on the data server
             //var qry = "http://fhir.hl7.org.nz/baseDstu2/StructureDefinition/OhPatient-cf-profile";
-            $http.get(pair.primary.url).then(
+
+            var arQuery = [];
+            arQuery.push ($http.get(pair.primary.url).then(
                 function(data){
-                    console.log(data)
+                   // console.log(data)
                     $scope.primary = {json: data.data};
-                    $scope.primary.cannonical = profileDiffSvc.makeCannonicalObj($scope.primary.json)
+                    $scope.primary.canonical = profileDiffSvc.makeCanonicalObj($scope.primary.json)
                     $scope.primary.display = pair.primary.display;
-                    console.log($scope.primary)
-                }
+                    //console.log($scope.primary)
+                })
             );
 
             //var qry = "http://fhir.hl7.org.nz/dstu2/StructureDefinition/argo-patient";
-            $http.get(pair.secondary.url).then(
+            arQuery.push ($http.get(pair.secondary.url).then(
                 function(data){
-                    console.log(data)
+                    //console.log(data)
                     $scope.secondary = {json:data.data};
-                    $scope.secondary.cannonical = profileDiffSvc.makeCannonicalObj($scope.secondary.json)
+                    $scope.secondary.canonical = profileDiffSvc.makeCanonicalObj($scope.secondary.json)
                     $scope.secondary.display = pair.secondary.display;
                 }
-            )
+            ))
+
+            $q.all(arQuery).then(function(){
+                profileDiffSvc.analyseDiff($scope.primary.canonical,$scope.secondary.canonical);
+            })
+
+           //
         }
 
 
