@@ -1,6 +1,6 @@
 
 angular.module("sampleApp")
-    .controller('workflowCtrl',
+    .controller('orionCtrl',
         function ($scope,$http,modalService,resourceCreatorSvc,builderSvc,$timeout) {
 
             $scope.nhi="WER4568";

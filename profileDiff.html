@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <base href="/" />
+    <meta charset="UTF-8">
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+        angular.module("sampleApp").constant("moment", moment);
+
+    </script>
+
+    <script src="js/appConfigSvc.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/libs/jstree.min.js"></script>
+    <script src="js/profileDiffCtl.js"></script>
+    <script src="js/modalDialogSvc.js"></script>
+    <script src="js/resourceCreatorSvc.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
+
+    <script src="js/profileCreatorSvc.js"></script>
+    <script src="js/resourceSvc.js"></script>
+    <script src="js/builderSvc.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/filters.js"></script>
+
+    <script src="js/profileDiffSvc.js"></script>
+
+    <!--
+
+
+  <script src="js/appConfigSvc.js"></script>
+  <script src="js/libs/ngStorage.min.js"></script>
+  <script src="resourceBuilder/rbServices.js"></script>
+  <script src="js/components/dataTypes.js"></script>
+
+  <script src="js/services.js"></script>
+
+  <script src="js/filters.js"></script>
+  <script src="js/documentBuilder.js"></script>
+  <script src="resourceBuilder/rbServices.js"></script>
+  <script src="js/reporterCtrl.js"></script>
+
+  <script src="js/libs/ngStorage.min.js"></script>
+
+
+
+  <script src="js/profileCreatorSvc.js"></script>
+  -->
+
+
+    <style>
+        .myScroll {
+            height: 800px;
+            overflow-y: scroll;
+        }
+        .myRequired {
+            color:red;
+            background-color:  mistyrose;
+        }
+        .extension {
+            color:blue;
+            background-color: powderblue;
+        }
+
+
+    </style>
+        <title>Profile Diff</title>
+
+</head>
+
+
+<body style="padding: 8px" >
+
+<div ng-app="sampleApp" ng-controller="profileDiffCtrl" class="container-fluid">
+
+
+    <div class="row">
+        <div class="col-sm-2 col-md-2">
+            Profile set to display:
+        </div>
+        <div class="col-sm-3 col-md-3">
+            <select class="form-control" ng-model = 'pr' ng-options="pair.name for pair in pairs" ng-change="loadPair(pr.name)">
+
+            </select>
+        </div>
+        <div class="col-sm-6 col-md-6">
+        </div>
+    </div>
+    <hr/>
+    <uib-tabset>
+        <uib-tab heading="Profiles">
+            <div class="row">
+                <div class="col-sm-6 col-md-6">
+                    <h3>Primary profile ({{primary.display}})</h3>
+                    <uib-tabset>
+
+                        <uib-tab heading="Model">
+                            <div class="myScroll">
+                                <table class="table">
+                                    <tr ng-repeat="item in primary.cannonical.item"
+                                        ng-class="{myRequired:item.min==1,extension:item.extension}">
+                                        <td  ng-click="showED(item.ed)" style="cursor: pointer">{{item.path}}</td>
+                                        <td>{{item.min}}..{{item.max}}</td>
+                                        <td>
+                                            <div ng-repeat="typ in item.type">
+                                                {{typ.code}}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>{{item.extension.name}}</div>
+                                            <div>{{item.extension.url}}</div>
+
+                                            <div ng-show="item.coded.valueSetUri">Uri: {{item.coded.valueSetUri}}</div>
+                                            <div ng-show="item.coded.valueSetReference">Ref: {{item.coded.valueSetReference}}</div>
+                                            <div>{{item.coded.strength}}</div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                        </uib-tab>
+                        <uib-tab heading="Json">
+                            <pre>{{primary.json | json}}</pre>
+                        </uib-tab>
+                    </uib-tabset>
+
+                </div>
+                <div class="col-sm-6 col-md-6">
+                    <h3>Secondary profile ({{secondary.display}})</h3>
+                    <uib-tabset>
+
+                        <uib-tab heading="Model">
+
+                            <div class="myScroll">
+                                <table class="table">
+                                    <tr ng-repeat="item in secondary.cannonical.item "
+                                    ng-class="{myRequired:item.min==1,extension:item.extension}" >
+                                        <td  style="cursor: pointer" ng-click="showED(item.ed)">{{item.path}}</td>
+                                        <td>{{item.min}}..{{item.max}}</td>
+                                        <td>
+                                            <div ng-repeat="typ in item.type">
+                                                {{typ.code}}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>{{item.extension.name}}</div>
+                                            <div>{{item.extension.url}}</div>
+
+                                            <div ng-show="item.coded.valueSetUri">Uri: {{item.coded.valueSetUri}}</div>
+                                            <div ng-show="item.coded.valueSetReference">Ref: {{item.coded.valueSetReference}}</div>
+                                            <div>{{item.coded.strength}}</div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+
+
+                        </uib-tab>
+                        <uib-tab heading="Json">
+                            <pre>{{secondary.json | json}}</pre>
+                        </uib-tab>
+                    </uib-tabset>
+                </div>
+            </div>
+
+
+        </uib-tab>
+        <uib-tab heading="Report">
+
+        </uib-tab>
+    </uib-tabset>
+
+
+</div>
+</body>
+</html>

@@ -1589,7 +1589,8 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editLogicalItem.html',
                     size: 'lg',
-                    controller: function($scope,allDataTypes,editNode,parentPath,findNodeWithPath,rootForDataType,igSvc,references,baseType){
+                    controller: function($scope,allDataTypes,editNode,parentPath,RenderProfileSvc,
+                                         findNodeWithPath,rootForDataType,igSvc,references,baseType){
                         $scope.references = references;
                         console.log(references);
                         $scope.rootForDataType = rootForDataType;
@@ -1599,6 +1600,12 @@ angular.module("sampleApp")
                         $scope.pathDescription = 'Parent path';
                         $scope.vsInGuide = igSvc.getResourcesInGuide('valueSet');       //so we can show the list of ValueSets in the IG
                         $scope.input = {};
+
+                        RenderProfileSvc.getAllStandardResourceTypes().then(
+                            function(data){
+                                $scope.allResourceTypes = data;
+                            });
+
 
                         for (var i=0; i< $scope.allDataTypes.length; i++) {
                             if ($scope.allDataTypes[i].code == 'string') {
@@ -1846,7 +1853,8 @@ angular.module("sampleApp")
 
                         $scope.checkName = function(){
                             $scope.canSave = true;
-                            if (! $scope.input.name || $scope.input.name.indexOf('0') > -1) {
+                            if (! $scope.input.name) {
+                            //if (! $scope.input.name || $scope.input.name.indexOf('0') > -1) { ????? why look for 0 ???
                                 $scope.canSave = false;
                                 modalService.showModal({},{bodyText:"The name cannot have spaces in it. Try again."})
                             }

@@ -76,10 +76,40 @@
                     <div class="col-md-4 col-sm-4">
                         <div ng-show="dt.code=='Reference'">
                             <div><label>Reference</label></div>
-                            <select  class="form-control" ng-model="input.referenceFromIg"
-                                     ng-options="entry.resource.name for entry in references.entry">
+<!--
+                            <div class="row">
+                                <div class="col-sm-6 col-md-6">
+                                    <input type="radio" name="referenceType" n
+                                </div>
+                                <div class="col-sm-6 col-md-6">
 
-                            </select>
+                                </div>
+                            </div>
+
+
+
+                            <div class="btn-group pull-right">
+                                <label class="btn btn-link" ng-model="checkModel.left" uib-btn-radio>Left</label>
+                                <label class="btn btn-link" ng-model="checkModel.middle" uib-btn-radio>Middle</label>
+                                <label class="btn btn-link" ng-model="checkModel.right" uib-btn-radio>Right</label>
+                            </div>-->
+
+                            <uib-tabset>
+                                <uib-tab heading="Logical Models">
+                                    <select  class="form-control" ng-model="input.referenceFromIg"
+                                             ng-options="entry.resource.name for entry in references.entry">
+
+                                    </select>
+                                </uib-tab>
+                                <uib-tab heading="Core Types">
+                                    <select  class="form-control" ng-model="input.referenceToCoreFromIg"
+                                             ng-options="item.name for item in allResourceTypes">
+
+                                    </select>
+                                </uib-tab>
+                            </uib-tabset>
+
+
                         </div>
 
                         <div ng-show="isCoded">
@@ -97,7 +127,7 @@
                     </div>
 
                 </div>
-                </div>
+            </div>
 
 
 
