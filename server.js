@@ -148,7 +148,10 @@ app.get('/orion/:nhi',function(req,res){
     var nhi = req.params['nhi'];
 
     //var url = "https://frontend1.solution-nzmoh-dataset-leahr-graviton-jump-host-auckland.graviton.odl.io/fhir/1.0/MedicationDispense?patient.identifier=SYS_A|"+nhi
-    var url = "https://35.162.186.149/fhir/1.0/MedicationDispense?patient.identifier=SYS_A|"+nhi
+    //var url = "https://52.41.169.101/fhir/1.0/MedicationDispense?patient.identifier=SYS_A|"+nhi
+
+
+    var url = "http://fhir.hl7.org.nz/baseDstu2/MedicationDispense?patient.identifier="+nhi
 
 
     if (nhi) {

@@ -6,6 +6,8 @@ angular.module("sampleApp").service('profileDiffSvc',
     return {
         makeCanonicalObj : function(SD) {
             if (SD && SD.snapshot && SD.snapshot.element) {
+                var hashPath = {}
+                var newSD = {snapshot: {element:[]}}        //a new SD that removes the excluded elements (max=0)
                 var canonical = {item:[]}      //the canonical object...
                 var excludeRoots = []           //roots which have been excluded...
                 SD.snapshot.element.forEach(function(ed){
@@ -80,11 +82,22 @@ angular.module("sampleApp").service('profileDiffSvc',
                     }
                     if (include) {
                         canonical.item.push(item)
+
+                        //check for a dusplaicate path
+                        var p = ed.path;
+                        if (hashPath[p]) {
+                            hashPath[p] ++;
+                            ed.path = ed.path + '_'+hashPath[p];
+
+                        } else {
+                            hashPath[p] = 1;
+                        }
+                        newSD.snapshot.element.push(ed);
                     }
 
 
                 });
-                return canonical;
+                return {canonical:canonical, SD : newSD};
             }
 
         },

@@ -1,21 +1,31 @@
 
 angular.module("sampleApp")
     .controller('profileDiffCtrl',
-        function ($scope,$q,$http,profileDiffSvc,$uibModal) {
+        function ($scope,$q,$http,profileDiffSvc,$uibModal,logicalModelSvc) {
 
 
 
 
             $scope.pairs = []      //the pairs of profiles to compare. move to a file...
-            $scope.pairs.push({name:"Patient",
+            $scope.pairs.push({name:"Argonaut Patient",
                 primary:{display:"Orion Patient",url:"http://fhir.hl7.org.nz/baseDstu2/StructureDefinition/OhPatient-cf-profile"}
                 ,secondary:{display:"Argonaut Patient",url:"http://fhir.hl7.org.nz/dstu2/StructureDefinition/argo-patient"}})
 
 
-            $scope.pairs.push({name:"Allergy",
+            $scope.pairs.push({name:"Argonaut Allergy",
                 primary:{display:"Orion Allergy",url:"http://fhir.hl7.org.nz/baseDstu2/StructureDefinition/OhAllergy-cf-profile"}
                 ,secondary:{display:"Argonaut Allergy",url:"http://fhir.hl7.org.nz/dstu2/StructureDefinition/argo-allergyintolerance"}})
 
+            //https://github.com/INTEROPen/CareConnect-profiles/tree/feature/initial_clinical_resources
+
+
+            $scope.pairs.push({name:"Interopen Patient",
+                primary:{display:"Orion Patient",url:"http://fhir.hl7.org.nz/baseDstu2/StructureDefinition/OhPatient-cf-profile"}
+                ,secondary:{display:"Interopen Patient",url:"http://fhir.hl7.org.nz/dstu2/StructureDefinition/ccPatient"}})
+
+            $scope.pairs.push({name:"Interopen Allergy",
+                primary:{display:"Orion Allergy",url:"http://fhir.hl7.org.nz/baseDstu2/StructureDefinition/OhAllergy-cf-profile"}
+                ,secondary:{display:"Interopen Allergy",url:"http://fhir.hl7.org.nz/dstu2/StructureDefinition/ccAllergy"}})
 
 
             $scope.showED = function(ed) {
@@ -48,30 +58,6 @@ angular.module("sampleApp")
 
             }
 
-/*
-            //load all the current tasks on the data server
-            var qry = "http://fhir.hl7.org.nz/baseDstu2/StructureDefinition/OhPatient-cf-profile";
-            $http.get(qry).then(
-                function(data){
-                    console.log(data)
-                    $scope.primary = {json: data.data};
-                    $scope.primary.canonical = profileDiffSvc.makeCanonicalObj($scope.primary.json)
-                    $scope.primary.display = "Orion Patient"
-                    console.log($scope.primary)
-                }
-            );
-
-            var qry = "http://fhir.hl7.org.nz/dstu2/StructureDefinition/argo-patient";
-            $http.get(qry).then(
-                function(data){
-                    console.log(data)
-                    $scope.secondary = {json:data.data};
-                    $scope.secondary.canonical = profileDiffSvc.makeCanonicalObj($scope.secondary.json)
-                    $scope.secondary.display = "Argonaut Patient"
-                }
-            )
-
-            */
 
         function loadPair(pair) {
             //load all the current tasks on the data server
@@ -82,7 +68,8 @@ angular.module("sampleApp")
                 function(data){
                    // console.log(data)
                     $scope.primary = {json: data.data};
-                    $scope.primary.canonical = profileDiffSvc.makeCanonicalObj($scope.primary.json)
+                    var vo = profileDiffSvc.makeCanonicalObj($scope.primary.json);
+                    $scope.primary.canonical = vo.canonical;// profileDiffSvc.makeCanonicalObj($scope.primary.json)
                     $scope.primary.display = pair.primary.display;
                     //console.log($scope.primary)
                 })
@@ -93,8 +80,18 @@ angular.module("sampleApp")
                 function(data){
                     //console.log(data)
                     $scope.secondary = {json:data.data};
-                    $scope.secondary.canonical = profileDiffSvc.makeCanonicalObj($scope.secondary.json)
+                    var vo = profileDiffSvc.makeCanonicalObj($scope.secondary.json);
+                    $scope.secondary.canonical = vo.canonical
                     $scope.secondary.display = pair.secondary.display;
+
+
+                    var secTreeData = logicalModelSvc.createTreeArrayFromSD(vo.SD)
+                    $('#pdSecondary').jstree('destroy');
+                    $('#pdSecondary').jstree(
+                        {'core': {'multiple': false, 'data': secTreeData, 'themes': {name: 'proton', responsive: true}}}
+                    )
+
+
                 }
             ))
 

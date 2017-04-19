@@ -2399,9 +2399,6 @@ angular.module("sampleApp")
             function drawTree() {
 
 
-
-
-
                 $('#lmTreeView').jstree('destroy');
                 $('#lmTreeView').jstree(
                     {'core': {'multiple': false, 'data': $scope.treeData, 'themes': {name: 'proton', responsive: true}}}
