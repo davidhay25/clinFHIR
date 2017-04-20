@@ -1284,7 +1284,10 @@ angular.module("sampleApp")
                         ed.mapping =  [];
 
                         data.mappingFromED.forEach(function(map){
-                            ed.mapping.push({identity:map.identity, map: map.map});
+                            if (map.map) {
+                                ed.mapping.push({identity:map.identity, map: map.map});
+                            }
+
                         })
                     }
 

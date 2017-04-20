@@ -245,12 +245,12 @@
                                 <input type="text" class="form-control" ng-model="input.mappingPathV2"/>
                             </uib-tab>
 
-                            <uib-tab heading="All">
+                            <uib-tab heading="Others">
                                 <br/>
 
-                                <div class="row" ng-repeat="map in input.mappingFromED">
+                                <div class="row" ng-repeat="map in input.mappingFromED" ng-hide="map.identity=='fhir' || map.identity=='hl7V2'">
                                     <div class="col-sm-3">{{map.identity}}</div>
-                                    <div class="col-sm-8"><input type="text" class="form-control" ng-model="map.identity"/></div>
+                                    <div class="col-sm-8"><input type="text" class="form-control" ng-model="map.map"/></div>
                                     <div class="col-sm-1" ng-click="removeMap($index)">
                                         <i class="clickable glyphicon glyphicon-minus-sign"></i></div>
                                 </div>

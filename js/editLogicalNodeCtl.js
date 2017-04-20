@@ -2,7 +2,7 @@
 angular.module("sampleApp")
     .controller('editLogicalNodeCtrl',
         function ($scope,allDataTypes,editNode,parentPath,RenderProfileSvc,
-                  findNodeWithPath,rootForDataType,igSvc,references,baseType,$uibModal, logicalModelSvc) {
+                  findNodeWithPath,rootForDataType,igSvc,references,baseType,$uibModal, logicalModelSvc, modalService) {
 
 
                 $scope.references = references;
@@ -307,9 +307,10 @@ angular.module("sampleApp")
                     vo.description = $scope.input.description || 'definition';
                     vo.comments = $scope.input.comments;
                     vo.mapping = $scope.input.mapping;
-                    vo.mappingPath = $scope.input.mappingPath;      //this is the FHIR path
 
+                    vo.mappingPath = $scope.input.mappingPath;      //this is the FHIR path
                     vo.mappingFromED = $scope.input.mappingFromED;      //all mappings
+                    vo.mappingPathV2 = $scope.input.mappingPathV2;
 
 
                     //if mapping to an extension, the include the oath to the extension
@@ -317,7 +318,10 @@ angular.module("sampleApp")
                         vo.fhirMappingExtensionUrl = $scope.input.fhirMappingExtensionUrl
                     }
 
-                    vo.mappingPathV2 = $scope.input.mappingPathV2;
+                    //make sure the v2 & fhir mappings align with the
+                    alignMap('hl7V2',vo.mappingPathV2,vo.mappingFromED)
+                    alignMap('fhir',vo.mappingPath,vo.mappingFromED)
+
                     vo.type = [{code:$scope.input.dataType.code}];
                     vo.editNode = editNode;
                     vo.parentPath = parentPath;
@@ -354,8 +358,6 @@ angular.module("sampleApp")
 
                     }
 
-
-
                     switch ($scope.input.multiplicity) {
                         case 'mult' :
                             vo.min =0; vo.max='*';
@@ -375,6 +377,33 @@ angular.module("sampleApp")
 
                     $scope.$close(vo);
                 };
+
+
+                //make sure the values in the array are the
+                function alignMap(identity,value,ar) {
+                    if (ar) {
+                        var aligned = false;
+                        for (var i=0;i<ar.length;i++) {
+                            var map = ar[i]
+                            if (map.identity == identity) {
+                                // this is the correct entry
+                                if (value) {
+                                    map.map = value;    //change the value
+                                } else {
+                                    ar.splice(i,1)      //no value - remove from map
+                                }
+                                aligned = true;
+                                break;
+
+                            }
+                        }
+                        if (! aligned) {
+                            //if here, there is no value for 'identity' in the ar
+                            ar.push(({identity:identity,map:value}))
+                        }
+
+                    }
+                }
 
                 $scope.setDataType = function(dt) {
                     $scope.dt = dt;
