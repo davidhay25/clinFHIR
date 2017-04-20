@@ -492,21 +492,45 @@ angular.module("sampleApp")
             };
 
             $scope.selectFromPalette = function(item) {
-                var url = appConfigSvc.getCurrentConformanceServer().url+item.reference;
-                $scope.showWaiting = true;
-                GetDataFromServer.adHocFHIRQuery(url).then(
-                    function(data){
-                        console.log(data)
-                        selectEntry({resource:data.data})
-                    }, function(err) {
-                        alert('error getting model '+angular.toJson(err));
-                    }
-                ).finally(
-                    function(){
-                        $scope.showWaiting = false;
-                    }
-                );
-                console.log(item)
+
+
+
+                if ($scope.isDirty) {
+                    var modalOptions = {
+                        closeButtonText: "No, don't lose changes",
+                        actionButtonText: 'Yes, select this model, abandoning changes to the old',
+                        headerText: 'Load model',
+                        bodyText: 'You have updated this model. Selecting another one will lose those changes.'
+                    };
+
+                    modalService.showModal({}, modalOptions).then(
+                        function (result) {
+                            selectFromPalette(item)
+                        }
+                    );
+                } else {
+                    selectFromPalette(item)
+                }
+
+
+                function selectFromPalette(item) {
+                    var url = appConfigSvc.getCurrentConformanceServer().url+item.reference;
+                    $scope.showWaiting = true;
+                    GetDataFromServer.adHocFHIRQuery(url).then(
+                        function(data){
+                            console.log(data)
+                            selectEntry({resource:data.data})
+                        }, function(err) {
+                            alert('error getting model '+angular.toJson(err));
+                        }
+                    ).finally(
+                        function(){
+                            $scope.showWaiting = false;
+                        }
+                    );
+                    console.log(item)
+                }
+
             };
 
             //add the current model to the current users palette of models

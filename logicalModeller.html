@@ -629,6 +629,19 @@
                                 <tr><td width="20%">Model path</td><td>{{selectedNode.data.path}}</td></tr>
                                 <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
                                 <tr><td>Description</td><td>{{selectedNode.data.description}}</td></tr>
+
+                                <tr><td>Mapping</td><td>
+                                    <table class="table table-condensed table-bordered">
+                                        <tr ng-repeat="map in selectedNode.data.mappingFromED">
+                                            <td>{{map.identity}}</td>
+                                            <td>{{map.map}}</td>
+                                        </tr>
+                                    </table>
+                                    <!--{{selectedNode.data.mappingFromED}}-->
+                                    <div ng-show="selectedNode.data.mapping"><em>{{selectedNode.data.mapping}}</em></div>
+                                </td></tr>
+
+<!--
                                 <tr><td>Mapping</td>
                                     <td>
                                         <div ng-show="selectedNode.data.mappingPath">FHIR: {{selectedNode.data.mappingPath}}</div>
@@ -637,6 +650,7 @@
 
                                     </td>
                                 </tr>
+                                -->
 
                                 <tr ng-show="selectedNode.data.fhirMappingExtensionUrl"><td>Extension Url</td>
                                     <td>
@@ -644,16 +658,6 @@
                                     </td>
                                 </tr>
 
-                                <tr><td></td><td>
-                                    <table class="table table-condensed table-bordered">
-                                        <tr ng-repeat="map in selectedNode.data.mappingFromED">
-                                            <td>{{map.identity}}</td>
-                                            <td>{{map.map}}</td>
-                                        </tr>
-                                    </table>
-                                    <!--{{selectedNode.data.mappingFromED}}-->
-
-                                </td></tr>
 
 
                                 <tr><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>
