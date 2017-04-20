@@ -485,8 +485,8 @@
                                         {{map.identity}}
                                     </td>
                                     <td>{{map.map}}</td>
-                                    <td class="clickable" ng-click="selectNodeFromTable(treeData[0].id + '.'+map.name)">
-                                        {{treeData[0].data.header.baseType}}.{{map.name}}</td>
+                                    <td class="clickable" ng-click="selectNodeFromTable(map.path)">
+                                       {{map.name}}</td>
                                 </tr>
                             </table>
 

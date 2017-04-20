@@ -1369,6 +1369,7 @@ angular.module("sampleApp")
 
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
+                var baseType = $scope.treeData[0].data.header.baseType
 
                 //find all the mapping identities that have been used..
                 $scope.allMappingIdentities = [];
@@ -1378,7 +1379,10 @@ angular.module("sampleApp")
                         item.data.mappingFromED.forEach(function (map) {
 
 
-                            $scope.allMappings.push({identity:map.identity,map:map.map, name:item.data.name})
+                            //$scope.allMappings.push({identity:map.identity,map:map.map, name:item.data.name})
+                            var ar = item.data.path.split('.');
+                            ar.splice(0,1)  //strip off the f
+                            $scope.allMappings.push({identity:map.identity,map:map.map, path:item.data.path, name:ar.join('.')})
 
                             if ($scope.allMappingIdentities.indexOf(map.identity)==-1){
                                 $scope.allMappingIdentities.push(map.identity)
@@ -1629,8 +1633,14 @@ angular.module("sampleApp")
 
             $scope.editNode = function() {
 
+               // var ar = $scope.selectedNode.data.path.split('.');
+               // ar.pop();
+               // var parentPath = ar.join('.');
 
                 var parentPath = $scope.selectedNode.data.path;
+
+
+
 
 
                 editNode($scope.selectedNode,parentPath);         //will edit the node

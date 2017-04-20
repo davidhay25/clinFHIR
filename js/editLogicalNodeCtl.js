@@ -272,33 +272,69 @@ angular.module("sampleApp")
                     if (! $scope.input.name) {
                         //if (! $scope.input.name || $scope.input.name.indexOf('0') > -1) { ????? why look for 0 ???
                         $scope.canSave = false;
-                        modalService.showModal({},{bodyText:"The name cannot have spaces in it. Try again."})
+                       // modalService.showModal({},{bodyText:"The name cannot have spaces in it. Try again."})
+                        modalService.showModal({},{bodyText:"The name cannot be blank. Try again."})
                     }
 
+
+                    //for now, only do duplicate checking for adding new nodes - not renaming - todo
+
+                    if (! editNode) {
+                        var pathForThisElement = parentPath + '.'+$scope.input.name;
+
+                        var duplicateNode = findNodeWithPath(pathForThisElement)
+                        if (duplicateNode) {
+                            $scope.canSave = false;
+                            modalService.showModal({},{bodyText:"This name is a duplicate of another and cannot be used. Try again."})
+                        }
+
+
+
+                        if ($scope.canSave) {
+                            //set the short element to the same as the name
+                            $scope.input.short = $scope.input.name;
+                        }
+
+                    }
+                    /*
+
+                    //work out the path for the element...
                     var pathForThisElement = parentPath + '.'+$scope.input.name;
+                    if (editNode) {
+                        //if editing, thne the 'parentPath' is actually the path...
+                        var ar = parentPath.split('.')
+                        ar.pop();
+                        pathForThisElement = ar.join('.')+ '.'+$scope.input.name;
+                    }
+
+
+
                     var duplicateNode = findNodeWithPath(pathForThisElement)
                     if (duplicateNode) {
                         $scope.canSave = false;
                         modalService.showModal({},{bodyText:"This name is a duplicate of another and cannot be used. Try again."})
                     }
 
+
+
                     if ($scope.canSave) {
                         //set the short element to the same as the name
                         $scope.input.short = $scope.input.name;
                     }
+                    */
                 };
 
 
                 $scope.removeMap = function(inx) {
                     $scope.input.mappingFromED.splice(inx,1)
-                }
+                };
 
                 $scope.addNewMap = function(identity,map) {
                     $scope.input.mappingFromED.push({identity:identity,map:map})
                     delete $scope.input.newMapIdentity;
                     delete $scope.input.newMapValue;
 
-                }
+                };
 
                 $scope.save = function() {
                     var vo = {};
@@ -311,7 +347,6 @@ angular.module("sampleApp")
                     vo.mappingPath = $scope.input.mappingPath;      //this is the FHIR path
                     vo.mappingFromED = $scope.input.mappingFromED;      //all mappings
                     vo.mappingPathV2 = $scope.input.mappingPathV2;
-
 
                     //if mapping to an extension, the include the oath to the extension
                     if (vo.mappingPath && vo.mappingPath.indexOf('xtension') > -1) {
@@ -338,7 +373,6 @@ angular.module("sampleApp")
                         vo.referenceUri = $scope.input.mapToModelEnt.resource.url; // for the reference table...
                         vo.mapToModelUrl = $scope.input.mapToModelEnt.resource.url;        //this is the actual model being references
                     }
-
 
                     //for a reference type...
                     if ($scope.input.dataType.code == 'Reference') {
@@ -373,13 +407,13 @@ angular.module("sampleApp")
                             break;
                     }
 
-                    //input.referenceFromIg
+
 
                     $scope.$close(vo);
                 };
 
 
-                //make sure the values in the array are the
+                //make sure the values in the array are the the same for fhir & hl7v2
                 function alignMap(identity,value,ar) {
                     if (ar) {
                         var aligned = false;
