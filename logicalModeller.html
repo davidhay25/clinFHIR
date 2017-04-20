@@ -80,6 +80,7 @@
     <script src="resourceBuilder/selectProfile.js"></script>
     <script src="js/setServers.js"></script>
     <script src="js/securitySvc.js"></script>
+    <script src="js/editLogicalNodeCtl.js"></script>
     <script src="js/components/extensionDirective.js"></script>
 
     <script>
@@ -415,10 +416,8 @@
                                     <td>{{ed.min}}..{{ed.max}}</td>
                                     <td>{{ed.definition}}</td>
                                     <td>
-                                        <div ng-repeat="map in ed.mapping">{{map.map}}</div>
 
-
-
+                                        <div ng-repeat="map in ed.mapping">{{map.identity}}:{{map.map}}</div>
                                         <div ng-repeat="ext in ed.mapping[0].extension">
                                             <em>
                                             {{ext.valueString}}
@@ -469,6 +468,26 @@
 
                         </uib-tab>
 
+
+                        <uib-tab heading="Mappings by Identity">
+                            <br/>
+                            <div class="btn-group">
+                                <label ng-repeat="identity in allMappingIdentities"
+                                       class="btn btn-default" ng-model='input.mi' uib-btn-radio="identity">
+                                    {{identity}}
+                                </label>
+                            </div>
+                            <br/> <br/>
+                            <table class="table table-condensed table-bordered">
+                                <tr><th>Identity</th><th>Map</th><th>Path</th></tr>
+                                <tr ng-repeat="map in allMappings" ng-show="map.identity == input.mi">
+                                    <td>{{map.identity}}</td>
+                                    <td>{{map.map}}</td>
+                                    <td>{{map.name}}</td>
+                                </tr>
+                            </table>
+
+                        </uib-tab>
 
                     </uib-tabset>
 
@@ -622,6 +641,16 @@
                                     </td>
                                 </tr>
 
+                                <tr><td></td><td>
+                                    <table class="table table-condensed table-bordered">
+                                        <tr ng-repeat="map in selectedNode.data.mappingFromED">
+                                            <td>{{map.identity}}</td>
+                                            <td>{{map.map}}</td>
+                                        </tr>
+                                    </table>
+                                    <!--{{selectedNode.data.mappingFromED}}-->
+
+                                </td></tr>
 
 
                                 <tr><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>

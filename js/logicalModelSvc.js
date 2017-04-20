@@ -1101,6 +1101,8 @@ angular.module("sampleApp")
                         if (ed.mapping) {           //the mapping path in the target resource...
 
 
+                            item.data.mappingFromED = ed.mapping;       //save all the mappings in an array...
+
                             //tofo get the extension, always on the first - I'm not sure this is correvt
                             if (ed.mapping[0]) {
                                 //there are extensions on this item - find the comment...
@@ -1120,6 +1122,7 @@ angular.module("sampleApp")
                             }
 
 
+                            //the 'named' maps...
                             ed.mapping.forEach(function(mapItem){
 
                                 switch (mapItem.identity) {
@@ -1264,16 +1267,26 @@ angular.module("sampleApp")
                     ed.min = data.min;
                     ed.max = data.max;
                     ed.comments = data.comments;
+
+
                     if (data.mappingPath) {         //the actual path in the target resource
                         ed.mapping = [{identity: 'fhir', map: data.mappingPath}]
                     }
 
+/*
                     if (data.mappingPathV2) {         //the actual path in the target resource
                         ed.mapping = ed.mapping || [];
                         ed.mapping.push({identity: 'hl7V2', map: data.mappingPathV2});
                     }
 
+*/
+                    if (data.mappingFromED && data.mappingFromED) {
+                        ed.mapping =  [];
 
+                        data.mappingFromED.forEach(function(map){
+                            ed.mapping.push({identity:map.identity, map: map.map});
+                        })
+                    }
 
 
                     if (data.mapping) {
