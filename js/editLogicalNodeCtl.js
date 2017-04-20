@@ -2,7 +2,7 @@
 angular.module("sampleApp")
     .controller('editLogicalNodeCtrl',
         function ($scope,allDataTypes,editNode,parentPath,RenderProfileSvc,
-                  findNodeWithPath,rootForDataType,igSvc,references,baseType,logicalModelSvc) {
+                  findNodeWithPath,rootForDataType,igSvc,references,baseType,$uibModal, logicalModelSvc) {
 
 
                 $scope.references = references;

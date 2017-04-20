@@ -941,8 +941,10 @@ angular.module("sampleApp")
             };
 
             $scope.selectNodeFromTable = function(path) {
+                //alert(path)
                 //to allow the details of a selected node in the table to be displayed...
                 $scope.selectedNode = findNodeWithPath(path);
+                //console.log($scope.selectedNode)
             };
 
             //revert to a previous version

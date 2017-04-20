@@ -481,9 +481,12 @@
                             <table class="table table-condensed table-bordered">
                                 <tr><th>Identity</th><th>Map</th><th>Path</th></tr>
                                 <tr ng-repeat="map in allMappings" ng-show="map.identity == input.mi">
-                                    <td>{{map.identity}}</td>
+                                    <td>
+                                        {{map.identity}}
+                                    </td>
                                     <td>{{map.map}}</td>
-                                    <td>{{map.name}}</td>
+                                    <td class="clickable" ng-click="selectNodeFromTable(treeData[0].id + '.'+map.name)">
+                                        {{treeData[0].data.header.baseType}}.{{map.name}}</td>
                                 </tr>
                             </table>
 
