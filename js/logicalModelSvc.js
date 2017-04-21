@@ -617,12 +617,14 @@ angular.module("sampleApp")
             },
 
             getModelFromBundle: function (bundle, url) {
-                for (var i = 0; i < bundle.entry.length; i++) {
+                if (bundle) {
+                    for (var i = 0; i < bundle.entry.length; i++) {
                     var resource = bundle.entry[i].resource;
                     if (resource.url == url) {
                         return resource
                         break;
                     }
+                }
                 }
             },
 
@@ -1103,13 +1105,34 @@ angular.module("sampleApp")
 
                             item.data.mappingFromED = ed.mapping;       //save all the mappings in an array...
 
+                            //this is a horrible hack to cover the fact that hapi doesn't yet support the final R3...
+                            item.data.mappingFromED.forEach(function(map){
+                                var value = map.map;    //the mapping
+                                var g = value.indexOf('|')
+                                if (g > -1) {
+                                    map.comment = value.substr(g+1);
+                                    map.map = value.substr(0,g);
+                                }
+                            });
+
                             //tofo get the extension, always on the first - I'm not sure this is correvt
                             if (ed.mapping[0]) {
                                 //there are extensions on this item - find the comment...
                                 var ext = Utilities.getSingleExtensionValue(ed.mapping[0], mappingCommentUrl)
                                 if (ext && ext.valueString) {
                                     item.data.mapping = ext.valueString;
+
+                                    //a temporary function to map across comments from the previous version (saved as an extension)
+                                    if (! item.data.mappingFromED[0].comment) {
+                                        item.data.mappingFromED[0].comment = ext.valueString;
+                                    }
+
+
                                 }
+
+
+
+
 
                                 var ext1 = Utilities.getSingleExtensionValue(ed.mapping[0], mapToModelExtensionUrl)
                                 if (ext1 && ext1.valueUri) {
@@ -1121,7 +1144,7 @@ angular.module("sampleApp")
 
                             }
 
-
+/*
                             //the 'named' maps...
                             ed.mapping.forEach(function(mapItem){
 
@@ -1140,6 +1163,8 @@ angular.module("sampleApp")
 
 
                             })
+
+                            */
 
 
 
@@ -1177,10 +1202,10 @@ angular.module("sampleApp")
                 }
                 return arTree;
             },
-            makeSD: function (scope, treeData) {     //todo - don't pass in scope...
-                //create a StructureDefinition from the treeData
+            makeSD: function (scope, treeData) {
+                //create a StructureDefinition from the treeData //todo - don't pass in scope...
                 var header = treeData[0].data.header || {};     //the first node has the header informatiion
-                //console.log(header)
+
                 var mappingCommentUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
                 var mapToModelExtensionUrl = appConfigSvc.config().standardExtensionUrl.mapToModel;
                 var baseTypeForModelUrl = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
@@ -1269,9 +1294,9 @@ angular.module("sampleApp")
                     ed.comments = data.comments;
 
 
-                    if (data.mappingPath) {         //the actual path in the target resource
-                        ed.mapping = [{identity: 'fhir', map: data.mappingPath}]
-                    }
+                  //  if (data.mappingPath) {         //the actual path in the target resource
+                        //ed.mapping = [{identity: 'fhir', map: data.mappingPath}]
+                    //}
 
 /*
                     if (data.mappingPathV2) {         //the actual path in the target resource
@@ -1280,17 +1305,21 @@ angular.module("sampleApp")
                     }
 
 */
-                    if (data.mappingFromED && data.mappingFromED) {
+                    if (data.mappingFromED ) {
                         ed.mapping =  [];
 
                         data.mappingFromED.forEach(function(map){
                             if (map.map) {
-                                ed.mapping.push({identity:map.identity, map: map.map});
+                                map.comment = map.comment || "";
+                                //a horrible hack as hapi doesn't yet support comments
+                                var ar = map.map.split('|')
+                                map.map = ar[0]+ "|"+map.comment;
+                                ed.mapping.push({identity:map.identity, map: map.map, comment: map.comment});
                             }
 
                         })
                     }
-
+/* - temp - need to migrate...
 
                     if (data.mapping) {
                         //comments about the mapping - added as an extension to the first mapping node mapping
@@ -1309,7 +1338,7 @@ angular.module("sampleApp")
                         ed.mapping[0] = mappingNode;
                     }
 
-
+*/
 
 
                     //todo - not sure about this..

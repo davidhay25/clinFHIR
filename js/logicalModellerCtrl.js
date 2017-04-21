@@ -663,10 +663,10 @@ angular.module("sampleApp")
                     var series = dataSnapshot.val();
                     if(series){
                         //so there's at least 1 shortcut for a model with this id, now check the server
-                        console.log("Found", series);
+                       // console.log("Found", series);
 
                         angular.forEach(series,function(v,k){
-                            console.log(k,v)
+                           // console.log(k,v)
                             if (v.config.conformanceServer.url == appConfigSvc.getCurrentConformanceServer().url) {
                                 deferred.resolve(v)
                             }
@@ -1392,7 +1392,7 @@ angular.module("sampleApp")
                 });
 
                 $scope.allMappings.sort(function(a,b){
-                    //console.log(a,b)
+
                     if (a.map > b.map) {
                         return 1
                     } else {
@@ -1400,7 +1400,7 @@ angular.module("sampleApp")
                     }
                 })
 
-                console.log($scope.allMappingIdentities)
+                //console.log($scope.allMappingIdentities)
 
 
                 findShortCutForModel(entry.resource.id).then(

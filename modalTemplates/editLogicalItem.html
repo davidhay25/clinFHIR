@@ -14,7 +14,7 @@
             </div>
             <div class="col-md-3">
                 <div class="pull-right">
-                    <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+                    <button class="btn btn-link" ng-click="cancel()">Cancel</button>
                     <button class="btn btn-success" ng-show="canSave" ng-click="save()">Save</button>
                 </div>
             </div>
@@ -218,9 +218,10 @@
 
 
                         <uib-tabset>
-                            <uib-tab heading="FHIR">
+                            <uib-tab heading="FHIR" select="setCurrentMap('fhir')">
                                 <br/>
                                 <input type="text" typeahead-on-select="fhirMapping(input.mappingPath)" ng-model="input.mappingPath"
+                                       ng-change="updateCurrentMapValue(input.mappingPath)"
                                        uib-typeahead="path for path in allPaths | filter:$viewValue | limitTo:100" class="form-control"/>
 
                                 <div ng-show="isExtension">
@@ -240,15 +241,18 @@
 
 
                             </uib-tab>
-                            <uib-tab heading="v2">
+                            <uib-tab heading="HL7 v2" select="setCurrentMap('hl7V2')">
                                 <br/>
-                                <input type="text" class="form-control" ng-model="input.mappingPathV2"/>
+                                <input type="text" class="form-control" ng-model="input.mappingPathV2"
+                                       ng-change="updateCurrentMapValue(input.mappingPathV2)"/>
                             </uib-tab>
 
-                            <uib-tab heading="Others">
+                            <uib-tab heading="Others" select = "deleteCurrentMap() ">
                                 <br/>
 
-                                <div class="row" ng-repeat="map in input.mappingFromED" ng-hide="map.identity=='fhir' || map.identity=='hl7V2'">
+                                <div class="row" ng-repeat="map in input.mappingFromED"
+                                    ng-hide="map.identity=='fhir' || map.identity=='hl7V2'"
+                                    ng-click="setCurrentMap(map.identity)">
                                     <div class="col-sm-3">{{map.identity}}</div>
                                     <div class="col-sm-8"><input type="text" class="form-control" ng-model="map.map"/></div>
                                     <div class="col-sm-1" ng-click="removeMap($index)">
@@ -272,9 +276,12 @@
 
 
                     <div class="col-md-6 col-sm-6">
-                        <div><label>Mapping notes</label></div>
-                            <textarea class="form-control" rows="5" ng-model="input.mapping"
+                        <div><label>Mapping notes for {{currentMap.identity}}</label></div>
+                            <textarea class="form-control" rows="5" ng-model="currentMap.comment"
                           placeholder="Describe FHIR mapping. Can also indicate if this element should be bound to a SNOMED term"></textarea>
+
+                        <!--  <textarea class="form-control" rows="5" ng-model="input.mapping"
+                          placeholder="Describe FHIR mapping. Can also indicate if this element should be bound to a SNOMED term"></textarea>-->
                     </div>
                 </div>
 
@@ -294,7 +301,7 @@
         <div class="row">
             <div class="col-md-12 col-sm-12">
                 <strong>{{pathDescription}}:</strong> {{parentPath}}
-
+             
             </div>
 
         </div>

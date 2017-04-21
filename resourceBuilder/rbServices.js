@@ -1779,18 +1779,21 @@ console.log(summary);
         },
         addExtensionOnce : function(resource,url,value) {
             //add the extension with this url if it does not already exist
-            var found = false;
-            resource.extension = resource.extension || []
+            if (resource) {
+                var found = false;
+                resource.extension = resource.extension || []
 
-            resource.extension.forEach(function(ext){
-                if (ext.url == url) {found = true;}
-            });
+                resource.extension.forEach(function(ext){
+                    if (ext.url == url) {found = true;}
+                });
 
-            if (! found) {
-                var ext = {url:url}
-                angular.extend(ext,value);
-                resource.extension.push(ext)
+                if (! found) {
+                    var ext = {url:url}
+                    angular.extend(ext,value);
+                    resource.extension.push(ext)
+                }
             }
+
         },
         getSingleExtensionValue : function(resource,url) {
             //return the value of an extension assuming there is only 1...
