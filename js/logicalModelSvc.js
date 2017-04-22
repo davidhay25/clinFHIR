@@ -122,6 +122,8 @@ angular.module("sampleApp")
                 var arDoc = []
                 var arQueries = [];
 
+
+
                 tree.forEach(function (branch) {
                     var data = branch.data;
 
@@ -138,7 +140,7 @@ angular.module("sampleApp")
                             addTextIfNotEmpty(arDoc,data.header.purpose);
 
                             if (data.header.baseType){
-                                arDoc.push("Base type is " + data.header.baseType);
+                                arDoc.push("**Base type is " + data.header.baseType+"**");
                                 arDoc.push("");
                             }
 
@@ -147,7 +149,7 @@ angular.module("sampleApp")
 
                     } else {
                         //this is an 'ordinary node
-                        ar.splice(0,1);
+                        ar.splice(0,1);     //ar is the path as an array...
 
 
                         var hdr = "## "+ar.join(".")    //the name of the element in the model
@@ -189,15 +191,42 @@ angular.module("sampleApp")
                             if (data.selectedValueSet.strength) {
                                 vs += " ("+data.selectedValueSet.strength + ")"
                             }
+                            vs = "**"+vs+"**";
                             addTextIfNotEmpty(arDoc,vs);
 
                         }
+
+                        //show the fhir mapings
+                        if (data.mappingFromED) {
+                            data.mappingFromED.forEach(function(map){
+                                if (map.identity == 'fhir') {
+                                    //note that this is a bit hacky as the comment element is only in R3...
+                                    arDoc.push("");
+                                    var m = map.map;
+                                    var c = map.comment;
+                                    var ar1 = m.split('|');
+                                    m = ar1[0];
+                                    if (ar1.length > 1 && ! c) {
+                                        c = ar1[1]
+                                    }
+
+                                    m = m.replace('|',"");
+                                    arDoc.push("###FHIR mapping:"+m)
+                                    if (c) {
+                                        arDoc.push(c)
+                                    }
+                                }
+                            })
+
+                        }
+
 
 
                     }
 
                 })
 
+                //note - not using any queries yet - thinking is to support looking up extensions...
                 if (arQueries.length > 0) {
                     $q.all(queries).then(
                         function () {
@@ -313,7 +342,13 @@ angular.module("sampleApp")
                                 ed.mapping.forEach(function (map) {
                                     if (map.identity=='fhir') {
                                         // mappedPath = map;
-                                        newED.path = map.map
+                                        //the hack for the mapping comments
+                                        if (map.map) {
+                                            var ar1 = map.map.split('|');
+
+                                            newED.path = ar1[0];//map.map
+                                        }
+
                                     }
                                 })
                             }

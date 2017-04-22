@@ -35,6 +35,34 @@
             height: 400px;
             border: 1px solid lightgray;
         }
+
+        /* These seem only to apply to the markdown generated html (which is the intention*/
+        h1 {
+
+            font-family: 'Titillium Web', sans-serif, Arial, sans-serif;
+            color:rebeccapurple;
+        }
+
+        h2 {
+            border-top: 1px solid lightgray;
+            margin-left: 8px;
+            font-family: 'Titillium Web', sans-serif, Arial, sans-serif;
+            color: red;
+        }
+
+        h3 {
+            margin-left: 16px;
+            font-family: 'Titillium Web', sans-serif, Arial, sans-serif;
+            color:blue;
+        }
+        p {
+            margin-left: 20px;
+            font-family: 'Titillium Web', sans-serif, Arial, sans-serif;
+            /*color:green;*/
+        }
+
+
+
     </style>
 
     <script>
@@ -577,9 +605,27 @@
                         <button class="btn btn-link " ng-click="updateDoc()">Update</button>
                     </div>
 
-                    <div>
-                        <pre>{{mdDoc}}</pre>
-                    </div>
+                    <uib-tabset>
+                        <uib-tab heading="Html">
+                            <br/>
+                            <div class="md">
+                                <p ng-bind-html="mdDoc |markDown"></p>
+                            </div>
+                        </uib-tab>
+                        <uib-tab heading="MD Text">
+                            <br/>
+                            <div>
+                                <pre>{{mdDoc}}</pre>
+                            </div>
+                        </uib-tab>
+                    </uib-tabset>
+
+
+
+
+
+
+
                 </uib-tab>
 
                 <uib-tab heading="Dev">
@@ -630,8 +676,8 @@
                                 <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
                                 <tr><td>Description</td><td>{{selectedNode.data.description}}</td></tr>
 
-                                <tr><td>Mapping</td><td>
-                                    <table class="table table-condensed table-bordered">
+                                <tr><td>Mappings</td><td>
+                                    <table class="table table-condensed table-bordered"  style="margin-bottom: 2px">
                                         <tr ng-repeat="map in selectedNode.data.mappingFromED">
                                             <td>{{map.identity}}</td>
                                             <td>{{map.map}}</td>

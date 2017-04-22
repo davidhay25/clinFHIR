@@ -1053,6 +1053,10 @@ angular.module("sampleApp")
                                 
                             }
 
+                            $scope.selectBaseType = function() {
+                                $scope.input.createElementsFromBase = true;     //default to copy elements across
+                            }
+
                             $scope.checkName = function() {
                                 if ($scope.input.name) {
                                     var name = $scope.input.name;
