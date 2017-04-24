@@ -1,0 +1,104 @@
+<div>
+
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h3 class="modal-title">Add a new Concept Map</h3>
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+                <div class="pull-right">
+                    <button class="btn btn-success pull-right" ng-show="canAdd" ng-click="add()">Add</button>
+                    <button class="btn btn-link pull-right" ng-click="$dismiss()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-body">
+
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                Name
+            </div>
+            <div class="col-md-6 col-sm-6">
+                <input type="text" class="form-control"  ng-model="input.name" ng-blur="checkCanAdd()"/>
+            </div>
+            <div class="col-md-2 col-sm-2">
+                <button class="btn btn-primary pull-right">Check</button>
+            </div>
+        </div>
+        <br/>
+
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                Description
+            </div>
+            <div class="col-md-8 col-sm-8">
+                <textarea class="form-control" ng-model="input.description" ng-blur="checkCanAdd()"></textarea>
+            </div>
+        </div>
+        <br/>
+       <div class="row">
+           <div class="col-md-4 col-sm-4">
+               Source ValueSet
+           </div>
+           <div class="col-md-8 col-sm-8">
+               <input type="text" class="form-control"  ng-model="input.sourceUri" ng-blur="checkCanAdd()"/>
+           </div>
+       </div>
+        <br/>
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                Target ValueSet
+            </div>
+            <div class="col-md-8 col-sm-8">
+                <input type="text" class="form-control" ng-model="input.targetUri" ng-blur="checkCanAdd()"/>
+            </div>
+        </div>
+
+        <br/>
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                Source CodeSystem
+            </div>
+            <div class="col-md-8 col-sm-8">
+                <input type="text" class="form-control"  ng-model="input.sourceCS" ng-blur="checkCanAdd()"/>
+            </div>
+        </div>
+        <br/>
+
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                Target CodeSystem
+            </div>
+            <div class="col-md-8 col-sm-8">
+                <input type="text" class="form-control" ng-model="input.targetCS" ng-blur="checkCanAdd()"/>
+            </div>
+        </div>
+
+
+
+   </div>
+
+
+
+
+    </div>
+
+    <div class="modal-header">
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+
+                <em>Add an extension to the resource that is not present in the profile being used</em>
+
+            </div>
+
+        </div>
+
+
+
+    </div>
+</div>

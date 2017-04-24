@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-04-01';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-04-24b';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};
@@ -142,7 +142,8 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'MiHIN STU2',version:2,url:"http://52.72.172.54:8080/fhir/baseDstu2/"});
         defaultConfig.allKnownServers.push({name:'Simplifier STU2',version:2,url:"https://simplifier.net/api/fhir/"});
         defaultConfig.allKnownServers.push({name:'Aegis WildFHIR STU3',version:3,url:" http://wildfhir.aegis.net/fhir1-6-0/"});
-        defaultConfig.allKnownServers.push({name:'SNApp',version:3,url:"http://snapp.clinfhir.com:8080/baseDstu3/"});
+        defaultConfig.allKnownServers.push({name:'SNApp STU2' ,version:2,url:"http://snapp.clinfhir.com:8080/baseDstu2/"});
+        defaultConfig.allKnownServers.push({name:'SNApp R3',version:3,url:"http://snapp.clinfhir.com:8081/baseDstu3/"});
         //defaultConfig.allKnownServers.push({name:'123',version:3,url:"https://fhirsandbox1.tsysinteropsvcs.net/sites/123/"});
 
         defaultConfig.allKnownServers.push({name:'GoFHIR',version:3,url:"https://syntheticmass.mitre.org/fhir/",everythingOperation:true});
@@ -151,7 +152,7 @@ angular.module("sampleApp")
         //defaultConfig.allKnownServers.push({name:'hsp2',version:3,url:"https://api2.hspconsortium.org/careplan2/open/",everythingOperation:true});
         //defaultConfig.allKnownServers.push({name:'hsp3',version:3,url:"https://api2.hspconsortium.org/careplan3/open/",everythingOperation:true});
 
-
+        defaultConfig.allKnownServers.push({name:'Patients First R3',version:3,url:"http://its.patientsfirst.org.nz/RestService.svc/Terminz/"});
 
 
 

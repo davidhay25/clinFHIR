@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <base href="/" />
+    <meta charset="UTF-8">
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+        angular.module("sampleApp").constant("moment", moment);
+
+    </script>
+
+    <script src="js/appConfigSvc.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/libs/jstree.min.js"></script>
+    <script src="js/conceptMapCtl.js"></script>
+    <script src="js/modalDialogSvc.js"></script>
+    <script src="js/resourceCreatorSvc.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
+
+    <script src="js/profileCreatorSvc.js"></script>
+    <script src="js/resourceSvc.js"></script>
+    <script src="js/builderSvc.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/filters.js"></script>
+
+
+
+    <!--
+    <script src="js/profileDiffSvc.js"></script>
+    <script src="js/logicalModelSvc.js"></script>
+
+  <script src="js/appConfigSvc.js"></script>
+  <script src="js/libs/ngStorage.min.js"></script>
+  <script src="resourceBuilder/rbServices.js"></script>
+  <script src="js/components/dataTypes.js"></script>
+
+  <script src="js/services.js"></script>
+
+  <script src="js/filters.js"></script>
+  <script src="js/documentBuilder.js"></script>
+  <script src="resourceBuilder/rbServices.js"></script>
+  <script src="js/reporterCtrl.js"></script>
+
+  <script src="js/libs/ngStorage.min.js"></script>
+
+
+
+  <script src="js/profileCreatorSvc.js"></script>
+  -->
+
+
+    <style>
+        .myScroll {
+            height: 800px;
+            overflow-y: scroll;
+        }
+        .myRequired {
+            color:red;
+            background-color:  mistyrose;
+        }
+        .extension {
+            color:blue;
+            background-color: powderblue;
+        }
+
+
+    </style>
+        <title>Concept Map builder</title>
+
+</head>
+
+
+<body  style="padding: 8px;padding-top: 80px" >
+
+<div ng-app="sampleApp" ng-controller="conceptMapCtrl" class="container-fluid">
+
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+
+        <div class="container-fluid">
+            <div class="col-md-3 col-sm-3">
+                    <span>
+                        <a class="navbar-brand" href="#" ng-click="showVersion()">
+                            ConceptMap: {{currentType.url | getLogicalID}}
+
+                        </a>
+                    </span>
+                <span>
+
+                    </span>
+
+            </div>
+            <div class="col-md-2 col-sm-2">
+
+                <span style="cursor:pointer" ng-click='setServers()' class="navbar-text pull-right"> {{appConfigSvc.getCurrentConformanceServer().name}}</span>
+
+
+            </div>
+
+            <div class="col-md-1 col-sm-1">
+                <form class="navbar-form navbar-left">
+                    <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
+
+
+                </form>
+
+
+            </div>
+
+            <div class="col-md-5 col-sm-5">
+
+
+                <form class="navbar-form">
+                    <button ng-show="isDirty" class="btn btn-danger pull-right"
+                            ng-click="saveCM()">Save model</button>
+                </form>
+
+
+            </div>
+
+            <div class="col-md-1 col-sm-1">
+
+                <div class="nav navbar-form navbar-right" ng-hide="firebase.auth().currentUser">
+                        <span style="font-size:1.8em; cursor: pointer">
+                            <div ng-click="login()">
+                                <i class="glyphicon glyphicon-log-in"></i>
+                            </div>
+                        </span>
+                </div>
+
+                <div class="nav navbar-form navbar-right" ng-show="firebase.auth().currentUser">
+                        <span style="font-size:1.8em; cursor: pointer"
+                              uib-popover="{{firebase.auth().currentUser.email}}"
+                              popover-placement="left"
+                              popover-trigger="'mouseenter'">
+
+                            <div href="#" ng-click="logout()"> <i class="glyphicon glyphicon-log-out"></i></div>
+                        </span>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+
+
+
+    <div class="row">
+
+        <div class="row">
+            <div class="col-md-3 col-sm-3">
+                <span class="pull-right"><span class="clickable" ng-click="addConceptMap()">New map</span></span>
+                <h4>Maps</h4>
+                <ul class="list-group" style=" height:500px; overflow: auto;" >
+                    <li style = "cursor:pointer" class="list-group-item" ng-repeat="entry in bundleCM.entry"
+                        ng-click="setCurrentCM(entry.resource)">
+                        {{entry.resource.id}}
+                        {{entry.resource.name}}
+                    </li>
+                </ul>
+
+            </div>
+            <div class="col-md-9 col-sm-9">
+                <span class="pull-right">
+                    <strong>{{currentCM.url}}</strong>
+                </span>
+
+                <uib-tabset ng-show="currentCM">
+
+                    <uib-tab heading="Details">
+
+                        <form>
+                            <!--
+                            <div class="row">
+                                <div class="col-md-6 col-sm-6">
+                                    <div class="form-group">
+                                        <label>Url</label>
+                                        <input type="text" class="form-control" ng-model="currentCM.url">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 col-sm-6">
+
+                                </div>
+                            </div>
+-->
+
+                            <div class="row">
+                                <div class="col-md-4 col-sm-4">
+                                    <div class="form-group">
+                                        <label>Name</label>
+                                        <input type="text" class="form-control" ng-model="currentCM.name"
+
+                                               placeholder="Name of map">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-8 col-sm-8">
+                                    <label>Description</label>
+                                    <textarea ng-change="setDirty()"
+                                            ng-model="currentCM.description" class="form-control" placeholder="Description">
+
+                                    </textarea>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 col-sm-12">
+
+                                </div>
+                            </div>
+
+
+                        </form>
+
+
+
+                        <div ng-repeat="group in currentCM.group">
+
+                            <hr/>
+                            <form>
+                                <div class="row">
+                                    <div class="col-md-4 col-sm-4">
+                                        <div class="form-group">
+                                            <label>Source CodeSystem Url</label>
+                                            <input type="text" class="form-control" ng-model="group.source">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 col-sm-4">
+                                        <div class="form-group">
+                                            <label>Target CodeSystem Url</label>
+                                            <input type="text" class="form-control" ng-model="group.target">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-sm-4">
+
+                                        <button ng-show="canEdit" style="margin-top: 20px"
+                                                class="btn btn-success pull-right" ng-click="addItem()">Add new item</button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <table class="table table-condensed">
+                                <tr><th>Code</th><th>Target</th><th>Edit</th></tr>
+                                <tr ng-repeat="element in group.element">
+                                    <td>{{element.code}}</td>
+                                    <td>
+                                        <table width="100%">
+                                            <tr ng-repeat="target in element.target">
+                                                <td valign = 'top' width="15%">{{target.code}}</td>
+                                                <td width="70%">{{target.comment}}</td>
+                                                <!--
+                                                <td>
+                                                    <table width="100%">
+                                                        <tr ng-repeat="product in target.product">
+                                                            <td>{{product.property}}</td>
+                                                            <td>{{product.system}}</td>
+                                                            <td>{{product.code}}</td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                                -->
+                                                <td>
+                                                    <i ng-show="canEdit" style="cursor: pointer"
+                                                       ng-click="removeItem({source:element.code,target:target.code})"
+                                                       class="glyphicon glyphicon-minus-sign"></i>
+
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                            </table>
+
+
+
+
+
+                        </div>
+
+
+
+                    </uib-tab>
+
+
+
+
+
+
+
+                    <uib-tab heading="Json">
+                        <pre>{{currentCM | json}}</pre>
+                    </uib-tab>
+                </uib-tabset>
+
+            </div>
+        </div>
+
+
+
+
+</div>
+
+</div>
+</body>
+</html>

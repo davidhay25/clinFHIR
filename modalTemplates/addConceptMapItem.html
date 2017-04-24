@@ -1,0 +1,66 @@
+<div>
+
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-7 col-sm-7">
+                <h3 class="modal-title">Add Concept Map Item</h3>
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+                <div class="pull-right">
+                    <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+                    <button class="btn btn-success" ng-show="input.source && input.target" ng-click="add()">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-body">
+
+       <div class="row">
+           <div class="col-md-4 col-sm-4">
+               Source Code
+           </div>
+           <div class="col-md-8 col-sm-8">
+               <input type="text" class="form-control" autofocus ng-model="input.source"/>
+           </div>
+       </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                Target Code
+            </div>
+            <div class="col-md-8 col-sm-8">
+                <input type="text" class="form-control" ng-model="input.target"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                Comment
+            </div>
+            <div class="col-md-8 col-sm-8">
+                <textarea class="form-control" ng-model="input.comment"></textarea>
+            </div>
+        </div>
+   </div>
+
+
+
+
+    </div>
+
+    <div class="modal-header">
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+
+                <em>Add an extension to the resource that is not present in the profile being used</em>
+
+            </div>
+
+        </div>
+
+
+
+    </div>
+</div>
