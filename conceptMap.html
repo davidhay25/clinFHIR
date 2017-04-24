@@ -208,25 +208,26 @@
                                     <div class="form-group">
                                         <label>Name</label>
                                         <input type="text" class="form-control" ng-model="currentCM.name"
-
                                                placeholder="Name of map">
+
+                                        <label>Description</label>
+                                        <textarea ng-change="setDirty()"
+                                                  ng-model="currentCM.description" class="form-control" placeholder="Description">
+
+                                    </textarea>
                                     </div>
                                 </div>
 
                                 <div class="col-md-8 col-sm-8">
-                                    <label>Description</label>
-                                    <textarea ng-change="setDirty()"
-                                            ng-model="currentCM.description" class="form-control" placeholder="Description">
+                                    <label>Purpose</label>
+                                    <textarea ng-change="setDirty()" rows="5"
+                                            ng-model="currentCM.purpose" class="form-control" placeholder="Purpose">
 
                                     </textarea>
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col-md-12 col-sm-12">
 
-                                </div>
-                            </div>
 
 
                         </form>
@@ -260,33 +261,29 @@
                             </form>
 
                             <table class="table table-condensed">
-                                <tr><th>Code</th><th>Target</th><th>Edit</th></tr>
+                                <tr><th>Code</th><th>Target</th><th><span class="pull-right"> Edit</span></th></tr>
                                 <tr ng-repeat="element in group.element">
                                     <td>{{element.code}}</td>
                                     <td>
                                         <table width="100%">
                                             <tr ng-repeat="target in element.target">
                                                 <td valign = 'top' width="15%">{{target.code}}</td>
-                                                <td width="70%">{{target.comment}}</td>
-                                                <!--
-                                                <td>
-                                                    <table width="100%">
-                                                        <tr ng-repeat="product in target.product">
-                                                            <td>{{product.property}}</td>
-                                                            <td>{{product.system}}</td>
-                                                            <td>{{product.code}}</td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                                -->
-                                                <td>
-                                                    <i ng-show="canEdit" style="cursor: pointer"
-                                                       ng-click="removeItem({source:element.code,target:target.code})"
-                                                       class="glyphicon glyphicon-minus-sign"></i>
+                                                <td width="85%">{{target.comment}}</td>
 
-                                                </td>
                                             </tr>
                                         </table>
+                                    </td>
+                                    <td>
+                                        <div class="pull-right">
+                                        <i ng-show="canEdit" style="cursor: pointer"
+                                            ng-click="removeItem({source:element.code,target:target.code})"
+                                            class="iconSpacing glyphicon glyphicon-minus-sign"></i>
+
+                                        <i ng-show="canEdit" style="cursor: pointer"
+                                           ng-click="addItem(element)"
+                                           class="iconSpacing glyphicon glyphicon-edit"></i>
+                                        </div>
+
                                     </td>
                                 </tr>
 

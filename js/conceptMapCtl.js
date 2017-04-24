@@ -53,14 +53,12 @@ angular.module("sampleApp")
                     case 'targCS' :
                         $scope.currentCM.group[0].target = value
                         break;
-
-
                 }
             }
 
             $scope.setDirty = function(){
                 $scope.isDirty = true;
-            }
+            };
 
 
             $scope.removeItem = function(vo){
@@ -79,8 +77,7 @@ angular.module("sampleApp")
                     grp.element.splice(inxToDelete,1)
                     $scope.isDirty = true;
                 }
-
-            }
+            };
 
             $scope.saveCM = function () {
                 console.log($scope.currentCM)
@@ -111,6 +108,7 @@ angular.module("sampleApp")
                             Utilities.setAuthoredByClinFhir(vo)
                             vo.name = $scope.input.name;
                             vo.description = $scope.input.description;
+                            vo.purpose = $scope.input.purpose;
 
                             vo.sourceUri = $scope.input.sourceUri;
                             vo.targetUri = $scope.input.targetUri;
@@ -134,22 +132,44 @@ angular.module("sampleApp")
             };
 
 
-            $scope.addItem = function () {
+            $scope.addItem = function (item) {
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
                     keyboard: false,       //same as above.
                     templateUrl: 'modalTemplates/addConceptMapItem.html',
-                    controller: function($scope){
+                    controller: function($scope,currentItem){
                         $scope.input = {};
+                        if (currentItem) {
+                            $scope.currentItem = currentItem;
+                            $scope.input.source = currentItem.code;
+                            //var targ = currentItem.
+                            $scope.input.target = currentItem.target[0].code;
+                            $scope.input.comment = currentItem.target[0].comment;
+                        }
+
+
                         $scope.add = function(){
-                            var vo = {source:$scope.input.source}
-                            vo.target = $scope.input.target;
-                            vo.comment = $scope.input.comment;
-                            $scope.$close(vo)
+
+                            if (currentItem) {
+                                currentItem.code = $scope.input.source;
+                                currentItem.target[0].code = $scope.input.target;
+                                currentItem.target[0].comment = $scope.input.comment;
+                                $scope.$close()
+                            } else {
+                                var vo = {source:$scope.input.source}
+                                vo.target = $scope.input.target;
+                                vo.comment = $scope.input.comment;
+                                $scope.$close(vo)
+                            }
+
+
                         }
 
                     },
                     resolve : {
+                        currentItem : function(){
+                            return item
+                        },
                         sourceSystem: function () {          //the default config
                             return '';
                         },
@@ -159,13 +179,16 @@ angular.module("sampleApp")
                     }
                 }).result.then(
                     function(vo) {
-                        console.log(vo)
-                        //for now, assume only a single group - and that it exists...
-                        var grp = $scope.currentCM.group[0]
-                        var element = {code:vo.source,target:[]}
-                        element.target.push({code:vo.target,equivalence:'equal',comment:vo.comment});  //assume codes are equal
-                        grp.element.push(element)
-                        console.log(grp)
+                        if (vo) {
+                            //console.log(vo)
+                            //for now, assume only a single group - and that it exists...
+                            var grp = $scope.currentCM.group[0]
+                            var element = {code:vo.source,target:[]}
+                            element.target.push({code:vo.target,equivalence:'equal',comment:vo.comment});  //assume codes are equal
+                            grp.element.push(element)
+                            //console.log(grp)
+                        }
+
                         $scope.isDirty = true;
 
                     }

@@ -5,13 +5,17 @@
 
         <div class="row">
             <div class="col-md-7 col-sm-7">
-                <h3 class="modal-title">Add Concept Map Item</h3>
+                <h3 ng-hide="currentItem" class="modal-title">Add Concept Map Item</h3>
+                <h3 ng-show="currentItem" class="modal-title">Edit Concept Map Item</h3>
             </div>
 
             <div class="col-md-4 col-sm-4">
                 <div class="pull-right">
                     <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
-                    <button class="btn btn-success" ng-show="input.source && input.target" ng-click="add()">Add</button>
+                    <button class="btn btn-success" ng-show="input.source && input.target" ng-click="add()">
+                        <span ng-hide="currentItem">Add</span>
+                        <span ng-show="currentItem">Save</span>
+                    </button>
                 </div>
             </div>
         </div>
