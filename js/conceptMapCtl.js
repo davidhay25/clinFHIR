@@ -30,6 +30,11 @@ angular.module("sampleApp")
 
 
                 function selectCM(cm){
+                    delete $scope.lookupUrl;
+                    delete $scope.lookupCode;
+                    delete $scope.lookupResponse;
+                    delete $scope.arLookupUrl;
+
                     $scope.currentCM = angular.copy(cm);
                     delete $scope.canEdit;
                     if (Utilities.isAuthoredByClinFhir($scope.currentCM)) {
@@ -60,6 +65,44 @@ angular.module("sampleApp")
                 $scope.isDirty = true;
             };
 
+
+
+            $scope.makeLookupUrl = function(code) {
+                if ($scope.currentCM.group) {
+                    $scope.lookupUrl = appConfigSvc.getCurrentConformanceServer().url + 'ConceptMap/'+ $scope.currentCM.id +'/$translate?';
+                    $scope.lookupUrl += "system="+$scope.currentCM.group[0].source;
+                    $scope.lookupUrl += "&targetSystem="+$scope.currentCM.group[0].target;
+                    $scope.lookupUrl += "&code="+code
+
+
+                    //for a nice display - could split on '?' and '&' I guess...
+                    $scope.arLookupUrl = [];
+                    $scope.arLookupUrl.push(appConfigSvc.getCurrentConformanceServer().url + 'ConceptMap/'+ $scope.currentCM.id +'/$translate')
+                    $scope.arLookupUrl.push("?system="+$scope.currentCM.group[0].source);
+                    $scope.arLookupUrl.push("&targetSystem="+$scope.currentCM.group[0].target);
+                    $scope.arLookupUrl.push("&code="+code);
+                    console.log($scope.lookupUrl)
+                } else {
+                    alert("Cannot call $translate without a group property")
+                }
+
+            };
+
+            $scope.lookup = function() {
+                if ($scope.lookupUrl) {
+
+                    GetDataFromServer.adHocFHIRQuery($scope.lookupUrl).then(
+                        function(data) {
+                            $scope.lookupResponse = data.data;
+                        },
+                        function(err) {
+                            $scope.lookupResponse = err
+                        }
+                    )
+
+                }
+
+            }
 
             $scope.removeItem = function(vo){
                 //assume a single group, and that each 'source' code is only represented once in the mapping, with only a single target

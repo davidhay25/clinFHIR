@@ -299,11 +299,28 @@
 
                     </uib-tab>
 
+                    <uib-tab heading="Test Lookup">
+                        <br/>
+                        <div class="row">
+                            <div class="col-md-2 col-sm-2">
+                                <input type="text" ng-model="lookupCode" class="form-control" ng-change="makeLookupUrl(lookupCode)"/>
 
 
 
+                            </div>
+                            <div class="col-md-1 col-sm-1">
+                                <button class="btn btn-primary" ng-click="lookup()">Lookup</button>
+                            </div>
+                            <div class="col-md-7 col-sm-7">
+                                <div ng-repeat="l in arLookupUrl">
+                                    {{l}}
+                                </div>
 
+                                <pre>{{lookupResponse | json}}</pre>
+                            </div>
+                        </div>
 
+                    </uib-tab>
 
                     <uib-tab heading="Json">
                         <pre>{{currentCM | json}}</pre>

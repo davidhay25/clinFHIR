@@ -1658,11 +1658,21 @@ console.log(summary);
             if (!isAuthoredByClinFhir) {
                 //used identifier in the past...
                 if (profile.identifier) {
-                    profile.identifier.forEach(function(ident){
-                        if (ident.system == 'http://clinfhir.com' && ident.value=='author') {
+
+                    if (angular.isArray(profile.identifier)) {
+                        profile.identifier.forEach(function(ident){
+                            if (ident.system == 'http://clinfhir.com' && ident.value=='author') {
+                                isAuthoredByClinFhir = true;
+                            }
+                        })
+                    } else {
+                        //conceptmap has only 1 identifier!
+                        if (profile.identifier.system == 'http://clinfhir.com' && profile.identifier.value=='author') {
                             isAuthoredByClinFhir = true;
                         }
-                    })
+                    }
+
+
                 }
             }
 
