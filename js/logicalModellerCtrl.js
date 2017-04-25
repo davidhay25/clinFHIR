@@ -1415,7 +1415,8 @@ angular.module("sampleApp")
 
                // checkDifferences(entry.resource)
 
-                var vo = logicalModelSvc.makeReferencedMapsModel(entry.resource,$scope.bundleModels);   //todo - may not be the right place...
+                /* WARNING todo - this calls teh 'makeTree' function in the service and mucks things up.. (particularly the momments)
+                //var vo = logicalModelSvc.makeReferencedMapsModel(entry.resource,$scope.bundleModels);   //todo - may not be the right place...
 
                 //so that we can draw a table with the references in it...
                 $scope.modelReferences = vo.references;
@@ -1463,11 +1464,13 @@ angular.module("sampleApp")
                     //selectedNetworkElement
 
                 });
-                
-                
 
+
+                 */
                 $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                 drawTree();
+
+
                 makeSD();
                 $scope.currentType = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
                 loadHistory($scope.rootName);

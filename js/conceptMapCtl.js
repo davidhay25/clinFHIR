@@ -90,7 +90,7 @@ angular.module("sampleApp")
 
             $scope.lookup = function() {
                 if ($scope.lookupUrl) {
-
+                    $scope.waiting = true;
                     GetDataFromServer.adHocFHIRQuery($scope.lookupUrl).then(
                         function(data) {
                             $scope.lookupResponse = data.data;
@@ -98,7 +98,9 @@ angular.module("sampleApp")
                         function(err) {
                             $scope.lookupResponse = err
                         }
-                    )
+                    ).finally(function(){
+                        $scope.waiting = false;
+                    })
 
                 }
 
@@ -242,6 +244,7 @@ angular.module("sampleApp")
 
             var loadAllCM = function(){
                 var url = appConfigSvc.getCurrentConformanceServer().url + "ConceptMap";
+                $scope.waiting = true;
                 GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
                     function(data) {
                         $scope.bundleCM = data.data;
@@ -250,7 +253,9 @@ angular.module("sampleApp")
                     function(err) {
                         alert(angular.toJson(err))
                     }
-                )
+                ).finally(function(){
+                    $scope.waiting = false;
+                })
             }
             loadAllCM();
 

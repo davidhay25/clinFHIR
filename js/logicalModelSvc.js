@@ -198,6 +198,7 @@ angular.module("sampleApp")
 
                         //show the fhir mapings
                         if (data.mappingFromED) {
+                            arDoc.push("### Mappings")
                             data.mappingFromED.forEach(function(map){
                                 if (map.identity == 'fhir') {
                                     //note that this is a bit hacky as the comment element is only in R3...
@@ -211,10 +212,32 @@ angular.module("sampleApp")
                                     }
 
                                     m = m.replace('|',"");
-                                    arDoc.push("###FHIR mapping:"+m)
+                                   // arDoc.push("###FHIR mapping:"+m)
+                                    arDoc.push("**FHIR:** " + m)
                                     if (c) {
+                                        arDoc.push("")
                                         arDoc.push(c)
                                     }
+                                } else {
+                                    arDoc.push("");
+                                    var m = map.map;
+                                    if (m) {
+                                        var c = map.comment;
+                                        var ar1 = m.split('|');
+                                        m = ar1[0];
+                                        if (ar1.length > 1 && ! c) {
+                                            c = ar1[1]
+                                        }
+
+                                        m = m.replace('|',"");
+                                        //arDoc.push("###"+map.identity+ " mapping:"+m)
+                                        arDoc.push('**'+ map.identity + ":** " + m)
+                                        if (c) {
+                                            arDoc.push("")
+                                            arDoc.push(c)
+                                        }
+                                    }
+
                                 }
                             })
 
@@ -1138,18 +1161,25 @@ angular.module("sampleApp")
                         if (ed.mapping) {           //the mapping path in the target resource...
 
 
-                            item.data.mappingFromED = ed.mapping;       //save all the mappings in an array...
+
+                            item.data.mappingFromED = []; //ed.mapping;       //save all the mappings in an array...
 
                             //this is a horrible hack to cover the fact that hapi doesn't yet support the final R3...
-                            item.data.mappingFromED.forEach(function(map){
+
+
+
+                            //item.data.mappingFromED.forEach(function(map){
+                            ed.mapping.forEach(function(map){
                                 var value = map.map;    //the mapping
                                 var g = value.indexOf('|')
                                 if (g > -1) {
                                     map.comment = value.substr(g+1);
                                     map.map = value.substr(0,g);
+                                    //var t = value.substr(0,g);
+                                    item.data.mappingFromED.push(map)
                                 }
                             });
-
+/*
                             //tofo get the extension, always on the first - I'm not sure this is correvt
                             if (ed.mapping[0]) {
                                 //there are extensions on this item - find the comment...
@@ -1178,6 +1208,7 @@ angular.module("sampleApp")
 
 
                             }
+                            */
 
 /*
                             //the 'named' maps...
@@ -1235,6 +1266,9 @@ angular.module("sampleApp")
 
 
                 }
+
+                console.log(arTree)
+
                 return arTree;
             },
             makeSD: function (scope, treeData) {

@@ -513,7 +513,7 @@ angular.module("sampleApp")
 
                         }
                     }
-                    if (! aligned) {
+                    if (! aligned && value) {
                         //if here, there is no value for 'identity' in the ar
                         ar.push(({identity:identity,map:value}))
                     }
