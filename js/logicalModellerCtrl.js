@@ -234,6 +234,21 @@ angular.module("sampleApp")
 
             };
 
+            $scope.explodeDT = function(dt) {
+
+                console.log($scope.selectedNode);
+                logicalModelSvc.explodeDataType($scope.treeData,$scope.selectedNode,dt).then(
+                    function() {
+                        drawTree();
+                    },
+                    function(err){
+                        alert(angular.toJson(err))
+                    }
+
+
+                )
+
+            }
             
             //if the selected node changes, look to see if we can expand any binding...
             $scope.$watch(

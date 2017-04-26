@@ -116,6 +116,77 @@ angular.module("sampleApp")
 
         return {
 
+            explodeDataType : function(treeData,node,dt) {
+                var arExclude=['id','extension'];
+                var deferred = $q.defer();
+                console.log(node)
+                var parentId = node.id;
+                var lmRoot = treeData[0].data.path;     //the root of this model...
+                var baseType = 'unknown';
+                if (treeData[0] && treeData[0].data && treeData[0].data.header) {
+                    baseType = treeData[0].data.header.baseType;    //base type
+                }
+
+                var url = appConfigSvc.getCurrentConformanceServer().url + 'StructureDefinition/'+dt;
+                GetDataFromServer.adHocFHIRQuery(url).then(
+                    function(data) {
+                        var dtSD = data.data;
+                        if (dtSD.snapshot && dtSD.snapshot.element) {
+
+                            dtSD.snapshot.element.forEach(function (ele,inx) {
+                                console.log(ele)
+
+
+                                var ar = ele.path.split('.')
+                                if (ar.length ==2 && arExclude.indexOf(ar[1]) == -1) {
+                                    var newId = 't' + new Date().getTime()+inx;
+                                    var newNode = {
+                                        "id": newId,
+                                        "parent": parentId,
+                                        "text": ar[1],
+                                        state: {opened: true},
+                                        data : {}
+                                    };
+                                    //newNode.data = {};
+
+                                    newNode.data.name = ar[1];
+                                    newNode.data.short = ele.short;
+
+                                    ar.splice(0,0,lmRoot)
+                                    //ar[0] = treeData[0].path;
+
+                                    newNode.data.path = ar.join('.')
+                                    newNode.data.mappingFromED = [{identity:'fhir',map:baseType + '.'+ ele.path}]
+                                    //newNode.description = $scope.input.description || 'definition';
+                                    //newNode.comments = $scope.input.comments;
+                                    newNode.data.type = ele.type;
+
+
+
+
+                                    treeData.push(newNode);
+                                }
+
+
+
+                            })
+
+
+
+
+                        }
+                        console.log(data);
+
+
+
+                        deferred.resolve();
+
+                    },function (err) {
+                        deferred.reject(err)
+                    }
+                )
+                return deferred.promise;
+            },
             generateDoc : function(tree) {
                 var deferred = $q.defer();
                 //var simpleExtensionUrl = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl;
@@ -198,7 +269,7 @@ angular.module("sampleApp")
 
                         //show the fhir mapings
                         if (data.mappingFromED) {
-                            arDoc.push("### Mappings")
+                            arDoc.push("### Path and Mappings")
                             data.mappingFromED.forEach(function(map){
                                 if (map.identity == 'fhir') {
                                     //note that this is a bit hacky as the comment element is only in R3...
@@ -213,7 +284,7 @@ angular.module("sampleApp")
 
                                     m = m.replace('|',"");
                                    // arDoc.push("###FHIR mapping:"+m)
-                                    arDoc.push("**FHIR:** " + m)
+                                    arDoc.push("**FHIR path:** " + m)
                                     if (c) {
                                         arDoc.push("")
                                         arDoc.push(c)
@@ -1112,6 +1183,22 @@ angular.module("sampleApp")
                         item.data.type = ed.type;
 
 
+                        //decorate the type elements...
+                        if (item.data.type) {
+                            item.data.type.forEach(function(typ){
+                                if (typ.code) {
+                                    var first = typ.code.substr(0,1);
+                                    if (first == first.toUpperCase()) {
+                                        typ.isComplexDT = true;
+                                    }
+                                }
+                            })
+
+                        }
+
+
+
+
 
                         var extSimpleExt = Utilities.getSingleExtensionValue(ed, simpleExtensionUrl);
                         if (extSimpleExt) {
@@ -1150,6 +1237,9 @@ angular.module("sampleApp")
                                 if (typ.code == 'Reference') {
                                     item.data.isReference = true;   //used to populate the 'is reference' table...
                                 }
+
+
+
 
                             })
                         }

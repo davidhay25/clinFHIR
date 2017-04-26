@@ -138,7 +138,7 @@
 
 
         .designerScroll {
-            height: 600px;
+            height: 900px;
             overflow-y: scroll;
         }
 
@@ -670,6 +670,7 @@
                             </div>
 
 
+
                             <table class="table table-bordered">
                                 <!--<tr><td width="20%">Name</td><td>{{selectedNode.data.name}}</td></tr> -->
                                 <tr><td width="20%">Model path</td><td>{{selectedNode.data.path}}</td></tr>
@@ -718,6 +719,7 @@
                                     <div ng-repeat = "typ in selectedNode.data.type">
 
 
+
                                         <a ng-href="{{rootForDataType}}{{typ.code}}" target="_blank">
                                             <i class="glyphicon glyphicon-eye-open clickable"></i>
                                         </a>
@@ -726,12 +728,13 @@
 
                                         {{typ.code}}
 
+                                        <span class="clickable" ng-click="explodeDT(typ.code)" ng-show = "typ.isComplexDT">Expand</span>
+
+
 
                                         <!-- Show any profile. If a reference, then hyperlink to the 'display' functionality... -->
                                         <span ng-show="typ.code == 'Reference'" class="pull-right">
                                             <span class="clickable" ng-click="viewReferencedModel(selectedNode.data.referenceUri)">View</span>
-
-
 
 
 
