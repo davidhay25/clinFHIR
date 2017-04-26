@@ -135,9 +135,12 @@ angular.module("sampleApp")
 
                             dtSD.snapshot.element.forEach(function (ele,inx) {
                                 console.log(ele)
+                                //the first letter needs to be lowercase, as it will be part of a path...
+                                ele.path = ele.path.charAt(0).toLowerCase() + ele.path.slice(1);
 
 
                                 var ar = ele.path.split('.')
+
                                 if (ar.length ==2 && arExclude.indexOf(ar[1]) == -1) {
                                     var newId = 't' + new Date().getTime()+inx;
                                     var newNode = {

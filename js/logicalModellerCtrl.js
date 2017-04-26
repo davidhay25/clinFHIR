@@ -240,6 +240,7 @@ angular.module("sampleApp")
                 logicalModelSvc.explodeDataType($scope.treeData,$scope.selectedNode,dt).then(
                     function() {
                         drawTree();
+                        $scope.isDirty = true;
                     },
                     function(err){
                         alert(angular.toJson(err))
