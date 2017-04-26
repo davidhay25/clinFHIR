@@ -1306,7 +1306,20 @@ angular.module("sampleApp")
 
                             //item.data.mappingFromED.forEach(function(map){
                             ed.mapping.forEach(function(map){
-                                var value = map.map;    //the mapping
+                                var internalMap = {identity:map.identity}
+                                var ar = map.map.split('|');        //the 'map' will always include the comment separated by '|'
+                                internalMap.map = ar[0];            //the first entry is the actual map
+                                if (map.comment) {
+                                    internalMap.comment = map.comment
+                                } else {
+                                    internalMap.comment = ar[1];
+                                }
+
+                                item.data.mappingFromED.push(internalMap);
+
+                                //var value = map.map;    //the mapping
+                                /*
+
                                 var g = value.indexOf('|')
                                 if (g > -1) {
                                     map.comment = value.substr(g+1);
@@ -1314,6 +1327,7 @@ angular.module("sampleApp")
                                     //var t = value.substr(0,g);
                                     item.data.mappingFromED.push(map)
                                 }
+                                */
                             });
 /*
                             //tofo get the extension, always on the first - I'm not sure this is correvt
@@ -1523,16 +1537,30 @@ angular.module("sampleApp")
                     }
 
 */
+
+                    //so all the mapping data for ED is in the 'mappingFromED' array...  {identity:, map:, comment:}
                     if (data.mappingFromED ) {
                         ed.mapping =  [];
 
+                        //this will always have data as {identity:, map:, comment: }
                         data.mappingFromED.forEach(function(map){
-                            if (map.map) {
+                            if (map.identity && map.map) {
+
+                                var savedMap = {identity:map.identity}
+                                if (map.comment) {
+                                    savedMap.map = map.map + "|" + map.comment
+                                } else {
+                                    savedMap.map = map.map + "|"
+                                }
+                                ed.mapping.push(savedMap);
+                                /*
                                 map.comment = map.comment || "";
-                                //a horrible hack as hapi doesn't yet support comments
+                                //a horrible hack as hapi doesn't yet support comments. Always add the comments to the map.
+
                                 var ar = map.map.split('|')
                                 map.map = ar[0]+ "|"+map.comment;
                                 ed.mapping.push({identity:map.identity, map: map.map, comment: map.comment});
+                                */
                             }
 
                         })

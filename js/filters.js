@@ -17,6 +17,13 @@ angular.module("sampleApp")
         }
     }])
 
+    .filter('showMapOnly', function() {
+        return function(map) {
+            var ar = map.split('|');
+            return ar[0];
+        }
+    })
+
     .filter('libraryCategory', function() {
         return function(selectedCategory,container) {
             console.log(selectedCategory,container)
