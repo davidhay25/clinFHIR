@@ -112,6 +112,30 @@ angular.module("sampleApp")
         }
 
 
+        //common function for decorating various properties of the treeview when building form an SD. Used when creating a new one & editing
+        function decorateTreeView(item,ed) {
+            //decorate the type elements...
+            if (item.data.type) {
+                item.data.type.forEach(function(typ){
+                    if (typ.code) {
+                        var first = typ.code.substr(0,1);
+                        if (first == first.toUpperCase()) {
+                            typ.isComplexDT = true;
+                        }
+                    }
+                })
+
+            }
+            var ar = ed.path.split('.')
+            //don't set for the first element (oterwise the colour cascades down....
+            if (ed.min == 1 && ar.length > 1) {
+                item['li_attr'] = {class: 'elementRequired'};
+            }
+
+            if (ed.fixedString) {
+                item['li_attr'] = {class: 'elementFixed'};
+            }
+        }
 
 
         return {
@@ -163,6 +187,7 @@ angular.module("sampleApp")
                                     //newNode.description = $scope.input.description || 'definition';
                                     //newNode.comments = $scope.input.comments;
                                     newNode.data.type = ele.type;
+                                    //newNode.data.type.isComplexDT = true;
 
 
 
@@ -272,7 +297,7 @@ angular.module("sampleApp")
 
                         //show the fhir mapings
                         if (data.mappingFromED) {
-                            arDoc.push("### Path and Mappings")
+                            //arDoc.push("### FHIPath and Mappings")
                             data.mappingFromED.forEach(function(map){
                                 if (map.identity == 'fhir') {
                                     //note that this is a bit hacky as the comment element is only in R3...
@@ -293,24 +318,27 @@ angular.module("sampleApp")
                                         arDoc.push(c)
                                     }
                                 } else {
-                                    arDoc.push("");
-                                    var m = map.map;
-                                    if (m) {
-                                        var c = map.comment;
-                                        var ar1 = m.split('|');
-                                        m = ar1[0];
-                                        if (ar1.length > 1 && ! c) {
-                                            c = ar1[1]
-                                        }
+                                    if (1==3) {
+                                        arDoc.push("");
+                                        var m = map.map;
+                                        if (m) {
+                                            var c = map.comment;
+                                            var ar1 = m.split('|');
+                                            m = ar1[0];
+                                            if (ar1.length > 1 && ! c) {
+                                                c = ar1[1]
+                                            }
 
-                                        m = m.replace('|',"");
-                                        //arDoc.push("###"+map.identity+ " mapping:"+m)
-                                        arDoc.push('**'+ map.identity + ":** " + m)
-                                        if (c) {
-                                            arDoc.push("")
-                                            arDoc.push(c)
+                                            m = m.replace('|',"");
+                                            //arDoc.push("###"+map.identity+ " mapping:"+m)
+                                            arDoc.push('**'+ map.identity + ":** " + m)
+                                            if (c) {
+                                                arDoc.push("")
+                                                arDoc.push(c)
+                                            }
                                         }
                                     }
+
 
                                 }
                             })
@@ -967,7 +995,6 @@ angular.module("sampleApp")
                     }
                 );
 
-
                 return deferred.promise;
 
                 function makeTreeData(SD, treeData) {
@@ -1044,6 +1071,22 @@ angular.module("sampleApp")
                                 //set the mapping
                                 item.data.mappingPath = path; //[{identity: 'fhir', map: path}]
 
+                                //decorate the type elements... - **** THIS IS A COPY
+
+                                decorateTreeView(item,ed);     //common decorator functions like isComplex
+
+                                /*
+                                if (item.data.type) {
+                                    item.data.type.forEach(function(typ){
+                                        if (typ.code) {
+                                            var first = typ.code.substr(0,1);
+                                            if (first == first.toUpperCase()) {
+                                                typ.isComplexDT = true;
+                                            }
+                                        }
+                                    })
+                                }
+                                */
 
 
                                 //note that we don't retrieve the complete valueset...
@@ -1165,6 +1208,10 @@ angular.module("sampleApp")
                             //otherwise the parent can be inferred from the path
                             arPath.pop();//
                             item.parent = arPath.join('.');
+
+
+                            /* moved to decorator
+
                             if (ed.min == 1) {
                                 item['li_attr'] = {class: 'elementRequired'};
                             }
@@ -1172,7 +1219,7 @@ angular.module("sampleApp")
                             if (ed.fixedString) {
                                 item['li_attr'] = {class: 'elementFixed'};
                             }
-
+*/
 
                         }
                         item.state = {opened: true};     //default to fully expanded
@@ -1187,6 +1234,8 @@ angular.module("sampleApp")
 
 
                         //decorate the type elements...
+                        decorateTreeView(item,ed);
+                        /*
                         if (item.data.type) {
                             item.data.type.forEach(function(typ){
                                 if (typ.code) {
@@ -1198,7 +1247,7 @@ angular.module("sampleApp")
                             })
 
                         }
-
+*/
 
 
 
@@ -1241,9 +1290,6 @@ angular.module("sampleApp")
                                     item.data.isReference = true;   //used to populate the 'is reference' table...
                                 }
 
-
-
-
                             })
                         }
 
@@ -1252,9 +1298,6 @@ angular.module("sampleApp")
                         item.data.max = ed.max;
 
                         if (ed.mapping) {           //the mapping path in the target resource...
-
-
-
                             item.data.mappingFromED = []; //ed.mapping;       //save all the mappings in an array...
 
                             //this is a horrible hack to cover the fact that hapi doesn't yet support the final R3...
@@ -1365,6 +1408,9 @@ angular.module("sampleApp")
                 return arTree;
             },
             makeSD: function (scope, treeData) {
+                var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
+
+
                 //create a StructureDefinition from the treeData //todo - don't pass in scope...
                 var header = treeData[0].data.header || {};     //the first node has the header informatiion
 
@@ -1391,7 +1437,17 @@ angular.module("sampleApp")
                 sd.id = scope.rootName;
                 sd.url = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/" + sd.id;
                 sd.name = header.name;
-                sd.title = header.title;
+
+                //these are fhir version changes...
+                if (fhirVersion ==2) {
+                    sd.display = header.title;
+                    sd.requirements = header.purpose;
+                } else {
+                    sd.title = header.title;
+                    sd.purpose = header.purpose;
+                }
+
+
                 sd.publisher = header.publisher;
                 sd.status = 'draft';
                 sd.date = moment().format();
