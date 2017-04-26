@@ -241,6 +241,7 @@ angular.module("sampleApp")
                     function() {
                         drawTree();
                         $scope.isDirty = true;
+                        makeSD();
                     },
                     function(err){
                         alert(angular.toJson(err))

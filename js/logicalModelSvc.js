@@ -130,6 +130,8 @@ angular.module("sampleApp")
             //don't set for the first element (oterwise the colour cascades down....
             if (ed.min == 1 && ar.length > 1) {
                 item['li_attr'] = {class: 'elementRequired'};
+            } else {
+                item['li_attr'] = {class: 'elementOptional'};
             }
 
             if (ed.fixedString) {
@@ -145,7 +147,8 @@ angular.module("sampleApp")
                 var deferred = $q.defer();
                 console.log(node)
                 var parentId = node.id;
-                var lmRoot = treeData[0].data.path;     //the root of this model...
+                var parentPath = node.data.path;        //the path of the element that is being expanded...
+                var lmRoot = treeData[0].data.path;     //the root of this model... (eg OhEncounter)
                 var baseType = 'unknown';
                 if (treeData[0] && treeData[0].data && treeData[0].data.header) {
                     baseType = treeData[0].data.header.baseType;    //base type
@@ -160,17 +163,21 @@ angular.module("sampleApp")
                             dtSD.snapshot.element.forEach(function (ele,inx) {
                                 console.log(ele)
                                 //the first letter needs to be lowercase, as it will be part of a path...
-                                ele.path = ele.path.charAt(0).toLowerCase() + ele.path.slice(1);
+                                ele.path = ele.path.charAt(0).toLowerCase() + ele.path.slice(1);    //this will be a codeableconcept
 
 
                                 var ar = ele.path.split('.')
 
                                 if (ar.length ==2 && arExclude.indexOf(ar[1]) == -1) {
-                                    var newId = 't' + new Date().getTime()+inx;
+
+                                    ar.splice(0,1);     //remove the first part of the path (the dt name eg CodeableConcept)
+                                    var pathForThisElement = parentPath + '.'+  ar.join('.');
+
+                                    var newId = pathForThisElement; ///'t' + new Date().getTime()+inx;
                                     var newNode = {
                                         "id": newId,
                                         "parent": parentId,
-                                        "text": ar[1],
+                                        "text": ar[0],
                                         state: {opened: true},
                                         data : {}
                                     };
@@ -179,18 +186,33 @@ angular.module("sampleApp")
                                     newNode.data.name = ar[1];
                                     newNode.data.short = ele.short;
 
-                                    ar.splice(0,0,lmRoot)
-                                    //ar[0] = treeData[0].path;
 
-                                    newNode.data.path = ar.join('.')
+                                    //ar.splice(0,0,lmRoot)
+                                    //ar[0] = treeData[0].path;
+                                  //  ar.splice(0,1);     //remove the first part of the path (the dt)
+
+                                    newNode.data.path = pathForThisElement;///parentPath + '.'+  ar.join('.')
+                                    newNode.data.min = ele.min;
+                                    newNode.data.max = ele.max;
+
+
                                     newNode.data.mappingFromED = [{identity:'fhir',map:baseType + '.'+ ele.path}]
                                     //newNode.description = $scope.input.description || 'definition';
                                     //newNode.comments = $scope.input.comments;
                                     newNode.data.type = ele.type;
+                                    newNode.data.type.forEach(function(typ){
+                                        var first = typ.code.substr(0,1);
+                                        if (first == first.toUpperCase()) {
+                                            typ.isComplexDT = true;
+                                        }
+                                    })
+
+
+
                                     //newNode.data.type.isComplexDT = true;
 
 
-
+console.log(newNode)
 
                                     treeData.push(newNode);
                                 }
@@ -203,7 +225,7 @@ angular.module("sampleApp")
 
 
                         }
-                        console.log(data);
+                        //console.log(data);
 
 
 
@@ -1210,17 +1232,6 @@ angular.module("sampleApp")
                             item.parent = arPath.join('.');
 
 
-                            /* moved to decorator
-
-                            if (ed.min == 1) {
-                                item['li_attr'] = {class: 'elementRequired'};
-                            }
-
-                            if (ed.fixedString) {
-                                item['li_attr'] = {class: 'elementFixed'};
-                            }
-*/
-
                         }
                         item.state = {opened: true};     //default to fully expanded
 
@@ -1235,22 +1246,6 @@ angular.module("sampleApp")
 
                         //decorate the type elements...
                         decorateTreeView(item,ed);
-                        /*
-                        if (item.data.type) {
-                            item.data.type.forEach(function(typ){
-                                if (typ.code) {
-                                    var first = typ.code.substr(0,1);
-                                    if (first == first.toUpperCase()) {
-                                        typ.isComplexDT = true;
-                                    }
-                                }
-                            })
-
-                        }
-*/
-
-
-
 
                         var extSimpleExt = Utilities.getSingleExtensionValue(ed, simpleExtensionUrl);
                         if (extSimpleExt) {

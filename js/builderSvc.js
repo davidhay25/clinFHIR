@@ -913,7 +913,7 @@ angular.module("sampleApp")
                             bundle.entry.forEach(function(entry){
                                 var dr = entry.resource;
                                 var container = that.getBundleContainerFromDocRef(dr)
-                                console.log(container);
+                                //console.log(container);
                                 if (cache[dr.id]) {
                                     container.cachedLocally = true;
                                 }
