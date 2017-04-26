@@ -42,7 +42,7 @@ angular.module("sampleApp")
             $scope.generateFHIRProfile = function(){
                 logicalModelSvc.generateFHIRProfile($scope.SD).then(
                     function(profile) {
-                        console.log(profile)
+
                         modalService.showModal({}, {bodyText: "Profile has been created with the URL: "+ profile.url});
                     },function(err) {
                         modalService.showModal({}, {bodyText: err});
@@ -93,9 +93,6 @@ angular.module("sampleApp")
                 }
 
 
-                console.log($scope.selectedNode);
-
-                console.log(modelToMerge);
 
             }
 
@@ -104,7 +101,7 @@ angular.module("sampleApp")
 
 
                 var treeObject = $('#lmTreeView').jstree().get_json();    //creates a hierarchical view of the resource
-                console.log(treeObject)
+
                 
                 $scope.sample = logicalModelSvc.generateSample(treeObject);
             };
@@ -236,7 +233,7 @@ angular.module("sampleApp")
 
             $scope.explodeDT = function(dt) {
 
-                console.log($scope.selectedNode);
+
                 logicalModelSvc.explodeDataType($scope.treeData,$scope.selectedNode,dt).then(
                     function() {
                         drawTree();
@@ -258,10 +255,10 @@ angular.module("sampleApp")
                 function() {
                     if ($scope.selectedNode) {
                         delete $scope.valueSetOptions;
-                        //console.log($scope.selectedNode)
+
                         logicalModelSvc.getOptionsFromValueSet($scope.selectedNode.data).then(
                             function(lst) {
-                                console.log(lst);
+
                                 $scope.valueSetOptions = lst;
 
                                 if (lst) {
@@ -311,41 +308,6 @@ angular.module("sampleApp")
                 })
             }
 
-            $scope.saveCommentDEP = function(parent) {
-                console.log(parent)
-                var user = logicalModelSvc.getCurrentUser();
-
-                var newComment = {display:$scope.input.newComment, date : moment().format(),
-                    user: {email:user.email,uid:user.uid},children:[]}
-                newComment.id = new Date().getTime();
-
-                delete $scope.input.newComment;
-
-
-                console.log($scope.selectedNode)
-
-                //$scope.input.modelChatData
-
-                parent.comment.children = parent.comment.children || []
-                parent.comment.children.push(newComment);
-                $scope.input.newCommentboxInx = -1;
-                $scope.input.modelChat = logicalModelSvc.generateChatDisplay( $scope.input.modelChatData);
-
-
-                var key = $scope.rootName;      //the key for this particular models chat in the database
-
-                //now update the database...
-                var update = {};
-                update[key] = $scope.input.modelChatData;
-
-                console.log(update)
-                console.log(angular.copy(update))
-
-                firebase.database().ref().child("chat").update(angular.copy(update))    //angular.copy() to remove $$hash
-
-
-
-            }
 
             //load the indicated model...
             $scope.loadReferencedModel = function(url){
@@ -437,7 +399,7 @@ angular.module("sampleApp")
                     //return the practitioner resource that corresponds to the current user (the service will create if absent)
                     GetDataFromServer.getPractitionerByLogin(user).then(
                         function(practitioner){
-                            //console.log(practitioner)
+
                             $scope.Practitioner = practitioner;
 
                             checkForComments($scope.currentType);     //get comments for this user against this model...
@@ -535,7 +497,7 @@ angular.module("sampleApp")
                     $scope.showWaiting = true;
                     GetDataFromServer.adHocFHIRQuery(url).then(
                         function(data){
-                            console.log(data)
+
                             selectEntry({resource:data.data})
                         }, function(err) {
                             alert('error getting model '+angular.toJson(err));
@@ -545,7 +507,7 @@ angular.module("sampleApp")
                             $scope.showWaiting = false;
                         }
                     );
-                    console.log(item)
+
                 }
 
             };
@@ -594,7 +556,7 @@ angular.module("sampleApp")
                 var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
                 sc.$loaded().then(
                     function(){
-                        console.log( sc.config)
+
 
                         $scope.loadedFromBookmark = true;
 
@@ -680,10 +642,9 @@ angular.module("sampleApp")
                     var series = dataSnapshot.val();
                     if(series){
                         //so there's at least 1 shortcut for a model with this id, now check the server
-                       // console.log("Found", series);
 
                         angular.forEach(series,function(v,k){
-                           // console.log(k,v)
+
                             if (v.config.conformanceServer.url == appConfigSvc.getCurrentConformanceServer().url) {
                                 deferred.resolve(v)
                             }
@@ -732,7 +693,7 @@ angular.module("sampleApp")
                     templateUrl: 'modalTemplates/viewLogicalModel.html',
                     size: 'lg',
                     controller: function ($scope,allModels,modelUrl) {
-                        console.log(allModels)
+
                         
                         //locate the specific model from the list of models. This won't scale of course...
                         for (var i=0; i < allModels.entry.length ; i++) {
@@ -826,7 +787,7 @@ angular.module("sampleApp")
 
                 GetDataFromServer.getValueSet(uri).then(
                     function(vs) {
-                        console.log(vs)
+
                         $scope.showVSBrowserDialog.open(vs);
 
                     }, function(err) {
@@ -841,7 +802,7 @@ angular.module("sampleApp")
             
             //re-draw the graph setting the indicated path as the parent...
             $scope.setParentInGraph = function(selectedNode) {
-                console.log(selectedNode)
+
                 var path = selectedNode.data.path;
                 createGraphOfProfile({parentPath:path})
             };
@@ -865,11 +826,7 @@ angular.module("sampleApp")
                     function(graphData) {
                         $scope.graphData = graphData;
 
-                        //console.log(graphData)
 
-                        //drawGraphFromGraphData(graphData);      //actually generate the graph...
-
-                        //console.log(graphData)
                         var container = document.getElementById('mmLogicalModel');
                         var options = {
 
@@ -895,13 +852,11 @@ angular.module("sampleApp")
                         $scope.profileNetwork = new vis.Network(container, graphData, options);
 
                         $scope.profileNetwork.on("click", function (obj) {
-                            //console.log(obj)
 
                             var nodeId = obj.nodes[0];  //get the first node
-                            //console.log(nodeId,graphData)
+
 
                             var node = graphData.nodes.get(nodeId);
-                            //console.log(node)
 
                             var pathOfSelectedNode = node.ed.path; //node.ed.base.path not working with merged...
 
@@ -909,7 +864,7 @@ angular.module("sampleApp")
                             $scope.selectedNode = findNodeWithPath(pathOfSelectedNode); //note this is the node for the tree view, not the graph
 
                             $scope.$digest();
-                            //selectedNetworkElement
+
 
                         });
 
@@ -921,7 +876,7 @@ angular.module("sampleApp")
 
             //generate the graph. allows tge graph to be manipulated (eg nodes hidden) after creation...
             var drawGraphFromGraphDataDEP = function(graphData,options) {
-                //console.log(graphData)
+
                 var container = document.getElementById('mmLogicalModel');
                 var options = {
 
@@ -946,13 +901,13 @@ angular.module("sampleApp")
                 $scope.profileNetwork = new vis.Network(container, graphData, options);
 
                 $scope.profileNetwork.on("click", function (obj) {
-                    //console.log(obj)
+
 
                     var nodeId = obj.nodes[0];  //get the first node
-                    //console.log(nodeId,graphData)
+
 
                     var node = graphData.nodes.get(nodeId);
-                    //console.log(node)
+
 
                     var pathOfSelectedNode = node.ed.path; //node.ed.base.path not working with merged...
 
@@ -960,7 +915,7 @@ angular.module("sampleApp")
                     $scope.selectedNode = findNodeWithPath(pathOfSelectedNode); //note this is the node for the tree view, not the graph
 
                     $scope.$digest();
-                    //selectedNetworkElement
+
 
                 });
 
@@ -969,23 +924,23 @@ angular.module("sampleApp")
 
             //this is the event when the profileGraph tab is chosen. Should really move this to a separate controller...
             $scope.redrawProfileGraph = function() {
-                console.log('click')
+
 
                 $scope.input.graphTabIsSelected = true;
 
                 $timeout(function(){
                     $scope.profileNetwork.fit();
-                    console.log('fitting...')
+
                 },1000            )
 
 
             };
 
             $scope.selectNodeFromTable = function(path) {
-                //alert(path)
+
                 //to allow the details of a selected node in the table to be displayed...
                 $scope.selectedNode = findNodeWithPath(path);
-                //console.log($scope.selectedNode)
+
             };
 
             //revert to a previous version
@@ -1025,7 +980,7 @@ angular.module("sampleApp")
                             $scope.input = {};
                             $scope.isNew = true;
                             $scope.allModels = allModels;
-                            //console.log(allModels)
+
 
                             //the list of all the base resource types in the spec...
                             RenderProfileSvc.getAllStandardResourceTypes().then(
@@ -1034,7 +989,7 @@ angular.module("sampleApp")
                             });
 
                             
-                           // console.log($scope.allResourceTypes)
+
                             //note that a StructureDefinition is passed in when editing...
                             if (SD) {
                                 $scope.SD = SD;
@@ -1108,7 +1063,7 @@ angular.module("sampleApp")
                                         }
 
                                     },function(err){
-                                       // console.log(err);
+
                                         //as long as the status is 404 or 410, it's save to create a new one...
                                         if (err.status == 404 || err.status == 410) {
                                             $scope.canSave = true;
@@ -1150,7 +1105,7 @@ angular.module("sampleApp")
                                 if ($scope.input.clone) {
                                     //creating another copy
 
-                                    console.log($scope.input.clone)
+
                                     vo.clone = $scope.input.clone.resource;
                                 }
 
@@ -1189,46 +1144,7 @@ angular.module("sampleApp")
                                 $scope.isDirty = true;      //as this has not been saved;
                                 $scope.isInPalette = false;
 
-                                /*
-                                switch (result.modelType) {
-                                    case 'single' :
-                                        if (result.baseType && result.createElementsFromBase) {
-                                            //if the user specified a base type, then pre-populate a model from that base
 
-
-                                            logicalModelSvc.createFromBaseType($scope.treeData, result.baseType, $scope.rootName).then(
-                                                function () {
-                                                    drawTree();
-                                                    makeSD();
-                                                    //add it to the list so we can see it
-                                                    $scope.bundleModels.entry.push({resource: $scope.SD})
-                                                    $scope.currentSD = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
-                                                },
-                                                function (err) {
-                                                    alert(angular.toJson(err))
-                                                }
-                                            )
-                                        }
-                                        break;
-                                    case 'clone' :
-                                        delete $scope.modelHistory;
-                                        delete $scope.selectedNode;
-
-                                        $scope.currentSD = logicalModelSvc.clone(result.clone,result.name);
-
-                                        console.log($scope.currentSD);
-                                        $scope.isDirty = true;  //as the model has noy been saved...
-                                        $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.currentSD)
-                                        console.log($scope.treeData)
-                                        $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
-                                        drawTree();
-                                        makeSD();
-                                        break;
-                                    case 'multiple' :
-                                        break;
-
-                                }
-                                */
 
                                 if (result.clone) {
                                     //if the user specified to copy from another model
@@ -1238,10 +1154,10 @@ angular.module("sampleApp")
 
                                     $scope.currentType = logicalModelSvc.clone(result.clone,result.name);
 
-                                    console.log($scope.currentType);
+
                                     $scope.isDirty = true;  //as the model has noy been saved...
                                     $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.currentType)
-                                    console.log($scope.treeData)
+
                                     $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                                     drawTree();
                                     makeSD();
@@ -1249,13 +1165,7 @@ angular.module("sampleApp")
                                 } else if (result.baseType && result.createElementsFromBase) {
                                     //if the user specified a base type, then pre-populate a model from that base
 
-                                    /* doen't seem to be doing anything with this...
-                                    logicalModelSvc.getAllPathsForType(result.baseType).then(
-                                        function(listOfPaths) {
-                                            console.log(listOfPaths);
-                                        }
-                                    );
-                                    */
+
 
 
                                     logicalModelSvc.createFromBaseType($scope.treeData,result.baseType,
@@ -1333,7 +1243,7 @@ angular.module("sampleApp")
                 
                 $http.put(url,SDToSave).then(
                     function(data) {
-                        //console.log(data)
+
                         if (!$scope.initialLM) {
                             //if there wasn't a model passed in, re-load the list
                             loadAllModels();
@@ -1344,7 +1254,7 @@ angular.module("sampleApp")
                         modalService.showModal({},{bodyText:"The model has been updated. You may continue editing."})
                     },
                     function(err) {
-                        //console.log(err)
+
                         $scope.error = err;
                         modalService.showModal({},{bodyText:"Sorry, there was an error saving the profile. View the 'Error' tab above for details."})
                     }
@@ -1421,7 +1331,7 @@ angular.module("sampleApp")
                     }
                 })
 
-                //console.log($scope.allMappingIdentities)
+
 
 
                 findShortCutForModel(entry.resource.id).then(
@@ -1440,7 +1350,7 @@ angular.module("sampleApp")
                 $scope.uniqueModelsList = vo.lstNodes;
                 
                 
-                //console.log($scope.uniqueModelsList)
+
                 var allNodesObj = vo.nodes;
 
                 var container = document.getElementById('refLogicalModel');
@@ -1463,7 +1373,7 @@ angular.module("sampleApp")
                         modalService.showModal({},{bodyText:"There are unsaved changes to the current model."})
                     } else {
                         var nodeId = obj.nodes[0];  //get the first node
-                        //console.log(nodeId,graphData)
+
                         var node = allNodesObj[nodeId];
 
                         $scope.history = $scope.history || []
@@ -1523,7 +1433,7 @@ angular.module("sampleApp")
                         $scope.refNetwork.fit();
                     }
 
-                    //console.log('fitting...')
+
                 },1000            )
 
             }
@@ -1547,7 +1457,7 @@ angular.module("sampleApp")
             function getAllComments(){
                 GetDataFromServer.getOutputsForModel($scope.currentType).then(
                     function(lst) {
-                        //console.log(lst)
+
                         $scope.allComments = lst;
                     }, function (err) {
 
@@ -1561,7 +1471,7 @@ angular.module("sampleApp")
                     var options = {active:true,focus:resource}
                     GetDataFromServer.getTasksForPractitioner($scope.Practitioner,options).then(
                         function(listTasks) {
-                           // console.log(listTasks)
+
                             if (listTasks.length > 0) {
                                 $scope.commentTask = listTasks[0];  //should only be 1 active task for this practitioner for this model
 
@@ -1569,7 +1479,7 @@ angular.module("sampleApp")
                                 GetDataFromServer.getOutputsForTask($scope.commentTask,'QuestionnaireResponse').then(
                                     function(lst){
                                         $scope.taskOutputs = lst;
-                                        console.log(lst)
+
 
                                         if (lst.length > 0 && lst[0].item) {
                                             //if there is at least 1 QuestionnaireResponse - set the text...
@@ -1600,7 +1510,7 @@ angular.module("sampleApp")
             function loadHistory(id) {
                 logicalModelSvc.getModelHistory(id).then(
                     function(data){
-                        //console.log(data.data)
+
                         $scope.modelHistory =data.data;
                     },
                     function(err) {
@@ -1620,7 +1530,7 @@ angular.module("sampleApp")
 
             $scope.editExtension = function () {
                 var extensionUrl = $scope.selectedNode.data.fhirMappingExtensionUrl;
-                console.log(extensionUrl)
+
                 GetDataFromServer.findConformanceResourceByUri(extensionUrl).then(
                     function(resource) {
                         $uibModal.open({
@@ -1742,7 +1652,7 @@ angular.module("sampleApp")
                             //the currently selected parent node type should now be set to 'BackBone element'
                             var node = findNodeWithPath(parentPath);
                             if (node){
-                                node.data.type = [{code:'BackboneElement'}]
+                           //     node.data.type = [{code:'BackboneElement'}]
                             }
 
 
@@ -1818,7 +1728,7 @@ angular.module("sampleApp")
                     var lst = [idToDelete];
 
                     findChildNodes(lst,idToDelete);     //all the child nodes (including their children) of the element to be removed
-                    //console.log(lst);
+
 
                     //now create a new list - excluding the ones to be deleted
                     var newList = [];
@@ -1881,7 +1791,7 @@ angular.module("sampleApp")
             //have this as a single function so we can extract scope properties rather than passing the whole scope across...
             makeSD = function() {
 
-                //console.log($scope.treeData);
+
 
                 //sorts the tree array in parent/child order
                 var ar = logicalModelSvc.reOrderTree($scope.treeData);
@@ -1902,7 +1812,7 @@ angular.module("sampleApp")
 
                 //restore the current (working) version...
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.SD)
-                console.log($scope.treeData)
+
                 $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                 drawTree();
                 makeSD();
@@ -1912,7 +1822,7 @@ angular.module("sampleApp")
             $scope.moveUp = function(){
                 var path = $scope.selectedNode.data.path;
                 var pos = findPositionInTree(path);     //the location of the element we wish to move in the array
-                console.log(pos);
+
                 if (pos > 0) {
                     var lst = getListOfPeers(path);
                     if (lst[0].data.path !== path) {
@@ -1980,7 +1890,7 @@ angular.module("sampleApp")
             //remove a nde and all of its children
             pruneBranch = function(path) {
                 var arChildren = getChildren(path);
-                console.log(arChildren)
+
                 //remove all the children from the array
                 var pos = findPositionInTree(path);
                 return $scope.treeData.splice(pos,arChildren.length+1)
@@ -2045,7 +1955,7 @@ angular.module("sampleApp")
                 ).on('changed.jstree', function (e, data) {
                     //seems to be the node selection event...
 
-                    //console.log(data)
+
                     if (data.node) {
                         $scope.selectedNode = data.node;
                     }
@@ -2061,7 +1971,7 @@ angular.module("sampleApp")
                 }).on('redraw.jstree', function (e, data) {
 
 
-                    //console.log('redraw')
+
 
                     if ($scope.treeIdToSelect) {
                         $("#lmTreeView").jstree("select_node", "#"+$scope.treeIdToSelect);

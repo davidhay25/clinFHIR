@@ -1091,9 +1091,10 @@ console.log(newNode)
                                 item.data.comments = ed.comments;
 
                                 //set the mapping
-                                item.data.mappingPath = path; //[{identity: 'fhir', map: path}]
+                                //item.data.mappingPath = path; //[{identity: 'fhir', map: path}]
 
-                                //decorate the type elements... - **** THIS IS A COPY
+                                item.data.mappingFromED = [{identity: 'fhir', map: path}];
+                                //decorate the type elements...
 
                                 decorateTreeView(item,ed);     //common decorator functions like isComplex
 
