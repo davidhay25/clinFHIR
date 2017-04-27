@@ -1150,6 +1150,7 @@ console.log(newNode)
             },
             createTreeArrayFromSD: function (sd) {
                 //generate the array that the tree uses from the StructureDefinition
+                var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
                 var mappingCommentUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
                 var mapToModelExtensionUrl = appConfigSvc.config().standardExtensionUrl.mapToModel;
                 var baseTypeForModel = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
@@ -1242,7 +1243,7 @@ console.log(newNode)
                         item.data.name = item.text;
                         item.data.short = ed.short;
                         item.data.description = ed.definition;
-                        item.data.type = ed.type;
+                        //item.data.type = ed.type;
 
 
                         //decorate the type elements...
@@ -1254,7 +1255,52 @@ console.log(newNode)
                         }
 
 
-                        //in STU3 type.profile became type.targetProfile - should be able to drop 'profile' eventually...
+                        //format of type prpfile changed between 2 & 3
+
+
+                        if (ed.type) {
+                            var tvType = []
+
+                            ed.type.forEach(function(typ){
+                                var newTyp = {code:typ.code}
+                                if (fhirVersion == 2) {
+                                    //the profile is multiple
+                                    if (typ.profile) {
+                                        newTyp.targetProfile = typ.profile[0]
+                                    }
+                                } else {
+                                    newTyp.targetProfile. typ.targetProfile;
+                                }
+
+                                //is this a coded type
+                                if (['CodeableConcept', 'Coding', 'code'].indexOf(typ.code) > -1) {
+                                    item.data.isCoded = true;
+                                }
+
+                                //is this a reference
+                                if (typ.code == 'Reference') {
+                                    item.data.isReference = true;   //used to populate the 'is reference' table...
+                                }
+
+                                //is this complex
+                                var first = newTyp.code.substr(0,1);
+                                if (first == first.toUpperCase()) {
+                                    newTyp.isComplexDT = true;
+                                }
+
+                                tvType.push(newTyp)
+
+
+                            })
+
+                            console.log(tvType)
+
+                            item.data.type = tvType;
+
+                        }
+
+
+                        /*
                         if (ed.type && ed.type[0].profile) {
                             item.data.referenceUri = ed.type[0].profile;
 
@@ -1262,8 +1308,8 @@ console.log(newNode)
                             if (angular.isArray(item.data.referenceUri)) {
                                 item.data.referenceUri = item.data.referenceUri[0];
                             }
-
                         }
+
 
                         if (ed.type && ed.type[0].targetProfile) {
                             item.data.referenceUri = ed.type[0].targetProfile;
@@ -1289,7 +1335,7 @@ console.log(newNode)
                             })
                         }
 
-
+*/
                         item.data.min = ed.min;
                         item.data.max = ed.max;
 
@@ -1394,15 +1440,6 @@ console.log(newNode)
                         }
 
 
-                        /*
-                         if (data.selectedValueSet) {
-                         ed.binding = {strength:data.selectedValueSet.strength};
-                         ed.binding.valueSetUri = data.selectedValueSet.vs.url;
-                         ed.binding.description = 'The bound valueset'
-
-                         }
-                         */
-
 
                         if (include) {
                             arTree.push(item);
@@ -1436,8 +1473,6 @@ console.log(newNode)
                 }
 
 
-
-
                 if (header.baseType) {
                     Utilities.addExtensionOnce(sd, baseTypeForModelUrl, {valueString: header.baseType})
                     // this.addSimpleExtension(sd,baseTypeForModel,header.baseType)
@@ -1448,7 +1483,7 @@ console.log(newNode)
                 sd.url = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/" + sd.id;
                 sd.name = header.name;
 
-                //these are fhir version changes...
+                //these are some of the fhir version changes...
                 if (fhirVersion ==2) {
                     sd.display = header.title;
                     sd.requirements = header.purpose;
@@ -1526,13 +1561,7 @@ console.log(newNode)
                         //ed.mapping = [{identity: 'fhir', map: data.mappingPath}]
                     //}
 
-/*
-                    if (data.mappingPathV2) {         //the actual path in the target resource
-                        ed.mapping = ed.mapping || [];
-                        ed.mapping.push({identity: 'hl7V2', map: data.mappingPathV2});
-                    }
 
-*/
 
                     //so all the mapping data for ED is in the 'mappingFromED' array...  {identity:, map:, comment:}
                     if (data.mappingFromED ) {
@@ -1561,26 +1590,7 @@ console.log(newNode)
 
                         })
                     }
-/* - temp - need to migrate...
 
-                    if (data.mapping) {
-                        //comments about the mapping - added as an extension to the first mapping node mapping
-                        //todo - might want separate notes per
-                        var mappingNode = {}
-                        if (ed.mapping) {
-                            //just in case there is more than one mapping
-                            mappingNode = ed.mapping[0]
-                        } else {
-                            ed.mapping = []
-                        }
-
-                        //adds an extension of this url once only to the specified node. Won't replace existing...
-                        Utilities.addExtensionOnce(mappingNode, mappingCommentUrl, {valueString: data.mapping})
-                        //ed.mapping = ed.mapping || []
-                        ed.mapping[0] = mappingNode;
-                    }
-
-*/
 
 
                     //todo - not sure about this..
@@ -1603,11 +1613,25 @@ console.log(newNode)
                     }
 
 
+                    //the format and name of the 'profile' property changed between 2 & 3...
                     if (data.type) {
                         ed.type = [];
                         data.type.forEach(function (typ) {
-                            //actually, there will only ever be one type at the moment...
-                            ed.type.push(typ);
+                            var newTyp;
+                            // {code:, targetProfile} - actually, there will only ever be one type at the moment...
+
+                            if (typ.code == 'Reference') {
+                                newTyp = {code:'Reference'}
+                                //in the treeview, the profile is always named targetProfile and is single
+                                if (fhirVersion == 2) {
+                                    newTyp.profile = [typ.targetProfile]
+                                } else {
+                                    newTyp.targetProfile = typ.targetProfile;
+                                }
+                            } else {
+                                newTyp = typ;
+                            }
+                            ed.type.push(newTyp);
                         })
                     }
 

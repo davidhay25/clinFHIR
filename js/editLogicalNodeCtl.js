@@ -1,12 +1,12 @@
 
 angular.module("sampleApp")
     .controller('editLogicalNodeCtrl',
-        function ($scope,allDataTypes,editNode,parentPath,RenderProfileSvc,
+        function ($scope,allDataTypes,editNode,parentPath,RenderProfileSvc,appConfigSvc, allResourceTypes,
                   findNodeWithPath,rootForDataType,igSvc,references,baseType,$uibModal, logicalModelSvc, modalService) {
 
-
+            $scope.allResourceTypes = allResourceTypes;
             $scope.references = references;
-            console.log(references);
+            //console.log(references);
             $scope.rootForDataType = rootForDataType;
             $scope.canSave = true;
             $scope.allDataTypes = allDataTypes;
@@ -14,28 +14,44 @@ angular.module("sampleApp")
             $scope.pathDescription = 'Parent path';
             $scope.vsInGuide = igSvc.getResourcesInGuide('valueSet');       //so we can show the list of ValueSets in the IG
             $scope.input = {};
+            var that = this;
 
-            RenderProfileSvc.getAllStandardResourceTypes().then(
-                function(data){
-                    $scope.allResourceTypes = data;
-                });
-
-
-            for (var i=0; i< $scope.allDataTypes.length; i++) {
-                if ($scope.allDataTypes[i].code == 'string') {
-                    $scope.input.dataType = $scope.allDataTypes[i];
-                    break;
-                }
-            }
-
-
-            $scope.input.multiplicity = 'opt';
             $scope.fhirMapping = function(map) {
                 $scope.isExtension = false;
                 if (map && map.indexOf('xtension') > -1) {
                     $scope.isExtension = true;
                 }
             };
+
+
+            if (editNode) {
+                setup(editNode);
+            } else {
+                for (var i=0; i< $scope.allDataTypes.length; i++) {
+                    if ($scope.allDataTypes[i].code == 'string') {
+                        $scope.input.dataType = $scope.allDataTypes[i];
+                        break;
+                    }
+                }
+
+
+                $scope.input.multiplicity = 'opt';
+            }
+
+/*
+            RenderProfileSvc.getAllStandardResourceTypes().then(
+                function(data){
+                    $scope.allResourceTypes = data;
+
+                    if (editNode) {
+                        setup(editNode);
+                    }
+
+                });
+*/
+
+
+
 
             if (baseType) {
 
@@ -49,6 +65,110 @@ angular.module("sampleApp")
             }
 
 
+
+            function setup(node) {
+
+               // if (editNode) {
+                    //editing an existing node
+                    $scope.pathDescription = 'Path'
+                    var data = node.data;
+                    $scope.input.name = data.name;
+                    $scope.input.short= data.short;
+                    $scope.input.description = data.description;
+                    $scope.input.comments = data.comments;
+                    $scope.input.mapping = data.mapping;
+                    //$scope.input.mappingPath = data.mappingPath;
+                    $scope.fhirMapping(data.mappingPath);       //check for an extension
+                    $scope.input.fixedString = data.fixedString;
+                    //$scope.input.mappingPathV2 = data.mappingPathV2;
+
+                    $scope.input.mappingFromED = angular.copy(data.mappingFromED);    //all the current mappings. Only want to update on save...
+
+
+
+                    $scope.input.mappingPath = getMapValueForIdentity('fhir');
+                    $scope.input.mappingPathV2 = getMapValueForIdentity('hl7V2');
+
+
+
+                    $scope.input.fhirMappingExtensionUrl = data.fhirMappingExtensionUrl;
+
+                    if (data.min == 0) {
+                        $scope.input.multiplicity = 'opt';
+                        if (data.max == '*') {$scope.input.multiplicity = 'mult'}
+                    }
+                    if (data.min == 1){
+                        $scope.input.multiplicity = 'req';
+                        if (data.max == '*') {$scope.input.multiplicity = 'multreq'}
+                    }
+
+                    $scope.dt = data.type[0];   //the selected datatype...
+
+                    var dtCode = data.type[0].code;     //only the first datatype (we only support 1 right now)
+                    $scope.allDataTypes.forEach(function(dt1){
+                        if (dt1.code == dtCode) {
+                            $scope.input.dataType = dt1;
+                        }
+                    });
+
+                    //set the dropdown if this is a valueset from the IG...
+                    if (data.selectedValueSet && data.selectedValueSet.vs){
+                        $scope.isCoded = true;
+                        $scope.vsInGuide.forEach(function(vs){
+                            if (vs.sourceUri ==data.selectedValueSet.vs.url) {
+                                $scope.input.vsFromIg = vs
+                            }
+                        })
+                    }
+
+
+                    $scope.selectedValueSet = data.selectedValueSet;
+
+
+                    //if this is a reference, set the initial reference
+                    if (dtCode == 'Reference') {
+
+                        //for a core type reference, find the name of the type (it's the last segment in the url)
+                        var profileUrl = data.type[0].targetProfile;    //normalized to this...
+                        var ar = profileUrl.split('/');
+                        var typeName = ar[ar.length-1];
+
+                        //this is for references to core types....
+                        $scope.allResourceTypes.forEach(function(typ){
+                            if (typ.name == typeName) {
+                                $scope.input.referenceToCoreFromIg = typ
+                            }
+                        });
+
+
+                        //var profileUrl = data.type[0].targetProfile || data.type[0].profile;     //only the first datatype (we only support 1 right now)
+                        //this is for references to Logical Models
+                        $scope.references.entry.forEach(function(ent){
+                            if (ent.resource.url == profileUrl) {
+                                $scope.input.referenceFromIg = ent;
+
+                                // $scope.dt = {code: 'Reference', isReference: true}; //to show the reference...
+                            }
+                        })
+                    }
+
+                    //this is the url of the model that this item (and it's children) will map to
+                    if (data.mapToModelUrl) {
+                        $scope.references.entry.forEach(function(ent){
+                            if (ent.resource.url == data.mapToModelUrl) {
+                                $scope.input.mapToModelEnt = ent;
+                                //$scope.dt = {code: 'Reference', isReference: true}; //to show the reference...
+                            }
+                        })
+                    }
+
+              //  }
+
+
+            }
+
+
+            /*
             if (editNode) {
                 //editing an existing node
                 $scope.pathDescription = 'Path'
@@ -83,9 +203,11 @@ angular.module("sampleApp")
                     if (data.max == '*') {$scope.input.multiplicity = 'multreq'}
                 }
 
-                var dt = data.type[0].code;     //only the first datatype (we only support 1 right now)
+                $scope.dt = data.type[0];   //the selected datatype...
+                
+                var dtCode = data.type[0].code;     //only the first datatype (we only support 1 right now)
                 $scope.allDataTypes.forEach(function(dt1){
-                    if (dt1.code == dt) {
+                    if (dt1.code == dtCode) {
                         $scope.input.dataType = dt1;
                     }
                 });
@@ -105,12 +227,28 @@ angular.module("sampleApp")
 
 
                 //if this is a reference, set the initial reference
-                if (dt == 'Reference') {
-                    var profileUrl = data.type[0].targetProfile || data.type[0].profile;     //only the first datatype (we only support 1 right now)
+                if (dtCode == 'Reference') {
+
+                    //for a core type reference, find the name of the type (it's the last segment in the url)
+                    var profileUrl = data.type[0].targetProfile;    //normalized to this...
+                    var ar = profileUrl.split('/');
+                    var typeName = ar[ar.length-1];
+
+                    //this is for references to core types....
+                    $scope.allResourceTypes.forEach(function(typ){
+                        if (typ.name == typeName) {
+                            $scope.input.referenceToCoreFromIg = typ
+                        }
+                    });
+
+                    
+                    //var profileUrl = data.type[0].targetProfile || data.type[0].profile;     //only the first datatype (we only support 1 right now)
+                    //this is for references to Logical Models
                     $scope.references.entry.forEach(function(ent){
                         if (ent.resource.url == profileUrl) {
                             $scope.input.referenceFromIg = ent;
-                            $scope.dt = {code: 'Reference', isReference: true}; //to show the reference...
+
+                           // $scope.dt = {code: 'Reference', isReference: true}; //to show the reference...
                         }
                     })
                 }
@@ -127,6 +265,9 @@ angular.module("sampleApp")
 
             }
 
+
+
+            */
 
             $scope.selectExistingExtension = function(){
 
@@ -217,16 +358,7 @@ angular.module("sampleApp")
                              */
 
                         }
-                        /*
-                         function setDataType(dtString) {
-                         for (var i=0; i< $scope.allDataTypes.length; i++) {
-                         if ($scope.allDataTypes[i].code == dtString) {
-                         $scope.input.dataType = $scope.allDataTypes[i];
-                         break;
-                         }
-                         }
-                         }
-                         */
+                        
 
                     },
                     resolve : {
@@ -366,10 +498,7 @@ angular.module("sampleApp")
 
             };
 
-
-
             $scope.setCurrentMap('fhir');       //'cause the first tab displayed is the fhir one...
-
 
             $scope.removeMap = function(inx) {
                 $scope.input.mappingFromED.splice(inx,1)
@@ -391,7 +520,6 @@ angular.module("sampleApp")
                 $scope.currentMap.map = value;
                 $scope.isDirty = true;
             }
-
 
             $scope.deleteCurrentMap = function(){
                 delete $scope.currentMap;
@@ -462,7 +590,13 @@ angular.module("sampleApp")
 
                         //set the default to any...
                         vo.referenceUri = "http://hl7.org/fhir/StructureDefinition/Resource";
+                        if ($scope.input.referenceToCoreFromIg) {
+                            vo.referenceUri = "http://hl7.org/fhir/StructureDefinition/" + $scope.input.referenceToCoreFromIg.name;
+                        }
+
                         vo.type[0].targetProfile = vo.referenceUri;
+
+
 
                         if ($scope.input.referenceFromIg) {
                             vo.isReference = true;
@@ -599,7 +733,7 @@ angular.module("sampleApp")
                         //vo is {vs,strength}
                         console.log(vo)
                         $scope.selectedValueSet = vo;
-                        dt.vs = vo;         //save the valueset against the datatype
+                        dtCode.vs = vo;         //save the valueset against the datatype
                     }
                 )
             };
@@ -608,7 +742,7 @@ angular.module("sampleApp")
                 var vs = $scope.input.vsFromIg;
                 var vo={vs:{url:vs.sourceUri,name:vs.name},strength:'preferred'}
                 $scope.selectedValueSet = vo;
-                dt.vs = vo;
+                dtCode.vs = vo;
 
                 console.log(vo)
 

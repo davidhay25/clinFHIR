@@ -1618,6 +1618,9 @@ angular.module("sampleApp")
                                 baseType = $scope.treeData[0].data.header.baseType;
                             }
                             return baseType;
+                        },
+                        allResourceTypes : function() {
+                            return  $scope.allResourceTypes;
                         }
                     }
                 }).result.then(
