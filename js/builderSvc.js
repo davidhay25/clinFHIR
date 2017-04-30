@@ -37,6 +37,10 @@ angular.module("sampleApp")
 
         };
 
+        //colours from node-red
+        //#3FADB5 #87A980 #A6BBCF #AAAA66 #C0C0C0 #C0DEED #C7E9C0 #D7D7A0 #D8BFD8 #DAC4B4 #DEB887 #DEBD5C #E2D96E #E6E0F8 #E7E7AE #E9967A #F3B567 #FDD0A2 #FDF0C2 #FFAAAA #FFCC66 #FFF0F0 #FFFFFF
+
+
         var objColours ={};
         objColours.Patient = '#93FF1A';
         objColours.Composition = '#E89D0C';

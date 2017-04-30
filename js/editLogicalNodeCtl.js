@@ -129,27 +129,32 @@ angular.module("sampleApp")
                     if (dtCode == 'Reference') {
 
                         //for a core type reference, find the name of the type (it's the last segment in the url)
-                        var profileUrl = data.type[0].targetProfile;    //normalized to this...
-                        var ar = profileUrl.split('/');
-                        var typeName = ar[ar.length-1];
+                        if (data.type) {
+                            var profileUrl = data.type[0].targetProfile;    //normalized to this...
+                            if (profileUrl) {
+                                var ar = profileUrl.split('/');
+                                var typeName = ar[ar.length-1];
 
-                        //this is for references to core types....
-                        $scope.allResourceTypes.forEach(function(typ){
-                            if (typ.name == typeName) {
-                                $scope.input.referenceToCoreFromIg = typ
+                                //this is for references to core types....
+                                $scope.allResourceTypes.forEach(function(typ){
+                                    if (typ.name == typeName) {
+                                        $scope.input.referenceToCoreFromIg = typ
+                                    }
+                                });
+
+
+                                //this is for references to Logical Models
+                                $scope.references.entry.forEach(function(ent){
+                                    if (ent.resource.url == profileUrl) {
+                                        $scope.input.referenceFromIg = ent;
+
+                                        // $scope.dt = {code: 'Reference', isReference: true}; //to show the reference...
+                                    }
+                                })
                             }
-                        });
 
+                        }
 
-                        //var profileUrl = data.type[0].targetProfile || data.type[0].profile;     //only the first datatype (we only support 1 right now)
-                        //this is for references to Logical Models
-                        $scope.references.entry.forEach(function(ent){
-                            if (ent.resource.url == profileUrl) {
-                                $scope.input.referenceFromIg = ent;
-
-                                // $scope.dt = {code: 'Reference', isReference: true}; //to show the reference...
-                            }
-                        })
                     }
 
                     //this is the url of the model that this item (and it's children) will map to

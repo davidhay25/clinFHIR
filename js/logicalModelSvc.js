@@ -21,9 +21,7 @@ angular.module("sampleApp")
             return ar[ar.length-1]
         }
 
-
-
-
+        /*
         function makeTreeDataElementDEP(rootName,ed,treeData) {
             //generate an item for the tree
 
@@ -111,7 +109,7 @@ angular.module("sampleApp")
 
         }
 
-
+*/
         //common function for decorating various properties of the treeview when building form an SD. Used when creating a new one & editing
         function decorateTreeView(item,ed) {
             //decorate the type elements...
@@ -181,15 +179,12 @@ angular.module("sampleApp")
                                         state: {opened: true},
                                         data : {}
                                     };
-                                    //newNode.data = {};
 
-                                    newNode.data.name = ar[1];
+
+                                    newNode.data.name = ar[0];
                                     newNode.data.short = ele.short;
 
 
-                                    //ar.splice(0,0,lmRoot)
-                                    //ar[0] = treeData[0].path;
-                                  //  ar.splice(0,1);     //remove the first part of the path (the dt)
 
                                     newNode.data.path = pathForThisElement;///parentPath + '.'+  ar.join('.')
                                     newNode.data.min = ele.min;
@@ -465,67 +460,90 @@ console.log(newNode)
 
                 function makeFHIRProfile(SD) {
 
+                    var err = [];
+                    var ok = [];
+                    var slices = []; // a collection of all sliced elements
 
 
-                    //create a hash of all the paths in the base resource type...
-                    var pathHash = {};
+                    //create a hash of all the paths in the Logical model. Ignore duplications. used for finding the dt of the parent
+                    internalLM.snapshot.element.forEach(function(ed,inx){
+
+                    })
+
+
+                    //create a hash of all the paths in the base resource type (That is being profiled)...
+                    var basePathHash = {};
                     SD.snapshot.element.forEach(function(ed){
-                        pathHash[ed.path] = ed;
+                        basePathHash[ed.path] = ed;
+                        /*
+                        if (pathHash[ed.path]) {
+                            err.push("The path '"+ed.path + "' is duplicated in the model.")
+                        } else {
+                            pathHash[ed.path] = ed;
+                        }*/
+
                     });
 
-                    var err = []
+
 
                     //now work through the model. if there's no mapping, then an error. If an extension then insert the url...
                     internalLM.snapshot.element.forEach(function(ed,inx){
                         var newED = angular.copy(ed);
 
+                        //the current path will not be correct (it is in the logical model) - we need to get this from the FHIR mapping
+                        var oldPath = newED.path;
+                        delete newED.path;
+
                         if (inx == 0) {
                             //this is the root element
                             newED.path = baseType;
                         } else {
-                            //get the path mapping for this element
-                            //var mappedPath;
+                            //get the path mapping for this element and update the path
                             if (ed.mapping) {
                                 ed.mapping.forEach(function (map) {
                                     if (map.identity=='fhir') {
-                                        // mappedPath = map;
+
                                         //the hack for the mapping comments
                                         if (map.map) {
                                             var ar1 = map.map.split('|');
+                                            var fhirPath = ar1[0];
 
-                                            newED.path = ar1[0];//map.map
+                                            //if the mapping path has '[ ', then this is a sliced element.
+                                            var ar2 = fhirPath.split('[')
+                                            if (ar2.length > 1) {
+                                                newED.path = map.map;//map.map
+                                                slices.push(newED)
+                                            } else {
+                                                newED.path = fhirPath;//map.map
+                                            }
+
                                         }
 
                                     }
                                 })
                             }
+
                         }
                         newED.id = baseType + ':' + newED.path;
-
-
-
-/*
-                        var path = ed.path;
-                        var ar = path.split('.');
-                        ar[0] = baseType;
-                        newED.path = ar.join('.')
-*/
-
                         console.log(newED.path)
 
-                        //if this is an extension then we need to insert the url to the extension...
-                        if (newED.path.indexOf('extension') == -1) {
 
-                            if (!pathHash[newED.path]) {
+                        if (! newED.path) {
+                            //there is no path - which means that there was no FHIR mapping
+                            err.push("Path: "+oldPath + " needs to have a FHIR mapping")
+                        } else if (newED.path.indexOf('extension') == -1) {
+
+                            if (!basePathHash[newED.path]) {
+                                //there was a path, but it didn't match anything in the base resource
                                 err.push("Path: "+newED.path + " is not valid for this resource type")
                             } else {
-
-
+                                //a path that matches one in the base resource...
                                 realProfile.snapshot.element.push(newED)
+                                ok.push("Path: "+newED.path + " mapped ")
                             }
                         } else {
                             //this is an extension...
-
+//if this is an extension then we need to insert the url to the extension...
                             var ext = Utilities.getSingleExtensionValue(newED, appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl)
                             if (ext && ext.valueString) {
                                 extensionUrl = ext.valueString;
@@ -541,18 +559,23 @@ console.log(newNode)
 
 
                         }
-
-
-
                     })
 
+
+
+
+
+
+
                     if (err.length > 0) {
-                        var msg = err.join(' ');
-                        deferred.reject(msg);
+                       // var msg = err.join(' ');
+                        deferred.reject({err:err,ok:ok});
                     } else {
 
                         //write out
-
+                        //
+                        deferred.resolve(realProfile)
+/*
                         SaveDataToServer.saveResource(realProfile,appConfigSvc.getCurrentConformanceServer().url).then(
                             function(data) {
                                 deferred.resolve(realProfile)
@@ -560,6 +583,7 @@ console.log(newNode)
                                 deferred.reject(angular.toJson(err));
                             }
                         )
+                        */
 
                     }
 

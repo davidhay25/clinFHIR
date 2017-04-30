@@ -40,14 +40,50 @@ angular.module("sampleApp")
 
             //generate a real FHIR profile from the Logical model
             $scope.generateFHIRProfile = function(){
-                logicalModelSvc.generateFHIRProfile($scope.SD).then(
-                    function(profile) {
 
-                        modalService.showModal({}, {bodyText: "Profile has been created with the URL: "+ profile.url});
-                    },function(err) {
-                        modalService.showModal({}, {bodyText: err});
-                    }
-                );
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/generateProfile.html',
+                    //size: 'lg',
+                    controller: function($scope,logicalModelSvc,SaveDataToServer,modalService,logicalModel) {
+
+
+
+
+                        $scope.generateProfile = function() {
+                            logicalModelSvc.generateFHIRProfile(logicalModel).then(
+                                function(profile) {
+                                    modalService.showModal({}, {bodyText: "Profile has been created with the URL: "+ profile.url});
+
+                                },function(vo) {
+                                    $scope.errors = vo.err
+
+                                }
+                            );
+                        };
+
+                        $scope.save = function() {
+                            SaveDataToServer.saveResource(realProfile,appConfigSvc.getCurrentConformanceServer().url).then(
+                                function(data) {
+                                    deferred.resolve(realProfile)
+                                },function (err) {
+                                    deferred.reject(angular.toJson(err));
+                                }
+                            )
+                        };
+
+                        $scope.generateProfile();
+
+                    },  resolve : {
+                        logicalModel : function(){
+
+
+                            return $scope.SD
+                        }}
+
+                })
+
+
+
 
             };
 

@@ -1,0 +1,63 @@
+<div>
+
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h3 class="modal-title">Generate a Profile from a Logical Model</h3>
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+                <div class="pull-right">
+
+                    <button class="btn btn-link pull-right" ng-click="$dismiss()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-body">
+
+
+
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+
+            </div>
+            <div class="col-md-6 col-sm-6">
+
+            </div>
+            <div class="col-md-2 col-sm-2">
+                <button ng-click="generateProfile()" class="btn btn-primary pull-right">Generate</button>
+            </div>
+        </div>
+
+        <ul class="list-group">
+            <li ng-repeat = 'err in errors  track by $index' class="list-group-item">{{err}}</li>
+        </ul>
+
+        <br/>
+
+
+   </div>
+
+
+
+
+    </div>
+
+    <div class="modal-header">
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+
+
+
+            </div>
+
+        </div>
+
+
+
+    </div>
+</div>
