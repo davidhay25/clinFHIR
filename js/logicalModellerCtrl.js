@@ -267,6 +267,38 @@ angular.module("sampleApp")
 
             };
 
+            $scope.explodeReference = function(node){
+                //expand a resource rather than a datatype. The node passed in is the 'reference' child, we need the 'parent'
+                var path = node.data.path.split('.');
+                path.pop();
+                var parent = findNodeWithPath(path.join('.')); //note this is the node for the tree view, not the graph
+
+                if (parent && parent.data && parent.data.type) {
+                    //now find the resource type that is being expanded...
+
+                    parent.data.type.forEach(function (typ) {
+                        if (typ.targetProfile) {
+                            logicalModelSvc.explodeResource($scope.treeData,$scope.selectedNode,typ.targetProfile).then(
+                                function() {
+                                    drawTree();
+                                    $scope.isDirty = true;
+                                    makeSD();
+                                },
+                                function(err){
+                                    alert(angular.toJson(err))
+                                }
+
+
+                            )
+                        }
+
+                    })
+                }
+
+
+                console.log(parent);
+            }
+
             $scope.explodeDT = function(dt) {
 
 
@@ -862,7 +894,6 @@ angular.module("sampleApp")
                     function(graphData) {
                         $scope.graphData = graphData;
 
-
                         var container = document.getElementById('mmLogicalModel');
                         var options = {
 
@@ -888,23 +919,14 @@ angular.module("sampleApp")
                         $scope.profileNetwork = new vis.Network(container, graphData, options);
 
                         $scope.profileNetwork.on("click", function (obj) {
-
                             var nodeId = obj.nodes[0];  //get the first node
-
-
                             var node = graphData.nodes.get(nodeId);
-
                             var pathOfSelectedNode = node.ed.path; //node.ed.base.path not working with merged...
-
-                            //var pathOfSelectedNode = node.ed.base.path;
                             $scope.selectedNode = findNodeWithPath(pathOfSelectedNode); //note this is the node for the tree view, not the graph
 
                             $scope.$digest();
 
-
                         });
-
-
                     }
                 );
             };
@@ -1093,7 +1115,7 @@ angular.module("sampleApp")
                                     function(data){
 
                                         if (Utilities.isAuthoredByClinFhir(data.data)) {
-                                            modalService.showModal({},{bodyText:"There's already a profile with this name. Please select another name."})
+                                            modalService.showModal({},{bodyText:"There's already a model with this name. Please select another name."})
                                         } else {
                                             modalService.showModal({},{bodyText:"Sorry, there's already a profile with this name"})
                                         }
@@ -1603,18 +1625,11 @@ angular.module("sampleApp")
 
             $scope.editNode = function() {
 
-               // var ar = $scope.selectedNode.data.path.split('.');
-               // ar.pop();
-               // var parentPath = ar.join('.');
 
                 var parentPath = $scope.selectedNode.data.path;
 
-
-
-
-
                 editNode($scope.selectedNode,parentPath);         //will edit the node
-                //$scope.isDirty = true;
+
             };
 
             //edit or add a new element to the model
@@ -1694,6 +1709,9 @@ angular.module("sampleApp")
                            //     node.data.type = [{code:'BackboneElement'}]
                             }
 
+                            //set all the element paths...
+                           // var rootNodeId = $scope.treeData[0].data.path;
+                            //setPath(rootNodeId, rootNodeId)
 
 
                         }
@@ -1717,7 +1735,12 @@ angular.module("sampleApp")
                         function setPath(parentPath,parentId) {
                             $scope.treeData.forEach(function(node){
                                 if (node.parent == parentId) {
-                                    var childPath = parentPath + '.' + node.data.name;
+
+                                    //can't rely on the name as this gets changed during the expand function...
+                                    var segment = node.data.pathSegment || node.data.name;
+
+                                   // var childPath = parentPath + '.' + node.data.name;
+                                    var childPath = parentPath + '.' + segment;
                                     node.data.path = childPath;
                                     setPath(childPath,node.id)
                                 }
@@ -1730,6 +1753,51 @@ angular.module("sampleApp")
                 };
 
 
+            $scope.copyNode = function() {
+                //make a copy of the current node (with a new id)
+
+
+
+                //var newNode = angular.copy($scope.selectedNode);
+
+                var newNode = {
+
+                    "parent": $scope.selectedNode.parent,
+                    "text": $scope.selectedNode.text,
+                    state: {opened: true},
+                    data : angular.copy($scope.selectedNode.data)
+                };
+
+
+                var path = newNode.data.path;
+                var ar = path.split('_');
+                var realPath = ar[0];   // in case this has already been copied...
+                var ctr,pos = 0;
+
+                $scope.treeData.forEach(function (node,inx) {
+                    if (node.data.path ==realPath) {
+                        pos = inx;      //the index in the tree array where the node we are copying is located
+                    }
+
+                });
+                if (ar[1]) {
+                    newNode.data.path = realPath + '_'+ ar[1]++      //there was already a copy
+                } else {
+                    newNode.data.path = realPath + '_1';             //this is the first copy
+                }
+
+                newNode.id = newNode.data.path;         //must have a unique id...
+
+                newNode.state.selected = false;
+                newNode.text += "_copy";
+                newNode.data.name = newNode.text;
+                $scope.treeData.splice(pos+1,0,newNode);
+
+                drawTree();
+                makeSD();
+
+
+            };
 
             //insert an external model into the
             $scope.insertModel = function () {

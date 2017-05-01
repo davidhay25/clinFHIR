@@ -60,7 +60,7 @@
         p {
             margin-left: 20px;
             font-family: 'Titillium Web', sans-serif, Arial, sans-serif;
-            /*color:green;*/
+
         }
 
 */
@@ -294,7 +294,7 @@
                     <div><input type="text" class="form-control" placeholder="Filter model list by id" ng-model="input.filter" ng-change="filterModelList(input.filter)"/> </div>
 
                     <ul class="list-group" style=" height:700px; overflow: auto;" >
-                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.type == entry.resource.type}"
+                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.id == entry.resource.id}"
                             ng-repeat="entry in bundleModels.entry"
                             ng-click="selectModel(entry,$index)">
 
@@ -727,6 +727,11 @@
 
                                         <span class="clickable" ng-click="explodeDT(typ.code)" ng-show = "typ.isComplexDT">Expand</span>
 
+                                        <span class="clickable" ng-click="explodeReference(selectedNode)"
+                                              ng-show = "selectedNode.text == 'reference'">Expand</span>
+
+
+
 
 
                                         <!-- Show any profile. If a reference, then hyperlink to the 'display' functionality... -->
@@ -798,10 +803,12 @@
                                         <button ng-show="!selectedNode.data.isRoot  && !isHistory"
                                                 class="btn btn-link" ng-click="deleteNode()">Remove Element</button>
 
+                                        <!-- todo work on in madrid
+                                        <button ng-show="!selectedNode.data.isRoot  && !isHistory"
+                                                class="btn btn-link" ng-click="copyNode()">Copy Element</button>
+-->
 
-                                        <!--
-                                        <button ng-show="!isHistory" class="btn btn-link" ng-click="insertModel()">Insert Model</button>
-        -->
+
 
 
 

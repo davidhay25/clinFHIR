@@ -38,20 +38,6 @@ angular.module("sampleApp")
                 $scope.input.multiplicity = 'opt';
             }
 
-/*
-            RenderProfileSvc.getAllStandardResourceTypes().then(
-                function(data){
-                    $scope.allResourceTypes = data;
-
-                    if (editNode) {
-                        setup(editNode);
-                    }
-
-                });
-*/
-
-
-
 
             if (baseType) {
 

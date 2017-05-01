@@ -14,12 +14,12 @@ angular.module("sampleApp")
             var ar = this.split('.');
             ar[0] = firstSegment;
             return ar.join('.')
-        }
+        };
 
         String.prototype.getLastSegment = function() {
             var ar = this.split('.');
             return ar[ar.length-1]
-        }
+        };
 
         /*
         function makeTreeDataElementDEP(rootName,ed,treeData) {
@@ -139,9 +139,11 @@ angular.module("sampleApp")
 
 
         return {
+            explodeResource : function(treeData,node,url) {
+                //get all teh child nodes for a resource...\\
 
-            explodeDataType : function(treeData,node,dt) {
-                var arExclude=['id','extension'];
+                //todo need to exlute text if path length is 2...
+                var arExclude=['id','extension','meta','implicitRules','modifierExtension','contained','language','text'];
                 var deferred = $q.defer();
                 console.log(node)
                 var parentId = node.id;
@@ -152,10 +154,13 @@ angular.module("sampleApp")
                     baseType = treeData[0].data.header.baseType;    //base type
                 }
 
-                var url = appConfigSvc.getCurrentConformanceServer().url + 'StructureDefinition/'+dt;
-                GetDataFromServer.adHocFHIRQuery(url).then(
-                    function(data) {
-                        var dtSD = data.data;
+
+
+                //var url = appConfigSvc.getCurrentConformanceServer().url + 'StructureDefinition/'+dt;
+
+                GetDataFromServer.findConformanceResourceByUri(url).then( //     .adHocFHIRQuery(url).then(
+                    function(dtSD) {
+                        //var dtSD = data.data;
                         if (dtSD.snapshot && dtSD.snapshot.element) {
 
                             dtSD.snapshot.element.forEach(function (ele,inx) {
@@ -166,7 +171,7 @@ angular.module("sampleApp")
 
                                 var ar = ele.path.split('.')
 
-                                if (ar.length ==2 && arExclude.indexOf(ar[1]) == -1) {
+                                if (ar.length == 2 && arExclude.indexOf(ar[1]) == -1) {
 
                                     ar.splice(0,1);     //remove the first part of the path (the dt name eg CodeableConcept)
                                     var pathForThisElement = parentPath + '.'+  ar.join('.');
@@ -192,8 +197,6 @@ angular.module("sampleApp")
 
 
                                     newNode.data.mappingFromED = [{identity:'fhir',map:baseType + '.'+ ele.path}]
-                                    //newNode.description = $scope.input.description || 'definition';
-                                    //newNode.comments = $scope.input.comments;
                                     newNode.data.type = ele.type;
                                     newNode.data.type.forEach(function(typ){
                                         var first = typ.code.substr(0,1);
@@ -202,25 +205,13 @@ angular.module("sampleApp")
                                         }
                                     })
 
-
-
-                                    //newNode.data.type.isComplexDT = true;
-
-
-console.log(newNode)
-
                                     treeData.push(newNode);
                                 }
 
-
-
                             })
 
-
-
-
                         }
-                        //console.log(data);
+
 
 
 
@@ -232,7 +223,102 @@ console.log(newNode)
                 )
                 return deferred.promise;
             },
-            generateDoc : function(tree) {
+            explodeDataType : function(treeData,node,dt) {
+                var arExclude=['id','extension','modifierExtension'];
+                var deferred = $q.defer();
+                console.log(node)
+                var parentId = node.id;
+                var parentPath = node.data.path;        //the path of the element that is being expanded...
+                var suffix = generateSuffix(treeData,node);//new Date().getTime();      //a prefix for the path to support multiple expands
+                var lmRoot = treeData[0].data.path;     //the root of this model... (eg OhEncounter)
+                var baseType = 'unknown';
+                if (treeData[0] && treeData[0].data && treeData[0].data.header) {
+                    baseType = treeData[0].data.header.baseType;    //base type
+                }
+
+                var url = appConfigSvc.getCurrentConformanceServer().url + 'StructureDefinition/'+dt;
+                GetDataFromServer.adHocFHIRQuery(url).then(
+                    function(data) {
+                        var dtSD = data.data;
+                        if (dtSD.snapshot && dtSD.snapshot.element) {
+
+                            dtSD.snapshot.element.forEach(function (ele,inx) {
+                                console.log(ele)
+                                //the first letter needs to be lowercase, as it will be part of a path...
+                                ele.path = ele.path.charAt(0).toLowerCase() + ele.path.slice(1);    //this will be a codeableconcept
+
+
+                                var ar = ele.path.split('.')
+
+                                if (ar.length ==2 && arExclude.indexOf(ar[1]) == -1) {
+
+                                    ar.splice(0,1);     //remove the first part of the path (the dt name eg CodeableConcept)
+
+                                    var pathForThisElement = parentPath + '.'+  ar.join('.') + "_"+suffix;
+
+                                   // var newId = pathForThisElement; ///'t' + new Date().getTime()+inx;
+
+                                    var newId = pathForThisElement + 't' + new Date().getTime()+inx;
+                                    var newNode = {
+                                        "id": newId,
+                                        "parent": parentId,
+                                        "text": ar[0],
+                                        state: {opened: true},
+                                        data : {}
+                                    };
+
+
+                                    newNode.data.name = ar[0];
+                                    newNode.data.short = ele.short;
+
+
+
+                                    newNode.data.path = pathForThisElement;///parentPath + '.'+  ar.join('.')
+                                    newNode.data.min = ele.min;
+                                    newNode.data.max = ele.max;
+
+
+                                    newNode.data.mappingFromED = [{identity:'fhir',map:baseType + '.'+ ele.path}]
+                                    newNode.data.type = ele.type;
+                                    newNode.data.type.forEach(function(typ){
+                                        var first = typ.code.substr(0,1);
+                                        if (first == first.toUpperCase()) {
+                                            typ.isComplexDT = true;
+                                        }
+                                    })
+
+                                       treeData.push(newNode);
+                                }
+
+                            })
+
+                        }
+
+
+
+
+                        deferred.resolve();
+
+                    },function (err) {
+                        deferred.reject(err)
+                    }
+                )
+                return deferred.promise;
+
+                function generateSuffix(treeData,node){
+                    //create a suffix which is the count of the number of child nodes +1
+                    var nodeId = node.id;
+                    ctr = 1;
+                    treeData.forEach(function (node) {
+                        if (node.parent == nodeId) {
+                            ctr++;
+                        }
+                    })
+                    return ctr;
+                }
+
+            },
+            generateDoc : function(treeData,tree) {
                 var deferred = $q.defer();
                 //var simpleExtensionUrl = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl;
                 var arDoc = []
@@ -1026,7 +1112,7 @@ console.log(newNode)
                         try {
                             makeTreeData(SD, treeData);
 
-                            console.log(treeData);
+
 
                             deferred.resolve(treeData);
                         } catch (ex) {
@@ -1076,7 +1162,7 @@ console.log(newNode)
                             }
 
                             if (include) {
-                                console.log(idThisElement);
+
                                 var parentId = arPath.join('.');
                                 var item = {};
 
@@ -1184,14 +1270,28 @@ console.log(newNode)
                 var arTree = [];
                 if (sd && sd.snapshot && sd.snapshot.element) {
 
-                    sd.snapshot.element.forEach(function (ed) {
+                    sd.snapshot.element.forEach(function (ed,inx) {
                         var include = true;
 
                         var path = ed.path;     //this is always unique in a logical model...
                         var arPath = path.split('.');
-                        var item = {}
-                        item.id = path;
-                        item.text = arPath[arPath.length - 1];   //the text will be the last entry in the path...
+                        var item = {data:{}}
+                        item.id = path
+
+                        if (inx > 0) {
+                         //  item.id += "_" + inx; - no, because can't wprk out the parent path correctly...
+                        }
+
+                        var text = arPath[arPath.length - 1];   //the text will be the last entry in the path...
+                        //item.text = arPath[arPath.length - 1];   //the text will be the last entry in the path...
+
+                        //if the text has an underscore, then remove it...
+                        var ar = text.split('_');
+                        item.text = ar[0];
+                        item.data.pathSegment = text;    //this is the actual path segment (possibly with _n). Needed for the setpath() finction in the controller
+
+
+
 
                         //give a unique name if an extension...
                         if (item.text === 'extension') {
@@ -1219,7 +1319,7 @@ console.log(newNode)
                             //    item.text += " *"
                         }
 
-                        item.data = {};
+                       // item.data = {};
                         if (arPath.length == 1) {
                             //this is the root node
                             item.parent = '#';
@@ -1317,7 +1417,7 @@ console.log(newNode)
 
                             })
 
-                            console.log(tvType)
+                            //console.log(tvType)
 
                             item.data.type = tvType;
 
@@ -1383,70 +1483,8 @@ console.log(newNode)
 
                                 item.data.mappingFromED.push(internalMap);
 
-                                //var value = map.map;    //the mapping
-                                /*
-
-                                var g = value.indexOf('|')
-                                if (g > -1) {
-                                    map.comment = value.substr(g+1);
-                                    map.map = value.substr(0,g);
-                                    //var t = value.substr(0,g);
-                                    item.data.mappingFromED.push(map)
-                                }
-                                */
                             });
-/*
-                            //tofo get the extension, always on the first - I'm not sure this is correvt
-                            if (ed.mapping[0]) {
-                                //there are extensions on this item - find the comment...
-                                var ext = Utilities.getSingleExtensionValue(ed.mapping[0], mappingCommentUrl)
-                                if (ext && ext.valueString) {
-                                    item.data.mapping = ext.valueString;
 
-                                    //a temporary function to map across comments from the previous version (saved as an extension)
-                                    if (! item.data.mappingFromED[0].comment) {
-                                        item.data.mappingFromED[0].comment = ext.valueString;
-                                    }
-
-
-                                }
-
-
-
-
-
-                                var ext1 = Utilities.getSingleExtensionValue(ed.mapping[0], mapToModelExtensionUrl)
-                                if (ext1 && ext1.valueUri) {
-                                    item.data.mapToModelUrl = ext1.valueUri;
-                                    item.data.referenceUri = ext1.valueUri;     //for the table dsplay...
-                                    item.data.isReference = true;   //this element references another model
-                                }
-
-
-                            }
-                            */
-
-/*
-                            //the 'named' maps...
-                            ed.mapping.forEach(function(mapItem){
-
-                                switch (mapItem.identity) {
-                                    case 'fhir' :
-                                        //var mapItem = ed.mapping[0];    //the actual map - assume only 1...
-                                        item.data.mappingPath = mapItem.map;      //the identity is currently hard coded
-
-
-                                        break;
-                                    case 'hl7V2' :
-                                        item.data.mappingPathV2 = mapItem.map;      //the identity is currently hard coded
-                                        break;
-
-                                }
-
-
-                            })
-
-                            */
 
 
 
@@ -1834,7 +1872,7 @@ console.log(newNode)
 
 
 
-                            console.log(analysis);
+                            //console.log(analysis);
                             deferred.resolve(analysis)
 
                         },
