@@ -59,6 +59,7 @@ angular.module("sampleApp")
                     $scope.pathDescription = 'Path'
                     var data = node.data;
                     $scope.input.name = data.name;
+                    $scope.input.pathSegment = data.pathSegment;
                     $scope.input.short= data.short;
                     $scope.input.description = data.description;
                     $scope.input.comments = data.comments;
@@ -544,6 +545,8 @@ angular.module("sampleApp")
                     vo.description = $scope.input.description || 'definition';
                     vo.comments = $scope.input.comments;
                     vo.mapping = $scope.input.mapping;
+                    vo.pathSegment = $scope.input.pathSegment;
+
 
                     vo.mappingPath = $scope.input.mappingPath;      //this is the FHIR path
                     vo.mappingFromED = $scope.input.mappingFromED;      //all mappings

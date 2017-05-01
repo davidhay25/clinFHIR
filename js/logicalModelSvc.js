@@ -254,7 +254,8 @@ angular.module("sampleApp")
 
                                     ar.splice(0,1);     //remove the first part of the path (the dt name eg CodeableConcept)
 
-                                    var pathForThisElement = parentPath + '.'+  ar.join('.') + "_"+suffix;
+                                    var pathSegment = ar.join('.') + "_"+suffix;
+                                    var pathForThisElement = parentPath + '.'+  pathSegment;
 
                                    // var newId = pathForThisElement; ///'t' + new Date().getTime()+inx;
 
@@ -268,6 +269,7 @@ angular.module("sampleApp")
                                     };
 
 
+                                    newNode.data.pathSegment = pathSegment;
                                     newNode.data.name = ar[0];
                                     newNode.data.short = ele.short;
 
@@ -287,7 +289,7 @@ angular.module("sampleApp")
                                         }
                                     })
 
-                                       treeData.push(newNode);
+                                    treeData.push(newNode);
                                 }
 
                             })
