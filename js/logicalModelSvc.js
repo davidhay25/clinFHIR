@@ -156,6 +156,7 @@ angular.module("sampleApp")
 
 
 
+
                 //var url = appConfigSvc.getCurrentConformanceServer().url + 'StructureDefinition/'+dt;
 
                 GetDataFromServer.findConformanceResourceByUri(url).then( //     .adHocFHIRQuery(url).then(
@@ -165,8 +166,9 @@ angular.module("sampleApp")
 
                             dtSD.snapshot.element.forEach(function (ele,inx) {
                                 console.log(ele)
+                                var originalPath = ele.path;        //used for the FHIR mapping in the 'imported' resource...
                                 //the first letter needs to be lowercase, as it will be part of a path...
-                                ele.path = ele.path.charAt(0).toLowerCase() + ele.path.slice(1);    //this will be a codeableconcept
+                                ele.path = ele.path.charAt(0).toLowerCase() + ele.path.slice(1);
 
 
                                 var ar = ele.path.split('.')
@@ -196,7 +198,10 @@ angular.module("sampleApp")
                                     newNode.data.max = ele.max;
 
 
-                                    newNode.data.mappingFromED = [{identity:'fhir',map:baseType + '.'+ ele.path}]
+
+                                    //newNode.data.mappingFromED = [{identity:'fhir',map:baseType + '.'+ ele.path}]
+                                    //the path is that of the resource being 'imported'
+                                    newNode.data.mappingFromED = [{identity:'fhir',map: originalPath}]
                                     newNode.data.type = ele.type;
                                     newNode.data.type.forEach(function(typ){
                                         var first = typ.code.substr(0,1);
@@ -1344,9 +1349,6 @@ angular.module("sampleApp")
                         item.text = ar[0];
                         item.data.pathSegment = text;    //this is the actual path segment (possibly with _n). Needed for the setpath() finction in the controller
 
-
-
-
                         //give a unique name if an extension...
                         if (item.text === 'extension') {
                             item.text = 'extension_' + cntExtension;
@@ -1615,7 +1617,7 @@ angular.module("sampleApp")
                 sd.date = moment().format();
 
 
-                //sd.
+
 
                 sd.purpose = header.purpose;
                 sd.description = header.description;

@@ -274,10 +274,26 @@ angular.module("sampleApp")
                 var parent = findNodeWithPath(path.join('.')); //note this is the node for the tree view, not the graph
 
                 if (parent && parent.data && parent.data.type) {
-                    //now find the resource type that is being expanded...
-
-                    parent.data.type.forEach(function (typ) {
+                    //now find the resource type that is being expanded. For now, use the first one only..
+                   // var resourceType;
+                    for (var i=0; i< parent.data.type.length; i++) {
+                        var typ = parent.data.type[i];
                         if (typ.targetProfile) {
+
+
+                            //set the resource type as a mapping. need to update both node and treeData (a scoping issue no doubt)..
+                            node.data.mappingFromED = [{identity:'fhir',map: typ.targetProfile}]
+                            $scope.treeData.forEach(function(item){
+                                if (item.data.path == node.data.path) {
+                                    item.data.mappingFromED = [{identity:'fhir',map: typ.targetProfile}]
+                                }
+                            })
+
+
+
+
+
+
                             var ar = typ.targetProfile.split('/');
                             parent.text += " ("+ ar[ar.length-1] + ")"
                             logicalModelSvc.explodeResource($scope.treeData,$scope.selectedNode,typ.targetProfile).then(
@@ -290,15 +306,15 @@ angular.module("sampleApp")
                                     alert(angular.toJson(err))
                                 }
 
-
-                            )
+                            );
+                            break;
                         }
+                    }
 
-                    })
                 }
 
 
-                console.log(parent);
+                //console.log(parent);
             }
 
             $scope.explodeDT = function(dt) {
@@ -868,7 +884,6 @@ angular.module("sampleApp")
                 });
             };
 
-            
             
             //re-draw the graph setting the indicated path as the parent...
             $scope.setParentInGraph = function(selectedNode) {
@@ -1900,10 +1915,13 @@ angular.module("sampleApp")
             //have this as a single function so we can extract scope properties rather than passing the whole scope across...
             makeSD = function() {
 
-
+                //return;
 
                 //sorts the tree array in parent/child order
                 var ar = logicalModelSvc.reOrderTree($scope.treeData);
+
+
+
                 $scope.SD = logicalModelSvc.makeSD($scope,ar);
 
 
