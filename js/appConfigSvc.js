@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-04-24b';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-05-03';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};
@@ -94,8 +94,8 @@ angular.module("sampleApp")
         defaultConfig.terminologyServers = [];
         defaultConfig.allKnownServers = [];
 
-        defaultConfig.terminologyServers.push({name:'Grahames STU2 Server',version:2,url:"http://fhir2.healthintersections.com.au/open/"});
-        defaultConfig.terminologyServers.push({name:'Grahames STU3 Server',version:3,url:"http://fhir3.healthintersections.com.au/open/"});
+        defaultConfig.terminologyServers.push({name:'Grahames STU2 Server',version:2,url:"http://test.fhir.org/r2/"});
+        defaultConfig.terminologyServers.push({name:'Grahames STU3 Server',version:3,url:"http://test.fhir.org/r3/"});
 
         //realUrl needed for conformance resources...
         //defaultConfig.terminologyServers.push({name:'Grahames STU2 Server',version:2,url:"grahamv2/",realUrl:'http://fhir2.healthintersections.com.au/open/'});
@@ -114,8 +114,8 @@ angular.module("sampleApp")
 
 
 
-        defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://fhir2.healthintersections.com.au/open/",version:2,everythingOperation:true,isTerminology:true});
-        defaultConfig.allKnownServers.push({name:"Grahame STU3 server",url:"http://fhir3.healthintersections.com.au/open/",version:3,everythingOperation:true,isTerminology:true});
+        defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://test.fhir.org/r2/",version:2,everythingOperation:true,isTerminology:true});
+        defaultConfig.allKnownServers.push({name:"Grahames STU3 server",url:"http://test.fhir.org/r3/",version:3,everythingOperation:true,isTerminology:true});
         
         //defaultConfig.allKnownServers.push({name:"Grahame STU3 server (Proxy)",url:"grahamv3/",version:3,everythingOperation:true,realUrl:'http://fhir3.healthintersections.com.au/open/'});
         //defaultConfig.allKnownServers.push({name:"Grahame STU2 server (Proxy)",url:"grahamv2/",version:2,everythingOperation:true,realUrl:'http://fhir2.healthintersections.com.au/open/'});
