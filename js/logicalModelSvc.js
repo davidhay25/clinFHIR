@@ -281,7 +281,7 @@ angular.module("sampleApp")
                                     newNode.data.pathSegment = pathSegment;
                                     newNode.data.name = ar[0];
                                     newNode.data.short = ele.short;
-                                    
+
 
                                     newNode.data.path = pathForThisElement;///parentPath + '.'+  ar.join('.')
                                     newNode.data.min = ele.min;
@@ -1108,6 +1108,7 @@ angular.module("sampleApp")
 
             },
             createFromBaseType: function (treeData, typeName, rootName) {
+                var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
                 //create a model from the base type, only bringing across stuff we want.
                 //todo - very similar to the logic in createTreeArrayFromSD() - ?call out to separate function...
                 var deferred = $q.defer();
@@ -1213,7 +1214,41 @@ angular.module("sampleApp")
                                 item.data.name = item.text;
                                 item.data.short = ed.short;
                                 item.data.description = ed.definition;
-                                item.data.type = ed.type;
+
+                                //if this is stu2, then the 'profile' array becomes a single 'targetType' on each type
+                                if (ed.type) {
+                                    if (fhirVersion == 2) {
+                                        //need to walk through each type in the type array and set the 'targetProfile' property...
+                                        item.data.type = [];
+
+                                        ed.type.forEach(function (typ) {
+                                            if (typ.profile) {
+                                                typ.targetProfile = typ.profile[0];
+                                                delete typ.profile;
+                                                item.data.type.push(typ)
+                                                //item.data.type.targetProfile = typ.profile[0]
+                                            }
+                                        })
+                                    } else {
+                                        item.data.type = ed.type;
+                                    }
+                                }
+/*
+
+                                if (fhirVersion == 2 && ed.type) {
+                                    var item.data.type = []
+                                    //the profile is multiple
+                                    ed.type.forEach(function (typ) {
+                                        if (typ.profile) {
+                                            item.data.type.targetProfile = typ.profile[0]
+                                        }
+                                    })
+
+                                } else {
+                                    item.data.type.targetProfile = typ.targetProfile;
+                                }
+*/
+                                //item.data.type = ed.type;
                                 item.data.min = ed.min;
                                 item.data.max = ed.max;
 
@@ -1412,8 +1447,9 @@ angular.module("sampleApp")
                                         newTyp.targetProfile = typ.profile[0]
                                     }
                                 } else {
-                                    newTyp.targetProfile. typ.targetProfile;
+                                    newTyp.targetProfile = typ.targetProfile;
                                 }
+                               // item.type = newTyp;
 
                                 //is this a coded type
                                 if (['CodeableConcept', 'Coding', 'code'].indexOf(typ.code) > -1) {

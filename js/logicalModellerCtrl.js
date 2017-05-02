@@ -278,6 +278,8 @@ angular.module("sampleApp")
 
                     parent.data.type.forEach(function (typ) {
                         if (typ.targetProfile) {
+                            var ar = typ.targetProfile.split('/');
+                            parent.text += " ("+ ar[ar.length-1] + ")"
                             logicalModelSvc.explodeResource($scope.treeData,$scope.selectedNode,typ.targetProfile).then(
                                 function() {
                                     drawTree();
