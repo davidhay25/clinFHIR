@@ -228,13 +228,24 @@ angular.module("sampleApp")
                 var deferred = $q.defer();
                 console.log(node)
                 var parentId = node.id;
-                var parentPath = node.data.path;        //the path of the element that is being expanded...
-                var suffix = generateSuffix(treeData,node);//new Date().getTime();      //a prefix for the path to support multiple expands
-                var lmRoot = treeData[0].data.path;     //the root of this model... (eg OhEncounter)
-                var baseType = 'unknown';
+                var parentPath = node.data.path;            //the path of the element that is being expanded...
+                var suffix = generateSuffix(treeData,node); //new Date().getTime();      //a prefix for the path to support multiple expands
+                var lmRoot = treeData[0].data.path;         //the root of this model... (eg OhEncounter)
+                var baseType = 'unknown';                   //base FHIR type for this node
                 if (treeData[0] && treeData[0].data && treeData[0].data.header) {
                     baseType = treeData[0].data.header.baseType;    //base type
                 }
+
+                //if the parent node has a FHIR mapping, then we can create FHIR mappings for the children also...
+                var fhirParentPath;
+                if (node.data && node.data.mappingFromED) {
+                    node.data.mappingFromED.forEach(function (map) {
+                        if (map.identity == 'fhir') {
+                            fhirParentPath = map.map;
+                        }
+                    })
+                }
+
 
                 var url = appConfigSvc.getCurrentConformanceServer().url + 'StructureDefinition/'+dt;
                 GetDataFromServer.adHocFHIRQuery(url).then(
@@ -257,8 +268,6 @@ angular.module("sampleApp")
                                     var pathSegment = ar.join('.') + "_"+suffix;
                                     var pathForThisElement = parentPath + '.'+  pathSegment;
 
-                                   // var newId = pathForThisElement; ///'t' + new Date().getTime()+inx;
-
                                     var newId = pathForThisElement + 't' + new Date().getTime()+inx;
                                     var newNode = {
                                         "id": newId,
@@ -272,15 +281,23 @@ angular.module("sampleApp")
                                     newNode.data.pathSegment = pathSegment;
                                     newNode.data.name = ar[0];
                                     newNode.data.short = ele.short;
-
-
+                                    
 
                                     newNode.data.path = pathForThisElement;///parentPath + '.'+  ar.join('.')
                                     newNode.data.min = ele.min;
                                     newNode.data.max = ele.max;
 
+                                    if (fhirParentPath) {
 
-                                    newNode.data.mappingFromED = [{identity:'fhir',map:baseType + '.'+ ele.path}]
+                                       // var fhirPath = baseType + '.'+ ele.path
+                                        var fhirPath = fhirParentPath + '.' + ar.join('.')
+
+                                        newNode.data.mappingFromED = [{identity:'fhir',map:fhirPath}]
+                                    }
+
+
+
+
                                     newNode.data.type = ele.type;
                                     newNode.data.type.forEach(function(typ){
                                         var first = typ.code.substr(0,1);
