@@ -12,8 +12,6 @@ angular.module("sampleApp")
                 var vo = builderSvc.splitNarrative(resource.text.div)
                 return vo.manual;
             }
-
-
         }
     }])
 

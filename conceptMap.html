@@ -19,7 +19,7 @@
     <script src="js/libs/angular-sanitize.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','ui.checkbox']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -42,7 +42,8 @@
     <script src="js/builderSvc.js"></script>
     <script src="js/services.js"></script>
     <script src="js/filters.js"></script>
-
+    <script src="js/newVSFinder.js"></script>
+    <script src="js/libs/angular-bootstrap-checkbox.js"></script>
 
 
     <!--
@@ -232,6 +233,23 @@
 
                         </form>
 
+                        <hr/>
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label>Source ValueSet Url</label>
+                                    <input type="text" class="form-control" ng-model="currentCM.sourceUri">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label>Target ValueSet Url</label>
+                                    <input type="text" class="form-control" ng-model="currentCM.targetUri">
+                                </div>
+                            </div>
+
+                        </div>
 
 
                         <div ng-repeat="group in currentCM.group">
@@ -273,8 +291,9 @@
                                             </tr>
                                         </table>
                                     </td>
-                                    <td>
+                                    <td width="10%">
                                         <div class="pull-right">
+
                                         <i ng-show="canEdit" style="cursor: pointer"
                                             ng-click="removeItem({source:element.code,target:target.code})"
                                             class="iconSpacing glyphicon glyphicon-minus-sign"></i>
@@ -299,7 +318,7 @@
 
                     </uib-tab>
 
-                    <uib-tab heading="Test Lookup">
+                    <uib-tab heading="Test Translate">
                         <br/>
                         <div class="row">
                             <div class="col-md-2 col-sm-2">
@@ -324,6 +343,20 @@
 
                     <uib-tab heading="Json">
                         <pre>{{currentCM | json}}</pre>
+                    </uib-tab>
+                    <uib-tab heading="Dev Notes">
+                        <div><strong>Servers</strong></div>
+                        <div>Conformance Server</div>
+                        <ul>
+                            <li>Holds ConceptMap</li>
+                            <li>Use $translate for test translate function</li>
+                        </ul>
+                        <div>Terminology Server</div>
+                        <ul>
+                            <li>Holds ValueSet</li>
+                            <li>Used when looking up VS for new ConceptMap</li>
+                            <li>Uses $expand for item lookup when adding new items - NOTE filter seems broken hapi & grahame</li>
+                        </ul>
                     </uib-tab>
                 </uib-tabset>
 

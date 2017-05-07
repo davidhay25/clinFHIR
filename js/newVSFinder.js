@@ -13,7 +13,6 @@ angular.module("sampleApp").controller('vsFinderCtrl',
         $scope.input.strength = currentBinding.strength;
         $scope.input.description = currentBinding.description;
 
-
         $scope.selectVSForDisplay = function(vs){
             $scope.input.vspreview=vs;
             delete $scope.expansion;
@@ -48,7 +47,6 @@ angular.module("sampleApp").controller('vsFinderCtrl',
                 $scope.showWaiting = false;
             })
         };
-        
 
         $scope.showExpansion = function(id,filter) {
             delete $scope.expansion;

@@ -85,23 +85,23 @@
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 
         <div class="container-fluid">
-            <div class="col-md-3 col-sm-3">
+            <div class="col-md-2 col-sm-2">
                 <a class="navbar-brand" href="#">
                     Patient Viewer
                 </a>
             </div>
-            <div class="col-md-3 col-sm-3">
+            <div class="col-md-7 col-sm-7">
 
-                <div class="navbar-text">
-                    {{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}}
+                <div class="navbar-text" ng-show="currentPatient">
+                    {{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}} ({{currentPatient.id}})
                 </div>
             </div>
-            <div class="col-md-3 col-sm-3">
+            <div class="col-md-1 col-sm-1">
                 <div class="pull-right navbar-form" ng-show="waiting">
                     <img src="css/ajax_loader_blue_32.gif"/>
                 </div>
             </div>
-            <div class="col-md-3 col-sm-3">
+            <div class="col-md-2 col-sm-2">
                 <form class="navbar-form navbar-right">
                     <button class="btn btn-primary" ng-click="findPatient()">Select Patient</button>
                 </form>

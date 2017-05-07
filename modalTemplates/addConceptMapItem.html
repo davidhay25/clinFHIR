@@ -1,6 +1,5 @@
 <div>
 
-
     <div class="modal-header">
 
         <div class="row">
@@ -28,7 +27,15 @@
                Source Code
            </div>
            <div class="col-md-8 col-sm-8">
-               <input type="text" class="form-control" autofocus ng-model="input.source"/>
+               <input ng-show = "sourceVS" type="text" class="form-control" autofocus ng-model="input.source"
+
+                      placeholder="vs={{sourceSystem}}"
+                      typeahead-min-length="1"
+                      typeahead-wait-ms="1000"
+                      typeahead-on-select="selectCCfromList($item, 'source')"
+                      uib-typeahead="opt as opt.display for opt in vsLookup('source',$viewValue)"/>
+               <input ng-hide = "sourceVS" type="text" class="form-control" autofocus ng-model="input.source"/>
+               <div>{{input.sourceDisplay}}</div>
            </div>
        </div>
         <div class="row">
@@ -36,7 +43,20 @@
                 Target Code
             </div>
             <div class="col-md-8 col-sm-8">
+                <input ng-show = "targetVS" type="text" class="form-control" autofocus ng-model="input.target"
+
+                       placeholder="vs={{targetSystem}}"
+                       typeahead-min-length="1"
+                       typeahead-wait-ms="1000"
+                       typeahead-on-select="selectCCfromList($item, 'target')"
+                       uib-typeahead="opt as opt.display for opt in vsLookup('target',$viewValue)"/>
+                <input ng-hide = "sourceVS" type="text" class="form-control" autofocus ng-model="input.target"/>
+                <div>{{input.targetDisplay}}</div>
+
+
+                <!--
                 <input type="text" class="form-control" ng-model="input.target"/>
+                -->
             </div>
         </div>
         <div class="row">

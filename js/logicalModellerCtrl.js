@@ -290,10 +290,6 @@ angular.module("sampleApp")
                             })
 
 
-
-
-
-
                             var ar = typ.targetProfile.split('/');
                             parent.text += " ("+ ar[ar.length-1] + ")"
                             logicalModelSvc.explodeResource($scope.treeData,$scope.selectedNode,typ.targetProfile).then(

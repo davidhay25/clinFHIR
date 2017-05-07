@@ -8,7 +8,7 @@
                 <h3 class="modal-title">Add a new Concept Map</h3>
             </div>
 
-            <div class="col-md-4 col-sm-4">
+            <div class="col-md-3 col-sm-3">
                 <div class="pull-right">
                     <button class="btn btn-success pull-right" ng-show="canAdd" ng-click="add()">Add</button>
                     <button class="btn btn-link pull-right" ng-click="$dismiss()">Cancel</button>
@@ -20,7 +20,7 @@
     <div class="modal-body">
 
         <div class="row">
-            <div class="col-md-4 col-sm-4">
+            <div class="col-md-3 col-sm-3">
                 Name
             </div>
             <div class="col-md-6 col-sm-6">
@@ -28,12 +28,13 @@
             </div>
             <div class="col-md-2 col-sm-2">
                 <button class="btn btn-primary pull-right">Check</button>
+
             </div>
         </div>
         <br/>
 
         <div class="row">
-            <div class="col-md-4 col-sm-4">
+            <div class="col-md-3 col-sm-3">
                 Description
             </div>
             <div class="col-md-8 col-sm-8">
@@ -42,7 +43,7 @@
         </div>
         <br/>
         <div class="row">
-            <div class="col-md-4 col-sm-4">
+            <div class="col-md-3 col-sm-3">
                 Purpose
             </div>
             <div class="col-md-8 col-sm-8">
@@ -51,27 +52,33 @@
         </div>
         <br/>
        <div class="row">
-           <div class="col-md-4 col-sm-4">
+           <div class="col-md-3 col-sm-3">
                Source ValueSet
            </div>
-           <div class="col-md-8 col-sm-8">
+           <div class="col-md-6 col-sm-6">
                <input type="text" class="form-control"  ng-model="input.sourceUri" ng-blur="checkCanAdd()"/>
+           </div>
+           <div class="col-md-2 col-sm-2">
+               <button class="btn btn-primary pull-right" ng-click="findVS('source')">Find</button>
            </div>
        </div>
         <br/>
 
         <div class="row">
-            <div class="col-md-4 col-sm-4">
+            <div class="col-md-3 col-sm-3">
                 Target ValueSet
             </div>
-            <div class="col-md-8 col-sm-8">
+            <div class="col-md-6 col-sm-6">
                 <input type="text" class="form-control" ng-model="input.targetUri" ng-blur="checkCanAdd()"/>
+            </div>
+            <div class="col-md-2 col-sm-2">
+                <button class="btn btn-primary pull-right" ng-click="findVS('source')">Find</button>
             </div>
         </div>
 
         <br/>
         <div class="row">
-            <div class="col-md-4 col-sm-4">
+            <div class="col-md-3 col-sm-3">
                 Source CodeSystem
             </div>
             <div class="col-md-8 col-sm-8">
@@ -81,17 +88,29 @@
         <br/>
 
         <div class="row">
-            <div class="col-md-4 col-sm-4">
+            <div class="col-md-3 col-sm-3">
                 Target CodeSystem
             </div>
             <div class="col-md-8 col-sm-8">
                 <input type="text" class="form-control" ng-model="input.targetCS" ng-blur="checkCanAdd()"/>
             </div>
         </div>
+        <br/>
+        <div class="row">
+            <div class="col-md-3 col-sm-3">
+                Add maps from all source
+            </div>
+            <div class="col-md-8 col-sm-8">
+                <checkbox ng-model="input.addall"/>
+                <span><em>If checked, will add an entry in the mapping table for all entries in the Source ValueSet</em></span>
+
+            </div>
+        </div>
 
 
 
-   </div>
+
+    </div>
 
 
 

@@ -17,8 +17,6 @@ angular.module("sampleApp")
                 console.log(patientData)
             });
 
-
-
             $scope.filterTimeLineByCondition = function(reference) {
                 delete $scope.outcome.selectedResource;
                 //console.log(reference);
@@ -156,9 +154,12 @@ angular.module("sampleApp")
                     // console.log(obj)
                     var nodeId = obj.nodes[0];  //get the first node
                     var node = graphData.nodes.get(nodeId);
-                    //console.log(node);
+
                     $scope.selectedGraphNode = graphData.nodes.get(nodeId);
-                    //console.log($scope.selectedGraphNode)
+                   // console.log($scope.selectedGraphNode);
+
+                    drawResourceTree($scope.selectedGraphNode.resource)
+
                     $scope.$digest();
                 });
 
@@ -322,6 +323,12 @@ angular.module("sampleApp")
                 $('#resourceTree').jstree(
                     {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
                 )
+
+                $('#graphResourceTree').jstree('destroy');
+                $('#graphResourceTree').jstree(
+                    {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+                )
+
 
             }
 

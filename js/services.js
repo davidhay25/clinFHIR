@@ -458,7 +458,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 code : {coding : [{code:'problems',system:'http://hl7.org/fhir/list-example-use-codes'}]}};
 
             var deferred = $q.defer();
-            var url = "artifacts/conditions.json";     //the reference list of medications to add to the list
+            var url = "artifacts/conditions.json";     //the reference list of conditions to add to the list
             var bundle = {resourceType:'Bundle',type:'transaction',entry:[]};
             var listBundleEntry = {resource : conditionList,request:{method:'POST',url:'List/'}};
 
@@ -484,6 +484,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                         condition.id = 'cond'+inx;
                       //  condition.reporter = {reference:'Patient/'+patientId};
 
+                       // condition.text = {status:'generated',div:"<div xmlns='http://www.w3.org/1999/xhtml'>"+nameText+'</div>'};
 
                         var entry = {date: today, item : {reference : 'Condition/'+condition.id}}
                         conditionList.entry.push(entry);

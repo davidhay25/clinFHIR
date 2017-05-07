@@ -40,6 +40,9 @@ angular.module("sampleApp")
                     if (Utilities.isAuthoredByClinFhir($scope.currentCM)) {
                         $scope.canEdit = true;
                     }
+
+                    $scope.canEdit = true; //todo <<<<<<<< temp
+
                 }
 
             };
@@ -70,16 +73,20 @@ angular.module("sampleApp")
             $scope.makeLookupUrl = function(code) {
                 if ($scope.currentCM.group) {
                     $scope.lookupUrl = appConfigSvc.getCurrentConformanceServer().url + 'ConceptMap/'+ $scope.currentCM.id +'/$translate?';
-                    $scope.lookupUrl += "system="+$scope.currentCM.group[0].source;
-                    $scope.lookupUrl += "&targetSystem="+$scope.currentCM.group[0].target;
+
+                    var sourceSystem = $scope.currentCM.group[0].source || $scope.currentCM.sourceUri;
+                    var targetSystem = $scope.currentCM.group[0].target || $scope.currentCM.targetUri;
+
+                    $scope.lookupUrl += "system="+sourceSystem;// $scope.currentCM.group[0].source;
+                    $scope.lookupUrl += "&targetSystem="+targetSystem;//$scope.currentCM.group[0].target;
                     $scope.lookupUrl += "&code="+code
 
 
                     //for a nice display - could split on '?' and '&' I guess...
                     $scope.arLookupUrl = [];
                     $scope.arLookupUrl.push(appConfigSvc.getCurrentConformanceServer().url + 'ConceptMap/'+ $scope.currentCM.id +'/$translate')
-                    $scope.arLookupUrl.push("?system="+$scope.currentCM.group[0].source);
-                    $scope.arLookupUrl.push("&targetSystem="+$scope.currentCM.group[0].target);
+                    $scope.arLookupUrl.push("?system="+sourceSystem);
+                    $scope.arLookupUrl.push("&targetSystem="+targetSystem);
                     $scope.arLookupUrl.push("&code="+code);
                     console.log($scope.lookupUrl)
                 } else {
@@ -136,17 +143,47 @@ angular.module("sampleApp")
             };
 
 
+
+
             $scope.addConceptMap = function () {
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
                     keyboard: false,       //same as above.
                     templateUrl: 'modalTemplates/addConceptMap.html',
+                    size: 'lg',
                     controller: function ($scope,Utilities) {
                         $scope.input = {};
 
                         $scope.checkCanAdd = function(){
                             $scope.canAdd = true;
                         };
+
+                        $scope.findVS = function(typ){
+                            console.log(typ)
+                            $uibModal.open({
+                                backdrop: 'static',      //means can't close by clicking on the backdrop.
+                                keyboard: false,       //same as above.
+                                templateUrl: 'modalTemplates/vsFinder.html',
+                                size: 'lg',
+                                controller: 'vsFinderCtrl',
+                                resolve  : {
+                                    currentBinding: function () {          //the default config
+                                        return {};
+                                    }
+                                },
+
+                            }).result.then(
+                                function (vo) {
+                                    //vo is {vs,strength}
+                                    console.log(vo)
+                                   if (type='source') {
+                                       $scope.input.sourceUri = vo.vs.url
+                                   } else {
+                                       $scope.input.targetUri = vo.vs.url
+                                   }
+                                }
+                            )
+                        }
 
                         $scope.add = function () {
                             var vo =  {resourceType:'ConceptMap',status:'draft'}
@@ -182,7 +219,44 @@ angular.module("sampleApp")
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
                     keyboard: false,       //same as above.
                     templateUrl: 'modalTemplates/addConceptMapItem.html',
-                    controller: function($scope,currentItem){
+                    controller: function($scope,currentItem,sourceSystem,targetSystem,GetDataFromServer,Utilities){
+                        sourceSystem="http://hl7.org/fhir/ValueSet/v3-AddressUse";   //todo cheating to get result!
+
+                        targetSystem="http://hl7.org/fhir/ValueSet/address-type";       //more cheating
+                         //   http://hl7.org/fhir/ValueSet/v3-AddressUse
+
+                        $scope.sourceSystem = sourceSystem;
+                        $scope.targetSystem = targetSystem;
+
+                        getVS($scope.sourceSystem,'source');
+                        getVS($scope.targetSystem,'target');
+                        /*
+                        if (sourceSystem) {
+                            Utilities.getValueSetIdFromRegistry($scope.sourceSystem,function(vs){
+                                if (vs) {
+                                    $scope.sourceVS = vs;
+                                } else {
+                                    modalService.showModal({}, {bodyText: 'The ValueSet:'+$scope.sourceSystem + ' was not found on the terminology server, so autocomplete is disabled'})
+                                }
+                            })
+                        }
+                        */
+
+                        function getVS(url,type) {
+                            if (url) {
+                                var key = type+"VS"
+                                Utilities.getValueSetIdFromRegistry(url,function(vs){
+                                    if (vs) {
+                                        $scope[key] = vs;
+                                    } else {
+                                        modalService.showModal({}, {bodyText: 'The ValueSet:'+url + ' was not found on the terminology server, so autocomplete is disabled'})
+                                    }
+                                })
+                            }
+
+                        }
+
+
                         $scope.input = {};
                         if (currentItem) {
                             $scope.currentItem = currentItem;
@@ -192,6 +266,57 @@ angular.module("sampleApp")
                             $scope.input.comment = currentItem.target[0].comment;
                         }
 
+
+
+                        //autocomplete from a valueset
+                        $scope.vsLookup = function(key,text) {
+
+                            console.log(text)
+                            var vs = $scope[key+'VS'];
+                            if (vs) {
+                                var id = vs.id;
+                                $scope.showWaiting = true;
+
+                                //filters don't seem to be working...
+                                return GetDataFromServer.getExpandedValueSet(id).then(
+
+                                //return GetDataFromServer.getFilteredValueSet(id,text).then(
+                                    function(data,statusCode){
+                                        if (data.expansion && data.expansion.contains) {
+                                            var lst = data.expansion.contains;
+                                            return lst;
+                                        } else {
+                                            return [
+                                                {'display': 'No expansion'}
+                                            ];
+                                        }
+                                    }, function(vo){
+                                        var msg = vo.error;
+
+
+                                        alert(msg);
+
+                                        return [
+                                            {'display': ""}
+                                        ];
+                                    }
+                                ).finally(function(){
+                                    $scope.showWaiting = false;
+                                });
+
+                            } else {
+                                return [{'display':'Select the ValueSet to query against'}];
+                            }
+                        }
+
+                        $scope.selectCCfromList = function(item,key){
+                            console.log(item,key)
+                            $scope.input[key] = item.code;
+                            var d = key+'Display'
+                            $scope.input[d] = item.display;
+                           // $scope.input.source = item.code;
+                           // $scope.input.sourceDisplay = item.display;
+                        }
 
                         $scope.add = function(){
 
@@ -216,10 +341,12 @@ angular.module("sampleApp")
                             return item
                         },
                         sourceSystem: function () {          //the default config
-                            return '';
+                            var sourceSystem = $scope.currentCM.group[0].source || $scope.currentCM.sourceUri;
+                            return sourceSystem;
                         },
                         targetSystem : function(){
-                            return ''
+                            var targetSystem = $scope.currentCM.group[0].target || $scope.currentCM.targetUri;
+                            return targetSystem
                         }
                     }
                 }).result.then(
@@ -258,10 +385,6 @@ angular.module("sampleApp")
                 })
             }
             loadAllCM();
-
-           // Utilities.setAuthoredByClinFhir()
-           // Ut
-
 
 
 

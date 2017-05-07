@@ -224,7 +224,19 @@
                 <div><em>Note that the Patient is not displayed in this graph.</em></div>
             </div>
             <div class="col-md-4 col-sm-4">
-                <pre>{{selectedGraphNode.resource | json}}</pre>
+                <uib-tabset>
+                    <uib-tab heading="Tree">
+                        <div id="graphResourceTree"></div>
+                    </uib-tab>
+                    <uib-tab heading="Text">
+                        <p ng-bind-html="selectedGraphNode.resource.text.div"></p>
+                    </uib-tab>
+                    <uib-tab heading="Json">
+                        <pre>{{selectedGraphNode.resource | json}}</pre>
+                    </uib-tab>
+                </uib-tabset>
+
+
             </div>
         </div>
 

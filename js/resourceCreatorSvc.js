@@ -3462,6 +3462,10 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             return $http.get(url);
         },
         buildResourceTree: function (resource) {
+            if (! resource) {
+                //function is called when clicking on the space between resources...
+                return;
+            }
             var tree = [];
             var idRoot = 0;
             //console.log(resource)
