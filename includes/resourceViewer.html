@@ -108,6 +108,13 @@
                                 <div class="col-md-8 col-sm-8">
 
                                     <uib-tabset>
+                                        <uib-tab heading="Tree">
+                                            <div id="resourceTree"></div>
+
+                                        </uib-tab>
+                                        <uib-tab heading="Text" >
+                                            <p ng-bind-html="outcome.selectedResource.text.div"></p>
+                                        </uib-tab>
                                         <uib-tab heading="Json">
                                             <div class="row">
                                                 <div class="col-md-10 col-sm-10">
@@ -120,10 +127,7 @@
                                             </div>
                                             <pre>{{outcome.selectedResource | json:2}}</pre>
                                         </uib-tab>
-                                        <uib-tab heading="Tree">
-                                            <div id="resourceTree"></div>
 
-                                        </uib-tab>
                                         <uib-tab heading="XML">
 
                                             <div class="row">
@@ -158,6 +162,9 @@
                                         <uib-tab heading="References" select="fitGraphInContainer('resourcenetwork')">
                                             <div id="resourcenetwork"></div>
                                         </uib-tab>
+
+
+
 
                                     </uib-tabset>
 

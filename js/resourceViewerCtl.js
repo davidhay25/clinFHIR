@@ -11,6 +11,8 @@ angular.module("sampleApp")
             $scope.ResourceUtilsSvc = ResourceUtilsSvc; //needed for 1 line summary
             $scope.appConfigSvc = appConfigSvc;     //for displaying the patient json
 
+            $scope.displayServers = "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>"
+
             //when a new scenario is selected with a patient from the server. passes in all data for that patient
             $scope.$on('patientSelected',function(event,patientData){
                 renderPatientDetails(patientData);
@@ -129,12 +131,13 @@ angular.module("sampleApp")
                         })
                     }
 
+                    /* comment out in madrid - do I need this???
                     //also need to add the reference resources to the dictionary (so thay can be found in outgoing references)
                     supportSvc.getReferenceResources().forEach(function (resource) {
                         var hash = resource.resourceType + "/" + resource.id;
                         $scope.allResourcesAsDict[hash] = resource;
                     });
-
+*/
 
 
                 });

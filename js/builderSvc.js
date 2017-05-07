@@ -181,17 +181,17 @@ angular.module("sampleApp")
                         var newBundle = {};
                         angular.forEach(data, function (bundle,type) {
                             newBundle[type] = {resourceType:'Bundle',entry:[],total:0}
-                            bundle.entry.forEach(function(entry){
-                                var resource = entry.resource;
-                                var id = resource.resourceType + "/"+ resource.id;
+                            if (bundle.entry) {
+                                bundle.entry.forEach(function(entry){
+                                    var resource = entry.resource;
+                                    var id = resource.resourceType + "/"+ resource.id;
 
-
-                               // temp - removed mar15 2017 - not sure why I'm doing this. Did I want to exclude the resources that may not be in the server??
-                                // if (! gAllResourcesThisSet[id]) {
                                     newBundle[type].entry.push(entry)
                                     newBundle[type].total++;
-                               // }
-                            })
+
+                                })
+                            }
+
 
                         });
 

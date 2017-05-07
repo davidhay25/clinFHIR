@@ -504,34 +504,71 @@ angular.module("sampleApp")
 
             }
 
-            $scope.saveToFHIRServer =function() {
+            $scope.saveToFHIRServer = function() {
+
+                var container = $localStorage.builderBundles[$scope.currentBundleIndex]
                 var bundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
-                //console.log(bundle);
-                $scope.waiting = true;
-                builderSvc.sendToFHIRServer(bundle).then(
-                    function(data){
-                        //console.log(data.data)
 
-                        bundle.entry.forEach(function(entry){
-                            entry.valid='saved'
-                        })
-
-                        //re-load the resources list if there's a patient...
-                        if ($scope.currentPatient) {
-                            getExistingData($scope.currentPatient)
-                        }
+                if (container.server && container.server.data) {
+                    //we recorded the data server that this bundle was created with
+                    if (container.server.data.name !== appConfigSvc.getCurrentDataServer().name) {
 
 
+                        var modalOptions = {
+                            closeButtonText: "No, I changed my mind",
+                            actionButtonText: 'Yes, please save it',
+                            headerText: 'Different Data server',
+                            bodyText: 'This bundle was created when a different data server was selected. Are you sure you wish to save to a different server? '
+                        };
 
-                        modalService.showModal({}, {bodyText:'All the resources have been updated on the server.'});
-                    },
-                    function(err) {
-                        modalService.showModal({}, {bodyText:'There was an error:'+angular.toJson(err)});
-                        //console.log(err)
+                        modalService.showModal({}, modalOptions).then(
+                            function (){
+                                saveX(bundle)
+                            })
+
+
+                    } else {
+                        saveX(bundle)
                     }
-                ).finally(function(){
-                    $scope.waiting = false;
-                })
+
+                } else {
+                    saveX(bundle)
+                }
+
+
+                function saveX(bundle) {
+
+                    console.log(bundle);
+                    $scope.waiting = true;
+                    builderSvc.sendToFHIRServer(bundle).then(
+                        function(data){
+                            //console.log(data.data)
+
+                            bundle.entry.forEach(function(entry){
+                                entry.valid='saved'
+                            })
+
+                            //re-load the resources list if there's a patient...
+                            if ($scope.currentPatient) {
+                                getExistingData($scope.currentPatient)
+                            }
+
+
+
+                            modalService.showModal({}, {bodyText:'All the resources have been updated on the server.'});
+                        },
+                        function(err) {
+                            modalService.showModal({}, {bodyText:'There was an error:'+angular.toJson(err)});
+                            //console.log(err)
+                        }
+                    ).finally(function(){
+                        $scope.waiting = false;
+                    })
+
+                }
+
+
+
             };
 
             $scope.validate = function(entry) {
@@ -746,6 +783,7 @@ angular.module("sampleApp")
                         newBundleContainer.category = vo.category;
                         newBundleContainer.history = [{bundle:newBundle}];
                         newBundleContainer.index = 0;
+                        newBundleContainer.server = {data:appConfigSvc.getCurrentDataServer()};     //save the data server in use
                         $localStorage.builderBundles.push(newBundleContainer);
                         $scope.selectedContainer = newBundleContainer;
                         $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
