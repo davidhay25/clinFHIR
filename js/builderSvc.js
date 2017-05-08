@@ -742,7 +742,6 @@ angular.module("sampleApp")
                 //create the reference from the resource
                 return resource.resourceType + "/" + resource.id;
             },
-
             saveToLibrary : function (bundleContainer,user) {
                 //save the bundle to the library. Note that the 'container' of the bundle (includes the name) is passed in...
 
@@ -1029,6 +1028,20 @@ angular.module("sampleApp")
                 var path = hashPath.path;
 
                 switch (dt) {
+                    case 'Quantity' :
+
+                        var v = parseFloat(value.quantity.value)
+                        console.log(v)
+                        if (v !== v) {      //test for Nan (http://stackoverflow.com/questions/30314447/how-do-you-test-for-nan-in-javascript)
+                            alert('Must be a numeric value')        //todo - shouldn't really use alert here...
+                        } else {
+                            var insrt = {value:v,unit:value.quantity.unit}
+                            simpleInsert(insertPoint,info,path,insrt,dt);
+                        }
+
+
+
+                        break;
                     case 'DosageInstruction' :
                         var insrt = {};
                         //addIfNotEmpty(value.HumanName.use,insrt,'use');
