@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-05-03a';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-05-09a';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};
@@ -140,7 +140,7 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'fhir.org',version:3,url:"http://tx.fhir.org/r3/",isTerminology:true});
         defaultConfig.allKnownServers.push({name:'Ontoserver STU3',version:3,url:"http://52.63.0.196:8080/fhir/",isTerminology:true});
         defaultConfig.allKnownServers.push({name:'MiHIN STU2',version:2,url:"http://52.72.172.54:8080/fhir/baseDstu2/"});
-        defaultConfig.allKnownServers.push({name:'Simplifier STU2',version:2,url:"https://simplifier.net/api/fhir/"});
+        defaultConfig.allKnownServers.push({name:'Simplifier R3',version:3,url:"https://stu3.simplifier.net/open/"});
         defaultConfig.allKnownServers.push({name:'Aegis WildFHIR STU3',version:3,url:" http://wildfhir.aegis.net/fhir3-0-1/"});
         defaultConfig.allKnownServers.push({name:'SNApp STU2' ,version:2,url:"http://snapp.clinfhir.com:8080/baseDstu2/"});
         defaultConfig.allKnownServers.push({name:'SNApp R3',version:3,url:"http://snapp.clinfhir.com:8081/baseDstu3/"});

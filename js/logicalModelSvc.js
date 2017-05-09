@@ -21,95 +21,7 @@ angular.module("sampleApp")
             return ar[ar.length-1]
         };
 
-        /*
-        function makeTreeDataElementDEP(rootName,ed,treeData) {
-            //generate an item for the tree
 
-                var path = ed.path;
-                var arPath = path.split('.');
-
-                if (arPath.length > 1) { //skip the first one
-
-                    arPath[0] = rootName;           //use the rootname of the Logical Model
-                    var idThisElement = arPath.join('.')
-                    var treeText = arPath.pop();//
-                    var include = true;
-                    if (elementsToIgnore.indexOf(treeText) > -1) {
-                        if (arPath.length == 2) {
-                            include = false;
-                        }
-
-                    }
-
-                    if (include) {
-                        console.log(idThisElement);
-                        var parentId = arPath.join('.');
-                        var item = {};
-
-                        item.id = idThisElement;
-                        item.text = treeText;
-                        item.data = {};
-                        item.parent = parentId;
-
-
-                        //test that the parent exists
-                        var found = false;
-                        treeData.forEach(function (item) {
-                            if (item.id == parentId) {
-                                found = true;
-                            }
-
-                        });
-
-                        if (!found) {
-                            console.log('Missing parent element ' + parentId)
-                            throw 'Missing parent element ' + parentId + '. This is because the model definition is incorrect, so I cannot use it.';
-                            return;
-                        }
-
-
-                        item.state = {opened: true};     //default to fully expanded
-
-                        item.data.path = idThisElement;     //is the same as the path...
-                        item.data.name = item.text;
-                        item.data.short = ed.short;
-                        item.data.description = ed.definition;
-                        item.data.type = ed.type;
-                        item.data.min = ed.min;
-                        item.data.max = ed.max;
-
-                        item.data.comments = ed.comments;
-
-                        //note that we don't retrieve the complete valueset...
-                        if (ed.binding) {
-                            item.data.selectedValueSet = {strength: ed.binding.strength};
-                            item.data.selectedValueSet.vs = {url: ed.binding.valueSetUri};
-                            item.data.selectedValueSet.vs.name = ed.binding.description;
-
-
-                            //this is a reference not a name - make up a uri (todo - load the reference to get the URL
-                            if (ed.binding.valueSetReference) {
-                                //todo - this is safe ONLY when loading one of the base types in the spec...
-                                item.data.selectedValueSet.vs.url = ed.binding.valueSetReference.reference;
-                            }
-
-                        }
-
-
-                        treeData.push(item);
-                         return item;
-                    } else {
-                        return null;
-                    }
-
-
-                }
-
-
-
-        }
-
-*/
         //common function for decorating various properties of the treeview when building form an SD. Used when creating a new one & editing
         function decorateTreeView(item,ed) {
             //decorate the type elements...
@@ -638,10 +550,19 @@ angular.module("sampleApp")
                         console.log(newED.path)
 
 
+                        var path = newED.path;
+                        if (path && path.indexOf('[x]') > -1) {
+                            //this is a choice type - change the
+                        }
+
+
+
                         if (! newED.path) {
                             //there is no path - which means that there was no FHIR mapping
                             err.push("Path: "+oldPath + " needs to have a FHIR mapping")
                         } else if (newED.path.indexOf('extension') == -1) {
+
+
 
                             if (!basePathHash[newED.path]) {
                                 //there was a path, but it didn't match anything in the base resource
@@ -652,8 +573,7 @@ angular.module("sampleApp")
                                 ok.push("Path: "+newED.path + " mapped ")
                             }
                         } else {
-                            //this is an extension...
-//if this is an extension then we need to insert the url to the extension...
+                            //this is an extension...//if this is an extension then we need to insert the url to the extension...
                             var ext = Utilities.getSingleExtensionValue(newED, appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl)
                             if (ext && ext.valueString) {
                                 extensionUrl = ext.valueString;
@@ -684,8 +604,8 @@ angular.module("sampleApp")
 
                         //write out
                         //
-                        deferred.resolve(realProfile)
-/*
+                       // deferred.resolve(realProfile)
+
                         SaveDataToServer.saveResource(realProfile,appConfigSvc.getCurrentConformanceServer().url).then(
                             function(data) {
                                 deferred.resolve(realProfile)
@@ -693,7 +613,7 @@ angular.module("sampleApp")
                                 deferred.reject(angular.toJson(err));
                             }
                         )
-                        */
+
 
                     }
 
