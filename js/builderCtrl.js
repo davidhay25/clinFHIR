@@ -799,7 +799,8 @@ angular.module("sampleApp")
 
                         makeGraph();
                         delete $scope.currentResource;
-                        delete $scope.currentPatient
+                        delete $scope.currentPatient;
+                        delete $scope.existingElements;
                         $rootScope.$emit('newSet',newBundleContainer);
                     }
                 });
