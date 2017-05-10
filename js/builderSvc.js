@@ -135,6 +135,11 @@ angular.module("sampleApp")
 
 
                 } else {
+                    if (!resource.id ) {
+                        resource.id = idPrefix+new Date().getTime();        //always assign a new id..
+                    }
+
+                    //todo ??? why did I disabel this ???
                     //resource.id = idPrefix+new Date().getTime();        //always assign a new id..
                     importOneResource(resource,scope);
                     importedResource = resource;

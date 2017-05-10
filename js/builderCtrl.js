@@ -1136,7 +1136,11 @@ angular.module("sampleApp")
             //edit the resource text
             $scope.editResource = function(resource){
                 $scope.selectedContainer.isDirty = true;
-                var vo = builderSvc.splitNarrative(resource.text.div)  //return manual & generated text
+
+                var vo = {manual:''}
+                if (resource.text && resource.text.div) {
+                    vo = builderSvc.splitNarrative(resource.text.div)  //return manual & generated text
+                }
 
 
                 var modalOptions = {
@@ -1169,7 +1173,7 @@ angular.module("sampleApp")
 
 
 
-            }
+            };
 
             //remove a bundle set...
             $scope.deleteBundle = function(inx) {

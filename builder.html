@@ -689,6 +689,7 @@
                                     </form>
 
                                 </uib-tab>
+
                                 <uib-tab heading = "Json">
                                     <div>
                                         <a class=" rounded-box pull-right" ng-show="downloadLinkJsonContent" download="{{downloadLinkJsonName}}.json"
@@ -698,6 +699,9 @@
                                     </div>
                                     <pre>{{selectedContainer.bundle | bundleDisplay | json}}</pre>
                                 </uib-tab>
+
+
+
                                 <uib-tab heading = "JsonContainer">
                                     <div>
                                         <a class=" rounded-box pull-right" ng-show="downloadLinkJsonContent" download="{{downloadLinkJsonName}}.json"
@@ -862,7 +866,7 @@
                         </div>
                         <uib-tabset>
 
-                            <uib-tab  ng-show="builderSvc.isVersionMostRecent(selectedContainer)"    heading="Structure & Reference">
+                            <uib-tab  ng-show="builderSvc.isVersionMostRecent(selectedContainer)" heading="Structure & Reference">
 
 
                                 <div class="row"  ng-show="builderSvc.isVersionMostRecent(selectedContainer)" >
@@ -1102,7 +1106,6 @@
 
                             </uib-tab>
 
-
                             <uib-tab heading="Current resource views">
                                 <br/>
                                 <uib-tabset>
@@ -1115,9 +1118,11 @@
 
                                         <div id="builderResourceTree"></div>
 
+                                    </uib-tab>
 
-
-
+                                    <uib-tab heading="Text">
+                                        <br/>
+                                        <div><p ng-bind-html="currentResource.text.div"></p></div>
                                     </uib-tab>
 
                                     <uib-tab heading="Json">
@@ -1166,7 +1171,7 @@
                                             </table>
                                         </div>
 
-                                        <hr/>
+                                       <!-- <hr/> -->
                                     </uib-tab>
 
                                 </uib-tabset>
