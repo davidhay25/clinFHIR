@@ -303,14 +303,19 @@ angular.module("sampleApp")
                                     }
                                 )
                             } else {
-                                importFromJson($scope.input.raw);
+                                importFromJson($scope.input.raw,$scope.input.stripText);
                             }
 
                         };
 
-                        importFromJson = function(json) {
+                        importFromJson = function(json,stripText) {
                             try {
                                 var res = angular.fromJson(json)
+                                if (stripText) {
+                                    if (res && res.text && res.text.div) {
+                                        res.text.div = "<div/>";
+                                    }
+                                }
                             } catch (ex) {
                                 modalService.showModal({}, {bodyText:'This is not valid JSON'});
                                 return;
