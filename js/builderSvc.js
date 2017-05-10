@@ -101,11 +101,17 @@ angular.module("sampleApp")
             getLinkingUrlFromId : function(resource) {
                 //return the url used for referencing. If a Uuid then just return it - otherwise make a relatibe
 
-                if (resource.id.lastIndexOf('urn:uuid:', 0) === 0) {
-                    return resource.id;
+                if (resource && resource.id) {
+                    if (resource.id.lastIndexOf('urn:uuid:', 0) === 0) {
+                        return resource.id;
+                    } else {
+                        return resource.resourceType + "/" + resource.id;
+                    }
                 } else {
-                    return resource.resourceType + "/" + resource.id;
+                    //in theory, shouldn't happen...
+                    alert("There is a resource with no id! " + angular.toJson(resource))
                 }
+
 
             },
             importResource : function(resource,scope,idPrefix){
