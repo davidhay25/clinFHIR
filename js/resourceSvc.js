@@ -23,6 +23,8 @@ angular.module("sampleApp").service('resourceSvc', function() {
                         reference = reference.reference;
                     }
 
+
+
                     outwardLinks.push({reference:reference,element: rootPath + " " +key,key:key})
 
                 } else {

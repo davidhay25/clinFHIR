@@ -2922,7 +2922,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     // console.log(link)
 
                     //nodeId will only be set for resources in the 'allReference' object - ie ones we've loaded...
-                    if (nodeId) {
+                    if (nodeId == 0 || nodeId) {
 
                         arEdges.push({from: thisNodeId, to: nodeId, arrows: {to: true}, label: link.key})
                     }

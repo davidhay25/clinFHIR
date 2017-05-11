@@ -42,6 +42,26 @@ angular.module("sampleApp")
 
             };
 
+
+            //show the section text (html)
+            $scope.showText = function(section){
+
+
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
+                    keyboard: false,       //same as above.
+                    templateUrl: 'modalTemplates/showSection.html',
+                    size:'lg',
+                    controller : function($scope,section){
+                        $scope.section = section;
+                    },
+                    resolve : {
+                        section : function(){
+                            return section
+                        }}
+                })
+            }
+
             //used by patientViewer to select a patient to display
             $scope.findPatient = function(){
                 delete $scope.resourcesFromServer;

@@ -4,6 +4,12 @@ angular.module("sampleApp")
     .controller('observationsDisplayCtrl',
         function ($scope,ResourceUtilsSvc) {
 
+
+
+            //load the Vital signs pfofile
+
+
+
             //when an obeservation code is selected, draw the chart...
             $scope.obsSelected = function(key,value) {
                 $('#observationsChart').empty();
@@ -12,6 +18,10 @@ angular.module("sampleApp")
                 var options = {};
                 var graph2d = new vis.Graph2d(container, dataset, options);
             }
+
+
+
+
 
             //fired when a patient is selected, passing across the bundle of Boservations
             $scope.$on('patientObservations',function(event,obsBundle) {

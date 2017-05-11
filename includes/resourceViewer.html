@@ -163,6 +163,34 @@
                                             <div id="resourcenetwork"></div>
                                         </uib-tab>
 
+                                        <uib-tab heading="Sections" ng-show="outcome.selectedResource.resourceType=='Composition'">
+                                            <div ng-repeat = "section in outcome.selectedResource.section">
+                                                <h5>{{section.title}}
+                                                    (<span ng-repeat = "code in section.code.coding">{{code.code}}</span>)
+                                                </h5>
+                                                <div class="row">
+                                                    <div class="col-sm-8 col-md-8">
+                                                        <div style="margin-left: 10px">
+                                                            <div ng-repeat = "entry in section.entry">
+                                                                --> {{entry.reference}}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4 col-md-4">
+
+                                                        <div class="pull-right clickable"
+                                                             ng-click="showText(section)">View Text</div>
+
+                                                    </div>
+                                                </div>
+
+
+                                            </div>
+
+
+
+                                        </uib-tab>
+
 
 
 

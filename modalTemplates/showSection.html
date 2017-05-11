@@ -1,0 +1,38 @@
+
+<div>
+    <!--<div ng-controller="newResourceCtrl">-->
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-10 col-sm-10 col-xs-10">
+                <h3 class="modal-title">{{section.title}}</h3>
+
+            </div>
+            <div class="col-md-2 col-sm-2">
+
+                <div class="pull-right clickable" ng-click="$close()">Close</div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-12 col-sm-6 col-xs-12">
+                <p ng-bind-html="section.text.div"></p>
+
+            </div>
+        </div>
+
+
+    </div>
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-12 col-sm-6 col-xs-12"> </div>
+        </div>
+
+    </div>
+</div>
