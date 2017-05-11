@@ -40,8 +40,10 @@
 
     <script src="js/libs/angular-sanitize.js"></script>
 
+    <script src="js/libs/angular-bootstrap-checkbox.js"></script>
+
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage','ngSanitize']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.checkbox','ui.bootstrap','ngStorage','ngSanitize']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);

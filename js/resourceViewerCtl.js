@@ -108,7 +108,6 @@ angular.module("sampleApp")
                 delete $scope.vitalsTable;
                 delete $scope.outcome.selectedResource;
 
-                //console.log(allResources)
 
                 //the order is significant - allResources must be set first...
                 appConfigSvc.setAllResources(allResources);

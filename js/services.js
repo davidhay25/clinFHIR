@@ -593,6 +593,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
         },
         createEncounters : function (patientId,options,bundleConditions) {
             //create a set of encounters for the patient and add them to the referenceResources (just for this session)
+            var fhirVersion = appConfigSvc.getCurrentDataServer().version; //format changed between versions
             console.log(bundleConditions)
             var deferred = $q.defer();
             options = options || {}
@@ -606,28 +607,44 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 enc.id = id;
 
 
-                enc.indication = []
+                if (fhirVersion == 2) {
+                    enc.indication = []
+                } else {
+                    enc.diagnosis = []
+                }
                 //find a random number of Random Condition as the indication
 
-                var cnt = parseInt(3 * Math.random());
+                var cnt = parseInt(5 * Math.random());
                 for (var j=0; j < cnt; j++) {
                     var ref = bundleConditions.entry[parseInt(bundleConditions.entry.length * Math.random())];
                     //console.log(ref)
                     if (ref.response.location && ref.response.location.indexOf('Condition') > -1) {
-                        enc.indication.push({reference:ref.response.location});
+
+                        if (fhirVersion == 2) {
+                            enc.indication.push({reference:ref.response.location});
+                        } else {
+                            enc.diagnosis.push({condition: {reference:ref.response.location}});
+                        }
                     }
 
                 }
 
                 //an empty array causes a parsing error on Grahames server...
-                if (enc.indication.length == 0) {
+                if (enc.indication && enc.indication.length == 0) {
                     delete enc.indication;
+                }
+
+
+                //version difference...
+                if (fhirVersion == 2) {
+                    enc.patient = {reference:'Patient/'+patientId};
+                } else {
+                    enc.subject = {reference:'Patient/'+patientId};
                 }
 
 
 
 
-                enc.patient = {reference:'Patient/'+patientId};
                 enc.reason = [];
                 enc.reason.push(this.getRandomEntryFromOptions('encounterReason'));
                 enc.type = [(this.getRandomEntryFromOptions('encounterType'))];
@@ -641,6 +658,8 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 bundle.entry.push({fullUrl:id,resource:enc,request: {method:'POST',url: 'Encounter'}});
 
             }
+
+            console.log(bundle)
 
             this.postBundle(bundle,referenceResources).then(
                 function(data){

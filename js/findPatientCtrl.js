@@ -127,12 +127,13 @@ angular.module("sampleApp")
                                 addLog('Checking that the required reference resources exist');
                                 supportSvc.checkReferenceResources().then (
                                     function() {
-                                        addLog('adding Encounters...');
+                                        addLog('adding Conditions...');
                                         supportSvc.buildConditionList(patientId,{logFn:addLog}).then(
                                             function(bundleConditions) {
+                                                addLog('adding Encounters...');
                                                 supportSvc.createEncounters(patientId,{},bundleConditions).then(
                                                     function(msg){
-                                                        addLog(msg);
+                                                        addLog('added encounters ' + msg);
                                                         var query = [];
 
                                                         supportSvc.createObservations(patientId,{logFn:addLog}).then(

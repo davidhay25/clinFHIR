@@ -2986,6 +2986,9 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             include = false;
                         }
 
+
+
+                        //this is in STU2
                         if (resource.indication) {
                             resource.indication.forEach(function (ind) {
                                 if (ind.reference && objCondition[ind.reference]) {
@@ -3002,6 +3005,27 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 }
                             })
                         }
+
+                        //this is in R3
+                        if (resource.diagnosis) {
+                            resource.diagnosis.forEach(function (dx) {
+                                if (dx.condition && dx.condition.reference && objCondition[dx.condition.reference]) {
+                                    objCondition[dx.condition.reference].count++;
+                                    if (filterCondition) {
+                                        if (dx.condition.reference == filterCondition) {
+                                            include = true;
+                                        }
+                                    }
+
+                                } else {
+                                    //generally a procedure...
+                                    //console.log('there is a reference to a condition not in the patients list: ' + ind.reference)
+                                }
+                            })
+                        }
+
+
+
 
                         if (include) {
                             var node = {id: inx, start: resource.period.start, resource: resource};
