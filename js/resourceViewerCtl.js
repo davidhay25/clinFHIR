@@ -19,6 +19,95 @@ angular.module("sampleApp")
                 console.log(patientData)
             });
 
+
+
+            //======== document functions
+
+            //display the docment graph. Only works for one document per patient
+            $scope.selectDocument = function(composition) {
+                console.log(composition);
+
+                $scope.currentComposition = angular.copy(composition);
+                var localAllResourcesList = angular.copy($scope.allResourcesAsList)
+
+
+                var sectionNodeMaster = {resourceType:"Section",id:'sectionNodeMaster'};
+                sectionNodeMaster.entry = [];
+                //temp disable $scope.currentComposition.sectionNodeMasterNode = {'reference':'Section/sectionNodeMaster'}
+                //temp disable localAllResourcesList.push(sectionNodeMaster)
+
+
+
+
+                //move through sections and create a node to represent that, moving the references to the node...
+                $scope.currentComposition.section.forEach(function(section,inx){
+                    var newNode = angular.copy(section);
+                    newNode.resourceType = "Section";
+                    newNode.id = 'sectionNode'+inx;
+                   // var newNode = {resourceType:"Section",id:'sectionNode'+inx};
+                   // newNode.entry = section.entry;
+                   // newNode.text = section.text;
+                    delete section.entry
+                    delete section.text
+
+                    section.refSectionNode = {'reference':'Section/sectionNode'+inx}
+                    sectionNodeMaster.entry.push({'reference':'Section/sectionNode'+inx})
+
+                    localAllResourcesList.push(newNode)
+                })
+
+                //move through the list of all resources, remove the current composition & insert the updated one
+                for (var i=0; i < localAllResourcesList.length; i++) {
+                    var resource = localAllResourcesList[i]
+
+                    if (resource.resourceType == 'Composition' && resource.id == $scope.currentComposition.id) {
+                        localAllResourcesList.splice(i,1,$scope.currentComposition);
+                        break;
+                    }
+                }
+
+
+
+                //create and draw the graph representation...
+                var graphData = resourceCreatorSvc.createGraphOfInstances(localAllResourcesList);
+                var container = document.getElementById('documentGraph');
+                var docGraph = new vis.Network(container, graphData, {});
+               // $scope.graph['mynetwork'] = network;
+                docGraph.on("click", function (obj) {
+                    // console.log(obj)
+                    var nodeId = obj.nodes[0];  //get the first node
+                    var node = graphData.nodes.get(nodeId);
+
+                    var selectedGraphNode = graphData.nodes.get(nodeId);
+
+                    console.log(selectedGraphNode)
+                    delete $scope.currentDocumentSectionText;
+                    delete $scope.currentDocumentSection
+                    if (selectedGraphNode.resource && selectedGraphNode.resource) {
+                        $scope.currentDocumentSection = selectedGraphNode.resource;
+                       // delete $scope.currentDocumentSection.text;
+                    }
+
+
+                    if (selectedGraphNode && selectedGraphNode.resource && selectedGraphNode.resource.text) {
+                        $scope.currentDocumentSectionText = selectedGraphNode.resource.text.div;
+
+
+                    }
+
+
+                    //drawResourceTree($scope.selectedGraphNode.resource)
+
+                    $scope.$digest();
+                });
+
+
+                //createGraphOneResource(composition,"documentGraph")
+
+
+            }
+
+
             $scope.filterTimeLineByCondition = function(reference) {
                 delete $scope.outcome.selectedResource;
                 //console.log(reference);

@@ -8,12 +8,26 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
     //colours for graph = http://www.w3schools.com/colors/colors_picker.asp
     var objColours ={};
-    objColours.Encounter = '#93FF1A';
-    objColours.Condition = '#E89D0C';
-    objColours.Observation = '#ff8080';
-    objColours.List = '#FFFFCC';
-    objColours.Practitioner = '#FFBB99';
-    objColours.MedicationStatement = '#ffb3ff';
+        objColours.Patient = '#93FF1A';
+        objColours.Composition = '#ff6600';
+        objColours.List = '#ff8080';
+        objColours.Observation = '#FFFFCC';
+        objColours.Practitioner = '#FFBB99';
+        objColours.MedicationStatement = '#ffb3ff';
+        objColours.CarePlan = '#FF9900';
+        objColours.Sequence = '#FF9900';
+        objColours.CareTeam = '#FFFFCC';
+        objColours.Condition = '#cc9900';
+        objColours.LogicalModel = '#cc0000';
+        objColours.Section = '#ff6600';
+
+        objColours.Organization = '#FF9900';
+        objColours.ProviderRole = '#FFFFCC';
+        objColours.Location = '#cc9900';
+        objColours.HealthcareService = '#FFFFCC';
+        objColours.MedicationDispense = '#FFFFCC';
+        objColours.Medication = '#FF9900';
+
 
         //function to capitalize the first letter of a word...
     String.prototype.toProperCase = function () {

@@ -7,6 +7,9 @@ angular.module("sampleApp")
                 $scope.input.dob = new Date(1982,9,31);     //will be replaced by name randomizer
                 $scope.outcome = {log:[]};
 
+
+                $scope.input.patientId = "87218" //<<<<<<<  TESTING...
+
                 $scope.input.createSamples = true;
                 //when the 'Add new patient' is selected...
                 $scope.seletNewPatientOption = function(){
@@ -16,10 +19,10 @@ angular.module("sampleApp")
                     supportSvc.getRandomName().then(
                         function(data) {
                             try {
-
+                                //moment(input.dob).format('YYYY-MM-DD');
 
                                 var user = data.data.results[0];
-                                $scope.input.dob = moment(user.dob).format();
+                                $scope.input.dob = moment(user.dob).toDate(); //format();
                                 $scope.input.fname  = user.name.first.toProperCase();
                                 $scope.input.lname = user.name.last.toProperCase();
                                 $scope.input.gender = user.gender;
