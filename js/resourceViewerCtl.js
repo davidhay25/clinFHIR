@@ -27,10 +27,11 @@ angular.module("sampleApp")
             $scope.selectDocument = function(composition) {
                 console.log(composition);
 
+                //work on copies
                 $scope.currentComposition = angular.copy(composition);
                 var localAllResourcesList = angular.copy($scope.allResourcesAsList)
 
-
+                //not currently used - was going to support a separate node for sections linked from the document
                 var sectionNodeMaster = {resourceType:"Section",id:'sectionNodeMaster'};
                 sectionNodeMaster.entry = [];
                 //temp disable $scope.currentComposition.sectionNodeMasterNode = {'reference':'Section/sectionNodeMaster'}
@@ -39,18 +40,17 @@ angular.module("sampleApp")
 
 
 
-                //move through sections and create a node to represent that, moving the references to the node...
+                //move through sections and create a node to represent that, moving the references from the composition to the node...
                 $scope.currentComposition.section.forEach(function(section,inx){
                     var newNode = angular.copy(section);
                     newNode.resourceType = "Section";
                     newNode.id = 'sectionNode'+inx;
-                   // var newNode = {resourceType:"Section",id:'sectionNode'+inx};
-                   // newNode.entry = section.entry;
-                   // newNode.text = section.text;
+
                     delete section.entry
                     delete section.text
 
-                    section.refSectionNode = {'reference':'Section/sectionNode'+inx}
+                    //the reference from the Composition to the section
+                    section.section = {'reference':'Section/sectionNode'+inx}
                     sectionNodeMaster.entry.push({'reference':'Section/sectionNode'+inx})
 
                     localAllResourcesList.push(newNode)
@@ -463,8 +463,67 @@ angular.module("sampleApp")
             };
 
 
+            //generate the table of vitals copied from resourceCreatorCtrl...
+            $scope.getVitals = function(){
+                //return the list of vitals observations so that a table can be generated
+               // delete $scope.outcome.selectedResource;
+               // delete $scope.outcome.selectedType;
+               // delete $scope.outcome.allResourcesOfOneType;
+
+                //toggle table...
+                if ($scope.vitalsTable) {
+                    delete $scope.vitalsTable;
+                    return;
+                }
+
+                supportSvc.getVitals({patientId:appConfigSvc.getCurrentPatient().id}).then(
+                    function(vo){
+                        var codes = vo.vitalsCodes;     //an array of codes - todo: add display ?get from profile to allow adjustable table
+                        var grid = vo.grid;             //obects where each property is a date (to become a colum
+                        //get a list of dates
+                        var dates = [];
+                        angular.forEach(grid,function(item,date){
+                            dates.push(date);
+                        });
+                        dates.sort(function(a,b){
+                            if (b > a) {
+                                return 1
+                            } else {
+                                return -1
+                            }
+                        });
+
+                        //convert the data grid into one suitable for display - ie the dates (properties) as columns
+                        $scope.vitalsTable = {rows:[],dates:[]};
+
+                        var firstRow = true;
+                        codes.forEach(function(code){
+                            var row = {code:code.code,unit:code.unit,display:code.display,cols:[]};
+                            //now, add a column for each date...
+                            dates.forEach(function(date){
+                                item = grid[date];
+                                var v = '';
+                                if (item[code.code]) {      //is there a value for this code on this date
+                                    v = item[code.code].valueQuantity.value;
+                                }
+                                row.cols.push({value:v});
+                                //add the date to the list of dates on the first row only
+                                if (firstRow) {
+                                    $scope.vitalsTable.dates.push(date);
+                                }
+
+                            });
+                            firstRow = false
+                            $scope.vitalsTable.rows.push(row);
+                        });
+
+
+                    }
+                )
+            };
 
 
 
 
-    });
+
+        });
