@@ -1170,10 +1170,15 @@ angular.module("sampleApp")
                         break;
 
                     case 'Period' :
-                        var start = value.period.start;
-                        var end = value.period.end;
-                        var insrt = {start:start,end:end}
-                        simpleInsert(insertPoint,info,path,insrt,dt);
+                        if (value.period) {
+                            var start = value.period.start;
+                            var end = value.period.end;
+                            var insrt = {start:start,end:end}
+                            simpleInsert(insertPoint,info,path,insrt,dt);
+                        } else {
+                            alert('No period data selected');   //todo - shuldn't really call alert here
+                        }
+
 
                         break;
 

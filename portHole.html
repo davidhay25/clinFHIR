@@ -6,6 +6,7 @@
     <script src="js/libs/jquery-1.9.0.min.js"></script>
     <script src="js/libs/angular.min1-5.js"></script>
     <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
     <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
 
     <script src="js/libs/moment.min.js"></script>
@@ -43,11 +44,13 @@
     <script src="js/services.js"></script>
     <script src="js/filters.js"></script>
 
-    <script src="js/profileDiffSvc.js"></script>
-    <script src="js/logicalModelSvc.js"></script>
+
+
+    <script src="js/libs/vis.min.js"></script>
 
     <!--
-
+ <script src="js/profileDiffSvc.js"></script>
+    <script src="js/logicalModelSvc.js"></script>
 
   <script src="js/appConfigSvc.js"></script>
   <script src="js/libs/ngStorage.min.js"></script>
@@ -129,10 +132,31 @@
 
 
 
-
     <div class="row">
         <div class="col-sm-2 col-md-2">
             <h4>Views</h4>
+
+        </div>
+        <div class="col-sm-8 col-md-8">
+            <div class="rounded-box">
+
+                <div id="timeline"></div>
+
+
+            </div>
+
+        </div>
+        <div class="col-sm-2 col-md-2">
+            <h4>View options</h4>
+        </div>
+    </div>
+
+
+
+
+    <div class="row">
+        <div class="col-sm-2 col-md-2">
+
             <ul class="list-group">
                 <li style="cursor:pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':view.mode == currentView.mode}"
                     ng-repeat="view in views" ng-click="processView(view)">
@@ -151,7 +175,7 @@
 
         </div>
         <div class="col-sm-2 col-md-2">
-            <h4>View options</h4>
+
         </div>
     </div>
 
