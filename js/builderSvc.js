@@ -1179,13 +1179,14 @@ angular.module("sampleApp")
 
                     case 'date' :
                         //value is a Date object...
-                        var v = moment(value).format('YYYY-MM-DD');
+                        var v = moment(value.date).format('YYYY-MM-DD');
                         simpleInsert(insertPoint,info,path,v,dt);
                         this.addStringToText(insertPoint,path+": "+ v)
                         break;
                     case 'dateTime' :
                         //value is a Date object...
-                        var v = moment(value).format();
+                        //var v = moment(valuedate).format();
+                        var v = moment(value.date).format('YYYY-MM-DD');
                         simpleInsert(insertPoint,info,path,v,dt);
                         this.addStringToText(insertPoint,path+": "+ v)
                         break;
@@ -1950,9 +1951,9 @@ angular.module("sampleApp")
 
                                         //note that profile can be an array or a string
                                         if (angular.isArray(profile)) {
-                                            references.push({path:ed.path,profile:profile[0].profile,min:ed.min, max:ed.max})
+                                            references.push({path:ed.path,profile:profile[0].profile,min:ed.min, max:ed.max,ed:ed})
                                         } else {
-                                            references.push({path:ed.path,profile:profile,min:ed.min, max:ed.max})
+                                            references.push({path:ed.path,profile:profile,min:ed.min, max:ed.max,ed:ed})
                                         }
                                     }
                                 }

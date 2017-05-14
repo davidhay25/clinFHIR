@@ -487,7 +487,6 @@
                         <hr/>
                     </div>
 
-
                     <button ng-hide="displayMode == 'new' || ! builderSvc.isVersionMostRecent(selectedContainer)"
                             ng-click="displayMode = 'new'"
                             class="btn btn-primary pull-right">Add Resource</button>
@@ -564,12 +563,10 @@
                                                 </i>
                                             </div>
 
-
-
                                         </div>
                                         <div class="form-group">
                                             <div class="col-md-3 col-sm-3">
-                                                <strong>Servers</strong>
+                                                <strong>Servers when created</strong>
                                             </div>
                                             <div class="col-md-8 col-sm-8">
 
@@ -1017,9 +1014,16 @@
                                         </div>
 
 
+
+
                                         <div ng-show="hashPath.isReference">
 
+
+
                                             <h5>Potential References</h5>
+
+
+
 
                                             <table class="table table-condensed table-bordered">
                                                 <tr><th>Type</th><th>Potential resources</th></tr>
@@ -1466,12 +1470,18 @@
                                         </a>
                                     </div>
 
+                                    <h5>Description</h5>
 
-                                    <h4>Potential references</h4>
+
+                                    {{currentType.description}}
+                                    {{currentType.purpose}}
+
+                                    <h5>Potential references</h5>
                                     <table class="table table-bordered table-condensed">
-                                        <tr><th>Path</th><th>Resource Type</th></tr>
+                                        <tr><th>Path</th><th>Description</th><th>Resource Type</th></tr>
                                         <tr ng-repeat="ref in references">
                                             <td>{{ref.path | dropFirstInPath}}</td>
+                                            <td>{{ref.ed.short}}</td>
                                             <td>{{ref.profile | getLogicalID}}</td>
 
                                         </tr>
