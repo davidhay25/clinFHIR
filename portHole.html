@@ -41,6 +41,7 @@
     <script src="js/profileCreatorSvc.js"></script>
     <script src="js/resourceSvc.js"></script>
     <script src="js/builderSvc.js"></script>
+    <script src="js/portHoleSvc.js"></script>
     <script src="js/services.js"></script>
     <script src="js/filters.js"></script>
 
@@ -134,20 +135,21 @@
 
     <div class="row">
         <div class="col-sm-2 col-md-2">
-            <h4>Views</h4>
+            <h4>Changes</h4>
 
         </div>
         <div class="col-sm-8 col-md-8">
-            <div class="rounded-box">
+            <div class="rounded-boxDEP">
+                <h4>Details</h4>
 
-                <div id="timeline"></div>
+                <div ng-hide="1" id="timeline"></div>
 
 
             </div>
 
         </div>
         <div class="col-sm-2 col-md-2">
-            <h4>View options</h4>
+            <h4>Views</h4>
         </div>
     </div>
 
@@ -155,6 +157,34 @@
 
 
     <div class="row">
+
+        <div class="col-sm-2 col-md-2">
+
+            <ul class="list-group">
+                <li style="cursor:pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':currentProvenance.id == prov.id}"
+                    ng-repeat="prov in provenance" ng-click="displayProvenance(prov)">
+                    <div>{{prov.local.scenario}}<span class="pull-right">{{prov.recorded | getAgeSeconds}}</span> </div>
+                    <em><div>{{prov.local.note}}</div></em>
+
+                </li>
+            </ul>
+
+
+
+
+        </div>
+
+        <div class="col-sm-8 col-md-8">
+            <div class="rounded-box myScroll">
+
+
+
+
+                <pre>{{currentProvenance | json}}</pre>
+
+            </div>
+
+        </div>
         <div class="col-sm-2 col-md-2">
 
             <ul class="list-group">
@@ -165,18 +195,7 @@
             </ul>
 
         </div>
-        <div class="col-sm-8 col-md-8">
-            <div class="rounded-box myScroll">
 
-
-
-
-            </div>
-
-        </div>
-        <div class="col-sm-2 col-md-2">
-
-        </div>
     </div>
 
 

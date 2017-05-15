@@ -3,7 +3,7 @@ angular.module("sampleApp")
 //also holds the current patient and all their resources...
 //note that the current profile is maintained by resourceCreatorSvc
 
-    .service('builderSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities,$filter,supportSvc) {
+    .service('builderSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities,$filter,supportSvc,SaveDataToServer) {
 
         var gAllReferences = []
         var gSD = {};   //a has of all SD's reas this session by type
@@ -62,6 +62,93 @@ angular.module("sampleApp")
         objColours.Medication = '#FF9900';
 
         return {
+            createProvenance : function(responseBundle,scenario,note) {
+                //if there's no provenance resource, then add one that points to all the resources in the bundle
+                //>>>> just add one...
+                //var provExt = appConfigSvc.standardExtensionUrl().scenarioProvenance;
+                var provExt = appConfigSvc.config().standardExtensionUrl.scenarioProvenance;
+                var provNoteUrl = appConfigSvc.config().standardExtensionUrl.scenarioNote;
+
+                console.log(responseBundle)
+                //var currentProvenanceInx;
+                var prov = {resourceType:'Provenance', target:[]}
+                prov.recorded = moment().toISOString();
+                //prov.id = 'cf-'+new Date().getTime();
+
+                //mark that this provenance is being used to track the contents of a scenario
+                Utilities.addExtensionOnce(prov,provExt,{valueString:scenario});
+
+                if (note) {
+                    //mark that this provenance is being used to track the contents of a scenario
+                    Utilities.addExtensionOnce(prov,provNoteUrl,{valueString:note});
+                }
+
+                //build a provenance resource pointing to all the resources in the bundle...
+                responseBundle.entry.forEach(function (ent,inx) {
+                    var res = ent.response;  //{eTag, lastModified, location, status}
+                    prov.target.push({reference: res.location})
+
+                });
+
+                return prov;
+
+            },
+            addProvenanceDEP : function(container,note) {
+                //if there's no provenance resource, then add one that points to all the resources in the bundle
+                //>>>> just add one...
+                //var provExt = appConfigSvc.standardExtensionUrl().scenarioProvenance;
+                var provExt = appConfigSvc.config().standardExtensionUrl.scenarioProvenance;
+                var provNoteUrl = appConfigSvc.config().standardExtensionUrl.scenarioNote;
+
+                console.log(container)
+                var currentProvenanceInx;
+                var prov = {resourceType:'Provenance', target:[]}
+                prov.recorded = moment().toISOString();
+                prov.id = 'cf-'+new Date().getTime();
+
+                //mark that this provenance is being used to track the contents of a scenario
+                Utilities.addExtensionOnce(prov,provExt,{valueString:container.name});
+
+                if (note) {
+                    //mark that this provenance is being used to track the contents of a scenario
+                    Utilities.addExtensionOnce(prov,provNoteUrl,{valueString:note});
+                }
+
+
+
+                //build a provenance resource pointing to all the resources in the bundle...
+                container.bundle.entry.forEach(function (ent,inx) {
+                    var res = ent.resource;
+
+                    if (res.resourceType == 'Provenance') {
+
+                        //is this the provenance used to track a scenario?
+                        var ext = Utilities.getSingleExtensionValue(res,provExt);
+                        if (ext) {
+                            //yep - it will be removed
+                            currentProvenanceInx = inx
+                        }
+
+                    } else {
+                        //don't create a reference to a provenance resource...
+                        var ref = res.resourceType + "/" + res.id;
+                        prov.target.push({reference: ref})
+                    }
+
+
+                })
+
+                return prov;
+
+                /*
+                 if (currentProvenanceInx) {
+                 container.bundle.entry.slice(currentProvenanceInx,1)
+                 }
+
+                 container.bundle.entry.push({resource:prov});
+
+                 */
+            },
             updateMostRecentVersion : function(container,bundle) {
                 //when editing - make sure the most current history is updated as well...
                 if (!container.history) {       //when migrating from existing scenarios...
@@ -216,9 +303,11 @@ angular.module("sampleApp")
                 );
                 return deferred.promise;
             },
-            sendToFHIRServer : function(bundle) {
+            sendToFHIRServer : function(container,note) {
                 //create a new bundle to submit as a transaction. excludes logical models
-               // var deferred = $q.defer();
+                var that=this;
+                var bundle = container.bundle;
+                var deferred = $q.defer();
                 var transBundle = {resourceType:'Bundle',type:'transaction',entry:[]}
                 bundle.entry.forEach(function(entry) {
 
@@ -231,16 +320,43 @@ angular.module("sampleApp")
                     }
                 });
 
-
-
-
                 var url = appConfigSvc.getCurrentDataServer().url;
-                return $http.post(url,transBundle)
+
+                $http.post(url,transBundle).then(
+                    function(data) {
+                        //the response contains the location where all resources were stored. Create a provenance resource...
+
+
+                        console.log(data.data)
+
+                        var prov = that.createProvenance(data.data,container.name,note)
+                        console.log(prov);
+                        SaveDataToServer.saveResource(prov).then(
+                            function(data) {
+                                deferred.resolve()
+                            },
+                            function(err) {
+                                alert(angular.toJson(err));
+                                deferred.resolve();
+                            }
+                        )
+
+
+
+
+
+
+
+                    },
+                    function(err) {
+                        alert(angular.toJson(err));
+                    }
+                )
 
 
              //   deferred.resolve()
 
-               // return deferred.promise
+                return deferred.promise
 
             },
             validateAll : function(bundle) {

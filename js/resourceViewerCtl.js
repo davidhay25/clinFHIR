@@ -259,20 +259,25 @@ angular.module("sampleApp")
                 //create and draw the graph representation...
                 var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList);
                 var container = document.getElementById('mynetwork');
-                var network = new vis.Network(container, graphData, {});
-                $scope.graph['mynetwork'] = network;
-                network.on("click", function (obj) {
-                    // console.log(obj)
-                    var nodeId = obj.nodes[0];  //get the first node
-                    var node = graphData.nodes.get(nodeId);
+                if (container) {
+                    var network = new vis.Network(container, graphData, {});
+                    $scope.graph['mynetwork'] = network;
+                    network.on("click", function (obj) {
 
-                    $scope.selectedGraphNode = graphData.nodes.get(nodeId);
-                   // console.log($scope.selectedGraphNode);
+                        var nodeId = obj.nodes[0];  //get the first node
+                        var node = graphData.nodes.get(nodeId);
 
-                    drawResourceTree($scope.selectedGraphNode.resource)
+                        $scope.selectedGraphNode = graphData.nodes.get(nodeId);
+                        // console.log($scope.selectedGraphNode);
 
-                    $scope.$digest();
-                });
+                        drawResourceTree($scope.selectedGraphNode.resource)
+
+                        $scope.$digest();
+                    });
+                } else {
+                    //alert("can't find the element 'mynetwork' in the page")
+                }
+
 
 
 
@@ -284,14 +289,19 @@ angular.module("sampleApp")
                 $('#encTimeline').empty();     //otherwise the new timeline is added below the first...
                 var tlContainer = document.getElementById('encTimeline');
 
-                var timeline = new vis.Timeline(tlContainer);
-                timeline.setOptions({});
-                timeline.setGroups(timelineData.groups);
-                timeline.setItems(timelineData.items);
+                //seems to be absent when there is no internet - or no doc sections vs - in plane back from madrid in may....
+                if (tlContainer) {
+                    var timeline = new vis.Timeline(tlContainer);
+                    timeline.setOptions({});
+                    timeline.setGroups(timelineData.groups);
+                    timeline.setItems(timelineData.items);
 
-                timeline.on('select', function(properties){
-                    timeLineItemSelected(properties,timelineData.items)
-                });
+                    timeline.on('select', function(properties){
+                        timeLineItemSelected(properties,timelineData.items)
+                    });
+                }
+
+
 
                 $scope.conditions = timelineData.conditions;
 

@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-05-09a';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-05-15b';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};
@@ -35,6 +35,8 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.simpleExtensionUrl = 'http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl';
         defaultConfig.standardExtensionUrl.clinFHIRCreated = 'http://clinfhir.com/fhir/StructureDefinition/cfAuthor';
         defaultConfig.standardExtensionUrl.userEmail = 'http:www.clinfhir.com/StructureDefinition/userEmail';
+        defaultConfig.standardExtensionUrl.scenarioProvenance = 'http:www.clinfhir.com/StructureDefinition/scenarioProvenance';
+        defaultConfig.standardExtensionUrl.scenarioNote = 'http:www.clinfhir.com/StructureDefinition/scenarioNote';
 
 
 

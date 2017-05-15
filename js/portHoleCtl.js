@@ -1,13 +1,21 @@
 
 angular.module("sampleApp")
     .controller('portHoleCtrl',
-        function ($scope,supportSvc,appConfigSvc,GetDataFromServer) {
+        function ($scope,supportSvc,appConfigSvc,GetDataFromServer,Utilities) {
 
+            //extension urls on provenance
+            var provScenarioUrl = appConfigSvc.config().standardExtensionUrl.scenarioProvenance;
+            var provNoteUrl = appConfigSvc.config().standardExtensionUrl.scenarioNote;
+
+
+            $scope.displayProvenance = function(prov) {
+                $scope.currentProvenance = prov;
+            }
 
 
             $scope.loadPatient = function() {
 
-                supportSvc.getAllData(26302).then(
+                supportSvc.getAllData('cf-1494850832169').then(
                     //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
                     function (allResources) {
                         console.log(allResources)
@@ -20,7 +28,7 @@ angular.module("sampleApp")
 
                 //get the provenance recources directly (Grahame includes, Hapi doesn't)
                 //?patient=cf-1494594813437
-                var url = appConfigSvc.getCurrentDataServer().url + "Provenance?patient=cf-1494594813437";
+                var url = appConfigSvc.getCurrentDataServer().url + "Provenance?patient=cf-1494850832169";
                 GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
                     function(data) {
                         $scope.provenance = [];
@@ -30,8 +38,27 @@ angular.module("sampleApp")
                                 var prov = entry.resource;
                                 console.log(prov)
 
+                                prov.local = {};
+                                try {
+                                    prov.local.note = Utilities.getSingleExtensionValue(prov,provNoteUrl).valueString
+                                } catch(ex) {
+
+                                }
+                                try {
+                                    prov.local.scenario = Utilities.getSingleExtensionValue(prov,provScenarioUrl).valueString
+                                } catch(ex) {
+
+                                }
+
+
+                                $scope.provenance.push(prov)
+
+
+
+
+
                                 if (prov.period) {
-                                    $scope.provenance.push(prov)
+
                                     var node = {id: inx, start: prov.period.start, resource: prov};
                                     var klass = prov.class || 'unknown';
                                     //node.group = objGroups[klass];
@@ -45,6 +72,15 @@ angular.module("sampleApp")
                         var items = new vis.DataSet(ar);
 
                         showTimeline({items:items})
+
+                        $scope.provenance.sort(function(p1,p2){
+                            if (moment(p1.recorded).toDate().getTime() > moment(p2.recorded).toDate().getTime()) {
+                                return -1
+                            } else {
+                                return 1;
+                            }
+                        })
+
 
                         console.log($scope.provenance)
                     },

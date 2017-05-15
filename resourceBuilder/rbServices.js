@@ -651,9 +651,6 @@ angular.module("sampleApp").
 
             return deferred.promise;
 
-
-
-
         },
         registerAccess : function(module){
             //register access for the logs...
@@ -1483,7 +1480,6 @@ console.log(summary);
             }
             return lst;
         },
-
         getValueSetIdFromRegistry : function(uri,cb,noError) {
             //return the id of the ValueSet on the terminology server so we can call $expand on it. For now, assume at the VS is on the terminology.
             var config = appConfigSvc.config();

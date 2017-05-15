@@ -514,6 +514,11 @@ angular.module("sampleApp")
                 var container = $localStorage.builderBundles[$scope.currentBundleIndex]
                 var bundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
 
+
+                var note = window.prompt("Enter a note about this update");
+
+                //builderSvc.addProvenance(container,note);    //add a provenance resource to the bundle
+
                 if (container.server && container.server.data) {
                     //we recorded the data server that this bundle was created with
                     if (container.server.data.name !== appConfigSvc.getCurrentDataServer().name) {
@@ -545,7 +550,7 @@ angular.module("sampleApp")
 
                     console.log(bundle);
                     $scope.waiting = true;
-                    builderSvc.sendToFHIRServer(bundle).then(
+                    builderSvc.sendToFHIRServer(container,note).then(
                         function(data){
                             //console.log(data.data)
 
