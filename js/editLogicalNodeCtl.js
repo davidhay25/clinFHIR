@@ -89,6 +89,13 @@ angular.module("sampleApp")
                         if (data.max == '*') {$scope.input.multiplicity = 'multreq'}
                     }
 
+
+                    if (! data.type) {
+                        alert("For some reason the 'type' element is absent. Setting it to a string.")
+                        data.type = [{code:'string'}]
+                    }
+
+
                     $scope.dt = data.type[0];   //the selected datatype...
 
                     var dtCode = data.type[0].code;     //only the first datatype (we only support 1 right now)
@@ -97,6 +104,8 @@ angular.module("sampleApp")
                             $scope.input.dataType = dt1;
                         }
                     });
+
+
 
                     //set the dropdown if this is a valueset from the IG...
                     if (data.selectedValueSet && data.selectedValueSet.vs){

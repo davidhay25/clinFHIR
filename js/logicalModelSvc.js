@@ -1148,10 +1148,14 @@ angular.module("sampleApp")
 
                                         ed.type.forEach(function (typ) {
                                             if (typ.profile) {
+                                                //if there's a profile, then this is a refrence.. todo - what about quantity???
                                                 typ.targetProfile = typ.profile[0];
                                                 delete typ.profile;
                                                 item.data.type.push(typ)
                                                 //item.data.type.targetProfile = typ.profile[0]
+                                            } else {
+                                                //Other data types
+                                                item.data.type.push(typ)
                                             }
                                         })
                                     } else {
