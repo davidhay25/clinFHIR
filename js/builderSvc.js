@@ -63,16 +63,55 @@ angular.module("sampleApp")
 
         return {
             createProvenance : function(responseBundle,scenario,note) {
+
+                /*
+                var list = {resourceType:'List',status:'current',mode:'snapshot',entry:[]}
+                responseBundle.entry.forEach(function (ent,inx) {
+                    var res = ent.response;  //{eTag, lastModified, location, status}
+                    if (res.location.indexOf('Patient') > -1) {
+                        list.subject = {reference:res.location}
+                    }
+
+
+
+                    var entry = {item: {reference: res.location}};
+                    // Utilities.addExtensionOnce(item,provTargetUrl,{valueString:res.location});
+                    list.entry.push(entry)
+
+                });
+
+                return list;
+
+
+
+                var group = {resourceType:'Group',type:'person',actual:true,member:[]}
+                responseBundle.entry.forEach(function (ent,inx) {
+                    var res = ent.response;  //{eTag, lastModified, location, status}
+                    var item = {entity: {reference: res.location}};
+                    // Utilities.addExtensionOnce(item,provTargetUrl,{valueString:res.location});
+                    group.member.push(item)
+
+                });
+
+                return group;
+
+
+*/
+
                 //if there's no provenance resource, then add one that points to all the resources in the bundle
                 //>>>> just add one...
                 //var provExt = appConfigSvc.standardExtensionUrl().scenarioProvenance;
                 var provExt = appConfigSvc.config().standardExtensionUrl.scenarioProvenance;
                 var provNoteUrl = appConfigSvc.config().standardExtensionUrl.scenarioNote;
+                var provTargetUrl = appConfigSvc.config().standardExtensionUrl.provenanceTargetUrl;
+
 
                 console.log(responseBundle)
                 //var currentProvenanceInx;
-                var prov = {resourceType:'Provenance', target:[]}
+                var prov = {resourceType:'Provenance', target:[], agent:[]}
                 prov.recorded = moment().toISOString();
+                prov.agent.push({whoUri:'http://clinfhir.com'});
+
                 //prov.id = 'cf-'+new Date().getTime();
 
                 //mark that this provenance is being used to track the contents of a scenario
@@ -85,12 +124,29 @@ angular.module("sampleApp")
 
                 //build a provenance resource pointing to all the resources in the bundle...
                 responseBundle.entry.forEach(function (ent,inx) {
-                    var res = ent.response;  //{eTag, lastModified, location, status}
-                    prov.target.push({reference: res.location})
+                    var res = ent.response;  //{eTag, lastModified, location, status}  http://test.fhir.org/r3/Condition/cf-1494878404520/_history/9
+                    var ar = res.location.split('/');
+                    var version = ar[ar.length-1];
+                    var id = ar[ar.length-3];
+                    var type = ar[ar.length-4];
+                    var ref = type+ '/'+id + '/_history/'+version;
+
+                    //Patient is not version specific - all the others are.
+                    if (type == 'Patient') {
+                        ref = type+ '/'+id;
+                    }
+
+                    var item = {reference: ref};
+                   // Utilities.addExtensionOnce(item,provTargetUrl,{valueString:res.location});
+                    prov.target.push(item)
 
                 });
 
+                console.log(prov);
+
                 return prov;
+
+
 
             },
             addProvenanceDEP : function(container,note) {
