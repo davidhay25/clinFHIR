@@ -1722,11 +1722,6 @@ angular.module("sampleApp")
                            //     node.data.type = [{code:'BackboneElement'}]
                             }
 
-                            //set all the element paths...
-                           // var rootNodeId = $scope.treeData[0].data.path;
-                            //setPath(rootNodeId, rootNodeId)
-
-
                         }
 
                         //set all the element paths...
@@ -1739,12 +1734,24 @@ angular.module("sampleApp")
                         }
 
 
+                        //console.log($scope.treeData)
+
+                        //close all the nodes
+                        $scope.treeData.forEach(function (node) {
+                            if (node.state) {
+                                node.state.opened=false;
+                            }
+                        })
+
+
+
+
                         drawTree();
                         $scope.isDirty = true;
                         makeSD();       //create the StructureDefinition resource...
                         
 
-                        //set the path of the element based on the name - and the parent names up th ehierarchy..
+                        //set the path of the element based on the name - and the parent names up the hierarchy..
                         function setPath(parentPath,parentId) {
                             $scope.treeData.forEach(function(node){
                                 if (node.parent == parentId) {
@@ -2070,6 +2077,9 @@ angular.module("sampleApp")
 
 
             function drawTree() {
+
+
+
 
 
                 $('#lmTreeView').jstree('destroy');
