@@ -10,8 +10,10 @@
 
             <div class="col-md-4 col-sm-4">
                 <div class="pull-right">
-
                     <button class="btn btn-link pull-right" ng-click="$dismiss()">Close</button>
+                    <button ng-show="canSave" ng-click="saveProfile()" class="btn btn-primary pull-right">Save</button>
+
+
                 </div>
             </div>
         </div>
@@ -29,13 +31,18 @@
 
             </div>
             <div class="col-md-2 col-sm-2">
-                <button ng-click="generateProfile()" class="btn btn-primary pull-right">Generate</button>
+
             </div>
         </div>
+
+        {{message}}
 
         <ul class="list-group">
             <li ng-repeat = 'err in errors  track by $index' class="list-group-item">{{err}}</li>
         </ul>
+
+
+        <pre ng-show="oo">{{oo | json}}</pre>
 
         <br/>
 

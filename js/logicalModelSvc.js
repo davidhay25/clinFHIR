@@ -485,6 +485,13 @@ angular.module("sampleApp")
                     var err = [];
                     var ok = [];
                     var slices = []; // a collection of all sliced elements
+                    var ignorePath = []
+
+                    //this will be an object holding child elements of datatypes. Just a few to see if it works
+                    var dt = {}
+                    dt['CodeableConcept'] = ['coding','text','coding.system','coding.code','coding.display']
+                    dt['Identifier'] = ['system','value']
+                    dt['Period'] = ['start','end'];
 
 
                     //create a hash of all the paths in the Logical model. Ignore duplications. used for finding the dt of the parent
@@ -495,16 +502,33 @@ angular.module("sampleApp")
 
                     //create a hash of all the paths in the base resource type (That is being profiled)...
                     var basePathHash = {};
+                    var listOfDataTypes = {};   //a hash of all the datatypes used by the model
                     SD.snapshot.element.forEach(function(ed){
                         basePathHash[ed.path] = ed;
-                        /*
-                        if (pathHash[ed.path]) {
-                            err.push("The path '"+ed.path + "' is duplicated in the model.")
-                        } else {
-                            pathHash[ed.path] = ed;
-                        }*/
+                        if (ed.type) {
+                            ed.type.forEach(function (typ) {
+                                //if the type is a complex datatype, then add the children...
+                                if (dt[typ.code]) {
+                                    dt[typ.code].forEach(function (child) {
+                                        var childPath = ed.path + "." + child;
+                                        basePathHash[childPath] = ed;
+
+                                    })
+                                }
+
+
+                                if (! listOfDataTypes[typ.code]) {
+                                    listOfDataTypes[typ.code] = {}
+                                }
+                            })
+                        }
+
 
                     });
+
+                    console.log(listOfDataTypes)
+
+
 
 
 
@@ -512,8 +536,18 @@ angular.module("sampleApp")
                     internalLM.snapshot.element.forEach(function(ed,inx){
                         var newED = angular.copy(ed);
 
+                        //remove invalid property
+                        if (newED.type){
+                            newED.type.forEach(function (typ) {
+                                delete typ.isComplexDT;
+                            })
+
+                        }
+
+
+
                         //the current path will not be correct (it is in the logical model) - we need to get this from the FHIR mapping
-                        var oldPath = newED.path;
+                        var oldPath = newED.path;       //save the old path
                         delete newED.path;
 
                         if (inx == 0) {
@@ -547,7 +581,7 @@ angular.module("sampleApp")
 
                         }
                         newED.id = baseType + ':' + newED.path;
-                        console.log(newED.path)
+                        //console.log(newED.path)
 
 
                         var path = newED.path;
@@ -556,39 +590,93 @@ angular.module("sampleApp")
                         }
 
 
+                        var addToProfile = true;
 
+                        //check for a path in the FHIR mapping
                         if (! newED.path) {
                             //there is no path - which means that there was no FHIR mapping
-                            err.push("Path: "+oldPath + " needs to have a FHIR mapping")
-                        } else if (newED.path.indexOf('extension') == -1) {
-
-
-
-                            if (!basePathHash[newED.path]) {
-                                //there was a path, but it didn't match anything in the base resource
-                                err.push("Path: "+newED.path + " is not valid for this resource type")
-                            } else {
-                                //a path that matches one in the base resource...
-                                realProfile.snapshot.element.push(newED)
-                                ok.push("Path: "+newED.path + " mapped ")
-                            }
-                        } else {
-                            //this is an extension...//if this is an extension then we need to insert the url to the extension...
-                            var ext = Utilities.getSingleExtensionValue(newED, appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl)
-                            if (ext && ext.valueString) {
-                                extensionUrl = ext.valueString;
-                                //need to set the type of the element to 'Extension' (In the LM it is the datatype)
-                                newED.type = {code:'Extension',profile:extensionUrl}
-                                delete newED.extension; //this is the extension that holds the url
-                                realProfile.snapshot.element.push(newED)
-
-
-                            } else {
-                                err.push("Path: "+newED.path + " is an extension, but there is no extension url given")
-                            }
-
-
+                            err.push("Path: " + oldPath + " needs to have a FHIR mapping")
+                            addToProfile = false;
                         }
+
+
+
+                        //exclude meta elements for now
+                        if (addToProfile) {
+                            var arNewPath = newED.path.split('.')
+                            if (arNewPath.length > 1 && arNewPath[1] == 'meta') {
+                                addToProfile = false;
+                            }
+                        }
+
+                        //if the oldPath value is in the list of ignorePaths then ignore
+                        if (addToProfile) {
+                            ignorePath.forEach(function (ignore) {
+                                if (oldPath.substr(0,ignore.length) === ignore) {
+                                    addToProfile = false;
+                                }
+
+                            })
+                        }
+
+
+                        //if this is datatype of reference, then add it to the list of 'ignorePaths' so the children will not be included
+                        if (addToProfile) {
+                            if (ed.type) {
+                                ed.type.forEach(function (typ) {
+
+                                    if (typ.code == 'Reference') {
+                                        ignorePath.push(oldPath);   //ignorePath works on the path in the model, not the mapping... Note we still add this element
+                                    }
+
+                                })
+                            }
+                        }
+
+
+                        //if we still want to add to the profile, check for an extension...
+                        if (addToProfile) {
+                            if (newED.path.indexOf('extension') == -1) {
+                                //not an extension...
+
+                                if (!basePathHash[newED.path]) {
+                                    err.push("Path: "+newED.path + " is not valid for this resource type")
+                                    addToProfile = false;
+                                }
+
+                            } else {
+                                //this is an extension...//if this is an extension then we need to insert the url to the extension...
+                                addToProfile = false;       //Will add here, or not at all...
+                                var ext = Utilities.getSingleExtensionValue(newED, appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl)
+                                if (ext && ext.valueString) {
+                                    extensionUrl = ext.valueString;
+                                    //need to set the type of the element to 'Extension' (In the LM it is the datatype)
+                                    newED.type = {code:'Extension',profile:extensionUrl}
+                                    delete newED.extension; //this is the extension that holds the url
+                                    realProfile.snapshot.element.push(newED)
+
+                                    ignorePath.push(oldPath); //If this is a complex extension and there are children in the model then ignore them...
+
+
+                                } else {
+                                    err.push("Path: "+newED.path + " is an extension, but there is no extension url given")
+                                }
+
+
+                            }
+                        }
+
+
+
+
+
+
+                        //an element not yet added to the real profile
+                        if (addToProfile) {
+                            realProfile.snapshot.element.push(newED)
+                            ok.push("Path: "+newED.path + " mapped ")
+                        }
+
                     })
 
 
@@ -606,6 +694,9 @@ angular.module("sampleApp")
                         //
                        // deferred.resolve(realProfile)
 
+                        deferred.resolve(realProfile)
+
+/*
                         SaveDataToServer.saveResource(realProfile,appConfigSvc.getCurrentConformanceServer().url).then(
                             function(data) {
                                 deferred.resolve(realProfile)
@@ -613,6 +704,7 @@ angular.module("sampleApp")
                                 deferred.reject(angular.toJson(err));
                             }
                         )
+                        */
 
 
                     }

@@ -4,6 +4,9 @@
 
 <div class="modal-body">
     <p>{{modalOptions.bodyText}}</p>
+
+    <div ng-show="modalOptions.oo"><pre>{{modalOptions.oo | json}}</pre></div>
+
 </div>
 
 <div ng-show="modalOptions.userText !== undefined">

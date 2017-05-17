@@ -43,35 +43,41 @@ angular.module("sampleApp")
 
                 $uibModal.open({
                     templateUrl: 'modalTemplates/generateProfile.html',
-                    //size: 'lg',
+                    size: 'lg',
                     controller: function($scope,logicalModelSvc,SaveDataToServer,modalService,logicalModel) {
 
-
-
-
-                        $scope.generateProfile = function() {
+                        $scope.canSave = false;
+                       // $scope.generateProfile = function() {
                             logicalModelSvc.generateFHIRProfile(logicalModel).then(
                                 function(profile) {
-                                    modalService.showModal({}, {bodyText: "Profile has been created with the URL: "+ profile.url});
+                                    $scope.realProfile = profile;
+                                    $scope.canSave = true;
+                                    $scope.message = "Profile generated. Click 'Save' to save to the server"
+                                   // modalService.showModal({}, {bodyText: "Profile has been created with the URL: "+ profile.url});
 
                                 },function(vo) {
+                                    $scope.message = "Unable to create profile."
                                     $scope.errors = vo.err
 
                                 }
                             );
-                        };
+                       // };
 
-                        $scope.save = function() {
-                            SaveDataToServer.saveResource(realProfile,appConfigSvc.getCurrentConformanceServer().url).then(
+                        $scope.saveProfile = function() {
+                            SaveDataToServer.saveResource($scope.realProfile,appConfigSvc.getCurrentConformanceServer().url).then(
                                 function(data) {
-                                    deferred.resolve(realProfile)
+                                    $scope.message = "Save successful."
+                                    $scope.oo = data.data;
+                                    delete $scope.oo.text;
                                 },function (err) {
-                                    deferred.reject(angular.toJson(err));
+                                    $scope.message = "Save failed."
+                                    $scope.oo = data.data;
+                                    delete $scope.oo.text;
                                 }
                             )
                         };
 
-                        $scope.generateProfile();
+                        //$scope.generateProfile();
 
                     },  resolve : {
                         logicalModel : function(){
@@ -1299,6 +1305,21 @@ angular.module("sampleApp")
                 $scope.showWaiting = true;
                 
                 var SDToSave = angular.copy($scope.SD);
+
+
+                SDToSave.snapshot.element.forEach(function (element) {
+                    //remove invalid property
+                    if (element.type){
+                        element.type.forEach(function (typ) {
+                            delete typ.isComplexDT;
+                        })
+
+                    }
+
+                });
+
+
+
                 
                 //this is a hack as only grahames server is on the latest (post baltimore) version of stu3.
                 //it can be removed when the others (ie hapi) are confrmant also...
@@ -1318,6 +1339,13 @@ angular.module("sampleApp")
                         if (!$scope.initialLM) {
                             //if there wasn't a model passed in, re-load the list
                             loadAllModels();
+                        }
+
+                        var res = data.data;
+                        var oo;
+                        if (res.resourceType == 'OperationOutcome') {
+                            oo = res;
+                            delete oo.text;
                         }
 
                         $scope.isDirty = false;
@@ -1371,6 +1399,15 @@ angular.module("sampleApp")
 
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
+
+
+                //close all the nodes
+                $scope.treeData.forEach(function (node,inx) {
+                    if (node.state && inx > 0) {
+                        node.state.opened=false;
+                    }
+                })
+
                 var baseType = $scope.treeData[0].data.header.baseType
 
                 //find all the mapping identities that have been used..
