@@ -47,6 +47,83 @@ angular.module("sampleApp")
 
             }
 
+
+            $scope.cloneNode = function(node){
+
+                //console.log(node)
+
+                //var parent = node.parent
+
+                var newName = 'clone'
+
+                //locate all the child nodes that will need to be added...
+                var lst = []
+                findChildNodes(lst,node.id)
+                console.log(lst)
+
+                //create the parent node for the copy...
+                var parentNode = {
+                    "id": 't' + new Date().getTime(),
+                    "parent": node.parent,
+                    "text": newName,
+                    state: {opened: true}
+                };
+                parentNode.data = angular.copy(node.data);
+                var ar = parentNode.data.path.split('.');
+                ar[1] = newName
+                parentNode.data.path = ar.join('.')
+                var parentId = parentNode.id;
+                var segmentLength = ar.length+1;      //
+
+                //locate the insert point for the parent
+                var insertPoint;
+                $scope.treeData.forEach(function (node0,inx) {
+                    if (node0.id == node.id) {
+                        insertPoint = inx+1;    //insert after the node being cloned
+                    }
+                })
+
+
+                //$scope.treeData.push(parentNode);
+                $scope.treeData.splice(insertPoint,0,parentNode);
+
+
+                var lastNode;
+                //$scope.treeData.push(newNode)
+                lst.forEach(function (node1,inx) {
+                    var ar = node1.data.path.split('.');
+                    ar[1] = newName
+                    if (ar.length > segmentLength) {
+                        //this is another step down the hierarchy. set the parent to the last node added...
+                        segmentLength ++;
+                        parentId = lastNode.id;
+                    }
+
+
+
+                    node1.parent = parentId;
+                    node1.data.path = ar.join('.')
+                    node1.id = node1.id+'-'+inx
+
+                    lastNode = node1;
+                    $scope.treeData.push(node1)
+
+
+                })
+
+                drawTree();
+
+                function findChildNodes(lst,parentId) {
+                    $scope.treeData.forEach(function(node){
+                        if (node.parent == parentId) {
+                            lst.push(angular.copy(node));
+                            findChildNodes(lst,node.id)
+                        }
+                    })
+
+                }
+            };
+
             //generate a real FHIR profile from the Logical model
             $scope.generateFHIRProfile = function(){
 
@@ -1409,7 +1486,7 @@ angular.module("sampleApp")
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
 
 
-                //close all the nodes
+                //close all the nodes except the root
                 $scope.treeData.forEach(function (node,inx) {
                     if (node.state && inx > 0) {
                         node.state.opened=false;
@@ -1785,8 +1862,8 @@ angular.module("sampleApp")
                         //console.log($scope.treeData)
 
                         //close all the nodes
-                        $scope.treeData.forEach(function (node) {
-                            if (node.state) {
+                        $scope.treeData.forEach(function (node,inx) {
+                            if (node.state && inx > 0) {
                                 node.state.opened=false;
                             }
                         })
