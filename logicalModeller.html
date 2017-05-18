@@ -369,10 +369,15 @@
                     <div class="row">
                         <div class="col-md-12 col-sm-12">
                              <span class="pull-right">
+
+                                 <button class="btn btn-link" ng-click="">Expand all</button>
+                                 <button class="btn btn-link" ng-click="">Collapse all</button>
+
                                 <button ng-hide="isInPalette" class="btn btn-link" ng-click="addToPalette()">Add to Palette</button>
                                 <button ng-show="isInPalette" class="btn btn-link" ng-click="removeFromPalette()">Remove from Palette</button>
 
                             </span>
+
                         </div>
                     </div>
 
@@ -772,6 +777,10 @@
                                     <td>Fixed</td><td>{{selectedNode.data.fixedString}}</td>
                                 </tr>
 
+                                <tr ng-show="selectedNode.data.discriminator">
+                                    <td>Discriminator</td><td>{{selectedNode.data.discriminator}}</td>
+                                </tr>
+
                                 <tr><td>Actions</td><td>
                                     <div ng-show="!firebase.auth().currentUser">
                                         Not logged in - read only mode
@@ -808,7 +817,9 @@
                                                 class="btn btn-link" ng-click="copyNode()">Copy Element</button>
 -->
 
-
+                                        <div>
+                                            <button ng-show="discriminatorReq" class="btn btn-link" ng-click="setAsDiscriminator(selectedNode)">Set as Discriminator</button>
+                                        </div>
 
 
 
@@ -835,13 +846,13 @@
                                     </td>
                                 </tr>
                             </table>
-
-
-
-
-
-
+<!--
+                            <pre>{{selectedNode | json}}</pre>
+-->
                         </div>
+
+
+
 
 
                     </uib-tab>

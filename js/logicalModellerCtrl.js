@@ -38,6 +38,15 @@ angular.module("sampleApp")
             $scope.input.newCommentboxInxDEP = -1;
 
 
+            //set the current node as the discriminator for all nodes with the sam path..
+            $scope.setAsDiscriminator = function (treeNode) {
+                logicalModelSvc.setAsDiscriminator(treeNode,$scope.treeData)
+                drawTree()
+                $scope.isDirty=true;
+                makeSD();
+
+            }
+
             //generate a real FHIR profile from the Logical model
             $scope.generateFHIRProfile = function(){
 
@@ -47,21 +56,21 @@ angular.module("sampleApp")
                     controller: function($scope,logicalModelSvc,SaveDataToServer,modalService,logicalModel) {
 
                         $scope.canSave = false;
-                       // $scope.generateProfile = function() {
-                            logicalModelSvc.generateFHIRProfile(logicalModel).then(
-                                function(profile) {
-                                    $scope.realProfile = profile;
-                                    $scope.canSave = true;
-                                    $scope.message = "Profile generated. Click 'Save' to save to the server"
-                                   // modalService.showModal({}, {bodyText: "Profile has been created with the URL: "+ profile.url});
+                        $scope.input = {}
 
-                                },function(vo) {
-                                    $scope.message = "Unable to create profile."
-                                    $scope.errors = vo.err
+                        logicalModelSvc.generateFHIRProfile(logicalModel).then(
+                            function(profile) {
+                                $scope.realProfile = profile;
+                                $scope.canSave = true;
+                                $scope.message = "Profile generated. Click 'Save' to save to the server"
 
-                                }
-                            );
-                       // };
+                            },function(vo) {
+                                $scope.message = "Unable to create profile.";
+                                $scope.errors = vo.err
+
+                            }
+                        );
+
 
                         $scope.saveProfile = function() {
                             SaveDataToServer.saveResource($scope.realProfile,appConfigSvc.getCurrentConformanceServer().url).then(
@@ -342,6 +351,10 @@ angular.module("sampleApp")
                 function() {return $scope.selectedNode},
                 function() {
                     if ($scope.selectedNode) {
+
+                        $scope.discriminatorReq = logicalModelSvc.isDiscriminatorRequired($scope.selectedNode,$scope.treeData)
+
+
                         delete $scope.valueSetOptions;
 
                         logicalModelSvc.getOptionsFromValueSet($scope.selectedNode.data).then(
@@ -805,11 +818,6 @@ angular.module("sampleApp")
 
             //load all the logical models created by clinFHIR
             loadAllModels = function() {
-
-
-
-
-
 
                 var url=$scope.conformanceServer.url + "StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
 
@@ -1722,6 +1730,9 @@ angular.module("sampleApp")
                         },
                         allResourceTypes : function() {
                             return  $scope.allResourceTypes;
+                        },
+                        treeData : function () {
+                            return $scope.treeData
                         }
                     }
                 }).result.then(

@@ -21,6 +21,19 @@ angular.module("sampleApp")
             return ar[ar.length-1]
         };
 
+        //get the mapping for this logicam model element to FHIR...
+        var getFhirMapping = function(map) {
+            var fhirPath;
+            if (map) {
+                map.forEach(function (mp) {
+                    if (mp.identity == 'fhir') {
+                        fhirPath =  mp.map;
+                    }
+                })
+            }
+            return fhirPath;
+        };
+
 
         //common function for decorating various properties of the treeview when building form an SD. Used when creating a new one & editing
         function decorateTreeView(item,ed) {
@@ -51,6 +64,73 @@ angular.module("sampleApp")
 
 
         return {
+            setAsDiscriminator : function(selectedNode,treeData){
+                //set the FHIR path for this node to be the discriminator for all nodes which have the same FHIR path...
+                if (selectedNode.data && selectedNode.data.mappingFromED)
+                var discriminator = getFhirMapping(selectedNode.data.mappingFromED);    //the fhir path for this element will be the discriminator for
+                var ar = discriminator.split('.')
+                var rootPath = ar[0]+'.'+ar[1];     //assume that the element that is duplicated is always attached to the root  NOT TRUE
+                //now check all the other nodes in the tree...
+                treeData.forEach(function (node) {
+                    if (node.data) {
+                        var map = node.data.mappingFromED;
+                        if (map) {
+                            var fmp = getFhirMapping(map)   //this is the FHIR path. If it starts with the same path as rootPath, then set the discriminator
+                            if (fmp.substr(rootPath) === rootPath){
+                                node.data.discriminator = discriminator;
+                            }
+
+                        }
+
+                    }
+
+                })
+                console.log(treeData)
+
+            },
+            isDiscriminatorRequired : function(node,treeData){
+                var discriminatorReq = false;
+                if (node.data && node.data.mappingFromED) {
+                    var fhirPath = getFhirMapping(node.data.mappingFromED);     //the map for this element
+                    //there is a mapping
+                    var cnt = 0;
+                    treeData.forEach(function (node) {
+                        if (node.data) {
+                            var map = node.data.mappingFromED;
+                            if (map) {
+                                var fmp = getFhirMapping(map)
+                                if (fmp == fhirPath){
+                                    cnt ++
+                                }
+
+                            }
+
+                        }
+
+                    })
+                    if (cnt > 1) {
+                        discriminatorReq = true;
+                    }
+                }
+                return discriminatorReq;
+
+                function getFhirMappingDEP(map) {
+                    var fhirPath;
+                    if (map) {
+                        map.forEach(function (mp) {
+                            if (mp.identity == 'fhir') {
+                                fhirPath =  mp.map;
+                            }
+                        })
+                    }
+                    return fhirPath;
+                }
+
+
+            },
+
+
+
             explodeResource : function(treeData,node,url) {
                 //get all teh child nodes for a resource...\\
 
@@ -143,7 +223,7 @@ angular.module("sampleApp")
             explodeDataType : function(treeData,node,dt) {
                 var arExclude=['id','extension','modifierExtension'];
                 var deferred = $q.defer();
-                console.log(node)
+                //console.log(node)
                 var parentId = node.id;
                 var parentPath = node.data.path;            //the path of the element that is being expanded...
                 var suffix = generateSuffix(treeData,node); //new Date().getTime();      //a prefix for the path to support multiple expands
@@ -171,7 +251,7 @@ angular.module("sampleApp")
                         if (dtSD.snapshot && dtSD.snapshot.element) {
 
                             dtSD.snapshot.element.forEach(function (ele,inx) {
-                                console.log(ele)
+                                //console.log(ele)
                                 //the first letter needs to be lowercase, as it will be part of a path...
                                 ele.path = ele.path.charAt(0).toLowerCase() + ele.path.slice(1);    //this will be a codeableconcept
 
@@ -254,7 +334,7 @@ angular.module("sampleApp")
                 }
 
             },
-            generateDoc : function(treeData,tree) {
+            generateDoc : function(tree) {
                 var deferred = $q.defer();
                 //var simpleExtensionUrl = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl;
                 var arDoc = []
@@ -427,9 +507,7 @@ angular.module("sampleApp")
                 if (ext && ext.valueString) {
                     baseType = ext.valueString
                 } else {
-
                     deferred.reject('No base type. A profile cannot be generated.');
-                    // return;
                 }
 
 
@@ -439,6 +517,9 @@ angular.module("sampleApp")
                 realProfile.id = realProfile.id+'-cf-profile';   //construct an id
                 realProfile.url = realProfile.url+'-cf-profile';   //and a url...
                 realProfile.kind = 'resource';
+
+                realProfile.derivation = 'constraint'
+
 
                 var url = "http://hl7.org/fhir/StructureDefinition/"+ baseType;
                 //realProfile.baseDefinition = url;
@@ -481,28 +562,31 @@ angular.module("sampleApp")
 
 
                 function makeFHIRProfile(SD) {
+                    var discriminatorUrl = appConfigSvc.config().standardExtensionUrl.discriminatorUrl;
 
                     var err = [];
                     var ok = [];
-                    var slices = []; // a collection of all sliced elements
-                    var ignorePath = []
+                    var slices = [];            // a collection of all sliced elements
+                    var ignorePath = [];        //paths to be ignored. Used for child elements of References...
+                    var arDiscriminator = [];   //paths for which a discriminator entry has been made
+                    var arPathsAdded = [];      //paths added so far...
 
                     //this will be an object holding child elements of datatypes. Just a few to see if it works
                     var dt = {}
                     dt['CodeableConcept'] = ['coding','text','coding.system','coding.code','coding.display']
-                    dt['Identifier'] = ['system','value']
+                    dt['Identifier'] = ['system','value','use','type','period','assigner']
                     dt['Period'] = ['start','end'];
 
 
                     //create a hash of all the paths in the Logical model. Ignore duplications. used for finding the dt of the parent
                     internalLM.snapshot.element.forEach(function(ed,inx){
 
-                    })
+                    });
 
 
                     //create a hash of all the paths in the base resource type (That is being profiled)...
                     var basePathHash = {};
-                    var listOfDataTypes = {};   //a hash of all the datatypes used by the model
+                   // var listOfDataTypes = {};   //a hash of all the datatypes used by the model
                     SD.snapshot.element.forEach(function(ed){
                         basePathHash[ed.path] = ed;
                         if (ed.type) {
@@ -516,35 +600,30 @@ angular.module("sampleApp")
                                     })
                                 }
 
-
-                                if (! listOfDataTypes[typ.code]) {
-                                    listOfDataTypes[typ.code] = {}
-                                }
+                             //   if (! listOfDataTypes[typ.code]) {
+                              //      listOfDataTypes[typ.code] = {}
+                              //  }
                             })
                         }
 
-
                     });
 
-                    console.log(listOfDataTypes)
-
-
-
-
+                  //  console.log(listOfDataTypes)
 
                     //now work through the model. if there's no mapping, then an error. If an extension then insert the url...
                     internalLM.snapshot.element.forEach(function(ed,inx){
                         var newED = angular.copy(ed);
+
+
+
+
 
                         //remove invalid property
                         if (newED.type){
                             newED.type.forEach(function (typ) {
                                 delete typ.isComplexDT;
                             })
-
                         }
-
-
 
                         //the current path will not be correct (it is in the logical model) - we need to get this from the FHIR mapping
                         var oldPath = newED.path;       //save the old path
@@ -554,7 +633,7 @@ angular.module("sampleApp")
                             //this is the root element
                             newED.path = baseType;
                         } else {
-                            //get the path mapping for this element and update the path
+                            //get the path mapping for this element and update the path in the newED element
                             if (ed.mapping) {
                                 ed.mapping.forEach(function (map) {
                                     if (map.identity=='fhir') {
@@ -572,23 +651,23 @@ angular.module("sampleApp")
                                             } else {
                                                 newED.path = fhirPath;//map.map
                                             }
-
                                         }
-
                                     }
                                 })
                             }
 
                         }
-                        newED.id = baseType + ':' + newED.path;
-                        //console.log(newED.path)
-
+                        newED.id = baseType + ':' + newED.path + '-' + inx ;
 
                         var path = newED.path;
                         if (path && path.indexOf('[x]') > -1) {
-                            //this is a choice type - change the
+                            //this is a choice type - change the name to the first type
+                            if (newED.type){
+                                var cd = newED.type[0].code
+                                newED.path = newED.path.substr(0,newED.path.length-4) + cd.substr(0,1).toUpperCase() + cd.substr(1)
+                                basePathHash[newED.path] = newED;   //add to the list of acceptable paths. (Assumes that the path before the [x] is legit...
+                            }
                         }
-
 
                         var addToProfile = true;
 
@@ -598,8 +677,6 @@ angular.module("sampleApp")
                             err.push("Path: " + oldPath + " needs to have a FHIR mapping")
                             addToProfile = false;
                         }
-
-
 
                         //exclude meta elements for now
                         if (addToProfile) {
@@ -667,16 +744,59 @@ angular.module("sampleApp")
                         }
 
 
+                        //If this path has already been added, then see if it matches a rootPath defined by a discriminator.
+                        //If so, then it can be added. If not, then add to paths to ignore
+                        if (addToProfile) {
+                            var lPath = newED.path
+                            if (arPathsAdded.indexOf(lPath) > -1) {
+                                //a possible dupe - is this root covered by a discriminator?
+                                var coveredByDiscriminator = false;
+                                arDiscriminator.forEach(function (item) {
+                                    if (lPath.substr(0,item.length) === item) {
+                                        coveredByDiscriminator = true
+                                    }
+                                })
+
+                                if (!coveredByDiscriminator ) {
+                                    //no, it isn't. Don't add to the profile
+                                    addToProfile = false;
+                                }
+
+                            }
 
 
+                        }
 
 
                         //an element not yet added to the real profile
                         if (addToProfile) {
+
+                            //if there's a discriminator, then add an entry - but once only
+                            var extDiscriminator = Utilities.getSingleExtensionValue(ed, discriminatorUrl);
+                            if (extDiscriminator) {
+                                if (arDiscriminator.indexOf(newED.path) == -1) {
+                                    var discriminator = extDiscriminator.valueString;
+                                    var element = {id:'discriminator'+inx,path: newED.path}
+                                    element.min = newED.min;
+                                    element.max = newED.max;
+                                    element.definition = "Discriminator";
+                                    if (fhirVersion == 2) {
+                                        element.slicing = {discriminator: discriminator}
+                                    } else {
+                                        element.slicing = {
+                                            rules:'open',discriminator: {path: discriminator, type: 'value'}
+                                        }
+                                    }
+                                    realProfile.snapshot.element.push(element)
+
+                                    arDiscriminator.push(newED.path)    //so it only gets added once...
+                                }
+                            }
+
                             realProfile.snapshot.element.push(newED)
+                            arPathsAdded.push(newED.path);
                             ok.push("Path: "+newED.path + " mapped ")
                         }
-
                     })
 
 
@@ -1340,6 +1460,7 @@ angular.module("sampleApp")
                 var mapToModelExtensionUrl = appConfigSvc.config().standardExtensionUrl.mapToModel;
                 var baseTypeForModel = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
                 var simpleExtensionUrl = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl;
+                var discriminatorUrl = appConfigSvc.config().standardExtensionUrl.discriminatorUrl;
 
                 var cntExtension = 0;
                 var arTree = [];
@@ -1449,6 +1570,17 @@ angular.module("sampleApp")
                         if (extSimpleExt) {
                             item.data.fhirMappingExtensionUrl = extSimpleExt.valueString;
                         }
+
+
+                        var extDiscriminator = Utilities.getSingleExtensionValue(ed, discriminatorUrl);
+                        if (extDiscriminator) {
+                            item.data.discriminator = extDiscriminator.valueString;
+                        }
+
+                      //  if (data.discriminator) {
+                          //  Utilities.addExtensionOnce(ed, discriminatorUrl, {valueString: data.discriminator})
+                     //   }
+
 
 
                         //format of type prpfile changed between 2 & 3
@@ -1600,6 +1732,7 @@ angular.module("sampleApp")
                 var mapToModelExtensionUrl = appConfigSvc.config().standardExtensionUrl.mapToModel;
                 var baseTypeForModelUrl = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
                 var simpleExtensionUrl = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl;
+                var discriminatorUrl = appConfigSvc.config().standardExtensionUrl.discriminatorUrl;
 
                 //todo - should use Utile.addExtension...
                 var sd = {resourceType: 'StructureDefinition'};
@@ -1782,6 +1915,13 @@ angular.module("sampleApp")
                     }
 
                     ed.fixedString = data.fixedString;  //todo needs to be a compatible type
+
+
+                    //used for slicing...
+                    if (data.discriminator) {
+                        Utilities.addExtensionOnce(ed, discriminatorUrl, {valueString: data.discriminator})
+                    }
+
                     sd.snapshot.element.push(ed)
                 });
 

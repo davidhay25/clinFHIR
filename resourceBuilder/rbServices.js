@@ -1731,7 +1731,7 @@ console.log(summary);
                                 var lnk = bundle.link[i];
 
                                 //if there is a 'next' link and we're not at the limit then get the next page
-                                if (lnk.relation == 'next' && returnBundle.entry.length < limit) {
+                                if (lnk.relation == 'next'){// && returnBundle.entry.length < limit) {
                                     moreToGet = true;
                                     var url = lnk.url;
 

@@ -1,7 +1,7 @@
 
 angular.module("sampleApp")
     .controller('editLogicalNodeCtrl',
-        function ($scope,allDataTypes,editNode,parentPath,RenderProfileSvc,appConfigSvc, allResourceTypes,
+        function ($scope,allDataTypes,editNode,parentPath,RenderProfileSvc,appConfigSvc, allResourceTypes,treeData,
                   findNodeWithPath,rootForDataType,igSvc,references,baseType,$uibModal, logicalModelSvc, modalService) {
 
             $scope.allResourceTypes = allResourceTypes;
@@ -74,6 +74,7 @@ angular.module("sampleApp")
 
 
                     $scope.input.mappingPath = getMapValueForIdentity('fhir');
+                    isDiscriminatorRequired();      //true if there is another fhir mapping the same
                     $scope.input.mappingPathV2 = getMapValueForIdentity('hl7V2');
 
 
@@ -437,6 +438,7 @@ angular.module("sampleApp")
                     }
 
                 }
+                isDiscriminatorRequired();
                 /*
 
                 //work out the path for the element...
@@ -464,6 +466,37 @@ angular.module("sampleApp")
                 }
                 */
             };
+
+
+            //if there is more than one entry in the model where the FHIR path is the same as the one here, then a discriminator is needed
+            function isDiscriminatorRequired(){
+                $scope.discriminatorReq = false;
+                if ($scope.input.mappingPath) {
+                    //there is a mapping
+                    var cnt = 0;
+                    treeData.forEach(function (node) {
+                        if (node.data) {
+                            var map = node.data.mappingFromED;
+                            if (map) {
+                                map.forEach(function (mp) {
+                                    if (mp.identity == 'fhir' && mp.map == $scope.input.mappingPath) {
+                                        cnt ++
+
+                                    }
+                                })
+                            }
+
+                        }
+
+                        //if (node.path == )
+                    })
+                    if (cnt > 1) {
+                        $scope.discriminatorReq = true;
+                    }
+                }
+
+
+            }
 
 
                 //------------ mappings functions ---------

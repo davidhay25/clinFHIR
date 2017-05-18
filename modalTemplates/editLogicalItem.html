@@ -225,6 +225,22 @@
                                     </div>
                                 </div>
 
+                                <div ng-show="discriminatorReq">
+                                    <br/>
+                                    <div class="row">
+                                        <div class="col-md-3 col-sm-3">
+                                            <div style="margin-top: 8px"><strong>Discriminator</strong></div>
+                                        </div>
+                                        <div class="col-md-9 col-sm-9">
+                                            <input type="text" placeholder="Discriminator"
+                                                   ng-model="input.discriminator" class="form-control"/>
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+
 
                             </uib-tab>
                             <uib-tab heading="HL7 v2" select="setCurrentMap('hl7V2')">

@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-05-15c';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-05-18';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};
@@ -38,6 +38,7 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.scenarioProvenance = 'http:www.clinfhir.com/StructureDefinition/scenarioProvenance';
         defaultConfig.standardExtensionUrl.scenarioNote = 'http:www.clinfhir.com/StructureDefinition/scenarioNote';
         defaultConfig.standardExtensionUrl.provenanceTargetUrl = 'http:www.clinfhir.com/StructureDefinition/provenanceTargetUrl';
+        defaultConfig.standardExtensionUrl.discriminatorUrl = 'http:www.clinfhir.com/StructureDefinition/discriminatorUrl';
 
 
 

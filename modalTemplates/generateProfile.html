@@ -10,9 +10,9 @@
 
             <div class="col-md-4 col-sm-4">
                 <div class="pull-right">
-                    <button class="btn btn-link pull-right" ng-click="$dismiss()">Close</button>
-                    <button ng-show="canSave" ng-click="saveProfile()" class="btn btn-primary pull-right">Save</button>
 
+                    <button ng-show="canSave" ng-click="saveProfile()" class="btn btn-primary pull-right">Save</button>
+                    <button class="btn btn-link pull-right" ng-click="$dismiss()">Close</button>
 
                 </div>
             </div>
@@ -36,6 +36,22 @@
         </div>
 
         {{message}}
+
+        <div class="row" ng-hide="oo">
+            <div class="col-md-4 col-sm-4">
+                <ul class="list-unstyled">
+                    <li ng-repeat="element in realProfile.snapshot.element">
+                        <div style="cursor: pointer" class="clickable" ng-click="input.selectedElement=element">{{element.path}}</div>
+                    </li>
+
+                </ul>
+            </div>
+            <div class="col-md-6 col-sm-6">
+                <pre>{{input.selectedElement | json}}</pre>
+
+            </div>
+        </div>
+
 
         <ul class="list-group">
             <li ng-repeat = 'err in errors  track by $index' class="list-group-item">{{err}}</li>
