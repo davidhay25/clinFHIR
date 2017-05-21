@@ -464,7 +464,7 @@ angular.module("sampleApp")
 
 
             //copy the files referenced by the current model to another server
-            $scope.copyFiles = function() {
+            $scope.copyFilesDEP = function() {
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
                     keyboard: false,       //same as above.
@@ -1860,6 +1860,7 @@ angular.module("sampleApp")
 
 
                         //console.log($scope.treeData)
+/*
 
                         //close all the nodes
                         $scope.treeData.forEach(function (node,inx) {
@@ -1868,7 +1869,7 @@ angular.module("sampleApp")
                             }
                         })
 
-
+*/
 
 
                         drawTree();
@@ -1987,7 +1988,8 @@ angular.module("sampleApp")
                     $scope.treeData.forEach(function(node){
                         if (lst.indexOf(node.id) == -1) {
                             newList.push(node);
-                        }
+                        } else {}
+                        node.state.opened=true;     //the whole tree is expanded
                     });
 
                     $scope.treeData = newList;
