@@ -7,6 +7,7 @@ angular.module("sampleApp")
 
         var currentUser;
         var elementsToIgnore =['id','meta','implicitRules','language','text','contained','extension','modifierExtension'];
+        var hashTreeState = {};   //save the state of the tree wrt expanded nodes so it can be restored after editing
 
 
         //set the first segment of a path to the supplied value. Used when determining differneces from the base type
@@ -64,6 +65,43 @@ angular.module("sampleApp")
 
 
         return {
+            openTopLevelOnly : function(tree) {
+                tree.forEach(function (node,inx) {
+                    node.state = node.state || {}
+                    if (inx ==0) {
+                        node.state.opened=true;
+                    } else {
+                        node.state.opened=false;
+                    }
+                })
+                this.saveTreeState(tree);
+            },
+            saveTreeState : function(tree) {
+                //save the current state of the tree...
+                hashTreeState= {}
+                if (tree) {
+                    tree.forEach(function(node){
+                        var opened = false;
+                        if (node.state && node.state.opened) {
+                            opened = true;
+                        }
+                        hashTreeState[node.id] = {opened:opened}
+                    })
+                }
+                console.log(hashTreeState)
+            },
+            resetTreeState : function(tree) {
+                //reset the tree state wrt opened/closed nodes
+                if (tree) {
+                    tree.forEach(function(node){
+                        node.state = node.state || {}
+                        node.state.opened = false;
+                        if (hashTreeState[node.id]) {
+                            node.state.opened = hashTreeState[node.id].opened;
+                        }
+                    })
+                }
+            },
             setAsDiscriminator : function(selectedNode,treeData){
                 //set the FHIR path for this node to be the discriminator for all nodes which have the same FHIR path...
                 if (selectedNode.data && selectedNode.data.mappingFromED)

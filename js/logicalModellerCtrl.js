@@ -1486,12 +1486,9 @@ angular.module("sampleApp")
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
 
 
-                //close all the nodes except the root
-                $scope.treeData.forEach(function (node,inx) {
-                    if (node.state && inx > 0) {
-                        node.state.opened=false;
-                    }
-                })
+                logicalModelSvc.openTopLevelOnly($scope.treeData);
+
+
 
                 var baseType = $scope.treeData[0].data.header.baseType
 
@@ -1770,6 +1767,7 @@ angular.module("sampleApp")
             //edit or add a new element to the model
             var editNode = function(nodeToEdit,parentPath) {
 
+                logicalModelSvc.saveTreeState($scope.treeData);
 
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editLogicalItem.html',
@@ -1858,18 +1856,6 @@ angular.module("sampleApp")
                             $scope.treeIdToSelect = $scope.selectedNode.id;
                         }
 
-
-                        //console.log($scope.treeData)
-/*
-
-                        //close all the nodes
-                        $scope.treeData.forEach(function (node,inx) {
-                            if (node.state && inx > 0) {
-                                node.state.opened=false;
-                            }
-                        })
-
-*/
 
 
                         drawTree();
@@ -1976,6 +1962,7 @@ angular.module("sampleApp")
 
 
                 function removeNode() {
+                    logicalModelSvc.saveTreeState($scope.treeData);
                     //first assemble list of nodes to remove
                     var idToDelete = $scope.selectedNode.id;
                     var lst = [idToDelete];
@@ -1988,11 +1975,13 @@ angular.module("sampleApp")
                     $scope.treeData.forEach(function(node){
                         if (lst.indexOf(node.id) == -1) {
                             newList.push(node);
-                        } else {}
-                        node.state.opened=true;     //the whole tree is expanded
+                        } //else {}
+                      //  node.state.opened=true;     //the whole tree is expanded
                     });
 
+
                     $scope.treeData = newList;
+                   // logicalModelSvc.resetTreeState($scope.treeData)
                     delete $scope.selectedNode;
                     drawTree();
                     makeSD();
@@ -2207,7 +2196,7 @@ angular.module("sampleApp")
 
 
 
-
+                logicalModelSvc.resetTreeState($scope.treeData);    //reset the opened/closed status to the most recent saved...
 
                 $('#lmTreeView').jstree('destroy');
                 $('#lmTreeView').jstree(
@@ -2220,23 +2209,14 @@ angular.module("sampleApp")
                         $scope.selectedNode = data.node;
                     }
 
-
-
-                                //used in the html template...
-
                     $scope.$digest();       //as the event occurred outside of angular...
 
 
 
                 }).on('redraw.jstree', function (e, data) {
 
-
-
-
                     if ($scope.treeIdToSelect) {
                         $("#lmTreeView").jstree("select_node", "#"+$scope.treeIdToSelect);
-
-                       // $scope.selectedNode = findNodeWithPath(path)
                         delete $scope.treeIdToSelect
                     }
 
@@ -2246,6 +2226,24 @@ angular.module("sampleApp")
                         $scope.$digest();       //as the event occurred outside of angular...
                     }
 
+                }).on('open_node.jstree',function(e,data){
+                    //console.log(e,data)
+                    //set the opened status of the scope propert to the same as the tree node so we can remember the state...
+                    $scope.treeData.forEach(function(node){
+                        if (node.id == data.node.id){
+                            node.state.opened = data.node.state.opened;
+                        }
+                    })
+                    $scope.$digest();
+                }).on('close_node.jstree',function(e,data){
+                    //console.log(e,data)
+                    //set the opened status of the scope propert to the same as the tree node so we can remember the state...
+                    $scope.treeData.forEach(function(node){
+                        if (node.id == data.node.id){
+                            node.state.opened = data.node.state.opened;
+                        }
+                    })
+                    $scope.$digest();
                 });
 
 
