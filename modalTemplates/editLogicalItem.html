@@ -99,7 +99,7 @@
                         </div>
 
                         <div ng-show="isCoded">
-                            <div><label>ValueSet</label></div>
+                            <div><label>ValueSet & Concept Map</label></div>
 
                             <select  ng-show="vsInGuide.length > 0" class="form-control" ng-model="input.vsFromIg"
                                      ng-change="selectVsFromIg()"
@@ -107,8 +107,12 @@
 
                             </select>
 
-                            <div class="clickable" ng-click="selectVsFromServer()">Select from Server</div>
+                            <div class="clickable " ng-click="selectVsFromServer()">Select ValueSet from Server</div>
+
+
+
                         </div>
+
 
                     </div>
 
@@ -216,6 +220,9 @@
                                         <div class="row">
                                             <div class="col-md-10 col-sm-10">
                                                 <input type="text" placeholder="Enter the Url of the extension definition"
+                                                       uib-popover="The Url for an Extension Definition to apply to this mapping"
+                                                       popover-placement="top"
+                                                       popover-trigger="'mouseenter'"
                                                        ng-model="input.fhirMappingExtensionUrl" class="form-control"/>
                                             </div>
                                             <div class="col-md-2 col-sm-2">
@@ -224,6 +231,29 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <div ng-show="isCoded">
+
+                                    <div class="form-group">
+                                        <br/>
+                                        <div class="row">
+                                            <div class="col-md-10 col-sm-10">
+                                                <div><input type="text" class="form-control"
+                                                            uib-popover="The Url for a ConceptMap to apply to this mapping"
+                                                            popover-placement="top"
+                                                            popover-trigger="'mouseenter'"
+                                                            placeholder="Url of ConceptMap" ng-model="input.conceptMap"/> </div>
+                                            </div>
+                                            <div class="col-md-2 col-sm-2">
+                                                <button class="btn btn-primary" ng-click="">Find</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+
 
                                 <div ng-show="discriminatorReq && false">   <!-- todo need to decide if allowed here...-->
                                     <br/>
@@ -249,6 +279,12 @@
                                        ng-change="updateCurrentMapValue(input.mappingPathV2)"/>
                             </uib-tab>
 
+
+
+
+
+
+
                             <uib-tab heading="Others" select = "deleteCurrentMap() ">
                                 <br/>
 
@@ -262,8 +298,10 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-sm-3"><input type="text" class="form-control" ng-model="input.newMapIdentity"/></div>
-                                    <div class="col-sm-8"><input type="text" class="form-control" ng-model="input.newMapValue"/></div>
+                                    <div class="col-sm-3"><input type="text" placeholder="Identity"
+                                                                 class="form-control" ng-model="input.newMapIdentity"/></div>
+                                    <div class="col-sm-8"><input type="text" placeholder="Value"
+                                                                 class="form-control" ng-model="input.newMapValue"/></div>
                                     <div class="col-sm-1" ng-click="addNewMap(input.newMapIdentity,input.newMapValue)">
                                         <i class="clickable glyphicon glyphicon-plus-sign"></i></div>
                                 </div>

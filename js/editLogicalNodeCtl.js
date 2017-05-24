@@ -590,6 +590,8 @@ angular.module("sampleApp")
                     vo.pathSegment = $scope.input.pathSegment;
 
 
+                    //input.conceptMap
+
                     vo.mappingPath = $scope.input.mappingPath;      //this is the FHIR path
                     vo.mappingFromED = $scope.input.mappingFromED;      //all mappings
                     vo.mappingPathV2 = $scope.input.mappingPathV2;

@@ -2039,17 +2039,12 @@ angular.module("sampleApp")
                 //sorts the tree array in parent/child order
                 var ar = logicalModelSvc.reOrderTree($scope.treeData);
 
-
-
                 $scope.SD = logicalModelSvc.makeSD($scope,ar);
 
-
-                
                 createGraphOfProfile();     //update the graph display...
                 checkDifferences($scope.SD)
 
             };
-
 
             //exit from the history review
             $scope.exitHistory = function(){
@@ -2066,6 +2061,7 @@ angular.module("sampleApp")
             };
 
             $scope.moveUp = function(){
+                logicalModelSvc.saveTreeState($scope.treeData);
                 var path = $scope.selectedNode.data.path;
                 var pos = findPositionInTree(path);     //the location of the element we wish to move in the array
 
@@ -2077,7 +2073,7 @@ angular.module("sampleApp")
                             if (lst[i].data.path == path) {
                                 //yes! we've got the one to move above, now where is it in the tree?
                                 var pos1 = findPositionInTree(lst[i-1].data.path);    //this marks where to do the insert
-                                removedBranch = pruneBranch(path);
+                                var removedBranch = pruneBranch(path);
                                 insertBranch(removedBranch,pos1);
                                 $scope.isDirty = true;
                                 $scope.treeIdToSelect = findNodeWithPath(path).id;
@@ -2093,6 +2089,7 @@ angular.module("sampleApp")
             };
 
             $scope.moveDn = function(){
+                logicalModelSvc.saveTreeState($scope.treeData);
                 var path = $scope.selectedNode.data.path;
                 //var originalPos = findPositionInTree(path);     //need to save where the list is now in case we need to re-insert...
                 var lst = getListOfPeers(path);
@@ -2111,7 +2108,7 @@ angular.module("sampleApp")
                     //we're at the end of the list - re-insert at original
                 } else if (placeInList == lengthOfPeers-2) {
                     //we're second to bottom - do nothing
-                    removedBranch = pruneBranch(path);      //prune the list
+                    var removedBranch = pruneBranch(path);      //prune the list
                     var insertPos = $scope.treeData.length; //the bottom
                     insertBranch(removedBranch,insertPos);
                     $scope.isDirty = true;
@@ -2122,7 +2119,7 @@ angular.module("sampleApp")
                 } else {
                     //insert above the secone one down...
                     var pathToInsertAbove = lst[placeInList+2].data.path;   //the node we'll insert above
-                    removedBranch = pruneBranch(path);      //prune the list
+                    var removedBranch = pruneBranch(path);      //prune the list
                     var insertPos= findPositionInTree(pathToInsertAbove);   //insert point (after the list was pruned)
                     insertBranch(removedBranch,insertPos);
                     $scope.isDirty = true;
@@ -2130,7 +2127,6 @@ angular.module("sampleApp")
                     drawTree();
                     makeSD();
                 }
-
             };
 
             //remove a nde and all of its children
@@ -2149,17 +2145,6 @@ angular.module("sampleApp")
                 }
             };
 
-            //are the 2 paths siblings (ie under the same parent)
-            areSiblingsDEP = function(path1,path2){
-                var ar1 = path1.split('.')
-                var ar2 = path2.split('.')
-                if (ar1.length !== ar2.length) {return false;}
-                ar1.pop();
-                ar2.pop();
-                if (ar1.join('.') !== ar2.join('.')) {return false;}
-                return true;
-
-            };
 
             //return a list of all peers to this one (used by the move functionality)
             getListOfPeers = function(path) {
@@ -2194,8 +2179,6 @@ angular.module("sampleApp")
 
             function drawTree() {
 
-
-
                 logicalModelSvc.resetTreeState($scope.treeData);    //reset the opened/closed status to the most recent saved...
 
                 $('#lmTreeView').jstree('destroy');
@@ -2204,14 +2187,12 @@ angular.module("sampleApp")
                 ).on('changed.jstree', function (e, data) {
                     //seems to be the node selection event...
 
-
                     if (data.node) {
                         $scope.selectedNode = data.node;
+                        $scope.selectedED = logicalModelSvc.getEDForPath($scope.SD,data.node)
                     }
 
                     $scope.$digest();       //as the event occurred outside of angular...
-
-
 
                 }).on('redraw.jstree', function (e, data) {
 
@@ -2219,15 +2200,16 @@ angular.module("sampleApp")
                         $("#lmTreeView").jstree("select_node", "#"+$scope.treeIdToSelect);
                         delete $scope.treeIdToSelect
                     }
-
+/*
 
                     if ($scope.treeData.length > 0) {
                         $scope.$broadcast('treebuilt');
                         $scope.$digest();       //as the event occurred outside of angular...
                     }
+                    */
 
                 }).on('open_node.jstree',function(e,data){
-                    //console.log(e,data)
+
                     //set the opened status of the scope propert to the same as the tree node so we can remember the state...
                     $scope.treeData.forEach(function(node){
                         if (node.id == data.node.id){
@@ -2236,7 +2218,7 @@ angular.module("sampleApp")
                     })
                     $scope.$digest();
                 }).on('close_node.jstree',function(e,data){
-                    //console.log(e,data)
+
                     //set the opened status of the scope propert to the same as the tree node so we can remember the state...
                     $scope.treeData.forEach(function(node){
                         if (node.id == data.node.id){

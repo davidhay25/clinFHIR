@@ -756,6 +756,7 @@
                                     </div>
                                     <!-- If there's a ValueSet defined, allow it to be selected... -->
                                     <span ng-show="selectedNode.data.selectedValueSet">
+                                      <!--  <span>{{selectedNode.data.selectedValueSet.vs.name}}</span>-->
                                         <span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.vs.url)">
                                             {{selectedNode.data.selectedValueSet.vs.url}}</span>
                                             ({{selectedNode.data.selectedValueSet.strength}})
@@ -866,6 +867,9 @@
 
 
                     </uib-tab>
+
+
+
 
                     <uib-tab heading="Model">
 
@@ -1013,6 +1017,16 @@
                         </div>
 
                     </uib-tab>
+
+                    <uib-tab heading="TreeJson">
+                        <pre>{{selectedNode | json}}</pre>
+                    </uib-tab>
+
+                    <uib-tab heading="EDJson">
+                        <pre>{{selectedED | json}}</pre>
+                    </uib-tab>
+
+
                     <uib-tab heading="Comments" >
                         <br/>
                         <uib-tabset>

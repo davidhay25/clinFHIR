@@ -65,6 +65,30 @@ angular.module("sampleApp")
 
 
         return {
+            getEDForPath : function(SD,node){
+                //return the ElementDefinition that corresponds to the mapped FHIR element..
+                var path = node.data.path;
+                /*
+                if (node && node.data && node.data.mappingFromED) {
+                    node.data.mappingFromED.forEach(function (map) {
+                        if (map.identity == 'fhir') {
+                            path = map.map;
+                        }
+                    })
+                }
+*/
+
+                if (path && SD && SD.snapshot && SD.snapshot.element) {
+                    for (var i=0;i < SD.snapshot.element.length;i++) {
+                        var ed = SD.snapshot.element[i];
+                        if (ed.path == path) {
+                            return ed;
+                            break;
+                        }
+                    }
+                }
+
+            },
             openTopLevelOnly : function(tree) {
                 tree.forEach(function (node,inx) {
                     node.state = node.state || {}
