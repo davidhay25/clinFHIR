@@ -17,8 +17,9 @@ angular.module("sampleApp").service('securitySvc', function(Utilities,appConfigS
                 var permission = {canView:true};
 
                 if (! currentUser) { return permission};
-                //I have super powers!
-                if (currentUser.email == 'david.hay25@gmail.com') {
+                //I have super powers! )so does Rod - I'm not THAT special ....
+
+                if (currentUser.email == 'david.hay25@gmail.com' || currentUser.email == 'rod.mcdonald@orionhealth.com') {
                     permission.canEdit = true;
                     permission.canDelete = true;
                     permission.canActivate = true;

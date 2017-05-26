@@ -64,6 +64,9 @@ angular.module("sampleApp")
                     $scope.input.description = data.description;
                     $scope.input.comments = data.comments;
                     $scope.input.mapping = data.mapping;
+
+                    $scope.input.conceptMap = data.conceptMap;
+
                     //$scope.input.mappingPath = data.mappingPath;
                     $scope.fhirMapping(data.mappingPath);       //check for an extension
                     $scope.input.fixedString = data.fixedString;
@@ -590,7 +593,7 @@ angular.module("sampleApp")
                     vo.pathSegment = $scope.input.pathSegment;
 
 
-                    //input.conceptMap
+                    vo.conceptMap = $scope.input.conceptMap;
 
                     vo.mappingPath = $scope.input.mappingPath;      //this is the FHIR path
                     vo.mappingFromED = $scope.input.mappingFromED;      //all mappings

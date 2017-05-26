@@ -1,0 +1,24 @@
+<Patient xmlns="http://hl7.org/fhir">
+	<id value="100"/>
+	<meta>
+		<lastUpdated value="2017-03-04T11:40"/>
+	</meta>
+	<text>
+		<status value="generated"/>
+		<div xmlns="http://www.w3.org/1999/xhtml">
+			<p>John Doe, Male, DOB: 12/12/1979</p>
+		</div>
+	</text>
+	<extension url="http://hl7.org/fhir/StructureDefinition/patient-religion">
+		<valueCodeableConcept value="jedi"/>
+	</extension>
+	<identifier>
+		<system value="http://hl7.org/fhir/sid/us-ssn"/>
+		<value value="123-4465-8762"/>
+	</identifier>
+	<name>
+		<family value="Doe"/>
+		<given value="John"/>
+	</name>
+	<gender value="male"/>
+</Patient>

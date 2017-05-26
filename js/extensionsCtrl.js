@@ -335,10 +335,7 @@ angular.module("sampleApp")
                 )
             }
 
-
             delete $scope.selectedExtension;
-
-
 
             $scope.selectExtension = function(entry,inx){
 
