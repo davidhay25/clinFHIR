@@ -7,7 +7,7 @@
     <script src="js/libs/angular.min1-5.js"></script>
     <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
     <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
-
+    <script src="js/libs/angular-sanitize.js"></script>
     <script src="js/libs/moment.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
@@ -19,7 +19,7 @@
     <script src="js/libs/angular-sanitize.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage','ui.checkbox']).config(function($locationProvider) {
+        angular.module("sampleApp",['ngSanitize','ui.bootstrap','ngStorage','ui.checkbox']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -219,21 +219,45 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-8 col-sm-8">
+                                <div class="col-md-4 col-sm-4">
                                     <label>Purpose</label>
                                     <textarea ng-change="setDirty()" rows="5"
-                                            ng-model="currentCM.purpose" class="form-control" placeholder="Purpose">
+                                              ng-model="currentCM.purpose" class="form-control" placeholder="Purpose">
 
                                     </textarea>
                                 </div>
+
+                                <div class="col-md-4 col-sm-4">
+
+                                    <div class="form-group">
+                                        <label>Source ValueSet Url</label>
+                                        <input type="text" class="form-control" ng-model="currentCM.sourceUri">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Target ValueSet Url</label>
+                                        <input type="text" class="form-control" ng-model="currentCM.targetUri">
+                                    </div>
+
+
+
+
+                                    <!--
+
+                                    -->
+                                </div>
+
                             </div>
 
+                            <div class="pull-right">
+                                <button class="btn btn-link" ng-click="editHeader()">Edit header</button>
 
-
+                            </div>
+                            <br/>
 
                         </form>
 
-                        <hr/>
+
+<!--
                         <div class="row">
                             <div class="col-md-6 col-sm-6">
                                 <div class="form-group">
@@ -250,6 +274,10 @@
                             </div>
 
                         </div>
+                        -->
+
+
+
 
 
                         <div ng-repeat="group in currentCM.group">
@@ -273,13 +301,84 @@
                                     <div class="col-md-4 col-sm-4">
 
                                         <button ng-show="canEdit" style="margin-top: 20px"
-                                                class="btn btn-success pull-right" ng-click="addItem()">Add new item</button>
+                                                class="btn btn-link pull-right" ng-click="addItem()">Add new mapping</button>
                                     </div>
                                 </div>
                             </form>
 
 
 
+                            <div class="row">
+                                <div class="col-md-2 col-sm-2">
+                                    <strong>Source code</strong>
+                                </div>
+                                <div class="col-md-8 col-sm-8">
+                                    <div class="row">
+                                        <div class="col-md-3 col-sm-3">
+                                            <strong>Equivalence</strong>
+                                        </div>
+                                        <div class="col-md-3 col-sm-3">
+                                            <strong>Target code</strong>
+                                        </div>
+
+
+                                        <div class="col-md-6 col-sm-6">
+                                            <strong>Comment</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 col-sm-2">
+                                   <strong class="text-center">Actions</strong>
+                                </div>
+
+                            </div>
+
+
+                            <div class="row" ng-repeat="element in group.element">
+                                <div class="col-md-2 col-sm-2">
+                                    {{element.code}}
+                                </div>
+                                <div class="col-md-8 col-sm-8">
+                                    <div class="row" ng-repeat="target in element.target">
+                                        <div class="col-md-3 col-sm-3">
+                                            <div uib-popover-html="showEquivalenceDescription(target.equivalence)"
+                                                 popover-trigger="'mouseenter'"
+                                                 popover-placement="top">
+                                                {{target.equivalence}}
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-3 col-sm-3">
+                                            {{target.code}}
+                                        </div>
+
+                                        <div class="col-md-6 col-sm-6">
+                                            {{target.comment}}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-sm-2">
+                                    <div class="pull-right">
+
+                                        <i ng-show="canEdit" style="cursor: pointer"
+                                           ng-click="removeItem({source:element.code,target:target.code})"
+                                           class="iconSpacing glyphicon glyphicon-minus-sign"></i>
+
+                                        <i ng-show="canEdit" style="cursor: pointer"
+                                           ng-click="addItem(element)"
+                                           class="iconSpacing glyphicon glyphicon-edit"></i>
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+
+
+
+
+                            <!--
 
                             <table class="table table-condensed">
                                 <tr><th>Code</th><th>Target</th><th><span class="pull-right"> Edit</span></th></tr>
@@ -314,7 +413,7 @@
 
 
 
-
+-->
 
                         </div>
 

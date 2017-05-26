@@ -4,6 +4,15 @@ angular.module("sampleApp")
         function ($scope,$q,$http,appConfigSvc,modalService,GetDataFromServer,$uibModal,SaveDataToServer,Utilities) {
 
 
+
+            $scope.equivalenceDescription = {};
+            $scope.equivalenceDescription.equal = "The definitions of the concepts are exactly the same (i.e. only grammatical differences) and structural implications of meaning are identical or irrelevant (i.e. intentionally identical)."
+            $scope.equivalenceDescription.equivalent = "The definitions of the concepts mean the same thing (including when structural implications of meaning are considered) (i.e. extensionally identical).";
+
+            $scope.showEquivalenceDescription = function(eq) {
+                return $scope.equivalenceDescription[eq]
+            }
+
             $scope.appConfigSvc = appConfigSvc;
 
             if (appConfigSvc.getCurrentConformanceServer().version < 3) {
@@ -220,16 +229,22 @@ angular.module("sampleApp")
                     keyboard: false,       //same as above.
                     templateUrl: 'modalTemplates/addConceptMapItem.html',
                     controller: function($scope,currentItem,sourceSystem,targetSystem,GetDataFromServer,Utilities){
-                        sourceSystem="http://hl7.org/fhir/ValueSet/v3-AddressUse";   //todo cheating to get result!
+                      //  sourceSystem="http://hl7.org/fhir/ValueSet/v3-AddressUse";   //todo cheating to get result!
 
-                        targetSystem="http://hl7.org/fhir/ValueSet/address-type";       //more cheating
+                        //targetSystem="http://hl7.org/fhir/ValueSet/address-type";       //more cheating
                          //   http://hl7.org/fhir/ValueSet/v3-AddressUse
 
+
+                        $scope.equivalence = ['equal','equivalent','relatedto','wider','subsumes','narrower','specializes'];
+
+/*
                         $scope.sourceSystem = sourceSystem;
                         $scope.targetSystem = targetSystem;
 
                         getVS($scope.sourceSystem,'source');
                         getVS($scope.targetSystem,'target');
+
+                        */
                         /*
                         if (sourceSystem) {
                             Utilities.getValueSetIdFromRegistry($scope.sourceSystem,function(vs){
@@ -258,12 +273,22 @@ angular.module("sampleApp")
 
 
                         $scope.input = {};
+                        $scope.input.eq = $scope.equivalence[0]
                         if (currentItem) {
                             $scope.currentItem = currentItem;
                             $scope.input.source = currentItem.code;
                             //var targ = currentItem.
                             $scope.input.target = currentItem.target[0].code;
                             $scope.input.comment = currentItem.target[0].comment;
+                            if (currentItem.target[0].equivalence) {
+                                $scope.equivalence.forEach(function(eq){
+                                    if (eq == currentItem.target[0].equivalence) {
+                                        $scope.input.eq= eq
+                                    }
+                                })
+                            }
+
+
                         }
 
 
@@ -324,11 +349,13 @@ angular.module("sampleApp")
                                 currentItem.code = $scope.input.source;
                                 currentItem.target[0].code = $scope.input.target;
                                 currentItem.target[0].comment = $scope.input.comment;
+                                currentItem.target[0].equivalence = $scope.input.eq;
                                 $scope.$close()
                             } else {
                                 var vo = {source:$scope.input.source}
                                 vo.target = $scope.input.target;
                                 vo.comment = $scope.input.comment;
+                                vo.equivalence = $scope.input.eq;
                                 $scope.$close(vo)
                             }
 
@@ -356,7 +383,7 @@ angular.module("sampleApp")
                             //for now, assume only a single group - and that it exists...
                             var grp = $scope.currentCM.group[0]
                             var element = {code:vo.source,target:[]}
-                            element.target.push({code:vo.target,equivalence:'equal',comment:vo.comment});  //assume codes are equal
+                            element.target.push({code:vo.target,equivalence:vo.equivalence,comment:vo.comment});
                             grp.element.push(element)
                             //console.log(grp)
                         }
