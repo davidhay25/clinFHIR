@@ -219,13 +219,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-4 col-sm-4">
-                                    <label>Purpose</label>
-                                    <textarea ng-change="setDirty()" rows="5"
-                                              ng-model="currentCM.purpose" class="form-control" placeholder="Purpose">
 
-                                    </textarea>
-                                </div>
 
                                 <div class="col-md-4 col-sm-4">
 
@@ -238,18 +232,20 @@
                                         <input type="text" class="form-control" ng-model="currentCM.targetUri">
                                     </div>
 
+                                </div>
 
+                                <div class="col-md-4 col-sm-4">
+                                    <label>Purpose</label>
+                                    <textarea ng-change="setDirty()" rows="5"
+                                              ng-model="currentCM.purpose" class="form-control" placeholder="Purpose">
 
-
-                                    <!--
-
-                                    -->
+                                    </textarea>
                                 </div>
 
                             </div>
 
                             <div class="pull-right">
-                                <button class="btn btn-link" ng-click="editHeader()">Edit header</button>
+                                <button class="btn btn-link" ng-click="editHeader(currentCM)">Edit header</button>
 
                             </div>
                             <br/>
@@ -312,7 +308,7 @@
                                 <div class="col-md-2 col-sm-2">
                                     <strong>Source code</strong>
                                 </div>
-                                <div class="col-md-8 col-sm-8">
+                                <div class="col-md-9 col-sm-9">
                                     <div class="row">
                                         <div class="col-md-3 col-sm-3">
                                             <strong>Equivalence</strong>
@@ -328,7 +324,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-2 col-sm-2">
+                                <div class="col-md-1 col-sm-1">
                                    <strong class="text-center">Actions</strong>
                                 </div>
 
@@ -339,7 +335,7 @@
                                 <div class="col-md-2 col-sm-2">
                                     {{element.code}}
                                 </div>
-                                <div class="col-md-8 col-sm-8">
+                                <div class="col-md-9 col-sm-9">
                                     <div class="row" ng-repeat="target in element.target">
                                         <div class="col-md-3 col-sm-3">
                                             <div uib-popover-html="showEquivalenceDescription(target.equivalence)"
@@ -358,16 +354,18 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-2 col-sm-2">
+                                <div class="col-md-1 col-sm-1">
                                     <div class="pull-right">
+
+                                        <i ng-show="canEdit" style="cursor: pointer"
+                                           ng-click="addItem(element)"
+                                           class="iconSpacing glyphicon glyphicon-edit"></i>
 
                                         <i ng-show="canEdit" style="cursor: pointer"
                                            ng-click="removeItem({source:element.code,target:target.code})"
                                            class="iconSpacing glyphicon glyphicon-minus-sign"></i>
 
-                                        <i ng-show="canEdit" style="cursor: pointer"
-                                           ng-click="addItem(element)"
-                                           class="iconSpacing glyphicon glyphicon-edit"></i>
+
                                     </div>
 
                                 </div>
@@ -376,6 +374,39 @@
                             </div>
 
 
+                            <div class="row" ng-show="canEdit" style="margin-top: 10px">
+                                <div class="col-md-2 col-sm-2">
+                                    <input type="text" class="form-control" ng-model="input.sourceCode" placeholder="Source"/>
+
+                                </div>
+                                <div class="col-md-9 col-sm-9">
+                                    <div class="row">
+                                        <div class="col-md-3 col-sm-3">
+                                            <select ng-model="input.eq" class="form-control" ng-options="eq for eq in equivalence">
+
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3 col-sm-3">
+                                            <input type="text" class="form-control" ng-model="input.targetCode" placeholder="Target"/>
+
+                                        </div>
+
+
+                                        <div class="col-md-6 col-sm-6">
+                                            <input type="text" class="form-control" ng-model="input.comment" placeholder="Comment"/>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-1 col-sm-1">
+
+                                    <i style="cursor: pointer"
+                                       ng-click="addItemDirect()"
+                                       class="iconSpacing pull-right glyphicon glyphicon-plus-sign"></i>
+                                </div>
+
+                            </div>
 
 
                             <!--

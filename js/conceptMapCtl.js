@@ -5,9 +5,24 @@ angular.module("sampleApp")
 
 
 
+            $scope.input = {};
+
+
+            $scope.equivalence = ['equal','equivalent','relatedto','wider','subsumes','narrower','specializes','inexact'];
             $scope.equivalenceDescription = {};
             $scope.equivalenceDescription.equal = "The definitions of the concepts are exactly the same (i.e. only grammatical differences) and structural implications of meaning are identical or irrelevant (i.e. intentionally identical)."
             $scope.equivalenceDescription.equivalent = "The definitions of the concepts mean the same thing (including when structural implications of meaning are considered) (i.e. extensionally identical).";
+
+
+            $scope.equivalenceDescription.relatedto = "The concepts are related to each other, and have at least some overlap in meaning, but the exact relationship is not known";
+            $scope.equivalenceDescription.wider= "The target mapping is wider in meaning than the source concept.";
+            $scope.equivalenceDescription.subsumes= "The target mapping subsumes the meaning of the source concept (e.g. the source is-a target).";
+            $scope.equivalenceDescription.narrower= "The target mapping is narrower in meaning than the source concept. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.";
+            $scope.equivalenceDescription.specializes= "The target mapping specializes the meaning of the source concept (e.g. the target is-a source).";
+            $scope.equivalenceDescription.inexact = "The target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.";
+
+            $scope.input.eq = $scope.equivalence[0];
+
 
             $scope.showEquivalenceDescription = function(eq) {
                 return $scope.equivalenceDescription[eq]
@@ -76,7 +91,6 @@ angular.module("sampleApp")
             $scope.setDirty = function(){
                 $scope.isDirty = true;
             };
-
 
 
             $scope.makeLookupUrl = function(code) {
@@ -152,16 +166,35 @@ angular.module("sampleApp")
             };
 
 
+            $scope.editHeader = function() {
+                $scope.addConceptMap($scope.currentCM);     //will actually edit..
+            };
 
 
-            $scope.addConceptMap = function () {
+            $scope.addConceptMap = function (map) {
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
                     keyboard: false,       //same as above.
                     templateUrl: 'modalTemplates/addConceptMap.html',
                     size: 'lg',
-                    controller: function ($scope,Utilities) {
+                    controller: function ($scope,Utilities,currentMap) {
                         $scope.input = {};
+
+                        if (currentMap) {
+                            $scope.currentMap = currentMap;
+                            $scope.canAdd = true;
+
+                            $scope.input.name = currentMap.name;
+                            $scope.input.description = currentMap.description;
+                            $scope.input.purpose = currentMap.purpose;
+
+                            $scope.input.sourceUri = currentMap.sourceUri;
+                            $scope.input.targetUri = currentMap.targetUri;
+
+                            $scope.input.sourceCS = currentMap.group[0].source;
+                            $scope.input.targetCS = currentMap.group[0].target;
+
+                        }
 
                         $scope.checkCanAdd = function(){
                             $scope.canAdd = true;
@@ -195,7 +228,12 @@ angular.module("sampleApp")
                         }
 
                         $scope.add = function () {
+
                             var vo =  {resourceType:'ConceptMap',status:'draft'}
+                            if (currentMap) {
+                                vo = currentMap;
+                            }
+
                             Utilities.setAuthoredByClinFhir(vo)
                             vo.name = $scope.input.name;
                             vo.description = $scope.input.description;
@@ -203,24 +241,35 @@ angular.module("sampleApp")
 
                             vo.sourceUri = $scope.input.sourceUri;
                             vo.targetUri = $scope.input.targetUri;
-                            var group = {element:[]}
-                            group.source = $scope.input.sourceCS;
-                            group.target = $scope.input.targetCS;
 
-                            vo.group=[group];          //the single group
+                            if (currentMap) {
+                                vo.group[0].source = $scope.input.sourceCS;
+                                vo.group[0].target = $scope.input.targetCS;
+
+                            } else {
+                                var group = {element:[]}
+                                group.source = $scope.input.sourceCS;
+                                group.target = $scope.input.targetCS;
+                                vo.group=[group];          //the single group
+                            }
 
                             $scope.$close(vo)
                         }
-
-                    }
-                }).result.then(
+                    },
+                    resolve : {
+                        currentMap : function(){
+                            return map
+                        }}}
+                ).result.then(
                     function(vo) {
+
                         $scope.currentCM = vo;
-                        $scope.isDirty
+                        $scope.isDirty = true;
                         loadAllCM();
                     }
                 )
             };
+
 
 
             $scope.addItem = function (item) {
@@ -228,14 +277,15 @@ angular.module("sampleApp")
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
                     keyboard: false,       //same as above.
                     templateUrl: 'modalTemplates/addConceptMapItem.html',
-                    controller: function($scope,currentItem,sourceSystem,targetSystem,GetDataFromServer,Utilities){
+                    controller: function($scope,currentItem,sourceSystem,targetSystem,GetDataFromServer,Utilities,equivalence){
+                        $scope.equivalence = equivalence;
                       //  sourceSystem="http://hl7.org/fhir/ValueSet/v3-AddressUse";   //todo cheating to get result!
 
                         //targetSystem="http://hl7.org/fhir/ValueSet/address-type";       //more cheating
                          //   http://hl7.org/fhir/ValueSet/v3-AddressUse
 
 
-                        $scope.equivalence = ['equal','equivalent','relatedto','wider','subsumes','narrower','specializes'];
+                        //$scope.equivalence = ['equal','equivalent','relatedto','wider','subsumes','narrower','specializes'];
 
 /*
                         $scope.sourceSystem = sourceSystem;
@@ -374,6 +424,10 @@ angular.module("sampleApp")
                         targetSystem : function(){
                             var targetSystem = $scope.currentCM.group[0].target || $scope.currentCM.targetUri;
                             return targetSystem
+                        },
+                        equivalence : function(){
+
+                            return $scope.equivalence
                         }
                     }
                 }).result.then(
@@ -392,6 +446,22 @@ angular.module("sampleApp")
 
                     }
                 )
+            }
+
+            $scope.addItemDirect = function(){
+                //for now, assume only a single group - and that it exists...
+                var grp = $scope.currentCM.group[0]
+                var element = {code:$scope.input.sourceCode,target:[]}
+                element.target.push({code:$scope.input.targetCode,equivalence:$scope.input.eq,comment:$scope.input.comment});
+                grp.element.push(element)
+
+                delete $scope.input.targetCode;
+                delete $scope.input.comment;
+                delete $scope.input.sourceCode;
+                $scope.input.eq = $scope.equivalence[0];
+                $scope.isDirty = true;
+
+
             }
 
             //todo - add clinfhir only

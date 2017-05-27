@@ -8,9 +8,12 @@
                 <h3 class="modal-title">Add a new Concept Map</h3>
             </div>
 
-            <div class="col-md-3 col-sm-3">
+            <div class="col-md-4 col-sm-4">
                 <div class="pull-right">
-                    <button class="btn btn-success pull-right" ng-show="canAdd" ng-click="add()">Add</button>
+                    <button class="btn btn-success pull-right" ng-show="canAdd" ng-click="add()">
+                        <span ng-hide="currentMap">Add</span>
+                        <span ng-show="currentMap">Update</span>
+                    </button>
                     <button class="btn btn-link pull-right" ng-click="$dismiss()">Cancel</button>
                 </div>
             </div>
@@ -27,7 +30,7 @@
                 <input type="text" class="form-control"  ng-model="input.name" ng-blur="checkCanAdd()"/>
             </div>
             <div class="col-md-2 col-sm-2">
-                <button class="btn btn-primary pull-right">Check</button>
+                <button ng-hide="currentMap" class="btn btn-primary pull-right">Check</button>
 
             </div>
         </div>
@@ -96,7 +99,7 @@
             </div>
         </div>
         <br/>
-        <div class="row">
+        <div class="row" ng-hide="currentMap">
             <div class="col-md-3 col-sm-3">
                 Add maps from all source
             </div>
@@ -121,7 +124,8 @@
         <div class="row">
             <div class="col-md-12 col-sm-12">
 
-                <em>Add an extension to the resource that is not present in the profile being used</em>
+                <em ng-hide="currentMap">Add the details for a new ConceptMap</em>
+                <em ng-show="currentMap">Edit the details of an existing ConceptMap</em>
 
             </div>
 
