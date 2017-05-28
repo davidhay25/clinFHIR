@@ -1,0 +1,67 @@
+<div>
+
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h3 class="modal-title">Concept Map</h3>
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+                <div class="pull-right">
+
+                    <button class="btn btn-link pull-right" ng-click="$dismiss()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-body">
+
+        <div class="row">
+            <div class="col-md-1 col-sm-1">
+                <strong>Source</strong>
+            </div>
+            <div class="col-md-5 col-sm-5">
+                {{cm.sourceCS}}
+            </div>
+            <div class="col-md-1 col-sm-1">
+                <strong>Target</strong>
+            </div>
+            <div class="col-md-5 col-sm-5">
+                {{cm.targetCS}}
+            </div>
+        </div>
+
+        <br/>
+
+        <table class="table table-bordered">
+            <tr><th>Source</th><th>Eq</th><th>target</th><th>Comment</th></tr>
+            <tr ng-repeat="map in cm.element">
+                <td>{{map.source}}</td>
+                <td>{{map.eq}}</td>
+                <td>{{map.target}}</td>
+                <td>{{map.comment}}</td>
+            </tr>
+        </table>
+
+
+
+    </div>
+
+
+
+    <div class="modal-header">
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+
+
+            </div>
+
+        </div>
+
+
+
+    </div>
+</div>

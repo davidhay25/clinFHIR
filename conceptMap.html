@@ -207,6 +207,14 @@
                             <div class="row">
                                 <div class="col-md-4 col-sm-4">
                                     <div class="form-group">
+                                        <div ng-show="currentCM.id">
+                                            <label>Url</label>
+                                            <div><input class="form-control" type="text"
+                                                        value="{{appConfigSvc.getCurrentConformanceServer().url + 'ConceptMap/' + currentCM.id}}"/></div>
+
+                                        </div>
+
+
                                         <label>Name</label>
                                         <input type="text" class="form-control" ng-model="currentCM.name"
                                                placeholder="Name of map">
@@ -386,8 +394,7 @@
 
                                                     uib-popover-html="showEquivalenceDescription(input.eq)"
                                                     popover-trigger="'mouseenter'"
-                                                    popover-placement="top"
-                                            >
+                                                    popover-placement="top">
 
                                             </select>
                                         </div>

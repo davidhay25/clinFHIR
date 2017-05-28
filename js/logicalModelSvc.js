@@ -65,6 +65,39 @@ angular.module("sampleApp")
 
 
         return {
+            getConceptMapMappings : function(url) {
+                var deferred = $q.defer();
+                if (url) {
+                    $http.get(url).then(
+                        function (data) {
+                            if (data && data.data) {
+                                var vo = {element:[]}
+                                var group = data.data.group[0];
+                                vo.sourceCS = group.source;
+                                vo.targetCS = group.target;
+                                if (group.element) {
+                                    group.element.forEach(function(element){
+                                        if (element.target) {
+                                            element.target.forEach(function (target) {
+                                                var map = {source:element.code,target:target.code,comment:target.comment,eq:target.equivalence}
+                                                vo.element.push(map)
+
+                                            })
+                                        }
+                                    })
+                                    deferred.resolve(vo)
+                                }
+                            }
+                            deferred.reject();
+
+                        },function () {
+                            deferred.reject();
+                        }
+                    )
+                }
+                return deferred.promise;
+
+            },
             getEDForPath : function(SD,node){
                 //return the ElementDefinition that corresponds to the mapped FHIR element..
                 var path = node.data.path;
@@ -190,8 +223,6 @@ angular.module("sampleApp")
 
 
             },
-
-
 
             explodeResource : function(treeData,node,url) {
                 //get all teh child nodes for a resource...\\
@@ -1523,7 +1554,7 @@ angular.module("sampleApp")
                 var baseTypeForModel = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
                 var simpleExtensionUrl = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl;
                 var discriminatorUrl = appConfigSvc.config().standardExtensionUrl.discriminatorUrl;
-
+                var conceptMapUrl = appConfigSvc.config().standardExtensionUrl.conceptMapUrl;
                 var cntExtension = 0;
                 var arTree = [];
                 if (sd && sd.snapshot && sd.snapshot.element) {
@@ -1639,9 +1670,12 @@ angular.module("sampleApp")
                             item.data.discriminator = extDiscriminator.valueString;
                         }
 
-                      //  if (data.discriminator) {
-                          //  Utilities.addExtensionOnce(ed, discriminatorUrl, {valueString: data.discriminator})
-                     //   }
+                        var extConceptMap = Utilities.getSingleExtensionValue(ed, conceptMapUrl);
+                        if (extConceptMap) {
+                            item.data.conceptMap = extConceptMap.valueString;
+                        }
+
+
 
 
 
@@ -1795,6 +1829,7 @@ angular.module("sampleApp")
                 var baseTypeForModelUrl = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
                 var simpleExtensionUrl = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl;
                 var discriminatorUrl = appConfigSvc.config().standardExtensionUrl.discriminatorUrl;
+                var conceptMapUrl = appConfigSvc.config().standardExtensionUrl.conceptMapUrl;
 
                 //todo - should use Utile.addExtension...
                 var sd = {resourceType: 'StructureDefinition'};
@@ -1887,11 +1922,11 @@ angular.module("sampleApp")
                     ed.comments = data.comments;
 
 
-                  //  if (data.mappingPath) {         //the actual path in the target resource
-                        //ed.mapping = [{identity: 'fhir', map: data.mappingPath}]
-                    //}
 
-
+                    //a conceptMap associated with this element
+                    if (data.conceptMap) {
+                        Utilities.addExtensionOnce(ed, conceptMapUrl, {valueString: data.conceptMap})
+                    }
 
                     //so all the mapping data for ED is in the 'mappingFromED' array...  {identity:, map:, comment:}
                     if (data.mappingFromED ) {

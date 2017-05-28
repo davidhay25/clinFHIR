@@ -4,11 +4,12 @@ angular.module("sampleApp")
         function ($scope,$q,$http,appConfigSvc,modalService,GetDataFromServer,$uibModal,SaveDataToServer,Utilities) {
 
 
+            $scope.appConfigSvc = appConfigSvc;
 
             $scope.input = {};
 
 
-            $scope.equivalence = ['equal','equivalent','relatedto','wider','subsumes','narrower','specializes','inexact'];
+            $scope.equivalence = ['equal','equivalent','relatedto','wider','subsumes','narrower','specializes','inexact','unmatched','disjoint'];
             $scope.equivalenceDescription = {};
             $scope.equivalenceDescription.equal = "The definitions of the concepts are exactly the same (i.e. only grammatical differences) and structural implications of meaning are identical or irrelevant (i.e. intentionally identical)."
             $scope.equivalenceDescription.equivalent = "The definitions of the concepts mean the same thing (including when structural implications of meaning are considered) (i.e. extensionally identical).";
@@ -20,6 +21,9 @@ angular.module("sampleApp")
             $scope.equivalenceDescription.narrower= "The target mapping is narrower in meaning than the source concept. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.";
             $scope.equivalenceDescription.specializes= "The target mapping specializes the meaning of the source concept (e.g. the target is-a source).";
             $scope.equivalenceDescription.inexact = "The target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.";
+            $scope.equivalenceDescription.unmatched ="There is no match for this concept in the destination concept system.";
+            $scope.equivalenceDescription.disjoint="This is an explicit assertion that there is no mapping between the source and target concept.";
+
 
             $scope.input.eq = $scope.equivalence[0];
 
@@ -279,33 +283,7 @@ angular.module("sampleApp")
                     templateUrl: 'modalTemplates/addConceptMapItem.html',
                     controller: function($scope,currentItem,sourceSystem,targetSystem,GetDataFromServer,Utilities,equivalence){
                         $scope.equivalence = equivalence;
-                      //  sourceSystem="http://hl7.org/fhir/ValueSet/v3-AddressUse";   //todo cheating to get result!
 
-                        //targetSystem="http://hl7.org/fhir/ValueSet/address-type";       //more cheating
-                         //   http://hl7.org/fhir/ValueSet/v3-AddressUse
-
-
-                        //$scope.equivalence = ['equal','equivalent','relatedto','wider','subsumes','narrower','specializes'];
-
-/*
-                        $scope.sourceSystem = sourceSystem;
-                        $scope.targetSystem = targetSystem;
-
-                        getVS($scope.sourceSystem,'source');
-                        getVS($scope.targetSystem,'target');
-
-                        */
-                        /*
-                        if (sourceSystem) {
-                            Utilities.getValueSetIdFromRegistry($scope.sourceSystem,function(vs){
-                                if (vs) {
-                                    $scope.sourceVS = vs;
-                                } else {
-                                    modalService.showModal({}, {bodyText: 'The ValueSet:'+$scope.sourceSystem + ' was not found on the terminology server, so autocomplete is disabled'})
-                                }
-                            })
-                        }
-                        */
 
                         function getVS(url,type) {
                             if (url) {
@@ -318,16 +296,14 @@ angular.module("sampleApp")
                                     }
                                 })
                             }
-
                         }
-
 
                         $scope.input = {};
                         $scope.input.eq = $scope.equivalence[0]
                         if (currentItem) {
                             $scope.currentItem = currentItem;
                             $scope.input.source = currentItem.code;
-                            //var targ = currentItem.
+
                             $scope.input.target = currentItem.target[0].code;
                             $scope.input.comment = currentItem.target[0].comment;
                             if (currentItem.target[0].equivalence) {
@@ -482,9 +458,5 @@ angular.module("sampleApp")
                 })
             }
             loadAllCM();
-
-
-
-
 
         })

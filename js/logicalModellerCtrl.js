@@ -47,12 +47,35 @@ angular.module("sampleApp")
 
             }
 
+            $scope.showConceptMap = function(url) {
+
+                logicalModelSvc.getConceptMapMappings(url).then(
+                    function (vo) {
+                        console.log(vo)
+
+                        $uibModal.open({
+                            templateUrl: 'modalTemplates/showCM.html',
+                            size: 'lg',
+                            controller: function($scope,cm) {
+                                $scope.cm = cm
+
+                            },
+                            resolve : {
+                                cm : function(){
+                                    return vo
+                                }
+                            }
+                        })
+
+                    }, function (err) {
+                        alert('Unable to locate or process the conceptmap: '+url)
+                    }
+                )
+            }
 
             $scope.cloneNode = function(node){
 
-                //console.log(node)
 
-                //var parent = node.parent
 
                 var newName = 'clone'
 
