@@ -376,18 +376,23 @@
 
                             <div class="row" ng-show="canEdit" style="margin-top: 10px">
                                 <div class="col-md-2 col-sm-2">
-                                    <input type="text" class="form-control" ng-model="input.sourceCode" placeholder="Source"/>
+                                    <input type="text" class="form-control" ng-model="input.sourceCode" placeholder="Source code"/>
 
                                 </div>
                                 <div class="col-md-9 col-sm-9">
                                     <div class="row">
                                         <div class="col-md-3 col-sm-3">
-                                            <select ng-model="input.eq" class="form-control" ng-options="eq for eq in equivalence">
+                                            <select ng-model="input.eq" class="form-control" ng-options="eq for eq in equivalence"
+
+                                                    uib-popover-html="showEquivalenceDescription(input.eq)"
+                                                    popover-trigger="'mouseenter'"
+                                                    popover-placement="top"
+                                            >
 
                                             </select>
                                         </div>
                                         <div class="col-md-3 col-sm-3">
-                                            <input type="text" class="form-control" ng-model="input.targetCode" placeholder="Target"/>
+                                            <input type="text" class="form-control" ng-model="input.targetCode" placeholder="Target code"/>
 
                                         </div>
 
