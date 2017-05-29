@@ -75,22 +75,7 @@ angular.module("sampleApp")
 
             };
 
-            $scope.editCMDEP = function(key,value) {
-                switch (key) {
-                    case 'name' :
-                        $scope.currentCM.name = value;
-                        break;
-                    case 'desc' :
-                        $scope.currentCM.description = value
-                        break;
-                    case 'srcCS' :
-                        $scope.currentCM.group[0].source = value
-                        break;
-                    case 'targCS' :
-                        $scope.currentCM.group[0].target = value
-                        break;
-                }
-            }
+
 
             $scope.setDirty = function(){
                 $scope.isDirty = true;
@@ -159,12 +144,21 @@ angular.module("sampleApp")
             };
 
             $scope.saveCM = function () {
-                console.log($scope.currentCM)
+               // console.log($scope.currentCM)
                 SaveDataToServer.saveResource($scope.currentCM,appConfigSvc.getCurrentConformanceServer().url)
                     .then(function(){
-                        modalService.showModal({}, {bodyText: 'The resource has been updated.'})
-                        delete $scope.isDirty;
-                        loadAllCM();
+                        if (!$scope.currentCM.id) {
+                            delete $scope.currentCM
+                            modalService.showModal({}, {bodyText: "The resource has been saved, but you need to re-select it from the side bar. I'll fix that soon..."})
+                            loadAllCM();
+                            $scope.isDirty = false;
+                        } else {
+                            modalService.showModal({}, {bodyText: 'The resource has been updated.'})
+                            delete $scope.isDirty;
+                            loadAllCM();
+                        }
+
+
                     }
                 )
             };

@@ -195,6 +195,13 @@
                         <uib-tab heading="Json">
                             <pre>{{secondary.json | json}}</pre>
                         </uib-tab>
+
+                        <uib-tab heading="Canonical">
+                            <pre>{{secondary.canonical | json}}</pre>
+                        </uib-tab>
+
+
+
                     </uib-tabset>
                 </div>
             </div>
@@ -202,6 +209,44 @@
 
         </uib-tab>
         <uib-tab heading="Report">
+
+
+            <h4>ValueSets</h4>
+
+            <table class="table table-bordered table-condensed">
+                <tr ng-repeat = "item in secondary.canonical.report.valueSet">
+                    <td>{{item.path}}</td>
+                    <td>{{item.different}}</td>
+                    <td>{{item.vsUri}}</td>
+                    <td>{{item.vsReference}}</td>
+                </tr>
+            </table>
+
+
+
+            <h4>Path's in secondary not in primary</h4>
+
+            <table class="table table-bordered table-condensed">
+                <tr ng-repeat = "item in secondary.canonical.report.missing">
+                    <td>{{item.path}}</td>
+                    <td>{{item.min}}</td>
+                    <td>{{item.extension}}</td>
+                </tr>
+            </table>
+
+
+            <h4>Fixed values in the secondary</h4>
+
+            <table class="table table-bordered table-condensed">
+                <tr ng-repeat = "item in secondary.canonical.report.fixed">
+                    <!--<td><pre>{{item | json}}</pre></td> -->
+                    <td>{{item.item.path}}</td>
+                    <td>{{item.item.difference.fixed.key}}</td>
+                    <td>{{item.item.difference.fixed.value}}</td>
+                </tr>
+            </table>
+
+            <pre>{{secondary.canonical.report.fixed | json}}</pre>
 
         </uib-tab>
     </uib-tabset>

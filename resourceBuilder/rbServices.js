@@ -87,7 +87,7 @@ angular.module("sampleApp").
             if (resource.id) {
                 //this is an update
                 qry += "/"+resource.id;
-                console.log(qry)
+                //console.log(qry)
                 $http.put(qry, resource).then(
                     function(data) {
                         deferred.resolve(data);

@@ -24,7 +24,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                     item.max = ed.max;
                     item.multiplicity = ed.min + ".."+ed.max;
                     item.type = ed.type;
-                    item.difference = {};       //a # of differences
+                    item.difference = {};       //a # of differences - set during the analysis phase...
 
                     //if multiplicity is 0, then add to the exclude roots
                     if (item.max == 0) {
@@ -38,6 +38,19 @@ angular.module("sampleApp").service('profileDiffSvc',
                             include = false;
                         }
                     })
+
+
+                    //pull out any fixed elements...
+                    //need to iterate through all the properies of the ED to see if any start with 'fixed'
+                    angular.forEach(ed,function (value,key) {
+
+                        if (key.substr(0,5) == 'fixed') {
+                            console.log(key)
+                            item.fixed = {key: key, value:value}
+                        }
+                    });
+
+
 
 
                     //special processing for coded elements
@@ -55,7 +68,6 @@ angular.module("sampleApp").service('profileDiffSvc',
 
                                     item.coded.valueSetUri = ed.binding.valueSetUri;
                                 }
-
                             }
                         }
                     )}
@@ -105,23 +117,48 @@ angular.module("sampleApp").service('profileDiffSvc',
             //pass in the canonical model (NOT the SD or ED)
             //var analysis = {};
 
+            secondary.report = {fixed:[],missing:[],valueSet:[]};
+
             var primaryHash = {};
             primary.item.forEach(function(item){
                 var path = item.originalPath;   //extensions will be made unique
                 primaryHash[path]= item
             });
 
-            console.log(primaryHash)
+          //  console.log(primaryHash)
             //fields in secondary, not in primary
             //analysis.notInPrimary = []
+
+
             secondary.item.forEach(function (item) {
+
+                console.log(item)
+
+                //may want to check the primary...
+                if (item.fixed) {
+                    console.log(item.fixed)
+                   // secondary.report.fixed = secondary.report.fixed || []
+                    secondary.report.fixed.push({item:item,fixed:item.fixed})
+
+                    item.difference.fixed = item.fixed;
+                }
+
                 if (!primaryHash[item.originalPath] ) {
+                    //this is a new path in the secondary. Either an extension, or is core, but not in the primary...
                     //analysis.notInPrimary.push(item)
+                    var reportItem = {path:item.path,min:item.min}
+                    if (item.extension) {
+                        reportItem.extension = item.extension.url
+                    }
+
+
                     if (item.min !== 0) {
                         item.difference.brk = true;         //breaking change
+                       // reportItem.
                     } else {
                         item.difference.nip = true;         //not in primary
                     }
+                    secondary.report.missing.push(reportItem);
 
                 } else {
                     var primaryItem = primaryHash[item.originalPath];
@@ -136,20 +173,28 @@ angular.module("sampleApp").service('profileDiffSvc',
 
                             item.difference.vsd = true;     //the primary is not!
                         } else {
+                            var vsItem = {}
                             if (item.coded.valueSetReference) {
                                 if (primaryItem.coded.valueSetReference !== item.coded.valueSetReference) {
                                     item.difference.vsd = true;
+                                    vsItem = {path:item.path,different:true,vsReference:item.coded.valueSetReference}
+                                } else {
+                                    vsItem = {path:item.path,different:false,vsReference:item.coded.valueSetReference}
                                 }
                             }
 
-                            if (item.coded.valueSetUri !== primaryItem.coded.valueSetUri) {
-                                item.difference.vsd = true;
+                            if (item.coded.valueSetUri) {
+                                if (item.coded.valueSetUri !== primaryItem.coded.valueSetUri) {
+                                    item.difference.vsd = true;
+                                    vsItem = {path:item.path,different:true,vsUri:item.coded.valueSetUri}
+                                } else {
+                                    vsItem = {path:item.path,different:false,vsUri:item.coded.valueSetUri}
+                                }
                             }
 
+                            secondary.report.valueSet.push(vsItem);
+
                         }
-
-
-
 
                     }
 
@@ -158,7 +203,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                 })
 
             //console.log(analysis)
-
+            console.log(secondary.report)
 
         }
     }
