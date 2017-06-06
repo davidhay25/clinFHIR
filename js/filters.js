@@ -21,6 +21,20 @@ angular.module("sampleApp")
             return ar[0];
         }
     })
+    .filter('addSpace', function() {
+        return function(s) {
+            //https://stackoverflow.com/questions/1144783/how-to-replace-all-occurrences-of-a-string-in-javascript
+
+
+            return s.replace(/\./g, '. ');
+
+
+          //  var ar = s.split('.')
+          //  return ar.join('. ')
+
+
+        }
+    })
 
     .filter('libraryCategory', function() {
         return function(selectedCategory,container) {

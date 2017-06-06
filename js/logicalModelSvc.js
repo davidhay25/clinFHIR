@@ -65,6 +65,37 @@ angular.module("sampleApp")
 
 
         return {
+            getRelativeMappings : function(tree) {
+                //find elements in the model that have mappings to both source and target
+                var source="hl7V2";
+                var target = "fhir";
+                var arRelative = []
+                tree.forEach(function (branch) {
+                    var data = branch.data;
+                    //see if there's a mapping for both source and target
+                    if (data.mappingFromED) {
+                        var sourceMap = "", targetMap = ""
+                        data.mappingFromED.forEach(function (map) {
+                            if (map.identity == source) {
+                                sourceMap = map.map;
+                            }
+                            if (map.identity == target) {
+                                targetMap = map.map;
+                            }
+                        })
+                        if (sourceMap && targetMap) {
+                            var item = {source:source,sourceMap:sourceMap,target:target, targetMap:targetMap, branch:branch};
+
+                            arRelative.push(item)
+                        }
+
+
+
+                    }
+                })
+                return arRelative;
+
+            },
             getConceptMapMappings : function(url) {
                 var deferred = $q.defer();
                 if (url) {

@@ -130,7 +130,7 @@ angular.module("sampleApp")
 
         defaultConfig.allKnownServers.push({name:"Public HAPI STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true,isTerminology:true});
 
-        defaultConfig.allKnownServers.push({name:'SNapp STU3',version:3,url:"http://snapp.clinfhir.com:8080/baseDstu3/",everythingOperation:true});
+        //defaultConfig.allKnownServers.push({name:'SNapp STU3',version:3,url:"http://snapp.clinfhir.com:8080/baseDstu3/",everythingOperation:true});
 
         defaultConfig.allKnownServers.push({name:"HealthConnex STU2 server",url:"http://sqlonfhir-dstu2.azurewebsites.net/fhir/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"HealthConnex STU3 server",url:"http://sqlonfhir-stu3.azurewebsites.net/fhir/",version:3,everythingOperation:true});

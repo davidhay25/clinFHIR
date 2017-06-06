@@ -1244,7 +1244,7 @@ angular.module("sampleApp")
                                         if (Utilities.isAuthoredByClinFhir(data.data)) {
                                             modalService.showModal({},{bodyText:"There's already a model with this name. Please select another name."})
                                         } else {
-                                            modalService.showModal({},{bodyText:"Sorry, there's already a profile with this name"})
+                                            modalService.showModal({},{bodyText:"Sorry, there's already a model with this name"})
                                         }
 
                                     },function(err){
@@ -1463,7 +1463,7 @@ angular.module("sampleApp")
                     function(err) {
 
                         $scope.error = err;
-                        modalService.showModal({},{bodyText:"Sorry, there was an error saving the profile. View the 'Error' tab above for details."})
+                        modalService.showModal({},{bodyText:"Sorry, there was an error saving the model. View the 'Error' tab above for details."})
                     }
                 ).finally(function(){
                     $scope.showWaiting = false;
@@ -1507,6 +1507,7 @@ angular.module("sampleApp")
 
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
+                $scope.relativeMappings = logicalModelSvc.getRelativeMappings($scope.treeData); //items with both v2 & fhir mappings
 
 
                 logicalModelSvc.openTopLevelOnly($scope.treeData);
@@ -1521,7 +1522,6 @@ angular.module("sampleApp")
                 $scope.treeData.forEach(function (item) {
                     if (item.data.mappingFromED && item.data.mappingFromED.length > 0) {
                         item.data.mappingFromED.forEach(function (map) {
-
 
                             //$scope.allMappings.push({identity:map.identity,map:map.map, name:item.data.name})
                             var ar = item.data.path.split('.');

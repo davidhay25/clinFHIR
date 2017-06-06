@@ -533,6 +533,23 @@
 
                         </uib-tab>
 
+                        <uib-tab heading="v2 -> FHIR">
+                            <h4>Mappings that have both an HL7 v2 and a FHIR mapping</h4>
+
+                            <table class="table table-bordered table-condensed">
+                                <tr><th>HL7 V2</th><th>FHIR</th><th>Path</th></tr>
+                                <tr ng-repeat="map in relativeMappings">
+                                    <td>{{map.sourceMap | addSpace}}</td>
+                                    <td>{{map.targetMap | addSpace}}</td>
+                                    <td>{{map.branch.data.path | addSpace}}</td>
+                                </tr>
+                            </table>
+
+
+
+
+                        </uib-tab>
+
                     </uib-tabset>
 
 

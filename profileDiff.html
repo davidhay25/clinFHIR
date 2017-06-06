@@ -211,42 +211,54 @@
         <uib-tab heading="Report">
 
 
-            <h4>ValueSets</h4>
-
-            <table class="table table-bordered table-condensed">
-                <tr ng-repeat = "item in secondary.canonical.report.valueSet">
-                    <td>{{item.path}}</td>
-                    <td>{{item.different}}</td>
-                    <td>{{item.vsUri}}</td>
-                    <td>{{item.vsReference}}</td>
-                </tr>
-            </table>
+            <div class="row">
+                <div class="col-sm-2 col-md-2">
 
 
 
-            <h4>Path's in secondary not in primary</h4>
+                </div>
+                <div class="col-sm-10 col-md-10">
+                    <h4>ValueSets</h4>
 
-            <table class="table table-bordered table-condensed">
-                <tr ng-repeat = "item in secondary.canonical.report.missing">
-                    <td>{{item.path}}</td>
-                    <td>{{item.min}}</td>
-                    <td>{{item.extension}}</td>
-                </tr>
-            </table>
+                    <table class="table table-bordered table-condensed">
+                        <tr ng-repeat = "item in secondary.canonical.report.valueSet">
+                            <td>{{item.path}}</td>
+                            <td>{{item.different}}</td>
+                            <td>{{item.vsUri}}</td>
+                            <td>{{item.vsReference}}</td>
+                        </tr>
+                    </table>
 
 
-            <h4>Fixed values in the secondary</h4>
 
-            <table class="table table-bordered table-condensed">
-                <tr ng-repeat = "item in secondary.canonical.report.fixed">
-                    <!--<td><pre>{{item | json}}</pre></td> -->
-                    <td>{{item.item.path}}</td>
-                    <td>{{item.item.difference.fixed.key}}</td>
-                    <td>{{item.item.difference.fixed.value}}</td>
-                </tr>
-            </table>
+                    <h4>Path's in secondary not in primary</h4>
 
-            <pre>{{secondary.canonical.report.fixed | json}}</pre>
+                    <table class="table table-bordered table-condensed">
+                        <tr ng-repeat = "item in secondary.canonical.report.missing">
+                            <td>{{item.path}}</td>
+                            <td>{{item.min}}</td>
+                            <td>{{item.extension}}</td>
+                        </tr>
+                    </table>
+
+
+                    <h4>Fixed values in the secondary</h4>
+
+                    <table class="table table-bordered table-condensed">
+                        <tr ng-repeat = "item in secondary.canonical.report.fixed">
+                            <!--<td><pre>{{item | json}}</pre></td> -->
+                            <td>{{item.item.path}}</td>
+                            <td>{{item.item.difference.fixed.key}}</td>
+                            <td>{{item.item.difference.fixed.value}}</td>
+                        </tr>
+                    </table>
+
+                    <pre>{{secondary.canonical.report.fixed | json}}</pre>
+                </div>
+            </div>
+
+
+
 
         </uib-tab>
     </uib-tabset>

@@ -423,6 +423,7 @@ angular.module("sampleApp")
                 var grp = $scope.currentCM.group[0]
                 var element = {code:$scope.input.sourceCode,target:[]}
                 element.target.push({code:$scope.input.targetCode,equivalence:$scope.input.eq,comment:$scope.input.comment});
+                grp.element = grp.element || []
                 grp.element.push(element)
 
                 delete $scope.input.targetCode;
