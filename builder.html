@@ -116,7 +116,7 @@
     <script src="js/loginCtrl.js"></script>
     <script src="js/addExtensionCtrl.js"></script>
     <script src="js/dataTypeCtrl.js"></script>
-
+    <script src="js/markerSvc.js"></script>
 
 
     <script>
@@ -156,15 +156,7 @@
                     </a>
                 </div>
 
-                <!--
-                <div class="col-md-3 col-sm-3">
-                    <div class="navbar-text" ng-click="setServers()" style="cursor: pointer">
-                        Conformance: {{appConfigSvc.getCurrentConformanceServer().name}}
-                        <div>Data: {{appConfigSvc.getCurrentDataServer().name}}</div>
-                    </div>
 
-                </div>
-                -->
 
 
 
@@ -223,6 +215,7 @@
                 </div>
 
                 <div class="col-md-1 col-sm-1">
+
                     <div class="pull-right navbar-form" ng-show="waiting">
                         <img src="css/ajax_loader_blue_32.gif"/>
                     </div>
@@ -267,7 +260,7 @@
 
             <div class="banner">
                 The Library of all Scenarios. Saved on the Data Server as DocumentReference resources.
-                <div style="font-weight:normal">(Select the type of entry. Click the Hide Library link to return to the Scenario Builder)</div>
+                <div style="font-weight:normal">(Select the type of entry. Click the 'Hide Library' link in the toolbar above to return to the Scenario Builder)</div>
             </div>
 
 
@@ -414,7 +407,7 @@
         <div class="row" ng-show="thingToDisplay=='scenario'">
 
 
-            <div ng-class="leftPaneClass" classDEP="col-md-2 col-sm-2">
+            <div ng-class="leftPaneClass">
 
                 <button class="btn btn-link pull-right" ng-click="newBundle()">New Scenario</button>
                 <h4>Local Scenarios</h4>
@@ -812,11 +805,32 @@
                             </div>
                         </uib-tab>
 
-<!--
-                        <uib-tab heading="Debug">
-                            <pre>{{selectedContainer | json}}</pre>
+
+                        <uib-tab heading="Mark">
+                            <br/>
+
+
+
+                            <ng-include src="'/includes/markerResult.html'"></ng-include>
+
+                            <div class="row">
+                                <div class="col-sm-8 col-md-8">
+                                    <select class="form-control" ng-model="input.markReference"
+                                            ng-options="container.name for container in referenceContainers">
+
+                                    </select>
+                                </div>
+                                <div class="col-sm-4 col-md-4">
+                                    <button ng-show="input.markReference" class="btn btn-danger pull-right"
+                                            ng-click="scoreBundle(input.markReference)">Mark</button>
+                                </div>
+                            </div>
+
+
+
+
                         </uib-tab>
-                        -->
+
 
 
                     </uib-tabset>

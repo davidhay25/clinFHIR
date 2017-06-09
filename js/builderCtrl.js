@@ -3,7 +3,7 @@ angular.module("sampleApp")
     .controller('builderCtrl',
         function ($scope,$http,appConfigSvc,$q,GetDataFromServer,resourceCreatorSvc,RenderProfileSvc,builderSvc,
                   $timeout,$localStorage,$filter,profileCreatorSvc,modalService,Utilities,$uibModal,$rootScope,
-                  $firebaseObject,logicalModelSvc,ResourceUtilsSvc) {
+                  $firebaseObject,logicalModelSvc,ResourceUtilsSvc,markerSvc) {
 
             $scope.input = {};
             $scope.input.dt = {};   //data entered as part of populating a datatype
@@ -14,6 +14,11 @@ angular.module("sampleApp")
 
             GetDataFromServer.registerAccess('scnBld');
 
+            $scope.scoreBundle = function(ref) {
+                $scope.markResult = markerSvc.mark($scope.selectedContainer,ref) ; //compare to first bundle - testing!
+                //$scope.markResult = markerSvc.mark($scope.selectedContainer,$scope.builderBundles[0]) ; //compare to first bundle - testing!
+            };
+
             var idPrefix = 'cf-';   //prefix for the id. todo should probably be related to the userid in some way...
             //load the library. todo THis will become slow with large numbers of sets...
             function refreshLibrary() {
@@ -21,12 +26,17 @@ angular.module("sampleApp")
                     function(arContainer){
                         $scope.libraryContainer = arContainer;
 
+                        $scope.referenceContainers = []; //reference bundles can be scored against
+                        arContainer.forEach(function (container) {
+                            if (container.category && container.category.code == 'reference') {
+                                $scope.referenceContainers.push(container)
+                            }
+                        })
                     }
                 );
             }
 
             refreshLibrary();       //initial load...
-
 
             //------------ scenario versioning
 
@@ -48,7 +58,6 @@ angular.module("sampleApp")
                 modalService.showModal({}, modalOptions).then(
                     function (){
                         var currentBundle = angular.copy($scope.selectedContainer.bundle);
-                        // var currentBundle = $scope.selectedContainer.bundle;
                         $scope.selectedContainer.history = $scope.selectedContainer.history || []
                         $scope.selectedContainer.history.push({bundle:currentBundle})
                         $scope.selectedContainer.index = $scope.selectedContainer.history.length -1;
@@ -989,6 +998,7 @@ angular.module("sampleApp")
             //select a bundle from the local list
             $scope.selectBundle = function(inx){
                 delete $scope.resourcesFromServer;
+                delete $scope.markResult;
                 $scope.currentBundleIndex = inx;
 
                 //get the container from the local store... 'builderBundles' would be better named 'builderContainers'

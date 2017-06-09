@@ -1,0 +1,29 @@
+<div ng-show="markResult">
+    <h3>Results:</h3>
+    <div class="row">
+        <div class="col-md-8">
+            <h4>Count of resource types</h4>
+        </div>
+        <div class="col-md-2">
+            {{markResult.compareResourceTypes.score}}%
+        </div>
+        <div class="col-md-2">
+            <div class="clickable" ng-click="markResult.compareResourceTypes.showDetails = ! markResult.compareResourceTypes.showDetails"  >Details</div>
+        </div>
+    </div>
+
+
+    <table class="table table-bordered" ng-show="markResult.compareResourceTypes.showDetails">
+        <tr><th>Resource Type</th><th>Reference scenario</th><th>Your scenario</th><th>Score</th></tr>
+        <tr ng-repeat="(key,value) in markResult.compareResourceTypes.types">
+            <td>{{key}}</td>
+            <td>{{value.ref}}</td>
+            <td>{{value.test}}</td>
+            <td>{{value.score}}%</td>
+        </tr>
+    </table>
+
+    <!--
+    <pre>{{markResult | json}}</pre>
+    -->
+</div>
