@@ -63,6 +63,9 @@ angular.module("sampleApp")
                 if (ignorePaths.indexOf(path) == -1) {
                     //this is an existing value that should be in the test resource
                     var item = {type: resource.resourceType,path:path,value:value};
+                    if (angular.isObject(value)) {
+                        item.jsonValue = angular.toJson(value);
+                    }
                     arData.push(item)
                 }
             });
@@ -87,16 +90,32 @@ angular.module("sampleApp")
                                 if (resource[property.path]) {
                                     //there is a value on this path, does it match the required one?
                                     var hash = resource.id + "-"+property.path;
+                                    if (! countedPathHash[hash]) {
+                                        var same = false;
+                                        if (property.jsonValue) {
+                                            var json = angular.toJson(resource[property.path])
+                                            if (json == property.jsonValue) {
+                                                same = true;
+                                            }
 
-                                    if (! countedPathHash[hash] && resource[property.path] == property.value) {
-                                        //yes!
-                                        property.result = "found"
-                                        property.score = 1;
-                                        found ++;
-                                        countedPathHash[hash] = true;
-                                    } else {
-                                        //property.result = "wrong value"
+                                        } else {
+                                            if (resource[property.path] == property.value) {
+                                                //yes!
+                                               same = true;
+                                            }
+                                        }
+                                        if (same) {
+                                            property.result = "found"
+                                            property.score = 1;
+                                            found ++;
+                                            countedPathHash[hash] = true;
+                                        }
+
+
+
                                     }
+
+
                                 }
                             }
                         }
