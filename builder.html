@@ -811,16 +811,21 @@
 
 
 
-                            <ng-include src="'/includes/markerResult.html'"></ng-include>
+                            <div class="rounded-box">
+                                <ng-include src="'/includes/markerResult.html'"></ng-include>
+                            </div>
+
 
                             <div class="row">
-                                <div class="col-sm-8 col-md-8">
+                                <div class="col-sm-10 col-md-10">
+                                    <div><em>Select the Bundle to compare this one with</em></div>
                                     <select class="form-control" ng-model="input.markReference"
                                             ng-options="container.name for container in referenceContainers">
 
                                     </select>
                                 </div>
-                                <div class="col-sm-4 col-md-4">
+                                <div class="col-sm-2 col-md-2">
+                                    <div>&nbsp;</div>
                                     <button ng-show="input.markReference" class="btn btn-danger pull-right"
                                             ng-click="scoreBundle(input.markReference)">Mark</button>
                                 </div>

@@ -26,6 +26,28 @@
 }
 
 
+.scoreResult {
+    border : 1px solid #eeeeee;
+    padding : 5px;
+    margin: 5px;
+    /*margin-left : 10px;*/
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    background-color:#F6F6F6;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.scoreText {
+    margin: 5px;
+    padding : 5px;
+    font-size: 18px;
+    font-weight: 500;
+}
+
 .chatItem {
     border : 1px solid #eeeeee;
     padding : 5px;
@@ -52,48 +74,15 @@
 .hidden {
     display: none;
 }
-.chat_textDEP {
-    border : 1px solid #eeeeee;
-    padding : 5px;
-    margin:0px;
-/*
-    margin-left : 10px;
-    margin-top : 10px;
-    */
-    margin-bottom : 10px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
-    background-color:#F6F6F6;
-}
 
-.chat_conversation_purposeDEP {
-    border : 1px solid #eeeeee;
-    padding : 5px;
-    margin:0px;
-    /*
-        margin-left : 10px;
-        margin-top : 10px;
-        */
-    margin-bottom : 10px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
-    background-color:#F6F6F6;
-}
+
 
 /*  classes for chat */
 .selected {
     font-weight: bold;
 }
 
-.chat_topic {
-    color: #333;
-    background-color: #f5f5f5;
-    text-align: center;
-}
 
-/* */
 .ng-table {
     border: 1px solid #000;
 }
