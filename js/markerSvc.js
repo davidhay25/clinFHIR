@@ -2,15 +2,17 @@ angular.module("sampleApp")
 //this performs marking services
 
 
-    .service('markerSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities,$filter,supportSvc,SaveDataToServer) {
+    .service('markerSvc', function() {
 
 
+        //paths that will be ignored when looking for existing data in the reference
+        var ignorePaths = ['id','text','subject','resourceType','patient','entry']
 
-        function getReferences(refs,node,nodePath,index) {
-            angular.forEach(node,function(value,key){
+        //find all the references between resources (aka connections) from a single resource
+        function getReferences(refs,resource,nodePath,index) {
+            angular.forEach(resource,function(value,key){
 
                 //if it's an object, does it have a child called 'reference'?
-
                 if (angular.isArray(value)) {
                     value.forEach(function(obj,inx) {
                         //examine each element in the array
@@ -53,32 +55,88 @@ angular.module("sampleApp")
         }
 
 
+        //get all the paths that have a value in the resource
+        function getData(resource) {
+            var arData = [];
+            angular.forEach(resource,function (value,path) {
+                console.log(path,value);
+                if (ignorePaths.indexOf(path) == -1) {
+                    //this is an existing value that should be in the test resource
+                    var item = {type: resource.resourceType,path:path,value:value};
+                    arData.push(item)
+                }
+            });
+            return arData
+        }
 
-        function countResources(bundle) {
+        //see if the test resources have the required data...
+        function scoreData(testResources, refResources) {
+            var score = {data:[]}
+            var found = 0, count = 0;
+            var countedPathHash = {};       //a hash of reasource paths that have already been counted
+            angular.forEach(refResources,function (arItem,type) {
+                arItem.forEach(function (item) {
+                    item.data.forEach(function (property) {     //{type: path: value: }
+                        //now go through each resource of this type in the test to see if one has this value...
+                        property.result = "not found";
+                        count ++;
+                        var test = testResources[property.type];
+                        if (test) {
+                            for (var i=0; i < test.length; i++ ) {
+                                var resource = test[i].resource;
+                                if (resource[property.path]) {
+                                    //there is a value on this path, does it match the required one?
+                                    var hash = resource.id + "-"+property.path;
+
+                                    if (! countedPathHash[hash] && resource[property.path] == property.value) {
+                                        //yes!
+                                        property.result = "found"
+                                        property.score = 1;
+                                        found ++;
+                                        countedPathHash[hash] = true;
+                                    } else {
+                                        //property.result = "wrong value"
+                                    }
+                                }
+                            }
+                        }
+
+                        score.data.push(property)
+                    })
+                })
+            });
+
+            //now the score
+            score.score = Math.round((found / count) * 10000 )/100;   //as a percantage to 2 decimal places...
+            return score;
+        }
+
+        //create a hash indexed by resource type for all resources in the bundle
+        function analyseBundle(bundle) {
             var obj = {};
             bundle.entry.forEach(function(entry){
                 var resource = entry.resource;
                 var type = resource.resourceType;
-                obj[type] = obj[type] || []
+                obj[type] = obj[type] || [];
                 var item = {resource:resource};
 
                 //now, get all the references from this resource
-
                 var refs = [];
-                getReferences(refs,resource,resource.resourceType)
+                getReferences(refs,resource,resource.resourceType);
                 item.references = refs;
+
+                //now the values in the reference resources (top level only)
+                item.data = getData(resource);
 
                 obj[type].push(item);
 
             });
             return obj;
-
-
         }
 
-
+        //create lists of connections - {from: path: to:}
         function checkReferences(testResources, refResources){
-            //create lists of connections - {from: path: to:}
+
             var refList = makeConnectionList(refResources)
             var testList = makeConnectionList(testResources)
             //console.log(refList)
@@ -110,12 +168,12 @@ angular.module("sampleApp")
             angular.forEach(objResource,function(arResources,type){
                 arResources.forEach(function (resource) {
                     resource.references.forEach(function (ref) {
-                        var item = {from: type, path: ref.path, to: ref.type}
+                        var item = {from: type, path: ref.path, to: ref.type};
                         item.hash = type+'-'+ref.path+'-'+ref.type;         //to make the comparison quickef...
                         lst.push(item)
                     })
                 })
-            })
+            });
             return lst;
         }
 
@@ -161,8 +219,8 @@ angular.module("sampleApp")
                 var testContainer = angular.copy(inTestContainer);
                 var refContainer = angular.copy(inRefContainer);
 
-                var testResources = countResources(testContainer.bundle);   //resources in bundle being tested
-                var refResources = countResources(refContainer.bundle);     //resources in reference bundle
+                var testResources = analyseBundle(testContainer.bundle);   //resources in bundle being tested
+                var refResources = analyseBundle(refContainer.bundle);     //resources in reference bundle
 
 
                 //console.log(testResources)
@@ -171,7 +229,10 @@ angular.module("sampleApp")
                 var score = {overallScore:0};     //the scoring object
                 score.compareResourceTypes = compareResourceTypes(testResources,refResources);
                 score.references = checkReferences(testResources, refResources);
-                score.score = (score.compareResourceTypes.score + score.references.score) / 2
+                score.data = scoreData(testResources, refResources);
+
+                //overall score
+                score.score = (score.compareResourceTypes.score + score.references.score + score.data.score) / 3
                 score.score = Math.round(score.score * 100) / 100
                // console.log(testContainer,testResources)
                // console.log(score)

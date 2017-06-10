@@ -1,8 +1,8 @@
 <div ng-show="markResult">
-    <h3>Results:</h3>
+    <h3>Results</h3>
     <div class="row">
         <div class="col-md-9">
-            <div class="scoreText">Count of resource types</div>
+            <div class="scoreText">Number of resources</div>
         </div>
         <div class="col-md-3">
             <div class="scoreResult" ng-click="markResult.compareResourceTypes.showDetails = ! markResult.compareResourceTypes.showDetails" >
@@ -35,11 +35,6 @@
             <div class="scoreResult" ng-click="markResult.references.showDetails = ! markResult.references.showDetails">
                 {{markResult.references.score}}%</div>
         </div>
-        <!--
-        <div class="col-md-2">
-            <div class="clickable" ng-click="markResult.references.showDetails = ! markResult.references.showDetails"  >Details</div>
-        </div>
-        -->
     </div>
 
     <table class="table table-bordered" ng-show="markResult.references.showDetails">
@@ -51,17 +46,39 @@
         </tr>
     </table>
 
+    <div class="row">
+        <div class="col-md-9">
+            <div class="scoreText">Populated properties</div>
+        </div>
+        <div class="col-md-3">
+            <div class="scoreResult" ng-click="markResult.data.showDetails = ! markResult.data.showDetails">
+                {{markResult.data.score}}%</div>
+        </div>
+    </div>
+
+
+    <table class="table table-bordered" ng-show="markResult.data.showDetails">
+        <tr><th>Type</th><th>Path</th><th>Value</th><th>Result</th></tr>
+        <tr ng-repeat="data in markResult.data.data">
+            <td>{{data.type}}</td>
+            <td>{{data.path}}</td>
+            <td>{{data.value | json}}</td>
+            <td>{{data.result}}</td>
+        </tr>
+    </table>
+
+
     <hr/>
     <div class="row">
         <div class="col-md-9">
-            <div class="scoreText">Total</div>
+            <div class="scoreText">Overall score</div>
         </div>
         <div class="col-md-3">
             <div class="scoreResult">{{markResult.score}}%</div>
         </div>
 
     </div>
-    
+
 
     <!--
     <pre>{{markResult | json}}</pre>
