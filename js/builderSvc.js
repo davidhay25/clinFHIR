@@ -2060,9 +2060,7 @@ angular.module("sampleApp")
                                         findReferences(refs,obj,lpath,inx)
                                     }
                                 }
-
-
-
+                                
                             })
                         } else
 
@@ -2077,8 +2075,6 @@ angular.module("sampleApp")
                                 findReferences(refs,value,lpath)
                             }
                         }
-
-
 
 
                     })
