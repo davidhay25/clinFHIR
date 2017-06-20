@@ -52,7 +52,7 @@ angular.module("sampleApp")
         objColours.Sequence = '#FF9900';
         objColours.CareTeam = '#FFFFCC';
         objColours.Condition = '#cc9900';
-        objColours.LogicalModel = '#cc0000';
+        objColours.LogicalModel = '#ff8080';
 
         objColours.Organization = '#FF9900';
         objColours.ProviderRole = '#FFFFCC';
@@ -2102,6 +2102,16 @@ angular.module("sampleApp")
                         var extensionValue = Utilities.getSingleExtensionValue(resource,baseTypeForModel);
                         if (extensionValue && extensionValue.valueString == type) {
                             ar.push(resource);
+                        } else {
+                            //could be a profiled resource. see if the resource being examined claims to be confirmant...
+                            if (resource.meta && resource.meta.profile) {
+                                //so it does claim conformance to some resources...
+                                for (var i=0; i < resource.meta.profile.length; i++) {
+                                    if (resource.meta.profile[i].indexOf(type) > -1) {      //todo a strict equality check might be best
+                                        ar.push(resource);
+                                    }
+                                }
+                            }
                         }
                     }
 

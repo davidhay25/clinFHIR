@@ -1,6 +1,11 @@
 //simple server to serve static files...
 
-var static = require('node-static');
+
+
+
+
+
+//var static = require('node-static');
 var request  = require('request');
 var moment = require('moment');
 

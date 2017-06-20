@@ -9,7 +9,12 @@
                 Value
             </div>
             <div class="col-md-6  col-sm-6 ">
-                <input placeholder = 'Enter text value' type="text" class="form-control" ng-model="input.dt.quantity.value"/>
+
+                <input placeholder = 'Enter quantity value' type="text" class="form-control" ng-model="input.dt.quantity.value"/>
+
+
+
+
             </div>
         </div>
         <div class="row">
@@ -249,7 +254,23 @@
     </div>
 
     <div ng-show="dataTypeBeingEntered == 'string'">
-        <input placeholder = 'Enter text value' type="text" class="form-control" ng-model="input.dt.string"/>
+
+        <uib-tabset>
+            <uib-tab heading="Text">
+                <br/>
+                <input placeholder = 'Enter text value' type="text" class="form-control" ng-model="input.dt.string"/>
+            </uib-tab>
+
+            <uib-tab heading="Textarea">
+                <br/>
+                <textarea rows="8" class="form-control"ng-model="input.dt.string" >
+
+                </textarea>
+
+            </uib-tab>
+        </uib-tabset>
+
+
     </div>
 
     <div ng-show="dataTypeBeingEntered == 'uri'">

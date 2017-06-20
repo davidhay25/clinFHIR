@@ -811,9 +811,7 @@
 
 
 
-                            <div class="rounded-box">
-                                <ng-include src="'/includes/markerResult.html'"></ng-include>
-                            </div>
+
 
 
                             <div class="row">
@@ -831,7 +829,9 @@
                                 </div>
                             </div>
 
-
+                            <div class="rounded-box" ng-show="markResult">
+                                <ng-include src="'/includes/markerResult.html'"></ng-include>
+                            </div>
 
 
                         </uib-tab>
@@ -866,9 +866,6 @@
                         <div><strong>To: </strong>{{currentReference.to.cf.resource.resourceType}}</div>
 
                     </div>
-
-
-
 
                     <uib-tabset ng-show="currentResource">
 
@@ -989,7 +986,7 @@
                                                 </div>
 
                                                 <span ng-class="{clickable:supportedDt.indexOf(type.code)>-1}"
-                                                      ng-click="addValueForDt(hashPath,type.code)">
+                                                      ng-click="addValueForDt(hashPath,type.code,currentElementValue.display)">
 
                                                 {{type.code}}
                                             </span>
@@ -1139,6 +1136,8 @@
                                         <button ng-show="canDeletePath()" class="btn btn-danger pull-right"
                                                 ng-click="removeResourceNode(displayResourceTreeDeletePath)">Delete</button>
 
+
+
                                         <div id="builderResourceTree"></div>
 
                                     </uib-tab>
@@ -1269,7 +1268,6 @@
 
                 <div ng-show="displayMode == 'new'">
 
-
                     <div class="row">
                         <div class="col-md-6 col-sm-6">
                             <h4>Add new Resource</h4>
@@ -1281,8 +1279,6 @@
                             </a>
                         </div>
                     </div>
-
-
 
                     <uib-tabset>
                         <uib-tab heading="Core resource">
@@ -1330,9 +1326,14 @@
                                 </div>
                                 <div class="col-md-6 col-sm-6">
                                     <select ng-model="input.selectLM" class="form-control"
-                                            ng-change="selectLogicalModelFromList(input.selectLM,$index)"
+                                            ng-changeDEP="selectLogicalModelFromList(input.selectLM,$index)"
                                             ng-options="entry.resource.name for entry in bundleLogicalModels.entry"></select>
                                 </div>
+                                <div class="col-md-3 col-sm-3">
+                                    <button class="btn btn-success"
+                                            ng-click="selectLogicalModelFromList(input.selectLM)">Add</button>
+                                </div>
+
                             </div>
 
 

@@ -2,10 +2,13 @@
 
 angular.module("sampleApp")
     .controller('addPropertyInBuilderCtrl',
-        function ($scope,dataType,hashPath,builderSvc,insertPoint,vsDetails,expandedValueSet,GetDataFromServer) {
+        function ($scope,dataType,hashPath,builderSvc,insertPoint,vsDetails,expandedValueSet,GetDataFromServer,currentValue) {
             $scope.dataTypeBeingEntered = dataType;
             //hashPath.path is the absolute path where the insertion is to occur. The last segment in the path is
             //the propertyname on the insert point (which can be the
+
+            console.log(currentValue)
+
             $scope.hashPath = hashPath;
 
             $scope.vsDetails = vsDetails;

@@ -707,7 +707,7 @@
                                 <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
                                 <tr><td>Description</td><td>{{selectedNode.data.description}}</td></tr>
 
-                                <tr><td>Mappings</td><td>
+                                <tr ng-show="selectedNode.data.mappingFromED"><td>Mappings</td><td>
                                     <table class="table table-condensed table-bordered"  style="margin-bottom: 2px">
                                         <tr><th>Identity</th><th>Map</th><th>Comment</th></tr>
                                         <tr ng-repeat="map in selectedNode.data.mappingFromED">
@@ -727,8 +727,6 @@
                                         <a href="#" ng-click="editExtension()">{{selectedNode.data.fhirMappingExtensionUrl}}</a>
                                     </td>
                                 </tr>
-
-
 
                                 <tr><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>
                                 <tr><td>Multiplicity</td><td>{{selectedNode.data.min}}..{{selectedNode.data.max}}</td></tr>

@@ -7,22 +7,7 @@ angular.module("sampleApp")
             $scope.item = {};       //hash of items based on resource.id
             $scope.user = "level1.sys_a";
 
-/*
-            $scope.test = function(){
 
-
-                var url = 'http://fhirtest.uhn.ca/baseDstu3/Patient/orion';
-                //url = "./orionMD.xml"
-                $http.get(url).then(
-                    function (data) {
-                        console.log(data)
-                        $scope.selectedResource = data.data;
-                        makeGraph(data.data)
-                    }
-                );
-
-            }
-*/
 
             $scope.selectItem = function(id) {
 

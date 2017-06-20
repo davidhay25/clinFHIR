@@ -1027,8 +1027,9 @@ angular.module("sampleApp")
             }
 
             //displays the data entry screen for adding a datatype value
-            $scope.addValueForDt = function(hashPath,dt) {
+            $scope.addValueForDt = function(hashPath,dt,currentValue) {
 
+                console.log(currentValue)
                 //if this is not adding to the root, check that there is a branch selected...
                 var ar = hashPath.path.split('.');
                 if (ar.length > 2 &&  $scope.existingElements.list.length == 0) {
@@ -1092,7 +1093,6 @@ angular.module("sampleApp")
                                 insertPoint = insertPoint[segmentName][0]
                             }
                         }
-
                     }
 
                     //if this is an extension, then the insertPoint moves down one...
@@ -1121,6 +1121,9 @@ angular.module("sampleApp")
                     delete $scope.input.dt;
                     $scope.resetValidation();
 
+
+
+
                     $uibModal.open({
                         templateUrl: 'modalTemplates/addPropertyInBuilder.html',
                         size: 'lg',
@@ -1141,6 +1144,9 @@ angular.module("sampleApp")
                             },
                             expandedValueSet: function () {          //the default config
                                 return $scope.expandedValueSet;
+                            },
+                            currentValue : function(){
+                                return currentValue;
                             }
                         }
                     }).result.then(function () {
@@ -1575,7 +1581,7 @@ angular.module("sampleApp")
 
 
                                 //get the type information
-                                console.log(ed)
+                                //console.log(ed)
 
                                 if (!ed.type) {
                                     //R3 seems to have no type for the root element in the resource. I need it for the extension adding...
@@ -1639,6 +1645,9 @@ angular.module("sampleApp")
 
 
                                             var type = $filter('getLogicalID')(targetProfile);
+
+
+                                            console.log('getting resources of type '+targetProfile)
 
 
                                             var ar = builderSvc.getResourcesOfType(type,$scope.selectedContainer.bundle);
@@ -1952,6 +1961,16 @@ angular.module("sampleApp")
                     {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
                 ).on('select_node.jstree', function (e, data) {
                     console.log(data.node.data)
+
+/*
+                    //temp
+                    if (! angular.isObject(data.node.data.element)) {
+                        console.log(data.node.data.element)
+                        data.node.data.element = data.node.data.element + 'x'
+                    }
+
+                    */
+
                     delete $scope.displayResourceTreeDeletePath;
                     if (data.node.data.level == 1) {
                         //a top level node that can be deleted

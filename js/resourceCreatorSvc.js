@@ -1876,7 +1876,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             display.myStuff.fixed = value;
                             display.myStuff.fixedType = key;
                         }
-
                     });
 
                     //look for coded values - is there a binding element
@@ -1888,7 +1887,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     if (element.type) {
                         display.myStuff.type = "";
                         element.type.forEach(function (typ) {
-                            display.myStuff.type += ', ' + typ.code
+                            //display.myStuff.type += ', ' + typ.code
+                            display.myStuff.type = display.myStuff.type +', ' + typ.code
                         });
 
                         display.myStuff.type = display.myStuff.type.substr(2);
@@ -3541,6 +3541,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     } else {
                         var display = key + " " + '<strong>' + element + '</strong>';
                         var data = {key:key, element:element,level:level}
+                        data.element = element;
                         var newNode = {
                             id: getId(),
                             parent: parentId,
