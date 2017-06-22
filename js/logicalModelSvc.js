@@ -1684,6 +1684,7 @@ angular.module("sampleApp")
                         item.data.name = item.text;
                         item.data.short = ed.short;
                         item.data.description = ed.definition;
+                        item.data.ed = ed;  //added for profileDiff
                         //item.data.type = ed.type;
 
 
@@ -1717,34 +1718,42 @@ angular.module("sampleApp")
                             var tvType = []
 
                             ed.type.forEach(function(typ){
-                                var newTyp = {code:typ.code}
-                                if (fhirVersion == 2) {
-                                    //the profile is multiple
-                                    if (typ.profile) {
-                                        newTyp.targetProfile = typ.profile[0]
+
+                                if (typ.code) {
+                                    var newTyp = {code:typ.code}
+                                    if (fhirVersion == 2) {
+                                        //the profile is multiple
+                                        if (typ.profile) {
+                                            newTyp.targetProfile = typ.profile[0]
+                                        }
+                                    } else {
+                                        newTyp.targetProfile = typ.targetProfile;
                                     }
+                                    // item.type = newTyp;
+
+                                    //is this a coded type
+                                    if (['CodeableConcept', 'Coding', 'code'].indexOf(typ.code) > -1) {
+                                        item.data.isCoded = true;
+                                    }
+
+                                    //is this a reference
+                                    if (typ.code == 'Reference') {
+                                        item.data.isReference = true;   //used to populate the 'is reference' table...
+                                    }
+
+                                    //is this complex
+                                    var first = newTyp.code.substr(0,1);
+                                    if (first == first.toUpperCase()) {
+                                        newTyp.isComplexDT = true;
+                                    }
+
+                                    tvType.push(newTyp)
                                 } else {
-                                    newTyp.targetProfile = typ.targetProfile;
-                                }
-                               // item.type = newTyp;
-
-                                //is this a coded type
-                                if (['CodeableConcept', 'Coding', 'code'].indexOf(typ.code) > -1) {
-                                    item.data.isCoded = true;
+                                    alert('The Path '+ ed.path + ' has a type with no code')
+                                    console.log(ed)
                                 }
 
-                                //is this a reference
-                                if (typ.code == 'Reference') {
-                                    item.data.isReference = true;   //used to populate the 'is reference' table...
-                                }
 
-                                //is this complex
-                                var first = newTyp.code.substr(0,1);
-                                if (first == first.toUpperCase()) {
-                                    newTyp.isComplexDT = true;
-                                }
-
-                                tvType.push(newTyp)
 
 
                             })

@@ -1955,12 +1955,17 @@ angular.module("sampleApp")
 
                 var treeData = resourceCreatorSvc.buildResourceTree(newResource);
 
+
+                $scope.resourceAsArray =builderSvc.makeResourceArray(treeData);
+
                 //show the tree structure of this resource version
                 $('#builderResourceTree').jstree('destroy');
                 $('#builderResourceTree').jstree(
                     {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
                 ).on('select_node.jstree', function (e, data) {
-                    console.log(data.node.data)
+                    //console.log(data.node.data);
+
+
 
 /*
                     //temp
@@ -2033,38 +2038,40 @@ angular.module("sampleApp")
             //------- select a profile --------
             $scope.showFindProfileDialog = {};
             $scope.findProfile = function(cheat) {
-
-                if (cheat) {
-                    GetDataFromServer.adHocFHIRQuery("http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/dhtest1profile").then(
-                        function(data) {
-
-                            $scope.selectedProfileFromDialog(data.data)
-
-                        }
-                    )
-                } else {
-                    $scope.showFindProfileDialog.open();
-                }
+                delete $scope.input.selectedProfile;
+                $scope.showFindProfileDialog.open();        //show the profile select modal...
             };
 
-            $scope.selectedProfileFromDialog = function (profile) {
 
+            //called when a profile has been selected
+            $scope.selectedProfileFromDialog = function (profile) {
+                $scope.input.selectedProfile = profile;
+                /*
                 builderSvc.makeLogicalModelFromSD(profile).then(
                     function (lm) {
-
                         selectLogicalModal(lm,profile.url)
-
-
                     },
                     function(vo) {
-
                         //if cannot locate an extension. returns the error and the incomplete LM
                         selectLogicalModal(vo.lm,profile.url)
                     }
                 )
-
+                */
             };
 
+
+            //actually add the resource instance based on this profile...
+            $scope.addSelectedProfile = function (profile) {
+                builderSvc.makeLogicalModelFromSD(profile).then(
+                    function (lm) {
+                        selectLogicalModal(lm,profile.url)
+                    },
+                    function(vo) {
+                        //if cannot locate an extension. returns the error and the incomplete LM
+                        selectLogicalModal(vo.lm,profile.url)
+                    }
+                )
+            };
 
 
 

@@ -3499,6 +3499,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var url = appConfigSvc.getCurrentDataServer().url + resource.resourceType + "/" + resource.id + "/_history";
             return $http.get(url);
         },
+
         buildResourceTree: function (resource) {
             if (! resource) {
                 //function is called when clicking on the space between resources...

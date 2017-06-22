@@ -45,7 +45,9 @@
 
     <script src="js/profileDiffSvc.js"></script>
     <script src="js/logicalModelSvc.js"></script>
-
+    <script src="js/modellerFilters.js"></script>
+    <script src="resourceBuilder/vsBrowser.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
     <!--
 
 
@@ -90,11 +92,46 @@
 </head>
 
 
-<body style="padding: 8px" >
+<body style="padding: 8px;padding-top: 80px" >
 
 <div ng-app="sampleApp" ng-controller="profileDiffCtrl" class="container-fluid">
 
 
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+
+        <div class="container-fluid">
+            <div class="col-md-2">
+                <a class="navbar-brand" href="#">
+                    Profile Explorer
+                </a>
+            </div>
+
+
+
+            <div class="col-md-5 col-sm-5">
+                <div class="navbar-text">
+                    Conformance:{{appConfigSvc.getCurrentConformanceServer().name}}
+                    <div>Terminology:{{appConfigSvc.getCurrentTerminologyServer().name}}</div>
+                </div>
+            </div>
+
+
+            <div class="col-md-2 col-sm-2">
+
+                <form class="navbar-form navbar-left">
+                    <img ng-show="waiting" src="css/ajax_loader_blue_32.gif"/>
+                </form>
+
+            </div>
+            <div class="col-md-3 col-sm-3">
+                <div class="navbar-text pull-right">
+                    User: {{orionUser.primaryActor.fullName}}
+                </div>
+            </div>
+
+        </div>
+    </nav>
+<!--
     <div class="row">
         <div class="col-sm-2 col-md-2">
             Profile set to display:
@@ -108,8 +145,256 @@
         </div>
     </div>
     <hr/>
+
+    -->
     <uib-tabset>
-        <uib-tab heading="Profiles">
+
+        <uib-tab heading="Implementation Guides">
+            <div class="row">
+                <div class="col-sm-4 col-md-4">
+                    <h4>Implementation Guides</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item" ng-repeat="entry in listOfIG.entry"
+                            ng-click = "selectIG(entry.resource)">
+                            {{entry.resource.description}}
+                        </li>
+                    </ul>
+
+                    <div class="myScroll">
+
+
+                        <uib-accordion ng-show="artifacts">
+                        <div uib-accordion-group class="panel-default">
+                            <uib-accordion-heading>
+                                Profiles
+                                <div class="pull-right badge">{{artifacts.profile.length}}</div>
+                            </uib-accordion-heading>
+                            <ul class="list-group">
+                                <li ng-class="{'list-group-item':true, listItemSelected:selectedItem == item}" ng-repeat="item in artifacts.profile"
+                                    ng-click = "selectItem(item,'profile')">
+                                    <div class="clickable">{{item.url | referenceType}}</div>
+                                    <div><em>{{item.description}}</em></div>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div uib-accordion-group class="panel-default">
+                            <uib-accordion-heading>
+                                Extensions
+                                <div class="pull-right badge">{{artifacts.extension.length}}</div>
+                            </uib-accordion-heading>
+                            <ul class="list-group">
+                                <li class="list-group-item" ng-repeat="item in artifacts.extension"
+                                    ng-click = "selectItem(item,'extension')">
+                                    <div class="clickable">{{item.url | referenceType}}</div>
+                                    <div><em>{{item.description}}</em></div>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div uib-accordion-group class="panel-default">
+                            <uib-accordion-heading>
+                                Terminology
+                                <div class="pull-right badge">{{artifacts.terminology.length}}</div>
+                            </uib-accordion-heading>
+                            <ul class="list-group">
+                                <li class="list-group-item" ng-repeat="item in artifacts.terminology"
+                                    ng-click = "selectItem(item,'terminology')">
+                                    <div class="clickable">{{item.url | referenceType}}</div>
+                                    <div><em>{{item.description}}</em></div>
+                                </li>
+                            </ul>
+                        </div>
+
+
+                    </uib-accordion>
+                    </div>
+
+                </div>
+
+
+
+                <div class="col-sm-8 col-md-8">
+                    <div ng-show="selectedItemType == 'profile'">
+                        <h4>Profiled resource</h4>
+
+                        <uib-tabset>
+                            <uib-tab heading="Logical">
+
+                                <div class="row">
+                                    <div class="col-sm-4 col-md-4">
+                                        <div id="profileTree1"></div>
+                                    </div>
+                                    <div class="col-sm-8 col-md-8">
+                                        <div class="myScroll">
+                                            <pre>{{selectedED1 | json}}</pre>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </uib-tab>
+
+
+                            <uib-tab heading="Canonical">
+
+                                <div class="myScroll">
+                                    <table class="table">
+                                        <tr><th></th><th>Path</th><th>Mult</th><th>DataTypes</th><th>Notes</th></tr>
+                                        <tr ng-repeat="item in canonical.item" ng-class="{myRequired:item.min==1}">
+                                            <!-- <tr ng-repeat="item in canonical.item"
+                                            ng-class="{myRequired:item.min==1,extension:item.extension}">  -->
+
+                                            <td>
+                                                <!--<span ng-show="item.min==1" style="color: red">R</span>-->
+                                                <strong ng-show="item.extension" style="color: darkblue">Ex</strong>
+                                            </td>
+                                            <td ng-click="showED(item.ed)" style="cursor: pointer">
+                                                <div ng-style="{ 'padding-left': (item.path | pathindent) -10 }">
+                                                    {{item.path}}
+                                                </div>
+                                            </td>
+                                            <td>{{item.min}}..{{item.max}}</td>
+                                            <td>
+                                                <div ng-repeat="typ in item.type">
+                                                    <div ng-show="typ.code == 'Reference'">
+                                                        --> {{typ.profile | referenceType}}
+                                                    </div>
+                                                    <div ng-hide="typ.code == 'Reference'">{{typ.code}}</div>
+
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div>{{item.extension.name}}</div>
+                                                <div class="clickable" ng-click="selectExtensionFromProfile(item.extension)">{{item.extension.url}}</div>
+
+                                                <div ng-show="item.coded.valueSetUri">
+                                                    Uri:
+                                                    <span class="clickable" ng-click="showValueSet(item.coded.valueSetReference,'uri')">
+                                                        {{item.coded.valueSetUri}}
+                                                    </span>
+
+                                                </div>
+                                                <div ng-show="item.coded.valueSetReference">
+                                                    Reference:
+                                                    <span class="clickable" ng-click="showValueSet(item.coded.valueSetReference,'ref')">
+                                                        {{item.coded.valueSetReference}}
+                                                    </span>
+                                                </div>
+
+                                                <div ng-show="item.coded.strength">Strength {{item.coded.strength}}</div>
+
+                                                <div ng-repeat="discriminator in item.slicing.discriminator">
+                                                    Sliced Element: Discriminator = {{discriminator}}
+                                                </div>
+
+                                                <div ng-repeat="fixed in item.fixed">
+                                                    {{fixed.k}} = {{fixed.v}}
+                                                </div>
+<!--
+                                                <pre>{{item.extension.analysis | json}}</pre>
+-->
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+
+
+                            </uib-tab>
+
+
+
+                            <uib-tab heading="Tree">
+                                <div class="row">
+                                    <div class="col-sm-4 col-md-4">
+                                        <div id="profileTree"></div>
+                                    </div>
+                                    <div class="col-sm-8 col-md-8">
+                                        <pre>{{selectedED | json}}</pre>
+                                    </div>
+                                </div>
+                            </uib-tab>
+
+                            <uib-tab heading="Paths">
+                                <div class="row">
+                                    <div class="col-sm-4 col-md-4">
+                                        <ul class="list-group">
+                                            <li class="list-group-item" ng-repeat="element in selectedSD.snapshot.element"
+                                                ng-click = "input.selectedPathED = element">
+                                                {{element.path}}
+                                            </li>
+                                        </ul>
+
+
+
+                                    </div>
+                                    <div class="col-sm-8 col-md-8">
+                                        <pre>{{input.selectedPathED | json}}</pre>
+                                    </div>
+                                </div>
+                            </uib-tab>
+
+                            <uib-tab heading="Json">
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-12">
+                                        <pre>{{selectedSD | json}}</pre>
+                                    </div>
+
+                                </div>
+                            </uib-tab>
+
+
+
+
+                        </uib-tabset>
+
+
+
+                    </div>
+
+                    <div ng-show="selectedItemType == 'extension'">
+                        <h4>Extension: {{selectedExtension.url}}</h4>
+                        <uib-tabset>
+
+                            <uib-tab heading="Analysis">
+                                <br/>
+                                <pre>{{selectedExtensionAnalysis | json}}</pre>
+                            </uib-tab>
+
+                            <uib-tab heading="Json">
+                                <br/>
+                                <pre>{{selectedExtension | json}}</pre>
+                            </uib-tab>
+
+
+                        </uib-tabset>
+
+
+                    </div>
+                    <div ng-show="selectedItemType == 'terminology'">
+                        <h4>Terminology</h4>
+                        <uib-tabset>
+
+                            <uib-tab heading="Analysis">
+                                <br/>
+
+                            </uib-tab>
+
+                            <uib-tab heading="Json">
+                                <br/>
+                                <pre>{{selectedValueSet | json}}</pre>
+                            </uib-tab>
+
+
+                        </uib-tabset>
+
+
+
+                    </div>
+
+                </div>
+            </div>
+        </uib-tab>
+        <uib-tab heading="Profile Comparison">
             <div class="row">
                 <div class="col-sm-6 col-md-6">
                     <h3>Primary profile ({{primary.display}})</h3>
@@ -262,6 +547,10 @@
 
         </uib-tab>
     </uib-tabset>
+
+
+    <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
+                vs-selected="vsSelected"></vs-browser>
 
 
 </div>

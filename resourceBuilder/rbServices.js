@@ -1083,7 +1083,7 @@ angular.module("sampleApp").
             var vo = {dataTypes: [], multiple: false};
             vo.display = SD.display; //will use this when displaying the element
             vo.name = SD.name;
-
+            vo.isComplexExtension = false;
             vo.context = SD.context;
             vo.publisher = SD.publisher;
             vo.url = SD.url;
@@ -1258,18 +1258,18 @@ angular.module("sampleApp").
                                         vo.isCoded = true;
                                     }
 
+                                    /* - no it isn't!  Jun 2017...
                                     //if the datatype starts with an uppercase letter, then it's a complex one...
                                     if (/[A-Z]/.test( code)){
                                         vo.isComplex = true;    //this really should be 'isComplexDatatype'
                                     }
+                                    */
 
                                     //is this a reference?
                                     if (code == 'Reference') {
 
                                     }
                                 }
-
-
                             })
                         }
 

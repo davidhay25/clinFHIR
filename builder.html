@@ -1145,6 +1145,15 @@
                                     <uib-tab heading="Text">
                                         <br/>
                                         <div><p ng-bind-html="currentResource.text.div"></p></div>
+<!--
+                                        <table class="table table-bordered">
+                                            <tr ng-repeat="row in resourceAsArray">
+                                                <td>{{row.title}}</td>
+                                                <td>{{row.value}}</td>
+                                            </tr>
+                                        </table>
+                                        -->
+
                                     </uib-tab>
 
                                     <uib-tab heading="Json">
@@ -1280,6 +1289,8 @@
                         </div>
                     </div>
 
+
+
                     <uib-tabset>
                         <uib-tab heading="Core resource">
                             <br/>
@@ -1293,10 +1304,67 @@
                                             ng-options="resource.name for resource in resources"></select>
                                 </div>
                             </div>
+                            <br/>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3">
+                                    Text
+                                </div>
+                                <div class="col-md-6 col-sm-6">
+                                    <textarea class="form-control" ng-model="input.text"></textarea>
+                                </div>
+                            </div>
+                            <br/>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3">
+
+                                </div>
+                                <div class="col-md-6 col-sm-6">
+                                    <button  ng-show="input.newResource" class="btn btn-success pull-right"
+                                             ng-click="addNewResource(input.newResource.name)">Add</button>
+                                    <button class="btn btn-link pull-right"
+                                            ng-click= "setDisplayMode( 'view')">Cancel</button>
+                                </div>
+                            </div>
+
+
+
+
+
+
                         </uib-tab>
                         <uib-tab heading="Profile">
                             <br/>
-                            <button class="btn btn-default" ng-click="findProfile()">Find Profile</button>
+
+                            <div class="row">
+                                <div class="col-md-2 col-sm-2">
+                                    <button class="btn btn-default" ng-click="findProfile()">Find Profile</button>
+                                </div>
+                                <div class="col-md-10 col-sm-10">
+                                    <div>{{selectedProfile.url}}</div>
+                                </div>
+                            </div>
+                            <br/>
+
+                            <div class="row" ng-show="input.selectedProfile">
+                                <div class="col-md-3 col-sm-3">
+                                    Text
+                                </div>
+                                <div class="col-md-6 col-sm-6">
+                                    <textarea class="form-control" ng-model="input.text"></textarea>
+                                </div>
+                            </div>
+                            <br/>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3">
+
+                                </div>
+                                <div class="col-md-6 col-sm-6" ng-show="input.selectedProfile">
+                                    <button class="btn btn-success pull-right"
+                                            ng-click="addSelectedProfile(input.selectedProfile)">Add</button>
+                                    <button class="btn btn-link pull-right" ng-click= "setDisplayMode( 'view')">Cancel</button>
+                                </div>
+                            </div>
+
                             <br/><br/>
                             <div style="margin-left: 30px">
                                 <h5>Notes on support of profiles resource types.</h5>
@@ -1310,6 +1378,8 @@
 
                                 </ul>
                             </div>
+
+
 
                         </uib-tab>
 
@@ -1443,7 +1513,7 @@
 
 
 
-
+<!--
                     <div class="row" ng-show="currentType">
                         <div class="col-md-12 col-sm-12">
                             <br/>
@@ -1508,12 +1578,10 @@
                                     </table>
                                 </uib-tab>
                             </uib-tabset>
-<!--
-                            <button class="btn btn-default" ng-click="displayMode = 'view'">Cancel</button>
--->
 
                         </div>
                     </div>
+                    -->
 
 
 

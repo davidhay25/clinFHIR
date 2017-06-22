@@ -62,6 +62,18 @@ angular.module("sampleApp")
         objColours.Medication = '#FF9900';
 
         return {
+            makeResourceArray : function(treeData) {
+                console.log(treeData)
+                var ar = []
+                ar.push({title:'title',value:'value'})
+           //     treeData.forEach(function (node) {
+                  //  var data = node.data;
+                   // var title = node.text
+          //      })
+
+
+                return ar
+            },
             createProvenance : function(responseBundle,scenario,note) {
 
                 /*
@@ -2060,7 +2072,7 @@ angular.module("sampleApp")
                                         findReferences(refs,obj,lpath,inx)
                                     }
                                 }
-                                
+
                             })
                         } else
 
