@@ -1204,6 +1204,7 @@ angular.module("sampleApp").
                                     if (element.binding.valueSetUri) {
                                         child.boundValueSet = element.binding.valueSetUri;
                                     }
+                                    child.bindingStrength = element.binding.strength;
 
                                 }
 
@@ -1256,6 +1257,7 @@ angular.module("sampleApp").
                                     //is this a codedd type?
                                     if (['CodeableConcept', 'code', 'coding'].indexOf(code) > -1) {
                                         vo.isCoded = true;
+
                                     }
 
                                     /* - no it isn't!  Jun 2017...
@@ -1275,6 +1277,12 @@ angular.module("sampleApp").
 
                         if (element.binding) {
                             vo.binding = element.binding;
+                            if (element.binding.valueSetUri) {
+                                vo.boundValueSet = element.binding.valueSetUri
+                            } else if (element.binding.valueSetReference){
+                                vo.boundValueSet = element.binding.valueSetReference.reference;
+                            }
+
                         }
 
                     }

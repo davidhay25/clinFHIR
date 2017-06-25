@@ -133,18 +133,30 @@
 
         </div>
     </nav>
+<!--
+    <div class="row">
+        <div class="col-sm-2 col-md-2">
+            Profile set to display:
+        </div>
+        <div class="col-sm-3 col-md-3">
+            <select class="form-control" ng-model = 'pr' ng-options="pair.name for pair in pairs" ng-change="loadPair(pr.name)">
 
+            </select>
+        </div>
+        <div class="col-sm-6 col-md-6">
+        </div>
+    </div>
+    <hr/>
 
+    -->
+    <uib-tabset>
+
+        <uib-tab heading="Implementation Guides">
             <div class="row">
                 <div class="col-sm-3 col-md-3">
-                    <uib-tabset>
-                        <uib-tab heading="Implementation Guide">
-                            <br/>
 
-
-<!--
                     <h4>Implementation Guides</h4>
--->
+
                     <div class="row">
                         <div class="col-sm-9 col-md-9">
                             <select class="form-control" ng-model="input.selIG"
@@ -180,7 +192,7 @@
 
                         <div uib-accordion-group class="panel-default">
                             <uib-accordion-heading>
-                                Extension Definitions
+                                Extensions
                                 <div class="pull-right badge">{{artifacts.extension.length}}</div>
                             </uib-accordion-heading>
                             <ul class="list-group">
@@ -211,38 +223,6 @@
                     </uib-accordion>
                     </div>
 
-                        </uib-tab>
-                        <uib-tab heading="Lookup">
-                            <br/>
-                            <div class="row">
-                                <div class="col-sm-9 col-md-9">
-                                    <select class="form-control" ng-model="input.selResourceType"
-                                            ng-options="typ.name for typ in allResourceTypes"
-                                            ng-change="findAdhHocProfile(input.selResourceType)">
-
-                                    </select>
-                                </div>
-                                <!--
-                                <div class="col-sm-3 col-md-3">
-                                    <button class="btn btn-success pull-right" ng-click="findAdhHocProfile(input.selResourceType)">Find</button>
-                                </div>
-                                -->
-                            </div>
-                            <br/>
-
-                            <ul class="list-group">
-                                <li ng-class="{'list-group-item':true, profileSelected:selectedItem == item}"
-                                    ng-repeat="entry in profilesOnBaseType.entry"
-                                    ng-click = "selectAdhHocProfile(entry.resource)">
-                                    <div class="clickable">{{entry.resource.url | referenceType}}</div>
-                                    <div><em>{{item.description}}</em></div>
-                                </li>
-                            </ul>
-
-
-                        </uib-tab>
-                    </uib-tabset>
-
                 </div>
 
 
@@ -253,7 +233,6 @@
 
                         <uib-tabset>
                             <uib-tab heading="Logical">
-                                <br/>
                                 <div class="row">
                                     <div class="col-sm-4 col-md-4">
                                         <div id="profileTree1"></div>
@@ -268,7 +247,7 @@
 
 
                             <uib-tab heading="Table">
-                                <br/>
+
                                 <div class="myScroll">
                                     <table class="table">
                                         <tr><th></th><th>Path</th><th>Mult</th><th>DataTypes</th><th>Notes</th></tr>
@@ -290,9 +269,7 @@
                                                 <div ng-repeat="typ in item.type">
                                                     <div ng-show="typ.code == 'Reference'">
 
-                                                        --> <span class="clickable" ng-click="selectItem(typ.profile,'profile')">{{typ.profile | referenceType}}</span>
-                                                        <span class="clickable" ng-click="selectItem(typ.targetProfile,'profile')">{{typ.targetProfile | referenceType}}</span>
-
+                                                        --> {{typ.profile | referenceType}} {{typ.targetProfile | referenceType}}<!-- The filter takes the first entry if an array-->
                                                     </div>
                                                     <div ng-hide="typ.code == 'Reference'">{{typ.code}}</div>
 
@@ -336,18 +313,15 @@
                                                 <!-- If a coded item...-->
                                                 <div ng-show="item.coded.valueSetUri">
                                                     VS:
-                                                    <span class="clickable" ng-click="showValueSet(item.coded.valueSetUri,'uri')">
-                                                        {{item.coded.valueSetUri}}
-                                                    </span>
                                                     <span class="clickable" ng-click="showValueSet(item.coded.valueSetReference,'uri')">
-                                                        {{item.coded.valueSetReference}}
+                                                        {{item.coded.valueSetUri}}
                                                     </span>
                                                 </div>
 
                                                 <!-- if a coded simple extension -->
                                                 <div ng-show="item.extension.analysis.binding">
                                                     <span class="clickable" ng-click="showValueSet(item.extension.analysis.boundValueSet,'uri')">
-                                                        VS: {{item.extension.analysis.boundValueSet}} ({{item.extension.analysis.binding.strength}})
+                                                        VS: {{item.extension.analysis.boundValueSet}}
                                                     </span>
                                                 </div>
 
@@ -440,18 +414,14 @@
                             </uib-tab>
 
                             <uib-tab heading="Paths">
-                                <br/>
                                 <div class="row">
                                     <div class="col-sm-4 col-md-4">
-                                        <div class="myScroll">
-                                            <ul class="list-group">
-                                                <li class="list-group-item" ng-repeat="element in selectedSD.snapshot.element"
-                                                    ng-click = "input.selectedPathED = element">
-                                                    {{element.path}}
-                                                </li>
-                                            </ul>
-                                        </div>
-
+                                        <ul class="list-group">
+                                            <li class="list-group-item" ng-repeat="element in selectedSD.snapshot.element"
+                                                ng-click = "input.selectedPathED = element">
+                                                {{element.path}}
+                                            </li>
+                                        </ul>
 
 
 
@@ -522,9 +492,160 @@
                     </div>
                 </div>
             </div>
+        </uib-tab>
+        <uib-tab heading="Profile Comparison">
+            <div class="row">
+                <div class="col-sm-6 col-md-6">
+                    <h3>Primary profile ({{primary.display}})</h3>
+                    <uib-tabset>
+
+                        <uib-tab heading="Model">
+                            <div class="myScroll">
+                                <table class="table">
+                                    <tr ng-repeat="item in primary.canonical.item"
+                                        ng-class="{myRequired:item.min==1,extension:item.extension}">
+                                        <td  ng-click="showED(item.ed)" style="cursor: pointer">{{item.path}}</td>
+                                        <td>{{item.min}}..{{item.max}}</td>
+                                        <td>
+                                            <div ng-repeat="typ in item.type">
+                                                {{typ.code}}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>{{item.extension.name}}</div>
+                                            <div>{{item.extension.url}}</div>
+
+                                            <div ng-show="item.coded.valueSetUri">Uri: {{item.coded.valueSetUri}}</div>
+                                            <div ng-show="item.coded.valueSetReference">Ref: {{item.coded.valueSetReference}}</div>
+                                            <div>{{item.coded.strength}}</div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                        </uib-tab>
+                        <uib-tab heading="Json">
+                            <pre>{{primary.json | json}}</pre>
+                        </uib-tab>
+                    </uib-tabset>
+
+                </div>
+                <div class="col-sm-6 col-md-6">
+                    <h3>Secondary profile ({{secondary.display}})</h3>
+                    <uib-tabset>
+
+                        <uib-tab heading="Model">
+
+                            <div class="myScroll">
+                                <table class="table">
+                                    <tr ng-repeat="item in secondary.canonical.item "
+                                    ng-class="{myRequired:item.min==1,extension:item.extension}" >
+                                        <td  style="cursor: pointer" ng-click="showED(item.ed)">{{item.path}}</td>
+                                        <td>{{item.min}}..{{item.max}}</td>
+                                        <td>
+                                            <div ng-repeat="typ in item.type">
+                                                {{typ.code}}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>{{item.extension.name}}</div>
+                                            <div>{{item.extension.url}}</div>
+
+                                            <div ng-show="item.coded.valueSetUri">Uri: {{item.coded.valueSetUri}}</div>
+                                            <div ng-show="item.coded.valueSetReference">Ref: {{item.coded.valueSetReference}}</div>
+                                            <div>{{item.coded.strength}}</div>
+                                        </td>
+                                        <td>
+                                            <span ng-show="item.difference.nip" title="Not in primary">
+                                                <i class="glyphicon glyphicon-remove"></i></span>
+                                            <span ng-show="item.difference.brk" title="Not in primary - required field">
+                                                <i class="glyphicon glyphicon-remove-sign"></i></span>
+                                            <span ng-show="item.difference.mc" title="Multiplicity is different">
+                                                <i class="glyphicon glyphicon-random"></i></span>
+                                            <span ng-show="item.difference.vsd" title="ValueSet is different">
+                                                <i class="glyphicon glyphicon-chevron-down"></i></span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
 
 
 
+                        </uib-tab>
+                        <uib-tab heading="Tree">
+                            <div id="pdSecondary"></div>
+                        </uib-tab>
+
+                        <uib-tab heading="Json">
+                            <pre>{{secondary.json | json}}</pre>
+                        </uib-tab>
+
+                        <uib-tab heading="Canonical">
+                            <pre>{{secondary.canonical | json}}</pre>
+                        </uib-tab>
+
+
+
+                    </uib-tabset>
+                </div>
+            </div>
+
+
+        </uib-tab>
+        <uib-tab heading="Report">
+
+
+            <div class="row">
+                <div class="col-sm-2 col-md-2">
+
+
+
+                </div>
+                <div class="col-sm-10 col-md-10">
+                    <h4>ValueSets</h4>
+
+                    <table class="table table-bordered table-condensed">
+                        <tr ng-repeat = "item in secondary.canonical.report.valueSet">
+                            <td>{{item.path}}</td>
+                            <td>{{item.different}}</td>
+                            <td>{{item.vsUri}}</td>
+                            <td>{{item.vsReference}}</td>
+                        </tr>
+                    </table>
+
+
+
+                    <h4>Path's in secondary not in primary</h4>
+
+                    <table class="table table-bordered table-condensed">
+                        <tr ng-repeat = "item in secondary.canonical.report.missing">
+                            <td>{{item.path}}</td>
+                            <td>{{item.min}}</td>
+                            <td>{{item.extension}}</td>
+                        </tr>
+                    </table>
+
+
+                    <h4>Fixed values in the secondary</h4>
+
+                    <table class="table table-bordered table-condensed">
+                        <tr ng-repeat = "item in secondary.canonical.report.fixed">
+                            <!--<td><pre>{{item | json}}</pre></td> -->
+                            <td>{{item.item.path}}</td>
+                            <td>{{item.item.difference.fixed.key}}</td>
+                            <td>{{item.item.difference.fixed.value}}</td>
+                        </tr>
+                    </table>
+
+                    <pre>{{secondary.canonical.report.fixed | json}}</pre>
+                </div>
+            </div>
+
+
+
+
+        </uib-tab>
+    </uib-tabset>
 
 
     <vs-browser trigger="showVSBrowserDialog" hidesearch="true"

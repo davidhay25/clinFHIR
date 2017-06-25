@@ -1,10 +1,68 @@
 angular.module("sampleApp").service('profileDiffSvc',
-    function($q,$http,GetDataFromServer,Utilities,appConfigSvc) {
+    function($q,$http,GetDataFromServer,Utilities,appConfigSvc,$filter) {
 
     var extensionDefinitionCache = {}
 
 
     return {
+        reportOneProfile : function(SD) {
+            var result = {required:[],valueSet:{}}
+            if (SD.snapshot && SD.snapshot.element) {
+                SD.snapshot.element.forEach(function (el) {
+                    //look for required elements
+                    if (el.min > 0 && el.max !== '0') {
+                        result.required.push(el);
+                    }
+
+                    //look for ValueSets
+                    if (el.type) {
+                        el.type.forEach(function(typ) {
+                            //this is a coded element, add the bound valueset
+                            if (['code', 'Coding', 'CodeableConcept'].indexOf(typ.code) > -1){
+                                    if (el.binding) {
+                                        var item = {strength:el.binding.strength, path:el.path, min:el.min, max:el.max};
+                                        var url;
+                                        if ( el.binding.valueSetReference) {
+                                            item.type='reference';
+                                            url = el.binding.valueSetReference.reference;
+                                        } else if (el.binding.valueSetUri){
+                                            item.type = 'uri'
+                                            url = el.binding.valueSetUri;
+                                        }
+                                        if (url) {
+                                            result.valueSet[url] = result.valueSet[url] || []
+                                            result.valueSet[url].push(item)
+                                        }
+
+
+                                    }
+                                }
+                            }
+                        )}
+
+
+                })
+                //create an array of valueset usages and sort it..
+                result.valueSetArray = []
+                angular.forEach(result.valueSet,function (v,k) {
+                    var item = {url:k,paths:v}
+                    result.valueSetArray.push(item)
+                })
+
+                result.valueSetArray.sort(function (a,b) {
+                    if (a.url > b.url) {
+                        return 1
+                    } else {
+                        return -1;
+                    }
+                })
+            }
+            //console.log(result)
+            return result;
+
+
+
+        },
         makeCanonicalObj : function(SD) {
             var deferred = $q.defer();
             var queries = [];   //retrieve extension definitions
@@ -14,16 +72,26 @@ angular.module("sampleApp").service('profileDiffSvc',
                 var newSD = {snapshot: {element:[]}}        //a new SD that removes the excluded elements (max=0)
                 var canonical = {item:[]}      //the canonical object...
                 var excludeRoots = []           //roots which have been excluded...
+
+                var topLineLevel = 1;           //the point at which a top level line should be drawn
+                var topLineRoot = "";
+
+
+
                 SD.snapshot.element.forEach(function(ed){
                     var include = true;
                     var path = ed.path;
-                    var arPath = path.split('.');
 
+                    if (path.indexOf(topLineRoot) == -1) {
+                        topLineLevel = 1;
+                    }
+
+
+                    var arPath = path.split('.');
 
                     if (arPath.length > 1) {
                         arPath = arPath.splice(1)
                     }
-
 
                     if (['id','meta','language','text','implicitRules','contained'].indexOf(arPath[0]) > -1) {
                         include = false;
@@ -35,6 +103,11 @@ angular.module("sampleApp").service('profileDiffSvc',
 
                     var item = {path:arPath.join('.')};
 
+
+                    //set a top line in the display
+                    if (arPath.length == topLineLevel) {
+                        item.groupParent = true;
+                    }
 
 
                     item.originalPath = path;
@@ -78,8 +151,15 @@ angular.module("sampleApp").service('profileDiffSvc',
                     if (item.type) {
                         item.type.forEach(function(typ) {
 
+                            //set a top line in the display
+                            if (typ.code == 'BackboneElement') {
+                                item.groupParent = true;
+                                topLineLevel = 2;       //todo - this might need to be reactive
+                                topLineRoot = path;
+                            }
+
+                            //this is a coded element, add the bound valueset
                             if (['code', 'Coding', 'CodeableConcept'].indexOf(typ.code) > -1){
-                                //this is a coded element, add the bound valueset
                                 if (ed.binding) {
                                     item.coded = {strength:ed.binding.strength}
                                     if ( ed.binding.valueSetReference) {
@@ -97,9 +177,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                         include = false;
                         //item.extension = {name:ed.name}
                         item.extension = {}
-
-                        item.path = ed.name + " (ext)";    //to make a nicer display...
-
                         if (item.type) {
                             item.type.forEach(function(typ) {
                                 if (typ.profile) {
@@ -114,6 +191,18 @@ angular.module("sampleApp").service('profileDiffSvc',
                                 }
                             })
                         }
+
+                        //see if we can make a nicer display...
+                        var display = ed.name;
+                        if (! display) {
+                            var display =  $filter('referenceType')(item.extension.url);
+                        }
+                        if (display) {
+                            item.path = display;// + " (ext)";    //to make a nicer display...
+                        }
+
+
+
                     }
                     if (include) {
                         canonical.item.push(item)

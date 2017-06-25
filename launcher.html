@@ -187,134 +187,155 @@ so is discouraged.</p>
 
 
             <div class="myBox">
-                <h5>Modules (open in new tab)</h5>
-                <table class="table width='100%'">
 
-                    <tr>
-                        <td>
-                            <a target="_blank" href="patientViewer.html">Patient Viewer</a>
-                        </td>
-                        <td>
-                            <p>Display resources for a specific patient, using a number of different views
-                                such as a list by resource type, json & tree views, encounters by condition,
-                                numeric Observation charting and graphical relationship views.</p>
-                            <p>There is also the option to add a new patient, and to create sample data for that patient.</p>
-                        </td>
-                        <td>Patient resources are stored on the Data Server.
-                            The server should support the $everything operation against Patient.</td>
-                    </tr>
 
-                    <tr>
-                        <td><a target="_blank" href="builder.html">Scenario Builder</a></td>
-                        <td>
-                            <p>The Scenario Builder is used to join together the resources needed to represent a specific clinical scenario.
-                                It can use Core Resource types, Profiles and Logical models as it does this. The intention is to help people understand
-                                how resources can tell a clinical story, and to validate that the resource types available (including profiles) are
-                                sufficient.</p>
-                            <p>Note that the builder still has issues with more complex resource types - this is a work in progress</p>
-                        </td>
-                        <td>
-                            Patient information is on the Data Server. Profiles on the Conformance server.
-                            ValueSets on the Terminology server.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td width="15%">
-                            <a target="_blank" href="logicalModeller.html">Logical Modeller</a>
-                        </td>
-                        <td>
-                            The Logical modeller allows the creation of a model that represents a particular interoperability requirement
-                            in a format that is easy to use. It uses FHIR datatypes, and can be based on an existing resource type or completely
-                            'ad hoc'. It is intended to act as a 'bridge' between Modeller and User, and can act as the basis for the generation
-                            of the profiling components required by FHIR
-                        </td>
-                        <td>
-                            Models are saved on the Conformance Server. Can reference ValueSets from the Terminology server.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td width="15%">
-                            <a target="_blank" href="codeSystem.html">CodeSystem builder</a>
-                        </td>
-                        <td>
-                            The CodeSystem defines a set of Concepts from which a ValueSet provides possible values for a resource element. The actual 'binding' between
-                            CodeSystem and element is done by the ValueSet. This component allows you to build (and edit) a
-                            CodeSystem, and optionally builds the ValueSet as well.
-                        </td>
-                        <td>
-                            CodeSystems are saved on the Terminology Server.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <a target="_blank" href="EDBuilder.html">Extension Definition builder</a>
-                        </td>
-                        <td>
-                            Views and builds extension definitions. These can be defined and applied to the Logical Model, which will
-                            allow them to be included in the generated Profile
-                        </td>
-                        <td>
-                            Extension definitions are saved on the Conformance Server
-                        </td>
-                    </tr>
+                <uib-tabset>
+                    <uib-tab>
+                        <uib-tab-heading><strong>Main modules (open in new tab)</strong></uib-tab-heading>
 
-                    <tr>
-                        <td>
-                            <a target="_blank" href="valuesetCreator.html">ValueSet explorer</a>
-                        </td>
-                        <td>
-                            Lets you view existing ValueSets. The builder works best with SNOMED (at the moment).
-                        </td>
-                        <td>ValueSets are stored on the Terminology Server</td>
-                    </tr>
+                        <br/>
 
 
 
-                    <tr>
-                        <td>
-                            <a target="_blank" href="query.html">Query Tool</a>
-                        </td>
-                        <td>
-                            Allows ad hoc queries against any FHIR server
-                        </td>
-                        <td>
-                            Can access any compliant FHIR server
-                        </td>
-                    </tr>
+                        <table class="table width='100%'">
 
-                    <tr>
-                        <td>
-                            <a target="_blank" href="conceptMap.html">Concept Mapper</a>
-                        </td>
-                        <td>
-                            Edit concept maps. <strong>Experimental!</strong>
-                        </td>
-                        <td>
-                            Can access any compliant FHIR server
-                        </td>
-                    </tr>
-                    <!--
-                                        <tr>
-                                            <td>
-                                                <a target="_blank" href="profileBuilder.html">Profile Builder</a>
-                                            </td>
-                                            <td>
-                                                Build profiles
-                                            </td>
-                                            <td>
-                                                Conformance server
-                                            </td>
-                                        </tr>
+                            <tr>
+                                <td>
+                                    <a target="_blank" href="patientViewer.html">Patient Viewer</a>
+                                </td>
+                                <td>
+                                    <p>Display resources for a specific patient, using a number of different views
+                                        such as a list by resource type, json & tree views, encounters by condition,
+                                        numeric Observation charting and graphical relationship views.</p>
+                                    <p>There is also the option to add a new patient, and to create sample data for that patient.</p>
+                                </td>
+                                <td>Patient resources are stored on the Data Server.
+                                    The server should support the $everything operation against Patient.</td>
+                            </tr>
+
+                            <tr>
+                                <td><a target="_blank" href="builder.html">Scenario Builder</a></td>
+                                <td>
+                                    <p>The Scenario Builder is used to join together the resources needed to represent a specific clinical scenario.
+                                        It can use Core Resource types, Profiles and Logical models as it does this. The intention is to help people understand
+                                        how resources can tell a clinical story, and to validate that the resource types available (including profiles) are
+                                        sufficient.</p>
+                                    <p>Note that the builder still has issues with more complex resource types - this is a work in progress</p>
+                                </td>
+                                <td>
+                                    Patient information is on the Data Server. Profiles on the Conformance server.
+                                    ValueSets on the Terminology server.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="15%">
+                                    <a target="_blank" href="logicalModeller.html">Logical Modeller</a>
+                                </td>
+                                <td>
+                                    The Logical modeller allows the creation of a model that represents a particular interoperability requirement
+                                    in a format that is easy to use. It uses FHIR datatypes, and can be based on an existing resource type or completely
+                                    'ad hoc'. It is intended to act as a 'bridge' between Modeller and User, and can act as the basis for the generation
+                                    of the profiling components required by FHIR
+                                </td>
+                                <td>
+                                    Models are saved on the Conformance Server. Can reference ValueSets from the Terminology server.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="15%">
+                                    <a target="_blank" href="codeSystem.html">CodeSystem builder</a>
+                                </td>
+                                <td>
+                                    The CodeSystem defines a set of Concepts from which a ValueSet provides possible values for a resource element. The actual 'binding' between
+                                    CodeSystem and element is done by the ValueSet. This component allows you to build (and edit) a
+                                    CodeSystem, and optionally builds the ValueSet as well.
+                                </td>
+                                <td>
+                                    CodeSystems are saved on the Terminology Server.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a target="_blank" href="EDBuilder.html">Extension Definition builder</a>
+                                </td>
+                                <td>
+                                    Views and builds extension definitions. These can be defined and applied to the Logical Model, which will
+                                    allow them to be included in the generated Profile
+                                </td>
+                                <td>
+                                    Extension definitions are saved on the Conformance Server
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <a target="_blank" href="valuesetCreator.html">ValueSet explorer</a>
+                                </td>
+                                <td>
+                                    Lets you view existing ValueSets. The builder works best with SNOMED (at the moment).
+                                </td>
+                                <td>ValueSets are stored on the Terminology Server</td>
+                            </tr>
 
 
 
-                                        <tr>
-                                            <td>
-                                                <a target="_blank" href="logicalModeller.html">Profile builder</a>
-                                            </td>
-                                        </tr>
-                                        -->
-                </table>
+                            <tr>
+                                <td>
+                                    <a target="_blank" href="query.html">Query Tool</a>
+                                </td>
+                                <td>
+                                    Allows ad hoc queries against any FHIR server
+                                </td>
+                                <td>
+                                    Can access any compliant FHIR server
+                                </td>
+                            </tr>
+
+
+                        </table>
+
+
+                    </uib-tab>
+
+                    <uib-tab>
+                        <uib-tab-heading><strong>Experimental modules (open in new tab)</strong></uib-tab-heading>
+                        <br/>
+
+
+
+
+                        <table class="table width='100%'">
+
+                            <tr>
+                                <td>
+                                    <a target="_blank" href="conceptMap.html">Concept Mapper</a>
+                                </td>
+                                <td>
+                                    Edit concept maps.
+                                </td>
+                                <td>
+                                    R3 conformance server only
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a target="_blank" href="profileDiff.html">Profile Browser</a>
+                                </td>
+                                <td>
+                                    Based on an Implementation Guide resource,
+                                </td>
+                                <td>
+
+                                </td>
+                            </tr>
+
+                        </table>
+
+
+                    </uib-tab>
+
+                </uib-tabset>
+
             </div>
 
 
