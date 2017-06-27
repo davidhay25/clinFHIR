@@ -11,7 +11,7 @@ angular.module('sampleApp')
                 showValueSetE : '&'
             },
 
-            templateUrl: 'directive/profileTable/profileTable.html',
+            templateUrl: 'directive/profiletable/profileTable.html',
             controller: function($scope){
                 $scope.selectItemI = function(profile,type) {
                     $scope.selectItem()(profile,type)
