@@ -2,12 +2,69 @@
 angular.module("sampleApp")
     .controller('profileDiffCtrl',
         function ($scope,$q,$http,profileDiffSvc,$uibModal,logicalModelSvc,appConfigSvc,RenderProfileSvc,
-                  Utilities,GetDataFromServer,profileCreatorSvc) {
+                  Utilities,GetDataFromServer,profileCreatorSvc,$filter,$firebaseObject,$location,$window,modalService) {
 
             $scope.input = {};
             $scope.appConfigSvc = appConfigSvc;
 
             $scope.history = [];        //
+
+
+            //see if this page was loaded from a shortcut
+            var hash = $location.hash();
+            if (hash) {
+                var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
+                sc.$loaded().then(
+                    function(){
+
+
+                        $scope.loadedFromBookmark = true;
+
+                        //set the conformance server to the one in the bookmark
+                        var conformanceServer =  sc.config.conformanceServer;
+                        appConfigSvc.setServerType('conformance',conformanceServer.url);
+                        //appConfigSvc.setServerType('data',conformanceServer.url);       //set the data server to the same as the conformance for the comments
+
+                        var id = sc.config.model.id;    //the id of the model on this server
+                        //get the model from the server...
+                        var url = conformanceServer.url + 'StructureDefinition/'+id;
+                        $scope.showWaiting = true;
+                        GetDataFromServer.adHocFHIRQuery(url).then(
+                            function(data){
+                                var model = data.data;
+                                console.log(model);
+                              //  $scope.hideLMSelector();            //only want to see this model...
+                               // selectEntry({resource:model});       //select the model
+                            },
+                            function(){
+                                modalService.showModal({}, {bodyText: "The model with the id '"+id + "' is not on the "+conformanceServer.name + " server"})
+                            }
+                        ).finally(function(){
+                            $scope.showWaiting = false;
+                        })
+
+                    }
+                )
+            }
+
+            $scope.generateShortCut = function() {
+                var hash = Utilities.generateHash();
+                var shortCut = $window.location.href+"#"+hash
+
+                var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
+                sc.modelId = $scope.selectedSD.id;     //this should make it possible to query below...
+                sc.config = {conformanceServer:appConfigSvc.getCurrentConformanceServer()};
+                sc.config.model = {id:$scope.selectedSD.id}
+                sc.shortCut = shortCut;     //the full shortcut
+                sc.$save().then(
+                    function(){
+                        //$scope.treeData.shortCut = sc;
+                        modalService.showModal({}, {bodyText: "The shortcut  " +  shortCut + "  has been generated for this model"})
+
+                    }
+                )
+            };
+
 
             function addToHistory(type,resource) {
                 $scope.history.push({type:type,resource:resource})
@@ -26,11 +83,14 @@ angular.module("sampleApp")
             }
 
 
+            var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
+
             function clearRightPane(){
                 delete $scope.currentIG;
                 delete $scope.selectedItemType ;
                 delete $scope.selectedItem;
                 delete $scope.profileReport;
+                delete $scope.allExtensions;
 
             }
 
@@ -50,15 +110,41 @@ angular.module("sampleApp")
                 if (svr.version == 3) {
                     searchString += "kind=resource&base=http://hl7.org/fhir/StructureDefinition/"+$scope.results.profileType.name
                 } else {
-                    searchString += "kind=resource&type="+baseType.name
+                    //var base = "http://hl7.org/fhir/StructureDefinition/DomainResource";
+                    searchString += "kind=resource&type="+baseType.name;
                 }
 
                 console.log(searchString)
                 $scope.waiting = true;
+
                 $http.get(searchString).then(
                     function(data) {
                         $scope.profilesOnBaseType = data.data;
-                        console.log($scope.profilesOnBaseType)
+
+                        var url1 =  appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/"+baseType.name;
+                        $http.get(url1).then(
+                            function (data) {
+                                if (data.data) {
+                                    console.log(data.data)
+                                    $scope.profilesOnBaseType.entry = $scope.profilesOnBaseType.entry || []
+                                    $scope.profilesOnBaseType.entry.push({resource:data.data});
+
+                                }
+
+                            },
+                            function () {
+                                //just ignore if we don't fine the base..
+                            }
+                        ).finally(function () {
+                            console.log($scope.profilesOnBaseType)
+                        })
+
+
+
+
+
+
+
 
                     },
                     function(err){
@@ -155,6 +241,9 @@ angular.module("sampleApp")
             //when an item is selected in the accordian for display in the roght pane...
             $scope.selectItem = function(item,type){
 
+
+                console.log(item.type)
+
                 clearRightPane()
 
                $scope.selectedItemType = type;
@@ -219,6 +308,9 @@ angular.module("sampleApp")
                            console.log(SD)
                            setupProfile(SD)
                            addToHistory('profile',SD)
+
+
+
 
                            /*
                             $scope.selectedSD = SD;
@@ -303,6 +395,33 @@ angular.module("sampleApp")
                 $scope.selectedSD = SD;
 
 
+
+                //------- other profiles on this base type...
+                var baseType;
+
+                if (fhirVersion == 2) {
+                    //baseType = SD.base;
+                    if (SD.base) {
+                        baseType = $filter('getLogicalID')(SD.base);
+                    }
+                }
+
+                console.log(baseType)
+                if (baseType) {
+                    profileDiffSvc.findProfilesOnBase(baseType).then(
+                        function (bundle) {
+                            console.log(bundle)
+                            $scope.profilesOnTypeBdl = bundle
+
+                        },
+                        function (err) {
+                            console.log("Error getting profiles on "+baseType,err);
+                        }
+                    )
+                }
+
+
+
                 //-------- logical model
                 profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
                     function(vo) {
@@ -354,6 +473,7 @@ angular.module("sampleApp")
                     function (vo) {
                         console.log(vo)
                         $scope.canonical = vo.canonical;
+                        $scope.allExtensions = vo.extensions;
                     },function (err) {
                         console.log(err)
                     }
@@ -365,7 +485,7 @@ angular.module("sampleApp")
             }
 
 
-            $scope.showED = function(ed) {
+            $scope.showEDDEP = function(ed) {
                 //console.log(ed)
                 $uibModal.open({
                     templateUrl: 'modalTemplates/diffED.html',

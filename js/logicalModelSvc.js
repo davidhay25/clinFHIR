@@ -700,6 +700,9 @@ angular.module("sampleApp")
                     dt['CodeableConcept'] = ['coding','text','coding.system','coding.code','coding.display']
                     dt['Identifier'] = ['system','value','use','type','period','assigner']
                     dt['Period'] = ['start','end'];
+                    dt['Address'] = ['use','type','text','line','city','district','state','postalCode','country','period'];
+                    dt['ContactPoint'] = ['system','value','use','rank','period'];
+                    dt['HumanName'] = ['use','text','family','given','prefix','suffix','period'];
 
 
                     //create a hash of all the paths in the Logical model. Ignore duplications. used for finding the dt of the parent

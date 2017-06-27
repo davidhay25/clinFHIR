@@ -202,12 +202,12 @@ app.get('/orion/:nhi',function(req,res){
 
 //when a user navigates to cf
 app.post('/stats/login',function(req,res){
-    //console.log('access')
+    console.log('access')
 
     var body = '';
     req.on('data', function (data) {
         body += data;
-       // console.log("Partial body: " + body);
+        console.log("Partial body: " + body);
     });
 
     req.on('end', function () {
@@ -550,3 +550,20 @@ function getProfileUsage(summary,cb) {
         }
     )};
 
+
+
+require("http").request(options, function(res) {
+
+    console.log('res',res);
+
+    res.on('error', function(data) {
+        console.log("error> "+data);
+    });
+
+    res.on('data', function(data) {
+        console.log("HTTP> "+data);
+    });
+    res.on('close', function(data) {
+        console.log("Connection closed");
+    });
+}).end(content);

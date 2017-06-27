@@ -5,6 +5,16 @@ angular.module("sampleApp").service('profileDiffSvc',
 
 
     return {
+        findProfilesOnBase : function(baseType){
+            var conformanceServer = appConfigSvc.getCurrentConformanceServer();
+            var url = conformanceServer.url;
+            if (conformanceServer.version == 2) {
+                url += "StructureDefinition?kind=resource&type="+baseType;
+            }
+
+           return GetDataFromServer.adHocFHIRQueryFollowingPaging(url);     //this is a promise
+
+        },
         reportOneProfile : function(SD) {
             var result = {required:[],valueSet:{}}
             if (SD.snapshot && SD.snapshot.element) {
@@ -66,6 +76,7 @@ angular.module("sampleApp").service('profileDiffSvc',
         makeCanonicalObj : function(SD) {
             var deferred = $q.defer();
             var queries = [];   //retrieve extension definitions
+            var quest = {resourceType:'Questionnaire',status:'draft',item:[]}   //questionnaire for form
 
             if (SD && SD.snapshot && SD.snapshot.element) {
                 var hashPath = {}
@@ -117,6 +128,14 @@ angular.module("sampleApp").service('profileDiffSvc',
                     item.multiplicity = ed.min + ".."+ed.max;
                     item.type = ed.type;
                     item.difference = {};       //a # of differences - set during the analysis phase...
+                    item.isModifier = ed.isModifier;
+
+                    //work out the help display...
+                    item.display = ed.definition || ed.short;       //definition in preference to short...
+                    if (ed.comments && ed.comments.indexOf('stigma') == -1 && ed.comments.indexOf('/[type]/[id]') == -1) {
+                        //don't include 'standard' comments
+                        item.display += ed.comments;
+                    }
 
                     if (ed.slicing) {
                         item.slicing = ed.slicing;
@@ -171,7 +190,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                         }
                     )}
 
-
                     //special processing for extensions...
                     if (arPath[arPath.length-1].indexOf('extension') > -1 || arPath[arPath.length-1] == 'modifierExtension') {
                         include = false;
@@ -201,13 +219,11 @@ angular.module("sampleApp").service('profileDiffSvc',
                             item.path = display;// + " (ext)";    //to make a nicer display...
                         }
 
-
-
                     }
                     if (include) {
                         canonical.item.push(item)
 
-                        //check for a dusplaicate path
+                        //check for a duplicate path
                         var p = ed.path;
                         if (hashPath[p]) {
                             hashPath[p] ++;
@@ -218,19 +234,17 @@ angular.module("sampleApp").service('profileDiffSvc',
                         }
                         newSD.snapshot.element.push(ed);
                     }
-
                 });
-
-
 
                 if (queries.length) {
                     $q.all(queries).then(
                         function () {
                             //process all extension analyses. Do this after all the extensions have loaded as we'll be inserting entries for complex extensions
-
+                            var extensions = []
                             for (var i=0; i < canonical.item.length; i++) {
                                 var item = canonical.item[i];
                                 if (item.extension && item.extension.analysis) {
+
                                     var analysis = item.extension.analysis;
                                     if (analysis.isComplexExtension) {
 
@@ -238,10 +252,17 @@ angular.module("sampleApp").service('profileDiffSvc',
                                         //
                                         item.type = angular.copy(analysis.dataTypes);
                                     }
+                                    var extension = angular.copy(item)
+                                    var ar = extension.originalPath.split('_')
+                                    extension.extensionPath = ar[0];
+                                    delete extension.groupParent;
+
+                                    extensions.push(extension);
+
                                 }
                             }
 
-                            deferred.resolve({canonical:canonical, SD : newSD});
+                            deferred.resolve({canonical:canonical, SD : newSD,extensions:extensions});
                         },
                         function (err) {
 

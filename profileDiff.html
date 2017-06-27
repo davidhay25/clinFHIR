@@ -17,9 +17,11 @@
     <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
 
     <script src="js/libs/angular-sanitize.js"></script>
+    <script src="js/libs/firebase.js"></script>
+    <script src="js/libs/angularfire.min.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage',"firebase"]).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -48,6 +50,10 @@
     <script src="js/modellerFilters.js"></script>
     <script src="resourceBuilder/vsBrowser.js"></script>
     <script src="resourceBuilder/rbServices.js"></script>
+    <script src="directive/profiletable/profileTable.js"></script>
+
+
+
     <!--
 
 
@@ -70,6 +76,20 @@
   <script src="js/profileCreatorSvc.js"></script>
   -->
 
+    <script>
+        var config = {
+            apiKey: "AIzaSyBNMohLbPiSKwpGwfARopdeW_6LLXujcUo",
+            authDomain: "clinfhir.firebaseapp.com",
+            databaseURL: "https://clinfhir.firebaseio.com",
+            storageBucket: ""
+        };
+
+        //  console.log(firebase)
+        if (firebase) {
+            firebase.initializeApp(config);
+
+        }
+    </script>
 
     <style>
         .myScroll {
@@ -89,7 +109,7 @@
         }
 
     </style>
-        <title>Profile Diff</title>
+        <title>Profile Explorer</title>
 
 </head>
 
@@ -118,13 +138,23 @@
             </div>
 
 
-            <div class="col-md-2 col-sm-2">
+            <div class="col-md-1 col-sm-1">
 
                 <form class="navbar-form navbar-left">
                     <img ng-show="waiting" src="css/ajax_loader_blue_32.gif"/>
                 </form>
 
             </div>
+
+            <div class="col-md-1 col-sm-1">
+                <form ng-show="selectedSD && !loadedFromBookmark" class="navbar-form">
+                    <button class="btn btn-success pull-right iconSpacing" ng-click="generateShortCut()">Share</button>
+                </form>
+            </div>
+
+
+
+
             <div class="col-md-3 col-sm-3">
                 <div class="navbar-text pull-right">
                     User: {{orionUser.primaryActor.fullName}}
@@ -252,6 +282,7 @@
                         <h4>Profiled resource</h4>
 
                         <uib-tabset>
+
                             <uib-tab heading="Logical">
                                 <br/>
                                 <div class="row">
@@ -268,8 +299,16 @@
 
 
                             <uib-tab heading="Table">
+                                <profile-table items="canonical.item" select-item="selectItem"
+                                   show-e-d-e="showED" select-extension-from-profile-e="selectExtensionFromProfile"
+                                   show-value-set-e="showValueSet"></profile-table>
+                            </uib-tab>
+
+
+                            <uib-tab ng-show="1==2" heading="TableDEP">
                                 <br/>
                                 <div class="myScroll">
+
                                     <table class="table">
                                         <tr><th></th><th>Path</th><th>Mult</th><th>DataTypes</th><th>Notes</th></tr>
                                         <tr ng-repeat="item in canonical.item" ng-class="{myRequired:item.min==1,borderTop:item.groupParent}">
@@ -374,6 +413,7 @@
                                             </td>
                                         </tr>
                                     </table>
+
                                 </div>
 
 
@@ -381,12 +421,19 @@
 
 
 
+                            <uib-tab heading="Extensions">
+                                <br/>
+                                <profile-table items="allExtensions" select-item="selectItem"
+                                               show-e-d-e="showED" select-extension-from-profile-e="selectExtensionFromProfile"
+                                               show-value-set-e="showValueSet"></profile-table>
+                            </uib-tab>
+
                             <uib-tab heading="Required Elements">
                                 <br/>
                                 <div class="row">
                                     <div class="col-sm-8 col-md-8">
 
-                                        <table>
+                                        <table class="table">
                                             <tr ng-repeat="req in profileReport.required">
                                                 <td>{{req.path}}</td>
                                             </tr>
@@ -522,6 +569,7 @@
                     </div>
                 </div>
             </div>
+
 
 
 
