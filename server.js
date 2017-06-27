@@ -218,7 +218,7 @@ app.post('/stats/login',function(req,res){
         } catch (ex) {}
 
         recordAccess(req,jsonBody);
-        res.end();
+        res.end('ok');
     });
 
     //recordAccess(req);
@@ -551,19 +551,3 @@ function getProfileUsage(summary,cb) {
     )};
 
 
-
-require("http").request(options, function(res) {
-
-    console.log('res',res);
-
-    res.on('error', function(data) {
-        console.log("error> "+data);
-    });
-
-    res.on('data', function(data) {
-        console.log("HTTP> "+data);
-    });
-    res.on('close', function(data) {
-        console.log("Connection closed");
-    });
-}).end(content);

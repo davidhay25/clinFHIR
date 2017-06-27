@@ -1646,6 +1646,7 @@ angular.module("sampleApp")
                             item.data.isRoot = true;
                             //now set the header data...
                             item.data.header = {};
+                            item.data.header.SDID = sd.id;
                             item.data.header.name = sd.name;
 
                             //the name of the next 2 elements changed after baltimore, so look in both places until the other stu3 servrs catch up...

@@ -1614,10 +1614,13 @@ angular.module("sampleApp")
                 makeSD();
                 $scope.currentType = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
                 loadHistory($scope.rootName);
-
+                /*
+                DON'T DELETE. - for now, don't try to find models...
                 checkForComments(entry.resource);
-
                 getAllComments();
+                */
+
+
                 checkInPalette();
 
 

@@ -901,9 +901,16 @@
                                 <br/>
                                 <table class="table table-bordered">
                                     <tr><td width="25%">Model Name</td><td>{{treeData[0].data.header.name}}</td></tr>
+                                    <tr><td>Model ID on server</td><td>{{treeData[0].data.header.SDID}}</td></tr>
                                     <tr><td>Model Title</td><td>{{treeData[0].data.header.title}}</td></tr>
                                     <tr><td>Model Purpose</td><td>{{treeData[0].data.header.purpose}}</td></tr>
-                                    <tr ng-show="treeData.shortCut.shortCut"><td>Shortcut</td><td>{{treeData.shortCut.shortCut}}</td></tr>
+                                    <tr ng-show="treeData.shortCut.shortCut">
+                                        <td>Shortcut</td>
+                                        <td>
+                                            {{treeData.shortCut.shortCut}}
+                                            <div><a href="#" ng-click="generateShortCut()">Replace</a></div>
+                                        </td>
+                                    </tr>
 
 
                                     <tr ng-show="treeData[0].data.header.baseType">
@@ -1046,7 +1053,7 @@
                     </uib-tab>
 
 
-                    <uib-tab heading="Comments" >
+                    <uib-tab ng-show="1==2" heading="Comments" >
                         <br/>
                         <uib-tabset>
                             <uib-tab heading="All Comments">
