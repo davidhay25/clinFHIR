@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-05-29';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-06-30';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};
@@ -158,6 +158,8 @@ angular.module("sampleApp")
         //defaultConfig.allKnownServers.push({name:'hsp3',version:3,url:"https://api2.hspconsortium.org/careplan3/open/",everythingOperation:true});
 
         defaultConfig.allKnownServers.push({name:'Patients First R3',version:3,url:"http://its.patientsfirst.org.nz/RestService.svc/Terminz/"});
+
+        defaultConfig.allKnownServers.push({name:'HSPC Synthea',version:3,url:"https://api3.hspconsortium.org/HSPCplusSynthea/open/"});
 
 
 

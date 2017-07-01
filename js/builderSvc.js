@@ -519,7 +519,7 @@ angular.module("sampleApp")
 
                                             if (! analysis.isComplexExtension) {
 
-                                                console.log(ed,analysis)
+                                               // console.log(ed,analysis)
 
                                                 //ed.short = analysis.name;   //will become the tree name
                                                 if (! ed.name) {

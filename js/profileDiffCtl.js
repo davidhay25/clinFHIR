@@ -1,7 +1,7 @@
 
 angular.module("sampleApp")
     .controller('profileDiffCtrl',
-        function ($scope,$q,$http,profileDiffSvc,$uibModal,logicalModelSvc,appConfigSvc,RenderProfileSvc,
+        function ($scope,$q,$http,profileDiffSvc,$uibModal,logicalModelSvc,appConfigSvc,RenderProfileSvc,builderSvc,
                   Utilities,GetDataFromServer,profileCreatorSvc,$filter,$firebaseObject,$location,$window,modalService) {
 
             $scope.input = {};
@@ -65,10 +65,23 @@ angular.module("sampleApp")
                 )
             };
 
+            $scope.exportToLogicalDEP = function() {
+                builderSvc.makeLogicalModelFromSD($scope.selectedSD).then(
+                    function (lm) {
+                        $scope.lm = lm;
+                        console.log(lm);
+                        //selectLogicalModal(lm,profile.url)
+                    },
+                    function(vo) {
+                        //if cannot locate an extension. returns the error and the incomplete LM
+                        // selectLogicalModal(vo.lm,profile.url)
+                    }
+                )
+            }
 
             function addToHistory(type,resource) {
                 $scope.history.push({type:type,resource:resource})
-                console.log($scope.history);
+                //console.log($scope.history);
             }
 
             function popHistory() {
@@ -425,6 +438,18 @@ angular.module("sampleApp")
                 //-------- logical model
                 profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
                     function(vo) {
+
+                        console.log(vo)
+
+                        profileDiffSvc.makeLogicalModelFromTreeData($scope.selectedSD,vo.treeData).then(
+                            function (treeData) {
+                                $scope.lm = treeData;
+                            }
+                        )
+
+
+
+
                         $('#profileTree1').jstree('destroy');
                         $('#profileTree1').jstree(
                             {
@@ -471,7 +496,7 @@ angular.module("sampleApp")
 
                 profileDiffSvc.makeCanonicalObj(SD).then(
                     function (vo) {
-                        console.log(vo)
+                        //console.log(vo)
                         $scope.canonical = vo.canonical;
                         $scope.allExtensions = vo.extensions;
                     },function (err) {

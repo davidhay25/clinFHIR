@@ -31,7 +31,9 @@ angular.module("sampleApp")
             $scope.findProfileDEP = function() {
                 //$scope.showFindProfileDialog.open();
             };
-            
+
+
+
 
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
 
@@ -1173,7 +1175,7 @@ angular.module("sampleApp")
                                     $scope.allResourceTypes = data;
                             });
 
-                            
+
 
                             //note that a StructureDefinition is passed in when editing...
                             if (SD) {
@@ -1278,7 +1280,6 @@ angular.module("sampleApp")
                                     //set when editing
                                     vo.baseType = $scope.baseType;
                                 }
-
 
                                 vo.mapping = $scope.input.mapping;
                                 vo.createElementsFromBase = $scope.input.createElementsFromBase;

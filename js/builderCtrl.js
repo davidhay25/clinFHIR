@@ -43,7 +43,8 @@ angular.module("sampleApp")
             $scope.toggleVersion = function(){
                 $scope.selectedContainer.showVersion = ! $scope.selectedContainer.showVersion;
                 console.log($scope.selectedContainer.showVersion)
-            }
+            };
+
 
             $scope.setNewScenarioVersion = function(){
                 //set the current bundle as a version...
@@ -97,7 +98,21 @@ angular.module("sampleApp")
 
                // $scope.selectedContainer.bundle = hx.bundle;   //todo - need to save current bundle + prevent updates!!!
                 makeGraph();
-            }
+            };
+
+
+            $scope.renameScenario = function(name){
+
+                if (name) {
+                    $scope.selectedContainer.name = name;
+                    var user = logicalModelSvc.getCurrentUser();
+                    if (user) {
+                        $scope.selectedContainer.author = [user];
+                    }
+                    delete $scope.input.renameScenario;
+                }
+
+            };
 
 
             $scope.displayServers = "Conformance: " + appConfigSvc.getCurrentConformanceServer().name
@@ -197,14 +212,15 @@ angular.module("sampleApp")
                 delete $scope.selectedLibraryContainer;
                 var code = category.code
                 $scope.selectedLibraryList = [];
-                $scope.libraryContainer.forEach(function(container){
-                    if (container.category && container.category.code) {
-                        if (container.category.code == code) {
-                            $scope.selectedLibraryList.push(container)
+                if ($scope.libraryContainer) {
+                    $scope.libraryContainer.forEach(function(container){
+                        if (container.category && container.category.code) {
+                            if (container.category.code == code) {
+                                $scope.selectedLibraryList.push(container)
+                            }
                         }
-                    }
-                })
-
+                    })
+                }
             };
 
             $scope.togglePatientDisplay = function(){
@@ -978,6 +994,8 @@ angular.module("sampleApp")
 
                 }
 
+
+
                 builderSvc.saveToLibrary($localStorage.builderBundles[$scope.currentBundleIndex],$scope.user).then(
                     function (data) {
 
@@ -999,6 +1017,8 @@ angular.module("sampleApp")
             $scope.selectBundle = function(inx){
                 delete $scope.resourcesFromServer;
                 delete $scope.markResult;
+                delete $scope.input.renameScenario;
+
                 $scope.currentBundleIndex = inx;
 
                 //get the container from the local store... 'builderBundles' would be better named 'builderContainers'

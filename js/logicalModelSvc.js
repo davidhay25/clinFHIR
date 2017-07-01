@@ -1601,10 +1601,6 @@ angular.module("sampleApp")
                         var item = {data:{}}
                         item.id = path
 
-                        if (inx > 0) {
-                         //  item.id += "_" + inx; - no, because can't wprk out the parent path correctly...
-                        }
-
                         var text = arPath[arPath.length - 1];   //the text will be the last entry in the path...
                         //item.text = arPath[arPath.length - 1];   //the text will be the last entry in the path...
 
@@ -1700,7 +1696,6 @@ angular.module("sampleApp")
                             item.data.fhirMappingExtensionUrl = extSimpleExt.valueString;
                         }
 
-
                         var extDiscriminator = Utilities.getSingleExtensionValue(ed, discriminatorUrl);
                         if (extDiscriminator) {
                             item.data.discriminator = extDiscriminator.valueString;
@@ -1711,13 +1706,7 @@ angular.module("sampleApp")
                             item.data.conceptMap = extConceptMap.valueString;
                         }
 
-
-
-
-
                         //format of type prpfile changed between 2 & 3
-
-
                         if (ed.type) {
                             var tvType = []
 
@@ -1768,43 +1757,6 @@ angular.module("sampleApp")
 
                         }
 
-
-                        /*
-                        if (ed.type && ed.type[0].profile) {
-                            item.data.referenceUri = ed.type[0].profile;
-
-                            //in stu2 this is an array - just grab the first one...
-                            if (angular.isArray(item.data.referenceUri)) {
-                                item.data.referenceUri = item.data.referenceUri[0];
-                            }
-                        }
-
-
-                        if (ed.type && ed.type[0].targetProfile) {
-                            item.data.referenceUri = ed.type[0].targetProfile;
-
-                            //in stu2 this is an array - just grab the first one...
-                            if (angular.isArray(item.data.referenceUri)) {
-                                item.data.referenceUri = item.data.referenceUri[0];
-                            }
-
-                        }
-
-                        //determine if this is a coded or a reference type
-                        if (ed.type) {
-                            ed.type.forEach(function (typ) {
-                                if (['CodeableConcept', 'Coding', 'code'].indexOf(typ.code) > -1) {
-                                    item.data.isCoded = true;
-                                }
-
-                                if (typ.code == 'Reference') {
-                                    item.data.isReference = true;   //used to populate the 'is reference' table...
-                                }
-
-                            })
-                        }
-
-*/
                         item.data.min = ed.min;
                         item.data.max = ed.max;
 
@@ -1836,7 +1788,6 @@ angular.module("sampleApp")
 
                         }
 
-
                         item.data.comments = ed.comments;
 
                         //note that we don't retrieve the complete valueset...
@@ -1845,8 +1796,6 @@ angular.module("sampleApp")
                             item.data.selectedValueSet.vs = {url: ed.binding.valueSetUri};
                             item.data.selectedValueSet.vs.name = ed.binding.description;
                         }
-
-
 
                         if (include) {
                             arTree.push(item);
@@ -1906,9 +1855,6 @@ angular.module("sampleApp")
                 sd.status = 'draft';
                 sd.date = moment().format();
 
-
-
-
                 sd.purpose = header.purpose;
                 sd.description = header.description;
 
@@ -1956,7 +1902,6 @@ angular.module("sampleApp")
                         Utilities.addExtensionOnce(ed, simpleExtensionUrl, {valueString: data.fhirMappingExtensionUrl})
                     }
 
-
                     ed.id = data.path;
                     ed.path = data.path;
                     ed.short = data.short;
@@ -1964,8 +1909,6 @@ angular.module("sampleApp")
                     ed.min = data.min;
                     ed.max = data.max;
                     ed.comments = data.comments;
-
-
 
                     //a conceptMap associated with this element
                     if (data.conceptMap) {

@@ -283,14 +283,21 @@
 
                         <uib-tabset>
 
-                            <uib-tab heading="Logical">
+                            <uib-tab heading="Logical View">
                                 <br/>
                                 <div class="row">
                                     <div class="col-sm-4 col-md-4">
                                         <div id="profileTree1"></div>
+
                                     </div>
                                     <div class="col-sm-8 col-md-8">
-                                        <div class="myScroll">
+                                        <div>
+                                            <div class="pull-right">
+                                                <a href="#" ng-click="exportToLogical()">Export</a>
+                                            </div>
+                                        </div>
+                                        <pre>{{lm | json}}</pre>
+                                        <div ng-show="selectedED1" class="myScroll">
                                             <pre>{{selectedED1 | json}}</pre>
                                         </div>
                                     </div>

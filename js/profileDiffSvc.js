@@ -1,10 +1,248 @@
 angular.module("sampleApp").service('profileDiffSvc',
-    function($q,$http,GetDataFromServer,Utilities,appConfigSvc,$filter) {
+    function($q,$http,GetDataFromServer,Utilities,appConfigSvc,$filter,logicalModelSvc) {
 
     var extensionDefinitionCache = {}
 
 
     return {
+        makeLogicalModelFromTreeData : function(SD,inTreeData) {
+            //so this receives the treeData array that was created by profileCreatorSvc.makeProfileDisplayFromProfile()
+            //and we need to convert it into the format used by the logicalmodel builder as they ar enot the same! TODO At some point cold be worth looking at whether they can be made the same...
+
+            var deferred = $q.defer();
+
+            var elementsToIgnore = ['id', 'meta', 'implicitRules', 'language', 'contained'];
+
+            var baseType = SD.snapshot.element[0].path;
+            var rootName = 'myResource';
+            var vo ={rootName:rootName,baseType:baseType};
+            var queries = []
+
+            setHeaderInfo(SD,vo);       //set the herader info
+
+            //adjust the elementDefinitions
+            var newElementArray = [];
+            SD.snapshot.element.forEach(function (el) {
+                var include = true;
+                var arPath = el.path.split('.');
+                arPath[0] = rootName;
+                el.path = arPath.join('.')
+                delete el.constraint;       // these are usually just copied from the base resource
+                delete el.mapping;          //ditto todo: ?? add the fhir path
+                delete el.alias;
+                delete el.condition;
+
+                if (elementsToIgnore.indexOf(arPath[arPath.length-1]) !== -1) {
+                    include = false;
+                }
+
+                if (arPath[arPath.length-1] == 'extension') {
+                    console.log(el)
+                    include = false;
+                    if (el.type) {
+                        el.type.forEach(function (typ) {
+                            if (typ.profile) {
+
+                                //stu2/3 difference
+                                var profile = typ.profile
+                                if (angular.isArray(typ.profile)) {
+                                    profile = typ.profile[0]
+                                }
+
+                                //if there's profile, then we'll pull in the profile definition to update the model.
+                                include = true;
+                                arPath[arPath.length-1] = el.name;      //todo check exists
+                                el.path = arPath.join('.')
+                                queries.push(checkExtensionDef(profile, el));
+                            }
+                        })
+                    }
+                }
+
+                if (include) {
+                    newElementArray.push(el);
+                }
+
+            });
+
+            $q.all(queries).then(
+                function () {
+                    console.log('DONE')
+                    //now that we have all the analysis objects,
+
+
+
+                    deferred.resolve(SD);
+                },
+                function (err) {
+                    console.log('ERROR: ', err)
+                    deferred.reject(SD);
+                }
+            );
+
+
+            SD.snapshot.element = newElementArray;
+
+
+
+            return deferred.promise;
+
+            function checkExtensionDef(extUrl, el) {
+                var deferred = $q.defer();
+                var url = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition?url=" + extUrl;
+                GetDataFromServer.adHocFHIRQuery(url).then(
+                    function (data) {
+                        var bundle = data.data;
+                        if (bundle && bundle.entry) {
+                            var extensionDef = bundle.entry[0].resource;     //should really only be one...
+                            var analysis = Utilities.analyseExtensionDefinition3(extensionDef);
+                            console.log(analysis)
+                            if (analysis.name) {
+                                var ar = el.path.split('.');
+                                ar[ar.length-1] = analysis.name;
+                                el.path = ar.join('.')
+                                //console.log(item)
+                            }
+                            el.analysis = analysis;
+                        }
+                        //console.log(data.data)
+                        deferred.resolve();
+                    },
+                    function (err) {
+                        deferred.reject();
+                    }
+                );
+                return deferred.promise;
+            };
+
+
+/*
+            rootName='myModel';
+            var scope = {rootName : 'myLM'};
+            treeData = [{id:rootName,parent:'#',data : {header : {}}}];
+
+            typeName = 'Encounter';
+
+            logicalModelSvc.createFromBaseType (treeData, typeName, rootName).then(
+                //generate a tree data array in the format that the Logical modeller uses...
+                function (treeData) {
+                    console.log(treeData);
+                    //note that any
+
+
+
+
+
+                    deferred.resolve(logicalModelSvc.makeSD(scope,treeData))
+                },function (err) {
+                    console.log(err)
+                }
+            );
+
+
+
+            console.log(SD,inTreeData);
+            var treeData = [];
+            inTreeData.forEach(function (line) {
+                console.log(line)
+                var item = {data:{}};
+                var ed = line.data.ed;
+                item.data.path = line.path;
+                item.data.min = ed.min;
+                item.data.max = ed.max;
+                item.data.comments = ed.comment;
+
+                treeData.push(item)
+            });
+
+
+            var scope = {rootName : 'myLM'};
+           // var treeData = inTreeData;
+
+
+            return logicalModelSvc.makeSD(scope,treeData);
+*/
+            function setHeaderInfo(sd,vo) {
+                //vo {currentuser: rootName: baseType: name:
+                //set the header information that makes this a Logical Model rather than a Profile...
+                var mappingCommentUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
+                var mapToModelExtensionUrl = appConfigSvc.config().standardExtensionUrl.mapToModel;
+                var baseTypeForModelUrl = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
+                var simpleExtensionUrl = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl;
+                var discriminatorUrl = appConfigSvc.config().standardExtensionUrl.discriminatorUrl;
+                var conceptMapUrl = appConfigSvc.config().standardExtensionUrl.conceptMapUrl;
+
+                //todo - should use Utile.addExtension...
+          //      var sd = {resourceType: 'StructureDefinition'};
+                if (vo.currentUser) {
+                    this.addSimpleExtension(sd, appConfigSvc.config().standardExtensionUrl.userEmail, vo.currentUser.email)
+                }
+
+
+
+                Utilities.addExtensionOnce(sd, baseTypeForModelUrl, {valueString: vo.baseType})
+
+
+
+                sd.id = vo.rootName;
+                sd.url = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/" + sd.id;
+               /* sd.name = vo.name;
+
+                //these are some of the fhir version changes...
+                if (appConfigSvc.getCurrentConformanceServer().version ==2) {
+                    sd.display = header.title;
+                    sd.requirements = header.purpose;
+                } else {
+                    sd.title = header.title;
+                    sd.purpose = header.purpose;
+                }
+*/
+
+               // sd.publisher = header.publisher;
+               // sd.status = 'draft';
+                sd.date = moment().format();
+
+             //   sd.purpose = header.purpose;
+               // sd.description = header.description;
+
+                //sd.publisher = scope.input.publisher;
+                //at the time of writing (Oct 12), the implementaton of stu3 varies wrt 'code' & 'keyword'. Remove this eventually...
+                sd.identifier = [{system: "http://clinfhir.com", value: "author"}]
+                sd.keyword = [{system: 'http://fhir.hl7.org.nz/NamingSystem/application', code: 'clinfhir'}]
+/*
+                if (header.mapping) {
+                    //mapping comments for the target resource as a whole...
+                    sd.mapping = [{identity: 'fhir', name: 'Model Mapping', comments: header.mapping}]
+                }
+                */
+/*
+                if (header.type) {
+                    var uc = {
+                        code: {
+                            code: 'logicalType',
+                            system: 'http:www.hl7.org.nz/NamingSystem/logicalModelContext'
+                        }
+                    };
+                    uc.valueCodeableConcept = {
+                        coding: [{
+                            code: header.type,
+                            'system': 'http:www.hl7.org.nz/NamingSystem/logicalModelContextType'
+                        }]
+                    };
+                    sd.useContext = [uc]
+
+                }
+*/
+                sd.kind = 'logical';
+                sd.abstract = false;
+                sd.baseDefinition = "http://hl7.org/fhir/StructureDefinition/Element";
+                sd.type = vo.rootName;
+                sd.derivation = 'specialization';
+
+            }
+
+
+        },
         findProfilesOnBase : function(baseType){
             var conformanceServer = appConfigSvc.getCurrentConformanceServer();
             var url = conformanceServer.url;
