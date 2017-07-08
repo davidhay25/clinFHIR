@@ -117,7 +117,8 @@
     <script src="js/addExtensionCtrl.js"></script>
     <script src="js/dataTypeCtrl.js"></script>
     <script src="js/markerSvc.js"></script>
-
+    <script src="js/sbHistorySvc.js"></script>
+    <script src="js/sbHistoryCtl.js"></script>
 
     <script>
         var config = {
@@ -157,9 +158,6 @@
                 </div>
 
 
-
-
-
                 <div class="col-md-4 col-sm-4">
 
                     <div class="navbar-text">
@@ -187,6 +185,19 @@
 
                 <div class="col-md-2 col-sm-2">
                     <div class="navbar-text">
+                        <!-- <a href="#" ng-hide="recording" ng-click="recording = true">Start Recording</a>
+                        <a href="#" ng-show="recording" ng-click="recording = false">Stop Recording</a>
+                        -->
+                        <div>
+                            <a href="#" ng-hide="thingToDisplay=='recording'" ng-click="thingToDisplay='recording'">View Recording</a>
+                            <a href="#" ng-show="thingToDisplay=='recording'" ng-click="thingToDisplay='scenario'">View Scenario</a>
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="navbar-text" ng-show="1==2">
 
                         <!-- Show the 'save to library' only in scenario mode, when there are changes-->
                         <div ng-show="thingToDisplay=='scenario' && selectedContainer.isDirty"
@@ -241,13 +252,87 @@
                         </span>
                         </div>
                     </div>
+
+                    <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
+                        <li uib-dropdown>
+                            <a href="#" uib-dropdown-toggle>
+                                <span style="font-size:2em; cursor: pointer">
+                                        <i class="glyphicon glyphicon-cog"></i>
+                                </span>
+                            </a>
+
+
+
+                            <ul class="dropdown-menu" role="menu">
+
+
+                                <li ng-show="thingToDisplay=='scenario' && selectedContainer.isDirty">
+                                    <a href="#" ng-click="saveToLibrary()">Save to Library</a>
+                                </li>
+
+
+                                <li ng-hide="thingToDisplay=='library'">
+                                    <a href="#" ng-click="thingToDisplay = 'library'">View Library</a>
+                                </li>
+
+                                <li ng-show="thingToDisplay=='library'">
+                                    <a href="#" ng-click="thingToDisplay = 'scenario'">Hide Library</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+
                 </div>
+<!--
+                <div class="col-md-1 col-sm-1">
+                    <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
+                    <li uib-dropdown>
+
+                        <a href="#" uib-dropdown-toggle>
+                        <span style="font-size:2em; cursor: pointer">
+                            <i class="glyphicon glyphicon-cog"></i>
+                        </span>
+                        </a>
+
+
+
+                        <ul class="dropdown-menu" role="menu">
+
+
+                            <li>
+                                <a href="#" ng-click="showChart()" ng-hide="displayMode=='access'"
+                                   uib-popover="Show how many people are using clinFHIR"
+                                   popover-placement="left"
+                                   popover-trigger="'mouseenter'">Access statistics</a>
+                            </li>
+
+                            <li>
+                                <a href="#" ng-click="displayMode = 'front'" ng-hide="displayMode=='front'"
+                                   uib-popover="Show the main Launcher screen"
+                                   popover-placement="left"
+                                   popover-trigger="'mouseenter'">Launcher</a>
+                            </li>
+
+                        </ul>
+                    </li>
+                </ul>
+                </div>
+                -->
 
             </div>
         </nav>
 
 
-        <!-- The 3 display modes - Library, Scenario Builder, Patient data  -->
+        <!-- The 4 display modes - Library, Scenario Builder, Patient data, Recording  -->
+
+        <div ng-show="thingToDisplay=='recording'" ng-controller="sbHistoryCtrl">
+            <div class="banner">
+                Current recording
+
+            </div>
+            <ng-include src="'/includes/sbHistoryViewer.html'"></ng-include>
+        </div>
+
         <div ng-show="thingToDisplay=='patient'" ng-controller="resourceViewerCtrl">
             <div class="banner">
                 Showing resources for this patient that are on the Data Server

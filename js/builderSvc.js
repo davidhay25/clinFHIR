@@ -1,8 +1,4 @@
 angular.module("sampleApp")
-//this returns config options. At the moment it is for servers...
-//also holds the current patient and all their resources...
-//note that the current profile is maintained by resourceCreatorSvc
-
     .service('builderSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities,$filter,supportSvc,SaveDataToServer) {
 
         var gAllReferences = []
@@ -1009,8 +1005,14 @@ angular.module("sampleApp")
 */
 
                     //the bundle of resources that makes up the scenario. stores as a b64 encoded attachment in the DR
-                    container.bundle = angular.fromJson(atob(dr.content[0].attachment.data));
 
+
+                    //there was some rubbish in the library...
+                    try {
+                        container.bundle = angular.fromJson(atob(dr.content[0].attachment.data));
+                    } catch (ex) {
+                        console.log('error loading library item: ',ex)
+                    }
 
                     //get the history (if any)
                     if (dr.content.length > 1) {
@@ -1221,6 +1223,7 @@ angular.module("sampleApp")
                 //for now, we only allow values for properties directly off the root...
 
                 var path = hashPath.path;
+                var valueSaved;     //needed for tracking;
 
                 switch (dt) {
                     case 'Quantity' :
@@ -1436,6 +1439,9 @@ angular.module("sampleApp")
                         break;
                 }
 
+
+                return valueSaved;
+
                 function addIfNotEmpty(value,obj,prop,isArray) {
                     if (value) {
                         if (isArray) {
@@ -1499,6 +1505,8 @@ angular.module("sampleApp")
 
 
                     }
+
+                    valueSaved =  insrt;
 
                 }
 

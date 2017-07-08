@@ -1,0 +1,23 @@
+<div>
+
+
+
+    <div class="row">
+        <div class="col-md-6 col-sm-6">
+            <ul class="list-group">
+                <li ng-repeat="track in selectedContainer.tracker" class="list-group-item"
+                    ng-click="selectItem(track)">
+                    {{track.type}}
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-6 col-sm-6">
+            <pre>
+                {{selectedItem | json}}
+            </pre>
+        </div>
+    </div>
+
+
+
+</div>

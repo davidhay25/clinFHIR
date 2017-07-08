@@ -3,7 +3,7 @@ angular.module("sampleApp")
     .controller('builderCtrl',
         function ($scope,$http,appConfigSvc,$q,GetDataFromServer,resourceCreatorSvc,RenderProfileSvc,builderSvc,
                   $timeout,$localStorage,$filter,profileCreatorSvc,modalService,Utilities,$uibModal,$rootScope,
-                  $firebaseObject,logicalModelSvc,ResourceUtilsSvc,markerSvc) {
+                  $firebaseObject,logicalModelSvc,ResourceUtilsSvc,markerSvc,sbHistorySvc) {
 
             $scope.input = {};
             $scope.input.dt = {};   //data entered as part of populating a datatype
@@ -38,7 +38,14 @@ angular.module("sampleApp")
 
             refreshLibrary();       //initial load...
 
+
+            //recording
+            $scope.recording = false;
+
+
             //------------ scenario versioning
+
+
 
             $scope.toggleVersion = function(){
                 $scope.selectedContainer.showVersion = ! $scope.selectedContainer.showVersion;
@@ -99,7 +106,6 @@ angular.module("sampleApp")
                // $scope.selectedContainer.bundle = hx.bundle;   //todo - need to save current bundle + prevent updates!!!
                 makeGraph();
             };
-
 
             $scope.renameScenario = function(name){
 
@@ -817,6 +823,7 @@ angular.module("sampleApp")
                         newBundleContainer.isDirty = true;
                         newBundleContainer.isPrivate = true;
                         newBundleContainer.category = vo.category;
+                        newBundleContainer.tracker = [];
                         newBundleContainer.history = [{bundle:newBundle}];
                         newBundleContainer.index = 0;
                         newBundleContainer.server = {data:appConfigSvc.getCurrentDataServer()};     //save the data server in use
@@ -826,6 +833,7 @@ angular.module("sampleApp")
 
                        // console.log(newBundleContainer)
 
+                        //sbHistorySvc.addItem('scenario',newBundle.id,true,newBundleContainer);      //track changes
 
                         makeGraph();
                         delete $scope.currentResource;
@@ -1167,6 +1175,11 @@ angular.module("sampleApp")
                             },
                             currentValue : function(){
                                 return currentValue;
+                            },
+                            container : function() {
+                                return $scope.selectedContainer;
+                            }, resource : function(){
+                                return $scope.currentResource;
                             }
                         }
                     }).result.then(function () {
@@ -1923,9 +1936,9 @@ angular.module("sampleApp")
                 );
 
 
+                sbHistorySvc.addItem('addCore',resource.id,true,resource,$scope.selectedContainer);      //track changes
 
                 $scope.displayMode = 'view';
-
 
                 $scope.selectResource(resource,function(){
                     $scope.waiting = false;

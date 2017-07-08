@@ -2,7 +2,8 @@
 
 angular.module("sampleApp")
     .controller('addPropertyInBuilderCtrl',
-        function ($scope,dataType,hashPath,builderSvc,insertPoint,vsDetails,expandedValueSet,GetDataFromServer,currentValue) {
+        function ($scope,dataType,hashPath,builderSvc,insertPoint,vsDetails,expandedValueSet,GetDataFromServer,
+                  currentValue,container,resource,sbHistorySvc) {
             $scope.dataTypeBeingEntered = dataType;
             //hashPath.path is the absolute path where the insertion is to occur. The last segment in the path is
             //the propertyname on the insert point (which can be the
@@ -15,9 +16,6 @@ angular.module("sampleApp")
             $scope.expandedValueSet = expandedValueSet;
             $scope.input = {};
             $scope.input = {dt: {contactpoint: {use:'home',system:'phone'}}};
-
-
-
 
             var path = hashPath.path;
 
@@ -35,10 +33,20 @@ angular.module("sampleApp")
             $scope.save = function(){
 
 
-                builderSvc.addPropertyValue(insertPoint,
+                var valueSaved = builderSvc.addPropertyValue(insertPoint,
                     $scope.hashPath,
                     $scope.dataTypeBeingEntered,
-                    $scope.input.dt)
+                    $scope.input.dt);
+
+                //{type, id, succeed, details, container
+                var details = {dataType: $scope.dataTypeBeingEntered};
+                details.resourceType = resource.resourceType;
+                details.path = hashPath.path;
+                details.value = valueSaved;
+                //details.insertPoint = insertPoint;      //todo - this is the branch
+
+                //var details = {ip:insertPoint,dt : $scope.dataTypeBeingEntered,hp:hashPath,value:$scope.input.dt};
+                sbHistorySvc.addItem('dt',resource.id,true,details,container);
 
                 $scope.$close();
             };
