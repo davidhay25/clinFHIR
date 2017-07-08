@@ -1,20 +1,58 @@
 <div>
 
-
+    <style>
+        .leader  {
+            float: left;
+            width : 100px;
+            font-weight:bold;
+        }
+    </style>
 
     <div class="row">
-        <div class="col-md-6 col-sm-6">
+        <div class="col-md-2 col-sm-2">
             <ul class="list-group">
                 <li ng-repeat="track in selectedContainer.tracker" class="list-group-item"
-                    ng-click="selectItem(track)">
+                    ng-click="selectItem(track)" style="cursor: pointer">
                     {{track.type}}
                 </li>
             </ul>
         </div>
-        <div class="col-md-6 col-sm-6">
-            <pre>
-                {{selectedItem | json}}
-            </pre>
+        <div class="col-md-10 col-sm-10">
+            <uib-tabset>
+                <uib-tab heading="Details">
+
+                    <div class="row">
+                        <div class="col-sm-8 col-md-8">
+
+
+
+                            <div ng-switch on="selectedItem.type">
+                                <div ng-switch-when="addCore">
+                                    <h3>Core resource type added: {{selectedItem.details.resourceType}}</h3>
+                                </div>
+
+                                <div ng-switch-when="dt">
+                                    <h3>Element added to resource: {{selectedItem.details.resourceType}}/{{selectedItem.id}}</h3>
+
+                                    <div><span class="leader">Path: </span>{{selectedItem.details.path}}</div>
+                                    <div><span class="leader">DataType:</span> {{selectedItem.details.dataType}}</div>
+                                    <div class="leader">Value:</div>
+
+                                    <pre>{{selectedItem.details.value | json}}</pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 col-md-4">
+
+                        </div>
+                    </div>
+
+                </uib-tab>
+                <uib-tab heading="Json">
+                    <pre>{{selectedItem | json}} </pre>
+                </uib-tab>
+            </uib-tabset>
+
         </div>
     </div>
 

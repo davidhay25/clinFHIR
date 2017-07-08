@@ -32,13 +32,6 @@
             border: 1px solid lightgray;
         }
 
-/*
-         .borderForGraphDEP {
-             border-left: thin solid darkgrey;
-             border-right: thin solid darkgrey;
-         }
-*/
-
         .pass {
             color:green;
         }
@@ -189,7 +182,9 @@
                         <a href="#" ng-show="recording" ng-click="recording = false">Stop Recording</a>
                         -->
                         <div>
-                            <a href="#" ng-hide="thingToDisplay=='recording'" ng-click="thingToDisplay='recording'">View Recording</a>
+                            <a href="#" ng-hide="thingToDisplay=='recording' || selectedContainer.tracker.length < 1"
+                               ng-click="thingToDisplay='recording'">View Recording
+                                <span class="badge">{{selectedContainer.tracker.length}}</span> </a>
                             <a href="#" ng-show="thingToDisplay=='recording'" ng-click="thingToDisplay='scenario'">View Scenario</a>
                         </div>
 
