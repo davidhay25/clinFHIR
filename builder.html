@@ -26,6 +26,9 @@
 
     <script src="js/libs/angular-bootstrap-checkbox.js"></script>
     <style>
+
+
+
         #resourceGraph {
             width: 100%;
             height: 550px;
@@ -165,7 +168,7 @@
                     </div>
                 </div>
                 <div class="col-md-2 col-sm-2">
-                    <div class="navbar-text">
+                    <div class="navbar-text" ng-show="thingToDisplay=='scenario'">
                         <div><a href="#" ng-click="importResource()">Import resource</a></div>
                         <div ng-show="selectedContainer.showVersion"><a href="#" ng-click="toggleVersion()">Hide version</a></div>
                         <div ng-hide="!selectedContainer || selectedContainer.showVersion">
@@ -183,7 +186,7 @@
                         -->
                         <div>
                             <a href="#" ng-hide="thingToDisplay=='recording' || selectedContainer.tracker.length < 1"
-                               ng-click="thingToDisplay='recording'">View Recording
+                               ng-click="thingToDisplay='recording'">View all changes
                                 <span class="badge">{{selectedContainer.tracker.length}}</span> </a>
                             <a href="#" ng-show="thingToDisplay=='recording'" ng-click="thingToDisplay='scenario'">View Scenario</a>
                         </div>
@@ -214,7 +217,7 @@
 
                 <div class="col-md-2 col-sm-2">
 
-                    <div class="navbar-text">
+                    <div class="navbar-text" ng-show="thingToDisplay=='scenario'">
                         <div class="clickable" ng-click="validateAll()">Validate All</div>
                         <div class="clickable" ng-click="saveToFHIRServer()">Update Server</div>
                     </div>
@@ -563,6 +566,74 @@
 
                     <uib-tabset>
 
+                        <uib-tab heading="List">
+                            <br/>
+
+                            <div class="row"  style="height:550px; overflow-y: auto;" >
+                                <div class="col-md-12 col-sm-12">
+
+
+
+                                    <table class="table table-bordered table-condensed">
+                                        <tr><th>Type</th><th>Text</th><th>Valid</th></tr>
+                                        <tr ng-repeat="entry in selectedContainer.bundle.entry">
+                                            <td width="30%">
+                                                <div class='clickable' ng-click="selectResource(entry)">
+                                                    {{entry.resource.resourceType}}
+
+                                                    <span ng-show="entry.isProfile"
+                                                          uib-popover="{{entry.profile}}"
+                                                          popover-placement="right"
+                                                          popover-trigger="'mouseenter'"
+
+                                                          class="rounded-box profile">profile
+                                                    </span>
+                                                    <span ng-show="entry.isLogical"
+                                                          uib-popover="Logical models cannot be saved on the FHIR server"
+                                                          popover-placement="right"
+                                                          popover-trigger="'mouseenter'"
+                                                          class="rounded-box logical">logical
+                                                    </span>
+
+                                                </div>
+
+                                            </td>
+                                            <td><p ng-bind-html="entry.resource.text.div"></p></td>
+                                            <td>
+                                                <div ng-hide="entry.isLogical" ng-switch on="entry.valid" ng-click="validate(entry)">    <!-- todo - not a real bundlemember-->
+                                                    <div ng-switch-when="yes">
+                                                        <i class="glyphicon glyphicon-ok clickable pass"
+                                                           title="Resource is valid">
+                                                        </i>
+                                                    </div>
+                                                    <div ng-switch-when="no">
+                                                        <i class="glyphicon glyphicon-remove clickable fail"
+                                                           title="Resource is not valid">
+                                                        </i>
+                                                    </div>
+                                                    <div ng-switch-when="saved">
+                                                        <i class="glyphicon glyphicon-thumbs-up pass"
+                                                           title="Resource is not valid">
+                                                        </i>
+                                                    </div>
+                                                    <div ng-switch-default>
+                                                        <i class="glyphicon glyphicon-question-sign clickable"
+                                                           title="Validity not yet checked">
+                                                        </i>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+
+                            </div>
+
+
+
+                        </uib-tab>
+
+
                         <uib-tab heading="Description">
                             <br/>
 
@@ -772,73 +843,6 @@
 
 
 
-
-
-
-                        </uib-tab>
-
-                        <uib-tab heading="List">
-                            <br/>
-
-                            <div class="row"  style="height:550px; overflow-y: auto;" >
-                                <div class="col-md-12 col-sm-12">
-
-
-
-                                    <table class="table table-bordered table-condensed">
-                                        <tr><th>Type</th><th>Text</th><th>Valid</th></tr>
-                                        <tr ng-repeat="entry in selectedContainer.bundle.entry">
-                                            <td width="30%">
-                                                <div class='clickable' ng-click="selectResource(entry)">
-                                                    {{entry.resource.resourceType}}
-
-                                                    <span ng-show="entry.isProfile"
-                                                          uib-popover="{{entry.profile}}"
-                                                          popover-placement="right"
-                                                          popover-trigger="'mouseenter'"
-
-                                                          class="rounded-box profile">profile
-                                                    </span>
-                                                    <span ng-show="entry.isLogical"
-                                                          uib-popover="Logical models cannot be saved on the FHIR server"
-                                                          popover-placement="right"
-                                                          popover-trigger="'mouseenter'"
-                                                          class="rounded-box logical">logical
-                                                    </span>
-
-                                                </div>
-
-                                            </td>
-                                            <td><p ng-bind-html="entry.resource.text.div"></p></td>
-                                            <td>
-                                                <div ng-hide="entry.isLogical" ng-switch on="entry.valid" ng-click="validate(entry)">    <!-- todo - not a real bundlemember-->
-                                                    <div ng-switch-when="yes">
-                                                        <i class="glyphicon glyphicon-ok clickable pass"
-                                                           title="Resource is valid">
-                                                        </i>
-                                                    </div>
-                                                    <div ng-switch-when="no">
-                                                        <i class="glyphicon glyphicon-remove clickable fail"
-                                                           title="Resource is not valid">
-                                                        </i>
-                                                    </div>
-                                                    <div ng-switch-when="saved">
-                                                        <i class="glyphicon glyphicon-thumbs-up pass"
-                                                           title="Resource is not valid">
-                                                        </i>
-                                                    </div>
-                                                    <div ng-switch-default>
-                                                        <i class="glyphicon glyphicon-question-sign clickable"
-                                                           title="Validity not yet checked">
-                                                        </i>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-
-                            </div>
 
 
 
@@ -1276,18 +1280,24 @@
 
                             </uib-tab>
 
-                            <uib-tab heading="Changes">
+                            <uib-tab>
+                                <uib-tab-heading>Changes <span ng-show="tracker.length > 0" class="badge">{{tracker.length}}</span> </uib-tab-heading>
                                 <div ng-controller="sbHistoryCtrl">
                                     <ul class="list-group">
                                         <li ng-repeat="item in tracker" class="list-group-item">
 
-                                            {{item.details.path}} <pre>{{item.details.value | json}}</pre>
+                                            {{$index+1}}. <strong>{{item.details.path}}</strong>
+                                            <span ng-show="item.details.to">
+                                                <strong>--> {{item.details.to.resourceType}}/{{item.details.to.id}}</strong>
+                                            </span>
+
+                                            <pre ng-hide="item.details.to">{{item.details.value | json}}</pre>
                                         </li>
                                     </ul>
                                 </div>
                             </uib-tab>
 
-                            <uib-tab heading="Dev Views">
+                            <uib-tab heading="Dev Views" ng-show="1==2">
                                 <h3>Views for clinFHIR developer</h3>
                                 <em>This is development information used for debugging. Just ignore it...</em>
 

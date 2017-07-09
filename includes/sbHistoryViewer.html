@@ -27,6 +27,9 @@
                         <div ng-switch-when="dt">
                             {{$index}} <strong>Update:</strong> {{item.details.path}}
                         </div>
+                        <div ng-switch-when="link">
+                            {{$index}} <strong>Link: </strong>
+                        </div>
                     </div>
                     {{track.type}}
                 </li>
@@ -52,6 +55,14 @@
                                     <div class="leader">Value:</div>
 
                                     <pre>{{selectedItem.details.value | json}}</pre>
+                                </div>
+                                <div ng-switch-when="link">
+                                    <h3>Reference from: {{selectedItem.details.resourceType}}/{{selectedItem.id}}</h3>
+
+                                    <div><span class="leader">From: </span>{{selectedItem.details.path}}</div>
+                                    <div><span class="leader">To:</span>
+                                        {{selectedItem.details.to.resourceType}}/{{selectedItem.details.to.id}}</div>
+
                                 </div>
                             </div>
                         </div>

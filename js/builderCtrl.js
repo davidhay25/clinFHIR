@@ -48,23 +48,30 @@ angular.module("sampleApp")
             //when the resource changes, set the tracker array for that resource
             $scope.$watch(function(scope) { return scope.currentResource },
                 function(newValue, oldValue) {
-                    //console.log(newValue);
-                    if (newValue) {
-                        var trackId = newValue.resourceType + "/" + newValue.id;
-                        $scope.tracker.length = 0;
-                        $scope.selectedContainer.tracker.forEach(function (item) {
-                            var resourceType = item.details.resourceType;
-                            var id = resourceType + "/" + item.id;
-                            if (id == trackId && item.type == 'dt') {
-                                $scope.tracker.push(item)
-                            }
-                        });
-                        //console.log($scope.tracker)
-                    }
-
+                    refreshTrackerDisplay(newValue)
                 }
             );
 
+            function refreshTrackerDisplay(resource) {
+                if (resource) {
+                    var trackId = resource.resourceType + "/" + resource.id;
+                    $scope.tracker.length = 0;
+                    $scope.selectedContainer.tracker.forEach(function (item) {
+                        var resourceType = item.details.resourceType;
+                        var id = resourceType + "/" + item.id;
+                        if (id == trackId && (item.type == 'dt'|| item.type == 'link' )) {
+                            $scope.tracker.push(item)
+                        }
+                    });
+                }
+
+                //console.log($scope.tracker)
+            }
+
+            $scope.showTrackerValueDEP = function(item){
+                var ret = "<pre>" + angular.toJson(item.details.value,2) + "</pre>";
+                return ret
+            }
 
 
             //------------ scenario versioning
@@ -1210,6 +1217,7 @@ angular.module("sampleApp")
                     }).result.then(function () {
                         drawResourceTree($scope.currentResource);   //don't need to update the graph...
                         builderSvc.updateMostRecentVersion( $scope.selectedContainer,$scope.selectedContainer.bundle)
+                        refreshTrackerDisplay($scope.currentResource);
                     })
 
                 }
@@ -1877,6 +1885,11 @@ angular.module("sampleApp")
 
                 builderSvc.insertReferenceAtPath($scope.currentResource,pth,resource,insertPoint)
 
+                //update the tracker...
+                var details = {path:pth,resourceType: $scope.currentResource.resourceType,
+                    to:{resourceType:resource.resourceType,id:resource.id},ip:insertPoint}
+                sbHistorySvc.addItem('link',$scope.currentResource.id,true,details,$scope.selectedContainer);
+
                 makeGraph();    //this will update the list of all paths in this model...
                 drawResourceTree($scope.currentResource);
                 $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedContainer.bundle); //update the generated document
@@ -1902,7 +1915,7 @@ angular.module("sampleApp")
                 }
 
 
-
+                refreshTrackerDisplay($scope.currentResource);
 
             }
 
