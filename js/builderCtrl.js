@@ -53,7 +53,7 @@ angular.module("sampleApp")
             );
 
             function refreshTrackerDisplay(resource) {
-                if (resource) {
+                if (resource && $scope.selectedContainer && $scope.selectedContainer.tracker) {
                     var trackId = resource.resourceType + "/" + resource.id;
                     $scope.tracker.length = 0;
                     $scope.selectedContainer.tracker.forEach(function (item) {
