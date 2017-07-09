@@ -43,6 +43,30 @@ angular.module("sampleApp")
             $scope.recording = false;
 
 
+
+            $scope.tracker = [];    //tracker items for the currently selected resource...
+            //when the resource changes, set the tracker array for that resource
+            $scope.$watch(function(scope) { return scope.currentResource },
+                function(newValue, oldValue) {
+                    //console.log(newValue);
+                    if (newValue) {
+                        var trackId = newValue.resourceType + "/" + newValue.id;
+                        $scope.tracker.length = 0;
+                        $scope.selectedContainer.tracker.forEach(function (item) {
+                            var resourceType = item.details.resourceType;
+                            var id = resourceType + "/" + item.id;
+                            if (id == trackId && item.type == 'dt') {
+                                $scope.tracker.push(item)
+                            }
+                        });
+                        //console.log($scope.tracker)
+                    }
+
+                }
+            );
+
+
+
             //------------ scenario versioning
 
 
@@ -742,6 +766,7 @@ angular.module("sampleApp")
                     $scope.currentPatient = builderSvc.getPatientResource();
                     getExistingData( $scope.currentPatient)
                     isaDocument();
+                    //$rootScope.$emit('newSet',$scope.selectedContainer.bundle);     //eg for the tracker view
                 }
 
             }
@@ -1989,7 +2014,7 @@ angular.module("sampleApp")
                 var treeData = resourceCreatorSvc.buildResourceTree(newResource);
 
 
-                $scope.resourceAsArray =builderSvc.makeResourceArray(treeData);
+                //$scope.resourceAsArray =builderSvc.makeResourceArray(treeData);
 
                 //show the tree structure of this resource version
                 $('#builderResourceTree').jstree('destroy');

@@ -318,13 +318,9 @@
         </nav>
 
 
-        <!-- The 4 display modes - Library, Scenario Builder, Patient data, Recording  -->
+        <!-- The 4 display modes - Library, Scenario Builder, Patient data, Recording/tracker  -->
 
         <div ng-show="thingToDisplay=='recording'" ng-controller="sbHistoryCtrl">
-            <div class="banner">
-                Current recording
-
-            </div>
             <ng-include src="'/includes/sbHistoryViewer.html'"></ng-include>
         </div>
 
@@ -1278,6 +1274,17 @@
 
                                 </uib-tabset>
 
+                            </uib-tab>
+
+                            <uib-tab heading="Changes">
+                                <div ng-controller="sbHistoryCtrl">
+                                    <ul class="list-group">
+                                        <li ng-repeat="item in tracker" class="list-group-item">
+
+                                            {{item.details.path}} <pre>{{item.details.value | json}}</pre>
+                                        </li>
+                                    </ul>
+                                </div>
                             </uib-tab>
 
                             <uib-tab heading="Dev Views">

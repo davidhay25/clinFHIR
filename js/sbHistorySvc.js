@@ -13,7 +13,7 @@ angular.module("sampleApp").service('sbHistorySvc', function($localStorage) {
             container.tracker.push(item)
            // console.log(history)
         },
-        getHistory: function() {
+        getHistoryDEP: function() {
             return history;
         }
 

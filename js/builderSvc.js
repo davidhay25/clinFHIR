@@ -58,8 +58,8 @@ angular.module("sampleApp")
         objColours.Medication = '#FF9900';
 
         return {
-            makeResourceArray : function(treeData) {
-                console.log(treeData)
+            makeResourceArrayDEP : function(treeData) {
+               // console.log(treeData)
                 var ar = []
                 ar.push({title:'title',value:'value'})
            //     treeData.forEach(function (node) {

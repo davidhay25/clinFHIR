@@ -8,27 +8,40 @@
         }
     </style>
 
+
+    <div class="banner">
+        Current recording
+        <select ng-model="input.filterResource" ng-change="applyFilter(input.filterResource)"
+                ng-options="filter for filter in filterResources"></select>
+    </div>
+
     <div class="row">
-        <div class="col-md-2 col-sm-2">
+        <div class="col-md-4 col-sm-4">
             <ul class="list-group">
-                <li ng-repeat="track in selectedContainer.tracker" class="list-group-item"
-                    ng-click="selectItem(track)" style="cursor: pointer">
+                <li ng-repeat="item in selectedContainer.tracker" class="list-group-item"
+                    ng-click="selectItem(item)" style="cursor: pointer" ng-show="showItem(item)">
+                    <div ng-switch on="item.type">
+                        <div ng-switch-when="addCore">
+                            {{$index}} <strong>Add resource:</strong> {{item.details.resourceType}}
+                        </div>
+                        <div ng-switch-when="dt">
+                            {{$index}} <strong>Update:</strong> {{item.details.path}}
+                        </div>
+                    </div>
                     {{track.type}}
                 </li>
             </ul>
         </div>
-        <div class="col-md-10 col-sm-10">
+        <div class="col-md-8 col-sm-8">
             <uib-tabset>
                 <uib-tab heading="Details">
 
                     <div class="row">
                         <div class="col-sm-8 col-md-8">
 
-
-
                             <div ng-switch on="selectedItem.type">
                                 <div ng-switch-when="addCore">
-                                    <h3>Core resource type added: {{selectedItem.details.resourceType}}</h3>
+                                    <h3>Core resource type added: {{selectedItem.details.resourceType}}/{{selectedItem.id}}</h3>
                                 </div>
 
                                 <div ng-switch-when="dt">
