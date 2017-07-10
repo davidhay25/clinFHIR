@@ -11,75 +11,107 @@
 
     <div class="banner">
         Current recording
-        <select ng-model="input.filterResource" ng-change="applyFilter(input.filterResource)"
+        <select ng-model="input.filterResource" ng-change="makeReport()"
                 ng-options="filter for filter in filterResources"></select>
     </div>
 
-    <div class="row">
-        <div class="col-md-4 col-sm-4">
-            <ul class="list-group">
-                <li ng-repeat="item in selectedContainer.tracker" class="list-group-item"
-                    ng-click="selectItem(item)" style="cursor: pointer" ng-show="showItem(item)">
-                    <div ng-switch on="item.type">
-                        <div ng-switch-when="addCore">
-                            {{$index}} <strong>Add resource:</strong> {{item.details.resourceType}}
-                        </div>
-                        <div ng-switch-when="dt">
-                            {{$index}} <strong>Update:</strong> {{item.details.path}}
-                        </div>
-                        <div ng-switch-when="link">
-                            {{$index}} <strong>Link: </strong>
-                        </div>
-                    </div>
-                    {{track.type}}
-                </li>
-            </ul>
-        </div>
-        <div class="col-md-8 col-sm-8">
-            <uib-tabset>
-                <uib-tab heading="Details">
 
-                    <div class="row">
-                        <div class="col-sm-8 col-md-8">
+    <uib-tabset>
+        <uib-tab heading="Details">
+            <br/>
 
-                            <div ng-switch on="selectedItem.type">
+
+            <div class="row">
+                <div class="col-md-4 col-sm-4">
+                    <ul class="list-group">
+                        <li ng-repeat="item in selectedContainer.tracker" class="list-group-item"
+                            ng-click="selectItem($index)" style="cursor: pointer" ng-show="showItem(item)">
+                            <div ng-switch on="item.type">
                                 <div ng-switch-when="addCore">
-                                    <h3>Core resource type added: {{selectedItem.details.resourceType}}/{{selectedItem.id}}</h3>
+                                    {{$index+1}} <strong>Add resource:</strong> {{item.details.resourceType}}/{{item.id}}
                                 </div>
-
                                 <div ng-switch-when="dt">
-                                    <h3>Element added to resource: {{selectedItem.details.resourceType}}/{{selectedItem.id}}</h3>
-
-                                    <div><span class="leader">Path: </span>{{selectedItem.details.path}}</div>
-                                    <div><span class="leader">DataType:</span> {{selectedItem.details.dataType}}</div>
-                                    <div class="leader">Value:</div>
-
-                                    <pre>{{selectedItem.details.value | json}}</pre>
+                                    {{$index+1}} <strong>Update:</strong> {{item.details.path}}
                                 </div>
                                 <div ng-switch-when="link">
-                                    <h3>Reference from: {{selectedItem.details.resourceType}}/{{selectedItem.id}}</h3>
-
-                                    <div><span class="leader">From: </span>{{selectedItem.details.path}}</div>
-                                    <div><span class="leader">To:</span>
-                                        {{selectedItem.details.to.resourceType}}/{{selectedItem.details.to.id}}</div>
-
+                                    {{$index+1}} <strong>Link: </strong> {{item.details.path}} -->
+                                    {{item.details.to.resourceType}}/{{item.details.to.id}}
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-sm-4 col-md-4">
+                            {{track.type}}
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-8 col-sm-8">
+                    <uib-tabset>
+                        <uib-tab heading="Details">
 
-                        </div>
-                    </div>
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12">
 
-                </uib-tab>
-                <uib-tab heading="Json">
-                    <pre>{{selectedItem | json}} </pre>
-                </uib-tab>
-            </uib-tabset>
+                                    <div ng-switch on="selectedItem.type">
+                                        <div ng-switch-when="addCore">
+                                            <h3>Core resource type added: {{selectedItem.details.resourceType}}/{{selectedItem.id}}</h3>
+                                        </div>
 
-        </div>
-    </div>
+                                        <div ng-switch-when="dt">
+                                            <h3>Element added to resource: {{selectedItem.details.resourceType}}/{{selectedItem.id}}</h3>
 
+                                            <div><span class="leader">Path: </span>{{selectedItem.details.path}}</div>
+                                            <div><span class="leader">DataType:</span> {{selectedItem.details.dataType}}</div>
+                                            <div class="leader">Value:</div>
+
+                                            <pre>{{selectedItem.details.value | json}}</pre>
+                                        </div>
+                                        <div ng-switch-when="link">
+                                            <h3>Reference from: {{selectedItem.details.resourceType}}/{{selectedItem.id}}</h3>
+
+                                            <div><span class="leader">From: </span>{{selectedItem.details.path}}</div>
+                                            <div><span class="leader">To:</span>
+                                                {{selectedItem.details.to.resourceType}}/{{selectedItem.details.to.id}}</div>
+
+                                        </div>
+                                    </div>
+                                    <div ng-show="selectedItem"><span class="leader">Notes: </span>
+                                        <textarea rows="5" class="form-control"
+                                                  placeholder="Enter any notes. They will automatically be saved."
+                                                  ng-model="selectedItem.notes"></textarea>
+
+                                        <a href="#"  class="pull-right" ng-click="deleteItem($index)">Delete entry</a>
+
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+
+                        </uib-tab>
+                        <uib-tab heading="Json">
+                            <pre>{{selectedItem | json}} </pre>
+                        </uib-tab>
+                    </uib-tabset>
+
+                </div>
+            </div>
+        </uib-tab>
+        <uib-tab heading="Report">
+            <br/>
+            <table class="table table-condensed table-bordered">
+                <tr><th>Step</th><th>Action</th><th>Detail</th><th>Notes</th></tr>
+                <tr ng-repeat="row in report">
+                    <td>{{$index+1}}</td>
+                    <td>{{row.action}}</td>
+                    <td>
+                        <div ng-repeat="line in row.detail">{{line}}</div>
+                        <pre ng-show="row.json">{{row.json | json}}</pre>
+                    </td>
+                    <td width="25%">{{row.notes}}</td>
+                </tr>
+            </table>
+
+        </uib-tab>
+    </uib-tabset>
 
 
 </div>

@@ -162,8 +162,8 @@
                         </div>
 
 
-                        <a ng-show = "showSelector" href="#" ng-click="toggleSelector()">Show Selector</a>
-                        <a ng-hide = "showSelector" href="#" ng-click="toggleSelector()">Hide Selector</a>
+                        <a ng-show = "showSelector && thingToDisplay=='scenario' " href="#" ng-click="toggleSelector()">Show Selector</a>
+                        <a ng-hide = "showSelector || thingToDisplay!=='scenario'" href="#" ng-click="toggleSelector()">Hide Selector</a>
 
                     </div>
                 </div>

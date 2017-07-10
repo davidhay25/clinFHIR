@@ -38,11 +38,8 @@ angular.module("sampleApp")
 
             refreshLibrary();       //initial load...
 
-
             //recording
             $scope.recording = false;
-
-
 
             $scope.tracker = [];    //tracker items for the currently selected resource...
             //when the resource changes, set the tracker array for that resource
@@ -76,13 +73,10 @@ angular.module("sampleApp")
 
             //------------ scenario versioning
 
-
-
             $scope.toggleVersion = function(){
                 $scope.selectedContainer.showVersion = ! $scope.selectedContainer.showVersion;
                 console.log($scope.selectedContainer.showVersion)
             };
-
 
             $scope.setNewScenarioVersion = function(){
                 //set the current bundle as a version...
@@ -150,7 +144,6 @@ angular.module("sampleApp")
                 }
 
             };
-
 
             $scope.displayServers = "Conformance: " + appConfigSvc.getCurrentConformanceServer().name
                 + "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>"
