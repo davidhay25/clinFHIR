@@ -124,9 +124,22 @@ angular.module("sampleApp")
                 $scope.selectedItemInx = inx;
             };
 
-            $scope.saveNote = function(){
-
+            $scope.moveItemUp = function (evt,inx) {
+                evt.stopPropagation();
+                var list = $scope.selectedContainer.tracker;
+                var b = list[inx-1];
+                list[inx-1] = list[inx];
+                list[inx] = b;
+                $scope.makeReport();
             }
 
+            $scope.moveItemDn = function (evt,inx) {
+                evt.stopPropagation();
+                var list = $scope.selectedContainer.tracker;
+                var b = list[inx+1];
+                list[inx+1] = list[inx];
+                list[inx] = b;
+                $scope.makeReport();
+            }
 
     })

@@ -26,6 +26,18 @@
                     <ul class="list-group">
                         <li ng-repeat="item in selectedContainer.tracker" class="list-group-item"
                             ng-click="selectItem($index)" style="cursor: pointer" ng-show="showItem(item)">
+
+                            <span class="pull-right">
+                                <i class="glyphicon glyphicon-arrow-up clickable"
+                                   ng-hide = "$index == 0"
+                                   ng-click="moveItemUp($event,$index)"></i>
+
+                                <i class="glyphicon glyphicon-arrow-down clickable"
+                                   ng-hide = "$index == (selectedContainer.tracker.length -1)"
+                                   ng-click="moveItemDn($event,$index)"></i>
+
+                            </span>
+
                             <div ng-switch on="item.type">
                                 <div ng-switch-when="addCore">
                                     {{$index+1}} <strong>Add resource:</strong> {{item.details.resourceType}}/{{item.id}}
@@ -38,7 +50,9 @@
                                     {{item.details.to.resourceType}}/{{item.details.to.id}}
                                 </div>
                             </div>
-                            {{track.type}}
+
+
+
                         </li>
                     </ul>
                 </div>
@@ -75,6 +89,7 @@
                                     <div ng-show="selectedItem"><span class="leader">Notes: </span>
                                         <textarea rows="5" class="form-control"
                                                   placeholder="Enter any notes. They will automatically be saved."
+                                                  ng-blur="makeReport()"
                                                   ng-model="selectedItem.notes"></textarea>
 
                                         <a href="#"  class="pull-right" ng-click="deleteItem($index)">Delete entry</a>
