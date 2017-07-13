@@ -5,9 +5,58 @@ angular.module("sampleApp").service('profileDiffSvc',
 
 
     return {
+
+        findProfiles : function(svr,type) {
+            //var svr =  appConfigSvc.getCurrentConformanceServer();
+            var searchString = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition?";
+
+            if (svr.version == 3) {
+                searchString += "kind=resource&base=http://hl7.org/fhir/StructureDefinition/"+$scope.results.profileType.name
+            } else {
+                //var base = "http://hl7.org/fhir/StructureDefinition/DomainResource";
+                searchString += "kind=resource&type="+baseType.name;
+            }
+
+            //console.log(searchString)
+            $scope.waiting = true;
+
+            $http.get(searchString).then(       //first get the base type...
+                function(data) {
+                    $scope.profilesOnBaseType = data.data;
+
+                    var url1 =  appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/"+baseType.name;
+                    $http.get(url1).then(       //and then the profiles on that server
+                        function (data) {
+                            if (data.data) {
+                               // console.log(data.data)
+                                $scope.profilesOnBaseType.entry = $scope.profilesOnBaseType.entry || []
+                                $scope.profilesOnBaseType.entry.push({resource:data.data});
+
+                            }
+
+                        },
+                        function () {
+                            //just ignore if we don't fine the base..
+                        }
+                    ).finally(function () {
+                       // console.log($scope.profilesOnBaseType)
+                    })
+
+                },
+                function(err){
+                    console.log(err)
+                }
+            ).finally(function () {
+                $scope.waiting = false;
+            });
+
+        },
+
+
         makeLogicalModelFromTreeData : function(SD,inTreeData) {
             //so this receives the treeData array that was created by profileCreatorSvc.makeProfileDisplayFromProfile()
             //and we need to convert it into the format used by the logicalmodel builder as they ar enot the same! TODO At some point cold be worth looking at whether they can be made the same...
+
 
             var deferred = $q.defer();
 
@@ -37,7 +86,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                 }
 
                 if (arPath[arPath.length-1] == 'extension') {
-                    console.log(el)
+                   // console.log(el)
                     include = false;
                     if (el.type) {
                         el.type.forEach(function (typ) {
@@ -67,7 +116,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
             $q.all(queries).then(
                 function () {
-                    console.log('DONE')
+                   // console.log('DONE')
                     //now that we have all the analysis objects,
 
 
@@ -96,7 +145,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                         if (bundle && bundle.entry) {
                             var extensionDef = bundle.entry[0].resource;     //should really only be one...
                             var analysis = Utilities.analyseExtensionDefinition3(extensionDef);
-                            console.log(analysis)
+                            //console.log(analysis)
                             if (analysis.name) {
                                 var ar = el.path.split('.');
                                 ar[ar.length-1] = analysis.name;
@@ -311,7 +360,8 @@ angular.module("sampleApp").service('profileDiffSvc',
 
 
         },
-        makeCanonicalObj : function(SD) {
+        makeCanonicalObj : function(SD,svr) {
+            //svr is the current server (may not be the same as the one in appConfig - eg for the comparison view...
             var deferred = $q.defer();
             var queries = [];   //retrieve extension definitions
             var quest = {resourceType:'Questionnaire',status:'draft',item:[]}   //questionnaire for form
@@ -443,7 +493,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                                         item.extension.url = typ.profile
                                     }
                                     item.originalPath += '_'+item.extension.url;    //to make it unique
-                                    queries.push(resolveExtensionDefinition(item))
+                                    queries.push(resolveExtensionDefinition(item,svr))
                                 }
                             })
                         }
@@ -522,7 +572,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
             return deferred.promise
 
-            function resolveExtensionDefinition(item) {
+            function resolveExtensionDefinition(item,svr) {
                 //console.log(item);
                 var deferred = $q.defer();
                 var url = item.extension.url;
@@ -534,7 +584,12 @@ angular.module("sampleApp").service('profileDiffSvc',
                     deferred.resolve()
                 } else {
                    // extensionDefinitionCache[url] = 'x'
-                    GetDataFromServer.findConformanceResourceByUri(url).then(
+                    //if a server was passed in then use that, otherwise use the default one...
+                    var serverUrl = appConfigSvc.getCurrentConformanceServer().url;
+                    if (svr) {
+                        serverUrl = svr.url;
+                    }
+                    GetDataFromServer.findConformanceResourceByUri(url,serverUrl).then(
                         function (sdef) {
                             //console.log(sdef);
                             extensionDefinitionCache[url] = sdef
@@ -578,7 +633,7 @@ angular.module("sampleApp").service('profileDiffSvc',
             var deferred = $q.defer();
             if (extensionDefinitionCache[url]) {
                 //note that this is an async call - some duplicate calls are inevitible
-                console.log('cache')
+                //console.log('cache')
                 deferred.resolve(extensionDefinitionCache[url]);
             } else {
                 // extensionDefinitionCache[url] = 'x'
@@ -598,7 +653,10 @@ angular.module("sampleApp").service('profileDiffSvc',
         analyseDiff : function(primary,secondary) {
             //pass in the canonical model (NOT the SD or ED)
             //var analysis = {};
-return;
+            if (!primary || !secondary) {
+                return;
+            }
+
             secondary.report = {fixed:[],missing:[],valueSet:[]};
 
             var primaryHash = {};
@@ -607,10 +665,6 @@ return;
                 primaryHash[path]= item
             });
 
-          //  console.log(primaryHash)
-            //fields in secondary, not in primary
-            //analysis.notInPrimary = []
-
 
             secondary.item.forEach(function (item) {
 
@@ -618,7 +672,7 @@ return;
 
                 //may want to check the primary...
                 if (item.fixed) {
-                    console.log(item.fixed)
+                    //console.log(item.fixed)
                    // secondary.report.fixed = secondary.report.fixed || []
                     secondary.report.fixed.push({item:item,fixed:item.fixed})
 

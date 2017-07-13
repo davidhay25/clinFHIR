@@ -8,6 +8,7 @@ angular.module("sampleApp")
             $scope.appConfigSvc = appConfigSvc;
 
             $scope.history = [];        //
+            $scope.input.tabShowing='single'
 
 
             //see if this page was loaded from a shortcut
@@ -32,7 +33,7 @@ angular.module("sampleApp")
                         GetDataFromServer.adHocFHIRQuery(url).then(
                             function(data){
                                 var model = data.data;
-                                console.log(model);
+                               // console.log(model);
                               //  $scope.hideLMSelector();            //only want to see this model...
                                // selectEntry({resource:model});       //select the model
                             },
@@ -78,6 +79,80 @@ angular.module("sampleApp")
                     }
                 )
             }
+
+
+            //load a profile into the given side ('left','right')
+            $scope.loadCompProfiles = function(side) {
+                var svr = $scope.input['compareServer'+side];
+                var type = $scope.input.compareResourceType;
+
+                if (svr && type) {
+                    //load the matching profiles...
+
+                    var searchString = svr.url + "StructureDefinition?";
+
+                    if (svr.version == 3) {
+                        searchString += "kind=resource&base=http://hl7.org/fhir/StructureDefinition/"+type.name
+                    } else {
+                        //var base = "http://hl7.org/fhir/StructureDefinition/DomainResource";
+                        searchString += "kind=resource&type="+type.name;
+                    }
+
+                    console.log(searchString)
+                    $scope.waiting = true;
+
+                    $http.get(searchString).then(       //first the profiles on that server ...
+                        function(data) {
+                            $scope.input['matchingProfiles'+side] = data.data;  //a bundle
+                            console.log(data.data)
+                        },
+                    function (err) {
+                        console.log(err)
+                    }).finally(function () {
+                        $scope.waiting = false;
+                    });
+                }
+
+                console.log(side,svr,type)
+            };
+
+            //select a single profile to display as a table...
+            $scope.selectCompProfile = function(entry,side) {
+              //  console.log(entry)
+                var canonicalName = 'canonical'+side;
+                var profilesBdl = $scope.input['matchingProfiles'+side];
+                if (profilesBdl && profilesBdl.entry) {
+                    profilesBdl.entry.forEach(function (p) {
+                        if (p.resource.url == entry.resource.url) {
+
+                            setCanonical(p.resource,canonicalName)
+
+                            profileDiffSvc.analyseDiff($scope.canonicalLeft,$scope.canonicalRight)
+
+                        }
+
+                    })
+                }
+
+
+                function setCanonical(SD,canonicalName) {
+                    profileDiffSvc.makeCanonicalObj(SD).then(
+                        function (vo) {
+                            //console.log(vo)
+                            $scope[canonicalName] = vo.canonical;
+
+                        },function (err) {
+                            console.log(err)
+                        }
+                    )
+                }
+
+
+
+
+
+            };
+
 
             function addToHistory(type,resource) {
                 $scope.history.push({type:type,resource:resource})
@@ -127,18 +202,18 @@ angular.module("sampleApp")
                     searchString += "kind=resource&type="+baseType.name;
                 }
 
-                console.log(searchString)
+                //console.log(searchString)
                 $scope.waiting = true;
 
-                $http.get(searchString).then(
+                $http.get(searchString).then(       //first the profiles on that server ...
                     function(data) {
                         $scope.profilesOnBaseType = data.data;
 
                         var url1 =  appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/"+baseType.name;
-                        $http.get(url1).then(
+                        $http.get(url1).then(       //and then get the base type
                             function (data) {
                                 if (data.data) {
-                                    console.log(data.data)
+                                    //console.log(data.data)
                                     $scope.profilesOnBaseType.entry = $scope.profilesOnBaseType.entry || []
                                     $scope.profilesOnBaseType.entry.push({resource:data.data});
 
@@ -149,15 +224,8 @@ angular.module("sampleApp")
                                 //just ignore if we don't fine the base..
                             }
                         ).finally(function () {
-                            console.log($scope.profilesOnBaseType)
+                            //console.log($scope.profilesOnBaseType)
                         })
-
-
-
-
-
-
-
 
                     },
                     function(err){
@@ -195,7 +263,7 @@ angular.module("sampleApp")
             $scope.selectIG = function(IG){
                 clearRightPane();
                 $scope.currentIG=IG;     //the List the holds this collection
-                console.log(IG)
+                //console.log(IG)
                 //now pull out the various artifacts into an easy to use object
                 $scope.artifacts = {}
                 $scope.currentIG.package.forEach(function (package) {
@@ -209,7 +277,7 @@ angular.module("sampleApp")
                 })
             };
 
-            //-------- functions and prperties to enable the valueset viewer
+            //-------- functions and properties to enable the valueset viewer
             $scope.showVSBrowserDialog = {};
             $scope.showVSBrowser = function(vs) {
                 $scope.showVSBrowserDialog.open(vs);        //the open method defined in the directive...
@@ -230,13 +298,9 @@ angular.module("sampleApp")
                 });
             };
 
-
-
-
-
             //select an extension from within a profile...
             $scope.selectExtensionFromProfile = function (itemExtension) {
-                console.log(itemExtension);
+                //console.log(itemExtension);
 
                 profileDiffSvc.getSD(itemExtension.url).then(
                     function (SD) {
@@ -247,15 +311,13 @@ angular.module("sampleApp")
                     }
                 )
 
-            }
+            };
 
-
-
-            //when an item is selected in the accordian for display in the roght pane...
+            //when an item is selected in the accordian for display in the right pane...
             $scope.selectItem = function(item,type){
 
 
-                console.log(item.type)
+                //console.log(item.type)
 
                 clearRightPane()
 
@@ -270,7 +332,7 @@ angular.module("sampleApp")
                }
 */
 
-               console.log(item)
+               //console.log(item)
 
                if (type == 'terminology') {
                    //really only works for ValueSet at this point...
@@ -317,8 +379,8 @@ angular.module("sampleApp")
                    //console.log($scope.selectedItem.url)
                    GetDataFromServer.findConformanceResourceByUri(url).then(
                        function(SD){
-                           console.log(item.url)
-                           console.log(SD)
+                          // console.log(item.url)
+                          // console.log(SD)
                            setupProfile(SD)
                            addToHistory('profile',SD)
 
@@ -419,7 +481,7 @@ angular.module("sampleApp")
                     }
                 }
 
-                console.log(baseType)
+               // console.log(baseType)
                 if (baseType) {
                     profileDiffSvc.findProfilesOnBase(baseType).then(
                         function (bundle) {
@@ -439,7 +501,8 @@ angular.module("sampleApp")
                 profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
                     function(vo) {
 
-                        console.log(vo)
+                      //  console.log(vo)
+/* - not sure why I'm doing this - warning: the SD is mutated by the function!
 
                         profileDiffSvc.makeLogicalModelFromTreeData($scope.selectedSD,vo.treeData).then(
                             function (treeData) {
@@ -447,7 +510,7 @@ angular.module("sampleApp")
                             }
                         )
 
-
+*/
 
 
                         $('#profileTree1').jstree('destroy');
@@ -461,7 +524,7 @@ angular.module("sampleApp")
                             }
                         ).on('select_node.jstree', function (e, data) {
                             if (data.node) {
-                                console.log(data.node && data.node.data);
+                               // console.log(data.node && data.node.data);
                                 $scope.selectedED1 = data.node.data.ed;
                                 $scope.$digest();       //as the event occurred outside of angular...
 
@@ -483,7 +546,7 @@ angular.module("sampleApp")
                     delete $scope.selectedED;
                     //console.log(data)
                     if (data.node) {
-                        console.log(data.node && data.node.data);
+                        //console.log(data.node && data.node.data);
                         $scope.selectedED = data.node.data.ed;
                         $scope.$digest();       //as the event occurred outside of angular...
 
@@ -508,7 +571,6 @@ angular.module("sampleApp")
                 $scope.profileReport = profileDiffSvc.reportOneProfile(SD);
 
             }
-
 
             $scope.showEDDEP = function(ed) {
                 //console.log(ed)

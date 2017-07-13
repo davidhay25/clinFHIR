@@ -32,6 +32,11 @@ angular.module("sampleApp")
 
             $scope.save = function(){
 
+                //>>>>>> just for new maker...
+                if ($scope.hashPath.noSave) {
+                    $scope.$close($scope.input.dt);
+                    return;
+                }
 
                 var valueSaved = builderSvc.addPropertyValue(insertPoint,
                     $scope.hashPath,

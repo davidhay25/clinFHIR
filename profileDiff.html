@@ -164,6 +164,19 @@
         </div>
     </nav>
 
+    <span class="pull-left" ng-show="input.tabShowing=='comp'">
+
+         <select class="form-control" ng-model="input.compareResourceType"
+                 ng-change="loadCompProfiles('Left')"
+                 ng-options="typ.name for typ in allResourceTypes">
+        </select>
+    </span>
+
+
+    <uib-tabset>
+        <uib-tab heading="Single Detail" select="input.tabShowing = 'single'" class="pull-right">
+
+            <br/>
 
             <div class="row">
                 <div class="col-sm-3 col-md-3">
@@ -291,15 +304,19 @@
 
                                     </div>
                                     <div class="col-sm-8 col-md-8">
+                                        <!--
                                         <div>
                                             <div class="pull-right">
                                                 <a href="#" ng-click="exportToLogical()">Export</a>
                                             </div>
                                         </div>
-                                        <pre>{{lm | json}}</pre>
-                                        <div ng-show="selectedED1" class="myScroll">
+                                        -->
+                                        <pre>{{selectedSD | json}}</pre>
+                                       <!-- <pre>{{lm | json}}</pre> -->
+                                       <!-- <div ng-show="selectedED1" class="myScroll">
                                             <pre>{{selectedED1 | json}}</pre>
                                         </div>
+                                        -->
                                     </div>
                                 </div>
                             </uib-tab>
@@ -577,7 +594,77 @@
                 </div>
             </div>
 
+        </uib-tab>
+        <uib-tab heading="Comparison" class="pull-right" select="input.tabShowing = 'comp'">
+            <br/>
 
+            <div class="row">
+<!--
+                <div class="col-md-2">
+
+                    <select class="form-control" ng-model="input.compareResourceType"
+                            ng-change="loadCompProfiles('Left')"
+                            ng-options="typ.name for typ in allResourceTypes">
+                    </select>
+                </div>
+                -->
+
+                <div class="col-md-2">
+                    <select class="form-control" ng-model="input.compareServerLeft"
+                            ng-change="loadCompProfiles('Left')"
+                            ng-options="svr.name for svr in appConfigSvc.getAllServers()">
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <select class="form-control" ng-model="input.profileLeft"
+                            ng-change="selectCompProfile(input.profileLeft,'Left')"
+                            ng-options="entry.resource.url for entry in input.matchingProfilesLeft.entry">
+                    </select>
+                </div>
+
+
+                <div class="col-md-2" style="border-left: solid 1px gray">
+                    <select class="form-control" ng-model="input.compareServerRight"
+                            ng-change="loadCompProfiles('Right')"
+                            ng-options="svr.name for svr in appConfigSvc.getAllServers()">
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <select class="form-control" ng-model="input.profileRight"
+                            ng-change="selectCompProfile(input.profileRight,'Right')"
+                            ng-options="entry.resource.url for entry in input.matchingProfilesRight.entry">
+                    </select>
+                </div>
+
+            </div>
+
+
+
+
+
+
+            <div class="row">
+                <div class="col-md-6">
+                    <profile-table items="canonicalLeft.item" select-item="selectItem"
+                                   show-e-d-e="showED" select-extension-from-profile-e="selectExtensionFromProfile"
+                                   show-value-set-e="showValueSet"></profile-table>
+
+                </div>
+                <div class="col-md-6" style="border-left: solid 1px gray">
+                    <profile-table items="canonicalRight.item" select-item="selectItem"
+                                   show-e-d-e="showED" select-extension-from-profile-e="selectExtensionFromProfile"
+                                   show-value-set-e="showValueSet"></profile-table>
+
+                </div>
+            </div>
+
+
+
+
+        </uib-tab>
+    </uib-tabset>
 
 
 

@@ -1127,9 +1127,17 @@ angular.module("sampleApp")
                     //this tests for an insert point not on the root, where the immediate predecessor is a BBE with a multiplecity of 1 (careplan.activity.detail)
                     ar.pop();       //pop off the segment we are inserting at
                     var testPath = ar.join('.');
-                    var info = builderSvc.getEDInfoForPath(testPath);
+                    var info = builderSvc.getEDInfoForPath(testPath);   //this is the parent
 
                     var segmentName = ar[ar.length-1];
+
+                    //this is a trial for nutritionrequest
+                    if (ar.length == 3) {
+                        var pSegName = ar[1];
+                        insertPoint = insertPoint[pSegName]
+                    }
+
+
                     if (info.isBBE) {
 
                         if (! info.isMultiple) {
@@ -1142,6 +1150,7 @@ angular.module("sampleApp")
                             }
                         } else {
                             //eg Organization.contact
+
                             if (insertPoint[segmentName]) {
                                 insertPoint = insertPoint[segmentName][0]
                             }
@@ -1165,7 +1174,6 @@ angular.module("sampleApp")
 
 
                     }
-
 
                 }
 
@@ -1857,7 +1865,7 @@ angular.module("sampleApp")
                     alert('cannot add new branch');
                 }
 
-            }
+            };
 
             $scope.linkToResource = function(pth,resource,ref){
 
@@ -1880,7 +1888,8 @@ angular.module("sampleApp")
 
                 //update the tracker...
                 var details = {path:pth,resourceType: $scope.currentResource.resourceType,
-                    to:{resourceType:resource.resourceType,id:resource.id},ip:insertPoint}
+                    to:{resourceType:resource.resourceType,id:resource.id},ip:insertPoint};
+
                 sbHistorySvc.addItem('link',$scope.currentResource.id,true,details,$scope.selectedContainer);
 
                 makeGraph();    //this will update the list of all paths in this model...
