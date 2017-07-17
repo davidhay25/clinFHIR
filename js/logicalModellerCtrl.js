@@ -1840,6 +1840,7 @@ angular.module("sampleApp")
                 }).result.then(
                     function(result) {
 
+
                         if (result.editNode) {
                             //editing an existing node - replace the data property in the node with the results......
                             $scope.treeData.forEach(function (item, index) {
@@ -1863,7 +1864,62 @@ angular.module("sampleApp")
                                 state: {opened: true}
                             };
                             newNode.data = angular.copy(result);
+
                             $scope.treeData.push(newNode);
+
+
+                            if (result.extensionAnalyse && result.extensionAnalyse.isComplexExtension && result.extensionAnalyse.children) {
+                                //this is a complex extension, so need to add the children...
+
+                                var parentId = newNode.id;
+                                result.extensionAnalyse.children.forEach(function (child) {
+
+                                  //  var parentId = newId;       //from the node entered above...
+                                    var newId = 't' + new Date().getTime() + Math.random(1000);
+                                    var newNode = {
+                                        "id": newId,
+                                        "parent": parentId,
+                                        "text": child.code,
+                                        state: {opened: true}
+                                    };
+                                    newNode.data = {ed:child.ed}    //not sure about this...
+                                    newNode.data.name = child.code;
+                                    newNode.data.short = child.code;
+                                    newNode.data.description = child.ed.definition;
+                                    newNode.data.type = child.ed.type;
+                                    //complex types start with uppercase...
+                                    if (child.ed.type && child.ed.type[0].code) {
+                                        if (child.ed.type[0].code.substr(0,1) === child.ed.type[0].code.substr(0,1).toUpperCase()) {
+                                            child.ed.type[0].isComplexDT = true;
+                                        }
+                                    }
+
+
+
+
+                                    newNode.data.min = child.min;
+                                    newNode.data.max = child.max;
+
+                                    if (child.boundValueSet) {
+                                        newNode.data.selectedValueSet = {strength: child.bindingStrength};
+                                        newNode.data.selectedValueSet.vs = {url: child.boundValueSet};
+                                    }
+
+
+                                    /* if (ed.binding) {
+                                     item.data.selectedValueSet = {strength: ed.binding.strength};
+                                     item.data.selectedValueSet.vs = {url: ed.binding.valueSetUri};
+                                     item.data.selectedValueSet.vs.name = ed.binding.description;
+                                     }*/
+
+                                    $scope.treeData.push(newNode);
+
+
+
+                                })
+                                
+                            }
+
 
 
                             //the currently selected parent node type should now be set to 'BackBone element'

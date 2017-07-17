@@ -1,7 +1,7 @@
 
 angular.module("sampleApp")
     .controller('editLogicalNodeCtrl',
-        function ($scope,allDataTypes,editNode,parentPath,RenderProfileSvc,appConfigSvc, allResourceTypes,treeData,
+        function ($scope,allDataTypes,editNode,parentPath,RenderProfileSvc,appConfigSvc, allResourceTypes,treeData,Utilities,
                   findNodeWithPath,rootForDataType,igSvc,references,baseType,$uibModal, logicalModelSvc, modalService) {
 
             $scope.allResourceTypes = allResourceTypes;
@@ -80,8 +80,6 @@ angular.module("sampleApp")
                     isDiscriminatorRequired();      //true if there is another fhir mapping the same
                     $scope.input.mappingPathV2 = getMapValueForIdentity('hl7V2');
 
-
-
                     $scope.input.fhirMappingExtensionUrl = data.fhirMappingExtensionUrl;
 
                     if (data.min == 0) {
@@ -108,7 +106,6 @@ angular.module("sampleApp")
                             $scope.input.dataType = dt1;
                         }
                     });
-
 
 
                     //set the dropdown if this is a valueset from the IG...
@@ -148,7 +145,7 @@ angular.module("sampleApp")
                                     if (ent.resource.url == profileUrl) {
                                         $scope.input.referenceFromIg = ent;
 
-                                        // $scope.dt = {code: 'Reference', isReference: true}; //to show the reference...
+
                                     }
                                 })
                             }
@@ -173,106 +170,7 @@ angular.module("sampleApp")
             }
 
 
-            /*
-            if (editNode) {
-                //editing an existing node
-                $scope.pathDescription = 'Path'
-                var data = editNode.data;
-                $scope.input.name = data.name;
-                $scope.input.short= data.short;
-                $scope.input.description = data.description;
-                $scope.input.comments = data.comments;
-                $scope.input.mapping = data.mapping;
-                //$scope.input.mappingPath = data.mappingPath;
-                $scope.fhirMapping(data.mappingPath);       //check for an extension
-                $scope.input.fixedString = data.fixedString;
-                //$scope.input.mappingPathV2 = data.mappingPathV2;
 
-                $scope.input.mappingFromED = angular.copy(data.mappingFromED);    //all the current mappings. Only want to update on save...
-
-
-
-                $scope.input.mappingPath = getMapValueForIdentity('fhir');
-                $scope.input.mappingPathV2 = getMapValueForIdentity('hl7V2');
-
-
-
-                $scope.input.fhirMappingExtensionUrl = data.fhirMappingExtensionUrl;
-
-                if (data.min == 0) {
-                    $scope.input.multiplicity = 'opt';
-                    if (data.max == '*') {$scope.input.multiplicity = 'mult'}
-                }
-                if (data.min == 1){
-                    $scope.input.multiplicity = 'req';
-                    if (data.max == '*') {$scope.input.multiplicity = 'multreq'}
-                }
-
-                $scope.dt = data.type[0];   //the selected datatype...
-                
-                var dtCode = data.type[0].code;     //only the first datatype (we only support 1 right now)
-                $scope.allDataTypes.forEach(function(dt1){
-                    if (dt1.code == dtCode) {
-                        $scope.input.dataType = dt1;
-                    }
-                });
-
-                //set the dropdown if this is a valueset from the IG...
-                if (data.selectedValueSet && data.selectedValueSet.vs){
-                    $scope.isCoded = true;
-                    $scope.vsInGuide.forEach(function(vs){
-                        if (vs.sourceUri ==data.selectedValueSet.vs.url) {
-                            $scope.input.vsFromIg = vs
-                        }
-                    })
-                }
-
-
-                $scope.selectedValueSet = data.selectedValueSet;
-
-
-                //if this is a reference, set the initial reference
-                if (dtCode == 'Reference') {
-
-                    //for a core type reference, find the name of the type (it's the last segment in the url)
-                    var profileUrl = data.type[0].targetProfile;    //normalized to this...
-                    var ar = profileUrl.split('/');
-                    var typeName = ar[ar.length-1];
-
-                    //this is for references to core types....
-                    $scope.allResourceTypes.forEach(function(typ){
-                        if (typ.name == typeName) {
-                            $scope.input.referenceToCoreFromIg = typ
-                        }
-                    });
-
-                    
-                    //var profileUrl = data.type[0].targetProfile || data.type[0].profile;     //only the first datatype (we only support 1 right now)
-                    //this is for references to Logical Models
-                    $scope.references.entry.forEach(function(ent){
-                        if (ent.resource.url == profileUrl) {
-                            $scope.input.referenceFromIg = ent;
-
-                           // $scope.dt = {code: 'Reference', isReference: true}; //to show the reference...
-                        }
-                    })
-                }
-
-                //this is the url of the model that this item (and it's children) will map to
-                if (data.mapToModelUrl) {
-                    $scope.references.entry.forEach(function(ent){
-                        if (ent.resource.url == data.mapToModelUrl) {
-                            $scope.input.mapToModelEnt = ent;
-                            //$scope.dt = {code: 'Reference', isReference: true}; //to show the reference...
-                        }
-                    })
-                }
-
-            }
-
-
-
-            */
 
             $scope.selectExistingExtension = function(){
 
@@ -350,6 +248,10 @@ angular.module("sampleApp")
                         $scope.selectExtension = function(ent) {
                             $scope.selectedExtension = ent.resource
                             $scope.analyse = Utilities.analyseExtensionDefinition3($scope.selectedExtension)
+
+                            //need to pass this back so we can add children of complex extensions...
+                           // $scope.selectedExtension = $scope.analyse;
+
                             console.log($scope.analyse)
 
                             /*
@@ -378,11 +280,15 @@ angular.module("sampleApp")
                     }
                 }).result.then(
                     function(extensionDef) {
-                        //an extension definition was selected
+                        //an extension definition was selected -
                         //console.log(extensionDef);
                         if (extensionDef && extensionDef.url) {
                             $scope.isDirty = true;
                             $scope.input.fhirMappingExtensionUrl = extensionDef.url;
+
+                            //need to pass the analyse object
+                           // $scope.extensionAnalyse = extensionDef.analyse;
+
 
                             var analyse = Utilities.analyseExtensionDefinition3(extensionDef)
 
@@ -393,11 +299,11 @@ angular.module("sampleApp")
                                 var dt = analyse.dataTypes[0].code; // the datatype as a string...
                                 setDataType(dt);
                             }
+                            $scope.extensionAnalyse = angular.copy(analyse);
 
-
-                            function setDataType(dtString) {
+                            function setDataType(dt) {
                                 for (var i=0; i< $scope.allDataTypes.length; i++) {
-                                    if ($scope.allDataTypes[i].code == dtString) {
+                                    if ($scope.allDataTypes[i].code == dt) {
                                         $scope.input.dataType = $scope.allDataTypes[i];
                                         break;
                                     }
@@ -612,6 +518,9 @@ angular.module("sampleApp")
                     vo.editNode = editNode;
                     vo.parentPath = parentPath;
                     vo.fixedString = $scope.input.fixedString;
+
+                    vo.extensionAnalyse = $scope.extensionAnalyse;
+
                     //coded elements...
                     if ($scope.isCoded) {
                         vo.selectedValueSet = $scope.selectedValueSet;

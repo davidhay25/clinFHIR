@@ -104,6 +104,30 @@ angular.module("sampleApp")
                     $http.get(searchString).then(       //first the profiles on that server ...
                         function(data) {
                             $scope.input['matchingProfiles'+side] = data.data;  //a bundle
+
+
+
+                            //get the base type (if it exists)...
+                            var url1 =  svr.url + "StructureDefinition/"+type.name;
+                            $http.get(url1).then(       //and then get the base type
+                                function (data) {
+                                    if (data.data) {
+                                        if (data.data) {
+                                            $scope.input['matchingProfiles'+side].entry = $scope.input['matchingProfiles'+side].entry || []
+                                            $scope.input['matchingProfiles'+side].entry.push({resource:data.data})
+                                        }
+
+
+                                    }
+
+                                },
+                                function () {
+                                    //just ignore if we don't fine the base..
+                                }
+                            )
+
+
+
                             console.log(data.data)
                         },
                     function (err) {
@@ -146,11 +170,6 @@ angular.module("sampleApp")
                         }
                     )
                 }
-
-
-
-
-
             };
 
 
@@ -531,7 +550,7 @@ angular.module("sampleApp")
                             }
                         })
                     }
-                )
+                );
 
 
 
@@ -565,7 +584,7 @@ angular.module("sampleApp")
                     },function (err) {
                         console.log(err)
                     }
-                )
+                );
 
                 //------ report
                 $scope.profileReport = profileDiffSvc.reportOneProfile(SD);

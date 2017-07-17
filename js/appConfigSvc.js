@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-06-30';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-07-14b';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};
@@ -149,7 +149,6 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'Aegis WildFHIR STU3',version:3,url:" http://wildfhir.aegis.net/fhir3-0-1/"});
         defaultConfig.allKnownServers.push({name:'SNApp STU2' ,version:2,url:"http://snapp.clinfhir.com:8080/baseDstu2/"});
         defaultConfig.allKnownServers.push({name:'SNApp R3',version:3,url:"http://snapp.clinfhir.com:8081/baseDstu3/"});
-        //defaultConfig.allKnownServers.push({name:'123',version:3,url:"https://fhirsandbox1.tsysinteropsvcs.net/sites/123/"});
 
         defaultConfig.allKnownServers.push({name:'GoFHIR',version:3,url:"https://syntheticmass.mitre.org/fhir/",everythingOperation:true});
 
@@ -161,6 +160,8 @@ angular.module("sampleApp")
 
         defaultConfig.allKnownServers.push({name:'HSPC Synthea',version:3,url:"https://api3.hspconsortium.org/HSPCplusSynthea/open/"});
 
+        defaultConfig.allKnownServers.push({name:'NHS-UK STU-2',version:2,url:"https://fhir.nhs.uk/"});
+        defaultConfig.allKnownServers.push({name:'HL7-UK STU-2',version:2,url:"https://fhir-test.hl7.org.uk/"});
 
 
 
