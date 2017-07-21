@@ -1,10 +1,332 @@
 angular.module("sampleApp").service('profileDiffSvc',
-    function($q,$http,GetDataFromServer,Utilities,appConfigSvc,$filter,logicalModelSvc) {
+    function($q,$http,GetDataFromServer,Utilities,appConfigSvc,$filter,resourceSvc,profileCreatorSvc,$localStorage) {
 
-    var extensionDefinitionCache = {}
+        $localStorage.extensionDefinitionCache = $localStorage.extensionDefinitionCache || {}
 
+        var objColours ={};
+
+        objColours.profile = '#ff8080';
+        objColours.extension = '#ffb3ff';
+        objColours.terminology = '#FFFFCC';
+
+        objColours.Patient = '#93FF1A';
+
+        objColours.List = '#ff8080';
+        objColours.Observation = '#FFFFCC';
+        objColours.Practitioner = '#FFBB99';
+        objColours.MedicationStatement = '#ffb3ff';
+        objColours.CarePlan = '#FF9900';
+        objColours.Sequence = '#FF9900';
+        objColours.CareTeam = '#FFFFCC';
+        objColours.Condition = '#cc9900';
+
+
+        objColours.Organization = '#FF9900';
+        objColours.ProviderRole = '#FFFFCC';
+        objColours.Location = '#cc9900';
+        objColours.HealthcareService = '#FFFFCC';
+
+        objColours.Medication = '#FF9900';
 
     return {
+
+        //generate a chart showing the interrelationships of artifacts in the IG...
+        createGraphOfIG: function (IG,options) {
+            var deferred = $q.defer();
+
+            var that = this;
+
+            var arNodes = [], arEdges = [];
+
+            //create a hash and a node of all the artifacts...
+            var hash = {}
+            IG.package.forEach(function (package) {
+                package.resource.forEach(function (item,inx) {
+                    var url = item.sourceReference.reference;
+
+                    var label = path = $filter('referenceType')(url);
+                    var node = {id: inx, label: label, shape: 'box',color:objColours[item.purpose]};
+                    hash[url]={purpose:item.purpose,description:item.description,nodeId:inx,usedBy:[]}  //usedBy is for extensions - what uses them...
+
+                    arNodes.push(node);
+                })
+            });
+
+
+            //now load all the profiles, and figure out the references to extensions. Do need to create all the nodes first...
+            var arQuery = []
+            angular.forEach(hash,function(item,key){
+
+                //console.log(key,item);
+                var parentId = item.nodeId;
+
+                    if (item.purpose == 'profile' || item.purpose == 'extension') {
+                        var url = key;//item.sourceReference.reference;
+                        arQuery.push(getEdges(that, url,hash,parentId,arEdges));
+                    }
+
+                });
+
+
+
+
+            $q.all(arQuery).then(
+                function(){
+                    var nodes = new vis.DataSet(arNodes);
+                    var edges = new vis.DataSet(arEdges);
+
+                    // provide the data in the vis format
+                    var data = {
+                        nodes: nodes,
+                        edges: edges,
+                        hash:hash
+                    };
+
+                    deferred.resolve(data)
+                },
+                function(err){
+                    deferred.reject(err)
+                }
+            )
+
+
+            return deferred.promise;
+            //----------
+
+
+            //get all the outward edges from this resource...
+            function getEdges(that, url,hash,parentId,arEdges) {
+                var deferred1 = $q.defer();
+                that.getSD(url).then(
+                    function (SD) {
+
+
+                        SD.snapshot.element.forEach(function (ed) {
+                            if (ed.path.indexOf('xtension') > -1) {
+                                if (ed.type) {
+                                    var profile = ed.type[0].profile;
+                                    var ref = hash[profile];
+                                    if (ref) {
+                                        //hurrah! we have a target resource
+                                        arEdges.push({from: parentId, to: ref.nodeId})
+                                        ref.usedBy.push(url)
+                                    }
+                                }
+                            }
+
+                            //is there a binding from a core element to a ValueSet?
+                            if (ed.binding) {
+                                var url = ed.binding.valueSetUri;
+                                if (ed.binding.valueSetReference) {
+                                    url = ed.binding.valueSetReference.reference
+                                }
+                                //var url = ed.binding.valueSetReference.reference || ed.binding.valueSetUri;
+                                if (url) {
+                                    var ref = hash[url];
+                                    if (ref) {
+                                        //hurrah! we have a target ValueSet
+                                        arEdges.push({from: parentId, to: ref.nodeId})
+                                        ref.usedBy.push(url)
+                                    }
+                                }
+                            }
+
+
+
+                        })
+                        deferred1.resolve();
+                        /*
+
+
+                        profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
+                            function(vo) {
+                                vo.treeData.forEach(function (item) {
+                                    if (item.path && item.path.indexOf('extension') > -1) {
+                                        //console.log(item)
+                                        if (item.data.ed.type){
+                                            var profile = item.data.ed.type[0].profile;
+                                            var ref = hash[profile];
+                                            if (ref) {
+                                                //hurrah! we have a target resource
+                                                arEdges.push({from: parentId, to: ref.nodeId})
+                                                ref.usedBy.push(url)
+                                            }
+
+                                         //   console.log(ref)
+                                        }
+                                    }
+
+                                })
+                                deferred1.resolve();
+                            }
+                        )
+                        */
+
+                    }
+                )
+
+                return deferred1.promise;
+
+            }
+
+
+            var arNodes = [], arEdges = [];
+            var objNodes = {};
+            profile.snapshot.element.forEach(function (ed, inx) {
+
+                var include = true;
+                var path = ed.path;
+
+                objNodes[ed.path] = inx;
+                var ar = path.split('.');
+
+
+                //excluding elements that I don;t want to show (like meta)
+                if (ar.length > 1 && elementsToDisable.indexOf(ar[ar.length - 1]) > -1) {
+                    include = false;
+                }
+
+
+                //some profiles seem to have excluded element in the snapshot (eg care connect)
+                if (ed.max == '0') {
+                    include = false;
+                    pathsToDisable.push(path);       //add to the list of paths to disable...
+                }
+
+                if (ar[ar.length - 1] == 'extension') {
+                    //if the extension has a profile type then include it, otherwise not...
+                    include = false;
+
+                    if (ed.type) {
+                        ed.type.forEach(function (it) {
+                            if (it.code == 'Extension' && it.profile) {
+                                include = true;
+                                /* may want to do this...
+                                 //load the extension definition
+                                 queries.push(GetDataFromServer.findConformanceResourceByUri(it.profile).then(
+                                 function(sdef) {
+                                 var analysis = Utilities.analyseExtensionDefinition2(sdef);
+                                 item.myMeta.analysis = analysis;
+                                 //console.log(analysis)
+                                 }, function(err) {
+                                 alert('Error retrieving '+ t.profile + " "+ angular.toJson(err))
+                                 }
+                                 ));
+                                 */
+                                //use the name rather than 'Extension'...
+                                ar[ar.length - 1] = ed.name;
+                            }
+                        })
+                    }
+                }
+
+
+                //Make sure the path is not a child of one that has been deleted...
+                pathsToDisable.forEach(function(disablePath){
+                    if (path.substr(0,disablePath.length) == disablePath) {
+                        include = false;
+                    }
+                });
+
+
+
+                //if there is a parent other than the root...
+                if (options && options.parentPath) {
+                    var l = options.parentPath.length;
+                    if (path.substr(0,l) !== options.parentPath) {
+                        include = false;
+                    }
+
+                    //include the ancestors
+                    elementsToInclude.forEach(function(pth){
+                        if (path == pth) {
+                            include = true;
+                        }
+                    })
+                }
+
+
+
+                if (include) {
+                    var label = ar[0];
+                    if (ar.length > 1) {
+                        var arLabel = angular.copy(ar);
+                        arLabel.shift();
+                        label = arLabel.join('.');
+
+                        label = ar[ar.length - 1];
+
+                    }
+                    //console.log(label)
+                    var arParent = angular.copy(ar);
+                    arParent.pop();
+
+                    var node = {id: inx, label: label, shape: 'box', ed: ed,color:'#FFFFCC'};
+
+                    if (ed.max == '*') {
+                        node.label += '*';
+                    }
+
+                    if (ed.type) {
+                        //var isCoded = false;
+                        ed.type.forEach(function (typ) {
+
+                            switch (typ.code) {
+                                case 'Reference' :
+                                    node.shape = 'ellipse';
+                                    node.color = {background: 'yellow', border: 'black'};
+                                    break;
+                                case 'BackboneElement' :
+                                    node.color = 'lightgreen';
+                                    break;
+                                case 'DomainResource' :
+                                    node.color = 'green';
+                                    node.font = {color: 'white'};
+                                    break;
+
+                            }
+                            //now see if this is a coded item....
+                            if (['code', 'Coding', 'CodeableConcept'].indexOf(typ.code) > -1) {
+                                //isCoded = true;
+                                node.label += ' C';
+                            }
+
+                        })
+
+                    }
+
+                    //an extension...
+                    if (ed.path.indexOf('xtension') > -1) {
+                        node.color = '#ffccff'
+                    }
+
+
+                    //required...
+                    if (ed.min !== 0) {
+                        node.font = {color: 'red'};
+                    }
+
+
+                    arNodes.push(node);
+                    arEdges.push({from: objNodes[arParent.join('.')], to: inx})
+                }
+
+
+            });
+
+
+
+
+
+
+
+
+
+
+            //return data;
+
+        },
+
 
         findProfiles : function(svr,type) {
             //var svr =  appConfigSvc.getCurrentConformanceServer();
@@ -577,13 +899,13 @@ angular.module("sampleApp").service('profileDiffSvc',
                 var deferred = $q.defer();
                 var url = item.extension.url;
 
-                if (extensionDefinitionCache[url]) {
+                if ($localStorage.extensionDefinitionCache[url]) {
                     //note that this is an async call - some duplicate calls are inevitible
                     //console.log('cache')
-                    item.extension.analysis = angular.copy(Utilities.analyseExtensionDefinition3(extensionDefinitionCache[url]));
+                    item.extension.analysis = angular.copy(Utilities.analyseExtensionDefinition3($localStorage.extensionDefinitionCache[url]));
                     deferred.resolve()
                 } else {
-                   // extensionDefinitionCache[url] = 'x'
+                   // $localStorage.extensionDefinitionCache[url] = 'x'
                     //if a server was passed in then use that, otherwise use the default one...
                     var serverUrl = appConfigSvc.getCurrentConformanceServer().url;
                     if (svr) {
@@ -592,7 +914,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                     GetDataFromServer.findConformanceResourceByUri(url,serverUrl).then(
                         function (sdef) {
                             //console.log(sdef);
-                            extensionDefinitionCache[url] = sdef
+                            $localStorage.extensionDefinitionCache[url] = sdef
                             item.extension.analysis = angular.copy(Utilities.analyseExtensionDefinition3(sdef));
                             //console.log(item.extension.analysis)
                             deferred.resolve()
@@ -609,18 +931,18 @@ angular.module("sampleApp").service('profileDiffSvc',
         },
         getTerminologyResource : function(url,resourceType) {
             var deferred = $q.defer();
-            if (extensionDefinitionCache[url]) {
+            if ($localStorage.extensionDefinitionCache[url]) {
                 //note that this is an async call - some duplicate calls are inevitible
                 console.log('cache')
-                deferred.resolve(extensionDefinitionCache[url]);
+                deferred.resolve($localStorage.extensionDefinitionCache[url]);
             } else {
                 // This assumes that the terminology resources are all on the terminology service...
                 var serverUrl = appConfigSvc.getCurrentTerminologyServer().url;
                 GetDataFromServer.findConformanceResourceByUri(url,serverUrl,resourceType).then(
                     function (sdef) {
                         //console.log(sdef);
-                        extensionDefinitionCache[url] = sdef
-                        deferred.resolve(extensionDefinitionCache[url]);
+                        $localStorage.extensionDefinitionCache[url] = sdef
+                        deferred.resolve($localStorage.extensionDefinitionCache[url]);
                     },function (err) {
                         console.log(err)
                         deferred.reject();
@@ -631,17 +953,17 @@ angular.module("sampleApp").service('profileDiffSvc',
         },
         getSD : function(url) {
             var deferred = $q.defer();
-            if (extensionDefinitionCache[url]) {
+            if ($localStorage.extensionDefinitionCache[url]) {
                 //note that this is an async call - some duplicate calls are inevitible
                 //console.log('cache')
-                deferred.resolve(extensionDefinitionCache[url]);
+                deferred.resolve($localStorage.extensionDefinitionCache[url]);
             } else {
-                // extensionDefinitionCache[url] = 'x'
+                // $localStorage.extensionDefinitionCache[url] = 'x'
                 GetDataFromServer.findConformanceResourceByUri(url).then(
                     function (sdef) {
                         //console.log(sdef);
-                        extensionDefinitionCache[url] = sdef
-                        deferred.resolve(extensionDefinitionCache[url]);
+                        $localStorage.extensionDefinitionCache[url] = sdef
+                        deferred.resolve($localStorage.extensionDefinitionCache[url]);
                     },function (err) {
                         console.log(err)
                         deferred.reject();

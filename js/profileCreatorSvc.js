@@ -288,7 +288,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         var id;
                         if (sliceRootPath) {
                             if (item.path == sliceRootPath) {
-                                console.log('new slice instance:'+sliceRootPath)
+                                //console.log('new slice instance:'+sliceRootPath)
                                 //this is a new 'instance' of the sliced element.
                                 parent = sliceGroupParent;  //the parent will be that for the whole slice group
 

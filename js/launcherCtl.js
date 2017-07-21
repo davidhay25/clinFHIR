@@ -5,6 +5,16 @@ angular.module("sampleApp")
 
             GetDataFromServer.registerAccess('launcher');
 
+
+
+            $http.get("https://fhir.nhs.uk/StructureDefinition/spine-practitioner-2-0").then(
+                function (data) {
+                    console.log(data);
+                }, function (err) {
+                    console.log(err)
+                }
+            )
+
             $scope.testing = {};
             $scope.showServers = false;
             $scope.displayMode = 'front';

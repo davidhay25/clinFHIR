@@ -16,6 +16,9 @@
     <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
     <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
 
+    <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
+
+
     <script src="js/libs/angular-sanitize.js"></script>
     <script src="js/libs/firebase.js"></script>
     <script src="js/libs/angularfire.min.js"></script>
@@ -52,7 +55,9 @@
     <script src="resourceBuilder/rbServices.js"></script>
     <script src="directive/profiletable/profileTable.js"></script>
 
-
+    <script src="js/libs/vis.min.js"></script>
+    <script src="js/components/extensionDirective.js"></script>
+    <script src="js/resourceSvc.js"></script>
 
     <!--
 
@@ -291,6 +296,20 @@
 
 
                 <div class="col-sm-9 col-md-9">
+
+                    <uib-tabset>
+                        <uib-tab heading="Implementation Guide">
+
+                            <div ng-hide="igGraphHash">
+                                <h4>Analysing Implementation Guide, please wait...</h4>
+                            </div>
+
+                            <div style=" height: 900px;" id="igModel"></div>
+
+                        </uib-tab>
+                        <uib-tab heading="Selected Resource">
+
+
                     <div ng-show="selectedItemType == 'profile'">
                         <h4>Profiled resource</h4>
 
@@ -547,8 +566,6 @@
 
                         </uib-tabset>
 
-
-
                     </div>
 
                     <div ng-show="selectedItemType == 'extension'">
@@ -556,6 +573,25 @@
                         <uib-tabset>
 
                             <uib-tab heading="Analysis">
+                                <br/>
+                                <fhir-extension analyse="selectedExtensionAnalysis" ></fhir-extension>
+
+
+                                <div ng-show="igGraphHash[selectedItem.url].usedBy">
+                                    <h5>Used By:
+                                        <ul class="list-unstyled">
+                                            <li ng-repeat="url in igGraphHash[selectedItem.url].usedBy">
+                                                {{url}}
+                                            </li>
+                                        </ul>
+                                    </h5>
+
+                                </div>
+
+
+                            </uib-tab>
+                            <uib-tab heading="Analysis Json">
+
                                 <br/>
                                 <pre>{{selectedExtensionAnalysis | json}}</pre>
                             </uib-tab>
@@ -578,6 +614,17 @@
                             <uib-tab heading="Analysis">
                                 <br/>
 
+                                <div ng-show="igGraphHash[selectedItem.url].usedBy">
+                                    <h5>Used By:
+                                        <ul class="list-unstyled">
+                                            <li ng-repeat="url in igGraphHash[selectedItem.url].usedBy">
+                                                {{url}}
+                                            </li>
+                                        </ul>
+                                    </h5>
+
+                                </div>
+
                             </uib-tab>
 
                             <uib-tab heading="Json">
@@ -591,6 +638,13 @@
 
 
                     </div>
+
+
+
+                        </uib-tab>
+                    </uib-tabset>
+
+
                 </div>
             </div>
 

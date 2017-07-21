@@ -294,6 +294,9 @@ angular.module("sampleApp")
                     })
 
                 })
+
+                createGraphOfIG(IG);
+
             };
 
             //-------- functions and properties to enable the valueset viewer
@@ -520,7 +523,7 @@ angular.module("sampleApp")
                 profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
                     function(vo) {
 
-                      //  console.log(vo)
+                        //console.log(vo)
 /* - not sure why I'm doing this - warning: the SD is mutated by the function!
 
                         profileDiffSvc.makeLogicalModelFromTreeData($scope.selectedSD,vo.treeData).then(
@@ -591,23 +594,55 @@ angular.module("sampleApp")
 
             }
 
-            $scope.showEDDEP = function(ed) {
-                //console.log(ed)
-                $uibModal.open({
-                    templateUrl: 'modalTemplates/diffED.html',
-                    // size: 'sm',
-                    controller: function($scope,ed){
-                        $scope.ed = ed;
-                       // console.log($scope.ed)
-                    },
-                    resolve : {
-                        ed: function () {          //the default config
-                            return ed;
-                        }
-                    }
-                })
-            };
 
+            var createGraphOfIG = function(IG) {
+                delete $scope.igGraphHash;
+                console.log(IG);
+
+                profileDiffSvc.createGraphOfIG(IG).then(
+                    function(graphData) {
+                        //$scope.graphData = graphData;
+
+                        console.log(graphData)
+
+                        $scope.igGraphHash = graphData.hash;    //the hash generated during the IG analysis. Contains useful stuff like extension usedBy
+
+                        var container = document.getElementById('igModel');
+                        var options = {
+
+                            edges: {
+
+                                smooth: {
+                                    type: 'cubicBezier',
+                                    forceDirection: 'horizontal',
+                                    roundness: 0.4
+                                }
+                            },
+                            layout: {
+                                hierarchical: {
+                                    direction: 'LR',
+                                    nodeSpacing : 35,
+                                    sortMethod:'directed',
+                                    parentCentralization : false
+                                }
+                            },
+                            physics:false
+                        };
+
+                        $scope.profileNetwork = new vis.Network(container, graphData, {});
+
+                        $scope.profileNetwork.on("click", function (obj) {
+                           // var nodeId = obj.nodes[0];  //get the first node
+                           // var node = graphData.nodes.get(nodeId);
+                           // var pathOfSelectedNode = node.ed.path; //node.ed.base.path not working with merged...
+                          //  $scope.selectedNode = findNodeWithPath(pathOfSelectedNode); //note this is the node for the tree view, not the graph
+
+                            $scope.$digest();
+
+                        });
+                    }
+                );
+            };
 
 
     })
