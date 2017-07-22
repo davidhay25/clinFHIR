@@ -598,8 +598,10 @@ angular.module("sampleApp")
             var createGraphOfIG = function(IG) {
                 delete $scope.igGraphHash;
                 console.log(IG);
+                var options = {profiles:[]}
 
-                profileDiffSvc.createGraphOfIG(IG).then(
+
+                profileDiffSvc.createGraphOfIG(IG,options).then(
                     function(graphData) {
                         //$scope.graphData = graphData;
 
@@ -608,32 +610,35 @@ angular.module("sampleApp")
                         $scope.igGraphHash = graphData.hash;    //the hash generated during the IG analysis. Contains useful stuff like extension usedBy
 
                         var container = document.getElementById('igModel');
+
+
+
                         var options = {
-
-                            edges: {
-
-                                smooth: {
-                                    type: 'cubicBezier',
-                                    forceDirection: 'horizontal',
-                                    roundness: 0.4
+                            layout: {randomSeed:8},
+                            physics: {
+                                enabled : true,
+                                timestep : .35,
+                                stabilization : {
+                                    fit:true
                                 }
+
                             },
-                            layout: {
-                                hierarchical: {
-                                    direction: 'LR',
-                                    nodeSpacing : 35,
-                                    sortMethod:'directed',
-                                    parentCentralization : false
+                            edges : {
+                                arrows: {
+                                    to:true
                                 }
-                            },
-                            physics:false
+                            }
                         };
 
-                        $scope.profileNetwork = new vis.Network(container, graphData, {});
+
+
+                        $scope.profileNetwork = new vis.Network(container, graphData, options);
 
                         $scope.profileNetwork.on("click", function (obj) {
-                           // var nodeId = obj.nodes[0];  //get the first node
-                           // var node = graphData.nodes.get(nodeId);
+                            var nodeId = obj.nodes[0];  //get the first node
+                            console.log(nodeId)
+                            var node = graphData.nodes.get(nodeId);
+                            console.log(node)
                            // var pathOfSelectedNode = node.ed.path; //node.ed.base.path not working with merged...
                           //  $scope.selectedNode = findNodeWithPath(pathOfSelectedNode); //note this is the node for the tree view, not the graph
 

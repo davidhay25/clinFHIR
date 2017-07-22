@@ -32,6 +32,10 @@ angular.module("sampleApp").service('profileDiffSvc',
 
         //generate a chart showing the interrelationships of artifacts in the IG...
         createGraphOfIG: function (IG,options) {
+            options = options || {profiles:[]};
+
+            options.profiles.push("https://fhir.hl7.org.uk/StructureDefinition/CareConnect-Practitioner-1");
+
             var deferred = $q.defer();
 
             var that = this;
@@ -42,13 +46,46 @@ angular.module("sampleApp").service('profileDiffSvc',
             var hash = {}
             IG.package.forEach(function (package) {
                 package.resource.forEach(function (item,inx) {
-                    var url = item.sourceReference.reference;
 
-                    var label = path = $filter('referenceType')(url);
-                    var node = {id: inx, label: label, shape: 'box',color:objColours[item.purpose]};
-                    hash[url]={purpose:item.purpose,description:item.description,nodeId:inx,usedBy:[]}  //usedBy is for extensions - what uses them...
+                    var include = true;
+                    switch (item.purpose) {
+                        case 'extension' :
+                            if (! options.includeExtensions) {
+                                include = false;
+                            }
+                            break;
+                        case 'terminology' :
+                            if (! options.includeTerminology) {
+                                include = false;
+                            }
+                            break;
+                        case 'profileDEP' :
+                            if (options.profile) {
+                                include = false;
+                                options.profile.forEach(function (url) {
+                                    if (url == item.sourceReference.reference) {
+                                        include = true;
+                                    }
+                                })
+                            }
+                            break;
+                    }
 
-                    arNodes.push(node);
+
+                    if (include) {
+                        var url = item.sourceReference.reference;   //the url of the node
+
+                        var label = path = $filter('referenceType')(url);
+                        var node = {id: inx, label: label, shape: 'box',color:objColours[item.purpose]};
+                        node.data = item;
+                        node.data.url = url;
+                        hash[url]={purpose:item.purpose,description:item.description,nodeId:inx,usedBy:[]}  //usedBy is for extensions - what uses them...
+
+                        arNodes.push(node);
+                    }
+
+
+
                 })
             });
 
@@ -72,6 +109,71 @@ angular.module("sampleApp").service('profileDiffSvc',
 
             $q.all(arQuery).then(
                 function(){
+
+                    //now - after all the edges have been created, if there is a specificed set of nodes to display then hide those without a reference
+
+                    if (options.profiles.length > 0) {
+
+                        var hashInclude = {};       //a hash of the nodes to include
+                        //create the initial hash from the urls passed in...
+                        options.profiles.forEach(function (url) {
+                            arNodes.forEach(function (node) {
+                                if (node.data.url == url) {
+                                    hashInclude[node.id] = true;
+                                }
+                            })
+                        });
+
+                        //first hide all the nodes
+                        arNodes.forEach(function (node) {
+                            node.hidden = true;
+                        });
+
+                        //now move through all the nodes showing the ones  with a relation to that one.
+                        //iterate until no more changes...
+
+                        hashRelationships = {};   //this will be a hash of relationships we know about...
+                        var moreToCheck = true;
+
+                        while (moreToCheck) {
+                            moreToCheck = false;
+                            arNodes.forEach(function (node) {
+                                arEdges.forEach(function (edge) {
+                                    if (edge.from == node.id){
+                                        //this is a relatonship from this node.
+                                        var hash = 'r'+node.id+"-"+edge.to;
+                                        if (! hashRelationships[hash]) { //do we already know about this relationship?
+                                            //no we don't, is the target already in the list of nodes to include
+                                            if (! hashInclude[edge.to]) {
+                                                //no it isn't - add it to the hash...
+                                                hashInclude[edge.to] = true;
+                                                //and set the hidden for the 'to' node to false...
+                                                for (var i=0; i< arNodes.length; i++)  {
+                                                    if (arNodes[i].id == edge.to) {
+
+                                                        //temp - not for patient
+                                                        if (node.data.url.indexOf('atient') == -1) {
+                                                            arNodes[i].hidden = false;
+                                                        }
+
+
+                                                        break;
+                                                    }
+                                                }
+                                                moreToCheck = true; // ...and set the flag for another round
+                                            }
+                                            hashRelationships[hash] = true; //mark that we know about this relationship...
+                                        }
+                                    }
+                                })
+
+                            })
+                        }
+
+
+                    }
+
+
                     var nodes = new vis.DataSet(arNodes);
                     var edges = new vis.DataSet(arEdges);
 
@@ -102,19 +204,26 @@ angular.module("sampleApp").service('profileDiffSvc',
 
 
                         SD.snapshot.element.forEach(function (ed) {
-                            if (ed.path.indexOf('xtension') > -1) {
-                                if (ed.type) {
-                                    var profile = ed.type[0].profile;
-                                    var ref = hash[profile];
-                                    if (ref) {
-                                        //hurrah! we have a target resource
-                                        arEdges.push({from: parentId, to: ref.nodeId})
-                                        ref.usedBy.push(url)
+                            //a reference to an extension
+
+                            if (options.includeExtensions) {
+                                if (ed.path.indexOf('xtension') > -1) {
+                                    if (ed.type) {
+                                        var profile = ed.type[0].profile;
+                                        var ref = hash[profile];
+                                        if (ref) {
+                                            //hurrah! we have a target resource
+                                            arEdges.push({from: parentId, to: ref.nodeId})
+                                            ref.usedBy.push(url)
+                                        }
                                     }
                                 }
                             }
 
-                            //is there a binding from a core element to a ValueSet?
+
+
+
+                            //is there a binding to a ValueSet?
                             if (ed.binding) {
                                 var url = ed.binding.valueSetUri;
                                 if (ed.binding.valueSetReference) {
@@ -131,36 +240,30 @@ angular.module("sampleApp").service('profileDiffSvc',
                                 }
                             }
 
+                            //a reference to another resource type
+                            if (ed.type) {
+                                ed.type.forEach(function (typ) {
+                                    var targetProfile = typ.targetProfile;
+                                    if (typ.profile) {
+                                        //stu 2
+                                        targetProfile = typ.profile[0]
+                                    }
+
+                                    var ref = hash[targetProfile];
+                                    if (ref) {
+                                        //hurrah! we have a target resource
+                                        arEdges.push({from: parentId, to: ref.nodeId})
+                                        //ref.usedBy.push(url)
+                                    }
+
+                                })
+                            }
+
 
 
                         })
                         deferred1.resolve();
-                        /*
 
-
-                        profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
-                            function(vo) {
-                                vo.treeData.forEach(function (item) {
-                                    if (item.path && item.path.indexOf('extension') > -1) {
-                                        //console.log(item)
-                                        if (item.data.ed.type){
-                                            var profile = item.data.ed.type[0].profile;
-                                            var ref = hash[profile];
-                                            if (ref) {
-                                                //hurrah! we have a target resource
-                                                arEdges.push({from: parentId, to: ref.nodeId})
-                                                ref.usedBy.push(url)
-                                            }
-
-                                         //   console.log(ref)
-                                        }
-                                    }
-
-                                })
-                                deferred1.resolve();
-                            }
-                        )
-                        */
 
                     }
                 )
@@ -170,6 +273,7 @@ angular.module("sampleApp").service('profileDiffSvc',
             }
 
 
+/*
             var arNodes = [], arEdges = [];
             var objNodes = {};
             profile.snapshot.element.forEach(function (ed, inx) {
@@ -201,18 +305,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                         ed.type.forEach(function (it) {
                             if (it.code == 'Extension' && it.profile) {
                                 include = true;
-                                /* may want to do this...
-                                 //load the extension definition
-                                 queries.push(GetDataFromServer.findConformanceResourceByUri(it.profile).then(
-                                 function(sdef) {
-                                 var analysis = Utilities.analyseExtensionDefinition2(sdef);
-                                 item.myMeta.analysis = analysis;
-                                 //console.log(analysis)
-                                 }, function(err) {
-                                 alert('Error retrieving '+ t.profile + " "+ angular.toJson(err))
-                                 }
-                                 ));
-                                 */
+
                                 //use the name rather than 'Extension'...
                                 ar[ar.length - 1] = ed.name;
                             }
@@ -319,7 +412,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
 
 
-
+*/
 
 
 
