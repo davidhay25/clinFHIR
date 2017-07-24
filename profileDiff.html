@@ -72,6 +72,7 @@
     <script src="js/resourceSvc.js"></script>
     <script src="js/libs/angular-bootstrap-checkbox.js"></script>
 
+
     <!--
 
 
@@ -127,7 +128,7 @@
         }
 
     </style>
-        <title>Profile Explorer</title>
+        <title>IG Viewer</title>
 
 </head>
 
@@ -142,7 +143,7 @@
         <div class="container-fluid">
             <div class="col-md-2">
                 <a class="navbar-brand" href="#">
-                    Profile Explorer
+                    Implementation Guide Viewer
                 </a>
             </div>
 
@@ -233,6 +234,7 @@
                                 Profiles
                                 <div class="pull-right badge">{{artifacts.profile.length}}</div>
                             </uib-accordion-heading>
+
                             <ul class="list-group">
                                 <li ng-class="{'list-group-item':true, listItemSelected:selectedItem == item}"
                                     ng-repeat="item in artifacts.profile"
@@ -333,9 +335,11 @@
                                     <h4>Display options</h4>
 
                                     <table width="100%">
+                                        <!--
                                         <tr><td>
                                             <checkbox ng-model="input.includePatient" ng-change="drawGraph()"></checkbox>
                                         </td><td>Expand beyond Patient</td></tr>
+                                        -->
                                         <tr><td>
                                             <checkbox ng-model="input.includeExtensions" ng-change="drawGraph()"></checkbox>
                                         </td><td>Include Extensions</td></tr>
@@ -366,14 +370,46 @@
                                             <li class="list-group-item" ng-repeat="(key,value) in graphReferences.pathHash">
                                                 {{value.path | dropFirstInPath}}
                                                 <span class="pull-right">{{value.min}}..{{value.max}}</span>
+                                                <div><em>{{value.short}}</em></div>
+                                                <div><em>{{value.definition}}</em></div>
+                                                <div><em>{{value.comments}}</em></div>
+
                                             </li>
                                         </ul>
+
+                                        <pre>{{graphReferences | json}}</pre>
 
                                     </div>
 
                                     <br/>
-                                    <h4>Selected Node</h4>
-                                    <pre>{{selectedNodeFromGraph | json}}</pre>
+                                    <div ng-show="selectedNodeFromGraph">
+                                        <h4>Selected Node</h4>
+                                        <div ng-show = "selectedNodeFromGraph.data.purpose == 'terminology'">
+                                            <span class = 'clickable' ng-click="showValueSet(selectedNodeFromGraph.data.url)">
+                                                {{selectedNodeFromGraph.data.url}}</span>
+                                        </div>
+
+                                        <div ng-show = "selectedNodeFromGraph.data.purpose == 'extension'">
+                                            <span class = 'clickable' ng-click="showExtension(selectedNodeFromGraph.data.SD)">
+                                                {{selectedNodeFromGraph.data.url}}</span>
+                                        </div>
+
+                                        <div ng-show = "selectedNodeFromGraph.data.purpose == 'profile'">
+                                            <div>{{selectedNodeFromGraph.data.url}}</div>
+                                        </div>
+
+
+
+                                        <br />
+                                        <div>{{selectedNodeFromGraph.data.description}}</div>
+
+                                        <button ng-show = "selectedNodeFromGraph.data.purpose == 'profile'" class="btn btn-link" ng-click="selectNodeFromGraph()">Select node</button>
+<!--
+                                        <pre>{{selectedNodeFromGraph | json}}</pre>
+                                        -->
+
+                                    </div>
+
 
 
                                 </div>

@@ -5,7 +5,7 @@ angular.module("sampleApp")
                   Utilities,GetDataFromServer,profileCreatorSvc,$filter,$firebaseObject,$location,$window,modalService,
                     $timeout) {
 
-            $scope.input = {includeExtensions:false,center:true,includeCore:true};
+            $scope.input = {includeExtensions:false,center:true,includeCore:true,immediateChildren:true,includePatient:true};
             $scope.appConfigSvc = appConfigSvc;
 
             $scope.history = [];        //
@@ -57,7 +57,7 @@ angular.module("sampleApp")
 
             $scope.clearCache = function(){
                 profileDiffSvc.clearCache();
-            }
+            };
 
             $scope.generateShortCut = function() {
                 var hash = Utilities.generateHash();
@@ -76,6 +76,27 @@ angular.module("sampleApp")
                     }
                 )
             };
+
+
+            $scope.showExtension = function(SD){
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/showExtension.html',
+                    size: 'lg',
+                    controller: function($scope,ext,Utilities) {
+                        $scope.extensionAnalysis = Utilities.analyseExtensionDefinition3(ext)
+
+console.log(ext)
+                    },
+                    resolve : {
+                        ext: function () {          //the default config
+                            return SD;
+                        }
+                    }
+
+                })
+
+            };
+
 
 
             //load a profile into the given side ('left','right')
@@ -324,10 +345,15 @@ angular.module("sampleApp")
 
                 profileDiffSvc.getSD(itemExtension.url).then(
                     function (SD) {
+
+                        $scope.showExtension(SD);
+                        /*
+
                         $scope.selectedItemType = 'extension';
                         $scope.selectedExtension = SD;
 
                         $scope.selectedExtensionAnalysis = Utilities.analyseExtensionDefinition3(SD)
+                        */
                     }
                 )
 
@@ -614,9 +640,10 @@ angular.module("sampleApp")
                             if (obj.nodes.length > 0) {
                                 var nodeId = obj.nodes[0];  //get the first node
                                 delete $scope.graphReferences;
+
                                 $scope.selectedNodeFromGraph = graphData.nodes.get(nodeId);
 
-
+/* disable for now...
                                 if ($scope.selectedNodeFromGraph && $scope.selectedNodeFromGraph.data && $scope.selectedNodeFromGraph.data.url) {
                                     $scope.selectItem({url:$scope.selectedNodeFromGraph.data.url, description:""},'profile')
 
@@ -625,6 +652,8 @@ angular.module("sampleApp")
                                         centerNodeInGraph(url)
                                     }
                                 }
+
+                                */
                             }
 
 
@@ -633,6 +662,28 @@ angular.module("sampleApp")
                         });
                     }
                 );
+            };
+
+            $scope.selectNodeFromGraph = function(){
+
+                //find the idem in the artifacts list
+                var item = {}
+                $scope.artifacts['profile'].forEach(function (art) {
+                    if (art.url == $scope.selectedNodeFromGraph.data.url) {
+                        item = art;
+                    }
+                });
+
+
+                if (item) {
+                    $scope.selectItem(item,'profile')
+                }
+
+
+                if ($scope.input.center && $scope.selectedNodeFromGraph) {
+                    var url = $scope.selectedNodeFromGraph.data.url;
+                    centerNodeInGraph(url)
+                }
             };
 
             $scope.fitGraph = function() {

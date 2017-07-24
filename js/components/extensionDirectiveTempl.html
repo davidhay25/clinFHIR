@@ -4,61 +4,84 @@
     <h5 ng-hide = "$ctrl.analyse.isComplexExtension">Simple extension</h5>
 
 
-        <table class="table">
-            <tr><td>Name</td><td>{{$ctrl.analyse.name}}</td></tr>
-            <tr><td>Description</td><td>{{$ctrl.analyse.description}}</td></tr>
-            <tr><td>Url</td><td>{{$ctrl.analyse.url}}</td></tr>
-            <tr><td>Publisher</td><td>{{$ctrl.analyse.publisher}}</td></tr>
-            <tr><td>Definition</td><td>{{$ctrl.analyse.definition}}</td></tr>
-            <tr><td>Multiple</td><td>{{$ctrl.analyse.multiple}}</td></tr>
-            <tr>
-                <td>Context</td>
-                <td>
+        <uib-tabset>
+            <uib-tab heading="Description">
+                <br/>
+                <table class="table">
+                    <tr><td>Url</td><td>{{$ctrl.analyse.url}}</td></tr>
+                    <tr><td>Name</td><td>{{$ctrl.analyse.name}}</td></tr>
+                    <tr><td>Description</td><td>{{$ctrl.analyse.description}}</td></tr>
+
+                    <tr><td>Publisher</td><td>{{$ctrl.analyse.publisher}}</td></tr>
+                    <tr><td>Definition</td><td>{{$ctrl.analyse.definition}}</td></tr>
+                    <tr><td>Multiple</td><td>{{$ctrl.analyse.multiple}}</td></tr>
+                    <tr>
+                        <td>Context</td>
+                        <td>
                     <span ng-repeat="ctx in $ctrl.analyse.context">
                         {{ctx}}
                     </span>
-                </td>
-            </tr>
+                        </td>
+                    </tr>
 
-            <tr ng-show = "$ctrl.analyse.isComplexExtension"><td>Children</td>
-                <td>
-                    <table class="table">
-                        <tr><th>Name</th><th>Short</th><th>Mult</th><th>Types</th></tr>
-                        <tr ng-repeat="item in $ctrl.analyse.children">
-                            <td>{{item.ed.name}}</td>
-                            <td>{{item.ed.short}}</td>
-                            <td>{{item.ed.min}}..{{item.ed.max}}</td>
-                            
-                            <td>
-                                <div ng-repeat="type in item.ed.type">
-                                    {{type.code}}
+                    <tr ng-show = "$ctrl.analyse.isComplexExtension"><td>Children</td>
+                        <td>
+                            <table class="table">
+                                <tr><th>Name</th><th>Short</th><th>Mult</th><th>Types</th></tr>
+                                <tr ng-repeat="item in $ctrl.analyse.children">
+                                    <td>{{item.ed.name}}</td>
+                                    <td>{{item.ed.short}}</td>
+                                    <td>{{item.ed.min}}..{{item.ed.max}}</td>
+
+                                    <td>
+                                        <div ng-repeat="type in item.ed.type">
+                                            {{type.code}}
+                                        </div>
+
+
+                                    </td>
+                                </tr>
+                            </table>
+
+
+                        </td>
+                    </tr>
+                    <tr ng-hide = "$ctrl.analyse.isComplexExtension"><td>Datatype/s</td>
+                        <td>
+                            <div ng-repeat="item in $ctrl.analyse.dataTypes">
+                                {{item.code}}
+                                {{item.profile}}
+
+                                <!-- profile changed from array to object in STU-3-->
+                                <div ng-if="isArray(item.profile)">
+                                    <div ng-repeat="p in item.profile track by $index">{{p}}</div>
                                 </div>
 
 
-                            </td>
-                        </tr>
-                    </table>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr ng-show = "$ctrl.analyse.binding">
+                        <td>Binding</td>
+                        <td>
+                            <div>{{$ctrl.analyse.binding.valueSetUri}}
+                                {{$ctrl.analyse.binding.valueSetUrl}}
+                                ({{$ctrl.analyse.binding.strength}})
+                            </div>
+                            <div>{{$ctrl.analyse.binding.description}}</div>
+                        </td>
+                    </tr>
+
+                </table>
 
 
-                </td>
-            </tr>
-            <tr ng-hide = "$ctrl.analyse.isComplexExtension"><td>Datatype/s</td>
-                <td>
-                    <div ng-repeat="item in $ctrl.analyse.dataTypes">
-                        {{item.code}}
-                        {{item.profile}}
+            </uib-tab>
+            <uib-tab heading="Analysis">
+                <br/>
+                <pre>{{$ctrl.analyse | json}}</pre>
+            </uib-tab>
+        </uib-tabset>
 
-                        <!-- profile changed from array to object in STU-3-->
-                        <div ng-if="isArray(item.profile)">
-                            <div ng-repeat="p in item.profile track by $index">{{p}}</div>
-                        </div>
-
-
-                    </div>
-                </td>
-            </tr>
-
-        </table>
     </div>
 <!--
     <div ng-hide = "$ctrl.analyse.isComplexExtension">

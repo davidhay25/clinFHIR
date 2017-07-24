@@ -70,7 +70,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                         node.data = item;
                         node.data.url = url;
                         //node.hidden = true;
-                        hash[url]={purpose:item.purpose,description:item.description,nodeId:inx,usedBy:[]}  //usedBy is for extensions - what uses them...
+                        hash[url]={purpose:item.purpose,description:item.description,nodeId:inx,usedBy:[],node:node};  //usedBy is for extensions - what uses them...
 
                         allNodeHashById[node.id] = node;
                         arNodes.push(node);
@@ -87,12 +87,11 @@ angular.module("sampleApp").service('profileDiffSvc',
                 //console.log(key,item);
                 var parentId = item.nodeId;
 
-                    if (item.purpose == 'profile' || item.purpose == 'extension') {
-                        var url = key;//item.sourceReference.reference;
-                        arQuery.push(getEdges(that, url,hash,parentId,arEdges));
-                    }
-
-                });
+                if (item.purpose == 'profile' || item.purpose == 'extension') {
+                    var url = key;//item.sourceReference.reference;
+                    arQuery.push(getEdges(that, url,hash,parentId,arEdges,options,item.node));
+                }
+            });
 
 
 
@@ -129,7 +128,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                         //now move through all the nodes showing the ones  with a relation to that one.
                         //iterate until no more changes...
 
-                      //  hashRelationships = {};   //this will be a hash of relationships we know about...
                         var moreToCheck = true;
 
                         while (moreToCheck) {
@@ -147,6 +145,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                                             //have to add it after the iteration
                                             var nn = allNodeHashById[edge.to]
                                             if (nn) {
+                                                //nn.hidden = false;
                                                 arNodesToAdd.push(nn);
                                             }
                                             moreToCheck = true;     //we'll need to go around again..
@@ -247,8 +246,8 @@ angular.module("sampleApp").service('profileDiffSvc',
                     //console.log(url)
 
                     var id = new Date().getTime() + "-" + Math.random();
-                    //var node = {id: id, label: label, shape: 'box',color:objColours[purpose]};
-                    var node = {id: id, label: label, shape: 'box',color:'#f7eaea'};
+                    var node = {id: id, label: label, shape: 'box',color:objColours[purpose]};
+                    //var node = {id: id, label: label, shape: 'box',color:'#f7eaea'};
 
                     node.data ={purpose:purpose, sourceReference: {reference:url}};
                     node.data.url = url;
@@ -265,10 +264,11 @@ angular.module("sampleApp").service('profileDiffSvc',
             }
 
             //get all the outward edges from this resource...
-            function getEdges(that, url,hash,parentId,arEdges) {
+            function getEdges(that, url,hash,parentId,arEdges,options,node) {
                 var deferred1 = $q.defer();
                 that.getSD(url).then(
                     function (SD) {
+                        node.data.SD = SD;
 
 
                         SD.snapshot.element.forEach(function (ed) {
@@ -301,7 +301,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                                     if (ed.binding.valueSetReference) {
                                         url = ed.binding.valueSetReference.reference
                                     }
-                                    //var url = ed.binding.valueSetReference.reference || ed.binding.valueSetUri;
+
                                     if (url) {
                                         var ref = hash[url];
                                         if (ref) {
@@ -311,10 +311,10 @@ angular.module("sampleApp").service('profileDiffSvc',
                                         } else {
                                             //this is a reference to a resource not in the IG
                                            // console.log(url)
-                                            if (options.includeCore) {
-                                              //  addNode(url,'terminology')
+                                            if (options.includeCore && options.includeTerminology) {
+                                                var newNodeId = addNode(url,'terminology')
+                                                arEdges.push({from: parentId, to: newNodeId, data:{path:ed.path,ed:ed}})
                                             }
-
 
                                         }
 
