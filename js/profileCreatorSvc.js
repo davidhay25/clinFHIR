@@ -121,8 +121,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
         return  {
             //generate the list used by the jsTree component to dsplay the tree view of the profile...
             makeProfileDisplayFromProfile : function(inProfile) {
-                //var that = this;
-                //console.log('MAKEPROFILE')
                 var loadErrors = [];        //any errors during loading
                 var deferred = $q.defer();
                 var lstTree = [];
@@ -131,9 +129,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                 //console.log(profile);
                 var arIsDataType = [];          //this is a list of disabled items...
                 var lst = [];           //this will be a list of elements in the profile to show.
-                //var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained'];
-                //var dataTypes = ['CodeableConcept', 'Identifier', 'Period', 'Quantity', 'Reference','HumanName'];
-                
+
                 var dataTypes = Utilities.getListOfDataTypes();
 
                 var cntExtension = 0;
@@ -353,9 +349,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
                         }
 
                         item.myMeta.id = id;        //for when we add a child node it
-
-
-                        //console.log(include,item)
 
 
                         //this is an element inserted by resourceCreatorSvc.insertComplexExtensionED so it can be displayed in the resource creator...

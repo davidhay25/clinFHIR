@@ -453,7 +453,7 @@ angular.module("sampleApp").
                     deferred.resolve(resp.resource);
                 } else {
                     // removed 24 jan 2017 alert('Unable to load ValueSet: '+ ref);
-                    deferred.reject('Unable to load ValueSet: '+ ref);
+                    deferred.reject('The terminology server does not have a ValueSet with the URL: '+ ref + "");
                 }
 
             });

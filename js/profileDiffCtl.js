@@ -2,14 +2,21 @@
 angular.module("sampleApp")
     .controller('profileDiffCtrl',
         function ($scope,$q,$http,profileDiffSvc,$uibModal,logicalModelSvc,appConfigSvc,RenderProfileSvc,builderSvc,
-                  Utilities,GetDataFromServer,profileCreatorSvc,$filter,$firebaseObject,$location,$window,modalService) {
+                  Utilities,GetDataFromServer,profileCreatorSvc,$filter,$firebaseObject,$location,$window,modalService,
+                    $timeout) {
 
-            $scope.input = {};
+            $scope.input = {includeExtensions:false,center:true,includeCore:true};
             $scope.appConfigSvc = appConfigSvc;
 
             $scope.history = [];        //
-            $scope.input.tabShowing='single'
+            $scope.input.tabShowing='single';
+            $scope.input.categories = ['profile','extension','terminology'];
 
+
+
+            $scope.updateIG = function(){
+                console.log($scope.selectedIG);
+            }
 
             //see if this page was loaded from a shortcut
             var hash = $location.hash();
@@ -48,6 +55,10 @@ angular.module("sampleApp")
                 )
             }
 
+            $scope.clearCache = function(){
+                profileDiffSvc.clearCache();
+            }
+
             $scope.generateShortCut = function() {
                 var hash = Utilities.generateHash();
                 var shortCut = $window.location.href+"#"+hash
@@ -65,20 +76,6 @@ angular.module("sampleApp")
                     }
                 )
             };
-
-            $scope.exportToLogicalDEP = function() {
-                builderSvc.makeLogicalModelFromSD($scope.selectedSD).then(
-                    function (lm) {
-                        $scope.lm = lm;
-                        console.log(lm);
-                        //selectLogicalModal(lm,profile.url)
-                    },
-                    function(vo) {
-                        //if cannot locate an extension. returns the error and the incomplete LM
-                        // selectLogicalModal(vo.lm,profile.url)
-                    }
-                )
-            }
 
 
             //load a profile into the given side ('left','right')
@@ -193,7 +190,8 @@ angular.module("sampleApp")
             var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
 
             function clearRightPane(){
-                delete $scope.currentIG;
+                //delete $scope.currentIG;
+                delete $scope.selectedElementInLM;
                 delete $scope.selectedItemType ;
                 delete $scope.selectedItem;
                 delete $scope.profileReport;
@@ -293,7 +291,7 @@ angular.module("sampleApp")
 
                     })
 
-                })
+                });
 
                 createGraphOfIG(IG);
 
@@ -339,11 +337,10 @@ angular.module("sampleApp")
             $scope.selectItem = function(item,type){
 
 
-                //console.log(item.type)
 
                 clearRightPane()
 
-               $scope.selectedItemType = type;
+                $scope.selectedItemType = type;
                 $scope.selectedItem = item;
                 /*
                //when called to navigate to a profile...
@@ -355,6 +352,7 @@ angular.module("sampleApp")
 */
 
                //console.log(item)
+                centerNodeInGraph(item.url)
 
                if (type == 'terminology') {
                    //really only works for ValueSet at this point...
@@ -399,80 +397,14 @@ angular.module("sampleApp")
 
                    $scope.waiting = true;
                    //console.log($scope.selectedItem.url)
-                   GetDataFromServer.findConformanceResourceByUri(url).then(
+
+
+                   profileDiffSvc.getSD(url).then(
+                   //GetDataFromServer.findConformanceResourceByUri(url).then(
                        function(SD){
-                          // console.log(item.url)
-                          // console.log(SD)
+
                            setupProfile(SD)
                            addToHistory('profile',SD)
-
-
-
-
-                           /*
-                            $scope.selectedSD = SD;
-
-
-                           //-------- logical model
-                           profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
-                               function(vo) {
-                                   $('#profileTree1').jstree('destroy');
-                                   $('#profileTree1').jstree(
-                                       {
-                                           'core': {
-                                               'multiple': false,
-                                               'data': vo.treeData,
-                                               'themes': {name: 'proton', responsive: true}
-                                           }
-                                       }
-                                   ).on('select_node.jstree', function (e, data) {
-                                       if (data.node) {
-                                           console.log(data.node && data.node.data);
-                                           $scope.selectedED1 = data.node.data.ed;
-                                           $scope.$digest();       //as the event occurred outside of angular...
-
-                                       }
-                                   })
-                               }
-                           )
-
-
-
-
-                           //------- physical model
-                           var treeData = logicalModelSvc.createTreeArrayFromSD(SD)
-                           $('#profileTree').jstree('destroy');
-                           $('#profileTree').jstree(
-                               {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
-                           ).on('changed.jstree', function (e, data) {
-                               //seems to be the node selection event...
-                                delete $scope.selectedED;
-                               //console.log(data)
-                               if (data.node) {
-                                   console.log(data.node && data.node.data);
-                                   $scope.selectedED = data.node.data.ed;
-                                   $scope.$digest();       //as the event occurred outside of angular...
-
-                               }
-                           })
-
-
-                           //------ canonical model
-                           //var vo = profileDiffSvc.makeCanonicalObj(SD);
-
-                           profileDiffSvc.makeCanonicalObj(SD).then(
-                               function (vo) {
-                                   console.log(vo)
-                                   $scope.canonical = vo.canonical;
-                               },function (err) {
-                                   console.log(err)
-                               }
-                           )
-
-                           //------ report
-                           $scope.profileReport = profileDiffSvc.reportOneProfile(SD);
-
-*/
 
                        }, function (err) {
                            console.log(err)
@@ -503,7 +435,7 @@ angular.module("sampleApp")
                     }
                 }
 
-               // console.log(baseType)
+               /* Not sure why I was doing this. Comment out for the moment...
                 if (baseType) {
                     profileDiffSvc.findProfilesOnBase(baseType).then(
                         function (bundle) {
@@ -516,6 +448,7 @@ angular.module("sampleApp")
                         }
                     )
                 }
+                */
 
 
 
@@ -523,20 +456,9 @@ angular.module("sampleApp")
                 profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
                     function(vo) {
 
-                        //console.log(vo)
-/* - not sure why I'm doing this - warning: the SD is mutated by the function!
 
-                        profileDiffSvc.makeLogicalModelFromTreeData($scope.selectedSD,vo.treeData).then(
-                            function (treeData) {
-                                $scope.lm = treeData;
-                            }
-                        )
-
-*/
-
-
-                        $('#profileTree1').jstree('destroy');
-                        $('#profileTree1').jstree(
+                        $('#logicalTree').jstree('destroy');
+                        $('#logicalTree').jstree(
                             {
                                 'core': {
                                     'multiple': false,
@@ -545,8 +467,11 @@ angular.module("sampleApp")
                                 }
                             }
                         ).on('select_node.jstree', function (e, data) {
-                            if (data.node) {
+                            if (data.node && data.node.data) {
                                // console.log(data.node && data.node.data);
+
+                                $scope.selectedElementInLM = data.node.data.ed;
+
                                 $scope.selectedED1 = data.node.data.ed;
                                 $scope.$digest();       //as the event occurred outside of angular...
 
@@ -558,7 +483,7 @@ angular.module("sampleApp")
 
 
 
-                //------- physical model
+                //------- raw model
                 var treeData = logicalModelSvc.createTreeArrayFromSD(SD)
                 $('#profileTree').jstree('destroy');
                 $('#profileTree').jstree(
@@ -595,23 +520,62 @@ angular.module("sampleApp")
             }
 
 
-            var createGraphOfIG = function(IG) {
-                delete $scope.igGraphHash;
-                console.log(IG);
+            $scope.drawGraph = function(){
+                createGraphOfIG($scope.currentIG);
+
+            };
+
+            $scope.centeredNode = function(centeredOnly){
+                if (!centeredOnly) {
+                    createGraphOfIG($scope.currentIG);
+                }
+            }
+
+            var makeOptions = function(){
                 var options = {profiles:[]}
+                if ($scope.input.includeExtensions) {
+                    options.includeExtensions = true;
+                }
 
+                if ($scope.input.includeTerminology) {
+                    options.includeTerminology = true;
+                }
+                if ($scope.input.includePatient) {
+                    options.includePatient = true;
+                }
+                if ($scope.centredNodeUrl && $scope.input.center){
+                    options.profiles.push($scope.centredNodeUrl)
+                }
+                if ($scope.input.includeCore) {
+                    options.includeCore = true;
+                }
+                if ($scope.input.immediateChildren) {
+                    options.immediateChildren = true;
+                }
 
-                profileDiffSvc.createGraphOfIG(IG,options).then(
+                return options;
+            }
+
+            var createGraphOfIG = function(IG,graphOptions) {
+                if (! IG) {
+                    return;
+                }
+                delete $scope.igGraphHash;
+                delete $scope.graphReferences;
+                delete $scope.selectedNodeFromGraph;
+                console.log(IG);
+                var graphOptions = graphOptions || makeOptions();
+
+                profileDiffSvc.createGraphOfIG(IG,graphOptions).then(
                     function(graphData) {
                         //$scope.graphData = graphData;
+                        var hashRelationships = graphData.hashRelationships;  //details of relationships (like path) = hash is <from>-<to>
 
                         console.log(graphData)
 
                         $scope.igGraphHash = graphData.hash;    //the hash generated during the IG analysis. Contains useful stuff like extension usedBy
 
                         var container = document.getElementById('igModel');
-
-
 
                         var options = {
                             layout: {randomSeed:8},
@@ -620,8 +584,10 @@ angular.module("sampleApp")
                                 timestep : .35,
                                 stabilization : {
                                     fit:true
+                                },
+                                barnesHut: {
+                                    gravitationalConstant:-7500
                                 }
-
                             },
                             edges : {
                                 arrows: {
@@ -635,12 +601,32 @@ angular.module("sampleApp")
                         $scope.profileNetwork = new vis.Network(container, graphData, options);
 
                         $scope.profileNetwork.on("click", function (obj) {
-                            var nodeId = obj.nodes[0];  //get the first node
-                            console.log(nodeId)
-                            var node = graphData.nodes.get(nodeId);
-                            console.log(node)
-                           // var pathOfSelectedNode = node.ed.path; //node.ed.base.path not working with merged...
-                          //  $scope.selectedNode = findNodeWithPath(pathOfSelectedNode); //note this is the node for the tree view, not the graph
+                            if (obj.edges.length > 0) {
+                                delete $scope.selectedNodeFromGraph
+                                console.log(obj.edges)
+                                var edge = graphData.edges.get(obj.edges[0]);
+                                //var relationship = hashRelationships[edge.from+'-'+edge.to];
+                                $scope.graphReferences = hashRelationships[edge.from+'-'+edge.to];
+
+                                console.log(hashRelationships[edge.from+'-'+edge.to])
+                            }
+
+                            if (obj.nodes.length > 0) {
+                                var nodeId = obj.nodes[0];  //get the first node
+                                delete $scope.graphReferences;
+                                $scope.selectedNodeFromGraph = graphData.nodes.get(nodeId);
+
+
+                                if ($scope.selectedNodeFromGraph && $scope.selectedNodeFromGraph.data && $scope.selectedNodeFromGraph.data.url) {
+                                    $scope.selectItem({url:$scope.selectedNodeFromGraph.data.url, description:""},'profile')
+
+                                    if ($scope.input.center && $scope.selectedNodeFromGraph) {
+                                        var url = $scope.selectedNodeFromGraph.data.url;
+                                        centerNodeInGraph(url)
+                                    }
+                                }
+                            }
+
 
                             $scope.$digest();
 
@@ -649,5 +635,28 @@ angular.module("sampleApp")
                 );
             };
 
+            $scope.fitGraph = function() {
+                if ($scope.profileNetwork) {
+
+                    $timeout(function(){
+                        $scope.profileNetwork.fit();
+                        console.log('fit')
+                    },1000)
+                }
+
+            };
+
+            function centerNodeInGraph(url) {
+                $scope.centredNodeUrl = url;
+                var options = makeOptions();
+                options.profiles.push(url);
+                createGraphOfIG($scope.currentIG,options);
+                //$scope.$digest();
+
+                $timeout(function(){
+                    $scope.profileNetwork.fit();
+                    console.log('fit')
+                },2000)
+            }
 
     })

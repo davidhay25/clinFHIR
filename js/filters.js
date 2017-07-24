@@ -237,7 +237,7 @@ angular.module("sampleApp")
     })
     .filter('dropFirstInPath',function(){
             return function(path) {
-                //return the last part of a path - allowing for stu2 (array) or stu3 (single)
+                //return the last part of a path
                 if (path) {
                     var ar = path.split('.');
                     ar.splice(0,1);
