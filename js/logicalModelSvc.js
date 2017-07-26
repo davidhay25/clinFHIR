@@ -778,19 +778,28 @@ angular.module("sampleApp")
                             }
 
                         }
-                        newED.id = baseType + ':' + newED.path + '-' + inx ;    //id is mandatory - but not used...
 
+                        var addToProfile = true;
+
+
+
+                        newED.id = baseType + ':' + newED.path + '-' + inx ;    //id is mandatory - but not used...
                         var path = newED.path;
-                        if (path && path.indexOf('[x]') > -1) {
-                            //this is a choice type - change the name to the first type
-                            if (newED.type){
-                                var cd = newED.type[0].code
-                                newED.path = newED.path.substr(0,newED.path.length-4) + cd.substr(0,1).toUpperCase() + cd.substr(1)
-                                basePathHash[newED.path] = newED;   //add to the list of acceptable paths. (Assumes that the path before the [x] is legit...
+
+                        if (addToProfile) {
+                            if (path && path.indexOf('[x]') > -1) {
+                                //this is a choice type - change the name to the first type
+                                if (newED.type){
+                                    var cd = newED.type[0].code
+                                    newED.path = newED.path.substr(0,newED.path.length-4) + cd.substr(0,1).toUpperCase() + cd.substr(1)
+                                    basePathHash[newED.path] = newED;   //add to the list of acceptable paths. (Assumes that the path before the [x] is legit...
+                                }
                             }
                         }
 
-                        var addToProfile = true;
+
+
+
 
                         //if the oldPath value is in the list of ignorePaths then ignore
                         if (addToProfile) {

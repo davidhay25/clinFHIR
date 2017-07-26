@@ -79,7 +79,9 @@ angular.module("sampleApp")
 
                             var res = profileDiffSvc.findResourceInIGPackage($scope.currentIG,SD.url);
                             if (res) {
-                                modalService.showModal({}, {bodyText: "There is already an entry for this profile in the Guide. You may need to clear the cache and re-load the app for the new profile to be displayed."})
+                                profileDiffSvc.clearSDProfile(SD.url);
+                                modalService.showModal({}, {
+                                    bodyText: "There is already an entry for this profile in the Guide. I've cleared it from the cache but you need to re-load the app for the new profile to be displayed."})
                                 return
                             } else {
                                 //add the profile to the IG - then find any extensions and add them as well. todo - should we check whether they exist first?
@@ -638,6 +640,9 @@ console.log(ext)
 
                 //------- raw model
                 var treeData = logicalModelSvc.createTreeArrayFromSD(SD)
+
+                console.log(treeData)
+
                 $('#profileTree').jstree('destroy');
                 $('#profileTree').jstree(
                     {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}

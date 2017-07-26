@@ -1045,9 +1045,13 @@ angular.module("sampleApp").service('profileDiffSvc',
             }
             return deferred.promise;
         },
+        clearSDProfile : function(url) {
+            delete $localStorage.extensionDefinitionCache[url];
+        },
         getSD : function(url) {
             var deferred = $q.defer();
             if ($localStorage.extensionDefinitionCache[url]) {
+
                 //note that this is an async call - some duplicate calls are inevitible
                 //console.log('cache')
                 deferred.resolve($localStorage.extensionDefinitionCache[url]);
