@@ -675,16 +675,14 @@ angular.module("sampleApp")
 
                     },
                     function(err) {
-                       //deferred.reject('Base profile (' + url + ') not found');
                         deferred.reject(angular.toJson(err));
-
-
                     }
                 );
 
                 return deferred.promise;
 
 
+                //SD is the base profile from the core spec...
                 function makeFHIRProfile(SD) {
                     var discriminatorUrl = appConfigSvc.config().standardExtensionUrl.discriminatorUrl;
 
@@ -697,19 +695,20 @@ angular.module("sampleApp")
 
                     //this will be an object holding child elements of datatypes. Just a few to see if it works
                     var dt = {}
-                    dt['CodeableConcept'] = ['coding','text','coding.system','coding.code','coding.display']
-                    dt['Identifier'] = ['system','value','use','type','period','assigner']
+                    dt['CodeableConcept'] = ['coding','text','coding.system','coding.code','coding.display'];
+                    dt['Identifier'] = ['system','value','use','type','period','assigner'];
                     dt['Period'] = ['start','end'];
                     dt['Address'] = ['use','type','text','line','city','district','state','postalCode','country','period'];
                     dt['ContactPoint'] = ['system','value','use','rank','period'];
                     dt['HumanName'] = ['use','text','family','given','prefix','suffix','period'];
+                    dt['Timing'] = ['event','repeat','boundsQuantity','boundsRange','count','duration','durationMax','durationUnits','frequency','frequencyMax','period','periodMax','periodUnits','when'];
 
-
+/*
                     //create a hash of all the paths in the Logical model. Ignore duplications. used for finding the dt of the parent
                     internalLM.snapshot.element.forEach(function(ed,inx){
 
                     });
-
+*/
 
                     //create a hash of all the paths in the base resource type (That is being profiled)...
                     var basePathHash = {};
@@ -727,9 +726,6 @@ angular.module("sampleApp")
                                     })
                                 }
 
-                             //   if (! listOfDataTypes[typ.code]) {
-                              //      listOfDataTypes[typ.code] = {}
-                              //  }
                             })
                         }
 
@@ -741,11 +737,7 @@ angular.module("sampleApp")
                     internalLM.snapshot.element.forEach(function(ed,inx){
                         var newED = angular.copy(ed);
 
-
-
-
-
-                        //remove invalid property
+                        //remove invalid property that was added in the logival model to support internal processing
                         if (newED.type){
                             newED.type.forEach(function (typ) {
                                 delete typ.isComplexDT;
@@ -768,7 +760,9 @@ angular.module("sampleApp")
                                         //the hack for the mapping comments
                                         if (map.map) {
                                             var ar1 = map.map.split('|');
-                                            var fhirPath = ar1[0];
+                                            var fhirPath = ar1[0];      //this is the 'real' path in the SD
+
+
 
                                             //if the mapping path has '[ ', then this is a sliced element.
                                             var ar2 = fhirPath.split('[')
@@ -784,7 +778,7 @@ angular.module("sampleApp")
                             }
 
                         }
-                        newED.id = baseType + ':' + newED.path + '-' + inx ;
+                        newED.id = baseType + ':' + newED.path + '-' + inx ;    //id is mandatory - but not used...
 
                         var path = newED.path;
                         if (path && path.indexOf('[x]') > -1) {
@@ -798,8 +792,19 @@ angular.module("sampleApp")
 
                         var addToProfile = true;
 
+                        //if the oldPath value is in the list of ignorePaths then ignore
+                        if (addToProfile) {
+                            ignorePath.forEach(function (ignore) {
+                                if (oldPath.substr(0,ignore.length) === ignore) {
+                                    addToProfile = false;
+                                }
+
+                            })
+                        }
+
+
                         //check for a path in the FHIR mapping
-                        if (! newED.path) {
+                        if (addToProfile && ! newED.path) {
                             //there is no path - which means that there was no FHIR mapping
                             err.push("Path: " + oldPath + " needs to have a FHIR mapping")
                             addToProfile = false;
@@ -812,7 +817,7 @@ angular.module("sampleApp")
                                 addToProfile = false;
                             }
                         }
-
+/*
                         //if the oldPath value is in the list of ignorePaths then ignore
                         if (addToProfile) {
                             ignorePath.forEach(function (ignore) {
@@ -822,17 +827,15 @@ angular.module("sampleApp")
 
                             })
                         }
-
+*/
 
                         //if this is datatype of reference, then add it to the list of 'ignorePaths' so the children will not be included
                         if (addToProfile) {
                             if (ed.type) {
                                 ed.type.forEach(function (typ) {
-
                                     if (typ.code == 'Reference') {
                                         ignorePath.push(oldPath);   //ignorePath works on the path in the model, not the mapping... Note we still add this element
                                     }
-
                                 })
                             }
                         }
@@ -882,16 +885,13 @@ angular.module("sampleApp")
                                     if (lPath.substr(0,item.length) === item) {
                                         coveredByDiscriminator = true
                                     }
-                                })
+                                });
 
                                 if (!coveredByDiscriminator ) {
                                     //no, it isn't. Don't add to the profile
                                     addToProfile = false;
                                 }
-
                             }
-
-
                         }
 
 
@@ -1644,6 +1644,7 @@ angular.module("sampleApp")
                             item.data.header = {};
                             item.data.header.SDID = sd.id;
                             item.data.header.name = sd.name;
+                            item.data.header.SDUrl = sd.url;
 
                             //the name of the next 2 elements changed after baltimore, so look in both places until the other stu3 servrs catch up...
                             item.data.header.purpose = sd.purpose || sd.requirements;

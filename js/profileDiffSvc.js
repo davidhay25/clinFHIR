@@ -9,6 +9,10 @@ angular.module("sampleApp").service('profileDiffSvc',
         objColours.extension = '#ffb3ff';
         objColours.terminology = '#FFFFCC';
 
+        objColours.profile_loaded = '#ffcece';
+        objColours.extension_loaded = '#ffb3ff';
+        objColours.terminology_loaded = '#FFFFCC';
+
         objColours.Patient = '#93FF1A';
 
         objColours.List = '#ff8080';
@@ -30,8 +34,64 @@ angular.module("sampleApp").service('profileDiffSvc',
 
     return {
 
+        findResourceInIGPackage : function(IG,profileUrl) {
+            var res;
+            IG.package.forEach(function (pkg) {
+                pkg.resource.forEach(function (r) {
+                    if (r.sourceReference) {
+                        if (r.sourceReference.reference == profileUrl) {
+                            res = r;
+                        }
+                    }
+
+                })
+            });
+            return res;
+        },
+
+        createDownloadBundle : function(IG){
+            var deferred = $q.defer();
+            var that = this;
+            var bundle = {resourceType:'Bundle',type:'collection',entry:[]}
+            var arQuery = [];
+            bundle.entry.push({resource:IG});
+            IG.package.forEach(function (package) {
+                package.resource.forEach(function (resource) {
+                    arQuery.push(addResource(that,resource.sourceReference.reference,bundle));
+                })
+            });
+
+            $q.all(arQuery).then(
+                function() {
+                    deferred.resolve(bundle)
+                }, function() {
+                    //any failure to read will cause a rejection...
+                    deferred.reject(bundle)
+                }
+            );
+
+            return deferred.promise;
+
+            function addResource(that,url,bundle) {
+                var deferred1 = $q.defer();
+                console.log(url)
+                that.getSD(url).then(
+                    function (SD) {
+                        bundle.entry.push({resource:SD});
+                        deferred1.resolve()
+                    }, function(err) {
+                        deferred1.reject()
+                    }
+                )
+                return deferred1.promise;
+            }
+
+
+        },
         //generate a chart showing the interrelationships of artifacts in the IG...
-        createGraphOfIG: function (IG,options) {
+        createGraphOfIG: function (inIG,options) {
+
+            var IG = angular.copy(inIG);    //as teh IG gets mutated by this function....
             options = options || {profiles:[]};
 
             var deferred = $q.defer();
@@ -41,11 +101,13 @@ angular.module("sampleApp").service('profileDiffSvc',
             var arNodes = [], arEdges = [];
 
             //create a hash indexed on the url and a node of all the artifacts...
-            var hash = {}
+            var hash = {};
             var allNodeHashById = {};
+            var IdToUse = 0;
             IG.package.forEach(function (package) {
                 package.resource.forEach(function (item,inx) {
-
+                    IdToUse++;
+//console.log(inx)
                     var include = true;
                     switch (item.purpose) {
                         case 'extension' :
@@ -64,21 +126,29 @@ angular.module("sampleApp").service('profileDiffSvc',
 
                     if (include) {
                         var url = item.sourceReference.reference;   //the url of the node
+                        if (url) {
+                            // console.log(url,IdToUse)
 
-                        var label = path = $filter('referenceType')(url);
-                        var node = {id: inx, label: label, shape: 'box',color:objColours[item.purpose]};
-                        node.data = item;
-                        node.data.url = url;
-                        //node.hidden = true;
-                        hash[url]={purpose:item.purpose,description:item.description,nodeId:inx,usedBy:[],node:node};  //usedBy is for extensions - what uses them...
+                            var label = path = $filter('referenceType')(url);
+                            var node = {id: IdToUse, label: label, shape: 'box',color:objColours[item.purpose]};
+                            node.data = item;
+                            node.data.url = url;
+                            //node.hidden = true;
+                            hash[url]={purpose:item.purpose,description:item.description,nodeId:IdToUse,usedBy:[],node:node};  //usedBy is for extensions - what uses them...
 
-                        allNodeHashById[node.id] = node;
-                        arNodes.push(node);
+                            allNodeHashById[node.id] = node;
+                            arNodes.push(node);
+                        } else {
+                            console.log("---> ",item,'No url')
+                        }
+
                     }
 
                 })
             });
 
+           // console.log(hash)
+           // return;
 
             //now load all the profiles, and figure out the references to extensions and other types. Do need to create all the nodes first...
             var arQuery = []
@@ -246,7 +316,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                     //console.log(url)
 
                     var id = new Date().getTime() + "-" + Math.random();
-                    var node = {id: id, label: label, shape: 'box',color:objColours[purpose]};
+                    var node = {id: id, label: label, shape: 'box',color:objColours[purpose+'_loaded']};
                     //var node = {id: id, label: label, shape: 'box',color:'#f7eaea'};
 
                     node.data ={purpose:purpose, sourceReference: {reference:url}};
@@ -275,8 +345,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                             //a reference to an extension
 
                             if (ed.max !== '0') {
-
-
 
                                 if (options.includeExtensions) {
                                     if (ed.path.indexOf('xtension') > -1) {
@@ -531,52 +599,7 @@ angular.module("sampleApp").service('profileDiffSvc',
             };
 
 
-/*
-            rootName='myModel';
-            var scope = {rootName : 'myLM'};
-            treeData = [{id:rootName,parent:'#',data : {header : {}}}];
 
-            typeName = 'Encounter';
-
-            logicalModelSvc.createFromBaseType (treeData, typeName, rootName).then(
-                //generate a tree data array in the format that the Logical modeller uses...
-                function (treeData) {
-                    console.log(treeData);
-                    //note that any
-
-
-
-
-
-                    deferred.resolve(logicalModelSvc.makeSD(scope,treeData))
-                },function (err) {
-                    console.log(err)
-                }
-            );
-
-
-
-            console.log(SD,inTreeData);
-            var treeData = [];
-            inTreeData.forEach(function (line) {
-                console.log(line)
-                var item = {data:{}};
-                var ed = line.data.ed;
-                item.data.path = line.path;
-                item.data.min = ed.min;
-                item.data.max = ed.max;
-                item.data.comments = ed.comment;
-
-                treeData.push(item)
-            });
-
-
-            var scope = {rootName : 'myLM'};
-           // var treeData = inTreeData;
-
-
-            return logicalModelSvc.makeSD(scope,treeData);
-*/
             function setHeaderInfo(sd,vo) {
                 //vo {currentuser: rootName: baseType: name:
                 //set the header information that makes this a Logical Model rather than a Profile...
@@ -1041,7 +1064,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                         deferred.resolve($localStorage.extensionDefinitionCache[url]);
                     },function (err) {
                         console.log(err)
-                        deferred.reject();
+                        deferred.reject(err);
                     }
                 )
             }

@@ -5,18 +5,18 @@ angular.module("sampleApp")
                   Utilities,GetDataFromServer,profileCreatorSvc,$filter,$firebaseObject,$location,$window,modalService,
                     $timeout) {
 
-            $scope.input = {includeExtensions:false,center:true,includeCore:true,immediateChildren:true,includePatient:true};
+            $scope.input = {includeExtensions:false,center:true,includeCore:true,immediateChildren:true,includeExtensions:true,includePatient:true};
             $scope.appConfigSvc = appConfigSvc;
 
             $scope.history = [];        //
             $scope.input.tabShowing='single';
             $scope.input.categories = ['profile','extension','terminology'];
 
-
+            GetDataFromServer.registerAccess('igView');
 
             $scope.updateIG = function(){
-                console.log($scope.selectedIG);
-            }
+                console.log($scope.currentIG);
+            };
 
             //see if this page was loaded from a shortcut
             var hash = $location.hash();
@@ -57,6 +57,116 @@ angular.module("sampleApp")
 
             $scope.clearCache = function(){
                 profileDiffSvc.clearCache();
+            };
+
+            $scope.createDownload = function(){
+                profileDiffSvc.createDownloadBundle($scope.currentIG).then(
+                    function(bundle) {
+                        console.log(bundle);
+                    },function(bundle) {
+                        console.log(bundle);
+                    }
+                );
+            };
+
+            $scope.importProfile = function(){
+
+                var url = $window.prompt('Enter the Url of the profile');
+                if (url) {
+                    profileDiffSvc.getSD(url).then(
+                        function (SD) {
+                            console.log(SD);
+
+                            var res = profileDiffSvc.findResourceInIGPackage($scope.currentIG,SD.url);
+                            if (res) {
+                                modalService.showModal({}, {bodyText: "There is already an entry for this profile in the Guide. You may need to clear the cache and re-load the app for the new profile to be displayed."})
+                                return
+                            } else {
+                                //add the profile to the IG - then find any extensions and add them as well. todo - should we check whether they exist first?
+                                var pkg = $scope.currentIG.package[0];  //just stuff everything into the first package
+                                pkg.resource = pkg.resource || []
+                                var res = {sourceReference:{reference:url}};
+                                //todo - should likely move to an extension for R3
+                                if (appConfigSvc.getCurrentConformanceServer().version ==2) {
+                                    res.purpose = 'profile'
+                                } else {
+                                    res.acronym = 'profile'
+                                }
+                                pkg.resource.push(res);
+                            }
+
+
+
+                            //now look for any extensions....
+                            if (SD.snapshot && SD.snapshot.element) {
+                                SD.snapshot.element.forEach(function (ed) {
+                                    if (ed.type) {
+                                        ed.type.forEach(function (typ) {
+                                            if (typ.code == 'Extension' && typ.profile) {
+                                                var profileUrl = typ.profile;
+                                                if (angular.isArray(profileUrl)) {
+                                                    profileUrl = typ.profile[0]
+                                                }
+                                                console.log(profileUrl);
+
+                                                //make sure this is not already in the list
+                                                //var found = false;
+                                                var res = profileDiffSvc.findResourceInIGPackage($scope.currentIG,profileUrl);
+                                                /*
+                                                $scope.currentIG.package.forEach(function (pkg) {
+                                                    pkg.resource.forEach(function (r) {
+                                                        if (r.sourceReference) {
+                                                            if (r.sourceReference.reference == profileUrl) {
+                                                                found = true;
+                                                            }
+                                                        }
+
+                                                    })
+                                                });
+                                                */
+                                                if (!res) {
+                                                    var res = {sourceReference:{reference:profileUrl}};
+                                                    //todo - should likely move to an extension for R3
+                                                    if (appConfigSvc.getCurrentConformanceServer().version ==2) {
+                                                        res.purpose = 'extension'
+                                                    } else {
+                                                        res.acronym = 'extension'
+                                                    }
+                                                    pkg.resource.push(res);
+                                                }
+
+
+
+                                            }
+
+
+
+                                        })
+                                    }
+                                })
+                            }
+
+
+                            $scope.dirty = true;
+                            $scope.selectIG($scope.currentIG);
+
+                        },function (err) {
+                            alert("Sorry, can't find a profile with that Url...")
+                        }
+                    )
+
+
+                    //alert(url)
+                }
+return;
+
+                var url = appConfigSvc.getCurrentConformanceServer().url;
+                url += 'StructureDefinition?kind=resource';
+                GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
+                    function(data) {
+                        console.log(data.data);
+                    }
+                )
             };
 
             $scope.generateShortCut = function() {
@@ -280,7 +390,7 @@ console.log(ext)
                 setupProfile(SD)
             };
             
-            //load the IG's that describe 'collections' of conformance aritfacts - like CareConnect & Argonaut
+            //load the IG's that describe 'collections' of conformance artifacts - like CareConnect & Argonaut
             var url = appConfigSvc.getCurrentConformanceServer().url + "ImplementationGuide";
             $http.get(url).then(
                 function(data) {
@@ -309,12 +419,10 @@ console.log(ext)
                         var purpose = resource.purpose || resource.acronym;     //<<< todo - 'purpose' was removed in R3...
                         $scope.artifacts[purpose] = $scope.artifacts[purpose] || []
                         $scope.artifacts[purpose].push({url:resource.sourceReference.reference, description:resource.description})
-
                     })
-
                 });
 
-                createGraphOfIG(IG);
+               //temp createGraphOfIG(IG);
 
             };
 
@@ -362,8 +470,6 @@ console.log(ext)
             //when an item is selected in the accordian for display in the right pane...
             $scope.selectItem = function(item,type){
 
-
-
                 clearRightPane()
 
                 $scope.selectedItemType = type;
@@ -379,6 +485,27 @@ console.log(ext)
 
                //console.log(item)
                 centerNodeInGraph(item.url)
+
+                if (type == 'logical') {
+
+                    profileDiffSvc.getSD(item.url).then(
+                        function (SD) {
+                            var treeData = logicalModelSvc.createTreeArrayFromSD(SD)
+
+                            logicalModelSvc.resetTreeState(treeData);
+                            treeData[0].state.opened = true;
+
+                            $('#lmTreeView').jstree('destroy');
+                            $('#lmTreeView').jstree(
+                                {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+                            )
+                        }
+                    )
+
+
+
+
+                }
 
                if (type == 'terminology') {
                    //really only works for ValueSet at this point...
@@ -705,8 +832,11 @@ console.log(ext)
                 //$scope.$digest();
 
                 $timeout(function(){
-                    $scope.profileNetwork.fit();
-                    console.log('fit')
+                    if ($scope.profileNetwork) {
+                        $scope.profileNetwork.fit();
+                        console.log('fit')
+                    }
+
                 },2000)
             }
 

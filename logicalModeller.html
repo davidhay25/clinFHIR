@@ -844,7 +844,11 @@
 
                                             -->
 
-                                            <button ng-show="discriminatorReq" class="btn btn-link" ng-click="setAsDiscriminator(selectedNode)">Set as Discriminator</button>
+                                            <button ng-show="discriminatorReq" class="btn btn-link"
+                                                    uib-popover="Use the value of this element as the discriminator for all elements with the same path"
+                                                    popover-placement="top"
+                                                    popover-trigger="'mouseenter'"
+                                                    ng-click="setAsDiscriminator(selectedNode)">Set as Discriminator</button>
                                         </div>
 
 
@@ -896,7 +900,11 @@
                             <uib-tab heading="Summary">
                                 <br/>
                                 <table class="table table-bordered">
+
+
+
                                     <tr><td width="25%">Model Name</td><td>{{treeData[0].data.header.name}}</td></tr>
+                                    <tr><td>Model Url</td><td>{{treeData[0].data.header.SDUrl}}</td></tr>
                                     <tr><td>Model ID on server</td><td>{{treeData[0].data.header.SDID}}</td></tr>
                                     <tr><td>Model Title</td><td>{{treeData[0].data.header.title}}</td></tr>
                                     <tr><td>Model Purpose</td><td>{{treeData[0].data.header.purpose}}</td></tr>
@@ -913,6 +921,11 @@
                                         <td>Base Resource Type</td><td>{{treeData[0].data.header.baseType}}</td></tr>
                                     <tr ng-show="treeData[0].data.header.mapping">
                                         <td>Mapping</td><td>{{treeData[0].data.header.mapping}}</td></tr>
+
+                                    <tr><td>Profile Url<div>(When generated</div></td><td>{{treeData[0].data.header.SDUrl + '-cf-profile'}}</td></tr>
+
+
+
                                 </table>
                             </uib-tab>
                             <uib-tab heading="History">

@@ -33,8 +33,6 @@ angular.module("sampleApp")
             };
 
 
-
-
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
 
             $scope.input.newCommentboxInxDEP = -1;
@@ -47,7 +45,7 @@ angular.module("sampleApp")
                 $scope.isDirty=true;
                 makeSD();
 
-            }
+            };
 
             $scope.showConceptMap = function(url) {
 
@@ -185,7 +183,9 @@ angular.module("sampleApp")
                                     $scope.oo = data.data;
                                     delete $scope.oo.text;
                                 }
-                            )
+                            ).finally(function () {
+                                $scope.canSave = false;  //hide the save button - it's confusing to have it here...
+                            })
                         };
 
                         //$scope.generateProfile();
@@ -198,8 +198,6 @@ angular.module("sampleApp")
                         }}
 
                 })
-
-
 
 
             };
@@ -1189,7 +1187,7 @@ angular.module("sampleApp")
                                     $scope.baseType = ext.valueString
                                 }
                                
-                                $scope.input.title = SD.title;
+                                $scope.input.title = SD.title || SD.display;    //stu2 vvs stu3
                                 $scope.input.publisher = SD.publisher;
                                 $scope.canSave = true;
                                 $scope.isNew = false;

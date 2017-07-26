@@ -172,13 +172,14 @@
             </div>
 
 
-            <div class="col-md-1 col-sm-1">
+            <div class="col-md-2 col-sm-2">
                 <div class="navbar-text">
-                    <a href="#" ng-click="clearCache()">Clear Cache</a>
+                    <div><a href="#" ng-click="clearCache()">Clear Cache</a></div>
+                    <div><a href="#" ng-click="createDownload()">Create download</a></div>
                 </div>
             </div>
 
-            <div class="col-md-2 col-sm-2">
+            <div class="col-md-1 col-sm-1">
                 <div class="navbar-text pull-right">
                     User: {{orionUser.primaryActor.fullName}}
                 </div>
@@ -232,7 +233,10 @@
                         <div uib-accordion-group class="panel-default">
                             <uib-accordion-heading>
                                 Profiles
-                                <div class="pull-right badge">{{artifacts.profile.length}}</div>
+                                <div class="pull-right badge">
+                                    <span>{{artifacts.profile.length}}</span>
+                                </div>
+
                             </uib-accordion-heading>
 
                             <ul class="list-group">
@@ -242,13 +246,22 @@
                                     <div class="clickable">{{item.url | referenceType}}</div>
                                     <div><em>{{item.description}}</em></div>
                                 </li>
+
                             </ul>
+                            <div class="pull-right"><a href="#" ng-click="importProfile()">Import new</a> </div>
                         </div>
 
                         <div uib-accordion-group class="panel-default">
                             <uib-accordion-heading>
                                 Extension Definitions
-                                <div class="pull-right badge">{{artifacts.extension.length}}</div>
+                                <div class="pull-right">
+                                    <!--<i class="glyphicon glyphicon-plus"
+                                       title="Add Extension Definition"
+                                       ng-click="addEDtoIG()" style="cursor: pointer">
+
+                                    </i>-->
+                                    <span class="badge">{{artifacts.extension.length}}</span>
+                                </div>
                             </uib-accordion-heading>
                             <ul class="list-group">
                                 <li ng-class="{'list-group-item':true, listItemSelected:selectedItem == item}"
@@ -273,6 +286,20 @@
                                 </li>
                             </ul>
                         </div>
+
+                            <div uib-accordion-group class="panel-default">
+                                <uib-accordion-heading>
+                                    Logical Models
+                                    <div class="pull-right badge">{{artifacts.logical.length}}</div>
+                                </uib-accordion-heading>
+                                <ul class="list-group">
+                                    <li class="list-group-item" ng-repeat="item in artifacts.logical"
+                                        ng-click = "selectItem(item,'logical')">
+                                        <div class="clickable">{{item.url | referenceType}}</div>
+                                        <div><em>{{item.description}}</em></div>
+                                    </li>
+                                </ul>
+                            </div>
 
 
                     </uib-accordion>
@@ -320,11 +347,6 @@
                         <uib-tab heading="Graph" select="fitGraph()">
 
 
-<!--
-                            <div ng-hide="igGraphHash">
-                                <h4>Analysing Implementation Guide, please wait...</h4>
-                            </div>
-                            -->
 
 
                             <div class="row" ng-show="currentIG">
@@ -425,6 +447,10 @@
                             <uib-tab-heading>Details of Resource: <strong>{{selectedItem.url | referenceType}}</strong></uib-tab-heading>
 
 
+                    <div ng-show="selectedItemType == 'logical'">
+                        <h4>Logical Model</h4>
+                        <div id="lmTreeView"></div>
+                    </div>
 
                     <div ng-show="selectedItemType == 'profile'">
                         <h4>Profiled resource</h4>
@@ -624,7 +650,7 @@
                                 <div ng-show="igGraphHash[selectedItem.url].usedBy">
                                     <h5>Used By:
                                         <ul class="list-unstyled">
-                                            <li ng-repeat="url in igGraphHash[selectedItem.url].usedBy">
+                                            <li ng-repeat="url in igGraphHash[selectedItem.url].usedBy track by $index">
                                                 {{url}}
                                             </li>
                                         </ul>
@@ -661,7 +687,7 @@
                                 <div ng-show="igGraphHash[selectedItem.url].usedBy">
                                     <h5>Used By:
                                         <ul class="list-unstyled">
-                                            <li ng-repeat="url in igGraphHash[selectedItem.url].usedBy">
+                                            <li ng-repeat="url in igGraphHash[selectedItem.url].usedBy track by $index">
                                                 {{url}}
                                             </li>
                                         </ul>
@@ -685,6 +711,9 @@
 
 
 
+                        </uib-tab>
+                        <uib-tab heading="Json">
+                            <pre>{{currentIG | json}}</pre>
                         </uib-tab>
                     </uib-tabset>
 
