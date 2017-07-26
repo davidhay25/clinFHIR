@@ -3,7 +3,7 @@ angular.module("sampleApp")
     .controller('profileDiffCtrl',
         function ($scope,$q,$http,profileDiffSvc,$uibModal,logicalModelSvc,appConfigSvc,RenderProfileSvc,builderSvc,
                   Utilities,GetDataFromServer,profileCreatorSvc,$filter,$firebaseObject,$location,$window,modalService,
-                    $timeout) {
+                    $timeout,SaveDataToServer) {
 
             $scope.input = {includeExtensions:false,center:true,includeCore:true,immediateChildren:true,includeExtensions:true,includePatient:true};
             $scope.appConfigSvc = appConfigSvc;
@@ -150,6 +150,17 @@ angular.module("sampleApp")
 
 
                             $scope.dirty = true;
+
+
+                            //var IGUrl = appConfigSvc.getCurrentConformanceServer().url + "/ImplementationGuide/"+$scope.currentIG.id;
+                            SaveDataToServer.saveResource($scope.currentIG).then(
+                                function (data) {
+                                    console.log(data)
+                                }, function (err) {
+                                   alert('Error updating IG '+angular.toJson(err))
+                                }
+                            )
+
                             $scope.selectIG($scope.currentIG);
 
                         },function (err) {
