@@ -9,6 +9,13 @@ angular.module("sampleApp")
         var elementsToIgnore =['id','meta','implicitRules','language','text','contained','extension','modifierExtension'];
         var hashTreeState = {};   //save the state of the tree wrt expanded nodes so it can be restored after editing
 
+        var dataTypes = [];
+        $http.get("artifacts/dt.json").then(
+            function(data) {
+                dataTypes = data.data;
+                console.log(dataTypes)
+            }
+        )
 
         //set the first segment of a path to the supplied value. Used when determining differneces from the base type
         String.prototype.setFirstSegment = function(firstSegment) {
@@ -694,6 +701,7 @@ angular.module("sampleApp")
                     var arPathsAdded = [];      //paths added so far...
 
                     //this will be an object holding child elements of datatypes. Just a few to see if it works
+                    /*
                     var dt = {}
                     dt['CodeableConcept'] = ['coding','text','coding.system','coding.code','coding.display'];
                     dt['Identifier'] = ['system','value','use','type','period','assigner'];
@@ -701,7 +709,10 @@ angular.module("sampleApp")
                     dt['Address'] = ['use','type','text','line','city','district','state','postalCode','country','period'];
                     dt['ContactPoint'] = ['system','value','use','rank','period'];
                     dt['HumanName'] = ['use','text','family','given','prefix','suffix','period'];
-                    dt['Timing'] = ['event','repeat','boundsQuantity','boundsRange','count','duration','durationMax','durationUnits','frequency','frequencyMax','period','periodMax','periodUnits','when'];
+                    dt['Timing'] = ['repeat.boundsPeriod','repeat.boundsPeriod.start', 'repeat.boundsPeriod.end','event','repeat','boundsQuantity','boundsRange','count','duration','durationMax','durationUnits','frequency','frequencyMax','period','periodMax','periodUnits','when'];
+
+
+                    */
 
 /*
                     //create a hash of all the paths in the Logical model. Ignore duplications. used for finding the dt of the parent
@@ -717,9 +728,9 @@ angular.module("sampleApp")
                         basePathHash[ed.path] = ed;
                         if (ed.type) {
                             ed.type.forEach(function (typ) {
-                                //if the type is a complex datatype, then add the children...
-                                if (dt[typ.code]) {
-                                    dt[typ.code].forEach(function (child) {
+                                //if the type is a complex datatype, then add the children... the dataTypes array is read at the top of this service
+                                if (dataTypes[typ.code]) {
+                                    dataTypes[typ.code].forEach(function (child) {
                                         var childPath = ed.path + "." + child;
                                         basePathHash[childPath] = ed;
 
@@ -781,8 +792,6 @@ angular.module("sampleApp")
 
                         var addToProfile = true;
 
-
-
                         newED.id = baseType + ':' + newED.path + '-' + inx ;    //id is mandatory - but not used...
                         var path = newED.path;
 
@@ -796,10 +805,6 @@ angular.module("sampleApp")
                                 }
                             }
                         }
-
-
-
-
 
                         //if the oldPath value is in the list of ignorePaths then ignore
                         if (addToProfile) {

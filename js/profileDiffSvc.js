@@ -3,6 +3,8 @@ angular.module("sampleApp").service('profileDiffSvc',
 
         $localStorage.extensionDefinitionCache = $localStorage.extensionDefinitionCache || {}
 
+
+
         var objColours ={};
 
         objColours.profile = '#ff8080';
