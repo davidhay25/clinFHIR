@@ -69,38 +69,42 @@ angular.module("sampleApp")
                 );
             };
 
-            $scope.importProfile = function(){
+            $scope.importItem = function(itemType){
 
-                var url = $window.prompt('Enter the Url of the profile');
+                console.log(itemType)
+
+                var url = $window.prompt('Enter the Url of the '+itemType.display);
                 if (url) {
                     profileDiffSvc.getSD(url).then(
                         function (SD) {
                             console.log(SD);
+
+                            //get a reference to the package...
+                            var pkg = $scope.currentIG.package[0];  //just stuff everything into the first package for the moment...
+                            pkg.resource = pkg.resource || []
 
                             var res = profileDiffSvc.findResourceInIGPackage($scope.currentIG,SD.url);
                             if (res) {
                                 profileDiffSvc.clearSDProfile(SD.url);
                                 modalService.showModal({}, {
                                     bodyText: "There is already an entry for this profile in the Guide. I've cleared it from the cache but you need to re-load the app for the new profile to be displayed."})
-                                return
+                               // return
                             } else {
                                 //add the profile to the IG - then find any extensions and add them as well. todo - should we check whether they exist first?
-                                var pkg = $scope.currentIG.package[0];  //just stuff everything into the first package
-                                pkg.resource = pkg.resource || []
+
                                 var res = {sourceReference:{reference:url}};
                                 //todo - should likely move to an extension for R3
                                 if (appConfigSvc.getCurrentConformanceServer().version ==2) {
-                                    res.purpose = 'profile'
+                                    res.purpose = itemType.type
                                 } else {
-                                    res.acronym = 'profile'
+                                    res.acronym = itemType.type
                                 }
                                 pkg.resource.push(res);
                             }
 
 
-
-                            //now look for any extensions....
-                            if (SD.snapshot && SD.snapshot.element) {
+                            //now look for any extensions or ValueSets if the object being imported is a profile....
+                            if (itemType.type == "profile" && SD.snapshot && SD.snapshot.element) {
                                 SD.snapshot.element.forEach(function (ed) {
                                     if (ed.type) {
                                         ed.type.forEach(function (typ) {
@@ -114,18 +118,7 @@ angular.module("sampleApp")
                                                 //make sure this is not already in the list
                                                 //var found = false;
                                                 var res = profileDiffSvc.findResourceInIGPackage($scope.currentIG,profileUrl);
-                                                /*
-                                                $scope.currentIG.package.forEach(function (pkg) {
-                                                    pkg.resource.forEach(function (r) {
-                                                        if (r.sourceReference) {
-                                                            if (r.sourceReference.reference == profileUrl) {
-                                                                found = true;
-                                                            }
-                                                        }
 
-                                                    })
-                                                });
-                                                */
                                                 if (!res) {
                                                     var res = {sourceReference:{reference:profileUrl}};
                                                     //todo - should likely move to an extension for R3
@@ -141,9 +134,24 @@ angular.module("sampleApp")
 
                                             }
 
-
-
                                         })
+                                    }
+                                    if (ed.binding) {
+                                        var vsUrl = ed.binding.valueSetReference || ed.binding.valueSetUri;
+                                        if (vsUrl) {
+                                            var res = profileDiffSvc.findResourceInIGPackage($scope.currentIG,vsUrl);
+
+                                            if (!res) {
+                                                var res = {sourceReference:{reference:vsUrl}};
+                                                //todo - should likely move to an extension for R3
+                                                if (appConfigSvc.getCurrentConformanceServer().version ==2) {
+                                                    res.purpose = 'terminology'
+                                                } else {
+                                                    res.acronym = 'terminology'
+                                                }
+                                                pkg.resource.push(res);
+                                            }
+                                        }
                                     }
                                 })
                             }
@@ -164,14 +172,14 @@ angular.module("sampleApp")
                             $scope.selectIG($scope.currentIG);
 
                         },function (err) {
-                            alert("Sorry, can't find a profile with that Url...")
+                            alert("Sorry, can't find a "+itemType.display+" with that Url...")
                         }
                     )
 
 
                     //alert(url)
                 }
-return;
+/*return;
 
                 var url = appConfigSvc.getCurrentConformanceServer().url;
                 url += 'StructureDefinition?kind=resource';
@@ -180,6 +188,7 @@ return;
                         console.log(data.data);
                     }
                 )
+                */
             };
 
             $scope.generateShortCut = function() {
@@ -652,7 +661,7 @@ console.log(ext)
                 //------- raw model
                 var treeData = logicalModelSvc.createTreeArrayFromSD(SD)
 
-                console.log(treeData)
+                //console.log(treeData)
 
                 $('#profileTree').jstree('destroy');
                 $('#profileTree').jstree(
@@ -732,7 +741,7 @@ console.log(ext)
                 delete $scope.igGraphHash;
                 delete $scope.graphReferences;
                 delete $scope.selectedNodeFromGraph;
-                console.log(IG);
+
                 var graphOptions = graphOptions || makeOptions();
 
                 profileDiffSvc.createGraphOfIG(IG,graphOptions).then(
@@ -740,7 +749,7 @@ console.log(ext)
                         //$scope.graphData = graphData;
                         var hashRelationships = graphData.hashRelationships;  //details of relationships (like path) = hash is <from>-<to>
 
-                        console.log(graphData)
+
 
                         $scope.igGraphHash = graphData.hash;    //the hash generated during the IG analysis. Contains useful stuff like extension usedBy
 
@@ -850,7 +859,7 @@ console.log(ext)
                 $timeout(function(){
                     if ($scope.profileNetwork) {
                         $scope.profileNetwork.fit();
-                        console.log('fit')
+
                     }
 
                 },2000)
