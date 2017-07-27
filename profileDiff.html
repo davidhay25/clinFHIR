@@ -452,7 +452,48 @@
 
                     <div ng-show="selectedItemType == 'logical'">
                         <h4>Logical Model</h4>
-                        <div id="lmTreeView"></div>
+
+                        <uib-tabset>
+                            <uib-tab heading="Tree">
+                                <br/>
+                                <div class="row">
+                                    <div class="col-sm-4 col-md-4">
+                                        <div id="lmTreeView"></div>
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        <ng-include src="'/includes/lmitem.html'"></ng-include>
+                                    </div>
+                                </div>
+
+
+                            </uib-tab>
+                            <uib-tab heading="Table">
+                                <br/>
+
+
+                                <table class="table table-bordered table-condensed">
+                                    <tr><th>Element</th><th>DataType</th><th>isRef</th><th>Mult.</th><th>Description</th></tr>
+                                    <tr ng-repeat="row in LMtreeData">
+
+                                        <td>
+
+                                            <div  ng-style="{ 'padding-left': (row.data.path | pathindent) }"
+                                                  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path| lastInPath}}</div>
+                                        </td>
+                                        <td>{{row.data.type[0].code}}
+
+                                        </td>
+                                        <td><div ng-show="row.data.isReference">Y</div></td>
+                                        <td>{{row.data.min}}..{{row.data.max}}</td>
+                                        <td>{{row.data.description}}</td>
+
+                                    </tr>
+
+                                </table>
+                            </uib-tab>
+                        </uib-tabset>
+
+
                     </div>
 
                     <div ng-show="selectedItemType == 'profile'">

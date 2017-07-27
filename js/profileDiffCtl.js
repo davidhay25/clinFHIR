@@ -328,7 +328,7 @@ console.log(ext)
                 //console.log($scope.history);
             }
 
-            function popHistory() {
+            function popHistoryDEP() {
                 if (history.length > 0) {
                     var hx = history.pop();
                     switch (hx.type) {
@@ -444,6 +444,20 @@ console.log(ext)
                     })
                 });
 
+                ['extension','profile','terminology','logical'].forEach(function (purpose) {
+                    $scope.artifacts[purpose].sort(function(item1,item2) {
+                        var typ1 =  $filter('getLogicalID')(item1.url);
+                        var typ2 =  $filter('getLogicalID')(item2.url);
+                        if (typ1 > typ2) {
+                            return 1
+                        } else {
+                            return -1
+                        }
+                    })
+                })
+
+
+
                //temp createGraphOfIG(IG);
 
             };
@@ -512,15 +526,28 @@ console.log(ext)
 
                     profileDiffSvc.getSD(item.url).then(
                         function (SD) {
-                            var treeData = logicalModelSvc.createTreeArrayFromSD(SD)
+                            $scope.LMtreeData = logicalModelSvc.createTreeArrayFromSD(SD)
 
-                            logicalModelSvc.resetTreeState(treeData);
-                            treeData[0].state.opened = true;
+                            logicalModelSvc.resetTreeState($scope.LMtreeData);
+                            $scope.LMtreeData[0].state.opened = true;
 
                             $('#lmTreeView').jstree('destroy');
                             $('#lmTreeView').jstree(
-                                {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
-                            )
+                                {'core': {'multiple': false, 'data': $scope.LMtreeData, 'themes': {name: 'proton', responsive: true}}}
+                            ).on('changed.jstree', function (e, data) {
+                                //seems to be the node selection event...
+
+                                if (data.node) {
+                                    $scope.selectedNode = data.node;
+
+                                }
+
+                                $scope.$digest();       //as the event occurred outside of angular...
+
+                            })
+
+
+
                         }
                     )
 
@@ -697,7 +724,6 @@ console.log(ext)
 
             }
 
-
             $scope.drawGraph = function(){
                 createGraphOfIG($scope.currentIG);
 
@@ -749,8 +775,6 @@ console.log(ext)
                         //$scope.graphData = graphData;
                         var hashRelationships = graphData.hashRelationships;  //details of relationships (like path) = hash is <from>-<to>
 
-
-
                         $scope.igGraphHash = graphData.hash;    //the hash generated during the IG analysis. Contains useful stuff like extension usedBy
 
                         var container = document.getElementById('igModel');
@@ -773,8 +797,6 @@ console.log(ext)
                                 }
                             }
                         };
-
-
 
                         $scope.profileNetwork = new vis.Network(container, graphData, options);
 
@@ -864,5 +886,4 @@ console.log(ext)
 
                 },2000)
             }
-
-    })
+    });

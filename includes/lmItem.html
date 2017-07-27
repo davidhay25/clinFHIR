@@ -1,0 +1,186 @@
+<div ng-show="selectedNode">
+    <div class="row">
+        <div class="col-md-10 col-sm-10">
+            <h4>Element path <em>{{selectedNode.text}}</em> properties</h4>
+        </div>
+        <div class="col-md-2 col-sm-2">
+
+        </div>
+    </div>
+
+
+
+    <table class="table table-bordered">
+        <!--<tr><td width="20%">Name</td><td>{{selectedNode.data.name}}</td></tr> -->
+        <tr><td width="20%">Model path</td><td>{{selectedNode.data.path}}</td></tr>
+        <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
+        <tr><td>Description</td><td>{{selectedNode.data.description}}</td></tr>
+
+        <tr ng-show="selectedNode.data.mappingFromED"><td>Mappings</td><td>
+            <table class="table table-condensed table-bordered"  style="margin-bottom: 2px">
+                <tr><th>Identity</th><th>Map</th><th>Comment</th></tr>
+                <tr ng-repeat="map in selectedNode.data.mappingFromED">
+                    <td>{{map.identity}}</td>
+                    <td>{{map.map}}</td>
+                    <td>{{map.comment}}</td>
+                </tr>
+            </table>
+            <!--{{selectedNode.data.mappingFromED}}
+            <div ng-show="selectedNode.data.mapping"><em>{{selectedNode.data.mapping}}</em></div>-->
+        </td></tr>
+
+
+
+        <tr ng-show="selectedNode.data.fhirMappingExtensionUrl"><td>Extension Url</td>
+            <td>
+                <a href="#" ng-click="editExtension()">{{selectedNode.data.fhirMappingExtensionUrl}}</a>
+            </td>
+        </tr>
+
+        <tr><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>
+        <tr><td>Multiplicity</td><td>{{selectedNode.data.min}}..{{selectedNode.data.max}}</td></tr>
+        <tr ng-show="selectedNode.data.analysis">
+            <td>Extension data</td>
+            <td>{{selectedNode.data.analysis | json}}</td>
+        </tr>
+        <tr><td>Datatypes</td>
+            <td>
+                <div ng-repeat = "typ in selectedNode.data.type">
+
+
+
+                    <a ng-href="{{rootForDataType}}{{typ.code}}" target="_blank">
+                        <i class="glyphicon glyphicon-eye-open clickable"></i>
+                    </a>
+
+
+
+                    {{typ.code}}
+
+                    <span class="clickable" ng-click="explodeDT(typ.code)" ng-show = "typ.isComplexDT">Expand</span>
+
+                    <span class="clickable" ng-click="explodeReference(selectedNode)"
+                          ng-show = "selectedNode.text == 'reference'">Expand</span>
+
+
+
+
+
+                    <!-- Show any profile. If a reference, then hyperlink to the 'display' functionality... -->
+                    <span ng-show="typ.code == 'Reference'" class="pull-right">
+                                            <span class="clickable" ng-click="viewReferencedModel(selectedNode.data.referenceUri)">View</span>
+
+
+
+                                            <span ng-hide="isDirty" class="clickable" ng-click="loadReferencedModel(selectedNode.data.referenceUri)">Load</span>
+                                        </span>
+
+                    <div>{{typ.profile}}{{typ.targetProfile}}</div>
+
+                </div>
+                <!-- If there's a ValueSet defined, allow it to be selected... -->
+                <span ng-show="selectedNode.data.selectedValueSet">
+                                      <!--  <span>{{selectedNode.data.selectedValueSet.vs.name}}</span>-->
+                                        <span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.vs.url)">
+                                            {{selectedNode.data.selectedValueSet.vs.url}}</span>
+                                            ({{selectedNode.data.selectedValueSet.strength}})
+
+                                    </span>
+
+
+            </td>
+
+
+        </tr>
+
+        <tr ng-show="selectedNode.data.conceptMap">
+            <td>ConceptMap</td>
+            <td><a href="#" ng-click="showConceptMap(selectedNode.data.conceptMap)">{{selectedNode.data.conceptMap}}</a></td></tr>
+
+        <tr ng-show="selectedNode.data.mapping"><td>Mapping notes</td><td>
+            {{selectedNode.data.mapping}}
+
+
+
+
+
+        </td></tr>
+        <tr ng-show="selectedNode.data.fixedString">
+            <td>Fixed</td><td>{{selectedNode.data.fixedString}}</td>
+        </tr>
+
+        <tr ng-show="selectedNode.data.discriminator">
+            <td>Discriminator</td><td>{{selectedNode.data.discriminator}}</td>
+        </tr>
+
+        <tr><td>Actions</td><td>
+            <div ng-show="!firebase.auth().currentUser">
+                Read only mode
+            </div>
+
+            <div ng-show ="isHistory">
+                Viewing Historical value, read only mode
+
+            </div>
+
+            <div ng-show = "canSaveModel && firebase.auth().currentUser.email && !isHistory">
+                                        <span>
+                                        <i class="glyphicon glyphicon-arrow-up clickable"
+                                           ng-hide = "$index == 0 || isHistory"
+                                           ng-click="moveUp($event,$index)" style="margin-right: 10px"></i>
+
+                                        <i class="glyphicon glyphicon-arrow-down clickable"
+                                           ng-hide = "$index == (config.sections.length -1) || isHistory"
+                                           ng-click="moveDn($event,$index)"></i>
+
+                                    </span>
+
+                <button ng-show="!selectedNode.data.isRoot && !isHistory"
+                        class="btn btn-link" ng-click="editNode()">Edit Element</button>
+
+
+                <button ng-show="!isHistory" class="btn btn-link" ng-click="addNode()">Add Element</button>
+
+                <button ng-show="!selectedNode.data.isRoot  && !isHistory"
+                        class="btn btn-link" ng-click="deleteNode()">Remove Element</button>
+
+
+
+                <div>
+
+                    <button ng-show="discriminatorReq" class="btn btn-link"
+                            uib-popover="Use the value of this element as the discriminator for all elements with the same path"
+                            popover-placement="top"
+                            popover-trigger="'mouseenter'"
+                            ng-click="setAsDiscriminator(selectedNode)">Set as Discriminator</button>
+                </div>
+
+
+
+            </div>
+
+
+            <div ng-show="input.graphTabIsSelected">
+                <span>Map display options: </span>
+                <button class="btn btn-link" ng-click="setParentInGraph(selectedNode)">Hide other nodes</button>
+                <button class="btn btn-link" ng-click="resetGraph()">Reset</button>
+            </div>
+
+
+
+        </td></tr>
+        <tr ng-show="valueSetOptions">
+            <td>Options</td>
+            <td>
+
+                <ul>
+                    <li ng-repeat="option in valueSetOptions">{{option.display}} ({{option.code}})</li>
+                </ul>
+
+            </td>
+        </tr>
+    </table>
+    <!--
+                                <pre>{{selectedNode | json}}</pre>
+    -->
+</div>
