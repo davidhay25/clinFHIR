@@ -776,6 +776,7 @@ angular.module("sampleApp")
 
 
                                             //if the mapping path has '[ ', then this is a sliced element.
+                                            /* I don't think this is true any more...
                                             var ar2 = fhirPath.split('[')
                                             if (ar2.length > 1) {
                                                 newED.path = map.map;//map.map
@@ -783,6 +784,8 @@ angular.module("sampleApp")
                                             } else {
                                                 newED.path = fhirPath;//map.map
                                             }
+                                            */
+                                            newED.path = fhirPath;//map.map
                                         }
                                     }
                                 })
@@ -795,23 +798,7 @@ angular.module("sampleApp")
                         newED.id = baseType + ':' + newED.path + '-' + inx ;    //id is mandatory - but not used...
                         var path = newED.path;
 
-                        if (addToProfile) {
-                            if (path && path.indexOf('[x]') > -1) {
-                                //this is a choice type - change the name to the first type
-                                if (newED.type){
-                                    var cd = newED.type[0].code; // the datatype
-                                    cd = cd.substr(0,1).toUpperCase() + cd.substr(1)
 
-                                    var g = path.indexOf('[x]');
-                                    newED.path = path.substr(0,g) +cd;//  path.splice(g,3,cd);
-
-                                    //newED.path = newED.path.substr(0,newED.path.length-4) + cd.substr(0,1).toUpperCase() + cd.substr(1)
-
-
-                                    basePathHash[newED.path] = newED;   //add to the list of acceptable paths. (Assumes that the path before the [x] is legit...
-                                }
-                            }
-                        }
 
                         //if the oldPath value is in the list of ignorePaths then ignore
                         if (addToProfile) {
@@ -823,6 +810,44 @@ angular.module("sampleApp")
                             })
                         }
 
+                        if (addToProfile) {
+                            if (path && path.indexOf('[x]') > -1) {
+                                ignorePath.push(oldPath)    //don't include any of the children in the profile. May need to revisit this...
+                                
+                                //this is a choice type - change the name to the first type
+
+/*
+
+
+                                if (newED.type){
+                                    var cd = newED.type[0].code; // the datatype
+                                    cd = cd.substr(0,1).toUpperCase() + cd.substr(1)
+
+                                    //now change the path segment with the [x]
+                                    var ar = path.split('.');
+                                    newAr = []
+                                    ar.forEach(function (s) {
+                                        var g = s.indexOf('[x]');
+                                        if (g > -1) {
+                                            s = s.substr(0,g) +cd;
+                                        }
+                                        newAr.push(s)
+
+                                    })
+
+
+                                    //var g = path.indexOf('[x]');
+                                    newED.path = path + " " + newAr.join('.'); //path.substr(0,g) +cd;//  path.splice(g,3,cd);
+
+                                    //newED.path = newED.path.substr(0,newED.path.length-4) + cd.substr(0,1).toUpperCase() + cd.substr(1)
+
+
+                                    basePathHash[newED.path] = newED;   //add to the list of acceptable paths. (Assumes that the path before the [x] is legit...
+                                }
+                                */
+
+                            }
+                        }
 
                         //check for a path in the FHIR mapping
                         if (addToProfile && ! newED.path) {
