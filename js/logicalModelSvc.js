@@ -799,8 +799,15 @@ angular.module("sampleApp")
                             if (path && path.indexOf('[x]') > -1) {
                                 //this is a choice type - change the name to the first type
                                 if (newED.type){
-                                    var cd = newED.type[0].code
-                                    newED.path = newED.path.substr(0,newED.path.length-4) + cd.substr(0,1).toUpperCase() + cd.substr(1)
+                                    var cd = newED.type[0].code; // the datatype
+                                    cd = cd.substr(0,1).toUpperCase() + cd.substr(1)
+
+                                    var g = path.indexOf('[x]');
+                                    newED.path = path.substr(0,g) +cd;//  path.splice(g,3,cd);
+
+                                    //newED.path = newED.path.substr(0,newED.path.length-4) + cd.substr(0,1).toUpperCase() + cd.substr(1)
+
+
                                     basePathHash[newED.path] = newED;   //add to the list of acceptable paths. (Assumes that the path before the [x] is legit...
                                 }
                             }
