@@ -813,7 +813,7 @@ angular.module("sampleApp")
                         if (addToProfile) {
                             if (path && path.indexOf('[x]') > -1) {
                                 ignorePath.push(oldPath)    //don't include any of the children in the profile. May need to revisit this...
-                                
+
                                 //this is a choice type - change the name to the first type
 
 /*

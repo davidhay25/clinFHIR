@@ -445,15 +445,18 @@ console.log(ext)
                 });
 
                 ['extension','profile','terminology','logical'].forEach(function (purpose) {
-                    $scope.artifacts[purpose].sort(function(item1,item2) {
-                        var typ1 =  $filter('getLogicalID')(item1.url);
-                        var typ2 =  $filter('getLogicalID')(item2.url);
-                        if (typ1 > typ2) {
-                            return 1
-                        } else {
-                            return -1
-                        }
-                    })
+                    if ($scope.artifacts[purpose]) {
+                        $scope.artifacts[purpose].sort(function(item1,item2) {
+                            var typ1 =  $filter('getLogicalID')(item1.url);
+                            var typ2 =  $filter('getLogicalID')(item2.url);
+                            if (typ1 > typ2) {
+                                return 1
+                            } else {
+                                return -1
+                            }
+                        })
+                    }
+
                 })
 
 
@@ -817,6 +820,46 @@ console.log(ext)
 
                                 $scope.selectedNodeFromGraph = graphData.nodes.get(nodeId);
 
+
+
+
+                                //retrieve the valueset properties if a valueset
+                                if ($scope.selectedNodeFromGraph.data.purpose == 'terminology') {
+                                    delete $scope.valueSetOptions;
+                                    console.log($scope.selectedNodeFromGraph.data)
+                                    //var vsUrl =
+                                    //selectedValueSet.vs.url
+                                    var vo = {selectedValueSet : {vs: {url: $scope.selectedNodeFromGraph.data.url}}}
+
+                                    logicalModelSvc.getOptionsFromValueSet(vo).then(
+                                        function(lst) {
+
+                                            $scope.valueSetOptions = lst;
+
+                                            if (lst) {
+                                                lst.sort(function(a,b){
+                                                    if (a.display > b.display) {
+                                                        return 1
+                                                    } else {
+                                                        return -1;
+                                                    }
+                                                })
+                                            }
+
+
+
+
+                                        },
+                                        function(err){
+                                            //$scope.valueSetOptions = [{code:'notExpanded',display:'Unable to get list, may be too long'}]
+                                            $scope.valueSetOptions = [{code:'notExpanded',display:err}]
+                                        }
+                                    )
+                                }
+
+
+
+
 /* disable for now...
                                 if ($scope.selectedNodeFromGraph && $scope.selectedNodeFromGraph.data && $scope.selectedNodeFromGraph.data.url) {
                                     $scope.selectItem({url:$scope.selectedNodeFromGraph.data.url, description:""},'profile')
@@ -833,6 +876,13 @@ console.log(ext)
 
                             $scope.$digest();
 
+                        }).on('oncontext',function(obj){
+                            //trying for a right click - and failing to stop context menualert('context')
+
+                            obj.event.cancelBubble = true;
+                            obj.event.stopPropagation();
+                            console.log(obj.event)
+                            $scope.$digest();
                         });
                     }
                 );

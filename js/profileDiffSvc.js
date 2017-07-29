@@ -3,8 +3,6 @@ angular.module("sampleApp").service('profileDiffSvc',
 
         $localStorage.extensionDefinitionCache = $localStorage.extensionDefinitionCache || {}
 
-
-
         var objColours ={};
 
         objColours.profile = '#ff8080';
@@ -1036,7 +1034,14 @@ angular.module("sampleApp").service('profileDiffSvc',
                 var serverUrl = appConfigSvc.getCurrentTerminologyServer().url;
                 GetDataFromServer.findConformanceResourceByUri(url,serverUrl,resourceType).then(
                     function (sdef) {
+                        //remove elements we don't use to save space...
                         delete sdef.text;
+                        delete sdef.mapping;
+                        delete sdef.differential;
+
+
+
+
                         $localStorage.extensionDefinitionCache[url] = sdef
                         deferred.resolve($localStorage.extensionDefinitionCache[url]);
                     },function (err) {

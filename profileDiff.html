@@ -561,9 +561,21 @@
                                         <br/>
                                         <div ng-show="selectedNodeFromGraph">
                                             <h4>Selected Node</h4>
+
+
                                             <div ng-show = "selectedNodeFromGraph.data.purpose == 'terminology'">
-                                            <span class = 'clickable' ng-click="showValueSet(selectedNodeFromGraph.data.url)">
-                                                {{selectedNodeFromGraph.data.url}}</span>
+                                                <span class = 'clickable' ng-click="showValueSet(selectedNodeFromGraph.data.url)">
+                                                    {{selectedNodeFromGraph.data.url}}
+                                                </span>
+                                                <div ng-hide="valueSetOptions">
+                                                    Unable to retrieve options
+                                                </div>
+                                                <div ng-show="valueSetOptions">
+                                                    <h5>Options</h5>
+                                                    <ul>
+                                                        <li ng-repeat="option in valueSetOptions">{{option.display}} ({{option.code}})</li>
+                                                    </ul>
+                                                </div>
                                             </div>
 
                                             <div ng-show = "selectedNodeFromGraph.data.purpose == 'extension'">
@@ -633,7 +645,7 @@
                                         <div class="myScroll">
                                             <table class="table">
                                                 <tr ng-repeat="req in profileReport.required">
-                                                    <td><div class='clickable' ng-click="input.reqSel = req">{{req.path}}</td>
+                                                    <td><div class='clickable' ng-click="input.reqSel = req">{{req.path}}</div></td>
                                                 </tr>
                                             </table>
                                         </div>
