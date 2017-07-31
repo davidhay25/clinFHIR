@@ -7,6 +7,8 @@ angular.module("sampleApp")
 
             $scope.input = {includeExtensions:false,center:true,includeCore:true,immediateChildren:true,includeExtensions:true,includePatient:true};
             $scope.appConfigSvc = appConfigSvc;
+            $scope.itemColours = profileDiffSvc.objectColours();
+            console.log($scope.itemColours)
 
             $scope.history = [];        //
             $scope.input.tabShowing='single';
@@ -532,6 +534,22 @@ console.log(ext)
                             $scope.LMtreeData = logicalModelSvc.createTreeArrayFromSD(SD)
 
                             logicalModelSvc.resetTreeState($scope.LMtreeData);
+
+                            //expand all backbone nodes
+                            $scope.LMtreeData.forEach(function (item) {
+
+                                if (item.data && item.data.ed && item.data.ed.type) {
+                                    item.data.ed.type.forEach(function (typ) {
+                                        if (typ.code == 'BackboneElement') {
+                                            item.state.opened = true;
+                                            console.log(item)
+                                        }
+                                    })
+                                }
+                            })
+
+
+
                             $scope.LMtreeData[0].state.opened = true;
 
                             $('#lmTreeView').jstree('destroy');
@@ -661,6 +679,11 @@ console.log(ext)
                 profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
                     function(vo) {
 
+                        //console.log(vo.treeData)
+
+
+
+
 
                         $('#logicalTree').jstree('destroy');
                         $('#logicalTree').jstree(
@@ -723,7 +746,7 @@ console.log(ext)
                 );
 
                 //------ report
-                $scope.profileReport = profileDiffSvc.reportOneProfile(SD);
+                $scope.profileReport = profileDiffSvc.reportOneProfile(SD,$scope.currentIG);
 
             }
 

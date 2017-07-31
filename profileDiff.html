@@ -509,34 +509,64 @@
                                         <div style="height: 600px; border: solid 1px gray" id="igModel"></div>
                                     </div>
                                     <div class="col-md-3">
+                                        <!--
                                         <h4>Display options</h4>
+                                        -->
 
-                                        <table width="100%">
+                                        <uib-tabset>
+                                            <br/>
+                                            <uib-tab heading="Display Options">
+                                                <br/>
+                                                <table width="100%">
 
-                                            <tr ng-show="1==2"><td>
-                                                <checkbox ng-model="input.includePatient" ng-change="drawGraph()"></checkbox>
-                                            </td><td>Expand beyond Patient</td></tr>
+                                                    <tr ng-show="1==2"><td>
+                                                        <checkbox ng-model="input.includePatient" ng-change="drawGraph()"></checkbox>
+                                                    </td><td>Expand beyond Patient</td></tr>
 
-                                            <tr><td>
-                                                <checkbox ng-model="input.includeExtensions" ng-change="drawGraph()"></checkbox>
-                                            </td><td>Include Extensions</td></tr>
-                                            <tr><td>
-                                                <checkbox ng-model="input.includeTerminology" ng-change="drawGraph()"></checkbox>
-                                            </td><td>Include Valuesets</td></tr>
-                                            <tr><td>
-                                                <checkbox ng-model="input.includeCore" ng-change="drawGraph()"></checkbox>
-                                            </td><td>Include Core resources</td></tr>
-                                            <tr><td valign="top">
-                                                <checkbox ng-model="input.center" ng-change="centeredNode(input.center)">
+                                                    <tr><td>
+                                                        <checkbox ng-model="input.includeExtensions" ng-change="drawGraph()"></checkbox>
+                                                    </td><td>Include Extensions</td></tr>
+                                                    <tr><td>
+                                                        <checkbox ng-model="input.includeTerminology" ng-change="drawGraph()"></checkbox>
+                                                    </td><td>Include Valuesets</td></tr>
+                                                    <tr><td>
+                                                        <checkbox ng-model="input.includeCore" ng-change="drawGraph()"></checkbox>
+                                                    </td><td>Include Core resources</td></tr>
+                                                    <tr><td valign="top">
+                                                        <checkbox ng-model="input.center" ng-change="centeredNode(input.center)">
 
-                                                </checkbox>
-                                            </td><td>
-                                                <div style="padding-bottom: 8px">Connections to selected Node</div>
-                                                <checkbox ng-model="input.immediateChildren" ng-change="drawGraph()"></checkbox>
-                                                Immediate children only
-                                            </td></tr>
-                                        </table>
+                                                        </checkbox>
+                                                    </td><td>
+                                                        <div style="padding-bottom: 8px">Connections to selected Node</div>
+                                                        <checkbox ng-model="input.immediateChildren" ng-change="drawGraph()"></checkbox>
+                                                        Immediate children only
+                                                    </td></tr>
+                                                </table>
 
+
+                                            </uib-tab>
+                                            <uib-tab heading="Legend">
+                                                <br/>
+                                                <table width="100%">
+                                                    <tr><td>Profile</td>
+                                                        <td width="50%"><div class="rounded-box form-control" style="background-color: {{itemColours.profile}}">
+
+                                                        </div> </td></tr>
+                                                    <tr><td>Core resource type</td>
+                                                        <td><div class="rounded-box form-control" style="background-color: {{itemColours.profile_loaded}}">
+
+                                                        </div> </td></tr>
+                                                    <tr><td>Extension</td>
+                                                        <td><div class="rounded-box form-control" style="background-color: {{itemColours.extension}}">
+
+                                                        </div> </td></tr>
+                                                    <tr><td>ValueSet</td>
+                                                        <td><div class="rounded-box form-control" style="background-color: {{itemColours.terminology}}">
+
+                                                        </div> </td></tr>
+                                                </table>
+                                            </uib-tab>
+                                        </uib-tabset>
 
                                         <br/>
                                         <div ng-show="graphReferences">
@@ -663,9 +693,14 @@
                                 <div class="row">
                                     <div class="col-sm-12 col-md-12">
                                         <table class="table">
-                                            <tr><th>ValueSet</th><th>Paths & Binding Strength</th></tr>
+                                            <tr><th>ValueSet</th>
+                                                <th uib-popover="If true, ValueSet was included in the IG"
+                                                    popover-placement="left"
+                                                    popover-trigger="'mouseenter'">Included</th>
+                                                <th>Paths & Binding Strength</th></tr>
                                             <tr ng-repeat="item in profileReport.valueSetArray">
                                                 <td width="40%"><span class="clickable"  ng-click="showValueSet(item.url)">{{item.url}}</span> </td>
+                                                <td><div ng-show="item.included">Yes</div></td>
                                                 <td>
                                                     <table width="100%">
                                                         <tr ng-repeat="row in item.paths">
@@ -675,7 +710,9 @@
                                                     </table>
 
                                                 </td>
-
+                                                <!--
+                                                <td><pre>{{item | json}}</pre></td>
+                                                -->
                                             </tr>
                                         </table>
                                     </div>

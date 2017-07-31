@@ -9,9 +9,13 @@ angular.module("sampleApp").service('profileDiffSvc',
         objColours.extension = '#ffb3ff';
         objColours.terminology = '#FFFFCC';
 
-        objColours.profile_loaded = '#ffcece';
+
+        //_loaded are profiles not in the IG...
+        objColours.profile_loaded = '#00c6ff'
         objColours.extension_loaded = '#ffb3ff';
         objColours.terminology_loaded = '#FFFFCC';
+
+
 
         objColours.Patient = '#93FF1A';
 
@@ -33,6 +37,9 @@ angular.module("sampleApp").service('profileDiffSvc',
         objColours.Medication = '#FF9900';
 
     return {
+        objectColours : function () {
+            return objColours;
+        },
 
         findResourceInIGPackage : function(IG,profileUrl) {
             var res;
@@ -107,7 +114,7 @@ angular.module("sampleApp").service('profileDiffSvc',
             IG.package.forEach(function (package) {
                 package.resource.forEach(function (item,inx) {
                     IdToUse++;
-//console.log(inx)
+
                     var include = true;
                     switch (item.purpose) {
                         case 'extension' :
@@ -692,8 +699,21 @@ angular.module("sampleApp").service('profileDiffSvc',
            return GetDataFromServer.adHocFHIRQueryFollowingPaging(url);     //this is a promise
 
         },
-        reportOneProfile : function(SD) {
+        reportOneProfile : function(SD,IG) {
             var result = {required:[],valueSet:{},reference:{}}
+
+            //create a hash of all urls in the IG...
+            hashUrl = {}
+            IG.package.forEach(function (pkg) {
+                pkg.resource.forEach(function (r) {
+                    if (r.sourceReference) {
+                        hashUrl[r.sourceReference.reference] = r;
+                    }
+                })
+            });
+
+
+
             if (SD.snapshot && SD.snapshot.element) {
                 SD.snapshot.element.forEach(function (el) {
                     //look for required elements
@@ -717,16 +737,37 @@ angular.module("sampleApp").service('profileDiffSvc',
                                             url = el.binding.valueSetUri;
                                         }
                                         if (url) {
+                                           // var included = false;
+                                            if (hashUrl[url]) {
+                                                    item.included = true;
+                                            }
+
                                             result.valueSet[url] = result.valueSet[url] || []
                                             result.valueSet[url].push(item)
+
+
+
                                         }
                                     }
                                 }
 
 
                             if (typ.code == 'Reference' && typ.profile) {
+
+                            //    var thisUrl =  typ.profile;
+                              //  if (angular.isArray(typ.profile)) {
+                                //    thisUrl = typ.profile[0];
+                               // }
+
                                 var item = {url:typ.profile,path:el.path, min:el.min, max:el.max}
                                 result.reference[typ.profile] = result.reference[typ.profile] || []
+
+
+
+                              //  if (hashUrl[thisUrl]) {
+                                //    item.included = true;
+                               // }
+
                                 result.reference[typ.profile].push(item);
                             }
                         })
@@ -738,7 +779,14 @@ angular.module("sampleApp").service('profileDiffSvc',
                 //create an array of valueset usages and sort it..
                 result.valueSetArray = []
                 angular.forEach(result.valueSet,function (v,k) {
-                    var item = {url:k,paths:v}
+                    var item = {url:k,paths:v,included:v.included}
+
+                    v.forEach(function (k) {
+                        if (k.included) {
+                            item.included = true
+                        }
+                    })
+
                     result.valueSetArray.push(item)
                 })
 
@@ -750,10 +798,17 @@ angular.module("sampleApp").service('profileDiffSvc',
                     }
                 })
 
+
+
+
                 //do the same with references
                 result.referenceArray = []
                 angular.forEach(result.reference,function (v,k) {
                     var item = {url:k,paths:v}
+
+
+
+
                     result.referenceArray.push(item)
                 })
 

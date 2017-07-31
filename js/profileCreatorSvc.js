@@ -309,7 +309,9 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                                 id = item.path;
                                 if (item.name) {
-                                    text = item.name
+                                    text = item.name}
+                                else if (item.label) {
+                                    text = item.label
                                 } else {
                                     text = getLastNameInPath(item.path);
                                 }
@@ -332,13 +334,13 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             parent = arTree.join('.');
                             if (item.name) {
                                 text = item.name
-                            //} else if (item.short) {
-                              //  text = item.short
+                            } else if (item.label) {
+                                text = item.label
                             } else {
                                 text = getLastNameInPath(item.path);
                             }
 
-                            //text = getLastNameInPath(item.path);
+
                         }
 
                         addLog(item.path + ' ' +include)
