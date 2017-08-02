@@ -5,10 +5,10 @@ angular.module("sampleApp")
                   Utilities,GetDataFromServer,profileCreatorSvc,$filter,$firebaseObject,$location,$window,modalService,
                     $timeout,SaveDataToServer) {
 
-            $scope.input = {includeExtensions:false,center:true,includeCore:true,immediateChildren:true,includeExtensions:true,includePatient:true};
+            $scope.input = {center:true,includeCore:true,immediateChildren:true,includeExtensions:true,includePatient:true};
             $scope.appConfigSvc = appConfigSvc;
             $scope.itemColours = profileDiffSvc.objectColours();
-            console.log($scope.itemColours)
+            //console.log($scope.itemColours)
 
             $scope.history = [];        //
             $scope.input.tabShowing='single';
@@ -26,28 +26,27 @@ angular.module("sampleApp")
                 var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
                 sc.$loaded().then(
                     function(){
-
+                        console.log(sc);
 
                         $scope.loadedFromBookmark = true;
 
                         //set the conformance server to the one in the bookmark
                         var conformanceServer =  sc.config.conformanceServer;
                         appConfigSvc.setServerType('conformance',conformanceServer.url);
-                        //appConfigSvc.setServerType('data',conformanceServer.url);       //set the data server to the same as the conformance for the comments
+                        appConfigSvc.setServerType('terminology',sc.config.terminologyServer.url);
 
-                        var id = sc.config.model.id;    //the id of the model on this server
+                        var id = sc.config.IG.id;    //the id of the model on this server
                         //get the model from the server...
-                        var url = conformanceServer.url + 'StructureDefinition/'+id;
+                        var url = conformanceServer.url + 'ImplementationGuide/'+id;
                         $scope.showWaiting = true;
                         GetDataFromServer.adHocFHIRQuery(url).then(
                             function(data){
-                                var model = data.data;
-                               // console.log(model);
-                              //  $scope.hideLMSelector();            //only want to see this model...
-                               // selectEntry({resource:model});       //select the model
+                                var IG = data.data;
+                                console.log(IG);
+                                $scope.selectIG(IG);
                             },
                             function(){
-                                modalService.showModal({}, {bodyText: "The model with the id '"+id + "' is not on the "+conformanceServer.name + " server"})
+                                modalService.showModal({}, {bodyText: "The IG with the id '"+id + "' is not on the "+conformanceServer.name + " server"})
                             }
                         ).finally(function(){
                             $scope.showWaiting = false;
@@ -195,17 +194,18 @@ angular.module("sampleApp")
 
             $scope.generateShortCut = function() {
                 var hash = Utilities.generateHash();
-                var shortCut = $window.location.href+"#"+hash
+                var shortCut = $window.location.href+"#"+hash;
 
                 var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
-                sc.modelId = $scope.selectedSD.id;     //this should make it possible to query below...
+                sc.modelId = $scope.currentIG.id;     //this should make it possible to query below...
                 sc.config = {conformanceServer:appConfigSvc.getCurrentConformanceServer()};
-                sc.config.model = {id:$scope.selectedSD.id}
+                sc.config.terminologyServer = appConfigSvc.getCurrentTerminologyServer();
+                sc.config.IG = {id:$scope.currentIG.id};
                 sc.shortCut = shortCut;     //the full shortcut
                 sc.$save().then(
                     function(){
-                        //$scope.treeData.shortCut = sc;
-                        modalService.showModal({}, {bodyText: "The shortcut  " +  shortCut + "  has been generated for this model"})
+
+                        modalService.showModal({}, {bodyText: "The shortcut  " +  shortCut + "  has been generated for this IG"})
 
                     }
                 )
@@ -230,8 +230,6 @@ console.log(ext)
                 })
 
             };
-
-
 
             //load a profile into the given side ('left','right')
             $scope.loadCompProfiles = function(side) {
@@ -341,7 +339,6 @@ console.log(ext)
                 }
             }
 
-
             var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
 
             function clearRightPane(){
@@ -351,6 +348,7 @@ console.log(ext)
                 delete $scope.selectedItem;
                 delete $scope.profileReport;
                 delete $scope.allExtensions;
+                delete $scope.selectedNode;
 
             }
 

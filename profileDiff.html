@@ -166,7 +166,7 @@
             </div>
 
             <div class="col-md-1 col-sm-1">
-                <form ng-show="selectedSD && !loadedFromBookmark" class="navbar-form">
+                <form ng-show="currentIG && !loadedFromBookmark" class="navbar-form">
                     <button class="btn btn-success pull-right iconSpacing" ng-click="generateShortCut()">Share</button>
                 </form>
             </div>
@@ -267,7 +267,10 @@
                                 <li ng-class="{'list-group-item':true, listItemSelected:selectedItem == item}"
                                     ng-repeat="item in artifacts.extension"
                                     ng-click = "selectItem(item,'extension')">
-                                    <div class="clickable">{{item.url | referenceType}}</div>
+                                    <div class="clickable">{{item.url | referenceType}}
+
+
+                                    </div>
                                     <div><em>{{item.description}}</em></div>
                                 </li>
                             </ul>
@@ -282,7 +285,11 @@
                             <ul class="list-group">
                                 <li class="list-group-item" ng-repeat="item in artifacts.terminology"
                                     ng-click = "selectItem(item,'terminology')">
-                                    <div class="clickable">{{item.url | referenceType}}</div>
+                                    <div class="clickable">{{item.url | referenceType}}
+                                        <span ng-show="item.url.indexOf('hl7.org/fhir') > -1"   class="pull-right">
+                                            <i title="Official FHIR resource" style = 'color: red' class="glyphicon glyphicon-fire" ></i>
+                                        </span>
+                                    </div>
                                     <div><em>{{item.description}}</em></div>
                                 </li>
                             </ul>
@@ -346,104 +353,6 @@
                 <div class="col-sm-9 col-md-9">
 
                     <uib-tabset>
-                        <!--
-                        <uib-tab ng-show = "1==2" heading="Graph" select="fitGraph()">
-
-
-
-
-                            <div class="row" ng-show="currentIG">
-                                <div class="col-md-9">
-                                    <div style="height: 600px; border: solid 1px gray" id="igModel"></div>
-                                </div>
-                                <div class="col-md-3">
-                                    <h4>Display options</h4>
-
-                                    <table width="100%">
-
-                                        <tr ng-show="1==2"><td>
-                                            <checkbox ng-model="input.includePatient" ng-change="drawGraph()"></checkbox>
-                                        </td><td>Expand beyond Patient</td></tr>
-
-                                        <tr><td>
-                                            <checkbox ng-model="input.includeExtensions" ng-change="drawGraph()"></checkbox>
-                                        </td><td>Include Extensions</td></tr>
-                                        <tr><td>
-                                            <checkbox ng-model="input.includeTerminology" ng-change="drawGraph()"></checkbox>
-                                        </td><td>Include Valuesets</td></tr>
-                                        <tr><td>
-                                            <checkbox ng-model="input.includeCore" ng-change="drawGraph()"></checkbox>
-                                        </td><td>Include Core resources</td></tr>
-                                        <tr><td valign="top">
-                                            <checkbox ng-model="input.center" ng-change="centeredNode(input.center)">
-
-                                            </checkbox>
-                                        </td><td>
-                                            <div style="padding-bottom: 8px">Connections to selected Node</div>
-                                            <checkbox ng-model="input.immediateChildren" ng-change="drawGraph()"></checkbox>
-                                            Immediate children only
-                                        </td></tr>
-                                    </table>
-
-
-                                    <br/>
-                                    <div ng-show="graphReferences">
-                                        <h4>Paths</h4>
-                                        <div>{{graphReferences.from.data.url | referenceType}}</div>
-                                        <div>-> {{graphReferences.to.data.url | referenceType}}</div>
-                                        <ul class="list-group">
-                                            <li class="list-group-item" ng-repeat="(key,value) in graphReferences.pathHash">
-                                                {{value.path | dropFirstInPath}}
-                                                <span class="pull-right">{{value.min}}..{{value.max}}</span>
-                                                <div><em>{{value.short}}</em></div>
-                                                <div><em>{{value.definition}}</em></div>
-                                                <div><em>{{value.comments}}</em></div>
-
-                                            </li>
-                                        </ul>
-
-                                        <pre>{{graphReferences | json}}</pre>
-
-                                    </div>
-
-                                    <br/>
-                                    <div ng-show="selectedNodeFromGraph">
-                                        <h4>Selected Node</h4>
-                                        <div ng-show = "selectedNodeFromGraph.data.purpose == 'terminology'">
-                                            <span class = 'clickable' ng-click="showValueSet(selectedNodeFromGraph.data.url)">
-                                                {{selectedNodeFromGraph.data.url}}</span>
-                                        </div>
-
-                                        <div ng-show = "selectedNodeFromGraph.data.purpose == 'extension'">
-                                            <span class = 'clickable' ng-click="showExtension(selectedNodeFromGraph.data.SD)">
-                                                {{selectedNodeFromGraph.data.url}}</span>
-                                        </div>
-
-                                        <div ng-show = "selectedNodeFromGraph.data.purpose == 'profile'">
-                                            <div>{{selectedNodeFromGraph.data.url}}</div>
-                                        </div>
-
-
-
-                                        <br />
-                                        <div>{{selectedNodeFromGraph.data.description}}</div>
-
-                                        <button ng-show = "selectedNodeFromGraph.data.purpose == 'profile'" class="btn btn-link" ng-click="selectNodeFromGraph()">Select node</button>
-
-                                    </div>
-
-
-
-                                </div>
-                            </div>
-
-
-
-
-
-                        </uib-tab>
-
-                        -->
 
                         <uib-tab>
 

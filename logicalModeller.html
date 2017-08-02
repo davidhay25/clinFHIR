@@ -369,8 +369,10 @@
                         <div class="col-md-12 col-sm-12">
                              <span class="pull-right">
 
-                                 <button class="btn btn-link" ng-click="">Expand all</button>
-                                 <button class="btn btn-link" ng-click="">Collapse all</button>
+                                 <!--<button class="btn btn-link" ng-click="">Expand all</button>
+                                 <button class="btn btn-link" ng-click="">Collapse all</button>-->
+                                   <button class="btn btn-link" ng-click="resetLayout()">Expand Layout</button>
+                                  <button class="btn btn-link" ng-click="collapseLayout()">Collapse Layout</button>
 
                                 <button ng-hide="isInPalette" class="btn btn-link" ng-click="addToPalette()">Add to Palette</button>
                                 <button ng-show="isInPalette" class="btn btn-link" ng-click="removeFromPalette()">Remove from Palette</button>

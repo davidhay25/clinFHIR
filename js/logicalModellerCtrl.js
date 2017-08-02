@@ -38,6 +38,31 @@ angular.module("sampleApp")
             $scope.input.newCommentboxInxDEP = -1;
 
 
+            $scope.resetLayout = function(){
+                logicalModelSvc.resetTreeState($scope.treeData);
+                $scope.treeData.forEach(function (item) {
+                    console.log(item)
+                    if (item.data && item.data.ed && item.data.ed.type) {
+                        item.data.ed.type.forEach(function (typ) {
+                            if (typ.code == 'BackboneElement') {
+                                item.state.opened = true;
+                                console.log('---> open')
+                            }
+                        })
+                    }
+                })
+                drawTree();
+
+            };
+            $scope.collapseLayout = function(){
+                logicalModelSvc.resetTreeState($scope.treeData);
+
+                drawTree();
+
+            };
+
+            //collapseLayout
+
             //set the current node as the discriminator for all nodes with the sam path..
             $scope.setAsDiscriminator = function (treeNode) {
                 logicalModelSvc.setAsDiscriminator(treeNode,$scope.treeData)
@@ -1516,6 +1541,9 @@ angular.module("sampleApp")
                 var baseType = $scope.treeData[0].data.header.baseType
 
                 //find all the mapping identities that have been used..
+                setAllMappings();
+
+                /*
                 $scope.allMappingIdentities = [];
                 $scope.allMappings = [];        //all of the mappings
                 $scope.treeData.forEach(function (item) {
@@ -1543,6 +1571,7 @@ angular.module("sampleApp")
                     }
                 })
 
+                */
 
 
 
@@ -1626,6 +1655,36 @@ angular.module("sampleApp")
 
             }
 
+
+            function setAllMappings() {
+                //find all the mapping identities that have been used..
+                $scope.allMappingIdentities = [];
+                $scope.allMappings = [];        //all of the mappings
+                $scope.treeData.forEach(function (item) {
+                    if (item.data.mappingFromED && item.data.mappingFromED.length > 0) {
+                        item.data.mappingFromED.forEach(function (map) {
+
+                            //$scope.allMappings.push({identity:map.identity,map:map.map, name:item.data.name})
+                            var ar = item.data.path.split('.');
+                            ar.splice(0,1)  //strip off the f
+                            $scope.allMappings.push({identity:map.identity,map:map.map, path:item.data.path, name:ar.join('.')})
+
+                            if ($scope.allMappingIdentities.indexOf(map.identity)==-1){
+                                $scope.allMappingIdentities.push(map.identity)
+                            }
+                        })
+                    }
+                });
+
+                $scope.allMappings.sort(function(a,b){
+
+                    if (a.map > b.map) {
+                        return 1
+                    } else {
+                        return -1
+                    }
+                })
+            }
 
             //If based on a single FHIR resource, check for differences from that base
             function checkDifferences(resource) {
@@ -1942,7 +2001,8 @@ angular.module("sampleApp")
                         drawTree();
                         $scope.isDirty = true;
                         makeSD();       //create the StructureDefinition resource...
-                        
+
+                        setAllMappings();   //update any mappings
 
                         //set the path of the element based on the name - and the parent names up the hierarchy..
                         function setPath(parentPath,parentId) {
@@ -2260,7 +2320,7 @@ angular.module("sampleApp")
 
             function drawTree() {
 
-                logicalModelSvc.resetTreeState($scope.treeData);    //reset the opened/closed status to the most recent saved...
+                //not sure about this...  logicalModelSvc.resetTreeState($scope.treeData);    //reset the opened/closed status to the most recent saved...
 
                 $('#lmTreeView').jstree('destroy');
                 $('#lmTreeView').jstree(
