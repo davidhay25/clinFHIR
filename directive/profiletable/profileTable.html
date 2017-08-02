@@ -91,9 +91,13 @@
 
             <div ng-show="item.coded.strength">Strength: {{item.coded.strength}}</div>
 
-            <div ng-repeat="discriminator in item.slicing.discriminator">
-                Sliced Element: Discriminator = {{discriminator}}
+            <div ng-show="item.slicing">
+                <div ng-repeat="discriminator in item.slicing.discriminator">
+                    Sliced Element: Discriminator = {{discriminator}}
+                </div>
+                <div>Rule: {{item.slicing.rules}}   Ordered: {{item.slicing.ordered}}</div>
             </div>
+
 
             <div ng-repeat="fixed in item.fixed">
                 {{fixed.k}} = {{fixed.v}}
