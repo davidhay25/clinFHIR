@@ -419,7 +419,12 @@ console.log(ext)
                     $scope.listOfIG = []
                     if (data.data && data.data.entry) {
                         data.data.entry.forEach(function (entry) {
-                            $scope.listOfIG.push(entry.resource)
+                            //make sure there is a name field for display...
+                            var ig = entry.resource;
+                            ig.name = ig.name || ig.description;
+
+
+                            $scope.listOfIG.push(ig)
                         })
                     }
                     $scope.input.selIG = $scope.listOfIG[0]
@@ -676,13 +681,8 @@ console.log(ext)
              //  var clone = angular.copy(SD);
 
                 //-------- logical model
-                profileCreatorSvc.makeProfileDisplayFromProfile(angular.copy(SD)).then(
+                profileDiffSvc.makeLMFromProfile(angular.copy(SD)).then(
                     function(vo) {
-
-                        //console.log(vo.treeData)
-
-
-
 
 
                         $('#logicalTree').jstree('destroy');

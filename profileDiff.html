@@ -215,7 +215,7 @@
                     <div class="row">
                         <div class="col-sm-9 col-md-9">
                             <select class="form-control" ng-model="input.selIG"
-                                    ng-options="ig.description for ig in listOfIG">
+                                    ng-options="ig.name for ig in listOfIG">
 
                             </select>
                         </div>
@@ -761,12 +761,13 @@
 
 
                             </uib-tab>
+                            <!--
                             <uib-tab heading="Analysis Json">
 
                                 <br/>
                                 <pre>{{selectedExtensionAnalysis | json}}</pre>
                             </uib-tab>
-
+-->
                             <uib-tab heading="Json">
                                 <br/>
                                 <pre>{{selectedExtension | json}}</pre>
