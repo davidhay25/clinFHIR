@@ -43,7 +43,7 @@ angular.module("sampleApp")
 
                 logicalModelSvc.getAllPathsForType(baseType).then(
                     function(listOfPaths) {
-                        //console.log(listOfPaths);
+
                         $scope.allPaths = listOfPaths;
                     }
                 )
@@ -77,10 +77,18 @@ angular.module("sampleApp")
 
 
                     $scope.input.mappingPath = getMapValueForIdentity('fhir');
+
+                    if ($scope.input.mappingPath && $scope.input.mappingPath.indexOf('xtension')>-1) {
+                        $scope.isExtension = true;
+                    }
+
                     isDiscriminatorRequired();      //true if there is another fhir mapping the same
                     $scope.input.mappingPathV2 = getMapValueForIdentity('hl7V2');
 
                     $scope.input.fhirMappingExtensionUrl = data.fhirMappingExtensionUrl;
+
+
+
 
                     if (data.min == 0) {
                         $scope.input.multiplicity = 'opt';
@@ -499,6 +507,7 @@ angular.module("sampleApp")
                     vo.pathSegment = $scope.input.pathSegment;
 
 
+
                     vo.conceptMap = $scope.input.conceptMap;
 
                     vo.mappingPath = $scope.input.mappingPath;      //this is the FHIR path
@@ -508,6 +517,7 @@ angular.module("sampleApp")
                     //if mapping to an extension, the include the oath to the extension
                     if (vo.mappingPath && vo.mappingPath.indexOf('xtension') > -1) {
                         vo.fhirMappingExtensionUrl = $scope.input.fhirMappingExtensionUrl
+
                     }
 
                     //make sure the v2 & fhir mappings align with the
@@ -613,11 +623,7 @@ angular.module("sampleApp")
                 if (dt.isCoded) {
                     $scope.isCoded = true;
                 }
-                /*
-                 if (dt.code == 'Extension') {
-                 $scope.isExtension = true;
-                 }
-                 */
+
 
             }
 

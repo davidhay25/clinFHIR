@@ -1125,7 +1125,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                         delete sdef.text;   //text can be v large in some profiles
 
                         $localStorage.extensionDefinitionCache[url] = sdef
-
+//console.log(sdef)
 
                         deferred.resolve($localStorage.extensionDefinitionCache[url]);
                     },function (err) {

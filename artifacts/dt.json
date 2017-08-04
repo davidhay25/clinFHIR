@@ -1,5 +1,5 @@
 {
-  "CodeableConcept": ["coding","text","coding.system","coding.code","coding.display"],
+  "CodeableConcept": ["coding","text","coding.system","coding.code","coding.display","coding.version"],
    "Identifier": ["system","value","use","type","period","assigner"],
    "Period": ["start","end"],
    "Address":  ["use","type","text","line","city","district","state","postalCode","country","period"],

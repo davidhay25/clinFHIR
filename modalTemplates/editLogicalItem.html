@@ -146,29 +146,7 @@
                         <textarea class="form-control" rows="2" ng-model="input.fixedString"
                                   placeholder="If this element should have a specific value"></textarea>
 
-                        <!--
-                        <div ng-show="dt.code=='Reference'">
-                            <div><label>Reference</label></div>
-                            <select  class="form-control" ng-model="input.referenceFromIg"
-                                     ng-options="entry.resource.name for entry in references.entry">
 
-                            </select>
-                        </div>
-
-                        <div ng-show="isCoded">
-                            <div><label>ValueSet</label></div>
-
-                            <select  ng-show="vsInGuide.length > 0" class="form-control" ng-model="input.vsFromIg"
-                                     ng-change="selectVsFromIg()"
-                                     ng-options="vs.name for vs in vsInGuide">
-
-                            </select>
-
-                            <div class="clickable" ng-click="selectVsFromServer()">Select from Server</div>
-                        </div>
-
-
-                        -->
 
                     </div>
 
@@ -178,28 +156,7 @@
 
             </div>
 
-<!--
-            <div class="form-group">
-                <div class="row">
 
-                    <div class="col-md-4 col-sm-4">
-                        <div><label>Fixed Value</label></div>
-                        <textarea class="form-control" rows="2" ng-model="input.fixedString"
-                                  placeholder="If this element should have a specific value"></textarea>
-                    </div>
-
-                </div>
-            </div>
-                -->
-
-<!--
-
-            <div class="form-group">
-                <div><label>Description</label></div>
-                <textarea class="form-control" rows="3" ng-model="input.description" placeholder="Description of element"></textarea>
-            </div>
-
--->
 
             <div class="form-group">
                 <div class="row">
@@ -210,9 +167,14 @@
                         <uib-tabset>
                             <uib-tab heading="FHIR" select="setCurrentMap('fhir')">
                                 <br/>
+                                <input type="text" ng-blur="fhirMapping(input.mappingPath)" ng-model="input.mappingPath"
+                                       ng-change="updateCurrentMapValue(input.mappingPath)"
+                                       uib-typeahead="path for path in allPaths | filter:$viewValue | limitTo:100" class="form-control"/>
+<!--
                                 <input type="text" typeahead-on-select="fhirMapping(input.mappingPath)" ng-model="input.mappingPath"
                                        ng-change="updateCurrentMapValue(input.mappingPath)"
                                        uib-typeahead="path for path in allPaths | filter:$viewValue | limitTo:100" class="form-control"/>
+                                -->
 
                                 <div ng-show="isExtension">
                                     <div class="form-group">

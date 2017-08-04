@@ -526,11 +526,11 @@ console.log(ext)
                 centerNodeInGraph(item.url)
 
                 if (type == 'logical') {
-
+                    delete $scope.LMSD
                     profileDiffSvc.getSD(item.url).then(
                         function (SD) {
-                            $scope.LMtreeData = logicalModelSvc.createTreeArrayFromSD(SD)
-
+                            $scope.LMtreeData = logicalModelSvc.createTreeArrayFromSD(angular.copy(SD))
+                            $scope.LMSD = SD;
                             logicalModelSvc.resetTreeState($scope.LMtreeData);
 
                             //expand all backbone nodes
@@ -623,7 +623,7 @@ console.log(ext)
                    profileDiffSvc.getSD(url).then(
                    //GetDataFromServer.findConformanceResourceByUri(url).then(
                        function(SD){
-
+                           console.log(SD);
                            setupProfile(SD)
                            addToHistory('profile',SD)
 
@@ -673,8 +673,10 @@ console.log(ext)
 
 
 
+             //  var clone = angular.copy(SD);
+
                 //-------- logical model
-                profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
+                profileCreatorSvc.makeProfileDisplayFromProfile(angular.copy(SD)).then(
                     function(vo) {
 
                         //console.log(vo.treeData)
@@ -710,7 +712,7 @@ console.log(ext)
 
 
                 //------- raw model
-                var treeData = logicalModelSvc.createTreeArrayFromSD(SD)
+                var treeData = logicalModelSvc.createTreeArrayFromSD(angular.copy(SD))
 
                 //console.log(treeData)
 
@@ -733,7 +735,7 @@ console.log(ext)
                 //------ canonical model
                 //var vo = profileDiffSvc.makeCanonicalObj(SD);
 
-                profileDiffSvc.makeCanonicalObj(SD).then(
+                profileDiffSvc.makeCanonicalObj(angular.copy(SD)).then(
                     function (vo) {
                         //console.log(vo)
                         $scope.canonical = vo.canonical;
@@ -744,7 +746,7 @@ console.log(ext)
                 );
 
                 //------ report
-                $scope.profileReport = profileDiffSvc.reportOneProfile(SD,$scope.currentIG);
+                $scope.profileReport = profileDiffSvc.reportOneProfile(angular.copy(SD),$scope.currentIG);
 
             }
 
