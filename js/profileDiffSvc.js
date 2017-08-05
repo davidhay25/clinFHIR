@@ -37,8 +37,296 @@ angular.module("sampleApp").service('profileDiffSvc',
         objColours.Medication = '#FF9900';
 
     return {
-        //copied from profilecreaterSvs.makeProfileDisplayFromProfile so I can safely customize it.
         makeLMFromProfile : function(inProfile) {
+            var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained','DomainResource'];
+            var deferred = $q.defer();
+            var profile = angular.copy(inProfile);
+            var lstTree = [];
+            var lst = [];           //this will be a list of elements in the profile to show.
+            var queries = [];       //a list of queries to get the details of extensions...
+            var loadErrors = [];        //any errors during loading
+            var hashPath = {};      //hash of paths to id. If there's more than one with a path, only the most recent
+            if (profile && profile.snapshot && profile.snapshot.element) {
+
+                profile.snapshot.element.forEach(function (item, inx) {
+                    item.myMeta = {id:inx} ;        //create a separate index for internal linking...
+                    var path = item.path;
+                    var ar=path.split('.')
+                    if (ar.length == 1) {
+                        //this is the root
+                        hashPath[path] = inx;
+                        lstTree.push({id:inx,parent:'#',text:ar[0],state:{opened:true,selected:true},path:path,data: {ed : item}});
+                    } else {
+                        var segment = ar.splice(-1,1)[0];   //the last entry in the path...
+                        var parent = ar.join('.');
+                        var node = {id:inx, text:path, state: {}, data: {ed : item, myMeta:{}}};
+
+                        //standard element names like 'text' or 'language'. Note that hidden elements are actually removed form the tree b4 returning...
+                        if (ar.length == 1 && elementsToDisable.indexOf(segment) > -1) {
+                            node.state.hidden=true;
+                        }
+
+                        node.text = getDisplay(node);
+
+                        //find the hash of the parent, and set the id in the node
+                        var pos = hashPath[parent];
+                        if (pos!== undefined) {
+                            node.parent = pos;
+                            lstTree.push(node);
+                        } else {
+                            console.log("can't find parent: ",item)
+                        }
+
+                        //now set the hash, replacing any previous one. This is important in representing sliced elements correctly
+                        hashPath[path] = inx;
+
+                        //are there any fixed values
+                        angular.forEach(item,function(value,key) {
+                            if (key.substr(0,5)=='fixed') {
+                                item.myMeta.fixed = {key:key,value:value}
+                            }
+
+                        });
+
+                        if (segment == 'extension') {
+                       // if (ar[ar.length - 1] == 'extension') {
+                            node.a_attr = {style:'color:blueviolet'}
+                            //if the extension has a profile type then include it, otherwise not...
+                            if (item.type) {
+                                item.type.forEach(function (it) {
+                                    if (it.code == 'Extension' && it.profile) {
+                                        //load the extension definition
+                                        queries.push(GetDataFromServer.findConformanceResourceByUri(it.profile).then(
+                                            function(sdef) {
+                                                var analysis = Utilities.analyseExtensionDefinition3(sdef);
+                                                item.myMeta.analysis = analysis;
+
+                                            }, function(err) {
+                                                modalService.showModal({}, {bodyText: 'makeProfileDisplayFromProfile: Error retrieving '+ it.profile + " "+ angular.toJson(err)})
+                                                loadErrors.push({type:'missing StructureDefinition',value:it.profile})
+                                                item.myMeta.analysis = {}
+                                            }
+                                        ));
+                                    }
+                                })
+                            }
+
+
+                        }
+
+                    }
+
+
+                })
+                //console.log(hashPath)
+
+
+                if (queries.length) {
+                    $q.all(queries).then(
+                        function() {
+                            //add the child nodes for any complex extensions...  item.myMeta.analysis
+                            var newNodes = [];      //create a separate array to hold the new nodes...
+                            lstTree.forEach(function(node){
+                                if (node.data && node.data.ed && node.data.ed.myMeta) {
+                                    var analysis = node.data.ed.myMeta.analysis;
+                                    if (analysis && analysis.isComplexExtension) {
+                                        //console.log(node)
+                                        //console.log(analysis.children)
+                                        if (analysis.children) {
+                                            //add the child nodes for the complex extension...
+                                            analysis.children.forEach(function(child){
+                                                var id = 'ce'+lstTree.length+newNodes.length;
+                                                var newNode = {id:id,parent:node.id,text:child.code,state:{opened:false,selected:false},
+                                                    a_attr:{title: + id}};
+                                                newNode.data = {ed : child.ed};
+                                                newNodes.push(newNode);
+
+                                            })
+                                        }
+                                    }
+                                }
+
+                            })
+
+
+                            lstTree = lstTree.concat(newNodes)
+
+                            setNodeIcons(lstTree);
+
+
+                            deferred.resolve({table:lst,treeData:removeHidden(lstTree),errors: loadErrors})
+                        }
+                    )
+
+                } else {
+                    setNodeIcons(lstTree);
+                    deferred.resolve({table:lst,treeData:removeHidden(lstTree),errors: loadErrors})
+                }
+
+
+            }
+
+            return deferred.promise;
+
+
+            function removeHidden(lst) {
+                var treeData =[];
+                var hash = {}
+                lst.forEach(function (item,inx) {
+                    var include = true
+                    if (item.state && item.state.hidden){
+                        include = false
+                    }
+                    if (inx == 0 || (include && hash[item.parent])) {
+                        treeData.push(item)
+                        hash[item.id] = 'x'
+                    }
+                })
+                return treeData;
+
+            }
+
+            function addLogDEP(msg,err) {
+                //console.log(msg)
+            }
+
+            //get the text display for the element
+            function getDisplay(node) {
+                var ed = node.data.ed;
+                var display = ed.path;
+
+                var ar = ed.path.split('.');
+                if (ar.length > 1) {
+                    ar.splice(0,1)
+                    display = ar.join('.')
+                }
+
+
+                if (ed.label) {
+                    display=ed.label
+                } else if (ed.name) {
+                    display=ed.name;
+                }
+                return display;
+            }
+
+
+            function getLastNameInPathDEP(path) {
+                if (path) {
+                    var ar = path.split('.');
+                    return ar[ar.length-1]
+                }
+            }
+
+            function setNodeIcons(treeData) {
+                //here is where we set the icons - ie after all the extension definitions have been loaded & resolved...
+                lstTree.forEach(function(node){
+
+                    if (node.data && node.data.ed) {
+                        //look for hidden nodes
+                        var path = node.data.ed.path;
+                        var ar = node.data.ed.path.split('.');
+                        if (elementsToDisable.indexOf(ar[ar.length-1])>-1) {
+                            node.state.hidden=true;
+                        }
+
+                        //set the 'required' colour
+                        if (node.data.ed.min == 1) {
+                            node['li_attr'] = {class : 'elementRequired elementRemoved'};
+                        } else {
+                            //have to formally add an 'optional' class else the required colour 'cascades' in the tree...
+                            node['li_attr'] = {class : 'elementOptional'};
+                        }
+
+                        //set multiplicity
+                        if (node.data.ed.max == "*") {
+                            if (node.data.ed.path) {
+                                var ar = node.data.ed.path.split('.')
+                                if (ar.length > 1) {
+                                    node.text += " *"
+                                }
+                            }
+                        }
+
+                    }
+
+                    //set the '[x]' suffix unless already there...
+                    if (node.text && node.text.indexOf('[x]') == -1) {
+                        //set the '[x]' for code elements
+                        if (node.data && node.data.ed && node.data.ed.type && node.data.ed.type.length > 1) {
+                            node.text += '[x]'
+                        }
+
+                        //set the '[x]' for extensions (whew!)
+                        if (node.data && node.data.ed && node.data.ed.myMeta && node.data.ed.myMeta.analysis &&
+                            node.data.ed.myMeta.analysis.dataTypes && node.data.ed.myMeta.analysis.dataTypes.length > 1) {
+                            node.text += '[x]'
+                        }
+                    }
+
+
+                    //set icon
+                    node.icon='/icons/icon_primitive.png';
+                    if (node.data && node.data.ed) {
+                        if (node.data.ed.type) {
+                            node.data.ed.type.forEach(function(typ){
+                                console.log(typ)
+                                if (typ.code) {
+                                    if (typ.code.substr(0,1) == typ.code.substr(0,1).toUpperCase()){
+                                        node.icon='/icons/icon_datatype.gif';
+                                    }
+
+                                    if (typ.code == 'Reference') {
+                                        node.icon='/icons/icon_reference.png';
+                                    }
+                                }
+
+
+
+
+                            })
+                        }
+                    }
+
+                    //set the display icon
+                    if (1 == 2 && node.data && node.data.ed && node.data.ed.myMeta){
+
+                        var myMeta = node.data.ed.myMeta;
+
+                        if (!myMeta.isParent) {     //leave parent node as folder...
+
+                            var r = myMeta;
+                            if (myMeta.isExtension && myMeta.analysis) {
+                                r = myMeta.analysis;
+                            }
+                            //var isComplex = myMeta.isComplex ||
+
+
+                            if (r.isComplex) {
+                                node.icon='/icons/icon_datatype.gif';
+                            } else {
+                                node.icon='/icons/icon_primitive.png';
+                            }
+
+                            if (r.isReference) {
+                                node.icon='/icons/icon_reference.png';
+                            }
+
+
+
+                        }
+
+                    }
+                })
+            }
+
+
+
+        },
+
+
+        //copied from profilecreaterSvs.makeProfileDisplayFromProfile so I can safely customize it.
+        makeLMFromProfileDEP : function(inProfile) {
             var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained','DomainResource'];
 
             var loadErrors = [];        //any errors during loading
@@ -185,8 +473,12 @@ angular.module("sampleApp").service('profileDiffSvc',
                         include = false; //It is not added to the tree...
                         addLog('excluding '+ item.path + ' as it defined a discriminator')
 
-                      //  addLog('new slice:'+item.slicing.discriminator + ' not included')
-                        //sliceRootPath = item.path;  //the root path for BBE ?other sliced types or only BBE
+                        //leave extensions alone. But if slicing an 'ordinary' element - like identifier - then set the root
+                        if (item.path.indexOf('xtension') == -1) {
+                            addLog('new slice:'+item.slicing.discriminator + ' not included')
+                            sliceRootPath = item.path;  //the root path for BBE ?other sliced types or only BBE
+                        }
+
 
                         //but we do need to establish the parent for instances of this slice group... <<<< NOT ANY MORE
                       //  var arSliceGroupParent = path.split('.');
@@ -205,7 +497,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                         idsInTree[id] = 'x'
                     }
 
-
+/*
                     var arTree = path.split('.');
                     if (arTree[arTree.length-1] == 'extension') {
                         text = item.name;// +inx;
@@ -222,10 +514,10 @@ angular.module("sampleApp").service('profileDiffSvc',
                     } else {
                         text = getLastNameInPath(item.path);
                     }
+*/
 
-/*
 
-                    if (sliceRootPath && 1==2) {
+                    if (sliceRootPath) {
                         if (item.path == sliceRootPath) {
                             //console.log('new slice instance:'+sliceRootPath)
                             //this is a new 'instance' of the sliced element.
@@ -258,14 +550,10 @@ angular.module("sampleApp").service('profileDiffSvc',
                             } else {
                                 text = getLastNameInPath(item.path);
                             }
-
-
                         }
 
-
-
                     } else {
-                        //there is no slicing in action - just add. todo - what if there's more than one slice???
+                        //there is no slicing in action (or it's an extension) - just add. todo - what if there's more than one slice???
                         id = path;
                         var arTree = path.split('.');
                         if (arTree[arTree.length-1] == 'extension') {
@@ -286,7 +574,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
 
                     }
-*/
+
                     addLog(item.path + ' ' +include)
 
                     //the item has been marked for removal in the UI...
@@ -303,10 +591,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                     }
 
 
-                    //var show_removed = true; - just while working on diff from
                     if (include) {
-
-                        //all the slicing stuff above has mucked up extension name. todo needs refinement...
 
 
                         //there should always be a name  - but just in case there isn't, grab the profile name...
@@ -344,8 +629,23 @@ angular.module("sampleApp").service('profileDiffSvc',
                             })
                         }
 
+                        var tooltip = dataType + ' ' + id;
+                        if (item.max = '*') {
+                            tooltip += ' multiple allowed';
+                        }
+
+                        //are there any fixed values
+                        angular.forEach(item,function(value,key) {
+                            if (key.substr(0,5)=='fixed') {
+                                item.myMeta.fixed = {key:key,value:value}
+                            }
+
+                        });
+
+
+
                         var node = {id:id,parent:parent,text:text,state:{opened:false,selected:false},
-                            a_attr:{title: dataType + ' ' + id}, path:path};
+                            a_attr:{title: tooltip}, path:path};
 
 
 

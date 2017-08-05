@@ -17,7 +17,8 @@ angular.module("sampleApp")
             GetDataFromServer.registerAccess('igView');
 
             $scope.updateIG = function(){
-                console.log($scope.currentIG);
+                alert('Updates not currently supported');
+
             };
 
             //see if this page was loaded from a shortcut
@@ -212,14 +213,32 @@ angular.module("sampleApp")
             };
 
 
+            //select an extension from within a profile...
+            $scope.selectExtensionFromProfile = function (itemExtension) {
+                profileDiffSvc.getSD(itemExtension.url).then(
+                    function (SD) {
+                        $scope.showExtension(SD);
+                    }
+                )
+            };
+
+            $scope.showExtensionFromUrl = function(url){
+                profileDiffSvc.getSD(url).then(
+                    function(SD){
+                        $scope.showExtension(SD)
+                    },
+                    function(err) {
+                        alert(err.msg)
+                    }
+                )
+            };
+
             $scope.showExtension = function(SD){
                 $uibModal.open({
                     templateUrl: 'modalTemplates/showExtension.html',
                     size: 'lg',
                     controller: function($scope,ext,Utilities) {
                         $scope.extensionAnalysis = Utilities.analyseExtensionDefinition3(ext)
-
-console.log(ext)
                     },
                     resolve : {
                         ext: function () {          //the default config
@@ -491,25 +510,7 @@ console.log(ext)
                 });
             };
 
-            //select an extension from within a profile...
-            $scope.selectExtensionFromProfile = function (itemExtension) {
-                //console.log(itemExtension);
 
-                profileDiffSvc.getSD(itemExtension.url).then(
-                    function (SD) {
-
-                        $scope.showExtension(SD);
-                        /*
-
-                        $scope.selectedItemType = 'extension';
-                        $scope.selectedExtension = SD;
-
-                        $scope.selectedExtensionAnalysis = Utilities.analyseExtensionDefinition3(SD)
-                        */
-                    }
-                )
-
-            };
 
             //when an item is selected in the accordian for display in the right pane...
             $scope.selectItem = function(item,type){
@@ -684,7 +685,7 @@ console.log(ext)
                 profileDiffSvc.makeLMFromProfile(angular.copy(SD)).then(
                     function(vo) {
 
-
+//console.log(vo)
                         $('#logicalTree').jstree('destroy');
                         $('#logicalTree').jstree(
                             {
