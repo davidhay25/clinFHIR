@@ -66,7 +66,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                             node.state.hidden=true;
                         }
 
-                        node.text = getDisplay(node);
+                        //node.text = getDisplay(node);
 
                         //find the hash of the parent, and set the id in the node
                         var pos = hashPath[parent];
@@ -85,11 +85,19 @@ angular.module("sampleApp").service('profileDiffSvc',
                             if (key.substr(0,5)=='fixed') {
                                 item.myMeta.fixed = {key:key,value:value}
                             }
-
                         });
+
+                        //is this a discriminator entry
+                        if (item.slicing) {
+                           // node.a_attr = {style:'color:blue'}
+                        }
+
+                        node.text = getDisplay(node);
+
 
                         if (segment == 'extension') {
                        // if (ar[ar.length - 1] == 'extension') {
+
                             node.a_attr = {style:'color:blueviolet'}
                             //if the extension has a profile type then include it, otherwise not...
                             if (item.type) {
@@ -146,7 +154,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                                     }
                                 }
 
-                            })
+                            });
 
 
                             lstTree = lstTree.concat(newNodes)
@@ -207,6 +215,15 @@ angular.module("sampleApp").service('profileDiffSvc',
                 } else if (ed.name) {
                     display=ed.name;
                 }
+
+                if (ed.slicing) {
+                    display += " D"
+                }
+
+                if (ed.myMeta.fixed) {
+                    display += " F"
+                }
+
                 return display;
             }
 

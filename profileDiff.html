@@ -561,6 +561,13 @@
                                             <uib-tab heading="Summary">
                                                 <br/>
                                                 <table class="table">
+                                                    <tr ng-show="selectedElementInLM.slicing"><td><strong>Is Discriminator: </strong></td><td>
+                                                        <div>Discriminator: <span ng-repeat = "d in selectedElementInLM.slicing.discriminator">
+                                                            {{selectedElementInLM.path}}.{{d}}  </span></div>
+                                                        <div>Ordered: {{selectedElementInLM.slicing.ordered}}</div>
+                                                        <div>Rules: {{selectedElementInLM.slicing.rules}}</div>
+                                                    </td></tr>
+
                                                     <tr><td width="15%">Path</td><td>{{selectedElementInLM.path}}</td></tr>
                                                     <tr><td>Multiplicity</td><td>{{selectedElementInLM.min}}..{{selectedElementInLM.max}}</td></tr>
                                                     <tr><td>Name</td><td>{{selectedElementInLM.name}}</td></tr>
@@ -577,10 +584,35 @@
                                                                 <span ng-show="typ.profile"> --> {{typ.profile}}</span>
                                                             </div>
                                                         </td>
-
-
-
                                                     </tr>
+
+                                                    <tr ng-show="selectedElementInLM.binding"><td>Binding</td><td>
+
+                                                        <span class="clickable"  ng-click="showValueSet(selectedElementInLM.binding.valueSetReference.reference)">
+                                                            {{selectedElementInLM.binding.valueSetReference.reference}}
+                                                        </span>
+
+
+                                                        {{selectedElementInLM.binding.valueSetUri}}
+                                                        ({{selectedElementInLM.binding.strength}})
+                                                        <div>{{selectedElementInLM.binding.description}}</div>
+                                                    </td></tr>
+
+
+                                                    <tr ng-show="selectedElementInLM.myMeta.analysis.binding"><td>Binding (from Extension)</td><td>
+
+                                                        <span class="clickable"
+                                                              ng-click="showValueSet(selectedElementInLM.myMeta.analysis.binding.valueSetReference.reference)">
+                                                            {{selectedElementInLM.myMeta.analysis.binding.valueSetReference.reference}}
+                                                        </span>
+
+
+                                                        {{selectedElementInLM.myMeta.analysis.binding.valueSetUri}}
+                                                        ({{selectedElementInLM.myMeta.analysis.binding.strength}})
+                                                        <div>{{selectedElementInLM.myMeta.analysis.binding.description}}</div>
+                                                    </td></tr>
+
+
                                                     <tr ng-show="selectedElementInLM.myMeta.fixed"><td>{{selectedElementInLM.myMeta.fixed.key}}</td>
                                                         <td>{{selectedElementInLM.myMeta.fixed.value}}</td>
                                                     </tr>
@@ -610,6 +642,8 @@
                                                     <li><span style="color:blueviolet">Purple</span> is an element that is an extension - it has been added to the underlying 'core' resource</li>
                                                     <li><span class="elementRequired">Red</span> is a required field</li>
                                                     <li>The asterisk (*) indicates that multiple entries are allowed.</li>
+                                                    <li>The letter 'D' indicates this element is a Discriminator.</li>
+                                                    <li>The letter 'F' indicates this element has a fixed value.</li>
                                                 </ul>
                                                 <p>Selecting an element will show more details of that element, including the 'raw' json from
                                                 which the logical model was derived.</p>
