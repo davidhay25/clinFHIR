@@ -36,6 +36,13 @@ angular.module("sampleApp")
 
                         $scope.test = function() {
 
+
+                            if ($scope.input.url.substr(-1,1) !== '/') {
+                               // alert('no trailing slash')
+                                $scope.input.url += '/';
+                            }
+
+
                             var svr = appConfigSvc.getServerByUrl($scope.input.url);
                             if (svr) {
                                 modalService.showModal({}, {bodyText: 'That URL is already defined as '+svr.name + ' and cannot be added again.'})
