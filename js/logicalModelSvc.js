@@ -700,26 +700,7 @@ angular.module("sampleApp")
                     var arDiscriminator = [];   //paths for which a discriminator entry has been made
                     var arPathsAdded = [];      //paths added so far...
 
-                    //this will be an object holding child elements of datatypes. Just a few to see if it works
-                    /*
-                    var dt = {}
-                    dt['CodeableConcept'] = ['coding','text','coding.system','coding.code','coding.display'];
-                    dt['Identifier'] = ['system','value','use','type','period','assigner'];
-                    dt['Period'] = ['start','end'];
-                    dt['Address'] = ['use','type','text','line','city','district','state','postalCode','country','period'];
-                    dt['ContactPoint'] = ['system','value','use','rank','period'];
-                    dt['HumanName'] = ['use','text','family','given','prefix','suffix','period'];
-                    dt['Timing'] = ['repeat.boundsPeriod','repeat.boundsPeriod.start', 'repeat.boundsPeriod.end','event','repeat','boundsQuantity','boundsRange','count','duration','durationMax','durationUnits','frequency','frequencyMax','period','periodMax','periodUnits','when'];
 
-
-                    */
-
-/*
-                    //create a hash of all the paths in the Logical model. Ignore duplications. used for finding the dt of the parent
-                    internalLM.snapshot.element.forEach(function(ed,inx){
-
-                    });
-*/
 
                     //create a hash of all the paths in the base resource type (That is being profiled)...
                     var basePathHash = {};
@@ -1663,7 +1644,7 @@ angular.module("sampleApp")
                             cntExtension++;
 
 
-                            //console.log(ed);
+
 
                             //see if this extension points to an extension definition
                             if (ed.type && ed.type[0].profile) {
@@ -1933,7 +1914,6 @@ angular.module("sampleApp")
                         }]
                     };
                     sd.useContext = [uc]
-
                 }
 
                 sd.kind = 'logical';
@@ -1952,6 +1932,15 @@ angular.module("sampleApp")
                     if (data.fhirMappingExtensionUrl) {
                         Utilities.addExtensionOnce(ed, simpleExtensionUrl, {valueString: data.fhirMappingExtensionUrl})
                     }
+
+
+                    //the 'name'(stu2) or 'label'(r3) is used for the display in the logical model generated from the profile
+                    if (fhirVersion == 2) {
+                        ed.name = item.text;
+                    } else {
+                        ed.label = item.text;
+                    }
+
 
                     ed.id = data.path;
                     ed.path = data.path;

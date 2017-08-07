@@ -105,8 +105,13 @@ angular.module("sampleApp")
                             }
 
 
+
                             //now look for any extensions or ValueSets if the object being imported is a profile....
                             if (itemType.type == "profile" && SD.snapshot && SD.snapshot.element) {
+
+                                profileDiffSvc.updateExtensionsAndVSInProfile($scope.currentIG,SD,pkg);
+
+                                /*
                                 SD.snapshot.element.forEach(function (ed) {
                                     if (ed.type) {
                                         ed.type.forEach(function (typ) {
@@ -156,6 +161,7 @@ angular.module("sampleApp")
                                         }
                                     }
                                 })
+                                */
                             }
 
 
@@ -169,7 +175,7 @@ angular.module("sampleApp")
                                 }, function (err) {
                                    alert('Error updating IG '+angular.toJson(err))
                                 }
-                            )
+                            );
 
                             $scope.selectIG($scope.currentIG);
 
@@ -181,16 +187,7 @@ angular.module("sampleApp")
 
                     //alert(url)
                 }
-/*return;
 
-                var url = appConfigSvc.getCurrentConformanceServer().url;
-                url += 'StructureDefinition?kind=resource';
-                GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
-                    function(data) {
-                        console.log(data.data);
-                    }
-                )
-                */
             };
 
             $scope.generateShortCut = function() {
@@ -211,7 +208,6 @@ angular.module("sampleApp")
                     }
                 )
             };
-
 
             //select an extension from within a profile...
             $scope.selectExtensionFromProfile = function (itemExtension) {
@@ -457,7 +453,7 @@ angular.module("sampleApp")
             $scope.selectIG = function(IG){
                 clearRightPane();
                 $scope.currentIG=IG;     //the List the holds this collection
-                //console.log(IG)
+
                 //now pull out the various artifacts into an easy to use object
                 $scope.artifacts = {}
                 $scope.currentIG.package.forEach(function (package) {
@@ -630,6 +626,22 @@ angular.module("sampleApp")
                    //GetDataFromServer.findConformanceResourceByUri(url).then(
                        function(SD){
                            console.log(SD);
+
+                           //always check if there are any extension definitions or valuesets references by this profile (in case they have been externally changed)
+                           if (profileDiffSvc.updateExtensionsAndVSInProfile($scope.currentIG,SD)) {
+                               SaveDataToServer.saveResource($scope.currentIG).then(
+                                   function (data) {
+                                       console.log(data)
+                                       $scope.selectIG($scope.currentIG);       //re-draw the lists
+                                       //need to reset these as they are cleared in the select routine...
+                                       $scope.selectedItemType = type;
+                                       $scope.selectedItem = item;
+                                   }, function (err) {
+                                       alert('Error updating IG '+angular.toJson(err))
+                                   }
+                               );
+                           }
+
                            setupProfile(SD)
                            addToHistory('profile',SD)
 

@@ -37,6 +37,66 @@ angular.module("sampleApp").service('profileDiffSvc',
         objColours.Medication = '#FF9900';
 
     return {
+        updateExtensionsAndVSInProfile : function(IG,SD,pkg) {
+            var updated = false;
+            var that = this;
+            if (! pkg) {
+                pkg = IG.package[0];
+            }
+
+            SD.snapshot.element.forEach(function (ed) {
+                if (ed.type) {
+                    ed.type.forEach(function (typ) {
+                        if (typ.code == 'Extension' && typ.profile) {
+                            var profileUrl = typ.profile;
+                            if (angular.isArray(profileUrl)) {
+                                profileUrl = typ.profile[0]
+                            }
+                            //console.log(profileUrl);
+
+                            //make sure this is not already in the list
+                            //var found = false;
+                            var res = that.findResourceInIGPackage(IG,profileUrl);
+
+                            if (!res) {
+                                var res = {sourceReference:{reference:profileUrl}};
+                                //todo - should likely move to an extension for R3
+                                if (appConfigSvc.getCurrentConformanceServer().version ==2) {
+                                    res.purpose = 'extension'
+                                } else {
+                                    res.acronym = 'extension'
+                                }
+                                pkg.resource.push(res);
+                                updated = true;
+                            }
+
+
+
+                        }
+
+                    })
+                }
+                if (ed.binding) {
+                    var vsUrl = ed.binding.valueSetReference || ed.binding.valueSetUri;
+                    if (vsUrl) {
+                        var res = that.findResourceInIGPackage(IG,vsUrl);
+
+                        if (!res) {
+                            var res = {sourceReference:{reference:vsUrl}};
+                            //todo - should likely move to an extension for R3
+                            if (appConfigSvc.getCurrentConformanceServer().version ==2) {
+                                res.purpose = 'terminology'
+                            } else {
+                                res.acronym = 'terminology'
+                            }
+                            pkg.resource.push(res);
+                            updated = true;
+                        }
+                    }
+                }
+            })
+            return  updated;
+        },
         makeLMFromProfile : function(inProfile) {
             var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained','DomainResource'];
             var deferred = $q.defer();
@@ -214,7 +274,12 @@ angular.module("sampleApp").service('profileDiffSvc',
                     display=ed.label
                 } else if (ed.name) {
                     display=ed.name;
+                }else if (ed.short) {
+                    display=ed.short;
                 }
+
+
+
 
                 if (ed.slicing) {
                     display += " D"
@@ -287,7 +352,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                     if (node.data && node.data.ed) {
                         if (node.data.ed.type) {
                             node.data.ed.type.forEach(function(typ){
-                                console.log(typ)
+                                //console.log(typ)
                                 if (typ.code) {
                                     if (typ.code.substr(0,1) == typ.code.substr(0,1).toUpperCase()){
                                         node.icon='/icons/icon_datatype.gif';
@@ -1840,7 +1905,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                             deferred.resolve({canonical:canonical, SD : newSD,extensions:extensions});
                         },
                         function (err) {
-
 
                             alert("error getting SD's for children " + angular.toJson(err))
                             // return with what we have...
