@@ -37,7 +37,7 @@
     <script src="js/libs/angular-bootstrap-checkbox.js"></script>
 
     <script src="js/modalDialogSvc.js"></script>
-
+    <script src="js/libs/ng-file-upload.min.js"></script>
 
     <!--
 <script src="js/libs/vis.min.js"></script>
@@ -88,7 +88,7 @@
             color:red;
             background-color:  mistyrose;
         }
-        .extension {
+        .myActive {
             color:blue;
             background-color: powderblue;
         }
@@ -120,6 +120,15 @@
 
 
     <uib-tabset>
+        <uib-tab heading="Setup">
+
+
+
+            <input type="file" id="input"/>
+
+            <button class="btn btn-danger" ng-click="uploadFile()">Upload</button>
+
+        </uib-tab>
         <uib-tab heading="Result">
             <table class="table table-bordered table-condensed">
                 <tr><th>Element Name</th><th>V2 field and result</th><th>FHIR field and result</th></tr>
@@ -152,11 +161,23 @@
                 <br/>
                 <div class="col-sm-1 col-md-1">
                     <ul class="list-group">
-                        <li class="list-group-item" ng-repeat = "segment in results.v2Message"
+                        <li ng-class="{'list-group-item':true,'clickable':true,'myActive':segment==currentSegment}"
+                             ng-repeat = "segment in results.v2Message"
                             ng-click="selectSegment(segment)">
                             {{segment[0]}}
                         </li>
                     </ul>
+
+                    <!--
+                    <div class="list-group">
+                        <a href="#" ng-class="{'list-group-item':true,'active':segment==currentSegment}"
+                            ng-repeat = "segment in results.v2Message"
+                            ng-click="selectSegment(segment)">
+                            {{segment[0]}}
+                        </a>
+                    </div>
+                    -->
+
 
                 </div>
                 <div class="col-sm-11 col-md-11">

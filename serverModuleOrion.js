@@ -38,6 +38,7 @@ var Map = JSON.parse(fs.readFileSync(pathToFile,{encoding:'utf8'}));
 function performAnalysis() {
     var response = {line:[]};
     response.v2Message = hl7Msg;
+    response.v2String = hl7Str;
     response.map = Map;
 
     var arResult = [];

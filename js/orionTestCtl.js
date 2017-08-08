@@ -29,20 +29,35 @@ angular.module("sampleApp")
                 function(data) {
                     $scope.v2FieldNames = data.data;
                 }
-            )
+            );
 
             $http.get('artifacts/v2DataTypes.json').then(
                 function(data) {
                     $scope.v2Datatypes = data.data;
                     console.log($scope.v2Datatypes)
                 }
-            )
+            );
 
+            $scope.uploadFile = function () {
+                var selectedFile = document.getElementById('input').files[0];
+                console.log(selectedFile);
+                var reader = new FileReader();
+                reader.readAsText(selectedFile)
+
+                reader.onload = function(e) {
+                    $scope.$apply(function() {
+                        $scope.csvFile = reader.result;
+                        console.log(reader.result)
+                    });
+                };
+
+            }
+            
             $scope.selectSegment = function(segment){
                 $scope.currentSegment = segment;
                 $scope.currentV2Fields = $scope.v2FieldNames[segment[0]];
                 console.log($scope.currentV2Fields)
-            }
+            };
 
             $scope.decomposeData = function(dt,data) {
                 console.log(dt,data);
@@ -81,10 +96,11 @@ angular.module("sampleApp")
                 if (details) {
                     var display = "";
                     details.fieldName.forEach(function (fld) {
-                        display += fld.name + "^";
+                        display += fld.name + " ("+ fld.type +  ")<br/>";
                     })
-                    if (display !== "") {
-                        display.slice(-1,1);
+
+                    if (display) {
+                        display = display.substring(0,display.length -5)
                     }
 
                     return display;
