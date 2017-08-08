@@ -10,5 +10,27 @@
       {"name":"Effective date","type":"DT"},
       {"name":"Expiration date","type":"DT"}
     ]
+  },
+  "HD": {
+    "fieldName": [
+      {"name":"Namespace id","type":"IS"},
+      {"name":"Universal id","type":"ID"},
+      {"name":"Universal id","type":"ID"}
+    ]
+  },
+  "XPN": {
+    "fieldName": [
+      {"name":"Family name","type":"EN"},
+      {"name":"Given name","type":"ST"},
+      {"name":"Middle names","type":"ST"},
+      {"name":"Suffix","type":"EN"},
+      {"name":"Prefix","type":"ST"},
+      {"name":"Degree","type":"IS"},
+      {"name":"Name type","type":"ID"},
+      {"name":"Name representation","type":"ID"},
+      {"name":"Name context","type":"CE"},
+      {"name":"Name validity","type":"DR"},
+      {"name":"Name assembly order" ,"type":"ID"}
+    ]
   }
 }

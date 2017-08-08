@@ -44,6 +44,35 @@ angular.module("sampleApp")
                 console.log($scope.currentV2Fields)
             }
 
+            $scope.decomposeData = function(dt,data) {
+                console.log(dt,data);
+                var ar = []
+                if (data) {
+                    ar = data.split('^')
+                }
+
+                var details = $scope.v2Datatypes[dt];
+                console.log(details)
+                if (details) {
+                    var display = "";
+
+                    details.fieldName.forEach(function (fld,inx) {
+                        if (ar[inx]) {
+                            display += fld.name + "=" + ar[inx] + "<br/>";
+                        }
+                    })
+
+
+
+
+                    return display;
+                } else {
+                    return dt
+                }
+
+
+            }
+
             $scope.showDT = function(dt) {
                 //var dt = $scope.v2Datatypes[dt];
                 console.log(dt)
@@ -62,8 +91,6 @@ angular.module("sampleApp")
                 } else {
                     return dt
                 }
-
-
 
             }
 

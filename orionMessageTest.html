@@ -174,7 +174,12 @@
                                 >{{currentV2Fields.fieldName[$index].type}}</div>
                             </td>
                             <td width="35%">
-                                {{field}}
+                                <div uib-popover-html="decomposeData(currentV2Fields.fieldName[$index].type,field)"
+                                     popover-placement="top"
+                                     popover-trigger="'mouseenter'"
+                                >{{field}}</div>
+
+
                             </td>
                             <td width="30%">
                                 <div ng-repeat = "m in v2FieldMap[currentSegment[0] + '-' + $index]">
