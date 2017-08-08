@@ -415,7 +415,7 @@
 
 
                             <uib-tab heading="Graph" select="fitGraph()">
-
+                                <p class="banner"><em>Relationships between the Profile and other resources, Extensions and ValueSets.</em></p>
                                 <div class="row" ng-show="currentIG">
                                     <div class="col-md-9">
                                         <div style="height: 600px; border: solid 1px gray" id="igModel"></div>
@@ -483,6 +483,7 @@
                                         <br/>
                                         <div ng-show="graphReferences">
                                             <h4>Paths</h4>
+
                                             <div>{{graphReferences.from.data.url | referenceType}}</div>
                                             <div>-> {{graphReferences.to.data.url | referenceType}}</div>
                                             <ul class="list-group">
@@ -550,7 +551,8 @@
 
 
                             <uib-tab heading="Logical View">
-                                <br/>
+
+                                <p class="banner"><em>The Profile rendered as a Logical Model - extensions appear as ordinary elements.</em></p>
                                 <div class="row">
                                     <div class="col-sm-4 col-md-4">
                                         <div id="logicalTree"></div>
@@ -665,6 +667,8 @@
 
 
                             <uib-tab heading="Table">
+
+                                <p class="banner"><em>A tabular view of the Profile. </em></p>
                                 <profile-table items="canonical.item" select-item="selectItem"
                                    show-e-d-e="showED" select-extension-from-profile-e="selectExtensionFromProfile"
                                    show-value-set-e="showValueSet"></profile-table>
@@ -673,14 +677,16 @@
 
 
                             <uib-tab heading="Extensions">
-                                <br/>
+
+                                <p class="banner"><em>Extensions that this Profile references. Shows Url and any ValueSet references by the Extension.</em></p>
                                 <profile-table items="allExtensions" select-item="selectItem"
                                                show-e-d-e="showED" select-extension-from-profile-e="selectExtensionFromProfile"
                                                show-value-set-e="showValueSet"></profile-table>
                             </uib-tab>
 
                             <uib-tab heading="Required Elements">
-                                <br/>
+
+                                <p class="banner"><em>Elements marked as 'Required' (min = 1)</em></p>
                                 <div class="row">
                                     <div class="col-sm-4 col-md-4">
 
@@ -701,7 +707,8 @@
                             </uib-tab>
 
                             <uib-tab heading="ValueSets used">
-                                <br/>
+
+                                <p class="banner"><em>ValueSets used by this Profile, including binding information</em></p>
                                 <div class="row">
                                     <div class="col-sm-12 col-md-12">
                                         <table class="table">
@@ -733,8 +740,8 @@
                             </uib-tab>
 
                             <uib-tab heading="References">
-                                <br/>
 
+                                <p class="banner"><em>The references from this Profile to some other resource</em></p>
                                 <div class="row">
                                     <div class="col-sm-12 col-md-12">
                                         <table class="table">
@@ -778,7 +785,8 @@
                             -->
 
                             <uib-tab heading="Paths">
-                                <br/>
+
+                                <p class="banner"><em>These are the actual Element Definitions - in order - from the Profile. (StructureDefinition.snapshot.element)</em></p>
                                 <div class="row">
                                     <div class="col-sm-4 col-md-4">
                                         <div class="myScroll">
@@ -798,6 +806,7 @@
                             </uib-tab>
 
                             <uib-tab heading="Json">
+                                <p class="banner"><em>The raw Json of the profile (StructureDefinition)</em></p>
                                 <div class="row">
                                     <div class="col-sm-12 col-md-12">
                                         <pre>{{selectedSD | json}}</pre>
@@ -806,7 +815,7 @@
                                 </div>
                             </uib-tab>
 
-                            <uib-tab heading="IG Entry">
+                            <uib-tab ng-show="1==2" heading="IG Entry">
                                 <br/>
                                 <div class="row">
                                     <div class="col-sm-2 col-md-2">
@@ -841,7 +850,6 @@
 
 
                                 </div>
-
 
                             </uib-tab>
 
@@ -946,9 +954,16 @@
 
 
                         </uib-tab>
+                        <uib-tab heading="Implementation Guide Summary">
+                            <br/>
+                            <ng-include src="'/includes/IGSummary.html'"></ng-include>
+
+                        </uib-tab>
                         <uib-tab heading="Implementation Guide Json">
+                            <br/>
                             <pre>{{currentIG | json}}</pre>
                         </uib-tab>
+
                     </uib-tabset>
 
 

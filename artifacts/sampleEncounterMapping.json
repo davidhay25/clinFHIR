@@ -1,0 +1,446 @@
+[{
+    "description": "OhEncounter.meta.lastUpdated",
+    "v2": "MSH-7",
+    "fhir": "Encounter.meta.lastUpdated"
+  },
+  {
+    "description": "OhEncounter.meta.security.code_1",
+    "v2": "DG1-18, ZPV1-6",
+    "fhir": "Encounter.meta.security.code"
+  },
+  {
+    "description": "OhEncounter.identifier.system",
+    "v2": "PV1-19.4.2",
+    "fhir": "Encounter.identifier.system"
+  },
+  {
+    "description": "OhEncounter.identifier.value",
+    "v2": "PV1-19.1",
+    "fhir": "Encounter.identifier.value"
+  },
+  {
+    "description": "OhEncounter.status",
+    "v2": "MSH-9",
+    "fhir": "Encounter.status"
+  },
+  {
+    "description": "OhEncounter.statusHistory.status",
+    "v2": "MSH-9",
+    "fhir": "Encounter.statusHistory.status"
+  },
+  {
+    "description": "OhEncounter.class",
+    "v2": "PV1-2",
+    "fhir": "Encounter.class"
+  },
+  {
+    "description": "OhEncounter.type",
+    "v2": "PV1-2",
+    "fhir": "Encounter.type"
+  },
+  {
+    "description": "OhEncounter.type.coding_2.code_1",
+    "v2": "PV1-2",
+    "fhir": "Encounter.type.coding.code"
+  },
+  {
+    "description": "OhEncounter.type.coding.code",
+    "v2": "PV1-2",
+    "fhir": "Encounter.type.coding.code"
+  },
+  {
+    "description": "OhEncounter.specialty",
+    "v2": "PV1-10",
+    "fhir": "Encounter.type"
+  },
+  {
+    "description": "OhEncounter.specialty.coding.code",
+    "v2": "PV1-10",
+    "fhir": "Encounter.type.coding.code"
+  },
+  {
+    "description": "OhEncounter.participant-attender",
+    "v2": "PV1-7",
+    "fhir": "Encounter.participant"
+  },
+  {
+    "description": "OhEncounter.participant-attender.individual.reference_1.identifier.system_1",
+    "v2": "PV1-7.9.2",
+    "fhir": "Practitioner.identifier.system"
+  },
+  {
+    "description": "OhEncounter.participant-attender.individual.reference_1.identifier.value_1",
+    "v2": "PV1-7.1",
+    "fhir": "Practitioner.identifier.value"
+  },
+  {
+    "description": "OhEncounter.participant-attender.individual.reference_1.name.family_1",
+    "v2": "PV1-7.2",
+    "fhir": "Practitioner.name.family"
+  },
+  {
+    "description": "OhEncounter.participant-attender.individual.reference_1.name.given_1",
+    "v2": "PV1-7.3",
+    "fhir": "Practitioner.name.given"
+  },
+  {
+    "description": "OhEncounter.participant-attender.individual.reference_1.name.prefix_1",
+    "v2": "PV1-7.6",
+    "fhir": "Practitioner.name.prefix"
+  },
+  {
+    "description": "OhEncounter.participant-referrer",
+    "v2": "PV1-8",
+    "fhir": "Encounter.participant"
+  },
+  {
+    "description": "OhEncounter.participant-referrer.individual.reference_1.identifier.system_1",
+    "v2": "PV1-8.9.2",
+    "fhir": "Practitioner.identifier.system"
+  },
+  {
+    "description": "OhEncounter.participant-referrer.individual.reference_1.identifier.value_1",
+    "v2": "PV1-8.1",
+    "fhir": "Practitioner.identifier.value"
+  },
+  {
+    "description": "OhEncounter.participant-referrer.individual.reference_1.name.family_1",
+    "v2": "PV1-8.2",
+    "fhir": "Practitioner.name.family"
+  },
+  {
+    "description": "OhEncounter.participant-referrer.individual.reference_1.name.given_1",
+    "v2": "PV1-8.3",
+    "fhir": "Practitioner.name.given"
+  },
+  {
+    "description": "OhEncounter.participant-referrer.individual.reference_1.name.prefix_1",
+    "v2": "PV1-8.6",
+    "fhir": "Practitioner.name.prefix"
+  },
+  {
+    "description": "OhEncounter.participant-consultant",
+    "v2": "PV1-9",
+    "fhir": "Encounter.participant"
+  },
+  {
+    "description": "OhEncounter.participant-consultant.individual.reference_1.identifier.system_1",
+    "v2": "PV1-9.9.2",
+    "fhir": "Practitioner.identifier.system"
+  },
+  {
+    "description": "OhEncounter.participant-consultant.individual.reference_1.identifier.value_1",
+    "v2": "PV1-9.1",
+    "fhir": "Practitioner.identifier.value"
+  },
+  {
+    "description": "OhEncounter.participant-consultant.individual.reference_1.name.family_1",
+    "v2": "PV1-9.2",
+    "fhir": "Practitioner.name.family"
+  },
+  {
+    "description": "OhEncounter.participant-consultant.individual.reference_1.name.given_1",
+    "v2": "PV1-9.3",
+    "fhir": "Practitioner.name.given"
+  },
+  {
+    "description": "OhEncounter.participant-consultant.individual.reference_1.name.prefix_1",
+    "v2": "PV1-9.6",
+    "fhir": "Practitioner.name.prefix"
+  },
+  {
+    "description": "OhEncounter.appointment.reference_3.start",
+    "v2": "PV2-8",
+    "fhir": "Appointment.start"
+  },
+  {
+    "description": "OhEncounter.appointment.reference_3.end",
+    "v2": "PV2-9",
+    "fhir": "Appointment.end"
+  },
+  {
+    "description": "OhEncounter.period.start",
+    "v2": "PV1-44",
+    "fhir": "Encounter.period.start"
+  },
+  {
+    "description": "OhEncounter.period.end",
+    "v2": "PV1-45",
+    "fhir": "Encounter.period.end"
+  },
+  {
+    "description": "OhEncounter.length",
+    "v2": "PV1-45 - PV1-44",
+    "fhir": "Encounter.length"
+  },
+  {
+    "description": "OhEncounter.reason",
+    "v2": "PV2-3",
+    "fhir": "Encounter.reason"
+  },
+  {
+    "description": "OhEncounter.reason.coding.system",
+    "v2": "PV2-3.3",
+    "fhir": "Encounter.reason.coding.system"
+  },
+  {
+    "description": "OhEncounter.reason.coding.code",
+    "v2": "PV2-3.1",
+    "fhir": "Encounter.reason.coding.code"
+  },
+  {
+    "description": "OhEncounter.reason.coding.display",
+    "v2": "PV2-3.2",
+    "fhir": "Encounter.reason.coding.display"
+  },
+  {
+    "description": "OhEncounter.reason.text",
+    "v2": "PV2-3.5",
+    "fhir": "Encounter.reason.text"
+  },
+  {
+    "description": "OhEncounter.hospitalization.preAdmissionIdentifier.system",
+    "v2": "PV1-5.4.2",
+    "fhir": "Encounter.hospitalization.preAdmissionIdentifier.system"
+  },
+  {
+    "description": "OhEncounter.hospitalization.preAdmissionIdentifier.value",
+    "v2": "PV1-5.1",
+    "fhir": "Encounter.hospitalization.preAdmissionIdentifier.value"
+  },
+  {
+    "description": "OhEncounter.hospitalization.admitSource",
+    "v2": "PV1-14",
+    "fhir": "Encounter.hospitalization.admitSource"
+  },
+  {
+    "description": "OhEncounter.hospitalization.admitSource.coding.code",
+    "v2": "PV1-14",
+    "fhir": "Encounter.hospitalization.admitSource.coding.code"
+  },
+  {
+    "description": "OhEncounter.hospitalization.destination.reference.identifier.value_1",
+    "v2": "PV1-37.1",
+    "fhir": "Location.identifier.value"
+  },
+  {
+    "description": "OhEncounter.hospitalization.dischargeDisposition",
+    "v2": "PV1-36",
+    "fhir": "Encounter.hospitalization.dischargeDisposition"
+  },
+  {
+    "description": "OhEncounter.hospitalization.dischargeDisposition.coding.code",
+    "v2": "PV1-36",
+    "fhir": "Encounter.hospitalization.dischargeDisposition.coding.code"
+  },
+  {
+    "description": "OhEncounter.hospitalization.dischargeDiagnosis.condition-agent-author.actorId.system",
+    "v2": "MSH-4.2",
+    "fhir": "Condition.extension.agent.actorId.system"
+  },
+  {
+    "description": "OhEncounter.hospitalization.dischargeDiagnosis.condition-agent-author.actorId.value",
+    "v2": "MSH-4.2",
+    "fhir": "Condition.extension.agent.actorId.value"
+  },
+  {
+    "description": "OhEncounter.hospitalization.dischargeDiagnosis.reference_1.asserter.reference_1.identifier.system_1",
+    "v2": "DG1-16.9.2",
+    "fhir": "Practitioner.identifier.system"
+  },
+  {
+    "description": "OhEncounter.hospitalization.dischargeDiagnosis.reference_1.asserter.reference_1.identifier.value_1",
+    "v2": "DG1-16.1",
+    "fhir": "Practitioner.identifier.value"
+  },
+  {
+    "description": "OhEncounter.hospitalization.dischargeDiagnosis.reference_1.asserter.reference_1.name.family_1",
+    "v2": "DG1-16.2.1",
+    "fhir": "Practitioner.name.family"
+  },
+  {
+    "description": "OhEncounter.hospitalization.dischargeDiagnosis.reference_1.asserter.reference_1.name.given_1",
+    "v2": "DG1-16.3",
+    "fhir": "Practitioner.name.given"
+  },
+  {
+    "description": "OhEncounter.hospitalization.dischargeDiagnosis.reference_1.asserter.reference_1.name.prefix_1",
+    "v2": "DG1-16.6",
+    "fhir": "Practitioner.name.prefix"
+  },
+  {
+    "description": "OhEncounter.hospitalization.dischargeDiagnosis.reference_1.dateRecorded",
+    "v2": "DG1-5",
+    "fhir": "Condition.dateRecorded"
+  },
+  {
+    "description": "OhEncounter.hospitalization.dischargeDiagnosis.reference_1.code",
+    "v2": "DG1-3",
+    "fhir": "Condition.code"
+  },
+  {
+    "description": "OhEncounter.hospitalization.dischargeDiagnosis.reference_1.code.coding_1.system_1",
+    "v2": "DG1-3.3",
+    "fhir": "Condition.code.coding.system"
+  },
+  {
+    "description": "OhEncounter.hospitalization.dischargeDiagnosis.reference_1.code.coding_1.code_1",
+    "v2": "DG1-3.1",
+    "fhir": "Condition.code.coding.code"
+  },
+  {
+    "description": "OhEncounter.hospitalization.dischargeDiagnosis.reference_1.code.coding_1.display_1",
+    "v2": "DG1-3.2",
+    "fhir": "Condition.code.coding.display"
+  },
+  {
+    "description": "OhEncounter.hospitalization.dischargeDiagnosis.reference_1.verificationStatus",
+    "v2": "DG1-6",
+    "fhir": "Condition.verificationStatus"
+  },
+  {
+    "description": "OhEncounter.location-ward",
+    "v2": "PV1-3.1",
+    "fhir": "Encounter.location.location"
+  },
+  {
+    "description": "OhEncounter.location-ward.reference_1.identifier.value_1",
+    "v2": "PV1-3.1",
+    "fhir": "Location.identifier.value"
+  },
+  {
+    "description": "OhEncounter.location-ward.reference_1.description",
+    "v2": "PV1-3.1",
+    "fhir": "Location.description"
+  },
+  {
+    "description": "OhEncounter.location-ward.reference_1.partOf.reference_1",
+    "v2": "PV1-3.9",
+    "fhir": "http://hl7.org/fhir/StructureDefinition/Location"
+  },
+  {
+    "description": "OhEncounter.location-room",
+    "v2": "PV1-3.2",
+    "fhir": "Encounter.location.location"
+  },
+  {
+    "description": "OhEncounter.location-room.reference_1.identifier.value_1",
+    "v2": "PV1-3.2",
+    "fhir": "Location.identifier.value"
+  },
+  {
+    "description": "OhEncounter.location-room.reference_1.description",
+    "v2": "PV1-3.2",
+    "fhir": "Location.description"
+  },
+  {
+    "description": "OhEncounter.location-room.reference_1.partOf.reference_1",
+    "v2": "PV1-3.9",
+    "fhir": "http://hl7.org/fhir/StructureDefinition/Location"
+  },
+  {
+    "description": "OhEncounter.location-bed",
+    "v2": "PV1-3.3",
+    "fhir": "Encounter.location.location"
+  },
+  {
+    "description": "OhEncounter.location-bed.reference_1.identifier.value_1",
+    "v2": "PV1-3.3",
+    "fhir": "Location.identifier.value"
+  },
+  {
+    "description": "OhEncounter.location-bed.reference_1.description",
+    "v2": "PV1-3.3",
+    "fhir": "Location.description"
+  },
+  {
+    "description": "OhEncounter.location-bed.reference_1.partOf.reference_1",
+    "v2": "PV1-3.9",
+    "fhir": "http://hl7.org/fhir/StructureDefinition/Location"
+  },
+  {
+    "description": "OhEncounter.location-facility",
+    "v2": "PV1-3.4",
+    "fhir": "Encounter.location.location"
+  },
+  {
+    "description": "OhEncounter.location-facility.reference_1.identifier.system_1",
+    "v2": "PV1-3.4.2",
+    "fhir": "Location.identifier.system"
+  },
+  {
+    "description": "OhEncounter.location-facility.reference_1.identifier.value_1",
+    "v2": "PV1-3.4.2",
+    "fhir": "Location.identifier.value"
+  },
+  {
+    "description": "OhEncounter.location-facility.reference_1.partOf.reference_1",
+    "v2": "PV1-3.9",
+    "fhir": "http://hl7.org/fhir/StructureDefinition/Location"
+  },
+  {
+    "description": "OhEncounter.location-building",
+    "v2": "PV1-3.7",
+    "fhir": "Encounter.location.location"
+  },
+  {
+    "description": "OhEncounter.location-building.reference_1.identifier.value_1",
+    "v2": "PV1-3.7",
+    "fhir": "Location.identifier.value"
+  },
+  {
+    "description": "OhEncounter.location-building.reference_1.description",
+    "v2": "PV1-3.7",
+    "fhir": "Location.description"
+  },
+  {
+    "description": "OhEncounter.location-building.reference_1.partOf.reference_1",
+    "v2": "PV1-3.9",
+    "fhir": "http://hl7.org/fhir/StructureDefinition/Location"
+  },
+  {
+    "description": "OhEncounter.location-floor",
+    "v2": "PV1-3.8",
+    "fhir": "Encounter.location.location"
+  },
+  {
+    "description": "OhEncounter.location-floor.reference_1.identifier.value_1",
+    "v2": "PV1-3.8",
+    "fhir": "Location.identifier.value"
+  },
+  {
+    "description": "OhEncounter.location-floor.reference_1.description",
+    "v2": "PV1-3.8",
+    "fhir": "Location.description"
+  },
+  {
+    "description": "OhEncounter.location-floor.reference_1.partOf.reference_1",
+    "v2": "PV1-3.9",
+    "fhir": "http://hl7.org/fhir/StructureDefinition/Location"
+  },
+  {
+    "description": "OhEncounter.location-description",
+    "v2": "PV1-3.9",
+    "fhir": "Encounter.location.location"
+  },
+  {
+    "description": "OhEncounter.location-description.reference_1.description",
+    "v2": "PV1-3.9",
+    "fhir": "Location.description"
+  },
+  {
+    "description": "OhEncounter.agent-enterer",
+    "v2": "EVN-5",
+    "fhir": "Encounter.extension"
+  },
+  {
+    "description": "OhEncounter.agent-author",
+    "v2": "MSH-4 EVN-7",
+    "fhir": "Encounter.extension"
+  },
+  {
+    "description": "OhEncounter.agent-custodian",
+    "v2": "EVN-7 MSH-4",
+    "fhir": "Encounter.extension"
+  }
+]

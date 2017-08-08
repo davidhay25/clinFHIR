@@ -465,6 +465,7 @@ angular.module("sampleApp")
                 delete $scope.input.newMapValue;
                 $scope.setCurrentMap(identity)
                 $scope.isDirty = true;
+                delete $scope.input.addOtherMap;    //
             };
 
             $scope.updateCurrentMapValue = function(value) {
@@ -498,6 +499,11 @@ angular.module("sampleApp")
 
 
             $scope.save = function() {
+                //if adding a new mapping and forget to click the plus
+                if ($scope.input.addOtherMap) {
+                    $scope.addNewMap($scope.input.newMapIdentity,$scope.input.newMapValue)
+                }
+
                     var vo = {};
                     vo.name = $scope.input.name;
                     vo.short = $scope.input.short;

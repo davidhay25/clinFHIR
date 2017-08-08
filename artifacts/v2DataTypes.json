@@ -1,0 +1,14 @@
+{
+  "CX": {
+    "fieldName": [
+      {"name":"ID","type":"ST"},
+      {"name":"Check digit","type":"ST"},
+      {"name":"Code","type":"ID"},
+      {"name":"Assigning authority","type":"HD"},
+      {"name":"Identifier type","type":"ID"},
+      {"name":"Assigning facility","type":"HD"},
+      {"name":"Effective date","type":"DT"},
+      {"name":"Expiration date","type":"DT"}
+    ]
+  }
+}

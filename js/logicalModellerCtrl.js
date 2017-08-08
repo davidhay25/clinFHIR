@@ -1534,9 +1534,19 @@ angular.module("sampleApp")
                 $scope.relativeMappings = logicalModelSvc.getRelativeMappings($scope.treeData); //items with both v2 & fhir mappings
 
 
+
+
+
                 logicalModelSvc.openTopLevelOnly($scope.treeData);
 
+                //temp little routine to generate a mapping file -
+                var map = []
+                $scope.relativeMappings.forEach(function(m) {
+                    //console.log(m)
+                    map.push({description: m.branch.data.path,v2:m.sourceMap,fhir:m.targetMap})
+                })
 
+                console.log(angular.toJson(map))
 
                 var baseType = $scope.treeData[0].data.header.baseType
 
@@ -1684,6 +1694,9 @@ angular.module("sampleApp")
                         return -1
                     }
                 })
+
+                //console.log($scope.allMappings)
+
             }
 
             //If based on a single FHIR resource, check for differences from that base

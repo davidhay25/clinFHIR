@@ -16,8 +16,16 @@ angular.module("sampleApp")
 
             GetDataFromServer.registerAccess('igView');
 
-            $scope.updateIG = function(){
-                alert('Updates not currently supported');
+            $scope.saveIG = function(){
+
+                SaveDataToServer.saveResource($scope.currentIG).then(
+                    function (data) {
+                        alert('IG updated');
+                        delete $scope.input.IGSummaryDirty;
+                    },function(err){
+                        alert('Error updating IG '+ angular.toJson(err,true))
+                    }
+                )
 
             };
 
@@ -364,7 +372,7 @@ angular.module("sampleApp")
                 delete $scope.profileReport;
                 delete $scope.allExtensions;
                 delete $scope.selectedNode;
-
+                delete $scope.input.IGSummaryDirty;
             }
 
             //used when selecting a single profile...
@@ -625,7 +633,7 @@ angular.module("sampleApp")
                    profileDiffSvc.getSD(url).then(
                    //GetDataFromServer.findConformanceResourceByUri(url).then(
                        function(SD){
-                           console.log(SD);
+                           //console.log(SD);
 
                            //always check if there are any extension definitions or valuesets references by this profile (in case they have been externally changed)
                            if (profileDiffSvc.updateExtensionsAndVSInProfile($scope.currentIG,SD)) {

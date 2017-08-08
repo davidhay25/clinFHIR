@@ -1,13 +1,10 @@
 //simple server to serve static files...
 
-
-
-
-
-
 //var static = require('node-static');
 var request  = require('request');
 var moment = require('moment');
+
+
 
 var httpProxy = require('http-proxy')
 
@@ -18,6 +15,12 @@ var Cookies = require( "cookies" )
 var express = require('express');
 var app = express();
 //remove for proxy app.use(myParser.json({extended : true}));
+
+
+
+var orionModule = require("./serverModuleOrion.js")
+
+orionModule.setup(app);
 
 //var connect = require('connect');
 var http = require('http');

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <base href="/" />
+    <meta charset="UTF-8">
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ui.checkbox','ngSanitize']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+        angular.module("sampleApp").constant("moment", moment);
+
+    </script>
+
+
+    <script src="js/orionTestCtl.js"></script>
+
+
+    <script src="js/libs/angular-bootstrap-checkbox.js"></script>
+
+    <script src="js/modalDialogSvc.js"></script>
+
+
+    <!--
+<script src="js/libs/vis.min.js"></script>
+
+        <script src="js/appConfigSvc.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/libs/jstree.min.js"></script>
+
+
+    <script src="js/resourceCreatorSvc.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
+
+    <script src="js/profileCreatorSvc.js"></script>
+    <script src="js/resourceSvc.js"></script>
+    <script src="js/builderSvc.js"></script>
+    <script src="js/portHoleSvc.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/filters.js"></script>
+ <script src="js/profileDiffSvc.js"></script>
+    <script src="js/logicalModelSvc.js"></script>
+
+  <script src="js/appConfigSvc.js"></script>
+  <script src="js/libs/ngStorage.min.js"></script>
+  <script src="resourceBuilder/rbServices.js"></script>
+  <script src="js/components/dataTypes.js"></script>
+
+  <script src="js/services.js"></script>
+
+  <script src="js/filters.js"></script>
+  <script src="js/documentBuilder.js"></script>
+  <script src="resourceBuilder/rbServices.js"></script>
+  <script src="js/reporterCtrl.js"></script>
+
+  <script src="js/libs/ngStorage.min.js"></script>
+
+
+
+  <script src="js/profileCreatorSvc.js"></script>
+  -->
+
+
+    <style>
+        .myScroll {
+            height: 600px;
+            overflow-y: scroll;
+        }
+        .myRequired {
+            color:red;
+            background-color:  mistyrose;
+        }
+        .extension {
+            color:blue;
+            background-color: powderblue;
+        }
+
+
+    </style>
+        <title>Orion Message Test</title>
+
+</head>
+
+
+<body style="padding-top: 80px" >
+
+<div ng-app="sampleApp" ng-controller="orionTestCtrl" class="container-fluid">
+
+    <div class="row">
+        <div class="col-sm-2 col-md-2">
+
+
+        </div>
+        <div class="col-sm-8 col-md-8">
+
+
+        </div>
+        <div class="col-sm-2 col-md-2">
+            <checkbox ng-model="input.showAllMappings"></checkbox> Show all mapped
+        </div>
+    </div>
+
+
+    <uib-tabset>
+        <uib-tab heading="Result">
+            <table class="table table-bordered table-condensed">
+                <tr><th>Element Name</th><th>V2 field and result</th><th>FHIR field and result</th></tr>
+                <tr ng-show="showRow(item)" ng-repeat = "item in results.line">
+                    <td width = '14%'>{{item.description | dropFirst}}</td>
+                    <td width = '43%'>
+                        <div ng-repeat = "v in item.v2.value.values">
+                            <div class="pull-right">{{v}}</div>
+                        </div>
+                        <div><em class="pull-left">{{item.v2.key}}</em></div>
+                    </td>
+                    <td width = '43%'>
+                        <div ng-repeat = "v in item.fhir.value">
+                            {{v}}
+                        </div>
+                        <div><em class="pull-right" >{{item.fhir.key}}</em></div>
+                    </td>
+                </tr>
+
+            </table>
+
+        </uib-tab>
+        <uib-tab heading="Json">
+            <pre>
+                {{results | json}}
+            </pre>
+        </uib-tab>
+        <uib-tab heading="V2 message">
+            <div class="row">
+                <br/>
+                <div class="col-sm-1 col-md-1">
+                    <ul class="list-group">
+                        <li class="list-group-item" ng-repeat = "segment in results.v2Message"
+                            ng-click="selectSegment(segment)">
+                            {{segment[0]}}
+                        </li>
+                    </ul>
+
+                </div>
+                <div class="col-sm-11 col-md-11">
+                    <table class="table">
+                        <tr><th>Field</th><th>Name</th><th>Type</th><th>Value</th><th>FHIR mappings</th></tr>
+                        <tr ng-repeat="field in currentSegment track by $index">
+                            <td width="10%">
+                                {{currentSegment[0]}}-{{$index}}
+                            </td>
+                            <td width="15%">{{currentV2Fields.fieldName[$index].name}}</td>
+                            <td width="10%">
+                                <div uib-popover-html="showDT(currentV2Fields.fieldName[$index].type)"
+                                    popover-placement="top"
+                                    popover-trigger="'mouseenter'"
+                                >{{currentV2Fields.fieldName[$index].type}}</div>
+                            </td>
+                            <td width="35%">
+                                {{field}}
+                            </td>
+                            <td width="30%">
+                                <div ng-repeat = "m in v2FieldMap[currentSegment[0] + '-' + $index]">
+                                    {{m.v2}} -> {{m.fhir}}
+                                </div>
+
+                            </td>
+                        </tr>
+                    </table>
+
+
+
+                </div>
+                <div class="col-sm-2 col-md-2">
+
+                </div>
+            </div>
+
+        </uib-tab>
+    </uib-tabset>
+
+
+
+    <div class="row">
+        <div class="col-sm-2 col-md-2">
+
+
+        </div>
+        <div class="col-sm-8 col-md-8">
+
+
+        </div>
+        <div class="col-sm-2 col-md-2">
+
+        </div>
+    </div>
+
+
+
+</div>
+</body>
+</html>
