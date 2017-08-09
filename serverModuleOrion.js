@@ -7,9 +7,6 @@ var ObjectID = require('mongodb').ObjectID;
 function setup(app,db) {
     mongoDb = db;
 
-    app.get('/orionTest/test',function(req,res){
-        res.json({OK:"OK"})
-    });
 
     app.get('/orionTest/getSamples',function(req,res){
         if (mongoDb) {
@@ -20,8 +17,8 @@ function setup(app,db) {
         }
     });
 
-
-    app.get('/orionTest/performAnalysis',function(req,res){
+    //app.get('/orionTest/performAnalysis',function(req,res){
+    app.get('/orionTest/getFiles',function(req,res){
         var hl7Id = req.query.hl7;
         var fhirId = req.query.fhir;
        // console.log(req.query)
@@ -36,10 +33,26 @@ function setup(app,db) {
                 }
             }
 
-            getSample(hl7Id,function(fhirMessage){
+            getSample(fhirId,function(fhirMessage){
                 if (fhirMessage && fhirMessage.content) {
-                    var result =  performAnalysis(arHL7,fhirMessage.content);
-                    res.json(result)
+
+
+                   // var vo = convertV2ToObject(arHL7);
+                   // var hl7Hash = vo.hash;
+                   // var hl7Msg = vo.msg;
+
+                    var response = {line:[]};
+
+
+                    response.fhir = fhirMessage.content;
+                  //  response.v2Message = hl7Msg;
+                    response.arHL7 = arHL7;
+                    response.map = Map;
+
+
+                   // var result =  performAnalysis(arHL7,fhirMessage.content);
+
+                    res.json(response)
                 } else {
                     res.statusCode = 400;
                     res.json({err:'FHIR document not found'})
@@ -56,7 +69,7 @@ function setup(app,db) {
     function getSample(id,cb) {
         var objectId = new ObjectID(id);
         var cursor = mongoDb.collection('orionSample').find({"_id": objectId}).toArray(function(err,doc){
-            console.log(err,doc)
+            //console.log(err,doc)
             cb(doc[0])
         });
 
@@ -164,6 +177,7 @@ function performAnalysis(arHl7,FHIR) {
     var response = {line:[]};
 
 
+    response.fhir = FHIR;
     response.v2Message = hl7Msg;
     response.v2String = arHl7;
     response.map = Map;

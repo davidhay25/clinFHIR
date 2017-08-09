@@ -38,6 +38,7 @@
 
     <script src="js/modalDialogSvc.js"></script>
     <script src="js/libs/ng-file-upload.min.js"></script>
+    <script src="js/libs/jsonpath.js"></script>
 
     <!--
 <script src="js/libs/vis.min.js"></script>
@@ -108,21 +109,21 @@
 <div ng-app="sampleApp" ng-controller="orionTestCtrl" class="container-fluid">
 
     <div class="row">
-        <div class="col-sm-5 col-md-5">
-
+        <div class="col-sm-2 col-md-2">
+            Message Comparison
 
         </div>
-        <div class="col-sm-4 col-md-4">
+        <div class="col-sm-8 col-md-8">
             <div>HL7 message:   {{selectedHL7Sample.description}}</div>
             <div>FHIR resource: {{selectedFHIRSample.description}}</div>
         </div>
         <div class="col-sm-1 col-md-1">
             <button class="btn btn-primary pull-right"
                     ng-show="selectedHL7Sample && selectedFHIRSample"
-                    ng-click="performAnalysis()">Analyse</button>
+                    ng-click="getFiles()">Analyse</button>
 
         </div>
-        <div class="col-sm-2 col-md-2">
+        <div class="col-sm-1 col-md-1">
             <checkbox ng-model="input.showAllMappings"></checkbox> Show all mapped
         </div>
     </div>
@@ -150,8 +151,6 @@
                             <span class="clickable" ng-click="selectSample(sample,'fhir')">{{sample.description}}</span>
                         </li>
                     </ul>
-
-
 
 
                 </div>
@@ -300,11 +299,18 @@
             </div>
 
         </uib-tab>
+
+        <uib-tab heading="FHIR">
+            <pre>{{results.fhir | json}}</pre>
+        </uib-tab>
+
+        <!--
         <uib-tab heading="Json">
             <pre>
                 {{results | json}}
             </pre>
         </uib-tab>
+        -->
     </uib-tabset>
 
 
