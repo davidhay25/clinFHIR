@@ -129,7 +129,7 @@ var FHIR = JSON.parse(fs.readFileSync(pathToFile,{encoding:'utf8'}));
 
  */
 //load the mapfile
-pathToFile = "/Users/davidha/clinfhir/FHIRSampleCreator/artifacts/encounterV2Mappings.json"
+pathToFile = "./artifacts/encounterV2Mappings.json"
 var Map = JSON.parse(fs.readFileSync(pathToFile,{encoding:'utf8'}));
 
 
