@@ -23,19 +23,31 @@ function setup(app,db) {
 
     app.get('/orionTest/performAnalysis',function(req,res){
         var hl7Id = req.query.hl7;
-        console.log(req.query)
-        //var
+        var fhirId = req.query.fhir;
+       // console.log(req.query)
+        //get the v2 message....
         getSample(hl7Id,function(hl7Message){
-            var content;
+            var arHL7;
             if (hl7Message) {
-                content = hl7Message.content;       //this is actually an array representation of the message
-                if (! content.length) {
+                arHL7 = hl7Message.content;       //this is actually an array representation of the message
+                if (! arHL7.length) {
                     res.statusCode = 400;
                     res.json({err:'HL7 sample should be an array...'})
                 }
             }
-            var result =  performAnalysis(content);
-            res.json(result)
+
+            getSample(hl7Id,function(fhirMessage){
+                if (fhirMessage && fhirMessage.content) {
+                    var result =  performAnalysis(arHL7,fhirMessage.content);
+                    res.json(result)
+                } else {
+                    res.statusCode = 400;
+                    res.json({err:'FHIR document not found'})
+                }
+            })
+
+
+
         })
 
     });
@@ -135,7 +147,7 @@ var Map = JSON.parse(fs.readFileSync(pathToFile,{encoding:'utf8'}));
 
 //console.log(JSONPath({path:'class',json:FHIR}))
 
-function performAnalysis(arHl7) {
+function performAnalysis(arHl7,FHIR) {
 
    // if (!hl7Str ) {
       //  var pathToFile = "/Users/davidha/clinfhir/FHIRSampleCreator/artifacts/ADT-sample.hl7"
@@ -165,7 +177,8 @@ function performAnalysis(arHl7) {
         var fhirKey = item.fhir;
         var ar = fhirKey.split('.');
         ar.splice(0,1);
-
+console.log(ar)
+        //result.fhir = {key: item.fhir, value:JSONPath({path:ar.join('.')})}
         result.fhir = {key: item.fhir, value:JSONPath({path:ar.join('.'),json:FHIR})}
         response.line.push(result)
     });
