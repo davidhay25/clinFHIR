@@ -1,16 +1,12 @@
 //simple server to serve static files...
 
-//var static = require('node-static');
 var request  = require('request');
 var moment = require('moment');
-
-
 
 var httpProxy = require('http-proxy')
 
 //  remove for proxy var myParser = require("body-parser");
 var Cookies = require( "cookies" )
-
 
 var express = require('express');
 var app = express();
@@ -20,7 +16,7 @@ var app = express();
 
 var orionModule = require("./serverModuleOrion.js")
 
-orionModule.setup(app);
+
 
 //var connect = require('connect');
 var http = require('http');
@@ -66,6 +62,8 @@ MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
         console.log('>>> Mongo server not running')
     } else {
         db = ldb;
+        orionModule.setup(app,db);
+
     }
 });
 

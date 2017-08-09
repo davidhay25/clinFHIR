@@ -1,20 +1,119 @@
 
 var fs = require('fs');
 var JSONPath = require('JSONPath');
+var mongoDb;
+var ObjectID = require('mongodb').ObjectID;
 
-function setup(app) {
+function setup(app,db) {
+    mongoDb = db;
+
     app.get('/orionTest/test',function(req,res){
         res.json({OK:"OK"})
     });
 
+    app.get('/orionTest/getSamples',function(req,res){
+        if (mongoDb) {
+            var ar = []
+            var cursor = mongoDb.collection('orionSample').find().toArray(function(err,doc){
+                res.json(doc)
+            });
+        }
+    });
+
+
     app.get('/orionTest/performAnalysis',function(req,res){
-        var result =  performAnalysis();
-        res.json(result)
+        var hl7Id = req.query.hl7;
+        console.log(req.query)
+        //var
+        getSample(hl7Id,function(hl7Message){
+            var content;
+            if (hl7Message) {
+                content = hl7Message.content;       //this is actually an array representation of the message
+                if (! content.length) {
+                    res.statusCode = 400;
+                    res.json({err:'HL7 sample should be an array...'})
+                }
+            }
+            var result =  performAnalysis(content);
+            res.json(result)
+        })
+
+    });
+
+    //retrieve a single sample from the Db...
+    function getSample(id,cb) {
+        var objectId = new ObjectID(id);
+        var cursor = mongoDb.collection('orionSample').find({"_id": objectId}).toArray(function(err,doc){
+            console.log(err,doc)
+            cb(doc[0])
+        });
+
+    }
+
+    //upload either an hl7 or a fhir document...
+    app.post('/orionTest/uploadFile',function(req,res){
+        var body = "";
+
+        req.on('data', function (data) {
+            var segment = data.toString('utf8');
+            var plainText = new Buffer(segment, 'base64').toString()
+            body += plainText;
+        });
+
+        req.on('end', function (data) {
+           // body += data;
+            console.log(body);
+
+            var insert = {};
+
+            //we separate the description from the actual sample by a '%' symbol //todo ?? move to a more robust method
+            var g = body.indexOf('%');      //separator...
+            var firstChar = body.substr(g+1,1);
+           // console.log(g,firstChar)
+
+            insert.content = JSON.parse(body.substr(g+1));      //actually an array...
+            insert.description = body.substr(0,g);
+
+            var messageType = 'hl7';
+
+            //console.log(body.substring(0,1))
+            //if the sample starts with a { assume it is a fhir resource    //todo ?? move to a more robust method...
+            if (firstChar == '{') {
+                messageType = 'fhir'
+            }
+
+            insert.type = messageType;
+
+            if (mongoDb) {
+                mongoDb.collection('orionSample').insertOne(insert,function(err,result){
+                    if (err) {
+                        console.log('error inserting into Db: ',err)
+                        res.statusCode = 404;
+                        res.json(err)
+
+                    } else {
+                        res.statusCode = 201;
+                        res.json({})
+                    }
+                })
+            } else {
+                res.statusCode = 500;
+                res.json({msg:"Can't load database"})
+            }
+
+        });
+
+
+
+
+
     })
+
 
 }
 
 //load the v2
+/*
 var pathToFile = "/Users/davidha/clinfhir/FHIRSampleCreator/artifacts/ADT-sample.hl7"
 var hl7Str = fs.readFileSync(pathToFile,{encoding:'utf8'})
 
@@ -22,7 +121,7 @@ var hl7Str = fs.readFileSync(pathToFile,{encoding:'utf8'})
 var vo = convertV2ToObject(hl7Str);
 var hl7Hash = vo.hash;
 var hl7Msg = vo.msg;
-
+*/
 //load the FHIR resource
 pathToFile = "/Users/davidha/clinfhir/FHIRSampleCreator/artifacts/encounter-fhir.json"
 var FHIR = JSON.parse(fs.readFileSync(pathToFile,{encoding:'utf8'}));
@@ -35,10 +134,25 @@ var Map = JSON.parse(fs.readFileSync(pathToFile,{encoding:'utf8'}));
 
 //console.log(JSONPath({path:'class',json:FHIR}))
 
-function performAnalysis() {
+function performAnalysis(arHl7) {
+
+   // if (!hl7Str ) {
+      //  var pathToFile = "/Users/davidha/clinfhir/FHIRSampleCreator/artifacts/ADT-sample.hl7"
+      //  hl7Str = fs.readFileSync(pathToFile,{encoding:'utf8'})
+  //  }
+
+    var vo = convertV2ToObject(arHl7);
+    var hl7Hash = vo.hash;
+    var hl7Msg = vo.msg;
+
+
+
+
     var response = {line:[]};
+
+
     response.v2Message = hl7Msg;
-    response.v2String = hl7Str;
+    response.v2String = arHl7;
     response.map = Map;
 
     var arResult = [];
@@ -73,38 +187,6 @@ function performAnalysis() {
 
 //console.log('fhir val -  ' , fVal)
 
-
-
-//not used - but left it in there to remind me how it should work...
-function getFHIRValue(path,resource) {
-
-
-    var getLeafValue = function(path,resource) {
-        var ar = path.split('.')
-        console.log('path: ' +path)
-        if (ar.length == 1) {
-            //this is the node on which the target is a direct child so return it
-            console.log('==>',resource[path])
-
-             return resource[path];
-        } else {
-            //need to drop down a level
-            var nextLevelElement = resource[ar[0]];
-            console.log('nl:',nextLevelElement);
-            ar.splice(0,1);     //remove the current parent
-            var newPath = ar.join('.')
-            return getLeafValue(newPath,nextLevelElement)
-        }
-    };
-
-    var v=""
-    v = getLeafValue(path,resource)
-
-  //console.log('----===' ,resource['patient']['reference'])
-
-    console.log('--> ',v)
-    //return getLeafValue(path,resource);
-}
 
 
 
@@ -167,12 +249,10 @@ function getFieldValue(hl7Hash,fieldName) {
 }
 
 //convert an hl7 message  hash[segmentCode] = array of segments with that code
-function convertV2ToObject(hl7) {
+function convertV2ToObject(arHl7) {
     var hash = {}
     var arMessage = [];
-    //first, convert into an array
-    var ar = hl7.split('\n')        //the splitting is a bit wierd - but this works for now...
-    ar.forEach(function(line){
+    arHl7.forEach(function(line){
         var arLine = line.split('|');
         var segmentName = arLine[0];
         hash[segmentName] = hash[segmentName] || []
@@ -180,7 +260,7 @@ function convertV2ToObject(hl7) {
 
 
         arMessage.push(arLine)
-        //console.log(arLine)
+
     })
 
     //console.log(hash);
@@ -192,3 +272,37 @@ function convertV2ToObject(hl7) {
 module.exports= {
     setup : setup
 }
+
+//---------  just for posterity...
+
+//not used - but left it in there to remind me how it should work...
+function getFHIRValue(path,resource) {
+
+
+    var getLeafValue = function(path,resource) {
+        var ar = path.split('.')
+        console.log('path: ' +path)
+        if (ar.length == 1) {
+            //this is the node on which the target is a direct child so return it
+            console.log('==>',resource[path])
+
+            return resource[path];
+        } else {
+            //need to drop down a level
+            var nextLevelElement = resource[ar[0]];
+            console.log('nl:',nextLevelElement);
+            ar.splice(0,1);     //remove the current parent
+            var newPath = ar.join('.')
+            return getLeafValue(newPath,nextLevelElement)
+        }
+    };
+
+    var v=""
+    v = getLeafValue(path,resource)
+
+    //console.log('----===' ,resource['patient']['reference'])
+
+    console.log('--> ',v)
+    //return getLeafValue(path,resource);
+}
+

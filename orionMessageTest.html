@@ -92,6 +92,9 @@
             color:blue;
             background-color: powderblue;
         }
+        .showHl7 {
+            font-family: "Courier New";
+        }
 
 
     </style>
@@ -105,12 +108,18 @@
 <div ng-app="sampleApp" ng-controller="orionTestCtrl" class="container-fluid">
 
     <div class="row">
-        <div class="col-sm-2 col-md-2">
+        <div class="col-sm-5 col-md-5">
 
 
         </div>
-        <div class="col-sm-8 col-md-8">
-
+        <div class="col-sm-4 col-md-4">
+            <div>HL7 message:   {{selectedHL7Sample.description}}</div>
+            <div>FHIR resource: {{selectedFHIRSample.description}}</div>
+        </div>
+        <div class="col-sm-1 col-md-1">
+            <button class="btn btn-primary pull-right"
+                    ng-show="selectedHL7Sample && selectedFHIRSample"
+                    ng-click="performAnalysis()">Analyse</button>
 
         </div>
         <div class="col-sm-2 col-md-2">
@@ -123,12 +132,87 @@
         <uib-tab heading="Setup">
 
 
+            <div class="row">
+                <div class="col-sm-4 col-md-4">
+                    <br/>
+                    <h5>Select HL7 v2 file</h5>
 
-            <input type="file" id="input"/>
+                    <ul>
+                        <li ng-repeat="sample in samples track by $index" ng-if="sample.type=='hl7'" >
+                            <span class="clickable" ng-click="selectSample(sample,'hl7')">{{sample.description}}</span>
+                        </li>
+                    </ul>
 
-            <button class="btn btn-danger" ng-click="uploadFile()">Upload</button>
+                    <h5>Select HL7 FHIR resource</h5>
+
+                    <ul>
+                        <li ng-repeat="sample in samples track by $index"  ng-if="sample.type=='fhir'" >
+                            <span class="clickable" ng-click="selectSample(sample,'fhir')">{{sample.description}}</span>
+                        </li>
+                    </ul>
+
+
+
+
+                </div>
+                <div class="col-sm-8 col-md-8">
+                    <br/>
+
+                    <div  class="showHl7" ng-repeat="line in selectedHL7Sample.content">
+                        {{line}}
+                    </div>
+                    <hr ng-show="selectedHL7Sample && selectedFHIRSample" />
+                    <uib-tabset ng-show="selectedFHIRSample">
+                        <uib-tab heading="Json">
+                            <pre>{{selectedFHIRSample.content | json}}</pre>
+                        </uib-tab>
+                    </uib-tabset>
+                    <div class="showHl7">
+
+                    </div>
+
+
+                </div>
+            </div>
+
+
+
+
 
         </uib-tab>
+
+        <uib-tab heading="Upload a new file">
+
+            <div class="row">
+                <div class="col-sm-4 col-md-4">
+                    <br/>
+
+
+
+
+                    <h5>Upload new file</h5>
+
+                    <input class="btn btn-primary" type="file" id="inputFileName"/>
+
+                    <input type="text" class="form-control" placeholder="Description" ng-model="fileDescription"/>
+
+                    <button class="btn btn-success" ng-click="loadFile()">Load File</button>
+
+                    <button class="btn btn-danger" ng-show="fileToUpload"
+                            ng-click="uploadFile()">Upload</button>
+
+                </div>
+                <div class="col-sm-8 col-md-8">
+
+                    <textarea class="form-control" rows="10" ng-model="fileToUpload"></textarea>
+                </div>
+
+            </div>
+
+
+
+        </uib-tab>
+
         <uib-tab heading="Result">
             <table class="table table-bordered table-condensed">
                 <tr><th>Element Name</th><th>V2 field and result</th><th>FHIR field and result</th></tr>
@@ -151,11 +235,7 @@
             </table>
 
         </uib-tab>
-        <uib-tab heading="Json">
-            <pre>
-                {{results | json}}
-            </pre>
-        </uib-tab>
+
         <uib-tab heading="V2 message">
             <div class="row">
                 <br/>
@@ -219,6 +299,11 @@
                 </div>
             </div>
 
+        </uib-tab>
+        <uib-tab heading="Json">
+            <pre>
+                {{results | json}}
+            </pre>
         </uib-tab>
     </uib-tabset>
 
