@@ -123,6 +123,7 @@ var hl7Hash = vo.hash;
 var hl7Msg = vo.msg;
 */
 //load the FHIR resource
+/*
 pathToFile = "/Users/davidha/clinfhir/FHIRSampleCreator/artifacts/encounter-fhir.json"
 var FHIR = JSON.parse(fs.readFileSync(pathToFile,{encoding:'utf8'}));
 
@@ -131,7 +132,7 @@ var FHIR = JSON.parse(fs.readFileSync(pathToFile,{encoding:'utf8'}));
 pathToFile = "/Users/davidha/clinfhir/FHIRSampleCreator/artifacts/encounterV2Mappings.json"
 var Map = JSON.parse(fs.readFileSync(pathToFile,{encoding:'utf8'}));
 
-
+*/
 //console.log(JSONPath({path:'class',json:FHIR}))
 
 function performAnalysis(arHl7) {

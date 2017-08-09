@@ -145,8 +145,10 @@ console.log(contents)
                 $http.post(url,btoa(transmit)).then(
                     function(data) {
                         console.log(data.data)
+                        alert('File has been uploaded.')
                     },
                     function(err) {
+                        alert('There was an error uploading the file: '+ angular.toJson(err));
                         console.log(err);
                     }
                 )
