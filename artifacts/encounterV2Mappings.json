@@ -54,15 +54,12 @@
         "v2": "PV1-10",
         "fhir": "Encounter.type"
     },
-    {
-        "description": "OhEncounter.specialty.coding.code",
-        "v2": "PV1-10",
-        "fhir": "Encounter.type.coding.code"
-    },
+
+
     {
         "description": "OhEncounter.participant-attender",
         "v2": "PV1-7",
-        "fhir": "Encounter.participant"
+        "fhir": "Encounter.participant [type.*.coding.*.code=ATND]"
     },
     {
         "description": "OhEncounter.participant-attender.individual.reference_1.identifier.system_1",
@@ -92,7 +89,7 @@
     {
         "description": "OhEncounter.participant-referrer",
         "v2": "PV1-8",
-        "fhir": "Encounter.participant"
+        "fhir": "Encounter.participant [type.*.coding.*.code=REF]"
     },
     {
         "description": "OhEncounter.participant-referrer.individual.reference_1.identifier.system_1",
@@ -122,7 +119,7 @@
     {
         "description": "OhEncounter.participant-consultant",
         "v2": "PV1-9",
-        "fhir": "Encounter.participant"
+        "fhir": "Encounter.participant [type.*.coding.*.code=CON]"
     },
     {
         "description": "OhEncounter.participant-consultant.individual.reference_1.identifier.system_1",

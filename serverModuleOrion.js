@@ -37,7 +37,10 @@ function setup(app,db) {
                 if (fhirMessage && fhirMessage.content) {
 
 
-                   // var vo = convertV2ToObject(arHL7);
+                    pathToFile = "./artifacts/encounterV2Mappings.json"
+                    var Map = JSON.parse(fs.readFileSync(pathToFile,{encoding:'utf8'}));
+
+                    // var vo = convertV2ToObject(arHL7);
                    // var hl7Hash = vo.hash;
                    // var hl7Msg = vo.msg;
 
@@ -154,8 +157,8 @@ var FHIR = JSON.parse(fs.readFileSync(pathToFile,{encoding:'utf8'}));
 
  */
 //load the mapfile
-pathToFile = "./artifacts/encounterV2Mappings.json"
-var Map = JSON.parse(fs.readFileSync(pathToFile,{encoding:'utf8'}));
+//pathToFile = "./artifacts/encounterV2Mappings.json"
+//var Map = JSON.parse(fs.readFileSync(pathToFile,{encoding:'utf8'}));
 
 
 //console.log(JSONPath({path:'class',json:FHIR}))

@@ -20,7 +20,7 @@
     <script src="js/libs/angular-sanitize.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ui.checkbox','ngSanitize']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ui.checkbox','ngSanitize','ngStorage']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -39,23 +39,30 @@
     <script src="js/modalDialogSvc.js"></script>
     <script src="js/libs/ng-file-upload.min.js"></script>
     <script src="js/libs/jsonpath.js"></script>
-
+    <script src="js/libs/jstree.min.js"></script>
+    <script src="js/resourceCreatorSvc.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/appConfigSvc.js"></script>
+    <script src="js/profileCreatorSvc.js"></script>
+    <script src="js/resourceSvc.js"></script>
+    <script src="js/services.js"></script>
     <!--
 <script src="js/libs/vis.min.js"></script>
 
-        <script src="js/appConfigSvc.js"></script>
+
     <script src="js/libs/ngStorage.min.js"></script>
     <script src="js/libs/jstree.min.js"></script>
 
 
     <script src="js/resourceCreatorSvc.js"></script>
-    <script src="resourceBuilder/rbServices.js"></script>
 
-    <script src="js/profileCreatorSvc.js"></script>
+
+
     <script src="js/resourceSvc.js"></script>
     <script src="js/builderSvc.js"></script>
     <script src="js/portHoleSvc.js"></script>
-    <script src="js/services.js"></script>
+
     <script src="js/filters.js"></script>
  <script src="js/profileDiffSvc.js"></script>
     <script src="js/logicalModelSvc.js"></script>
@@ -104,29 +111,50 @@
 </head>
 
 
-<body style="padding-top: 80px" >
+<body style="padding: 8px;padding-top: 80px" >
 
 <div ng-app="sampleApp" ng-controller="orionTestCtrl" class="container-fluid">
 
-    <div class="row">
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+
+        <div class="row">
+
+
         <div class="col-sm-2 col-md-2">
-            Message Comparison
+            <a class="navbar-brand" href="#">
+                Message Comparison
+            </a>
+
 
         </div>
-        <div class="col-sm-8 col-md-8">
-            <div>HL7 message:   {{selectedHL7Sample.description}}</div>
-            <div>FHIR resource: {{selectedFHIRSample.description}}</div>
+        <div class="col-sm-7 col-md-7">
+            <div class="navbar-text">
+                <div>HL7 message:   {{selectedHL7Sample.description}}</div>
+                <div>FHIR resource: {{selectedFHIRSample.description}}</div>
+            </div>
+
         </div>
         <div class="col-sm-1 col-md-1">
+            <form class="navbar-form navbar-right">
             <button class="btn btn-primary pull-right"
                     ng-show="selectedHL7Sample && selectedFHIRSample"
                     ng-click="getFiles()">Analyse</button>
+            </form>
 
         </div>
+            <div class="col-sm-1 col-md-1">
+                <div class="navbar-text">
+                    {{analysisOutcome}}
+                </div>
+
+            </div>
         <div class="col-sm-1 col-md-1">
-            <checkbox ng-model="input.showAllMappings"></checkbox> Show all mapped
+            <checkbox class="navbar-text"
+
+                      ng-model="input.showAllMappings"></checkbox> Show all mapped
         </div>
-    </div>
+        </div>
+    </nav>
 
 
     <uib-tabset>
@@ -213,26 +241,72 @@
         </uib-tab>
 
         <uib-tab heading="Result">
-            <table class="table table-bordered table-condensed">
-                <tr><th>Element Name</th><th>V2 field and result</th><th>FHIR field and result</th></tr>
-                <tr ng-show="showRow(item)" ng-repeat = "item in results.line">
-                    <td width = '14%'>{{item.description | dropFirst}}</td>
+            <div class="myScroll">
+
+
+                <table class="table table-bordered table-condensed ">
+                <tr><th>Seq</th><th>V2 field and result</th><th>Element Name</th><th>FHIR field and result</th></tr>
+                <tr  ng-repeat = "item in results.line">
+                    <td>{{$index}}</td>
                     <td width = '43%'>
                         <div ng-repeat = "v in item.v2.value.values">
                             <div class="pull-right">{{v}}</div>
                         </div>
-                        <div><em class="pull-left">{{item.v2.key}}</em></div>
-                    </td>
-                    <td width = '43%'>
-                        <div ng-repeat = "v in item.fhir.value">
-                            {{v}}
+                        <div>
+                            <em class="pull-left">
+                            <div uib-popover-html="showHl7Desc(item.v2.key)"
+                                 popover-placement="right"
+                                 popover-trigger="'mouseenter'">{{item.v2.key}}</div>
+
+
+                            </em>
+
+
                         </div>
+                    </td>
+                    <td width = '14%'>{{item.description | dropFirst}}</td>
+                    <td width = '43%'>
+
+                        <pre ng-hide="isArray(item.fhir.value)">{{item.fhir.value | json}}</pre>
+
+                        <div ng-show="isArray(item.fhir.value)"  >
+
+                            <div ng-repeat="i in item.fhir.value track by $index">
+                                <pre>{{i | json}}</pre>
+                            </div>
+                        </div>
+
+                        <!--
+                        <div ng-repeat = "v in item.fhir.value">
+
+
+
+                            <div ng-hide="isArray(v)">
+                                <pre>{{v | json}}</pre>
+                            </div>
+
+
+
+                            <div ng-show="isArray(v)"  >
+                                arr
+                                {{v}}
+                                <div ng-repeat="i in v track by $index">
+                                    <pre>{{i | json}}</pre>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+
+
+                        -->
                         <div><em class="pull-right" >{{item.fhir.key}}</em></div>
                     </td>
                 </tr>
 
             </table>
-
+            </div>
         </uib-tab>
 
         <uib-tab heading="V2 message">
@@ -301,7 +375,34 @@
         </uib-tab>
 
         <uib-tab heading="FHIR">
-            <pre>{{results.fhir | json}}</pre>
+
+            <uib-tabset>
+
+
+
+                <uib-tab heading="Tree">
+                    <div class="row">
+                        <div class="col-sm-6 col-md-6">
+                            <div id="resourceTree"></div>
+                        </div>
+                        <div class="col-sm-6 col-md-6">
+                            <input class = "form-control" ng-model="input.JSONPath" type="text" placeholder="Enter JSONPath expression"/>
+                            <button class="btn btn-success" ng-click="executeJSONPath(input.JSONPath)">Execute</button>
+                            <div>
+                                <pre>{{JSONPathResult | json}}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                </uib-tab>
+                <uib-tab heading="Json">
+                    <pre>{{results.fhir | json}}</pre>
+
+                </uib-tab>
+            </uib-tabset>
+
         </uib-tab>
 
         <!--

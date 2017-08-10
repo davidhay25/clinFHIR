@@ -1,21 +1,12 @@
 
 angular.module("sampleApp")
     .controller('orionTestCtrl',
-        function ($scope,$http,$sce) {
+        function ($scope,$http,$sce,resourceCreatorSvc) {
             $scope.input = {};
 
-/*
-            $http.get('orionTest/performAnalysis').then(
-                function(data) {
-                    
-                    $scope.results = data.data;
-                    displayAnalysis($scope.results);
+            $scope.input.showAllMappings = false;
+            $scope.isArray = angular.isArray;
 
-                    console.log($scope.results)
-
-                }
-            );
-            */
 
             function displayAnalysis(results) {
                 //build a map of v2 map by segment (
@@ -102,22 +93,53 @@ console.log(contents)
 
 
 
+            $scope.executeJSONPath = function(path) {
 
+               // var test = {"Encounter": $scope.dataFromServer.fhir}
+
+                var allElements = JSONPath({path:path,json:$scope.dataFromServer.fhir,flatten:true})
+                $scope.JSONPathResult = allElements;
+                console.log(allElements)
+            }
+
+            //switch on the 'show all checkbox
+            $scope.$watch(
+                function() {return $scope.input.showAllMappings},
+                function() {
+                    console.log($scope.input.showAllMappings)
+
+
+                    if ($scope.dataFromServer){
+                        var fhir = $scope.dataFromServer.fhir;
+                        var arHL7 = $scope.dataFromServer.arHL7;
+                        var map = $scope.dataFromServer.map;
+
+                        $scope.results = performAnalysis(arHL7,fhir,map);
+                    }
+
+
+                });
+
+            //get the files for the selected set...
             $scope.getFiles = function() {
                 var url = 'orionTest/getFiles?hl7='+$scope.selectedHL7Sample._id + '&fhir='+ $scope.selectedFHIRSample._id;
                 $http.get(url).then(
                     function(data) {
                         console.log(data)
+                        $scope.dataFromServer = data.data;
 
                         var fhir = data.data.fhir;
                         var arHL7 = data.data.arHL7;
                         var map = data.data.map;
 
+                        drawResourceTree(fhir)
 
                         $scope.results = performAnalysis(arHL7,fhir,map);
                         displayAnalysis($scope.results)
-                        alert('Analysis complete. View the tabs for details.')
+                        $scope.analysisOutcome = "Analysis Complete."
+                        //alert('Analysis complete. View the tabs for details.')
                     },function(err) {
+                        $scope.analysisOutcome = "Analysis Error."
                         alert("There as an error performing the analysis: "+ angular.toJson(err))
                         console.log(err)
                     }
@@ -154,34 +176,156 @@ console.log(contents)
 
             function performAnalysis(arHl7,FHIR,Map) {
 
+                if (!arHl7 || !FHIR || !Map) {
+                    return
+                }
+
+                //find the contained resources, and create a hash indexed on id...
+                var arContained = JSONPath({path:'contained',json:FHIR})[0];    //returns an array of arrays...
+                console.log(arContained);
+                var hashContained = {};
+                arContained.forEach(function (resource) {
+                    hashContained[resource.id] = hashContained;
+                })
+
+
+                //generate an array to set the order of HL7 elements displayed  (see the sort below)
+                var order = [];
+                for (var i=0; i<arHl7.length;i++) {
+                    var ar = arHl7[i].split('|');
+                    order.push(ar[0]);
+                }
 
                 var vo = convertV2ToObject(arHl7);
                 var hl7Hash = vo.hash;
                 var hl7Msg = vo.msg;
 
-
                 var response = {line:[]};
-
 
                 response.fhir = FHIR;
                 response.v2Message = hl7Msg;
-                response.v2String = arHl7;
+               // response.v2String = arHl7;
                 response.map = Map;
 
                 var arResult = [];
                 Map.forEach(function (item) {
                     var result = {description: item.description};
-                    result.v2 = {key: item.v2, value: getFieldValue(hl7Hash,item.v2)};
+                    var v2Value = getFieldValue(hl7Hash,item.v2);
+
+                    result.v2 = {key: item.v2, value: v2Value};
+
+                    var include = false;
+                    if ($scope.input.showAllMappings) {
+                        include = true
+                    }
+
+                    if (v2Value.values) {
+                        v2Value.values.forEach(function (v) {
+                            if (v !== "" && v!== undefined) {
+                                include = true
+                            }
+                        })
+                    }
+
 
                     //we need to remove the first segment in the path as it isn't present in the actual resource...
                     var fhirKey = item.fhir;
                     var ar = fhirKey.split('.');
                     ar.splice(0,1);
-                    console.log(ar)
-                    //result.fhir = {key: item.fhir, value:JSONPath({path:ar.join('.')})}
-                    result.fhir = {key: item.fhir, value:JSONPath({path:ar.join('.'),json:FHIR})}
-                    response.line.push(result)
+                    var pathInHostResource = ar.join('.');
+
+
+                    //console.log(fhirKey,ar.join('.'))
+                    var fhirValue;
+
+                    var ar1 = pathInHostResource.split('[')        //has this path got a predicate? [...]
+                    if (ar1.length > 1) {
+                        //this path has a [] jsonPath predicate expression.
+
+
+
+                        var expression = ar1[1].substr(0,ar1[1].length -1); //the expression - eg type.coding.code='ATND'
+                        var arE = expression.split('=');
+                        var expressionPath = arE[0];
+                        var expressionValue = arE[1];
+
+
+                        var parentPath = (ar1[0]).replace(/ /g,'');
+
+                        var allElements = JSONPath({path:parentPath,json:FHIR,flatten:true})
+                        console.log(allElements)
+
+                        allElements.forEach(function (el) {
+
+                            var results = JSONPath({path:expressionPath,json:el})
+                            if (results) {
+                                results.forEach(function (r) {
+                                    if (r == expressionValue) {
+                                        fhirValue = el;//JSONPath({path:pathInHostResource,json:FHIR})
+                                        include = true;
+                                    }
+                                })
+                            }
+
+
+
+                        })
+
+
+
+                        var expr = ar1[1].substr(0,ar1[1].length -1)
+
+
+                       // console.log(expr,FHIR)
+
+                       // console.log(JSONPath({path:expr,json:FHIR}))
+
+                        /*for (var i=0; i<arContained.length;i++) {
+
+                            var contained = arContained[i];
+                            console.log(JSONPath({path:expr,json:contained}))
+                        }*/
+
+
+                    } else {
+                        //nope - a straight path...
+//console.log(ar)
+                        //result.fhir = {key: item.fhir, value:JSONPath({path:ar.join('.')})}
+                        fhirValue = JSONPath({path:pathInHostResource,json:FHIR})
+
+                    }
+
+
+
+
+
+                    if (fhirValue && fhirValue.length > 0) {
+                        include = true
+                    }
+
+                    result.fhir = {key: item.fhir, value: fhirValue}
+                    if (include) {
+                        response.line.push(result)
+                    }
+
                 });
+
+
+
+
+                //console.log(order);
+                response.line.sort(function (a,b) {
+
+                    //console.log(b.v2.key)
+                    return order.indexOf(a.v2.key.substr(0,3)) - order.indexOf(b.v2.key.substr(0,3));
+  /*
+                    if (a.v2.key > b.v2.key) {
+                        return 1
+                    } else {return -1}
+*/
+
+                })
+
                 return response;
 
                 //return the value of this field. - field name is like PV1-7.9.2
@@ -325,7 +469,34 @@ console.log(contents)
 
             }
 
-            $scope.showRow = function(item) {
+
+            $scope.showHl7Desc = function(key) {
+
+                var ar = key.split('-')
+                var segName = ar[0];
+                var ar1 = ar[1].split(' ');
+                var fieldNumber = ar1[0];
+                var names = $scope.v2FieldNames[segName];
+                if (names) {
+                    var txt = names.fieldName[fieldNumber]
+                    if (txt) {
+                        return txt.name;
+                    }
+
+                }
+
+
+
+
+               // $scope.v2FieldNames
+
+
+                return key + " " + segName + " "+ fieldNumber;
+
+
+            }
+
+            $scope.showRowDEP = function(item) {
                 //console.log(item)
                 if ($scope.input.showAllMappings) {
                     return true;
@@ -343,6 +514,31 @@ console.log(contents)
                 return false;
             }
 
+
+            function drawResourceTree(resource) {
+                var treeData = resourceCreatorSvc.buildResourceTree(resource);
+
+                treeData.forEach(function (item) {
+                    item.state = item.state || {}
+                    item.state.opened = false;
+                })
+
+                //show the tree of this version
+                $('#resourceTree').jstree('destroy');
+                $('#resourceTree').jstree(
+                    {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+                )
+
+
+/*
+                $('#graphResourceTree').jstree('destroy');
+                $('#graphResourceTree').jstree(
+                    {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+                )
+                */
+
+
+            }
 
     }).filter('dropFirst', function() {
     return function(path) {
