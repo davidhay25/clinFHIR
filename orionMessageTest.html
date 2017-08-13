@@ -47,6 +47,11 @@
     <script src="js/profileCreatorSvc.js"></script>
     <script src="js/resourceSvc.js"></script>
     <script src="js/services.js"></script>
+
+    <script src="directive/fhirpath/fhirpath.js"></script>
+    <script src="js/logicalModelSvc.js"></script>
+
+
     <!--
 <script src="js/libs/vis.min.js"></script>
 
@@ -65,7 +70,7 @@
 
     <script src="js/filters.js"></script>
  <script src="js/profileDiffSvc.js"></script>
-    <script src="js/logicalModelSvc.js"></script>
+
 
   <script src="js/appConfigSvc.js"></script>
   <script src="js/libs/ngStorage.min.js"></script>
@@ -107,6 +112,9 @@
 
     </style>
         <title>Orion Message Test</title>
+
+
+
 
 </head>
 
@@ -155,6 +163,9 @@
         </div>
         </div>
     </nav>
+
+
+
 
 
     <uib-tabset>
@@ -245,9 +256,11 @@
 
 
                 <table class="table table-bordered table-condensed ">
-                <tr><th>Seq</th><th>V2 field and result</th><th>Element Name</th><th>FHIR field and result</th></tr>
-                <tr  ng-repeat = "item in results.line">
+                <tr><th>Seq</th><th>Element Name</th><th>V2 field and result</th><th>FHIR field and result</th></tr>
+                <tr  ng-repeat = "item in results.line track by $index">
                     <td>{{$index}}</td>
+                    <td width = '14%'>{{item.description | dropFirst}}</td>
+
                     <td width = '43%'>
                         <div ng-repeat = "v in item.v2.value.values">
                             <div class="pull-right">{{v}}</div>
@@ -264,7 +277,7 @@
 
                         </div>
                     </td>
-                    <td width = '14%'>{{item.description | dropFirst}}</td>
+
                     <td width = '43%'>
 
                         <pre ng-hide="isArray(item.fhir.value)">{{item.fhir.value | json}}</pre>
@@ -276,32 +289,9 @@
                             </div>
                         </div>
 
-                        <!--
-                        <div ng-repeat = "v in item.fhir.value">
-
-
-
-                            <div ng-hide="isArray(v)">
-                                <pre>{{v | json}}</pre>
-                            </div>
-
-
-
-                            <div ng-show="isArray(v)"  >
-                                arr
-                                {{v}}
-                                <div ng-repeat="i in v track by $index">
-                                    <pre>{{i | json}}</pre>
-                                </div>
-                            </div>
-
-
-
-                        </div>
-
-
-                        -->
                         <div><em class="pull-right" >{{item.fhir.key}}</em></div>
+                        <div><em class="pull-right" >{{item.fhir.fhirPath}}</em></div>
+
                     </td>
                 </tr>
 
@@ -375,43 +365,49 @@
         </uib-tab>
 
         <uib-tab heading="FHIR">
-
-            <uib-tabset>
-
+            <br/>
 
 
-                <uib-tab heading="Tree">
-                    <div class="row">
-                        <div class="col-sm-6 col-md-6">
+
+
+            <div class="row">
+                <div class="col-sm-6 col-md-6">
+                    <uib-tabset>
+                        <uib-tab heading="Tree">
                             <div id="resourceTree"></div>
-                        </div>
-                        <div class="col-sm-6 col-md-6">
-                            <input class = "form-control" ng-model="input.JSONPath" type="text" placeholder="Enter JSONPath expression"/>
-                            <button class="btn btn-success" ng-click="executeJSONPath(input.JSONPath)">Execute</button>
-                            <div>
-                                <pre>{{JSONPathResult | json}}</pre>
-                            </div>
-                        </div>
+                        </uib-tab>
+                        <uib-tab heading="Json">
+                            <pre>{{results.fhir | json}}</pre>
+
+                        </uib-tab>
+                    </uib-tabset>
+                </div>
+                <div class="col-sm-6 col-md-6">
+
+
+
+                    <fhirpath resource="dataFromServer.fhir"></fhirpath>
+
+                    <!--
+                    <a href="http://hl7.org/fhirpath/" target="_blank" class="pull-right">FHIRPath spec</a>
+                    <h4>Execute FHIRPath expression</h4>
+
+
+
+
+                    <hr/>
+
+                    <input class = "form-control" ng-model="input.JSONPath" type="text" placeholder="Enter JSONPath expression"/>
+                    <button class="btn btn-success pull-right" ng-click="executeJSONPath(input.JSONPath)">Execute</button>
+                    <div>
+                        <pre ng-show="FHIRPathResult">{{FHIRPathResult | json}}</pre>
                     </div>
-
-
-
-                </uib-tab>
-                <uib-tab heading="Json">
-                    <pre>{{results.fhir | json}}</pre>
-
-                </uib-tab>
-            </uib-tabset>
-
+                    -->
+                </div>
+            </div>
         </uib-tab>
 
-        <!--
-        <uib-tab heading="Json">
-            <pre>
-                {{results | json}}
-            </pre>
-        </uib-tab>
-        -->
+
     </uib-tabset>
 
 

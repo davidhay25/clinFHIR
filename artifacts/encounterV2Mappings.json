@@ -57,7 +57,7 @@
 
 
     {
-        "description": "OhEncounter.participant-attender",
+        "description": "OhEncounter.participant-attender**",
         "v2": "PV1-7",
         "fhir": "Encounter.participant [type.*.coding.*.code=ATND]"
     },
@@ -87,7 +87,7 @@
         "fhir": "Practitioner.name.prefix"
     },
     {
-        "description": "OhEncounter.participant-referrer",
+        "description": "OhEncounter.participant-referrer**",
         "v2": "PV1-8",
         "fhir": "Encounter.participant [type.*.coding.*.code=REF]"
     },
@@ -217,9 +217,9 @@
         "fhir": "Encounter.hospitalization.admitSource.coding.code"
     },
     {
-        "description": "OhEncounter.hospitalization.destination.reference.identifier.value_1",
-        "v2": "PV1-37.1",
-        "fhir": "Location.identifier.value"
+        "description": "OhEncounter.hospitalization.destination.reference.identifier.value_1**",
+        "v2": "PV1-37",
+        "fhir": "Encounter.location [ref Location.physicalType.text=facility]"
     },
     {
         "description": "OhEncounter.hospitalization.dischargeDisposition",
@@ -429,16 +429,20 @@
     {
         "description": "OhEncounter.agent-enterer",
         "v2": "EVN-5",
-        "fhir": "Encounter.extension"
+        "fhir": "Encounter.extension",
+        "fhirPath" : "extension.where(url='http://fhir.hl7.org.nz/dstu2/StructureDefinition/agent' and extension.valueCoding.code='enterer')"
     },
     {
         "description": "OhEncounter.agent-author",
         "v2": "MSH-4 EVN-7",
-        "fhir": "Encounter.extension"
+        "fhir": "Encounter.extension ",
+        "fhirPath" : "extension.where(url='http://fhir.hl7.org.nz/dstu2/StructureDefinition/agent' and extension.valueCoding.code='author')"
     },
     {
         "description": "OhEncounter.agent-custodian",
-        "v2": "EVN-7 MSH-4",
-        "fhir": "Encounter.extension"
+        "v2": "MSH-4 EVN-7",
+        "fhir": "Encounter.extension",
+        "fhirPath" : "extension.where(url='http://fhir.hl7.org.nz/dstu2/StructureDefinition/agent' and extension.valueCoding.code='custodian')"
+
     }
 ]

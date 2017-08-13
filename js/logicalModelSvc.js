@@ -72,12 +72,44 @@ angular.module("sampleApp")
 
 
         return {
+            getMappingFile : function(url) {
+                url = url || "http://fhir.hl7.org.nz/baseDstu2/StructureDefinition/OhEncounter";    //testing
+                var deferred = $q.defer();
+                var that = this;
+                GetDataFromServer.findConformanceResourceByUri(url).then(
+                    function(LM){
+                        //create a v2 -> fhir mapping file for a given logical model. Used by the message comparer...
+                        var treeData = that.createTreeArrayFromSD(LM)
+                        var relativeMappings = that.getRelativeMappings(treeData); //items with both v2 & fhir mappings
+
+                        var map = []
+                        relativeMappings.forEach(function(m) {
+                            //console.log(m)
+                            map.push({description: m.branch.data.path,v2:m.sourceMap,fhir:m.targetMap,fhirPath:m.fhirPath})
+                        })
+
+                        console.log(angular.toJson(map))
+                        deferred.resolve(map)
+
+                    },
+                    function(err) {
+                        deferred.reject(err);
+                    }
+                )
+
+                return deferred.promise;
+
+
+            },
+
             getRelativeMappings : function(tree) {
                 //find elements in the model that have mappings to both source and target
+
                 var source="hl7V2";
                 var target = "fhir";
                 var arRelative = []
                 tree.forEach(function (branch) {
+                    var fhirPath = null;
                     var data = branch.data;
                     //see if there's a mapping for both source and target
                     if (data.mappingFromED) {
@@ -89,9 +121,17 @@ angular.module("sampleApp")
                             if (map.identity == target) {
                                 targetMap = map.map;
                             }
+
+                            if (map.identity == 'fhirpath') {
+                                fhirPath = map.map
+                            }
+
                         })
                         if (sourceMap && targetMap) {
                             var item = {source:source,sourceMap:sourceMap,target:target, targetMap:targetMap, branch:branch};
+                            item.fhirPath = fhirPath;
+
+
 
                             arRelative.push(item)
                         }

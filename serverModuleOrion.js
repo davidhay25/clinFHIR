@@ -4,8 +4,76 @@ var JSONPath = require('JSONPath');
 var mongoDb;
 var ObjectID = require('mongodb').ObjectID;
 
+var fp = require('fhirpath.js');
+var fpContext;      //the context for subsequent fhirPath requests
+
 function setup(app,db) {
     mongoDb = db;
+
+
+    app.post('/orionTest/executeFP',function(req,res){
+
+        var body = "";
+
+        req.on('data', function (data) {
+            body += data;
+        });
+
+        req.on('end', function (data) {
+           // var segment = body.toString('utf8');
+            //var plainText = new Buffer(segment, 'base64').toString()
+           // console.log(body);
+            var query = JSON.parse(body);
+
+            try {
+                var result = fp.evaluate(query.resource,query.path)
+                res.json(result)
+            } catch (ex) {
+                res.statusCode = 500;
+                res.json(ex)
+            }
+
+
+        })
+
+/*
+        var fpQuery  = req.query.fp;
+        if (fpQuery && fpContext) {
+            console.log(fpQuery, fpQuery)
+
+            try {
+                res.json(fp.evaluate(fpContext,fpQuery));
+            } catch (ex) {
+                res.statusCode = 500
+                res.json({msg:'Error evaluating FHIRPath: ' + JSON.stringify(ex)})
+            }
+
+        } else {
+            res.statusCode = 500
+            res.json({msg:"Must set FP context"})
+        }
+
+        */
+    });
+
+
+    app.get('/orionTest/executeFP',function(req,res){
+        var fpQuery  = req.query.fp;
+        if (fpQuery && fpContext) {
+            //console.log(fpQuery, fpQuery)
+
+            try {
+                res.json(fp.evaluate(fpContext,fpQuery));
+            } catch (ex) {
+                res.statusCode = 500
+                res.json({msg:'Error evaluating FHIRPath: ' + JSON.stringify(ex)})
+            }
+
+        } else {
+            res.statusCode = 500
+            res.json({msg:"Must set FP context"})
+        }
+    });
 
 
     app.get('/orionTest/getSamples',function(req,res){
@@ -36,9 +104,10 @@ function setup(app,db) {
             getSample(fhirId,function(fhirMessage){
                 if (fhirMessage && fhirMessage.content) {
 
+                    fpContext = fhirMessage.content;    //context for subsequent fhirPath calls...
 
-                    pathToFile = "./artifacts/encounterV2Mappings.json"
-                    var Map = JSON.parse(fs.readFileSync(pathToFile,{encoding:'utf8'}));
+                  //  pathToFile = "./artifacts/encounterV2Mappings.json"
+                 //   var Map = JSON.parse(fs.readFileSync(pathToFile,{encoding:'utf8'}));
 
                     // var vo = convertV2ToObject(arHL7);
                    // var hl7Hash = vo.hash;
@@ -50,7 +119,7 @@ function setup(app,db) {
                     response.fhir = fhirMessage.content;
                   //  response.v2Message = hl7Msg;
                     response.arHL7 = arHL7;
-                    response.map = Map;
+                  //  response.map = Map;
 
 
                    // var result =  performAnalysis(arHL7,fhirMessage.content);

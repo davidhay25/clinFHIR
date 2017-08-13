@@ -1,11 +1,23 @@
 
 angular.module("sampleApp")
     .controller('orionTestCtrl',
-        function ($scope,$http,$sce,resourceCreatorSvc) {
+        function ($scope,$http,$sce,resourceCreatorSvc,logicalModelSvc) {
             $scope.input = {};
 
             $scope.input.showAllMappings = false;
             $scope.isArray = angular.isArray;
+
+            logicalModelSvc.getMappingFile().then(
+                function(data) {
+                    //console.log(data)
+                    $scope.currentMap = data;
+                },
+                function(err) {
+                    alert('Unable to get map from Logical Model')
+                    console.log(err)
+                }
+            );
+
 
 
             function displayAnalysis(results) {
@@ -93,13 +105,25 @@ console.log(contents)
 
 
 
-            $scope.executeJSONPath = function(path) {
-
+            $scope.executeJSONPathDEP = function(path) {
+                delete $scope.FHIRPathResult;
                // var test = {"Encounter": $scope.dataFromServer.fhir}
+                var url = "orionTest/executeFP?fp=" + path;
+                $http.get(url).then(
+                    function(data) {
+                        console.log(data.data)
+                        $scope.FHIRPathResult = data.data;
+                    },
+                    function (err){
+                        console.log(err)
+                    }
+                );
 
+/*
                 var allElements = JSONPath({path:path,json:$scope.dataFromServer.fhir,flatten:true})
                 $scope.JSONPathResult = allElements;
                 console.log(allElements)
+                */
             }
 
             //switch on the 'show all checkbox
@@ -112,7 +136,10 @@ console.log(contents)
                     if ($scope.dataFromServer){
                         var fhir = $scope.dataFromServer.fhir;
                         var arHL7 = $scope.dataFromServer.arHL7;
-                        var map = $scope.dataFromServer.map;
+                        var map = $scope.currentMap;//    dataFromServer.map;
+
+
+
 
                         $scope.results = performAnalysis(arHL7,fhir,map);
                     }
@@ -130,7 +157,7 @@ console.log(contents)
 
                         var fhir = data.data.fhir;
                         var arHL7 = data.data.arHL7;
-                        var map = data.data.map;
+                        var map =  $scope.currentMap;//  data.data.map;
 
                         drawResourceTree(fhir)
 
@@ -179,6 +206,8 @@ console.log(contents)
                 if (!arHl7 || !FHIR || !Map) {
                     return
                 }
+
+                console.log(Map)
 
                 //find the contained resources, and create a hash indexed on id...
                 var arContained = JSONPath({path:'contained',json:FHIR})[0];    //returns an array of arrays...
@@ -248,49 +277,66 @@ console.log(contents)
                         var arE = expression.split('=');
                         var expressionPath = arE[0];
                         var expressionValue = arE[1];
-
-
                         var parentPath = (ar1[0]).replace(/ /g,'');
+                        if (expressionPath.substr(0,3)== 'ref') {
+                            fhirValue = JSONPath({path:parentPath,json:FHIR})   //<< temp
 
-                        var allElements = JSONPath({path:parentPath,json:FHIR,flatten:true})
-                        console.log(allElements)
-
-                        allElements.forEach(function (el) {
-
-                            var results = JSONPath({path:expressionPath,json:el})
-                            if (results) {
-                                results.forEach(function (r) {
-                                    if (r == expressionValue) {
-                                        fhirValue = el;//JSONPath({path:pathInHostResource,json:FHIR})
-                                        include = true;
-                                    }
-                                })
-                            }
+                            //find the 'reference' elements in the current node...
+                            var references = JSONPath({path:parentPath,json:FHIR,flatten:true})
 
 
+                            //this expression is to an external resource - eg Location.physicalType.text in Encounter
 
-                        })
+                           // expressionPath = expressionPath.substr(3);  //strip of the 'ref '
+                            //var ar2 = expressionPath.split('.')     //the resource type is included...
+                            //var resourceType = ar2[0];
+                            //now find contained resources of this
 
+                        } else {
+                            //this expression references something in the current node - eg Participant in Encounter
+                           // var parentPath = (ar1[0]).replace(/ /g,'');
 
+                            var allElements = JSONPath({path:parentPath,json:FHIR,flatten:true})
+                            console.log(allElements)
 
-                        var expr = ar1[1].substr(0,ar1[1].length -1)
+                            allElements.forEach(function (el) {
 
+                                var results = JSONPath({path:expressionPath,json:el})
+                                if (results) {
+                                    results.forEach(function (r) {
+                                        if (r == expressionValue) {
+                                            fhirValue = el;//JSONPath({path:pathInHostResource,json:FHIR})
+                                            include = true;
+                                        }
+                                    })
+                                }
+                            })
+                        }
 
-                       // console.log(expr,FHIR)
+                    } else if (item.fhirPath) {
 
-                       // console.log(JSONPath({path:expr,json:FHIR}))
+                        console.log(item.fhirPath);
+                        var url = "orionTest/executeFP";
 
-                        /*for (var i=0; i<arContained.length;i++) {
+                        var data = {path: item.fhirPath,resource:FHIR}
+                         $http.post(url,data).then(
+                             function(data) {
+                                //console.log(data.data)
+                                 //fhirValue = data.data[0];
+                                 result.fhir = {key: item.fhir, value: data.data[0],fhirPath:item.fhirPath}
+                                 response.line.push(result)
 
-                            var contained = arContained[i];
-                            console.log(JSONPath({path:expr,json:contained}))
-                        }*/
-
+                                 console.log(fhirValue)
+                                // include = true
+                             },
+                             function (err){
+                                 //alert();
+                                console.log(err)
+                             }
+                         );
 
                     } else {
                         //nope - a straight path...
-//console.log(ar)
-                        //result.fhir = {key: item.fhir, value:JSONPath({path:ar.join('.')})}
                         fhirValue = JSONPath({path:pathInHostResource,json:FHIR})
 
                     }
@@ -376,11 +422,8 @@ console.log(contents)
                                     }
                                 }
 
-
                                 break;
                         }
-
-
 
                     })
                     return response;
@@ -396,12 +439,15 @@ console.log(contents)
                         hash[segmentName] = hash[segmentName] || []
                         hash[segmentName].push(arLine);
 
-
+                        //the MSH counting is different as the separator bar (|) is not yet defined...
+                        if (arLine[0] == 'MSH') {
+                            arLine.splice(1,0,'|')
+                        }
                         arMessage.push(arLine)
 
-                    })
+                    });
 
-                    //console.log(hash);
+                    console.log(hash);
                     return {hash:hash,msg:arMessage};
 
 

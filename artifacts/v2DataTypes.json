@@ -72,6 +72,19 @@
     "fieldName": [
       {"name":"Code","type":"ST"}
     ]},
+  "PL" : {
+    "fieldName": [
+      {"name":"Point Of Care","type":"IS"},
+      {"name":"Room","type":"IS"},
+      {"name":"Bed","type":"IS"},
+      {"name":"Facility","type":"HD"},
+      {"name":"Location Status","type":"IS"},
+      {"name":"Location Type","type":"IS"},
+      {"name":"Building","type":"IS"},
+      {"name":"Floor","type":"IS"},
+      {"name":"Description","type":"ST"}
+    ]},
+
   "ST": {
     "fieldName": [
       {"name":"String","type":"ST"}
