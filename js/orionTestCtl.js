@@ -1,24 +1,58 @@
 
 angular.module("sampleApp")
     .controller('orionTestCtrl',
-        function ($scope,$http,$sce,resourceCreatorSvc,logicalModelSvc) {
+        function ($scope,$http,$sce,resourceCreatorSvc,logicalModelSvc,appConfigSvc,GetDataFromServer) {
             $scope.input = {};
 
             $scope.input.showAllMappings = false;
             $scope.isArray = angular.isArray;
 
-            logicalModelSvc.getMappingFile().then(
+            var url=appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition?kind=logical&identifier=http://clinfhir.com|author&_summary=true";
+
+            GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
                 function(data) {
-                    //console.log(data)
-                    $scope.currentMap = data;
+
+                    $scope.input.LMUrl = "http://fhir.hl7.org.nz/baseDstu2/StructureDefinition/OhEncounter";
+
+                    $scope.bundleModels = [];
+                    data.data.entry.forEach(function (ent) {
+                        $scope.bundleModels.push(ent.resource.url);
+                       // if (ent.resource.url == "http://fhir.hl7.org.nz/baseDstu2/StructureDefinition/OhEncounter")
+                    });
+                    $scope.bundleModels.sort();
+
+
+                   // $scope.LMUrl = $scope.input.bundleModels[deflt]
+
+
                 },
                 function(err) {
-                    alert('Unable to get map from Logical Model')
+                    alert('Unable to load Logical Models');
                     console.log(err)
                 }
             );
 
+            $scope.selectLM = function(url) {
+                console.log(url)
+               // $scope.input.LMUrl = url;
+                getMappingFile(url)
+            };
 
+            function getMappingFile(url) {
+                logicalModelSvc.getMappingFile(url).then(
+                    function(data) {
+                        console.log(data)
+                        $scope.currentMap = data;
+                        delete $scope.results;
+                    },
+                    function(err) {
+                        alert('Unable to get map from Logical Model')
+                        console.log(err)
+                    }
+                );
+            }
+
+            getMappingFile();   //the default (encounter)
 
             function displayAnalysis(results) {
                 //build a map of v2 map by segment (
@@ -33,7 +67,6 @@ angular.module("sampleApp")
 
                // console.log($scope.v2FieldMap)
             }
-
 
             $http.get('artifacts/v2FieldNames.json').then(
                 function(data) {
@@ -104,7 +137,6 @@ console.log(contents)
             };
 
 
-
             $scope.executeJSONPathDEP = function(path) {
                 delete $scope.FHIRPathResult;
                // var test = {"Encounter": $scope.dataFromServer.fhir}
@@ -163,6 +195,7 @@ console.log(contents)
 
                         $scope.results = performAnalysis(arHL7,fhir,map);
                         displayAnalysis($scope.results)
+                        console.log($scope.results)
                         $scope.analysisOutcome = "Analysis Complete."
                         //alert('Analysis complete. View the tabs for details.')
                     },function(err) {
@@ -199,8 +232,6 @@ console.log(contents)
 
             };
 
-
-
             function performAnalysis(arHl7,FHIR,Map) {
 
                 if (!arHl7 || !FHIR || !Map) {
@@ -209,13 +240,17 @@ console.log(contents)
 
                 console.log(Map)
 
+                var hashContained = {};
+
                 //find the contained resources, and create a hash indexed on id...
                 var arContained = JSONPath({path:'contained',json:FHIR})[0];    //returns an array of arrays...
                 console.log(arContained);
-                var hashContained = {};
-                arContained.forEach(function (resource) {
-                    hashContained[resource.id] = hashContained;
-                })
+                if (arContained) {
+                    arContained.forEach(function (resource) {
+                        hashContained[resource.id] = hashContained;
+                    })
+                }
+
 
 
                 //generate an array to set the order of HL7 elements displayed  (see the sort below)
@@ -248,7 +283,7 @@ console.log(contents)
                         include = true
                     }
 
-                    if (v2Value.values) {
+                    if (v2Value && v2Value.values) {
                         v2Value.values.forEach(function (v) {
                             if (v !== "" && v!== undefined) {
                                 include = true
@@ -342,21 +377,18 @@ console.log(contents)
                     }
 
 
-
-
-
                     if (fhirValue && fhirValue.length > 0) {
                         include = true
                     }
 
-                    result.fhir = {key: item.fhir, value: fhirValue}
+                    result.fhir = {key: item.fhir, value: fhirValue};
+                    include = true;
+
                     if (include) {
                         response.line.push(result)
                     }
 
                 });
-
-
 
 
                 //console.log(order);
@@ -453,8 +485,6 @@ console.log(contents)
 
                 }
             }
-
-
 
 
 

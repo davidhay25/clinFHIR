@@ -94,7 +94,7 @@
 
     <style>
         .myScroll {
-            height: 600px;
+            height: 700px;
             overflow-y: scroll;
         }
         .myRequired {
@@ -174,8 +174,11 @@
 
             <div class="row">
                 <div class="col-sm-4 col-md-4">
+
+
+
                     <br/>
-                    <h5>Select HL7 v2 file</h5>
+                    <h5>Select HL7 v2 file which will be the input</h5>
 
                     <ul>
                         <li ng-repeat="sample in samples track by $index" ng-if="sample.type=='hl7'" >
@@ -183,13 +186,19 @@
                         </li>
                     </ul>
 
-                    <h5>Select HL7 FHIR resource</h5>
+                    <h5>Select HL7 FHIR resource which will be the output</h5>
 
                     <ul>
                         <li ng-repeat="sample in samples track by $index"  ng-if="sample.type=='fhir'" >
                             <span class="clickable" ng-click="selectSample(sample,'fhir')">{{sample.description}}</span>
                         </li>
                     </ul>
+
+
+                    <br/>
+                    <h5>Select Logical Model for the map between the two</h5>
+                    <select class = 'form-control' ng-model="input.LMUrl" ng-change="selectLM(input.LMUrl)"
+                            ng-options="url for url in bundleModels"></select>
 
 
                 </div>
@@ -251,7 +260,7 @@
 
         </uib-tab>
 
-        <uib-tab heading="Result">
+        <uib-tab heading="Result" ng-show="results">
             <div class="myScroll">
 
 
@@ -299,7 +308,7 @@
             </div>
         </uib-tab>
 
-        <uib-tab heading="V2 message">
+        <uib-tab heading="V2 message"  ng-show="results">
             <div class="row">
                 <br/>
                 <div class="col-sm-1 col-md-1">
@@ -364,7 +373,7 @@
 
         </uib-tab>
 
-        <uib-tab heading="FHIR">
+        <uib-tab heading="FHIR"  ng-show="results">
             <br/>
 
 

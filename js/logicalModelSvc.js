@@ -88,7 +88,7 @@ angular.module("sampleApp")
                             map.push({description: m.branch.data.path,v2:m.sourceMap,fhir:m.targetMap,fhirPath:m.fhirPath})
                         })
 
-                        console.log(angular.toJson(map))
+                        //console.log(angular.toJson(map))
                         deferred.resolve(map)
 
                     },
