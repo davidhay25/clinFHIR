@@ -433,26 +433,46 @@ console.log(contents)
                             case 2 :                        //sub value - eg 7.9
                                 if (fieldValue) {
                                     var arSubvalue = fieldValue.split('^');
-                                    if (arSubvalue.length >= ar1[1]) {
-
-                                        response.values.push(arSubvalue[ar1[1]])
+                                    if (arSubvalue.length >= ar1[1]-1) {
+                                        response.values.push(arSubvalue[ar1[1]-1])
                                     }
                                 }
                                 break;
                             case 3 :                        //sub-sub value - eg 7.9.2
+
                                 if (fieldValue) {
                                     var arSubvalue = fieldValue.split('^');
-                                    if (arSubvalue.length >= ar1[1]) {
-                                        var subSubValue = ar1[1];
-                                        var arSS = subSubValue.split('&');
-                                        if (arSS.length >= ar1[2]) {
-                                            response.values.push(arSS[ar1[2]])
+                                    if (arSubvalue.length >= ar1[1]-1) {
+
+                                        var l2Value = arSubvalue[ar1[1]-1];     //the value at the second level. now to split on '&'
+                                        var ar3 = l2Value.split('&');
+                                        var posInField = ar1[2];
+                                        if (posInField <= ar3.length){
+                                            response.values.push(ar3[posInField-1])
                                         }
+
+
+                                    }
+                                }
+                                break;
+
+                                /*if (fieldValue) {
+                                    var arSubvalue = fieldValue.split('^');
+                                    if (arSubvalue.length >= ar1[1]-1) {
+                                        var subSubValue = ar1[1]-1;
+                                        if (subSubValue) {
+                                            var arSS = subSubValue.split('&');
+                                            if (arSS.length >= ar1[2]-1) {
+                                                response.values.push(arSS[ar1[2]-1])
+                                            }
+                                        }
+
 
 
 
                                     }
                                 }
+                                */
 
                                 break;
                         }
@@ -494,6 +514,7 @@ console.log(contents)
                 //console.log($scope.currentV2Fields)
             };
 
+            //return a display for a popover of v2 data
             $scope.decomposeData = function(dt,data) {
                // console.log(dt,data);
                 var ar = []
@@ -524,10 +545,9 @@ console.log(contents)
             }
 
             $scope.showDT = function(dt) {
-                //var dt = $scope.v2Datatypes[dt];
-                //console.log(dt)
+
                 var details = $scope.v2Datatypes[dt];
-              //  console.log(details)
+
                 if (details) {
                     var display = "";
                     details.fieldName.forEach(function (fld) {
