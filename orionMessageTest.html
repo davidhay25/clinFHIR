@@ -197,8 +197,18 @@
 
                     <br/>
                     <h5>Select Logical Model for the map between the two</h5>
-                    <select class = 'form-control' ng-model="input.LMUrl" ng-change="selectLM(input.LMUrl)"
-                            ng-options="url for url in bundleModels"></select>
+
+                    <div class="row">
+                        <div class="col-md-10 col-sm-10">
+                            <select class = 'form-control' ng-model="input.LMUrl" ng-change="selectLM(input.LMUrl)"
+                                    ng-options="url for url in bundleModels"></select>
+                        </div>
+                        <div class="col-md-2 col-sm-2">
+                            <button class="btn btn-primary" ng-click="selectLM(input.LMUrl)">Refresh Model</button>
+                        </div>
+                    </div>
+
+
 
 
                 </div>
