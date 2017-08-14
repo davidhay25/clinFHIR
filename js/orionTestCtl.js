@@ -302,8 +302,8 @@ console.log(contents)
                     //console.log(fhirKey,ar.join('.'))
                     var fhirValue;
 
-                    var ar1 = pathInHostResource.split('[')        //has this path got a predicate? [...]
-                    if (ar1.length > 1) {
+                   // var ar1 = pathInHostResource.split('[')        //has this path got a predicate? [...]
+                    if (ar1.length > 1 || 1 ==2) {
                         //this path has a [] jsonPath predicate expression.
 
 

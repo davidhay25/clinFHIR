@@ -14,7 +14,6 @@ angular.module('sampleApp')
             templateUrl: 'directive/fhirpath/fhirpath.html',
             controller: function($scope,$http){
 
-
                 $scope.input = {};
 
                 $scope.$watch(
