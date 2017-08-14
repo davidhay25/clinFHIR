@@ -253,6 +253,8 @@ console.log(contents)
 
 
 
+
+
                 //generate an array to set the order of HL7 elements displayed  (see the sort below)
                 var order = [];
                 for (var i=0; i<arHl7.length;i++) {
@@ -298,57 +300,9 @@ console.log(contents)
                     ar.splice(0,1);
                     var pathInHostResource = ar.join('.');
 
-
-                    //console.log(fhirKey,ar.join('.'))
                     var fhirValue;
 
-                    var ar1 = pathInHostResource.split('[')        //has this path got a predicate? [...]
-                    if (ar1.length > 1 && 1 ==2) {
-                        //this path has a [] jsonPath predicate expression.
-
-
-
-                        var expression = ar1[1].substr(0,ar1[1].length -1); //the expression - eg type.coding.code='ATND'
-                        var arE = expression.split('=');
-                        var expressionPath = arE[0];
-                        var expressionValue = arE[1];
-                        var parentPath = (ar1[0]).replace(/ /g,'');
-                        if (expressionPath.substr(0,3)== 'ref') {
-                            fhirValue = JSONPath({path:parentPath,json:FHIR})   //<< temp
-
-                            //find the 'reference' elements in the current node...
-                            var references = JSONPath({path:parentPath,json:FHIR,flatten:true})
-
-
-                            //this expression is to an external resource - eg Location.physicalType.text in Encounter
-
-                           // expressionPath = expressionPath.substr(3);  //strip of the 'ref '
-                            //var ar2 = expressionPath.split('.')     //the resource type is included...
-                            //var resourceType = ar2[0];
-                            //now find contained resources of this
-
-                        } else {
-                            //this expression references something in the current node - eg Participant in Encounter
-                           // var parentPath = (ar1[0]).replace(/ /g,'');
-
-                            var allElements = JSONPath({path:parentPath,json:FHIR,flatten:true})
-                            console.log(allElements)
-
-                            allElements.forEach(function (el) {
-
-                                var results = JSONPath({path:expressionPath,json:el})
-                                if (results) {
-                                    results.forEach(function (r) {
-                                        if (r == expressionValue) {
-                                            fhirValue = el;//JSONPath({path:pathInHostResource,json:FHIR})
-                                            include = true;
-                                        }
-                                    })
-                                }
-                            })
-                        }
-
-                    } else if (item.fhirPath) {
+                    if (item.fhirPath) {
 
                         console.log(item.fhirPath);
                         var url = "orionTest/executeFP";
@@ -593,7 +547,7 @@ console.log(contents)
             }
 
             $scope.showRow = function(item) {
-                console.log(item)
+               // console.log(item)
                 if ($scope.input.showAllMappings) {
                     return true;
                 } else {

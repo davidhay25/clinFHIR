@@ -46,35 +46,7 @@ angular.module("sampleApp")
 
                 if (vsDetails) {
 
-                    /*
-                    //we don't need to expand this set as we know that the codes are incldued in the VS.
-                    //$expand maybe safer, but requires LOINC to be loaded,
 
-                    GetDataFromServer.findConformanceResourceByUri(vsUrl,appConfigSvc.getCurrentTerminologyServer().url,'ValueSet').then(
-                        function (vs) {
-
-                            //system,code,display
-                            var system = vs.include[0].system
-                            vs.include[0].concept.forEach(function(concept){
-                                sectionCodes.push({system:system,code:concept.code})
-                            })
-
-
-                            sectionCodes = vs.expansion.contains;
-                            sectionCodes.sort(function(a,b){
-                                if (a.display > b.display) {
-                                    return 1;
-                                } else {
-                                    return -1
-                                }
-                            })
-                            //console.log(vs);
-                        }, function (err) {
-                            alert(err + ' expanding ValueSet:')
-                        }
-                    )
-
-                    */
 
                     GetDataFromServer.getExpandedValueSet(vsDetails.id).then(
                         function (vs) {
@@ -92,7 +64,9 @@ angular.module("sampleApp")
                             var msg = 'The terminology service was unable to expand the Document section codes. ';
                             msg += 'This generally means that the LOINC system is not loaded into the service. ';
                             msg += "The impact is that when creating a document, you'll need to enter section type text manually. Sorry about that.";
-                            modalService.showModal({}, {bodyText:msg});
+
+                            
+                            //Temp - better to display this in the dociment seciotn... modalService.showModal({}, {bodyText:msg});
 
                             //alert(err + ' expanding ValueSet:')
                         }

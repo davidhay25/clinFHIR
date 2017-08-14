@@ -126,10 +126,11 @@ angular.module("sampleApp")
                                 fhirPath = map.map
                             }
 
-                        })
+                        });
                         if (sourceMap && targetMap) {
                             var item = {source:source,sourceMap:sourceMap,target:target, targetMap:targetMap, branch:branch};
                             item.fhirPath = fhirPath;
+                            item.type = data.type;
 
 
 

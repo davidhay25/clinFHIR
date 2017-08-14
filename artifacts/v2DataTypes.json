@@ -61,7 +61,7 @@
     "fieldName": [
       {"name":"Namespace id","type":"IS"},
       {"name":"Universal id","type":"ID"},
-      {"name":"Universal id","type":"ID"}
+      {"name":"Universal id type","type":"ID"}
     ]
   },
   "ID": {

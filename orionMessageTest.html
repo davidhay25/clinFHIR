@@ -271,7 +271,7 @@
                     <td width = '14%'>{{item.description | dropFirst}}</td>
 
                     <td width = '43%'>
-                       
+
                         <div ng-repeat = "v in item.v2.value.values track by $index" >
                             <div class="pull-right">{{v}}</div>
                         </div>
@@ -387,7 +387,10 @@
                             <div id="resourceTree"></div>
                         </uib-tab>
                         <uib-tab heading="Json">
-                            <pre>{{results.fhir | json}}</pre>
+                            <div class="myScroll">
+                                <pre>{{results.fhir | json}}</pre>
+                            </div>
+
 
                         </uib-tab>
                     </uib-tabset>
