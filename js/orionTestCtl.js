@@ -316,7 +316,7 @@ console.log(contents)
                                  response.line.push(result)
 
                                  console.log(fhirValue)
-                                // include = true
+                                 include = false;
                              },
                              function (err){
                                  //alert();
@@ -336,7 +336,7 @@ console.log(contents)
                     }
 
                     result.fhir = {key: item.fhir, value: fhirValue};
-                    include = true;
+                    //include = true;
 
                     if (include) {
                         response.line.push(result)
