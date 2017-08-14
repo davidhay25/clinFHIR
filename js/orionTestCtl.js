@@ -327,10 +327,13 @@ console.log(contents)
                     } else {
                         //nope - a straight path...
                         fhirValue = JSONPath({path:pathInHostResource,json:FHIR})
-
+                        if (fhirValue && fhirValue.length > 0) {
+                            result.fhir = {key: item.fhir, value: fhirValue};
+                            response.line.push(result)
+                        }
                     }
 
-
+/*
                     if (fhirValue && fhirValue.length > 0) {
                         include = true
                     }
@@ -341,6 +344,7 @@ console.log(contents)
                     if (include) {
                         response.line.push(result)
                     }
+                    */
 
                 });
 
