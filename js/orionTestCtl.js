@@ -163,7 +163,7 @@ console.log(contents)
                 function() {return $scope.input.showAllMappings},
                 function() {
                     console.log($scope.input.showAllMappings)
-
+/*
 
                     if ($scope.dataFromServer){
                         var fhir = $scope.dataFromServer.fhir;
@@ -175,7 +175,7 @@ console.log(contents)
 
                         $scope.results = performAnalysis(arHL7,fhir,map);
                     }
-
+*/
 
                 });
 
@@ -470,14 +470,14 @@ console.log(contents)
 
             //return a display for a popover of v2 data
             $scope.decomposeData = function(dt,data) {
-               // console.log(dt,data);
+
                 var ar = []
                 if (data) {
                     ar = data.split('^')
                 }
 
                 var details = $scope.v2Datatypes[dt];
-                //console.log(details)
+
                 if (details) {
                     var display = "";
 
@@ -547,7 +547,7 @@ console.log(contents)
             }
 
             $scope.showRow = function(item) {
-               // console.log(item)
+
                 if ($scope.input.showAllMappings) {
                     return true;
                 } else {

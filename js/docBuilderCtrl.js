@@ -65,7 +65,7 @@ angular.module("sampleApp")
                             msg += 'This generally means that the LOINC system is not loaded into the service. ';
                             msg += "The impact is that when creating a document, you'll need to enter section type text manually. Sorry about that.";
 
-                            
+
                             //Temp - better to display this in the dociment seciotn... modalService.showModal({}, {bodyText:msg});
 
                             //alert(err + ' expanding ValueSet:')
