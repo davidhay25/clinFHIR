@@ -22,13 +22,14 @@ function setup(app,db) {
         req.on('end', function (data) {
            // var segment = body.toString('utf8');
             //var plainText = new Buffer(segment, 'base64').toString()
-           // console.log(body);
+            console.log(body);
             var query = JSON.parse(body);
 
             try {
-                var result = fp.evaluate(query.resource,query.path)
+                var result = fp.evaluate(query.resource,query.path);
                 res.json(result)
             } catch (ex) {
+                console.log('error evaluating fhirpath ',ex);
                 res.statusCode = 500;
                 res.json(ex)
             }

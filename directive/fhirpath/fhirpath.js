@@ -17,7 +17,8 @@ angular.module('sampleApp')
                 $scope.executeJSONPath = function(path) {
                     delete $scope.FHIRPathResult;
                     // var test = {"Encounter": $scope.dataFromServer.fhir}
-                    var url = "orionTest/executeFP?fp=" + path;
+                   // var url = "orionTest/executeFP?fp=" + path;
+                    var url = "orionTest/executeFP";
                     /*
                     $http.get(url).then(
                         function(data) {

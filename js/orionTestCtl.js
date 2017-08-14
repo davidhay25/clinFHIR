@@ -495,14 +495,14 @@ console.log(contents)
             };
 
             $scope.decomposeData = function(dt,data) {
-                console.log(dt,data);
+               // console.log(dt,data);
                 var ar = []
                 if (data) {
                     ar = data.split('^')
                 }
 
                 var details = $scope.v2Datatypes[dt];
-                console.log(details)
+                //console.log(details)
                 if (details) {
                     var display = "";
 
@@ -525,9 +525,9 @@ console.log(contents)
 
             $scope.showDT = function(dt) {
                 //var dt = $scope.v2Datatypes[dt];
-                console.log(dt)
+                //console.log(dt)
                 var details = $scope.v2Datatypes[dt];
-                console.log(details)
+              //  console.log(details)
                 if (details) {
                     var display = "";
                     details.fieldName.forEach(function (fld) {
