@@ -592,22 +592,27 @@ console.log(contents)
 
             }
 
-            $scope.showRowDEP = function(item) {
-                //console.log(item)
+            $scope.showRow = function(item) {
+                console.log(item)
                 if ($scope.input.showAllMappings) {
                     return true;
                 } else {
-                    if (item.v2.value && item.v2.value.values.length > 0) {
-                        return true;
-                        /*item.v2.value.values.for(function (v) {
-                            if (v) {
+                    if (item.v2.value && item.v2.value.values && item.v2.value.values.length > 0) {
+
+                        for (var i=0; i < item.v2.value.values.length; i++) {
+                            var v = item.v2.value.values[i]
+                       // item.v2.value.values.forEach(function (v) {
+                            if (v && v !== '""') {
                                 return true;
                             }
-                        })*/
+                        }
 
+                    } else {
+                        return false;
                     }
+
                 }
-                return false;
+
             }
 
 

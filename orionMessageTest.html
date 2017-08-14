@@ -266,12 +266,13 @@
 
                 <table class="table table-bordered table-condensed ">
                 <tr><th>Seq</th><th>Element Name</th><th>V2 field and result</th><th>FHIR field and result</th></tr>
-                <tr  ng-repeat = "item in results.line track by $index">
+                <tr  ng-show="showRow(item)"   ng-repeat = "item in results.line track by $index">
                     <td>{{$index}}</td>
                     <td width = '14%'>{{item.description | dropFirst}}</td>
 
                     <td width = '43%'>
-                        <div ng-repeat = "v in item.v2.value.values">
+                       
+                        <div ng-repeat = "v in item.v2.value.values track by $index" >
                             <div class="pull-right">{{v}}</div>
                         </div>
                         <div>
