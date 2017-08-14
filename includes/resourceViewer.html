@@ -425,7 +425,42 @@
 
     </uib-tab>
 
+    <uib-tab heading="FHIRPath">
+        <br/>
+        <div class="row">
+            <div class="col-md-2">
 
+                <uib-accordion>
+
+                    <div uib-accordion-group class="panel-default" heading="{{key}}"
+                         ng-show = "value.entry.length > 0"
+                         ng-repeat="(key,value)  in allResources">
+                        <ul class="list-group">
+                            <li ng-class="{'list-group-item':1==1,'list-group-item-info':entry.resource.id == outcome.selectedResource.id}"
+                                ng-repeat = "entry in value.entry" ng-click="resourceSelected(entry)">
+                                <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
+
+                            </li>
+                        </ul>
+
+                    </div>
+
+                </uib-accordion>
+
+            </div>
+
+            <div class="col-md-5 col-sm-5">
+                <pre>{{outcome.selectedResource | json}}</pre>
+            </div>
+
+            <div class="col-md-5 col-sm-5">
+                <fhirpath resource="outcome.selectedResource"></fhirpath>
+            </div>
+
+        </div>
+
+
+    </uib-tab>
 
 
     <uib-tab heading="Documents">

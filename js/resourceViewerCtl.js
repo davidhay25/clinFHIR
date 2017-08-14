@@ -198,6 +198,7 @@ angular.module("sampleApp")
                 delete $scope.outcome.selectedResource;
 
 
+
                 //the order is significant - allResources must be set first...
                 appConfigSvc.setAllResources(allResources);
 

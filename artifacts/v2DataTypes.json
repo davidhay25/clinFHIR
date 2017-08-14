@@ -108,6 +108,31 @@
       {"name":"Address representation code","type":"ID"},
       {"name":"Address validity range","type":"DR"}
     ]},
+  "XCN": {
+    "fieldName": [
+      {"name":"ID number","type":"ST"},
+      {"name":"Family name","type":"FN"},
+      {"name":"Given name","type":"ST"},
+      {"name":"Middle names","type":"ST"},
+      {"name":"Suffix","type":"EN"},
+      {"name":"Prefix","type":"ST"},
+      {"name":"Degree","type":"IS"},
+      {"name":"Source Table","type":"IS"},
+      {"name":"Assigning Authority","type":"HD"},
+      {"name":"Name type code","type":"ID"},
+      {"name":"Identifier check digit","type":"ST"},
+      {"name":"Check digit scheme" ,"type":"ID"},
+
+      {"name":"Identifier type code","type":"IS"},
+      {"name":"Assigning Authority","type":"HD"},
+      {"name":"Name representation code" ,"type":"ID"},
+
+      {"name":"Name context","type":"CE"},
+      {"name":"Name validity","type":"DR"},
+      {"name":"Name assembly order" ,"type":"ID"}
+
+    ]
+  },
   "XPN": {
     "fieldName": [
       {"name":"Family name","type":"EN"},

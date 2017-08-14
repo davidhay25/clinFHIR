@@ -14,28 +14,28 @@ angular.module('sampleApp')
             templateUrl: 'directive/fhirpath/fhirpath.html',
             controller: function($scope,$http){
 
+
+                $scope.input = {};
+
+                $scope.$watch(
+                    function() {return $scope.resource},
+                    function() {
+                        console.log($scope.resource)
+                        delete $scope.FHIRPathResult;
+                        delete $scope.input.JSONPath;
+
+                    }
+                );
+
                 $scope.executeJSONPath = function(path) {
                     delete $scope.FHIRPathResult;
-                    // var test = {"Encounter": $scope.dataFromServer.fhir}
-                   // var url = "orionTest/executeFP?fp=" + path;
-                    var url = "orionTest/executeFP";
-                    /*
-                    $http.get(url).then(
-                        function(data) {
-                            console.log(data.data)
-                            $scope.FHIRPathResult = data.data;
-                        },
-                        function (err){
-                            console.log(err)
-                        }
-                    );
 
-console.log('exec post')
-                    */
+                    var url = "orionTest/executeFP";
+
                     var data = {path:path,resource:$scope.resource}
                     $http.post(url,data).then(
                         function(data) {
-                            console.log(data.data)
+                            //console.log(data.data)
                             $scope.FHIRPathResult = data.data;
                         },
                         function (err){
