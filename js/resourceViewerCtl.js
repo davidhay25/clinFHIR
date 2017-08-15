@@ -21,8 +21,14 @@ angular.module("sampleApp")
 
 
             //==== for fhirpath ===
+
+            $scope.selectFPResource = function(resource){
+                $scope.fpResource = resource
+            }
+
             $scope.selectSingleBundle = function(bundle){
-                $scope.outcome.selectedResource = bundle;
+                $scope.fpResource = bundle
+               // $scope.outcome.selectedResource = bundle;
 
             }
 

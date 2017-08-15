@@ -115,6 +115,7 @@
     <script src="js/markerSvc.js"></script>
     <script src="js/sbHistorySvc.js"></script>
     <script src="js/sbHistoryCtl.js"></script>
+    <script src="directive/fhirpath/fhirpath.js"></script>
 
     <script>
         var config = {
@@ -633,6 +634,25 @@
 
                         </uib-tab>
 
+
+                        <uib-tab heading="FHIRPath">
+                            <br/>
+
+                            <fhirpath resource="selectedContainer.bundle"></fhirpath>
+                            <hr/>
+                            <pre>{{selectedContainer.bundle | json}}</pre>
+                            <!--
+                            <div class="row">
+                                <div class="col-md-6 col-sm-6">
+                                    <pre>{{selectedContainer.bundle | json}}</pre>
+                                </div>
+                                <div class="col-md-6 col-sm-6">
+                                    <fhirpath resource="selectedContainer.bundle"></fhirpath>
+                                </div>
+                            </div>
+                            -->
+
+                        </uib-tab>
 
                         <uib-tab heading="Description">
                             <br/>
@@ -1231,6 +1251,18 @@
                                         <br/>
                                         <pre>{{currentResource | json}}</pre>
                                     </uib-tab>
+
+                                    <uib-tab heading="FHIRPath">
+                                        <br/>
+                                        <fhirpath resource="currentResource"></fhirpath>
+
+
+
+                                        <pre>{{currentResource | json}}</pre>
+                                    </uib-tab>
+
+
+
 
                                     <uib-tab heading="Summary">
                                         <br/>

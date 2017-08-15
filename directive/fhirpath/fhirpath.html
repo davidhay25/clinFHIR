@@ -2,8 +2,17 @@
     <a href="http://hl7.org/fhirpath/" target="_blank" class="pull-right">FHIRPath spec</a>
 
     <h4>Execute FHIRPath expression</h4>
-    <input class = "form-control" ng-model="input.JSONPath" type="text" placeholder="Enter JSONPath expression"/>
-    <button class="btn btn-success pull-right" ng-click="executeJSONPath(input.JSONPath)">Execute</button>
+    <div class="row">
+        <div class="col-md-10 col-sm-10">
+            <input class = "form-control" ng-model="input.JSONPath" type="text" placeholder="Enter JSONPath expression"/>
+        </div>
+        <div class="col-md-2 col-sm-2">
+            <button class="btn btn-success pull-right" ng-click="executeJSONPath(input.JSONPath)">Run</button>
+        </div>
+    </div>
+
+
+
     <div>
         <pre ng-show="FHIRPathResult">{{FHIRPathResult | json}}</pre>
     </div>

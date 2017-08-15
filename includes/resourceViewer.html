@@ -441,7 +441,7 @@
                                 <ul class="list-group">
                                     <li ng-class="{'list-group-item':1==1,'list-group-item-info':entry.resource.id == outcome.selectedResource.id}"
                                         style = "cursor: pointer"
-                                        ng-repeat = "entry in value.entry" ng-click="resourceSelected(entry)">
+                                        ng-repeat = "entry in value.entry" ng-click="selectFPResource(entry)">
                                         <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
 
                                     </li>
@@ -463,7 +463,7 @@
 
                             <li ng-class="{'list-group-item':1==1,'list-group-item-info':entry.resource.id == outcome.selectedResource.id}"
                                 style = "cursor: pointer"
-                                ng-repeat = "entry in singleBundle.entry" ng-click="resourceSelected(entry)">
+                                ng-repeat = "entry in singleBundle.entry" ng-click="selectFPResource(entry)">
                                 <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
 
                             </li>
@@ -479,11 +479,11 @@
             </div>
 
             <div class="col-md-5 col-sm-5">
-                <pre>{{outcome.selectedResource | json}}</pre>
+                <pre>{{fpResource | json}}</pre>
             </div>
 
             <div class="col-md-5 col-sm-5">
-                <fhirpath resource="outcome.selectedResource"></fhirpath>
+                <fhirpath resource="fpResource"></fhirpath>
             </div>
 
         </div>
