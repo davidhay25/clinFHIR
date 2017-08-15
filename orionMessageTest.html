@@ -170,19 +170,19 @@
                     <br/>
                     <h5>Select HL7 v2 file which will be the input</h5>
 
-                    <ul>
+                    <ol>
                         <li ng-repeat="sample in samples track by $index" ng-if="sample.type=='hl7'" >
                             <span class="clickable" ng-click="selectSample(sample,'hl7')">{{sample.description}}</span>
                         </li>
-                    </ul>
+                    </ol>
 
                     <h5>Select HL7 FHIR resource which will be the output</h5>
 
-                    <ul>
+                    <ol>
                         <li ng-repeat="sample in samples track by $index"  ng-if="sample.type=='fhir'" >
                             <span class="clickable" ng-click="selectSample(sample,'fhir')">{{sample.description}}</span>
                         </li>
-                    </ul>
+                    </ol>
 
 
                     <br/>
