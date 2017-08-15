@@ -11,6 +11,25 @@ function setup(app,db) {
     mongoDb = db;
 
 
+    app.delete('/orionTest/deleteFile',function(req,res){
+        var id = req.query.id;
+        console.log(id);
+        res.json({})
+        return;
+
+        var objectId = new ObjectID(id);
+        var cursor = mongoDb.collection('orionSample').deleteOne({"_id": objectId},function(err,doc){
+            if (err) {
+                res.statusCode = 500;
+                res.json(err)
+            } else {
+                res.json({})
+            }
+        })
+
+
+    })
+
     app.post('/orionTest/executeFP',function(req,res){
 
         var body = "";
@@ -22,7 +41,7 @@ function setup(app,db) {
         req.on('end', function (data) {
            // var segment = body.toString('utf8');
             //var plainText = new Buffer(segment, 'base64').toString()
-            console.log(body);
+            //console.log(body);
             var query = JSON.parse(body);
 
             try {

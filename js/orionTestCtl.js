@@ -163,7 +163,7 @@ console.log(contents)
                 function() {return $scope.input.showAllMappings},
                 function() {
                     console.log($scope.input.showAllMappings)
-/*
+
 
                     if ($scope.dataFromServer){
                         var fhir = $scope.dataFromServer.fhir;
@@ -175,7 +175,7 @@ console.log(contents)
 
                         $scope.results = performAnalysis(arHL7,fhir,map);
                     }
-*/
+
 
                 });
 
@@ -280,6 +280,7 @@ console.log(contents)
 
                     result.v2 = {key: item.v2, value: v2Value};
 
+                    /*
                     var include = false;
                     if ($scope.input.showAllMappings) {
                         include = true
@@ -292,7 +293,7 @@ console.log(contents)
                             }
                         })
                     }
-
+*/
 
                     //we need to remove the first segment in the path as it isn't present in the actual resource...
                     var fhirKey = item.fhir;
@@ -316,7 +317,7 @@ console.log(contents)
                                  response.line.push(result)
 
                                  console.log(fhirValue)
-                                 include = false;
+                                 //include = false;
                              },
                              function (err){
                                  //alert();
@@ -371,7 +372,7 @@ console.log(contents)
 
                     var ar = fieldName.split('-');
                     var segmentCode = ar[0];                //eg PV1
-                    var fieldNumberAsString = ar[1];         //eg 7.9.2
+                    var fieldNumberAsString = ar[1] || fieldName;         //eg 7.9.2 - allow for a filed name like 'MSH'
                     var fieldNumber = parseInt(ar[1],10);   //eg 7
 
                     var segments = hl7Hash[segmentCode]     //each segment is a full seg,ent - eg a PV1...
@@ -551,7 +552,7 @@ console.log(contents)
             }
 
             $scope.showRow = function(item) {
-
+console.log(item)
                 if ($scope.input.showAllMappings) {
                     return true;
                 } else {
@@ -560,7 +561,7 @@ console.log(contents)
                         for (var i=0; i < item.v2.value.values.length; i++) {
                             var v = item.v2.value.values[i]
                        // item.v2.value.values.forEach(function (v) {
-                            if (v && v !== '""') {
+                            if ((v && v !== '""') || (item.fhir && item.fhir.value)) {
                                 return true;
                             }
                         }
@@ -587,15 +588,6 @@ console.log(contents)
                 $('#resourceTree').jstree(
                     {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
                 )
-
-
-/*
-                $('#graphResourceTree').jstree('destroy');
-                $('#graphResourceTree').jstree(
-                    {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
-                )
-                */
-
 
             }
 
