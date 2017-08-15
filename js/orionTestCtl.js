@@ -1,7 +1,7 @@
 
 angular.module("sampleApp")
     .controller('orionTestCtrl',
-        function ($scope,$http,$sce,resourceCreatorSvc,logicalModelSvc,appConfigSvc,GetDataFromServer) {
+        function ($scope,$http,$sce,resourceCreatorSvc,logicalModelSvc,appConfigSvc,GetDataFromServer,$window) {
             $scope.input = {};
 
             $scope.input.showAllMappings = false;
@@ -81,12 +81,46 @@ angular.module("sampleApp")
                 }
             );
 
-            $http.get('orionTest/getSamples').then(
-                function(data) {
-                    $scope.samples = data.data;
-                   // console.log($scope.samples)
+
+
+            function getSamples() {
+                $http.get('orionTest/getSamples').then(
+                    function(data) {
+                        $scope.samples = data.data;
+                        // console.log($scope.samples)
+                    }
+                );
+            }
+            getSamples();
+
+            $scope.deleteSample = function(type) {
+                var sample;
+                if (type == 'hl7') {
+                    sample = $scope.selectedHL7Sample;
+                } else {
+                    sample = $scope.selectedFHIRSample;
                 }
-            );
+                console.log(sample)
+
+                if (sample) {
+                    if ($window.confirm('Are you sure you wish to remove this file?')){
+                        var url = 'orionTest/deleteFile?id='+sample._id;
+                        $http.delete(url).then(
+                            function(data){
+                                console.log(data)
+                                getSamples();
+                            },
+                            function(err){
+                                alert('There was an error removing the file. Sorry. ' + angular.toJson(err))
+                                console.log(err)
+                            }
+                        )
+                    }
+
+
+                }
+
+            }
 
             $scope.selectSample = function(sample,type) {
                 $scope.sampleType = type;

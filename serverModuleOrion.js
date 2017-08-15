@@ -13,9 +13,11 @@ function setup(app,db) {
 
     app.delete('/orionTest/deleteFile',function(req,res){
         var id = req.query.id;
+        /*
         console.log(id);
         res.json({})
         return;
+        */
 
         var objectId = new ObjectID(id);
         var cursor = mongoDb.collection('orionSample').deleteOne({"_id": objectId},function(err,doc){
@@ -252,7 +254,7 @@ var FHIR = JSON.parse(fs.readFileSync(pathToFile,{encoding:'utf8'}));
 
 //console.log(JSONPath({path:'class',json:FHIR}))
 
-function performAnalysis(arHl7,FHIR) {
+function performAnalysisDEP(arHl7,FHIR) {
 
    // if (!hl7Str ) {
       //  var pathToFile = "/Users/davidha/clinfhir/FHIRSampleCreator/artifacts/ADT-sample.hl7"
