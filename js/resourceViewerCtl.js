@@ -20,6 +20,11 @@ angular.module("sampleApp")
             });
 
 
+            //==== for fhirpath ===
+            $scope.selectSingleBundle = function(bundle){
+                $scope.outcome.selectedResource = bundle;
+
+            }
 
             //======== document functions
 
@@ -204,6 +209,8 @@ angular.module("sampleApp")
 
 
                 $scope.allResources = allResources;
+                $scope.singleBundle = {resourceType:'Bundle','type':'bundle',entry:[]}
+
                 //all conditions is used by the timeline display to
                 $scope.outcome.resourceTypes = [];
                 angular.forEach(allResources, function (bundle, type) {
@@ -214,6 +221,14 @@ angular.module("sampleApp")
                             //if there are Obervations, then may be able to build a Vitals table...
                             $scope.hasVitals = true;
                         }
+
+                        //create the single 'megabundle' of all resources for the fhirPath
+                        if (bundle.entry) {
+                            bundle.entry.forEach(function(entry){
+                                $scope.singleBundle.entry.push(entry) ;
+                            })
+                        }
+
                     }
 
                 });

@@ -32,6 +32,12 @@ angular.module("sampleApp")
                 }
             );
 
+
+            //save the currently selected message & resource as a text pair...
+            $scope.saveAsTest = function() {
+
+            }
+
             $scope.selectLM = function(url) {
                 console.log(url)
                // $scope.input.LMUrl = url;

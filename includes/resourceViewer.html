@@ -430,22 +430,51 @@
         <div class="row">
             <div class="col-md-2">
 
-                <uib-accordion>
+                <uib-tabset>
+                    <uib-tab heading="By Type">
+                        <uib-accordion>
 
-                    <div uib-accordion-group class="panel-default" heading="{{key}}"
-                         ng-show = "value.entry.length > 0"
-                         ng-repeat="(key,value)  in allResources">
+                            <div uib-accordion-group class="panel-default" heading="{{key}}"
+
+                                 ng-show = "value.entry.length > 0"
+                                 ng-repeat="(key,value)  in allResources">
+                                <ul class="list-group">
+                                    <li ng-class="{'list-group-item':1==1,'list-group-item-info':entry.resource.id == outcome.selectedResource.id}"
+                                        style = "cursor: pointer"
+                                        ng-repeat = "entry in value.entry" ng-click="resourceSelected(entry)">
+                                        <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
+
+                                    </li>
+                                </ul>
+
+                            </div>
+
+                        </uib-accordion>
+                    </uib-tab>
+                    <uib-tab heading="Bundle">
+
                         <ul class="list-group">
+
                             <li ng-class="{'list-group-item':1==1,'list-group-item-info':entry.resource.id == outcome.selectedResource.id}"
-                                ng-repeat = "entry in value.entry" ng-click="resourceSelected(entry)">
+                                style = "cursor: pointer">
+                                <span ng-click="selectSingleBundle(singleBundle)">Show all</span>
+
+                            </li>
+
+                            <li ng-class="{'list-group-item':1==1,'list-group-item-info':entry.resource.id == outcome.selectedResource.id}"
+                                style = "cursor: pointer"
+                                ng-repeat = "entry in singleBundle.entry" ng-click="resourceSelected(entry)">
                                 <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
 
                             </li>
                         </ul>
 
-                    </div>
 
-                </uib-accordion>
+
+                    </uib-tab>
+                </uib-tabset>
+
+
 
             </div>
 

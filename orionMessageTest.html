@@ -132,11 +132,12 @@
 
 
         </div>
-        <div class="col-sm-7 col-md-7">
-            <div class="navbar-text">
+        <div class="col-sm-5 col-md-5">
+            <!--<div class="navbar-text">
                 <div>HL7 message:   {{selectedHL7Sample.description}}</div>
                 <div>FHIR resource: {{selectedFHIRSample.description}}</div>
             </div>
+            -->
 
         </div>
         <div class="col-sm-1 col-md-1">
@@ -147,16 +148,17 @@
             </form>
 
         </div>
-            <div class="col-sm-1 col-md-1">
+            <div class="col-sm-2 col-md-2">
                 <div class="navbar-text">
                     {{analysisOutcome}}
                 </div>
 
             </div>
-        <div class="col-sm-1 col-md-1">
-            <checkbox class="navbar-text"
+        <div class="col-sm-2 col-md-2">
+            <div class="navbar-text">
+                <checkbox ng-model="input.showAllMappings"></checkbox> Show all mapped
+            </div>
 
-                      ng-model="input.showAllMappings"></checkbox> Show all mapped
         </div>
         </div>
     </nav>
@@ -194,7 +196,7 @@
                                     ng-options="url for url in bundleModels"></select>
                         </div>
                         <div class="col-md-2 col-sm-2">
-                            <button class="btn btn-primary" ng-click="selectLM(input.LMUrl)">Refresh Model</button>
+                            <button class="btn btn-primary" ng-click="selectLM(input.LMUrl)">Refresh</button>
                         </div>
                     </div>
 
@@ -205,7 +207,50 @@
                 <div class="col-sm-8 col-md-8">
                     <br/>
 
-                    <div  class="showHl7" ng-repeat="line in selectedHL7Sample.content">
+                    <div class="rounded-box">
+                        <div class="row">
+                            <div class="col-sm-10 col-md-10">
+                                <div class='row' ng-show="selectedHL7Sample">
+                                    <div class="col-sm-2 col-md-2">
+                                        <strong>HL7 message</strong>
+                                    </div>
+                                    <div class="col-sm-10 col-md-10">
+                                        {{selectedHL7Sample.description}}
+                                    </div>
+
+                               </div>
+
+                                <div class='row' ng-show="selectedFHIRSample">
+                                    <div class="col-sm-2 col-md-2">
+                                        <strong>FHIR resource</strong>
+                                    </div>
+                                    <div class="col-sm-10 col-md-10">
+                                        {{selectedFHIRSample.description}}
+                                    </div>
+                                </div>
+
+                                <div class='row'>
+                                    <div class="col-sm-2 col-md-2">
+                                        <strong>Map</strong>
+                                    </div>
+                                    <div class="col-sm-10 col-md-10">
+                                        {{input.LMUrl}}
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <div class="col-sm-2 col-md-2">
+                                <button ng-show="selectedHL7Sample && selectedFHIRSample" class="btn btn-success" ng-click="saveAsTest()">
+                                    Save as Test Case
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div class="showHl7" ng-repeat="line in selectedHL7Sample.content">
                         {{line}}
                     </div>
                     <div class="pull-right" ng-show="selectedHL7Sample.content">
@@ -213,11 +258,16 @@
                     </div>
 
                     <hr ng-show="selectedHL7Sample && selectedFHIRSample" />
+
+
+                    <pre ng-show="selectedFHIRSample">{{selectedFHIRSample.content | json}}</pre>
+                    <!--
                     <uib-tabset ng-show="selectedFHIRSample">
                         <uib-tab heading="Json">
                             <pre>{{selectedFHIRSample.content | json}}</pre>
                         </uib-tab>
                     </uib-tabset>
+                    -->
                     <div class="pull-right" ng-show="selectedFHIRSample.content">
                         <button class="btn btn-danger" ng-click="deleteSample('fhir')">Delete</button>
                     </div>
@@ -306,8 +356,29 @@
                             </div>
                         </div>
 
-                        <div><em class="pull-right" >{{item.fhir.key}}</em></div>
-                        <div><em class="pull-right" >{{item.fhir.fhirPath}}</em></div>
+                        <div>
+                            <div class="row">
+                                <div class="col-sm-2 col-md-2">
+                                    Path
+                                </div>
+                                <div class="col-sm-10 col-md-19">
+                                    <em >{{item.fhir.key}}</em>
+                                </div>
+                            </div>
+                            <div class="row" ng-show="item.fhir.fhirPath">
+                                <div class="col-sm-2 col-md-2">
+                                    FHIRPath
+                                </div>
+                                <div class="col-sm-10 col-md-10">
+                                    <em >{{item.fhir.fhirPath}}</em>
+                                </div>
+                            </div>
+                            <!--
+                            <div>Path: &nbsp;&nbsp;&nbsp;&nbsp;</div>
+                            <div ng-show="item.fhir.fhirPath">FHIRPath: <em >{{item.fhir.fhirPath}}</em></div>
+                            -->
+                        </div>
+
 
                     </td>
                 </tr>
