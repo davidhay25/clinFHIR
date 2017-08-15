@@ -419,6 +419,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
             function(data){
 
                 $scope.response = data;
+                //$scope.statusCode = data.statusCode;
 
 
                 var hx = {
@@ -444,6 +445,13 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
             //temp setDefaultInput();
         })
     };
+
+
+    //display the bundle in the results pane
+    $scope.showBundle = function(bundle){
+        $scope.result.selectedEntry = bundle;
+        $('#queryResourceTree').jstree('destroy');      //don't render the tree (todo though might look into this later)
+    }
 
     $scope.selectEntry = function(entry){
 

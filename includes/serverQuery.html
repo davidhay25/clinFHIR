@@ -4,7 +4,7 @@
         color: blue;
         font-weight: bold;
     }
-    .hide: {
+    .hide {
         display: none;
     }
 
@@ -80,7 +80,7 @@
 
 
         <uib-tabset>
-            <uib-tab heading="Query">
+            <uib-tab heading="Single resource query">
                 <div class="pull-right">
                     <button class="btn btn-link" ng-click="showHistory = ! showHistory">
                         <span ng-show="showHistory">Hide History</span>
@@ -169,14 +169,7 @@
                                     </div>
 
                                 </div>
-<!--
-                                <div class="col-md-6 col-sm-6"> {{query}}</div>
-                                -->
-<!--
-                                <div class="col-md-1 col-sm-1">
-                                    <button class="btn btn-default" ng-click="doit()">Run</button>
-                                </div>
-                                -->
+
                             </div>
 
 
@@ -199,14 +192,19 @@
 
                         <div class="row" ng-show="err">
                             <div class="col-md-12 col-sm-12">
-                                <div><strong>StatusCode:{{err.status}}</strong></div>
+                                <div><strong>StatusCode:{{err.statusCode}}</strong></div>
                                 <pre>{{err.data | json}}</pre>
                             </div>
                         </div>
 
+
+                        <hr/>
                         <div class="row" ng-show="response">
                             <div class="col-md-12 col-sm-12">
 
+
+
+<!--
                                 <div class="row">
                                     <div class="col-md-4 col-sm-4">
                                         <div><strong>StatusCode:</strong>{{response.status}}</div>
@@ -215,15 +213,28 @@
                                         <div><strong>Count:</strong>{{response.data.entry.length}}</div>
                                     </div>
                                 </div>
+                                -->
 
-
-
-                                <uib-tabset>
-                                    <uib-tab heading="Contents">
 
                                         <div class="row">
                                             <div class="col-md-3 col-sm-3">
+
+                                                <div class="row" style="margin-bottom: 8px">
+
+                                                    <div class="col-md-8 col-sm-8">
+                                                        {{response.data.entry.length}} Entries
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-4">
+                                                        <span ng-click="showBundle(response.data)" class="clickable">Show Bundle</span>
+                                                    </div>
+                                                </div>
+
+
                                                 <div class="list-group"  style="height:600px; overflow-y: auto;">
+
+
+
+
                                                     <div ng-class="{'list-group-item':true,'list-group-item-info':result.selectedEntry.fullUrl == entry.fullUrl}"
                                                          ng-repeat="entry in response.data.entry">
                                                         <div  ng-click="selectEntry(entry)"  ng-clickDEP="result.selectedEntry = entry" style="cursor: pointer">
@@ -235,11 +246,13 @@
                                             </div>
                                             <div class="col-md-9 col-sm-9">
 
-
-
-
                                                 <uib-tabset>
                                                     <uib-tab heading="Json">
+                                                        <pre>{{result.selectedEntry | json}}</pre>
+                                                    </uib-tab>
+                                                    <uib-tab heading="FHIRPath">
+                                                        <fhirpath resource="result.selectedEntry"></fhirpath>
+                                                        <hr/>
                                                         <pre>{{result.selectedEntry | json}}</pre>
                                                     </uib-tab>
                                                     <uib-tab heading="Tree">
@@ -248,23 +261,72 @@
                                                     </uib-tab>
                                                 </uib-tabset>
 
-
-
-
-
                                             </div>
                                         </div>
 
 
 
-                                    </uib-tab>
-
-                                    <uib-tab heading="Json">
-                                        <pre>{{response.data | json}}</pre>
-                                    </uib-tab>
-                                </uib-tabset>
 
 
+
+
+
+
+
+                                <!--
+
+                                                                <uib-tabset>
+                                                                    <uib-tab heading="Contents">
+
+                                                                        <div class="row">
+                                                                            <div class="col-md-3 col-sm-3">
+                                                                                <div class="list-group"  style="height:600px; overflow-y: auto;">
+
+
+                                                                                    <div class="list-group-item">
+                                                                                        <span ng-click="showBundle(response.data)">Show Bundle</span>
+                                                                                    </div>
+
+
+                                                                                    <div ng-class="{'list-group-item':true,'list-group-item-info':result.selectedEntry.fullUrl == entry.fullUrl}"
+                                                                                         ng-repeat="entry in response.data.entry">
+                                                                                        <div  ng-click="selectEntry(entry)"  ng-clickDEP="result.selectedEntry = entry" style="cursor: pointer">
+                                                                                            {{entry.resource.resourceType}}
+                                                                                            <div>{{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}</div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-9 col-sm-9">
+
+                                                                                <uib-tabset>
+                                                                                    <uib-tab heading="Json">
+                                                                                        <pre>{{result.selectedEntry | json}}</pre>
+                                                                                    </uib-tab>
+                                                                                    <uib-tab heading="FHIRPath">
+                                                                                        <fhirpath resource="result.selectedEntry"></fhirpath>
+                                                                                        <hr/>
+                                                                                        <pre>{{result.selectedEntry | json}}</pre>
+                                                                                    </uib-tab>
+                                                                                    <uib-tab heading="Tree">
+                                                                                        <div id="queryResourceTree"></div>
+
+                                                                                    </uib-tab>
+                                                                                </uib-tabset>
+
+                                                                            </div>
+                                                                        </div>
+
+
+
+                                                                    </uib-tab>
+
+                                                                    <uib-tab heading="Json">
+                                                                        <pre>{{response.data | json}}</pre>
+                                                                    </uib-tab>
+                                                                </uib-tabset>
+
+                                -->
 
 
                             </div>
