@@ -432,6 +432,7 @@
 
                 <uib-tabset>
                     <uib-tab heading="By Type">
+                        <br/>
                         <uib-accordion>
 
                             <div uib-accordion-group class="panel-default" heading="{{key}}"
@@ -452,14 +453,22 @@
                         </uib-accordion>
                     </uib-tab>
                     <uib-tab heading="Bundle">
+                        <br/>
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12">
+                                <span class="clickable pull-right" ng-click="selectSingleBundle(singleBundle)">Show all</span>
+                            </div>
+
+                        </div>
 
                         <ul class="list-group">
-
+                            <!--
                             <li ng-class="{'list-group-item':1==1,'list-group-item-info':entry.resource.id == outcome.selectedResource.id}"
                                 style = "cursor: pointer">
                                 <span ng-click="selectSingleBundle(singleBundle)">Show all</span>
 
                             </li>
+                            -->
 
                             <li ng-class="{'list-group-item':1==1,'list-group-item-info':entry.resource.id == outcome.selectedResource.id}"
                                 style = "cursor: pointer"
@@ -489,6 +498,16 @@
         </div>
 
 
+    </uib-tab>
+
+
+    <uib-tab heading="GraphQL">
+        <br/>
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <graphql resource="currentPatient"></graphql>
+            </div>
+        </div>
     </uib-tab>
 
 

@@ -1,0 +1,32 @@
+{
+  "links" : [
+    {"url":"http://hl7.org/fhir/index.html","description":"Main specification page"},
+    {"url":"http://hl7.org/fhir/documentation.html","description":"Documentation Index"},
+    {"url":"http://hl7.org/fhir/resourcelist.html","description":"List of resources"},
+
+    {"url": "http://hl7.org/fhir/http.html","description": "RESTful API description"},
+    {"url": "http://hl7.org/fhir/search.html","description":"Details of search"}
+
+
+],
+  "search": [
+    {"name":"Including resources","param": "_include","url":"http://hl7.org/fhir/search.html#include",
+      "description":"Asks the server to include referenced resources from those in the main query. Uses the defined search parameters",
+      "syntax": "GET [base]/MedicationRequest?_include=MedicationRequest:patient&criteria..."
+
+    },
+    {"name":"Chaining","param": "","url":"http://hl7.org/fhir/search.html#chaining",
+      "description":"Specifying a search by including parameters in references resources (using defined search parameters)",
+      "syntax": "GET [base]/DiagnosticReport?subject:Patient.name=peter"
+
+    },
+    {"name":"","param": "","url":"",
+      "description":"",
+      "syntax": ""
+
+    }
+  ]
+
+}
+
+

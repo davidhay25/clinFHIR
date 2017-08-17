@@ -6,14 +6,14 @@
     "verificationStatus" : "confirmed",
     "category" : {
       "coding" : [
-        {"code": "diagnosis","system":"http://hl7.org/fhir/condition-category","display":"diagnosis"},
+
         {"code": "14657009","system": "http://snomed.info/sct","display": "Diagnosis"}
       ],
       "text" : "Diagnosis"
     },
     "severity" : {
       "coding" : [
-        {"code": "371923033","system":"http://snomed.info/ct","display":"mild to moderate"}
+        {"code": "6736007","system":"http://snomed.info/ct","display":"mild to moderate"}
       ],
       "text" : "mild to moderate"
     },
@@ -37,7 +37,7 @@
     "verificationStatus" : "confirmed",
     "category" : {
       "coding" : [
-        {"code": "diagnosis","system":"http://hl7.org/fhir/condition-category","display":"diagnosis"},
+
         {"code": "14657009","system": "http://snomed.info/sct","display": "Diagnosis"}
       ],
       "text" : "Diagnosis"
@@ -69,7 +69,7 @@
     "verificationStatus" : "confirmed",
     "category" : {
       "coding" : [
-        {"code": "diagnosis","system":"http://hl7.org/fhir/condition-category","display":"diagnosis"},
+
         {"code": "14657009","system": "http://snomed.info/sct","display": "Diagnosis"}
       ],
       "text" : "Diagnosis"
@@ -101,7 +101,7 @@
   "verificationStatus" : "confirmed",
   "category" : {
     "coding" : [
-      {"code": "diagnosis","system":"http://hl7.org/fhir/condition-category","display":"diagnosis"},
+
       {"code": "14657009","system": "http://snomed.info/sct","display": "Diagnosis"}
     ],
     "text" : "Diagnosis"
@@ -133,7 +133,7 @@
     "verificationStatus" : "confirmed",
     "category" : {
       "coding" : [
-        {"code": "diagnosis","system":"http://hl7.org/fhir/condition-category","display":"diagnosis"},
+
         {"code": "14657009","system": "http://snomed.info/sct","display": "Diagnosis"}
       ],
       "text" : "Diagnosis"
@@ -165,7 +165,7 @@
     "verificationStatus" : "confirmed",
     "category" : {
       "coding" : [
-        {"code": "diagnosis","system":"http://hl7.org/fhir/condition-category","display":"diagnosis"},
+
         {"code": "14657009","system": "http://snomed.info/sct","display": "Diagnosis"}
       ],
       "text" : "Diagnosis"
@@ -218,14 +218,14 @@
     "verificationStatus" : "confirmed",
     "category" : {
       "coding" : [
-        {"code": "diagnosis","system":"http://hl7.org/fhir/condition-category","display":"diagnosis"},
+
         {"code": "14657009","system": "http://snomed.info/sct","display": "Diagnosis"}
       ],
       "text" : "Diagnosis"
     },
     "severity" : {
       "coding" : [
-        {"code": "371923033","system":"http://snomed.info/ct","display":"mild to moderate"}
+        {"code": "6736007","system":"http://snomed.info/ct","display":"mild to moderate"}
       ],
       "text" : "Diagnosis"
     },
@@ -271,14 +271,14 @@
     "verificationStatus" : "confirmed",
     "category" : {
       "coding" : [
-        {"code": "diagnosis","system":"http://hl7.org/fhir/condition-category","display":"diagnosis"},
+
         {"code": "14657009","system": "http://snomed.info/sct","display": "Diagnosis"}
       ],
       "text" : "Diagnosis"
     },
     "severity" : {
       "coding" : [
-        {"code": "371923033","system":"http://snomed.info/ct","display":"moderate"}
+        {"code": "6736007","system":"http://snomed.info/ct","display":"moderate"}
       ],
       "text" : "Moderate"
     },
@@ -303,7 +303,7 @@
     "verificationStatus" : "confirmed",
     "category" : {
       "coding" : [
-        {"code": "diagnosis","system":"http://hl7.org/fhir/condition-category","display":"diagnosis"},
+
         {"code": "14657009","system": "http://snomed.info/sct","display": "Diagnosis"}
       ],
       "text" : "Diagnosis"
@@ -335,7 +335,7 @@
     "verificationStatus" : "confirmed",
     "category" : {
       "coding" : [
-        {"code": "diagnosis","system":"http://hl7.org/fhir/condition-category","display":"diagnosis"},
+
         {"code": "14657009","system": "http://snomed.info/sct","display": "Diagnosis"}
       ],
       "text" : "Diagnosis"
@@ -367,14 +367,14 @@
     "verificationStatus" : "confirmed",
     "category" : {
       "coding" : [
-        {"code": "diagnosis","system":"http://hl7.org/fhir/condition-category","display":"diagnosis"},
+
         {"code": "14657009","system": "http://snomed.info/sct","display": "Diagnosis"}
       ],
       "text" : "Diagnosis"
     },
     "severity" : {
       "coding" : [
-        {"code": "371923033","system":"http://snomed.info/ct","display":"moderate"}
+        {"code": "6736007","system":"http://snomed.info/ct","display":"moderate"}
       ],
       "text" : "Moderate"
     },

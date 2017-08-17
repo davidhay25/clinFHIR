@@ -1,5 +1,5 @@
 angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,
-                                 profileCreatorSvc,GetDataFromServer,ResourceUtilsSvc,RenderProfileSvc){
+                                 profileCreatorSvc,GetDataFromServer,ResourceUtilsSvc,RenderProfileSvc,$http){
 
     $scope.config = $localStorage.config;
     $scope.operationsUrl = $scope.config.baseSpecUrl + "operations.html";
@@ -12,20 +12,19 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         return  $scope.config.baseSpecUrl + type;
     }
 
-    setDefaultInput();
 
-    //get all the standard resource types - the one defined in the fhir spec. Used for the select profile modal...
-
-    /*
-    RenderProfileSvc.getAllStandardResourceTypes().then(
-        function(standardResourceTypes) {
-            $scope.standardResourceTypes = standardResourceTypes ;
-
+    $http.get('artifacts/fhirHelp.json').then(
+        function(data) {
+            $scope.fhirHelp = data.data;
+            console.log($scope.fhirHelp)
+        }, function (err) {
+            console.log(err);
         }
     );
 
+    setDefaultInput();
 
-    */
+
 
     GetDataFromServer.registerAccess('query');
 
@@ -406,18 +405,27 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     };
 
+    $scope.executeAdHoc = function(qry) {
+        executeQuery($scope.server.url + qry)
+    }
+
+
     $scope.doit = function() {
-        $scope.buildQuery();        //always make sure the query is correct;
+        $scope.buildQuery();
+        executeQuery($scope.query)
+    }
+
+
+    var executeQuery = function(qry) {
+       // $scope.buildQuery();        //always make sure the query is correct;
         delete $scope.response;
         delete $scope.err;
         delete $scope.result.selectedEntry;
         $scope.waiting = true;
 
-        GetDataFromServer.adHocFHIRQueryFollowingPaging($scope.query).then(
+        GetDataFromServer.adHocFHIRQueryFollowingPaging(qry).then(
 
-        //resourceCreatorSvc.executeQuery('GET',$scope.query).then(
             function(data){
-
                 $scope.response = data;
                 //$scope.statusCode = data.statusCode;
 
@@ -427,12 +435,10 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                     type:$scope.input.selectedType.name,
                     parameters:$scope.input.parameters,
                     server : $scope.server,
-                   // id:$scope.input.id,
                     verb:$scope.input.verb};
 
 
                 $scope.queryHistory = resourceCreatorSvc.addToQueryHistory(hx)
-                //delete $scope.input.id;
                 $scope.input.parameters = "";
 
             },
@@ -442,7 +448,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
             }
         ).finally(function(){
             $scope.waiting = false;
-            //temp setDefaultInput();
         })
     };
 

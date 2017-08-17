@@ -206,7 +206,7 @@
                 </div>
                 <div class="col-sm-8 col-md-8">
                     <br/>
-
+<!--
                     <div class="rounded-box">
                         <div class="row">
                             <div class="col-sm-10 col-md-10">
@@ -247,7 +247,7 @@
                             </div>
                         </div>
                     </div>
-
+-->
 
 
                     <div class="showHl7" ng-repeat="line in selectedHL7Sample.content">
@@ -329,9 +329,13 @@
 
                     <td width = '43%'>
 
-                        <div ng-repeat = "v in item.v2.value.values track by $index" >
-                            <div class="pull-right">{{v}}</div>
+                        <div class="pull-right">
+                            <div ng-repeat = "v in item.v2.value.values track by $index" >
+                                <div>{{v}}</div>
+                            </div>
                         </div>
+
+
                         <div>
                             <em class="pull-left">
                             <div uib-popover-html="showHl7Desc(item.v2.key)"

@@ -80,7 +80,7 @@
 
 
         <uib-tabset>
-            <uib-tab heading="Single resource query">
+            <uib-tab heading="Query">
                 <div class="pull-right">
                     <button class="btn btn-link" ng-click="showHistory = ! showHistory">
                         <span ng-show="showHistory">Hide History</span>
@@ -113,78 +113,98 @@
 
 
                         <div ng-show="server">
-                            <!--
-                            <div class="row">
-                                <div class="col-md-2 col-sm-2">Verb</div>
-                                <div class="col-md-3 col-sm-3">Resource Type</div>
-                                <div class="col-md-6 col-sm-6">
-                                    Parameters
-
-                                </div>
-                                <div class="col-md-1 col-sm-1"></div>
-                            </div>
-                            -->
 
 
-                            <div class="row">
-                                <div class="col-md-2 col-sm-2">
-                                    Resource Type
-                                </div>
-                            </div>
-
-
-
-                            <div class="row">
-                                <div class="col-md-2 col-sm-2">
-
-                                    <select class="form-control" ng-model="input.selectedType"
-                                            ng-change="typeSelected(input.selectedType)"
-                                            ng-options="type.name for type in standardResourceTypes"/>
-                                </div>
-
-                                <div class="col-md-1 col-sm-1" ng-show="type">
-                                    <a target="_blank" ng-href="{{fhirBasePath}}{{type.name | getLogicalID | lowercase}}.html">
-                                        <i class="glyphicon glyphicon-globe"
-                                           title="View Resource definition in spec">
-                                        </i>
-
-                                    </a>
-                                </div>
-
-                                <div class="col-md-5 col-sm-5">
+                            <uib-tabset>
+                                <uib-tab heading="Query Builder">
+                                    <br/>
                                     <div class="row">
-                                        <div class="col-md-11 col-sm-11">
+                                        <div class="col-md-2 col-sm-2">
+                                            Resource Type
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="row">
+                                        <div class="col-md-2 col-sm-2">
+
+                                            <select class="form-control" ng-model="input.selectedType"
+                                                    ng-change="typeSelected(input.selectedType)"
+                                                    ng-options="type.name for type in standardResourceTypes"/>
+                                        </div>
+
+                                        <div class="col-md-1 col-sm-1" ng-show="type">
+                                            <a target="_blank" ng-href="{{fhirBasePath}}{{type.name | getLogicalID | lowercase}}.html">
+                                                <i class="glyphicon glyphicon-globe"
+                                                   title="View Resource definition in spec">
+                                                </i>
+
+                                            </a>
+                                        </div>
+
+                                        <div class="col-md-5 col-sm-5">
+                                            <div class="row">
+                                                <div class="col-md-11 col-sm-11">
                                             <textarea ng-show="input.selectedType"
                                                       placeholder="Query parameters"
                                                       ng-model="input.parameters" class="form-control"
                                                       ng-change="buildQuery()"></textarea>
-                                        </div>
-                                        <div class="col-md-1 col-sm-1">
-                                            <i ng-show="input.selectedType" class="glyphicon glyphicon-plus"
-                                               title="Add to parameter"
-                                               ng-click="addParamToQuery()" style="cursor: pointer">
+                                                </div>
+                                                <div class="col-md-1 col-sm-1">
+                                                    <i ng-show="input.selectedType" class="glyphicon glyphicon-plus"
+                                                       title="Add to parameter"
+                                                       ng-click="addParamToQuery()" style="cursor: pointer">
 
-                                            </i>
+                                                    </i>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row rounded-box" ng-show="type && query">
+                                        <div class="col-md-1 col-sm-1">
+                                            <button class="btn btn-primary" ng-click="doit()">Execute</button>
+                                        </div>
+                                        <div class="col-md-11 col-sm-11">
+                                            <h5>{{query}}</h5>
+                                        </div>
+
+                                    </div>
+
+
+                                </uib-tab>
+
+                                <uib-tab heading="Ad Hoc REST query">
+                                    <br/>
+                                    <div class="row">
+                                        <div class="col-sm-10 col-md-10">
+                                            <textarea class="form-control" ng-model="adHocQry"
+                                            placeholder="Enter the query to be executed against {{server.url}}"></textarea>
+                                        </div>
+                                        <div class="col-sm-2 col-md-2">
+                                            <button  rows=4 class="btn btn-primary" ng-click="executeAdHoc(adHocQry)">Execute</button>
                                         </div>
                                     </div>
 
-                                </div>
+                                </uib-tab>
 
-                            </div>
+                                <!--
+                                <uib-tab heading="GraphQL">
+                                    <graphql></graphql>
+                                </uib-tab>
+-->
+
+                            </uib-tabset>
 
 
 
 
 
-                            <div class="row rounded-box" ng-show="type && query">
-                                <div class="col-md-1 col-sm-1">
-                                    <button class="btn btn-primary" ng-click="doit()">Execute</button>
-                                </div>
-                                <div class="col-md-11 col-sm-11">
-                                    <h5>{{query}}</h5>
-                                </div>
 
-                            </div>
+
 
                         </div>
 
@@ -204,19 +224,8 @@
 
 
 
-<!--
+
                                 <div class="row">
-                                    <div class="col-md-4 col-sm-4">
-                                        <div><strong>StatusCode:</strong>{{response.status}}</div>
-                                    </div>
-                                    <div class="col-md-4 col-sm-4">
-                                        <div><strong>Count:</strong>{{response.data.entry.length}}</div>
-                                    </div>
-                                </div>
-                                -->
-
-
-                                        <div class="row">
                                             <div class="col-md-3 col-sm-3">
 
                                                 <div class="row" style="margin-bottom: 8px">
@@ -264,69 +273,6 @@
                                             </div>
                                         </div>
 
-
-
-
-
-
-
-
-
-
-                                <!--
-
-                                                                <uib-tabset>
-                                                                    <uib-tab heading="Contents">
-
-                                                                        <div class="row">
-                                                                            <div class="col-md-3 col-sm-3">
-                                                                                <div class="list-group"  style="height:600px; overflow-y: auto;">
-
-
-                                                                                    <div class="list-group-item">
-                                                                                        <span ng-click="showBundle(response.data)">Show Bundle</span>
-                                                                                    </div>
-
-
-                                                                                    <div ng-class="{'list-group-item':true,'list-group-item-info':result.selectedEntry.fullUrl == entry.fullUrl}"
-                                                                                         ng-repeat="entry in response.data.entry">
-                                                                                        <div  ng-click="selectEntry(entry)"  ng-clickDEP="result.selectedEntry = entry" style="cursor: pointer">
-                                                                                            {{entry.resource.resourceType}}
-                                                                                            <div>{{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}</div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="col-md-9 col-sm-9">
-
-                                                                                <uib-tabset>
-                                                                                    <uib-tab heading="Json">
-                                                                                        <pre>{{result.selectedEntry | json}}</pre>
-                                                                                    </uib-tab>
-                                                                                    <uib-tab heading="FHIRPath">
-                                                                                        <fhirpath resource="result.selectedEntry"></fhirpath>
-                                                                                        <hr/>
-                                                                                        <pre>{{result.selectedEntry | json}}</pre>
-                                                                                    </uib-tab>
-                                                                                    <uib-tab heading="Tree">
-                                                                                        <div id="queryResourceTree"></div>
-
-                                                                                    </uib-tab>
-                                                                                </uib-tabset>
-
-                                                                            </div>
-                                                                        </div>
-
-
-
-                                                                    </uib-tab>
-
-                                                                    <uib-tab heading="Json">
-                                                                        <pre>{{response.data | json}}</pre>
-                                                                    </uib-tab>
-                                                                </uib-tabset>
-
-                                -->
 
 
                             </div>
@@ -441,6 +387,47 @@
                     </uib-tabset>
 
                 </div>
+            </uib-tab>
+            <uib-tab heading="Query help">
+                <br/>
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <h5>General links (open in new tab)</h5>
+                        <table class="table">
+                            <tr ng-repeat="link in fhirHelp.links">
+                                <td><a href="{{link.url}}" target="_blank">{{link.url}}</a>  </td>
+                                <td>{{link.description}}</td>
+                            </tr>
+                        </table>
+
+                    </div>
+                    <div class="col-md-6 col-sm-6">
+
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 col-sm-12">
+
+                        <h5>Search parameters (links open in new tab)</h5>
+
+                        <table class="table table-bordered">
+                            <tr><th>Name</th><th>Parameter</th><th>Example syntax</th><th>Description</th><th>Spec</th></tr>
+                            <tr ng-repeat="srch in fhirHelp.search">
+                                <td>{{srch.name}}</td>
+                                <td>{{srch.param}}</td>
+                                <td>{{srch.syntax}}</td>
+                                <td>{{srch.description}}</td>
+                                <td><a href="{{srch.url}}" target="_blank">Details</a>  </td>
+
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+
+
             </uib-tab>
         </uib-tabset>
 

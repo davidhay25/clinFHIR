@@ -478,14 +478,19 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                             condition.patient = {reference:'Patient/'+patientId};
                         } else {
                             condition.subject = {reference:'Patient/'+patientId};
+
+                            //category became multiple in stu3
+                            var category = angular.copy(condition.category );
+                            condition.category =[category];
+
+                            if (condition.evidence && condition.evidence[0].code) {
+                                var eCode = angular.copy(condition.evidence[0].code);
+                                condition.evidence[0].code = [eCode]
+                            }
+
                         }
 
-                       // condition.patient = {reference:'Patient/'+patientId};
                         condition.id = 'cond'+inx;
-                      //  condition.reporter = {reference:'Patient/'+patientId};
-
-                       // condition.text = {status:'generated',div:"<div xmlns='http://www.w3.org/1999/xhtml'>"+nameText+'</div>'};
-
                         var entry = {date: today, item : {reference : 'Condition/'+condition.id}}
                         conditionList.entry.push(entry);
 
@@ -542,10 +547,18 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             bundle.entry.push(listBundleEntry);
             GetDataFromServer.localServerQuery(url).then(
                 function(data) {
+                    var fhirVersion = appConfigSvc.getCurrentFhirVersion();
+
                     var refList = data.data;
                     refList.forEach(function(medStmt,inx){
                         //each entry is a basic medication statement - needs to have the patient specific stuff added
-                        medStmt.patient = {reference:'Patient/'+patientId};
+                        if (fhirVersion == 2) {
+                            medStmt.patient = {reference:'Patient/'+patientId};
+                        } else {
+                            medStmt.subject = {reference:'Patient/'+patientId};
+                            medStmt.taken='y';
+                        }
+
                         medStmt.status = "active";
                         medStmt.id = 'med'+inx;
                         //console.log(angular.toJson(medStmt));
@@ -632,6 +645,10 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 //an empty array causes a parsing error on Grahames server...
                 if (enc.indication && enc.indication.length == 0) {
                     delete enc.indication;
+                }
+
+                if (enc.diagnosis && enc.diagnosis.length == 0) {
+                    delete enc.diagnosis;
                 }
 
 

@@ -405,14 +405,31 @@ console.log(contents)
 
                 return response;
 
-                //return the value of this field. - field name is like PV1-7.9.2
-                function getFieldValue(hl7Hash,fieldName) {
 
+
+
+                function getFieldValue(hl7Hash,fieldName) {
                     var response = {values:[]}
+
+                    var ar = fieldName.split(' ');      //assume multiple names are spearated by a space
+                    ar.forEach(function (fieldName) {
+                        responseOneField = getOneFieldValue(hl7Hash,fieldName);
+                        if (responseOneField.values) {
+                            response.values = response.values.concat(responseOneField.values);
+                        }
+                    })
+
+                    return response;
+                }
+
+                //return the value of this field. - field name is like PV1-7.9.2
+                function getOneFieldValue(hl7Hash,fieldName) {
+
+                    var response = {values:[]};
 
                     var ar = fieldName.split('-');
                     var segmentCode = ar[0];                //eg PV1
-                    var fieldNumberAsString = ar[1] || fieldName;         //eg 7.9.2 - allow for a filed name like 'MSH'
+                    var fieldNumberAsString = ar[1] || fieldName;         //eg 7.9.2 - allow for a field name like 'MSH'
                     var fieldNumber = parseInt(ar[1],10);   //eg 7
 
                     var segments = hl7Hash[segmentCode]     //each segment is a full seg,ent - eg a PV1...
@@ -592,7 +609,7 @@ console.log(contents)
             }
 
             $scope.showRow = function(item) {
-console.log(item)
+//console.log(item)
                 if ($scope.input.showAllMappings) {
                     return true;
                 } else {
