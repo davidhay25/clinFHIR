@@ -256,7 +256,7 @@
 
                                                 <uib-tabset>
                                                     <uib-tab heading="Json">
-                                                        <pre>{{result.selectedEntry.resource | json}}</pre>
+                                                        <pre>{{result.selectedEntry | json}}</pre>
                                                     </uib-tab>
                                                     <uib-tab heading="XML">
                                                         <pre>{{xmlResource}}</pre>
@@ -269,7 +269,7 @@
                                                     <uib-tab heading="FHIRPath">
                                                         <fhirpath resource="result.selectedEntry"></fhirpath>
                                                         <hr/>
-                                                        <pre>{{result.selectedEntry.resource | json}}</pre>
+                                                        <pre>{{result.selectedEntry | json}}</pre>
                                                     </uib-tab>
 
                                                 </uib-tabset>

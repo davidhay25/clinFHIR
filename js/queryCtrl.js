@@ -464,9 +464,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         var newResource =  angular.fromJson(angular.toJson(r));
         var treeData = resourceCreatorSvc.buildResourceTree(newResource);
 
-
-
-
+        
         GetDataFromServer.getXmlResource(r.resourceType + "/" + r.id + "?_format=xml&_pretty=true").then(
             function (data) {
                 $scope.xmlResource = data.data;
