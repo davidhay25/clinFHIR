@@ -26,7 +26,8 @@
         <select class="form-control" ng-model="input.param"
                 ng-options="opt.name for opt in paramList"/>
 
-        <input type="text" class="form-control" ng-model="input.paramValue" placeholder="Value of {{input.param.name}}"/>
+        <input type="text" class="form-control" ng-model="input.paramValue"
+               placeholder="Value of {{input.param.name}} ({{input.param.type}})"/>
 
 
     </div>

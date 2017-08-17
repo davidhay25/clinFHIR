@@ -120,24 +120,32 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                 data.data.rest[0].resource.forEach(function(res){
                     //console.log(res)
                     $scope.standardResourceTypes.push({name:res.type})
+
+                    //sort the search parameters alphabetically...
+
+                    res.searchParam.sort(function (a,b) {
+                        if (a.name > b.name) {
+                            return 1
+                        } else {
+                            return -1
+                        }
+
+                    });
+
+
                     $scope.hashResource[res.type] = res;
                 })
-
-
-                //analyseConformance(data.data);      //figure out the server capabi
 
             },function (err) {
                 alert('Error loading conformance resource:'+angular.toJson(err));
             }
         ).finally(function(){
             $scope.waiting = false;
-        })
+        });
 
         $scope.buildQuery();        //builds the query from the params on screen
 
     };
-
-
 
 
     //whan a resource tye is selected
@@ -145,28 +153,17 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         $scope.type = type;
         $scope.buildQuery();
 
-
-
-    }
+    };
 
 
     $scope.addParamToQuery = function(modelUrl) {
         $uibModal.open({
             templateUrl: 'modalTemplates/queryParam.html',
-            controller: function ($scope,paramListDEP,hashResource,type) {
+            controller: function ($scope,hashResource,type) {
                 $scope.paramList = hashResource[type.name].searchParam; // paramList;
 
-               // console.log($scope.paramList);
 
                 $scope.input = {};
-
-/*
-                //find all the resources referenced by this type...
-                var refs = []
-                $scope.paramList.forEach(function(param){
-                    console.log(param)
-                })
-*/
 
                 $scope.close = function() {
                     $scope.$close({param:$scope.input.param,value:$scope.input.paramValue})
@@ -180,13 +177,9 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                 },
                 hashResource : function(){
                     return $scope.hashResource;
-                },
-                paramListDEP: function () {          //the default config
-                    console.log($scope.queryParam)
-                    return $scope.queryParam;
                 }
             }}).result.then(function(vo) {
-                console.log(vo)
+              //  console.log(vo)
                 if (vo) {
                     delete $scope.response;
 
@@ -432,11 +425,15 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
                 var hx = {
                     anonQuery:$scope.anonQuery,
-                    type:$scope.input.selectedType.name,
+                   // type:$scope.input.selectedType.name,
                     parameters:$scope.input.parameters,
                     server : $scope.server,
                     verb:$scope.input.verb};
 
+
+                if ($scope.input.selectedType) {
+                    hx.type = $scope.input.selectedType.name;
+                }
 
                 $scope.queryHistory = resourceCreatorSvc.addToQueryHistory(hx)
                 $scope.input.parameters = "";
@@ -460,11 +457,26 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     $scope.selectEntry = function(entry){
 
+        delete  $scope.xmlResource;
         $scope.result.selectedEntry = entry;
 
         var r = angular.copy(entry.resource);
         var newResource =  angular.fromJson(angular.toJson(r));
         var treeData = resourceCreatorSvc.buildResourceTree(newResource);
+
+
+
+
+        GetDataFromServer.getXmlResource(r.resourceType + "/" + r.id + "?_format=xml&_pretty=true").then(
+            function (data) {
+                $scope.xmlResource = data.data;
+            },
+            function (err) {
+                $scope.xmlResource = "<error>Sorry, Unable to load Xml version</error>";
+                // alert(angular.toJson(err, true))
+            }
+        )
+
 
         //show the tree of this version
         $('#queryResourceTree').jstree('destroy');

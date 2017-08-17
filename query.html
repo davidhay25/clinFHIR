@@ -30,13 +30,26 @@
 
     </script>
 
+    <style>/*https://css-tricks.com/snippets/css/css-box-shadow/*/
+    .myBox {
+        margin-top: 10px;
+        box-shadow: 0 0 8px black;
+        padding:12px;
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+    }
+
+
+    </style>
+
+
     <script src="js/libs/ngStorage.min.js"></script>
     <script src="js/services.js"></script>
     <script src="js/libs/jstree.min.js"></script>
 
     <script src="js/appConfigSvc.js"></script>
     <script src="js/queryCtrl.js"></script>
-
 
     <script src="js/modalDialogSvc.js"></script>
     <script src="js/profileCreatorSvc.js"></script>
@@ -47,34 +60,24 @@
     <script src="js/components/profileDisplayComp.js"></script>
     <script src="directive/fhirpath/fhirpath.js"></script>
     <script src="directive/graphql/graphql.js"></script>
-    <!--
-
-  <script src="js/libs/ngStorage.min.js"></script>
-  <script src="js/components/dataTypes.js"></script>
-
-
-
-
-  <script src="js/documentBuilder.js"></script>
-  <script src="resourceBuilder/rbServices.js"></script>
-  <script src="js/reporterCtrl.js"></script>
-
-
-
-
-
-  <script src="js/profileCreatorSvc.js"></script>
-  -->
 
     <title>Server Query</title>
 
 </head>
 
-
-<body style="padding: 8px" >
+<body style="padding: 8px; padding-top: 80px">
 
 <div ng-app="sampleApp" ng-controller="queryCtrl" class="container-fluid">
 
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="col-md-3 col-sm-3">
+            <a class="navbar-brand" href="#">
+                Server Query
+            </a>
+        </div>
+        <div class="col-md-9 col-sm-9">
+        </div>
+    </nav>
 
     <ng-include src="'/includes/serverQuery.html'"></ng-include>
 

@@ -104,22 +104,15 @@
 
 
         <div class="col-md-1 col-sm-1">
-            <!--
-            <div class="pull-right navbar-form" ng-show="waiting">
-                <img src="css/ajax_loader_blue_32.gif"/>
-            </div>
-            -->
 
             <div ng-hide="waiting">
                 <div class="nav navbar-form navbar-right" ng-hide="firebase.auth().currentUser">
-                        <span style="font-size:1.8em; cursor: pointer">
-                            <div ng-click="login()">
-                                <i class="glyphicon glyphicon-log-in"></i>
-                            </div>
-                        </span>
+                    <span style="font-size:1.8em; cursor: pointer">
+                        <div ng-click="login()">
+                            <i class="glyphicon glyphicon-log-in"></i>
+                        </div>
+                    </span>
                 </div>
-
-
 
                 <div class="nav navbar-form navbar-right" ng-show="firebase.auth().currentUser">
                         <span style="font-size:1.8em; cursor: pointer"
@@ -175,11 +168,7 @@
 
     </nav>
 
-    <!--
-<p>The following table describes the modules that are part of clinFHIR and provides a link to load them. The link will
-open the module in a new browser tab. Multiple copies of a module can be open at the same time, though this can cause confusion
-so is discouraged.</p>
--->
+
     <div class="row"  ng-show="displayMode == 'front'">
         <div class="col-md-8 col-sm-8">
 
@@ -212,6 +201,20 @@ so is discouraged.</p>
                             </tr>
 
                             <tr>
+                                <td>
+                                    <a target="_blank" href="query.html">Server Query</a>
+                                </td>
+                                <td>
+                                    Supports ad hoc queries against any FHIR server. Includes a simple query builder.
+                                    The response can be displayed as Json or a Tree view, and FHIRPath is supported.
+                                </td>
+                                <td>
+                                    Can access any compliant FHIR server (must expose a Capability Statement)
+                                </td>
+                            </tr>
+
+
+                            <tr>
                                 <td><a target="_blank" href="builder.html">Scenario Builder</a></td>
                                 <td>
                                     <p>The Scenario Builder is used to join together the resources needed to represent a specific clinical scenario.
@@ -225,6 +228,9 @@ so is discouraged.</p>
                                     ValueSets on the Terminology server.
                                 </td>
                             </tr>
+
+
+
                             <tr>
                                 <td width="15%">
                                     <a target="_blank" href="logicalModeller.html">Logical Modeller</a>
@@ -291,17 +297,7 @@ so is discouraged.</p>
 
 
 
-                            <tr>
-                                <td>
-                                    <a target="_blank" href="query.html">Query Tool</a>
-                                </td>
-                                <td>
-                                    Allows ad hoc queries against any FHIR server
-                                </td>
-                                <td>
-                                    Can access any compliant FHIR server
-                                </td>
-                            </tr>
+
 
 
                         </table>
@@ -482,7 +478,7 @@ so is discouraged.</p>
                             <li><a target="_blank" href="http://hl7.org/fhir/index.html">STU-3 (R3) Specification</a></li>
                             <li><a target="_blank" href="http://hl7.org/fhir/DSTU2/index.html">STU-2 Specification</a></li>
                             <li><a target="_blank" href="http://wiki.hl7.org/index.php?title=FHIR">FHIR wiki</a></li>
-                            <li><a target="_blank" href="/resourceCreator.html">Old clinFHIR</a></li>
+
 
 
 

@@ -1,10 +1,10 @@
 
 <style>
-    .thisServer{
+    .thisServerDEP{
         color: blue;
         font-weight: bold;
     }
-    .hide {
+    .hideDEP {
         display: none;
     }
 
@@ -13,68 +13,67 @@
 </style>
 
 
-<!-- Display a 'select server' dialog-->
-<div class="row">
+<!-- Display a 'select server' panel-->
 
-    <div class="col-md-1 col-sm-1">
-        <strong>Select Server</strong>
+<div class="panel panel-default">
+    <div class="panel-body">
 
-    </div>
+        <div class="row" >
 
-    <div class="col-md-1 col-sm-1">
-        <div><input type="radio" ng-model="input.serverType" value="known"> Known</div>
-        <input type="radio" ng-model="input.serverType" value="adhoc"> AdHoc
-    </div>
+            <div class="col-md-1 col-sm-1">
+                <strong>Select Server</strong>
+
+            </div>
+
+            <div class="col-md-1 col-sm-1">
+                <div><input type="radio" ng-model="input.serverType" value="known"> Known</div>
+                <input type="radio" ng-model="input.serverType" value="adhoc"> AdHoc
+            </div>
 
 
-    <div class="col-md-3 col-sm-3">
-        <div ng-show="input.serverType == 'known'">
-            <select class="form-control"
-                    ng-change="selectServer(server)"
-                    ng-options="value.name for value in config.allKnownServers track by value.name"
-                    ng-model="server">
+            <div class="col-md-3 col-sm-3">
+                <div ng-show="input.serverType == 'known'">
+                    <select class="form-control"
+                            ng-change="selectServer(server)"
+                            ng-options="value.name for value in config.allKnownServers track by value.name"
+                            ng-model="server">
 
-            </select>
+                    </select>
+                </div>
+                <div ng-show="input.serverType == 'adhoc'">
+                    <input type="text" ng-model="input.adHocServer" ng-blur="selectServer(null,input.adHocServer)"
+                           class="form-control" placeholder="Enter the base Url of the server"/>
+                </div>
+
+            </div>
+
+            <div class="col-md-3 col-sm-3">
+
+            </div>
+
+
+            <div class="col-md-1 col-sm-1">
+
+                <div class="pull-right" ng-show="waiting">
+                    <img src="css/ajax_loader_blue_32.gif"/>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-3">
+                <div class="pull-right">{{server.url}}</div>
+            </div>
+
+
         </div>
-        <div ng-show="input.serverType == 'adhoc'">
-            <input type="text" ng-model="input.adHocServer" ng-blur="selectServer(null,input.adHocServer)"
-                   class="form-control" placeholder="Enter the base Url of the server"/>
-        </div>
 
     </div>
-
-    <div class="col-md-3 col-sm-3">
-        {{server.url}}
-    </div>
-
-
-    <div class="col-md-1 col-sm-1">
-
-        <div class="pull-right" ng-show="waiting">
-            <img src="css/ajax_loader_blue_32.gif"/>
-        </div>
-    </div>
-
-    <div class="col-md-3 col-sm-3">
-        <!--
-        <button ng-show="server && input.localMode == 'serverquery'"
-                class="btn btn-primary pull-right" ng-click = "showConformance()">Read Conformance</button>
-        <div>
-            <button ng-show="server && input.localMode == 'serverquery' && conformance"
-                    class="btn btn-link pull-right" ng-click = "removeConformance()">Query</button>
-        </div>
-        -->
-    </div>
-
-
-
-
 </div>
 
 
 
+
 <div class="row" ng-show="server">
-    <hr/>
+
     <div class="col-sm-12 col-md-12">
 
 
@@ -182,7 +181,7 @@
                                     <div class="row">
                                         <div class="col-sm-10 col-md-10">
                                             <textarea class="form-control" ng-model="adHocQry"
-                                            placeholder="Enter the query to be executed against {{server.url}}"></textarea>
+                                            placeholder="Enter the query to be executed against {{server.url}}. Remember to use _id to refer to a resource id (as this is a search)"></textarea>
                                         </div>
                                         <div class="col-sm-2 col-md-2">
                                             <button  rows=4 class="btn btn-primary" ng-click="executeAdHoc(adHocQry)">Execute</button>
@@ -257,17 +256,22 @@
 
                                                 <uib-tabset>
                                                     <uib-tab heading="Json">
-                                                        <pre>{{result.selectedEntry | json}}</pre>
+                                                        <pre>{{result.selectedEntry.resource | json}}</pre>
                                                     </uib-tab>
-                                                    <uib-tab heading="FHIRPath">
-                                                        <fhirpath resource="result.selectedEntry"></fhirpath>
-                                                        <hr/>
-                                                        <pre>{{result.selectedEntry | json}}</pre>
+                                                    <uib-tab heading="XML">
+                                                        <pre>{{xmlResource}}</pre>
                                                     </uib-tab>
+
                                                     <uib-tab heading="Tree">
                                                         <div id="queryResourceTree"></div>
 
                                                     </uib-tab>
+                                                    <uib-tab heading="FHIRPath">
+                                                        <fhirpath resource="result.selectedEntry"></fhirpath>
+                                                        <hr/>
+                                                        <pre>{{result.selectedEntry.resource | json}}</pre>
+                                                    </uib-tab>
+
                                                 </uib-tabset>
 
                                             </div>
@@ -364,8 +368,10 @@
 
                             </div>
 
+                            <!-- remove temporarily...
                             <button class="btn btn-primary" ng-hide="waiting" ng-click="createConformanceQualityReport()">
                                 Generate Quality report</button>
+                            -->
 
                         </uib-tab>
 
@@ -391,12 +397,13 @@
             <uib-tab heading="Query help">
                 <br/>
                 <div class="row">
-                    <div class="col-md-6 col-sm-6">
+                    <div class="col-md-6 col-sm-6 myBox">
                         <h5>General links (open in new tab)</h5>
                         <table class="table">
                             <tr ng-repeat="link in fhirHelp.links">
-                                <td><a href="{{link.url}}" target="_blank">{{link.url}}</a>  </td>
                                 <td>{{link.description}}</td>
+                                <td><a href="{{link.url}}" target="_blank">{{link.url}}</a>  </td>
+
                             </tr>
                         </table>
 
@@ -408,7 +415,7 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-12 col-sm-12">
+                    <div class="col-md-12 col-sm-12 myBox">
 
                         <h5>Search parameters (links open in new tab)</h5>
 
