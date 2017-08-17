@@ -516,17 +516,12 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                         }
                     );
 
-
-
-                    //deferred.resolve(refList);
                 }
                 ,
                 function(err) {
                     alert('error getting list of conditions to create: ' + angular.toJson(err))
                 }
             );
-
-
 
             return deferred.promise;
 

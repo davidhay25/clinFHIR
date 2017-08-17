@@ -11,6 +11,8 @@ angular.module("sampleApp")
             $scope.ResourceUtilsSvc = ResourceUtilsSvc; //needed for 1 line summary
             $scope.appConfigSvc = appConfigSvc;     //for displaying the patient json
 
+            $scope.showGQL = appConfigSvc.getCurrentDataServer().name == 'Grahames STU3 server';
+
             $scope.displayServers = "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>"
 
             //when a new scenario is selected with a patient from the server. passes in all data for that patient

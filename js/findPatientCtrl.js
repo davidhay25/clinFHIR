@@ -8,8 +8,6 @@ angular.module("sampleApp")
                 $scope.outcome = {log:[]};
 
 
-                //$scope.input.patientId = "87218" //<<<<<<<  TESTING...
-
                 $scope.input.createSamples = true;
                 //when the 'Add new patient' is selected...
                 $scope.seletNewPatientOption = function(){
