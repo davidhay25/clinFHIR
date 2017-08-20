@@ -453,7 +453,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     $scope.showBundle = function(bundle){
         $scope.result.selectedEntry = bundle;
         $('#queryResourceTree').jstree('destroy');      //don't render the tree (todo though might look into this later)
-    }
+    };
 
     $scope.selectEntry = function(entry){
 
@@ -464,7 +464,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         var newResource =  angular.fromJson(angular.toJson(r));
         var treeData = resourceCreatorSvc.buildResourceTree(newResource);
 
-        
+
         GetDataFromServer.getXmlResource(r.resourceType + "/" + r.id + "?_format=xml&_pretty=true").then(
             function (data) {
                 $scope.xmlResource = data.data;
@@ -473,7 +473,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                 $scope.xmlResource = "<error>Sorry, Unable to load Xml version</error>";
                 // alert(angular.toJson(err, true))
             }
-        )
+        );
 
 
         //show the tree of this version

@@ -52,10 +52,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                             if (angular.isArray(profileUrl)) {
                                 profileUrl = typ.profile[0]
                             }
-                            //console.log(profileUrl);
 
-                            //make sure this is not already in the list
-                            //var found = false;
                             var res = that.findResourceInIGPackage(IG,profileUrl);
 
                             if (!res) {
@@ -69,15 +66,20 @@ angular.module("sampleApp").service('profileDiffSvc',
                                 pkg.resource.push(res);
                                 updated = true;
                             }
-
-
-
                         }
 
                     })
                 }
                 if (ed.binding) {
-                    var vsUrl = ed.binding.valueSetReference || ed.binding.valueSetUri;
+
+                    //prefer the valueSetReference...
+                    var vsUrl = ed.binding.valueSetUri;
+                    if (ed.binding.valueSetReference) {
+                        vsUrl = ed.binding.valueSetReference.reference;
+                    }
+
+
+
                     if (vsUrl) {
                         var res = that.findResourceInIGPackage(IG,vsUrl);
 
@@ -89,6 +91,9 @@ angular.module("sampleApp").service('profileDiffSvc',
                             } else {
                                 res.acronym = 'terminology'
                             }
+
+                           // console.log(res)
+
                             pkg.resource.push(res);
                             updated = true;
                         }
@@ -1716,7 +1721,7 @@ angular.module("sampleApp").service('profileDiffSvc',
             //svr is the current server (may not be the same as the one in appConfig - eg for the comparison view...
             var deferred = $q.defer();
             var queries = [];   //retrieve extension definitions
-            var quest = {resourceType:'Questionnaire',status:'draft',item:[]}   //questionnaire for form
+            //var quest = {resourceType:'Questionnaire',status:'draft',item:[]}   //questionnaire for form
 
             if (SD && SD.snapshot && SD.snapshot.element) {
                 var hashPath = {}
@@ -1726,8 +1731,6 @@ angular.module("sampleApp").service('profileDiffSvc',
 
                 var topLineLevel = 1;           //the point at which a top level line should be drawn
                 var topLineRoot = "";
-
-
 
                 SD.snapshot.element.forEach(function(ed){
                     var include = true;

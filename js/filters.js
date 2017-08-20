@@ -194,9 +194,21 @@ angular.module("sampleApp")
             if (ref) {
 
                 var profile = ref;
+
+                //console.log(ref)
                 if (angular.isArray(profile)){
                     profile = ref[0]
                 }
+/*
+                //this is a cop-out. Somethign in the IG viewer is passing a reference rather than a string...
+                if (angular.isObject(profile)){
+                    if (profile.reference) {
+                        profile = profile.reference;
+                    }
+
+                }
+*/
+
 
                 //DSTU-2 - this is an array - just grab the first
                 var ar = profile.split('/');

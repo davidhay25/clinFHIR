@@ -177,6 +177,7 @@ angular.module("sampleApp")
 
 
                             //var IGUrl = appConfigSvc.getCurrentConformanceServer().url + "/ImplementationGuide/"+$scope.currentIG.id;
+
                             SaveDataToServer.saveResource($scope.currentIG).then(
                                 function (data) {
                                     console.log(data)
@@ -637,6 +638,10 @@ angular.module("sampleApp")
 
                            //always check if there are any extension definitions or valuesets references by this profile (in case they have been externally changed)
                            if (profileDiffSvc.updateExtensionsAndVSInProfile($scope.currentIG,SD)) {
+                               console.log($scope.currentIG);
+
+
+
                                SaveDataToServer.saveResource($scope.currentIG).then(
                                    function (data) {
                                        console.log(data)
@@ -648,7 +653,13 @@ angular.module("sampleApp")
                                        alert('Error updating IG '+angular.toJson(err))
                                    }
                                );
+
+
+
+
                            }
+
+
 
                            setupProfile(SD)
                            addToHistory('profile',SD)

@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-07-14b';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-08-20-a';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};
@@ -135,7 +135,7 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:"HealthConnex STU2 server",url:"http://sqlonfhir-dstu2.azurewebsites.net/fhir/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"HealthConnex STU3 server",url:"http://sqlonfhir-stu3.azurewebsites.net/fhir/",version:3,everythingOperation:true});
 
-        defaultConfig.allKnownServers.push({name:"Local HAPI STU2 server",url:"http://localhost:8080/baseDstu2/",version:2,everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:"Local HAPI STU2 server",url:"http://localhost:8079/baseDstu2/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Local HAPI STU3 server",url:"http://localhost:8080/baseDstu3/",version:3,everythingOperation:true,isTerminology:true});
 
 
