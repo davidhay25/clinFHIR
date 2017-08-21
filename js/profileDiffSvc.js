@@ -38,6 +38,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
     return {
         updateExtensionsAndVSInProfile : function(IG,SD,pkg) {
+            //add any referenced extensions and valuesets to the profile...
             var updated = false;
             var that = this;
             if (! pkg) {
@@ -103,6 +104,7 @@ angular.module("sampleApp").service('profileDiffSvc',
             return  updated;
         },
         makeLMFromProfile : function(inProfile) {
+
             var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained','DomainResource'];
             var deferred = $q.defer();
             var profile = angular.copy(inProfile);
@@ -175,7 +177,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                                                 item.myMeta.analysis = analysis;
 
                                             }, function(err) {
-                                                modalService.showModal({}, {bodyText: 'makeProfileDisplayFromProfile: Error retrieving '+ it.profile + " "+ angular.toJson(err)})
+                                               // modalService.showModal({}, {bodyText: 'makeProfileDisplayFromProfile: Error retrieving '+ it.profile + " "+ angular.toJson(err)})
                                                 loadErrors.push({type:'missing StructureDefinition',value:it.profile})
                                                 item.myMeta.analysis = {}
                                             }
@@ -1005,8 +1007,12 @@ angular.module("sampleApp").service('profileDiffSvc',
                 package.resource.forEach(function (item,inx) {
                     IdToUse++;
 
+
+                    //because I'm using acrnym in R3. Dumb reallylll
+                    var purpose = item.purpose || item.acronym;
+
                     var include = true;
-                    switch (item.purpose) {
+                    switch (purpose) {
                         case 'extension' :
                             if (! options.includeExtensions) {
                                 include = false;
@@ -1027,11 +1033,16 @@ angular.module("sampleApp").service('profileDiffSvc',
                             // console.log(url,IdToUse)
 
                             var label = path = $filter('referenceType')(url);
-                            var node = {id: IdToUse, label: label, shape: 'box',color:objColours[item.purpose]};
+                            var node = {id: IdToUse, label: label, shape: 'box',color:objColours[purpose]};
+                           // if (item.acronym) {
+                             //   node.color = objColours[item.acronym]
+                           // }
+
+
                             node.data = item;
                             node.data.url = url;
                             //node.hidden = true;
-                            hash[url]={purpose:item.purpose,description:item.description,nodeId:IdToUse,usedBy:[],node:node};  //usedBy is for extensions - what uses them...
+                            hash[url]={acronym:item.acronym,purpose:item.purpose,description:item.description,nodeId:IdToUse,usedBy:[],node:node};  //usedBy is for extensions - what uses them...
 
                             allNodeHashById[node.id] = node;
                             arNodes.push(node);
@@ -1044,7 +1055,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                 })
             });
 
-           // console.log(hash)
+            console.log(hash)
            // return;
 
             //now load all the profiles, and figure out the references to extensions and other types. Do need to create all the nodes first...
@@ -1054,7 +1065,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                 //console.log(key,item);
                 var parentId = item.nodeId;
 
-                if (item.purpose == 'profile' || item.purpose == 'extension') {
+                if (item.purpose == 'profile' || item.purpose == 'extension' ||item.acronym == 'profile' || item.acronym == 'extension') {
                     var url = key;//item.sourceReference.reference;
                     arQuery.push(getEdges(that, url,hash,parentId,arEdges,options,item.node));
                 }
@@ -1080,6 +1091,8 @@ angular.module("sampleApp").service('profileDiffSvc',
                             node.hidden = true;
                             node.paths = [];    //this will have all the paths between 2 resources (we aggregate them below against the first one
                         });
+
+
 
                         var hashInclude = {};       //a hash of the nodes to include
                         //create the initial hash from the urls passed in...
@@ -1321,6 +1334,9 @@ angular.module("sampleApp").service('profileDiffSvc',
                         deferred1.resolve();
 
 
+                    },function(){
+                        //even if we can't find the resource, resolve the promise so that $q.all will work correctly...
+                        deferred1.resolve();
                     }
                 );
 
@@ -2016,7 +2032,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
                         deferred.resolve($localStorage.extensionDefinitionCache[url]);
                     },function (err) {
-                        console.log(err)
+                        console.log(err.msg)
                         deferred.reject(err);
                     }
                 )

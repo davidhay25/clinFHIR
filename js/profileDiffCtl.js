@@ -473,7 +473,7 @@ angular.module("sampleApp")
                     })
                 });
 
-                ['extension','profile','terminology','logical'].forEach(function (purpose) {
+                ['extension','profile','terminology','logical','other'].forEach(function (purpose) {
                     if ($scope.artifacts[purpose]) {
                         $scope.artifacts[purpose].sort(function(item1,item2) {
                             var typ1 =  $filter('getLogicalID')(item1.url);
@@ -524,14 +524,7 @@ angular.module("sampleApp")
 
                 $scope.selectedItemType = type;
                 $scope.selectedItem = item;
-                /*
-               //when called to navigate to a profile...
-               if (angular.isArray(item)) {
-                   $scope.selectedItem = item[0];
-               } else {
-                   $scope.selectedItem = item;
-               }
-*/
+
 
                //console.log(item)
                 centerNodeInGraph(item.url)
@@ -630,6 +623,9 @@ angular.module("sampleApp")
                    $scope.waiting = true;
                    //console.log($scope.selectedItem.url)
 
+                   //?? !!!!!!!!!!! temp
+                  // url = "http://hl7.org/fhir/us/sdc/"+url
+
 
                    profileDiffSvc.getSD(url).then(
                    //GetDataFromServer.findConformanceResourceByUri(url).then(
@@ -638,7 +634,7 @@ angular.module("sampleApp")
 
                            //always check if there are any extension definitions or valuesets references by this profile (in case they have been externally changed)
                            if (profileDiffSvc.updateExtensionsAndVSInProfile($scope.currentIG,SD)) {
-                               console.log($scope.currentIG);
+                               console.log('updating IG',$scope.currentIG);
 
 
 
@@ -665,7 +661,7 @@ angular.module("sampleApp")
                            addToHistory('profile',SD)
 
                        }, function (err) {
-                           console.log(err)
+                           console.log(err.msg)
                        }
                    ).finally(function () {
                        $scope.waiting = false;
@@ -682,7 +678,7 @@ angular.module("sampleApp")
                 $scope.selectedSD = SD;
 
 
-
+/*
                 //------- other profiles on this base type...
                 var baseType;
 
@@ -692,7 +688,7 @@ angular.module("sampleApp")
                         baseType = $filter('getLogicalID')(SD.base);
                     }
                 }
-
+*/
                /* Not sure why I was doing this. Comment out for the moment...
                 if (baseType) {
                     profileDiffSvc.findProfilesOnBase(baseType).then(
@@ -716,7 +712,18 @@ angular.module("sampleApp")
                 profileDiffSvc.makeLMFromProfile(angular.copy(SD)).then(
                     function(vo) {
 
-//console.log(vo)
+                        //display any errors...
+                        if (vo.errors.length) {
+                            var display = "";
+                            vo.errors.forEach(function (err) {
+                                display += err.type + err.value;
+                            });
+
+                            modalService.showModal({}, {bodyText: display})
+
+                        }
+
+
                         $('#logicalTree').jstree('destroy');
                         $('#logicalTree').jstree(
                             {

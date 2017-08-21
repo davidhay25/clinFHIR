@@ -295,20 +295,37 @@
                             </ul>
                         </div>
 
-                            <div uib-accordion-group class="panel-default">
-                                <uib-accordion-heading>
-                                    Logical Models
-                                    <div class="pull-right badge">{{artifacts.logical.length}}</div>
-                                </uib-accordion-heading>
-                                <ul class="list-group">
-                                    <li class="list-group-item" ng-repeat="item in artifacts.logical"
-                                        ng-click = "selectItem(item,'logical')">
-                                        <div class="clickable">{{item.url | referenceType}}</div>
-                                        <div><em>{{item.description}}</em></div>
-                                    </li>
-                                </ul>
-                                <div class="pull-right"><a href="#" ng-click="importItem({type:'logical',display:'Logical Model'})">Import new</a> </div>
-                            </div>
+                        <div uib-accordion-group class="panel-default">
+                            <uib-accordion-heading>
+                                Logical Models
+                                <div class="pull-right badge">{{artifacts.logical.length}}</div>
+                            </uib-accordion-heading>
+                            <ul class="list-group">
+                                <li class="list-group-item" ng-repeat="item in artifacts.logical"
+                                    ng-click = "selectItem(item,'logical')">
+                                    <div class="clickable">{{item.url | referenceType}}</div>
+                                    <div><em>{{item.description}}</em></div>
+                                </li>
+                            </ul>
+                            <div class="pull-right"><a href="#" ng-click="importItem({type:'logical',display:'Logical Model'})">Import new</a> </div>
+                        </div>
+
+                        <div uib-accordion-group class="panel-default">
+                            <uib-accordion-heading>
+                                Other artifacts
+                                <div class="pull-right badge">{{artifacts.logical.length}}</div>
+                            </uib-accordion-heading>
+                            <ul class="list-group">
+                                <li class="list-group-item" ng-repeat="item in artifacts.other"
+                                    ng-click = "selectItem(item,'other')">
+                                    <div class="clickable">{{item.url | referenceType}}</div>
+                                    <div><em>{{item.description}}</em></div>
+                                </li>
+                            </ul>
+                            <!--
+                            <div class="pull-right"><a href="#" ng-click="importItem({type:'logical',display:'Logical Model'})">Import new</a> </div>
+                            -->
+                        </div>
 
 
                     </uib-accordion>

@@ -1,14 +1,133 @@
-//upload conformance files in a folder structire to a FHOR server
-//currently set for careconnect profiles
-//works synchronously - easier to programme, and easier on the target server...
+//Upload SDC IG to an R3 FHIR server
 
 var fs = require('fs');
 var syncRequest = require('sync-request');
 
 
+var referenceRoot = "http://hl7.org/fhir/us/sdc/";  //so we can convert relative to absolute references
+
+
 //var remoteFhirServer = "http://fhirtest.uhn.ca/baseDstu2/";
 //var remoteFhirServer = "http://snapp.clinfhir.com:8080/baseDstu2/";
-var remoteFhirServer = "http://localhost:8079/baseDstu2/";
+var remoteFhirServer = "http://localhost:8080/baseDstu3/";
+//var localFileRoot = __dirname;
+var localFileRoot = "/Users/davidha/Dropbox/orion/SDC/full-ig/site/";
+var igFile = localFileRoot + "ImplementationGuide-sdc.json";
+
+var ig = getOneFile(igFile);
+if (!ig) {
+    console.log("can't find "+igFile)
+    return;
+
+}
+
+var IG = JSON.parse(ig);
+
+
+//upload the referenced artifacts
+var inx = 0;
+IG.package.forEach(function (package) {
+
+    package.resource.forEach(function (resource) {
+        //console.log(resource);
+        inx++;
+        if (resource.sourceReference) {
+            //console.log(inx + ' ref:' + resource.sourceReference.reference + " "+ resource.example);
+            var ar = resource.sourceReference.reference.split('/');
+            var type = ar[0];
+            var newId = ar[1];
+            var fileName = localFileRoot + type + '-' + ar[1] + '.json';
+
+
+
+           // var newId = ar[1] + '-' + type ;
+           // newId = newId.substr(0,64);   //max length of a FHIR Id...
+
+            //console.log(fileName);
+            var contents = getOneFile(fileName);
+            if (! contents) {
+                console.log(fileName + " not found");
+            } else {
+                //we were able to load the reference
+                var json = JSON.parse(contents);        //the referenced resource
+                json.id = newId;                        //the id on the server
+
+                //convert relative to absolute references...
+                if (resource.sourceReference.reference.substr(0,4 !== 'http')) {
+                    resource.sourceReference.reference = referenceRoot+resource.sourceReference.reference;
+                }
+
+
+
+
+
+                var url = remoteFhirServer  + json.resourceType + '/'+ newId;
+                console.log(url)
+
+                switch (json.resourceType) {
+                    case 'StructureDefinition' :
+                        resource.acronym = 'profile';
+                        break;
+                    case 'ValueSet' :
+                        resource.acronym = 'terminology';
+                        break;
+                    default :
+                        resource.acronym = 'other';
+                        resource.description += "( "+ json.resourceType + ")";
+                        break;
+
+                }
+
+
+                uploadFile(json,url,fileName)
+            }
+        }
+
+
+
+    })
+});
+
+
+
+var url = remoteFhirServer + 'ImplementationGuide/'+ IG.id;
+console.log(url)
+
+uploadFile(IG,url,"Implementation Guide")
+
+
+//console.log(IG);
+
+
+function uploadFile(json,url,fileName) {
+    var options = {};
+    options.body = JSON.stringify(json);
+    options.headers = {"content-type": "application/json+fhir"};
+    options.timeout = 20000;        //20 seconds
+    var response = syncRequest('PUT', url, options);
+
+
+    console.log(response.statusCode)
+    if (response.statusCode !== 200 && response.statusCode !== 201) {
+        console.log("Error saving:"+ fileName + response.body.toString())
+    } else {
+
+        //console.log("Uploaded ImplementationGuide.")
+    }
+}
+
+return;
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 var List = {resourceType:'List',status:'current',mode:'snapshot',entry:[]};
@@ -23,8 +142,7 @@ var IG = {resourceType:'ImplementationGuide',status:'draft',package:[{name:'comp
 IG.id = 'cf-artifacts-cc';
 IG.description = "Care Connect";
 
-//var localFileRoot = __dirname;
-var localFileRoot = "/Users/davidha/Dropbox/orion/careConnect";
+
 
 
 console.log('------ Uploading ValueSets -------')
@@ -210,6 +328,13 @@ function validateResource(fileName, json) {
     return err;
 }
 
+function getOneFile(fileName) {
+    var contents = fs.readFileSync(fileName);
+    if (contents) {
+        return contents.toString();
+    }
+
+}
 
 function getFilesInFolder(path) {
     var ar = []
