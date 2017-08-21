@@ -76,8 +76,6 @@
 
     <div class="col-sm-12 col-md-12">
 
-
-
         <uib-tabset>
             <uib-tab heading="Query">
                 <div class="pull-right">
@@ -288,6 +286,36 @@
                 </div>
 
 
+            </uib-tab>
+            <uib-tab heading="Validate">
+                <br/>
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <textarea  rows="30" class="form-control" ng-model= "input.validateJson">
+
+                        </textarea>
+                    </div>
+
+                    <div class="col-md-6 col-sm-6">
+                        <div class="row">
+                            <div class="col-md-10 col-sm-10">
+
+                                <input type="text" class="form-control" ng-model = "input.validationProfile"
+                                       placeholder="Optional profile (must be on the server)"/>
+
+                            </div>
+                            <div class="col-md-2 col-sm-2">
+                                <button class="btn btn-primary" ng-click="validate(input.validateJson)">Validate</button>
+                            </div>
+                        </div>
+                        <br/>
+                        <pre ng-show="validationResult"
+                             ng-class="{alert:true, 'alert-success':validationSuccess, 'alert-danger':! validationSuccess}"
+                             role="alert">{{validationResult | json}}</pre>
+                    </div>
+
+
+                </div>
             </uib-tab>
             <uib-tab heading="Server Capabilities">
                 <br/>

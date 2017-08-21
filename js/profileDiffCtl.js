@@ -596,6 +596,9 @@ angular.module("sampleApp")
                             $scope.selectedExtension = SD;
 
                             $scope.selectedExtensionAnalysis = Utilities.analyseExtensionDefinition3(SD)
+                        },function(err) {
+                            //can't find the references extension
+                            $scope.selectedExtension = {resourceType:'StructureDefinition',url:item.url}
                         }
                     )
                }
@@ -667,8 +670,6 @@ angular.module("sampleApp")
                        $scope.waiting = false;
                    })
 
-
-
                }
 
 
@@ -708,18 +709,22 @@ angular.module("sampleApp")
 
              //  var clone = angular.copy(SD);
 
+                delete $scope.errorsInLM;
                 //-------- logical model
                 profileDiffSvc.makeLMFromProfile(angular.copy(SD)).then(
                     function(vo) {
 
                         //display any errors...
                         if (vo.errors.length) {
+                            $scope.errorsInLM = vo.errors;
+                            /*
                             var display = "";
                             vo.errors.forEach(function (err) {
                                 display += err.type + err.value;
                             });
 
                             modalService.showModal({}, {bodyText: display})
+                            */
 
                         }
 

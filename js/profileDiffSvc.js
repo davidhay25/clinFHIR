@@ -2021,21 +2021,48 @@ angular.module("sampleApp").service('profileDiffSvc',
                 //console.log('cache')
                 deferred.resolve($localStorage.extensionDefinitionCache[url]);
             } else {
-                // $localStorage.extensionDefinitionCache[url] = 'x'
-                GetDataFromServer.findConformanceResourceByUri(url).then(
-                    function (sdef) {
-                        //console.log(sdef);
-                        delete sdef.text;   //text can be v large in some profiles
 
-                        $localStorage.extensionDefinitionCache[url] = sdef
-//console.log(sdef)
 
-                        deferred.resolve($localStorage.extensionDefinitionCache[url]);
-                    },function (err) {
-                        console.log(err.msg)
-                        deferred.reject(err);
-                    }
-                )
+                //is this a 'core' extension?
+                if (1==1 && url.indexOf('http://hl7.org/fhir/StructureDefinition' > -1)) {
+                    //yep. can get it directly
+                    var url1 = url.replace('StructureDefinition/','extension-');
+                    console.log(url1);
+                    $http.get(url1  +'.json').then(
+                        function(data) {
+                            var sdef = data.data;
+                            delete sdef.text;   //text can be v large in some profiles
+
+                            $localStorage.extensionDefinitionCache[url] = sdef
+
+                            deferred.resolve($localStorage.extensionDefinitionCache[url]);
+                        },
+                        function (err) {
+                            deferred.reject(err);
+                        }
+                    )
+
+
+                } else {
+                    GetDataFromServer.findConformanceResourceByUri(url).then(
+                        function (sdef) {
+                            //console.log(sdef);
+                            delete sdef.text;   //text can be v large in some profiles
+
+                            $localStorage.extensionDefinitionCache[url] = sdef
+
+                            deferred.resolve($localStorage.extensionDefinitionCache[url]);
+                        },function (err) {
+                            console.log(err.msg)
+                            deferred.reject(err);
+                        }
+                    )
+                }
+
+
+
+
+
             }
             return deferred.promise;
         },

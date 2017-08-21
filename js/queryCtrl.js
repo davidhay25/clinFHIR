@@ -1,5 +1,5 @@
-angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,resourceCreatorSvc,
-                                 profileCreatorSvc,GetDataFromServer,ResourceUtilsSvc,RenderProfileSvc,$http){
+angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,
+    resourceCreatorSvc, profileCreatorSvc,GetDataFromServer,ResourceUtilsSvc,RenderProfileSvc,$http,modalService){
 
     $scope.config = $localStorage.config;
     $scope.operationsUrl = $scope.config.baseSpecUrl + "operations.html";
@@ -29,6 +29,61 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     GetDataFromServer.registerAccess('query');
 
     $localStorage.queryHistory = $localStorage.queryHistory || [];
+
+    //validate user-entered json = todo allow a profile to be entered...
+    $scope.validate = function(input) {
+        try {
+            var json = angular.fromJson(input)
+        } catch(ex) {
+            modalService.showModal({}, {bodyText:'This is not valid JSON'});
+            return;
+        }
+        var resourceType = json.resourceType;
+        if (!resourceType) {
+            modalService.showModal({}, {bodyText:"There must be a 'resourceType' property"});
+            return;
+        }
+        if (! $scope.hashResource[resourceType]) {
+            modalService.showModal({}, {bodyText:"The currently selected server does not support this resource type"});
+            return;
+        }
+
+        //perform validation
+        delete $scope.validationResult;
+        delete $scope.validationSuccess;
+
+
+        var url = $scope.server.url + resourceType + "/$validate";
+        var profile = $scope.input.validationProfile;
+        if (profile) {
+            //add the profile to the resource (if not already there)
+            json.meta = json.meta || {}
+            json.meta.profile = json.meta.profile || [];
+            var exists = false;
+            json.meta.profile.forEach(function (prof) {
+                if (prof == profile) {exists=true;}
+            });
+            if (! exists) {
+                json.meta.profile.push(profile)
+                $scope.input.validateJson = angular.toJson(json,2);
+            }
+
+           // url += "?profile="+profile;
+        }
+
+        $http.post(url,angular.toJson(json)).then(
+            function(data) {
+                $scope.validationResult = data.data;    //should be an OO
+                $scope.validationSuccess = true
+            },function(err) {
+                $scope.validationSuccess = false
+                $scope.validationResult = err.data;    //should be an OO
+                //modalService.showModal({}, {bodyText:"There was an error calling the validation service: " + angular.toJson(err)});
+            }
+        )
+
+
+    }
 
     $scope.treeNodeSelected = function(item) {
 
@@ -122,15 +177,17 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                     $scope.standardResourceTypes.push({name:res.type})
 
                     //sort the search parameters alphabetically...
+                    if (res.searchParam) {
+                        res.searchParam.sort(function (a,b) {
+                            if (a.name > b.name) {
+                                return 1
+                            } else {
+                                return -1
+                            }
 
-                    res.searchParam.sort(function (a,b) {
-                        if (a.name > b.name) {
-                            return 1
-                        } else {
-                            return -1
-                        }
+                        });
+                    }
 
-                    });
 
 
                     $scope.hashResource[res.type] = res;
@@ -148,7 +205,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     };
 
 
-    //whan a resource tye is selected
+    //whan a resource tye is selected in th ebuilder
     $scope.typeSelected = function(type) {
         $scope.type = type;
         $scope.buildQuery();
@@ -197,19 +254,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         })
     };
 
-
-
-    $scope.addParamToQueryDEP = function(param,value) {
-
-        delete $scope.response;
-
-        if ($scope.input.parameters) {
-            $scope.input.parameters = $scope.input.parameters + '&'
-        } else {
-            $scope.input.parameters =""
-        }
-        $scope.input.parameters += param.name + '=' + value;
-    }
 
 
     $scope.buildQuery = function() {
@@ -455,6 +499,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         $('#queryResourceTree').jstree('destroy');      //don't render the tree (todo though might look into this later)
     };
 
+    //select an entry from the query result
     $scope.selectEntry = function(entry){
 
         delete  $scope.xmlResource;

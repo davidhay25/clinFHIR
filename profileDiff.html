@@ -832,6 +832,15 @@
                                 </div>
                             </uib-tab>
 
+                            <uib-tab heading="Errors" ng-show="errorsInLM">
+                                <table class="table table-bordered">
+                                    <tr ng-repeat = "err in errorsInLM">
+                                        <td>{{err.type}}</td>
+                                        <td>{{err.value}}</td>
+                                    </tr>
+                                </table>
+                            </uib-tab>
+
                             <uib-tab ng-show="1==2" heading="IG Entry">
                                 <br/>
                                 <div class="row">
