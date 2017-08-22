@@ -54,6 +54,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                                 profileUrl = typ.profile[0]
                             }
 
+                            //is it already in the IG?
                             var res = that.findResourceInIGPackage(IG,profileUrl);
 
                             if (!res) {
@@ -1008,7 +1009,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                     IdToUse++;
 
 
-                    //because I'm using acrnym in R3. Dumb reallylll
+                    //because I'm using acronym in R3. Dumb really - should replace with an extension..
                     var purpose = item.purpose || item.acronym;
 
                     var include = true;
@@ -1030,13 +1031,10 @@ angular.module("sampleApp").service('profileDiffSvc',
                     if (include) {
                         var url = item.sourceReference.reference;   //the url of the node
                         if (url) {
-                            // console.log(url,IdToUse)
+                             console.log(url,purpose)
 
                             var label = path = $filter('referenceType')(url);
                             var node = {id: IdToUse, label: label, shape: 'box',color:objColours[purpose]};
-                           // if (item.acronym) {
-                             //   node.color = objColours[item.acronym]
-                           // }
 
 
                             node.data = item;
@@ -1056,7 +1054,7 @@ angular.module("sampleApp").service('profileDiffSvc',
             });
 
             console.log(hash)
-           // return;
+
 
             //now load all the profiles, and figure out the references to extensions and other types. Do need to create all the nodes first...
             var arQuery = []
@@ -1953,7 +1951,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                     item.extension.analysis = angular.copy(Utilities.analyseExtensionDefinition3($localStorage.extensionDefinitionCache[url]));
                     deferred.resolve()
                 } else {
-                   // $localStorage.extensionDefinitionCache[url] = 'x'
+
                     //if a server was passed in then use that, otherwise use the default one...
                     var serverUrl = appConfigSvc.getCurrentConformanceServer().url;
                     if (svr) {
@@ -1961,7 +1959,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                     }
                     GetDataFromServer.findConformanceResourceByUri(url,serverUrl).then(
                         function (sdef) {
-                            //console.log(sdef);
 
                             delete sdef.text;       //large text
                             $localStorage.extensionDefinitionCache[url] = sdef
@@ -1977,11 +1974,10 @@ angular.module("sampleApp").service('profileDiffSvc',
                     )
                 }
                 return deferred.promise;
-
             }
-
         },
         getTerminologyResource : function(url,resourceType) {
+            //todo - there's an overlap with 'getSD' - maybe. To be investigated - especially getting 'standard' resources..
             var deferred = $q.defer();
             if ($localStorage.extensionDefinitionCache[url]) {
                 //note that this is an async call - some duplicate calls are inevitible
@@ -1996,9 +1992,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                         delete sdef.text;
                         delete sdef.mapping;
                         delete sdef.differential;
-
-
-
 
                         $localStorage.extensionDefinitionCache[url] = sdef
                         deferred.resolve($localStorage.extensionDefinitionCache[url]);
@@ -2018,14 +2011,13 @@ angular.module("sampleApp").service('profileDiffSvc',
             if ($localStorage.extensionDefinitionCache[url]) {
 
                 //note that this is an async call - some duplicate calls are inevitible
-                //console.log('cache')
                 deferred.resolve($localStorage.extensionDefinitionCache[url]);
             } else {
 
 
                 //is this a 'core' extension?
-                if (1==1 && url.indexOf('http://hl7.org/fhir/StructureDefinition' > -1)) {
-                    //yep. can get it directly
+                if (1==1 && url.indexOf('http://hl7.org/fhir/StructureDefinition') > -1) {
+                    //yep. can get it directly. THis seems to be the naming algorithm...
                     var url1 = url.replace('StructureDefinition/','extension-');
                     console.log(url1);
                     $http.get(url1  +'.json').then(
@@ -2033,7 +2025,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                             var sdef = data.data;
                             delete sdef.text;   //text can be v large in some profiles
 
-                            $localStorage.extensionDefinitionCache[url] = sdef
+                            $localStorage.extensionDefinitionCache[url] = sdef;
 
                             deferred.resolve($localStorage.extensionDefinitionCache[url]);
                         },

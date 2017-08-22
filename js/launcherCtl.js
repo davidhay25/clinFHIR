@@ -7,13 +7,7 @@ angular.module("sampleApp")
 
 
 
-            $http.get("https://fhir.nhs.uk/StructureDefinition/spine-practitioner-2-0").then(
-                function (data) {
-                    console.log(data);
-                }, function (err) {
-                    console.log(err)
-                }
-            )
+
 
             $scope.testing = {};
             $scope.showServers = false;
@@ -38,13 +32,13 @@ angular.module("sampleApp")
                     //return the practitioner resource that corresponds to the current user (the service will create if absent)
                     GetDataFromServer.getPractitionerByLogin(user).then(
                         function(practitioner){
-                            //console.log(practitioner)
+
                             $scope.Practitioner = practitioner;
 
                         },function (err) {
                             console.log('Current data server cannot create Practitioners...')
                             //just swallow any error
-                            //alert(err)
+
                         }
                     );
 
@@ -83,19 +77,15 @@ angular.module("sampleApp")
             };
 
 
-            //data for the chart
-
-            //var setByDate = function(min,)
-
             // an event that is called after the date range is changed in the graph...
             var evt = function(min,max){
-                //console.log('invoked',min,max)
+
                 //re- call the summary endpoint, but only update the moduleList and countryList properties...
                 GetDataFromServer.getAccessAudit(null,min,max).then(
                     function(log){
                         $scope.accessAudit.moduleList = log.moduleList;
                         $scope.accessAudit.countryList = log.countryList;
-                        //console.log(log)
+
                     },
                     function(err) {
 
@@ -108,7 +98,7 @@ angular.module("sampleApp")
             GetDataFromServer.getAccessAudit(evt).then(
                 function(log){
                     $scope.accessAudit = log;
-                    //console.log(log)
+
                 },
                 function(err) {
 
@@ -138,7 +128,7 @@ angular.module("sampleApp")
                 var opn = 'getCurrent'+type + 'Server'
                 var svr = appConfigSvc[opn]()
                 $scope.testing = {testData : {}, testConformance:{}, textTerminology:{}};
-                //console.log(server,type);
+
                 $scope.message = 'Reading the capabilityStatement from '+ svr.url + ' Please wait...';
 
 
@@ -151,8 +141,7 @@ angular.module("sampleApp")
 
                     stop = $interval(function() {
                         $scope.elapsed --;
-                        //$scope.$apply();
-                        //console.log($scope.elapsed);
+
                         if ($scope.elapsed < 0) {
                             //stopTimer();
                             $interval.cancel(stop);

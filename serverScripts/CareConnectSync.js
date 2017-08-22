@@ -149,7 +149,10 @@ function uploadFiles(serverRoot,filePath,arFiles,resourceType) {
                                 break;
                             case 'StructureDefinition':
 
-                                if (fileName.indexOf('Extension') > -1) {
+                                //need to look at the resource contents to decide...
+
+                                if (json.constrainedType == 'Extension') {
+                                //if (fileName.indexOf('Extension') > -1) {
                                     purpose = 'extension'
                                 } else {
                                     purpose = 'profile'
