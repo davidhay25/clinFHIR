@@ -1,5 +1,6 @@
 angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,
-    resourceCreatorSvc, profileCreatorSvc,GetDataFromServer,ResourceUtilsSvc,RenderProfileSvc,$http,modalService){
+    resourceCreatorSvc, profileCreatorSvc,GetDataFromServer,ResourceUtilsSvc,RenderProfileSvc,$http,modalService,
+        SaveDataToServer){
 
     $scope.config = $localStorage.config;
     $scope.operationsUrl = $scope.config.baseSpecUrl + "operations.html";
@@ -51,7 +52,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         //perform validation
         delete $scope.validationResult;
         delete $scope.validationSuccess;
-
+        delete $scope.saveOutcome;
 
         var url = $scope.server.url + resourceType + "/$validate";
         var profile = $scope.input.validationProfile;
@@ -81,7 +82,28 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                 //modalService.showModal({}, {bodyText:"There was an error calling the validation service: " + angular.toJson(err)});
             }
         )
+    };
 
+    $scope.saveResource = function(input){
+        delete $scope.saveOutcome;
+        delete $scope.validationResult;
+        delete $scope.validationSuccess;
+
+        try {
+            var json = angular.fromJson(input)
+        } catch(ex) {
+            modalService.showModal({}, {bodyText:'This is not valid JSON'});
+            return;
+        }
+
+        SaveDataToServer.saveResource(json,$scope.server.url).then(
+            function(data) {
+                $scope.saveOutcome = {success:true,msg:"Resource saved. Status code:" + data.status}
+            },
+            function(err) {
+                $scope.saveOutcome = {success:false,msg:angular.toJson(err)}
+            }
+        )
 
     }
 

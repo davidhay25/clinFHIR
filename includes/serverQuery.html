@@ -254,7 +254,7 @@
 
                                                 <uib-tabset>
                                                     <uib-tab heading="Json">
-                                                        <pre>{{result.selectedEntry | json}}</pre>
+                                                        <pre>{{result.selectedEntry.resource | json}}</pre>
                                                     </uib-tab>
                                                     <uib-tab heading="XML">
                                                         <pre>{{xmlResource}}</pre>
@@ -265,9 +265,9 @@
 
                                                     </uib-tab>
                                                     <uib-tab heading="FHIRPath">
-                                                        <fhirpath resource="result.selectedEntry"></fhirpath>
+                                                        <fhirpath resource="result.selectedEntry.resource"></fhirpath>
                                                         <hr/>
-                                                        <pre>{{result.selectedEntry | json}}</pre>
+                                                        <pre>{{result.selectedEntry.resource | json}}</pre>
                                                     </uib-tab>
 
                                                 </uib-tabset>
@@ -298,13 +298,13 @@
 
                     <div class="col-md-6 col-sm-6">
                         <div class="row">
-                            <div class="col-md-10 col-sm-10">
+                            <div class="col-md-9 col-sm-9">
 
                                 <input type="text" class="form-control" ng-model = "input.validationProfile"
                                        placeholder="Optional profile (must be on the server)"/>
 
                             </div>
-                            <div class="col-md-2 col-sm-2">
+                            <div class="col-md-3 col-sm-3">
                                 <button class="btn btn-primary" ng-click="validate(input.validateJson)">Validate</button>
                             </div>
                         </div>
@@ -312,6 +312,24 @@
                         <pre ng-show="validationResult"
                              ng-class="{alert:true, 'alert-success':validationSuccess, 'alert-danger':! validationSuccess}"
                              role="alert">{{validationResult | json}}</pre>
+
+
+                        <div ng-show="saveOutcome" role="alert"
+                             ng-class="{alert:true, 'alert-success':saveOutcome.success, 'alert-danger':! saveOutcome.success}">
+                                {{saveOutcome.msg}}
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-9 col-sm-9">
+                            </div>
+                            <div class="col-md-3 col-sm-3">
+                                <button ng-show="validationResult" class="btn btn-danger"
+                                        ng-click="saveResource(input.validateJson)">Send to server</button>
+                            </div>
+                        </div>
+
+
                     </div>
 
 
