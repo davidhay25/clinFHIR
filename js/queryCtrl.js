@@ -31,6 +31,51 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     $localStorage.queryHistory = $localStorage.queryHistory || [];
 
+
+    //validate a response against a profile
+    $scope.validateResponse = function(server,profileUrl,json){
+        console.log(server,profileUrl,json);
+        delete $scope.responseValidationResult;
+        delete $scope.responseValidationSuccess;
+        var url = server.url + json.resourceType + "/$validate";
+
+        //add the profile to the resource - remove any others...
+        delete json.meta.profile;
+        json.meta.profile = [profileUrl]
+
+        $http.post(url,angular.toJson(json)).then(
+            function(data) {
+                $scope.responseValidationResult = data.data;    //should be an OO
+                $scope.responseValidationSuccess = true
+                //just make sure there are no warnings - like if the profile could not be found....
+                if (data.data) {
+                   // try {
+                        var oo = data.data;
+                        if (oo.issue) {
+                            oo.issue.forEach(function (iss) {
+                                if (iss.severity !== 'information') {   //information is not an error
+                                    $scope.responseValidationSuccess = false
+                                }
+                            })
+                        }
+                   // } catch (ex) {
+                     //   $scope.responseValidationSuccess = false
+                    //}
+
+                }
+
+
+
+            },function(err) {
+                $scope.responseValidationSuccess = false
+                $scope.responseValidationResult = err.data;    //should be an OO
+
+            }
+        )
+
+
+    };
+
     //validate user-entered json = todo allow a profile to be entered...
     $scope.validate = function(input) {
         try {
@@ -76,6 +121,21 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
             function(data) {
                 $scope.validationResult = data.data;    //should be an OO
                 $scope.validationSuccess = true
+                //just make sure there are no warnings - like if the profile could not be found....
+                if (data.data) {
+                    var oo = data.data;
+                    if (oo.issue) {
+                        oo.issue.forEach(function (iss) {
+                            if (iss.severity !== 'information') {   //information is not an error
+                                $scope.validationSuccess = false
+                            }
+                        })
+                    }
+
+
+                }
+
+
             },function(err) {
                 $scope.validationSuccess = false
                 $scope.validationResult = err.data;    //should be an OO
@@ -184,6 +244,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         delete $scope.standardResourceTypes;
 
         $scope.server =server;
+        $scope.input.validationServer = server;     //default the validation server to the selected server
 
         $scope.waiting = true;
         resourceCreatorSvc.getConformanceResource($scope.server.url).then(
@@ -514,23 +575,26 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         })
     };
 
-
     //display the bundle in the results pane
     $scope.showBundle = function(bundle){
-        $scope.result.selectedEntry = bundle;
+        delete $scope.result.selectedEntry;
+        delete xmlResource;
+        $scope.bundle = bundle;
+
+        //$scope.result.selectedEntry = bundle;
         $('#queryResourceTree').jstree('destroy');      //don't render the tree (todo though might look into this later)
+
     };
 
     //select an entry from the query result
     $scope.selectEntry = function(entry){
-
-        delete  $scope.xmlResource;
+        delete $scope.bundle;
+        delete $scope.xmlResource;
         $scope.result.selectedEntry = entry;
 
         var r = angular.copy(entry.resource);
         var newResource =  angular.fromJson(angular.toJson(r));
         var treeData = resourceCreatorSvc.buildResourceTree(newResource);
-
 
         GetDataFromServer.getXmlResource(r.resourceType + "/" + r.id + "?_format=xml&_pretty=true").then(
             function (data) {
@@ -541,7 +605,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                 // alert(angular.toJson(err, true))
             }
         );
-
 
         //show the tree of this version
         $('#queryResourceTree').jstree('destroy');

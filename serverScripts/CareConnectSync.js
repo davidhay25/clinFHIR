@@ -7,8 +7,8 @@ var syncRequest = require('sync-request');
 
 
 //var remoteFhirServer = "http://fhirtest.uhn.ca/baseDstu2/";
-//var remoteFhirServer = "http://snapp.clinfhir.com:8080/baseDstu2/";
-var remoteFhirServer = "http://localhost:8079/baseDstu2/";
+var remoteFhirServer = "http://snapp.clinfhir.com:8080/baseDstu2/";
+//var remoteFhirServer = "http://localhost:8079/baseDstu2/";
 
 /*
 var List = {resourceType:'List',status:'current',mode:'snapshot',entry:[]};
@@ -111,6 +111,9 @@ function uploadFiles(serverRoot,filePath,arFiles,resourceType) {
 
                         json.id = id;
 
+
+                        //set the name property from the path if not an extension to make the logical model neater
+
                         var url = serverRoot + resourceType + "/" + id;
                         console.log('url=' + url)
 
@@ -162,7 +165,7 @@ function uploadFiles(serverRoot,filePath,arFiles,resourceType) {
                         varIGEntry = {purpose:purpose,description:description,sourceReference:{reference:json.url}}
                         IG.package[0].resource.push(varIGEntry);
                         var response = syncRequest('PUT', url, options);
-                        console.log(response.statusCode)
+                        console.log('-->' + response.statusCode)
                         if (response.statusCode !== 200 && response.statusCode !== 201) {
                             errors++
                             console.log(response.body.toString())
