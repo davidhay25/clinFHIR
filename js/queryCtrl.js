@@ -37,6 +37,9 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         console.log(server,profileUrl,json);
         delete $scope.responseValidationResult;
         delete $scope.responseValidationSuccess;
+
+        profileUrl = profileUrl || "http://hl7.org/fhir/StructureDefinition/"+json.resourceType;
+
         var url = server.url + json.resourceType + "/$validate";
 
         //add the profile to the resource - remove any others...

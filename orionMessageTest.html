@@ -250,7 +250,7 @@
 -->
 
 
-                    <div class="showHl7" ng-repeat="line in selectedHL7Sample.content">
+                    <div class="showHl7" ng-repeat="line in selectedHL7Sample.content track by $index">
                         {{line}}
                     </div>
                     <div class="pull-right" ng-show="selectedHL7Sample.content">
