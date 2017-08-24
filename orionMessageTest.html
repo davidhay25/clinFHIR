@@ -329,6 +329,19 @@
 
                     <td width = '43%'>
 
+
+                        <div>
+                            <em class="pull-left">
+                                <div uib-popover-html="showHl7Desc(item.v2.key)"
+                                     popover-placement="right"
+                                     popover-trigger="'mouseenter'">{{item.v2.key}}</div>
+
+
+                            </em>
+
+
+                        </div>
+
                         <div class="pull-right">
                             <div ng-repeat = "v in item.v2.value.values track by $index" >
                                 <div>{{v}}</div>
@@ -336,17 +349,7 @@
                         </div>
 
 
-                        <div>
-                            <em class="pull-left">
-                            <div uib-popover-html="showHl7Desc(item.v2.key)"
-                                 popover-placement="right"
-                                 popover-trigger="'mouseenter'">{{item.v2.key}}</div>
 
-
-                            </em>
-
-
-                        </div>
                     </td>
 
                     <td width = '43%'>
