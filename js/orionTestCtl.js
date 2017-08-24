@@ -422,7 +422,8 @@ console.log(contents)
 
                     if (ar.length == 1) {
                         //fieldName is a complete segment - like OBX
-                        return hl7Hash[fieldName]
+                        response.values =  hl7Hash[fieldName];
+                        return response;
                     }
 
 
