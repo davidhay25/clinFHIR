@@ -219,7 +219,7 @@ console.log(contents)
 
                 });
 
-            //get the files for the selected set...
+            //get the files for the selected set and perform analysis...
             $scope.getFiles = function() {
                 var url = 'orionTest/getFiles?hl7='+$scope.selectedHL7Sample._id + '&fhir='+ $scope.selectedFHIRSample._id;
                 $http.get(url).then(
@@ -345,15 +345,16 @@ console.log(contents)
 
                     if (item.fhirPath) {
 
-                        console.log(item.fhirPath);
+
                         var url = "orionTest/executeFP";
 
                         var data = {path: item.fhirPath,resource:FHIR}
                          $http.post(url,data).then(
                              function(data) {
-                                //console.log(data.data)
-                                 //fhirValue = data.data[0];
-                                 result.fhir = {key: item.fhir, value: data.data[0],fhirPath:item.fhirPath}
+
+                                 //console.log(item.fhirPath,)
+                                //fri result.fhir = {key: item.fhir, value: data.data[0],fhirPath:item.fhirPath}
+                                 result.fhir = {key: item.fhir, value: data.data,fhirPath:item.fhirPath}
                                  response.line.push(result)
 
                                  console.log(fhirValue)
