@@ -410,13 +410,19 @@ console.log(contents)
 
                 function getFieldValue(hl7Hash,fieldName) {
                     var response = {values:[]}
+                    fieldName = fieldName.trim();
 
                     var ar = fieldName.split(' ');      //assume multiple names are spearated by a space
                     ar.forEach(function (fieldName) {
                         responseOneField = getOneFieldValue(hl7Hash,fieldName);
-                        if (responseOneField.values) {
-                            response.values = response.values.concat(responseOneField.values);
+                        if (responseOneField) {
+                            if (responseOneField.values) {
+                                response.values = response.values.concat(responseOneField.values);
+                            }
+                        } else {
+                            console.log('no entry found for '+ fieldName)
                         }
+
                     })
 
                     return response;
