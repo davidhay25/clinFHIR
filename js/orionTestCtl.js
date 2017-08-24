@@ -258,11 +258,10 @@ console.log(contents)
                     return
                 }
 
-
-
                 var hashContained = {};
 
                 //find the contained resources, and create a hash indexed on id...
+                ///Note - not using this yet...
                 var arContained = JSONPath({path:'contained',json:FHIR})[0];    //returns an array of arrays...
 
                 if (arContained) {
@@ -420,6 +419,13 @@ console.log(contents)
                     var response = {values:[]};
 
                     var ar = fieldName.split('-');
+
+                    if (ar.length == 1) {
+                        //fieldName is a complete segment - like OBX
+                        return hl7Hash[fieldName]
+                    }
+
+
                     var segmentCode = ar[0];                //eg PV1
                     var fieldNumberAsString = ar[1] || fieldName;         //eg 7.9.2 - allow for a field name like 'MSH'
                     var fieldNumber = parseInt(ar[1],10);   //eg 7
@@ -577,25 +583,24 @@ console.log(contents)
             $scope.showHl7Desc = function(key) {
 
                 var ar = key.split('-')
-                var segName = ar[0];
-                var ar1 = ar[1].split(' ');
-                var fieldNumber = ar1[0];
-                var names = $scope.v2FieldNames[segName];
-                if (names) {
-                    var txt = names.fieldName[fieldNumber]
-                    if (txt) {
-                        return txt.name;
+
+                if (ar.length > 1) {
+                    var segName = ar[0];
+                    var ar1 = ar[1].split(' ');
+                    var fieldNumber = ar1[0];
+                    var names = $scope.v2FieldNames[segName];
+                    if (names) {
+                        var txt = names.fieldName[fieldNumber]
+                        if (txt) {
+                            return txt.name;
+                        }
+
                     }
 
+                    return key + " " + segName + " "+ fieldNumber;
                 }
 
 
-
-
-               // $scope.v2FieldNames
-
-
-                return key + " " + segName + " "+ fieldNumber;
 
 
             }
