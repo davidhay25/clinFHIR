@@ -177,26 +177,6 @@ console.log(contents)
             };
 
 
-            $scope.executeJSONPathDEP = function(path) {
-                delete $scope.FHIRPathResult;
-               // var test = {"Encounter": $scope.dataFromServer.fhir}
-                var url = "orionTest/executeFP?fp=" + path;
-                $http.get(url).then(
-                    function(data) {
-                        console.log(data.data)
-                        $scope.FHIRPathResult = data.data;
-                    },
-                    function (err){
-                        console.log(err)
-                    }
-                );
-
-/*
-                var allElements = JSONPath({path:path,json:$scope.dataFromServer.fhir,flatten:true})
-                $scope.JSONPathResult = allElements;
-                console.log(allElements)
-                */
-            }
 
             //switch on the 'show all checkbox
             $scope.$watch(
@@ -224,7 +204,7 @@ console.log(contents)
                 var url = 'orionTest/getFiles?hl7='+$scope.selectedHL7Sample._id + '&fhir='+ $scope.selectedFHIRSample._id;
                 $http.get(url).then(
                     function(data) {
-                        console.log(data)
+
                         $scope.dataFromServer = data.data;
 
                         var fhir = data.data.fhir;
@@ -235,7 +215,7 @@ console.log(contents)
 
                         $scope.results = performAnalysis(arHL7,fhir,map);
                         displayAnalysis($scope.results)
-                        console.log($scope.results)
+
                         $scope.analysisOutcome = "Analysis Complete."
                         //alert('Analysis complete. View the tabs for details.')
                     },function(err) {
@@ -278,21 +258,18 @@ console.log(contents)
                     return
                 }
 
-                console.log(Map)
+
 
                 var hashContained = {};
 
                 //find the contained resources, and create a hash indexed on id...
                 var arContained = JSONPath({path:'contained',json:FHIR})[0];    //returns an array of arrays...
-                console.log(arContained);
+
                 if (arContained) {
                     arContained.forEach(function (resource) {
                         hashContained[resource.id] = hashContained;
                     })
                 }
-
-
-
 
 
                 //generate an array to set the order of HL7 elements displayed  (see the sort below)
@@ -352,13 +329,16 @@ console.log(contents)
                          $http.post(url,data).then(
                              function(data) {
 
-                                 //console.log(item.fhirPath,)
+
                                 //fri result.fhir = {key: item.fhir, value: data.data[0],fhirPath:item.fhirPath}
                                  result.fhir = {key: item.fhir, value: data.data,fhirPath:item.fhirPath}
                                  response.line.push(result)
 
-                                 console.log(fhirValue)
-                                 //include = false;
+                                 //helps with debugging
+                                 if ($scope.input.showAllMappings) {
+                                     console.log(item.fhirPath,data.data)
+                                 }
+
                              },
                              function (err){
                                  //alert();
@@ -369,24 +349,19 @@ console.log(contents)
                     } else {
                         //nope - a straight path...
                         fhirValue = JSONPath({path:pathInHostResource,json:FHIR})
+
                         if (fhirValue && fhirValue.length > 0) {
                             result.fhir = {key: item.fhir, value: fhirValue};
                             response.line.push(result)
                         }
+
+                        //helps with debugging
+                        if ($scope.input.showAllMappings) {
+                            console.log(item.fhirPath,fhirValue)
+                        }
                     }
 
-/*
-                    if (fhirValue && fhirValue.length > 0) {
-                        include = true
-                    }
 
-                    result.fhir = {key: item.fhir, value: fhirValue};
-                    //include = true;
-
-                    if (include) {
-                        response.line.push(result)
-                    }
-                    */
 
                 });
 
@@ -396,11 +371,7 @@ console.log(contents)
 
                     //console.log(b.v2.key)
                     return order.indexOf(a.v2.key.substr(0,3)) - order.indexOf(b.v2.key.substr(0,3));
-  /*
-                    if (a.v2.key > b.v2.key) {
-                        return 1
-                    } else {return -1}
-*/
+
 
                 })
 
