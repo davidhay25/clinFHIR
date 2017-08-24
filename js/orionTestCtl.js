@@ -331,14 +331,19 @@ console.log(contents)
                              function(data) {
 
 
-                                //fri result.fhir = {key: item.fhir, value: data.data[0],fhirPath:item.fhirPath}
-                                 result.fhir = {key: item.fhir, value: data.data,fhirPath:item.fhirPath}
-                                 response.line.push(result)
 
-                                 //helps with debugging
-                                 if ($scope.input.showAllMappings) {
-                                     console.log(item.fhirPath,data.data)
+                                 if (data.data && data.data.length > 0) {
+                                     result.fhir = {key: item.fhir, value: data.data,fhirPath:item.fhirPath}
+                                     response.line.push(result)
+                                 } else {
+                                     if (v2Value && $scope.input.showAllMappings) {
+                                         //if there's a value in v2, but no fhie value and show-all is selected, then add a line...
+                                         response.line.push(result)
+                                     }
                                  }
+                                //fri result.fhir = {key: item.fhir, value: data.data[0],fhirPath:item.fhirPath}
+
+
 
                              },
                              function (err){
