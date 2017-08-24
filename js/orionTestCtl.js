@@ -319,6 +319,7 @@ console.log(contents)
                     var pathInHostResource = ar.join('.');
 
                     var fhirValue;
+                   // var valueFound=false;       //set when a FHIR value is located...
 
                     if (item.fhirPath) {
 
@@ -353,7 +354,15 @@ console.log(contents)
                         if (fhirValue && fhirValue.length > 0) {
                             result.fhir = {key: item.fhir, value: fhirValue};
                             response.line.push(result)
+                        } else {
+                            if (v2Value && $scope.input.showAllMappings) {
+                                //if there's a value in v2, but no fhie value and show-all is selected, then add a line...
+                                response.line.push(result)
+                            }
                         }
+
+
+
 
                         //helps with debugging
                         if ($scope.input.showAllMappings) {
