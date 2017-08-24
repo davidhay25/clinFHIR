@@ -357,7 +357,7 @@ console.log(contents)
 
                         //helps with debugging
                         if ($scope.input.showAllMappings) {
-                            console.log(item.fhirPath,fhirValue)
+                            console.log(pathInHostResource,fhirValue)
                         }
                     }
 
