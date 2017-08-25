@@ -41,7 +41,7 @@ angular.module("sampleApp").service('profileDiffSvc',
         generatePageTree : function(IG){
             var treeData = []
 
-            
+        /*
             var rootNode = {
                 "id": 'root',
                 "parent": "#",
@@ -50,10 +50,11 @@ angular.module("sampleApp").service('profileDiffSvc',
                 state: {opened: true}
             };
             treeData.push(rootNode);
-
+*/
 
             if (IG.page) {
-                addPage(treeData,IG.page,rootNode);
+                //addPage(treeData,IG.page,rootNode);
+                addPage(treeData,IG.page,{id:'#'});
             }
 
             return treeData;
@@ -70,7 +71,31 @@ angular.module("sampleApp").service('profileDiffSvc',
 */
 
 
-            function addPage(treeData,pagesList,parentNode) {
+
+            function addPage(treeData,page,parentNode) {
+
+                var id = 't' + new Date().getTime() + Math.random()*1000
+                var title = page.title || page.name;    //R3/STU2
+                var node = {id:id,parent:parentNode.id,text:title,state: {opened: true}}
+                var pageInTree = angular.copy(page);
+                delete pageInTree.page;
+                node.data = pageInTree;
+                treeData.push(node);
+
+                if (page.page) {
+                    for (var i=0; i< page.page.length; i++) {
+                        var page1 = page.page[i];
+                        addPage(treeData,page1,node);
+
+                    }
+
+                }
+
+
+
+            }
+
+            function addPageDEP(treeData,pagesList,parentNode) {
 
                 for (var i=0; i< pagesList.length; i++) {
                     var page = pagesList[i];

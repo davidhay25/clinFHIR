@@ -34,23 +34,10 @@ angular.module("sampleApp")
 
             //page links
             $scope.page = {}
-            $scope.page.src = $sce.trustAsResourceUrl("http://hl7.org/fhirpath/");
+            //$scope.page.src = $sce.trustAsResourceUrl("http://hl7.org/fhirpath/");
 
 
             function drawPageTree() {
-
-                /*
-
-                if (! $scope.currentIG.page) {
-                    var page = {source:"",kind:"page",page:[]}
-                    setTitle(page,"Table Of Contents")
-                    $scope.currentIG.page = [page]
-                }
-
-console.log($scope.currentIG)
-
-                var treeData = profileDiffSvc.generatePageTree($scope.currentIG);
-*/
                 $('#pagesTreeView').jstree('destroy');
                 $('#pagesTreeView').jstree(
                     {'core': {'multiple': false, 'data': $scope.pageTreeData, 'themes': {name: 'proton', responsive: true}}}
@@ -59,9 +46,8 @@ console.log($scope.currentIG)
                     if (data.node) {
                         $scope.selectedPageNode = data.node;
 
-
                         var t = $('#pagesTreeView').jstree().get_json('#')
-                        console.log(t)
+                      //  console.log(t)
                     }
 
                     //console.log()
@@ -74,43 +60,55 @@ console.log($scope.currentIG)
 
 
             $scope.savePages = function(){
-                var mainPage = {page:[]}
+                var pageRoot = {page:[]}
                 var tree = $('#pagesTreeView').jstree().get_json('#');
                 console.log(tree);
+
+
 
                 var top = tree[0];
                 if (top.children) {
                     for (var j = 0; j < top.children.length;j++) {
-                        getChildren(mainPage,top.children[j]);
+                        getChildren(pageRoot,top.children[j]);
                     }
                 }
 
+                console.log(pageRoot);
 
-               // var firstNode = top.children[0]
 
-               // getChildren(mainPage,firstNode);
-                console.log(mainPage);
+                //now copy to IG
+                var frontPage = {source:"",kind:'page'};
+                setTitle(frontPage,"Front Page");
+                frontPage.page = pageRoot.page;
+
+                $scope.currentIG.page = frontPage;// pageRoot.page;
+                console.log(frontPage);
+
+                //return;
+
+                SaveDataToServer.saveResource($scope.currentIG).then(
+                    function (data) {
+                        console.log(data)
+                    }, function (err) {
+                        alert('Error updating IG '+angular.toJson(err))
+                    }
+                );
+
 
 
                 function getChildren(parent,node) {
-
                     var page = node.data;     //this is a child page off the parent
-                    console.log(page);
+                    console.log(parent,page);
                     if (page) {
+                        parent.page = parent.page || []
                         parent.page.push(page)
-
                     }
                     if (node.children) {
                         for (var i = 0; i < node.children.length; i++) {
                             var node1 = node.children[i];
                              getChildren(page,node1)
                         }
-
-
                     }
-
-
-
 
                 }
 
@@ -125,9 +123,6 @@ console.log($scope.currentIG)
                 } else {
                     page.title = text;
                 }
-
-
-
             }
 
             $scope.addPage = function(){
@@ -159,29 +154,22 @@ console.log($scope.currentIG)
                 }).result.then(
                     function(vo) {
 
-                        var page = {source:vo.link,type:page,page:[]};
+                        var page = {source:vo.link,kind:'page'};
                         setTitle(page,vo.title);
-
-                        var id = 't' + new Date().getTime() + Math.random()*1000
+                        page.page = [];
+                        var id = 't' + new Date().getTime();// + Math.random()*1000
                         var title = page.title || page.name;    //R3/STU2
                         var node = {id:id,parent:$scope.selectedPageNode.id,text:title,state: {opened: true}}
                         node.data = page;
 
-                        //$scope.selectedPage.page = $scope.selectedPage.page || []
-                        //$scope.selectedPage.page.push(page)
+
 
                         $scope.pageTreeData.push(node)
 
                         //$scope.currentIG.page.push(page)
                         drawPageTree()
-return
-                        SaveDataToServer.saveResource($scope.currentIG).then(
-                            function (data) {
-                                console.log(data)
-                            }, function (err) {
-                                alert('Error updating IG '+angular.toJson(err))
-                            }
-                        );
+//return
+
 
                 })
 

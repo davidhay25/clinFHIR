@@ -369,7 +369,7 @@
 
                 <div class="col-sm-9 col-md-9">
 
-                    <uib-tabset>
+                    <uib-tabset ng-show="currentIG">
 
                         <uib-tab>
 
@@ -990,16 +990,24 @@
                                     <div id="pagesTreeView"></div>
 
                                     <div>
-                                        <button class="btn btn-link pull-right" ng-click="addPage()">Add Page link</button>
+                                        <button ng-show="selectedPageNode" class="btn btn-link pull-right"
+                                                ng-click="addPage()">Add Page link</button>
                                     </div>
 
                                     <div>
+
+
                                         <button class="btn btn-link" ng-click="savePages()">Save</button>
                                     </div>
+
+                                    <pre>{{pageTreeData | json}}</pre>
                                 </div>
 
 
                                 <div class="col-md-9 col-sm-9">
+                                    <div>
+                                        UrlX: {{selectedPageNode.data.source}}
+                                    </div>
                                     <iframe height = "800px" width="100%" ng-src="{{page.src}}"></iframe>
 
                                 </div>
