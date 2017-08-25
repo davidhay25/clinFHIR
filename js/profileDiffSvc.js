@@ -37,6 +37,57 @@ angular.module("sampleApp").service('profileDiffSvc',
         objColours.Medication = '#FF9900';
 
     return {
+
+        generatePageTree : function(IG){
+            var treeData = []
+
+            
+            var rootNode = {
+                "id": 'root',
+                "parent": "#",
+                "text": "Pages",   //we know there is at least 1 page...
+                "data" : IG.page[0],
+                state: {opened: true}
+            };
+            treeData.push(rootNode);
+
+
+            if (IG.page) {
+                addPage(treeData,IG.page,rootNode);
+            }
+
+            return treeData;
+
+            /*
+            //If there's only 1 entry, then it will be the one added by the controller
+            if (IG.page.length > 1) {
+                //IG.page.splice(0,1);    //remove the first page...
+                addPage(treeData,IG.page,rootNode);
+                return treeData;
+            } else {
+                return treeData;    //will just have a single page...
+            }
+*/
+
+
+            function addPage(treeData,pagesList,parentNode) {
+
+                for (var i=0; i< pagesList.length; i++) {
+                    var page = pagesList[i];
+               // pagesList.forEach(function(page){
+                    var id = 't' + new Date().getTime() + Math.random()*1000
+                    var title = page.title || page.name;    //R3/STU2
+                    var node = {id:id,parent:parentNode.id,text:title,state: {opened: true}}
+                    node.data = page;
+                    treeData.push(node);
+                    if (page.page) {
+                        addPage(treeData,page.page,node);
+                    }
+                }
+            }
+        },
+
+
         updateExtensionsAndVSInProfile : function(IG,SD,pkg) {
             //add any referenced extensions and valuesets to the profile...
             var updated = false;
@@ -415,521 +466,6 @@ angular.module("sampleApp").service('profileDiffSvc',
         },
 
 
-        //copied from profilecreaterSvs.makeProfileDisplayFromProfile so I can safely customize it.
-        makeLMFromProfileDEP : function(inProfile) {
-            var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained','DomainResource'];
-
-            var loadErrors = [];        //any errors during loading
-            var deferred = $q.defer();
-            var lstTree = [];
-
-            var profile = angular.copy(inProfile);      //w emuck around a bit with the profile, so use a copy
-            var arIsDataType = [];          //this is a list of disabled items...
-            var lst = [];           //this will be a list of elements in the profile to show.
-
-            var dataTypes = Utilities.getListOfDataTypes();
-
-            var cntExtension = 0;
-            //a hash of the id's in the tree. used to ensure we don't add an element to a non-esixtant parent.
-            //this occurs when the parent has a max of 0, but child nodes don't
-            var idsInTree = {};
-            var hashTree = {};
-
-            var sliceRootPath,parent,sliceGroupParent,parentForChildren;
-            var queries = [];       //a list of queries to get the details of extensions...
-            if (profile && profile.snapshot && profile.snapshot.element) {
-
-                profile.snapshot.element.forEach(function (item,inx) {
-
-                    var text = "";
-
-                    item.myMeta = item.myMeta || {};
-
-                    var include = true;
-                    var el = {path: item.path};
-
-                    var path = item.path;
-
-                    if (! path) {
-                        alert('empty path in Element Definition\n'+angular.toJson(item))
-                        return;
-                    }
-
-                    var ar = path.split('.');
-
-                    //process extensions first as this can set the include true or false - all the others only se false
-                    //process an extension. if it has a profile, then display it with a nicer name.
-                    if (ar[ar.length - 1] == 'extension') {
-                        //if the extension has a profile type then include it, otherwise not...
-                        include = false;
-
-                        if (item.type) {
-                            item.type.forEach(function (it) {
-                                if (it.code == 'Extension' && it.profile) {
-                                    include=true;
-                                    //load the extension definition
-                                    queries.push(GetDataFromServer.findConformanceResourceByUri(it.profile).then(
-                                        function(sdef) {
-                                            var analysis = Utilities.analyseExtensionDefinition3(sdef);
-                                            item.myMeta.analysis = analysis;
-                                        }, function(err) {
-                                            modalService.showModal({}, {bodyText: 'makeProfileDisplayFromProfile: Error retrieving '+ it.profile + " "+ angular.toJson(err)})
-                                            loadErrors.push({type:'missing StructureDefinition',value:it.profile})
-                                            item.myMeta.analysis = {}
-                                        }
-                                    ));
-
-                                    //use the name rather than 'Extension'...
-                                    //not sure if this is doing anything... ar[ar.length - 1] = "*"+   item.name;
-                                }
-                            })
-                        }
-
-                        if (!include) {
-                            addLog('extension with no profile excluded')
-                        }
-
-                    }
-
-                    //todo hide the modifier extension. Will need to figure out how to display 'real' extensions
-                    if (ar[ar.length - 1] == 'modifierExtension') {
-                        //disabled = true;
-                        include = false;
-                    }
-
-                    if (ar.length == 1) {
-                        //this is the root node
-                        //note - added data friday pm montreal
-                        lstTree.push({id:ar[0],parent:'#',text:ar[0],state:{opened:true,selected:true},path:path,data: {ed : item}});
-                        idsInTree[ar[0]] = 'x';
-                        include = false;
-                    }
-
-                    //obviously if the max is 0 then don't show  (might waant an option later to show
-                    if (item.max == 0) {
-                        include = false;
-                        addLog('excluding '+ item.path + ' as max == 0')
-                    }
-
-
-                    //standard element names like 'text' or 'language'
-                    if (ar.length == 2 && elementsToDisable.indexOf(ar[1]) > -1) {
-                        addLog('excluding '+ item.path + ' as in list of elementsToDisable');
-                        include = false;
-                    }
-
-                    //don't include id elements...
-                    if (ar[ar.length-1] == 'id') {
-                        include = false;
-                    }
-
-                    ar.shift();     //removes the type name at the beginning of the path
-                    item.myMeta.path = ar.join('. ');     //create a path that doesn't include the type (so is shorter)
-
-
-                    //set various meta items based on the datatype
-                    if (item.type) {
-                        item.type.forEach(function (it) {
-
-                            //a node that has child nodes
-                            if (it.code == 'BackboneElement') {
-                                item.myMeta.isParent = true;
-                            }
-
-                            if (it.code == 'Extension') {
-                                item.myMeta.isExtension = true;
-                            }
-
-                            if (it.code == 'Reference') {
-                                item.myMeta.isReference = true;
-                            }
-
-                            //if the datatype starts with an uppercase letter, then it's a complex one...
-                            if (/[A-Z]/.test( it.code)){
-                                item.myMeta.isComplex = true;
-                            }
-
-                            if (['code','Coding','CodeableConcept'].indexOf(it.code) > -1) {
-                                item.myMeta.isCoded = true;
-                            }
-
-
-                        })
-                    }
-
-                    //add to tree only if include is still true...
-                    //this is the start of a sliced section.
-                    if (item.slicing && item.slicing.discriminator) {
-                        include = false; //It is not added to the tree...
-                        addLog('excluding '+ item.path + ' as it defined a discriminator')
-
-                        //leave extensions alone. But if slicing an 'ordinary' element - like identifier - then set the root
-                        if (item.path.indexOf('xtension') == -1) {
-                            addLog('new slice:'+item.slicing.discriminator + ' not included')
-                            sliceRootPath = item.path;  //the root path for BBE ?other sliced types or only BBE
-                        }
-
-
-                        //but we do need to establish the parent for instances of this slice group... <<<< NOT ANY MORE
-                      //  var arSliceGroupParent = path.split('.');
-                        //arSliceGroupParent.pop();
-                       // sliceGroupParent = arSliceGroupParent.join('.');
-                    }
-
-                    //Ignoring sliced elements for the purposes of display
-
-                    var id = path;
-
-                    //because we're using the path as the id, we need to be sure it is unique.
-                    //if not, we make it unique by adding an extension. This means that it shouldn't act as a parent - not sure of the implications of this..
-                    if (idsInTree[id]) {
-                        id += '-' + (Math.random()*1000)
-                        idsInTree[id] = 'x'
-                    }
-
-/*
-                    var arTree = path.split('.');
-                    if (arTree[arTree.length-1] == 'extension') {
-                        text = item.name;// +inx;
-                        id = id + cntExtension;
-                        cntExtension++;
-                    }
-
-                    arTree.pop();
-                    parent = arTree.join('.');
-                    if (item.name) {
-                        text = item.name
-                    } else if (item.label) {
-                        text = item.label
-                    } else {
-                        text = getLastNameInPath(item.path);
-                    }
-*/
-
-
-                    if (sliceRootPath) {
-                        if (item.path == sliceRootPath) {
-                            //console.log('new slice instance:'+sliceRootPath)
-                            //this is a new 'instance' of the sliced element.
-                            parent = sliceGroupParent;  //the parent will be that for the whole slice group
-
-                            id = item.path + '.' + inx; //to ensure unique. may need to look at the discriminator
-                            parentForChildren = id;     //this will be the parent for child elements in this slice group
-                            //text = getLastNameInPath(item.path);// +inx;
-
-                            text = getDisplay(item);
-
-                        } else {
-                            //this is an 'ordinary' element (but still in the slice group) - attach it to the current slice root...
-                            //set the 'parent' variable to the currently active one...
-                            //if this is a child of the sliced element, then it will have the same path...
-                            var p = item.path;
-                            if (p.indexOf(sliceRootPath) > -1) {
-                                parent = parentForChildren
-                            } else {
-                                var ar1 = path.split('.');
-                                ar1.pop();
-                                parent = ar1.join('.')
-                            }
-
-                            id = item.path;
-                            if (item.name) {
-                                text = item.name}
-                            else if (item.label) {
-                                text = item.label
-                            } else {
-                                text = getLastNameInPath(item.path);
-                            }
-                        }
-
-                    } else {
-                        //there is no slicing in action (or it's an extension) - just add. todo - what if there's more than one slice???
-                        id = path;
-                        var arTree = path.split('.');
-                        if (arTree[arTree.length-1] == 'extension') {
-                            text = item.name;// +inx;
-                            id = id + cntExtension;
-                            cntExtension++;
-                        }
-
-                        arTree.pop();
-                        parent = arTree.join('.');
-                        if (item.name) {
-                            text = item.name
-                        } else if (item.label) {
-                            text = item.label
-                        } else {
-                            text = getLastNameInPath(item.path);
-                        }
-
-
-                    }
-
-                    addLog(item.path + ' ' +include)
-
-                    //the item has been marked for removal in the UI...
-                    if (item.myMeta.remove) {
-                        include = false;
-                    }
-
-                    item.myMeta.id = id;        //for when we add a child node it
-
-
-                    //this is an element inserted by resourceCreatorSvc.insertComplexExtensionED so it can be displayed in the resource creator...
-                    if (item.cfIsComplexExtension) {
-                        include = false;
-                    }
-
-
-                    if (include) {
-
-
-                        //there should always be a name  - but just in case there isn't, grab the profile name...
-                        if (text == 'extension') {
-                            if (item.short) {
-                                text = item.short;
-                            } else if (item.name) {
-                                text = item.name;
-                            } else if (item.type) {
-                                //this is a hack as the name element isn't in the Element Definition on the profile.
-                                var prof = item.type[0].profile;
-                                if (prof) {
-
-                                    if (angular.isArray(prof)){
-                                        var ar = prof[0].split('/');        //todo something seriously weird here...  should'nt be an array, and shouldn;t be called twice!!
-                                    } else {
-                                        var ar = prof.split('/');
-                                    }
-
-
-                                    text = ar[ar.length-1];
-                                }
-                            }
-
-                        }
-
-                        if (!text) {
-                            text = 'Unknown element'
-                        }
-
-                        var dataType = '';
-                        if (item.type) {
-                            item.type.forEach(function (it){
-                                dataType += " " + it.code;
-                            })
-                        }
-
-                        var tooltip = dataType + ' ' + id;
-                        if (item.max = '*') {
-                            tooltip += ' multiple allowed';
-                        }
-
-                        //are there any fixed values
-                        angular.forEach(item,function(value,key) {
-                            if (key.substr(0,5)=='fixed') {
-                                item.myMeta.fixed = {key:key,value:value}
-                            }
-
-                        });
-
-
-
-                        var node = {id:id,parent:parent,text:text,state:{opened:false,selected:false},
-                            a_attr:{title: tooltip}, path:path};
-
-
-
-                        //node['a_attr'].style = 'text-decoration:line-through';
-
-
-                        if (item.myMeta.isExtension || (item.builderMeta && item.builderMeta.isExtension)) {
-                            //todo - a class would be better, but this doesn't seem to render in the tree...
-                            node.a_attr.style='color:blueviolet'
-                        }
-
-                        node.data = {ed : item};
-
-
-                        //so long as the parent is in the tree, it's safe to add...
-                        if (idsInTree[parent]) {
-                            lstTree.push(node);
-                            idsInTree[id] = 'x'
-                            lst.push(item);
-
-                            // console.log(parent,id);
-
-                        } else {
-                            addLog('missing parent: '+parent + ' id:'+id + ' path:'+item.path,true)
-                        }
-
-                    }
-
-
-                    //if the type is a recognized datatype, then hide all child nodes todo - won't show profiled datatyoes
-                    //note that this check is after it has been added to the list...
-
-                    if (item.type) {
-                        item.type.forEach(function (type) {
-                            if (dataTypes.indexOf(type.code) > -1) {
-                                arIsDataType.push(path)
-                            }
-                        });
-                    }
-
-                });
-
-            }
-
-
-            if (queries.length) {
-                $q.all(queries).then(
-                    function() {
-                        //add the child nodes for any complex extensions...  item.myMeta.analysis
-                        var newNodes = [];      //create a separate array to hold the new nodes...
-                        lstTree.forEach(function(node){
-                            if (node.data && node.data.ed && node.data.ed.myMeta) {
-                                var analysis = node.data.ed.myMeta.analysis;
-                                if (analysis && analysis.isComplexExtension) {
-                                    //console.log(node)
-                                    //console.log(analysis.children)
-                                    if (analysis.children) {
-                                        //add the child nodes for the complex extension...
-                                        analysis.children.forEach(function(child){
-                                            var id = 'ce'+lstTree.length+newNodes.length;
-                                            var newNode = {id:id,parent:node.id,text:child.code,state:{opened:false,selected:false},
-                                                a_attr:{title: + id}};
-                                            newNode.data = {ed : child.ed};
-                                            newNodes.push(newNode);
-
-                                        })
-                                    }
-                                }
-                            }
-
-                        })
-
-
-                        lstTree = lstTree.concat(newNodes)
-
-                        setNodeIcons(lstTree);
-
-
-                        deferred.resolve({table:lst,treeData:lstTree,errors: loadErrors})
-                    }
-                )
-
-            } else {
-                setNodeIcons(lstTree);
-                deferred.resolve({table:lst,treeData:lstTree,errors: loadErrors})
-            }
-
-
-
-
-
-
-            return deferred.promise;
-
-            function addLog(msg,err) {
-                //console.log(msg)
-            }
-
-            //get the test display for the element
-            function getDisplay(ed) {
-                var display = ed.path;
-                if (ed.label) {
-                    display=ed.label
-                } else if (ed.name) {
-                    display=ed.name;
-                }
-                return display;
-            }
-
-
-            function getLastNameInPath(path) {
-                if (path) {
-                    var ar = path.split('.');
-                    return ar[ar.length-1]
-                }
-            }
-
-            function setNodeIcons(treeData) {
-                //here is where we set the icons - ie after all the extension definitions have been loaded & resolved...
-                lstTree.forEach(function(node){
-
-                    //set the 'required' colour
-                    if (node.data && node.data.ed) {
-                        if (node.data.ed.min == 1) {
-                            //console.log('REQUIRED')
-                            node['li_attr'] = {class : 'elementRequired elementRemoved'};
-
-                        } else {
-                            //have to formally add an 'optional' class else the required colour 'cascades' in the tree...
-                            node['li_attr'] = {class : 'elementOptional'};
-                        }
-
-                        if (node.data.ed.max == "*") {
-                            if (node.data.ed.path) {
-                                var ar = node.data.ed.path.split('.')
-                                if (ar.length > 1) {
-                                    node.text += " *"
-                                }
-                            }
-                        }
-
-
-                    }
-
-                    //set the '[x]' suffix unless already there...
-                    if (node.text && node.text.indexOf('[x]') == -1) {
-                        //set the '[x]' for code elements
-                        if (node.data && node.data.ed && node.data.ed.type && node.data.ed.type.length > 1) {
-                            node.text += '[x]'
-                        }
-
-                        //set the '[x]' for extensions (whew!)
-                        if (node.data && node.data.ed && node.data.ed.myMeta && node.data.ed.myMeta.analysis &&
-                            node.data.ed.myMeta.analysis.dataTypes && node.data.ed.myMeta.analysis.dataTypes.length > 1) {
-                            node.text += '[x]'
-                        }
-                    }
-
-
-                    //set the display icon
-                    if (node.data && node.data.ed && node.data.ed.myMeta){
-
-                        var myMeta = node.data.ed.myMeta;
-
-                        if (!myMeta.isParent) {     //leave parent node as folder...
-
-                            var r = myMeta;
-                            if (myMeta.isExtension && myMeta.analysis) {
-                                r = myMeta.analysis;
-                            }
-                            //var isComplex = myMeta.isComplex ||
-
-
-                            if (r.isComplex) {
-                                node.icon='/icons/icon_datatype.gif';
-                            } else {
-                                node.icon='/icons/icon_primitive.png';
-                            }
-
-                            if (r.isReference) {
-                                node.icon='/icons/icon_reference.png';
-                            }
-
-
-
-                        }
-
-                    }
-                })
-            }
-
-            // return {table:lst,treeData:lstTree};
-
-        },
         objectColours : function () {
             return objColours;
         },

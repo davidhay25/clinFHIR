@@ -983,6 +983,26 @@
                             <ng-include src="'/includes/IGSummary.html'"></ng-include>
 
                         </uib-tab>
+
+                        <uib-tab heading="Pages" >
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3">
+                                    <div id="pagesTreeView"></div>
+
+                                    <div>
+                                        <button class="btn btn-link pull-right" ng-click="addPage()">Add Page link</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-9 col-sm-9">
+                                    <iframe height = "800px" width="100%" ng-src="{{page.src}}"></iframe>
+
+                                </div>
+                            </div>
+
+
+                        </uib-tab>
+
+
                         <uib-tab heading="Implementation Guide Json">
                             <br/>
                             <pre>{{currentIG | json}}</pre>

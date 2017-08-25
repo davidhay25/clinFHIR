@@ -3,12 +3,15 @@ angular.module("sampleApp")
     .controller('profileDiffCtrl',
         function ($scope,$q,$http,profileDiffSvc,$uibModal,logicalModelSvc,appConfigSvc,RenderProfileSvc,builderSvc,
                   Utilities,GetDataFromServer,profileCreatorSvc,$filter,$firebaseObject,$location,$window,modalService,
-                    $timeout,SaveDataToServer) {
+                    $timeout,SaveDataToServer,$sce) {
 
             $scope.input = {center:true,includeCore:true,immediateChildren:true,includeExtensions:true,includePatient:true};
             $scope.appConfigSvc = appConfigSvc;
             $scope.itemColours = profileDiffSvc.objectColours();
             //console.log($scope.itemColours)
+
+            var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
+
 
             $scope.history = [];        //
             $scope.input.tabShowing='single';
@@ -26,8 +29,111 @@ angular.module("sampleApp")
                         alert('Error updating IG '+ angular.toJson(err,true))
                     }
                 )
+            };
+
+
+            //page links
+            $scope.page = {}
+            $scope.page.src = $sce.trustAsResourceUrl("http://hl7.org/fhirpath/");
+
+
+            function drawPageTree() {
+
+                /*
+
+                if (! $scope.currentIG.page) {
+                    var page = {source:"",kind:"page",page:[]}
+                    setTitle(page,"Table Of Contents")
+                    $scope.currentIG.page = [page]
+                }
+
+console.log($scope.currentIG)
+
+                var treeData = profileDiffSvc.generatePageTree($scope.currentIG);
+*/
+                $('#pagesTreeView').jstree('destroy');
+                $('#pagesTreeView').jstree(
+                    {'core': {'multiple': false, 'data': $scope.pageTreeData, 'themes': {name: 'proton', responsive: true}}}
+                ).on('changed.jstree', function (e, data) {
+
+                    if (data.node) {
+                        $scope.selectedPageNode = data.node;
+
+                    }
+                    $scope.$digest();       //as the event occurred outside of angular...
+
+                })
+            }
+
+            //function to set the title or name properties depending on fhir version
+            function setTitle(page,text) {
+                if (fhirVersion == 2) {
+                    page.name = text
+                } else {
+                    page.title = text;
+                }
+
+
+
+            }
+
+            $scope.addPage = function(){
+/*
+               // $scope.currentIG.page = $scope.currentIG.page || [{source:"",title:"Table Of Contents",kind:"page",page:[]}];
+                if (! $scope.selectedPage) {
+                    $scope.selectedPage = $scope.currentIG.page[0];// || {source:"",name:"Table Of Contents",kind:"page",page:[]}
+                }
+                console.log($scope.selectedPage)
+                */
+                //var page = $scope.currentIG.page[0] || {source:"",name:"root",kind:"page"}
+                $uibModal.open({
+
+                    templateUrl: 'modalTemplates/addPage.html',
+                    controller: function($scope) {
+                        $scope.input = {}
+
+                        $scope.add = function(){
+                            var vo = {link:$scope.input.link,title:$scope.input.title};
+                            $scope.$close(vo)
+                        }
+                    },
+                    resolve : {
+                        parent: function () {          //the default config
+                            return $scope.selectedPage;
+                        }
+                    }
+
+                }).result.then(
+                    function(vo) {
+
+                        var page = {source:vo.link,type:page,page:[]};
+                        setTitle(page,vo.title);
+
+                        var id = 't' + new Date().getTime() + Math.random()*1000
+                        var title = page.title || page.name;    //R3/STU2
+                        var node = {id:id,parent:$scope.selectedPageNode.id,text:title,state: {opened: true}}
+                        node.data = page;
+
+                        //$scope.selectedPage.page = $scope.selectedPage.page || []
+                        //$scope.selectedPage.page.push(page)
+
+                        $scope.pageTreeData.push(node)
+
+                        //$scope.currentIG.page.push(page)
+                        drawPageTree()
+return
+                        SaveDataToServer.saveResource($scope.currentIG).then(
+                            function (data) {
+                                console.log(data)
+                            }, function (err) {
+                                alert('Error updating IG '+angular.toJson(err))
+                            }
+                        );
+
+                })
 
             };
+
 
             //see if this page was loaded from a shortcut
             var hash = $location.hash();
@@ -363,7 +469,6 @@ angular.module("sampleApp")
                 }
             }
 
-            var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
 
             function clearRightPane(){
                 //delete $scope.currentIG;
@@ -488,7 +593,8 @@ angular.module("sampleApp")
 
                 })
 
-
+                $scope.pageTreeData = profileDiffSvc.generatePageTree($scope.currentIG);
+                drawPageTree();
 
                //temp createGraphOfIG(IG);
 
