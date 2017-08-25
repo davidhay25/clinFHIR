@@ -992,6 +992,9 @@
                                     <div>
                                         <button ng-show="selectedPageNode" class="btn btn-link pull-right"
                                                 ng-click="addPage()">Add Page link</button>
+
+                                        <button ng-show="selectedPageNode" class="btn btn-link pull-right"
+                                                ng-click="addPage(selectedPageNode)">Edit Page link</button>
                                     </div>
 
                                     <div>
@@ -999,6 +1002,8 @@
 
                                         <button class="btn btn-link" ng-click="savePages()">Save</button>
                                     </div>
+
+                                    <pre>{{selectedPageNode.data | json}}</pre>
 
                                     <pre>{{pageTreeData | json}}</pre>
                                 </div>

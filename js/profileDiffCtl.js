@@ -125,7 +125,10 @@ angular.module("sampleApp")
                 }
             }
 
-            $scope.addPage = function(){
+            $scope.addPage = function(node){
+                var edit = true;
+                //var that = this;
+                //if the node is not null, then this is edit...
 /*
                // $scope.currentIG.page = $scope.currentIG.page || [{source:"",title:"Table Of Contents",kind:"page",page:[]}];
                 if (! $scope.selectedPage) {
@@ -137,34 +140,64 @@ angular.module("sampleApp")
                 $uibModal.open({
 
                     templateUrl: 'modalTemplates/addPage.html',
-                    controller: function($scope) {
+                    controller: function($scope,inputNode) {
                         $scope.input = {}
+
+                        if (inputNode) {
+                            //this is edit
+                            $scope.input.link = inputNode.data.source;
+                            $scope.input.title = inputNode.data.title || inputNode.data.name;
+
+                        }
 
                         $scope.add = function(){
                             var vo = {link:$scope.input.link,title:$scope.input.title};
+                            vo.inputNode = inputNode;
                             $scope.$close(vo)
                         }
                     },
                     resolve : {
-                        parent: function () {          //the default config
-                            return $scope.selectedPage;
+                        inputNode: function () {          //the default config
+                            return node;
                         }
                     }
 
                 }).result.then(
                     function(vo) {
 
-                        var page = {source:vo.link,kind:'page'};
-                        setTitle(page,vo.title);
-                        page.page = [];
-                        var id = 't' + new Date().getTime();// + Math.random()*1000
-                        var title = page.title || page.name;    //R3/STU2
-                        var node = {id:id,parent:$scope.selectedPageNode.id,text:title,state: {opened: true}}
-                        node.data = page;
+                        if (vo.inputNode) {
+                            //edit...
+
+                            //create a new node...
+                            var page = vo.inputNode.data;
+                            page.source = vo.link;
+                            setTitle(page,vo.title);
+                            var id = 't' + new Date().getTime();
+                            var node = {id:id,parent:$scope.selectedPageNode.parent,text:vo.title,state: {opened: true}}
+                            node.data = page;
+                            $scope.pageTreeData.push(node)
+
+                            //delete the previous...
+                            for (var i=0; i<$scope.pageTreeData.length;i++) {
+                                if ($scope.pageTreeData[i].id == vo.inputNode.id) {
+                                    $scope.pageTreeData.splice(i,1);
+                                    break;
+                                }
+                            }
 
 
+                        } else {
+                            //add...
+                            var page = {source:vo.link,kind:'page'};
+                            setTitle(page,vo.title);
+                            page.page = [];
+                            var id = 't' + new Date().getTime();// + Math.random()*1000
+                            var title = page.title || page.name;    //R3/STU2
+                            var node = {id:id,parent:$scope.selectedPageNode.id,text:title,state: {opened: true}}
+                            node.data = page;
+                            $scope.pageTreeData.push(node)
+                        }
 
-                        $scope.pageTreeData.push(node)
 
                         //$scope.currentIG.page.push(page)
                         drawPageTree()
