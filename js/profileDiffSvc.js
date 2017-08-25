@@ -46,7 +46,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                 "id": 'root',
                 "parent": "#",
                 "text": "Pages",   //we know there is at least 1 page...
-                "data" : IG.page[0],
+                //"data" : IG.page[0],
                 state: {opened: true}
             };
             treeData.push(rootNode);

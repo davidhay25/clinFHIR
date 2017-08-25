@@ -59,11 +59,64 @@ console.log($scope.currentIG)
                     if (data.node) {
                         $scope.selectedPageNode = data.node;
 
+
+                        var t = $('#pagesTreeView').jstree().get_json('#')
+                        console.log(t)
                     }
+
+                    //console.log()
                     $scope.$digest();       //as the event occurred outside of angular...
 
+                }).on('redraw.jstree',function(e,data){
+                    console.log(data)
                 })
             }
+
+
+            $scope.savePages = function(){
+                var mainPage = {page:[]}
+                var tree = $('#pagesTreeView').jstree().get_json('#');
+                console.log(tree);
+
+                var top = tree[0];
+                if (top.children) {
+                    for (var j = 0; j < top.children.length;j++) {
+                        getChildren(mainPage,top.children[j]);
+                    }
+                }
+
+
+               // var firstNode = top.children[0]
+
+               // getChildren(mainPage,firstNode);
+                console.log(mainPage);
+
+
+                function getChildren(parent,node) {
+
+                    var page = node.data;     //this is a child page off the parent
+                    console.log(page);
+                    if (page) {
+                        parent.page.push(page)
+
+                    }
+                    if (node.children) {
+                        for (var i = 0; i < node.children.length; i++) {
+                            var node1 = node.children[i];
+                             getChildren(page,node1)
+                        }
+
+
+                    }
+
+
+
+
+                }
+
+
+            };
+
 
             //function to set the title or name properties depending on fhir version
             function setTitle(page,text) {
