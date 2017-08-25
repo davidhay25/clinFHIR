@@ -46,7 +46,10 @@ angular.module("sampleApp")
                     if (data.node) {
                         $scope.selectedPageNode = data.node;
 
-                        var t = $('#pagesTreeView').jstree().get_json('#')
+
+                        var url = $scope.selectedPageNode.data.source
+                        $scope.page.src = $sce.trustAsResourceUrl(url);
+                        //var t = $('#pagesTreeView').jstree().get_json('#')
                       //  console.log(t)
                     }
 
