@@ -1406,6 +1406,10 @@ angular.module("sampleApp")
 
             $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();
             $scope.dataTypes.push({code: 'BackboneElement',description: 'BackboneElement'});
+            $scope.dataTypes.push({code: 'Dosage',description: 'Dosage',definition:'http://hl7.org/fhir/dosage.html#Dosage'});
+
+
+
             //$scope.dataTypes.push({code: 'Extension',description: 'Extension'});
 
 /* hide for the moment...
