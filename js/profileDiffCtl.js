@@ -48,9 +48,9 @@ angular.module("sampleApp")
 
 
                         var url = $scope.selectedPageNode.data.source
+                        $scope.page.src = $sce.trustAsResourceUrl('about:blank');
                         $scope.page.src = $sce.trustAsResourceUrl(url);
-                        //var t = $('#pagesTreeView').jstree().get_json('#')
-                      //  console.log(t)
+
                     }
 
                     //console.log()
@@ -116,6 +116,76 @@ angular.module("sampleApp")
                 }
             }
 
+
+            $scope.move = function(node,dirn) {
+                var id = node.id;       //node to move
+                var parentId = node.parent;
+                //find all the nodes with the same parent
+                var ar = [];
+                var posOfNode = -1
+                $scope.pageTreeData.forEach(function (node,inx) {
+                    if (node.parent == parentId) {
+                        ar.push({inx:inx,id:node.id})        //a sibling
+                    }
+                    if (node.id == id) {posOfNode = inx}
+
+                })
+
+                var posInArray = -1
+                if (ar.length < 2  ) {return;}
+                ar.forEach(function (el,inx) {
+                    if (el.id == id) {posInArray = inx}
+                })
+
+
+                if (dirn == 'dn') {
+                    if (posInArray == -1) {return;}
+                    var item = $scope.pageTreeData[posOfNode];
+                    $scope.pageTreeData.splice(posOfNode,1);
+                    var insertPoint = ar[posInArray+1].inx
+                    $scope.pageTreeData.splice(insertPoint,0,item)
+                } else {
+                    if (posInArray == ar.length) {return;}
+                    var item = $scope.pageTreeData[posOfNode];
+                    $scope.pageTreeData.splice(posOfNode,1);
+                    var insertPoint = ar[posInArray-1].inx
+                    $scope.pageTreeData.splice(insertPoint,0,item)
+                }
+
+                drawPageTree()
+
+            }
+
+            $scope.deletePage = function(node) {
+                var id = node.id;
+
+                var inx = -1;
+                var hasChildren = false;
+                for (var i=0; i<$scope.pageTreeData.length;i++) {
+                    var item = $scope.pageTreeData[i];
+
+                    if (item.id == id) {
+                       // $scope.pageTreeData.splice(i,1);
+                        inx = i;
+                        //update the links for any page that has this one as the parent
+
+
+                        // break;
+                    } else if (item.parent == id) {
+                        hasChildren = true;
+                    }
+
+                }
+                if (hasChildren) {
+                    alert("Cannot remove nodes with children")
+                } else if (inx > -1) {
+                    $scope.pageTreeData.splice(inx,1);
+                    drawPageTree()
+                }
+
+
+            };
+
             $scope.addPage = function(node){
 
                 $uibModal.open({
@@ -154,17 +224,19 @@ angular.module("sampleApp")
                             page.source = vo.link;
                             setTitle(page,vo.title);
                             var id = 't' + new Date().getTime();
-                            var node = {id:id,parent:$scope.selectedPageNode.parent,text:vo.title,state: {opened: true}}
-                            node.data = page;
-                            $scope.pageTreeData.push(node)
+                            var newNode = {id:id,parent:$scope.selectedPageNode.parent,text:vo.title,state: {opened: true}}
+                            newNode.data = page;
+                            //$scope.pageTreeData.push(node)
 
                             //delete the previous...
+
+
                             var inx = -1;
                             for (var i=0; i<$scope.pageTreeData.length;i++) {
                                 var item = $scope.pageTreeData[i];
 
                                 if (item.id == vo.inputNode.id) {
-                                    $scope.pageTreeData.splice(i,1);
+                                   // $scope.pageTreeData.splice(i,1);
                                     inx = i;
                                     //update the links for any page that has this one as the parent
 
@@ -175,10 +247,13 @@ angular.module("sampleApp")
                                 }
 
                             }
-                            if (inx > -1) {
-                                $scope.pageTreeData.splice(inx,1);
-                            }
 
+                            if (inx > -1) {
+                                $scope.pageTreeData.splice(inx,1,newNode);
+
+                            } else {
+                                $scope.pageTreeData.push(newNode)
+                            }
 
 
 
@@ -194,8 +269,6 @@ angular.module("sampleApp")
                             $scope.pageTreeData.push(node)
                         }
 
-
-                        //$scope.currentIG.page.push(page)
                         drawPageTree()
 //return
 

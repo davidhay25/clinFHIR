@@ -989,13 +989,24 @@
                                 <div class="col-md-3 col-sm-3">
                                     <div id="pagesTreeView"></div>
 
-                                    <div>
-                                        <button ng-show="selectedPageNode" class="btn btn-link pull-right"
-                                                ng-click="addPage()">Add Page link</button>
+                                    <i class="glyphicon glyphicon-plus clickable iconSpacing"
+                                       ng-click="addPage()"></i>
 
-                                        <button ng-show="selectedPageNode" class="btn btn-link pull-right"
-                                                ng-click="addPage(selectedPageNode)">Edit Page link</button>
-                                    </div>
+                                    <span ng-show="selectedPageNode">
+                                        <i class="glyphicon glyphicon-edit clickable iconSpacing"
+                                           ng-click="addPage(selectedPageNode)"></i>
+
+                                        <i class="glyphicon glyphicon-remove clickable iconSpacing"
+                                           ng-click="deletePage(selectedPageNode)"></i>
+                                        
+                                        <i class="glyphicon glyphicon-arrow-down clickable iconSpacing"
+                                           ng-click="move(selectedPageNode,'dn')"></i>
+                                        <i class="glyphicon glyphicon-arrow-up clickable iconSpacing"
+                                           ng-click="move(selectedPageNode,'up')"></i>
+
+                                    </span>
+
+
 
                                     <div>
 
