@@ -734,9 +734,13 @@
                                     <td>
                                     <div ng-repeat = "typ in selectedNode.data.type">
 
+                                        <!-- todo - get rid of hard coded Dosage here-->
 
+                                        <a ng-show="typ.code == 'Dosage'" href="http://hl7.org/fhir/dosage.html" target="_blank">
+                                            <i class="glyphicon glyphicon-eye-open clickable"></i>
+                                        </a>
 
-                                        <a ng-href="{{rootForDataType}}{{typ.code}}" target="_blank">
+                                        <a ng-hide="typ.code == 'Dosage'" ng-href="{{rootForDataType}}{{typ.code}}" target="_blank">
                                             <i class="glyphicon glyphicon-eye-open clickable"></i>
                                         </a>
 
