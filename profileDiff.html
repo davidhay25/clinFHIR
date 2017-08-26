@@ -986,32 +986,39 @@
 
                         <uib-tab heading="Pages" >
                             <div class="row">
+
+
                                 <div class="col-md-3 col-sm-3">
+                                    <div class="pull-right" style="margin-top: 8px">
+
+                                        <span ng-show="selectedPageNode">
+                                            <i class="glyphicon glyphicon-edit clickable iconSpacing"
+                                               ng-click="addPage(selectedPageNode)"></i>
+
+                                            <i class="glyphicon glyphicon-remove clickable iconSpacing"
+                                               ng-click="deletePage(selectedPageNode)"></i>
+
+                                            <i class="glyphicon glyphicon-arrow-down clickable iconSpacing"
+                                               ng-click="move(selectedPageNode,'dn')"></i>
+                                            <i class="glyphicon glyphicon-arrow-up clickable iconSpacing"
+                                               ng-click="move(selectedPageNode,'up')"></i>
+
+                                        </span>
+
+                                        <i class="glyphicon glyphicon-plus clickable iconSpacing"
+                                           ng-click="addPage()"></i>
+
+
+                                    </div>
+                                    <hr style="margin-top: 30px"/>
+
                                     <div id="pagesTreeView"></div>
-
-                                    <i class="glyphicon glyphicon-plus clickable iconSpacing"
-                                       ng-click="addPage()"></i>
-
-                                    <span ng-show="selectedPageNode">
-                                        <i class="glyphicon glyphicon-edit clickable iconSpacing"
-                                           ng-click="addPage(selectedPageNode)"></i>
-
-                                        <i class="glyphicon glyphicon-remove clickable iconSpacing"
-                                           ng-click="deletePage(selectedPageNode)"></i>
-                                        
-                                        <i class="glyphicon glyphicon-arrow-down clickable iconSpacing"
-                                           ng-click="move(selectedPageNode,'dn')"></i>
-                                        <i class="glyphicon glyphicon-arrow-up clickable iconSpacing"
-                                           ng-click="move(selectedPageNode,'up')"></i>
-
-                                    </span>
-
-
 
                                     <div>
 
 
-                                        <button class="btn btn-link" ng-click="savePages()">Save</button>
+                                        <button class="btn btn-link pull-right" ng-show="pageDirty"
+                                                ng-click="savePages()">Save</button>
                                     </div>
 <!--
                                     <pre>{{selectedPageNode.data | json}}</pre>

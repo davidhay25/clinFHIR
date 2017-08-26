@@ -32,11 +32,9 @@ angular.module("sampleApp")
             };
 
 
-            //page links
+            // ===================  page links ===============
             $scope.page = {}
-            //$scope.page.src = $sce.trustAsResourceUrl("http://hl7.org/fhirpath/");
-
-
+            $scope.pageDirty = false;       //true if changes have been made...
             function drawPageTree() {
                 $('#pagesTreeView').jstree('destroy');
                 $('#pagesTreeView').jstree(
@@ -67,13 +65,18 @@ angular.module("sampleApp")
                 var pageRoot = {page:[]}
                 var tree = $('#pagesTreeView').jstree().get_json('#');
                 var top = tree[0];
+
+                getChildren(pageRoot,top);
+
                 if (top.children) {
                     for (var j = 0; j < top.children.length;j++) {
                         getChildren(pageRoot,top.children[j]);
                     }
                 }
+
                 //now copy to IG
-                var frontPage = {source:"",kind:'page'};
+
+                var frontPage = {source:"about:blank",kind:'page'};
                 setTitle(frontPage,"Front Page");
                 frontPage.page = pageRoot.page;
 
@@ -84,6 +87,8 @@ angular.module("sampleApp")
                 SaveDataToServer.saveResource($scope.currentIG).then(
                     function (data) {
                         console.log(data)
+                        $scope.pageDirty = false;
+                        alert("Implementation Guide has been updated.")
                     }, function (err) {
                         alert('Error updating IG '+angular.toJson(err))
                     }
@@ -115,7 +120,6 @@ angular.module("sampleApp")
                     page.title = text;
                 }
             }
-
 
             $scope.move = function(node,dirn) {
                 var id = node.id;       //node to move
@@ -153,6 +157,7 @@ angular.module("sampleApp")
                 }
 
                 drawPageTree()
+                $scope.pageDirty = true;
 
             }
 
@@ -163,27 +168,20 @@ angular.module("sampleApp")
                 var hasChildren = false;
                 for (var i=0; i<$scope.pageTreeData.length;i++) {
                     var item = $scope.pageTreeData[i];
-
                     if (item.id == id) {
-                       // $scope.pageTreeData.splice(i,1);
                         inx = i;
-                        //update the links for any page that has this one as the parent
-
-
-                        // break;
                     } else if (item.parent == id) {
                         hasChildren = true;
                     }
-
                 }
+
                 if (hasChildren) {
                     alert("Cannot remove nodes with children")
                 } else if (inx > -1) {
                     $scope.pageTreeData.splice(inx,1);
                     drawPageTree()
+                    $scope.pageDirty = true;
                 }
-
-
             };
 
             $scope.addPage = function(node){
@@ -215,7 +213,7 @@ angular.module("sampleApp")
 
                 }).result.then(
                     function(vo) {
-
+                        $scope.pageDirty = true;
                         if (vo.inputNode) {
                             //edit...
 
@@ -236,16 +234,10 @@ angular.module("sampleApp")
                                 var item = $scope.pageTreeData[i];
 
                                 if (item.id == vo.inputNode.id) {
-                                   // $scope.pageTreeData.splice(i,1);
                                     inx = i;
-                                    //update the links for any page that has this one as the parent
-
-
-                                   // break;
                                 } else if (item.parent == vo.inputNode.id) {
                                     item.parent = id;
                                 }
-
                             }
 
                             if (inx > -1) {
@@ -264,19 +256,21 @@ angular.module("sampleApp")
                             page.page = [];
                             var id = 't' + new Date().getTime();// + Math.random()*1000
                             var title = page.title || page.name;    //R3/STU2
-                            var node = {id:id,parent:$scope.selectedPageNode.id,text:title,state: {opened: true}}
+
+                            var parentId = '#'
+                            if ($scope.selectedPageNode) {
+                                parentId = $scope.selectedPageNode.id;
+                            }
+
+                            var node = {id:id,parent:parentId,text:title,state: {opened: true}}
                             node.data = page;
                             $scope.pageTreeData.push(node)
                         }
-
                         drawPageTree()
-//return
-
 
                 })
 
             };
-
 
             //see if this page was loaded from a shortcut
             var hash = $location.hash();
@@ -284,7 +278,7 @@ angular.module("sampleApp")
                 var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
                 sc.$loaded().then(
                     function(){
-                        console.log(sc);
+
 
                         $scope.loadedFromBookmark = true;
 
@@ -612,7 +606,6 @@ angular.module("sampleApp")
                 }
             }
 
-
             function clearRightPane(){
                 //delete $scope.currentIG;
                 delete $scope.selectedElementInLM;
@@ -721,6 +714,7 @@ angular.module("sampleApp")
                     })
                 });
 
+                //sort 'em all...
                 ['extension','profile','terminology','logical','other'].forEach(function (purpose) {
                     if ($scope.artifacts[purpose]) {
                         $scope.artifacts[purpose].sort(function(item1,item2) {
@@ -739,7 +733,6 @@ angular.module("sampleApp")
                 $scope.pageTreeData = profileDiffSvc.generatePageTree($scope.currentIG);
                 drawPageTree();
 
-               //temp createGraphOfIG(IG);
 
             };
 

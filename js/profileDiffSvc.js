@@ -41,34 +41,12 @@ angular.module("sampleApp").service('profileDiffSvc',
         generatePageTree : function(IG){
             var treeData = []
 
-        /*
-            var rootNode = {
-                "id": 'root',
-                "parent": "#",
-                "text": "Pages",   //we know there is at least 1 page...
-                //"data" : IG.page[0],
-                state: {opened: true}
-            };
-            treeData.push(rootNode);
-*/
-
             if (IG.page) {
-                //addPage(treeData,IG.page,rootNode);
+
                 addPage(treeData,IG.page,{id:'#'});
             }
 
             return treeData;
-
-            /*
-            //If there's only 1 entry, then it will be the one added by the controller
-            if (IG.page.length > 1) {
-                //IG.page.splice(0,1);    //remove the first page...
-                addPage(treeData,IG.page,rootNode);
-                return treeData;
-            } else {
-                return treeData;    //will just have a single page...
-            }
-*/
 
 
 
@@ -86,30 +64,10 @@ angular.module("sampleApp").service('profileDiffSvc',
                     for (var i=0; i< page.page.length; i++) {
                         var page1 = page.page[i];
                         addPage(treeData,page1,node);
-
-                    }
-
-                }
-
-
-
-            }
-
-            function addPageDEP(treeData,pagesList,parentNode) {
-
-                for (var i=0; i< pagesList.length; i++) {
-                    var page = pagesList[i];
-               // pagesList.forEach(function(page){
-                    var id = 't' + new Date().getTime() + Math.random()*1000
-                    var title = page.title || page.name;    //R3/STU2
-                    var node = {id:id,parent:parentNode.id,text:title,state: {opened: true}}
-                    node.data = page;
-                    treeData.push(node);
-                    if (page.page) {
-                        addPage(treeData,page.page,node);
                     }
                 }
             }
+
         },
 
 
