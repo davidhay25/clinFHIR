@@ -62,30 +62,22 @@ angular.module("sampleApp")
             }
 
 
+            //update the IG on the server..
             $scope.savePages = function(){
                 var pageRoot = {page:[]}
                 var tree = $('#pagesTreeView').jstree().get_json('#');
-                console.log(tree);
-
-
-
                 var top = tree[0];
                 if (top.children) {
                     for (var j = 0; j < top.children.length;j++) {
                         getChildren(pageRoot,top.children[j]);
                     }
                 }
-
-                console.log(pageRoot);
-
-
                 //now copy to IG
                 var frontPage = {source:"",kind:'page'};
                 setTitle(frontPage,"Front Page");
                 frontPage.page = pageRoot.page;
 
                 $scope.currentIG.page = frontPage;// pageRoot.page;
-                console.log(frontPage);
 
                 //return;
 
@@ -96,8 +88,6 @@ angular.module("sampleApp")
                         alert('Error updating IG '+angular.toJson(err))
                     }
                 );
-
-
 
                 function getChildren(parent,node) {
                     var page = node.data;     //this is a child page off the parent
@@ -114,8 +104,6 @@ angular.module("sampleApp")
                     }
 
                 }
-
-
             };
 
 
@@ -129,25 +117,15 @@ angular.module("sampleApp")
             }
 
             $scope.addPage = function(node){
-                var edit = true;
-                //var that = this;
-                //if the node is not null, then this is edit...
-/*
-               // $scope.currentIG.page = $scope.currentIG.page || [{source:"",title:"Table Of Contents",kind:"page",page:[]}];
-                if (! $scope.selectedPage) {
-                    $scope.selectedPage = $scope.currentIG.page[0];// || {source:"",name:"Table Of Contents",kind:"page",page:[]}
-                }
-                console.log($scope.selectedPage)
-                */
-                //var page = $scope.currentIG.page[0] || {source:"",name:"root",kind:"page"}
-                $uibModal.open({
 
+                $uibModal.open({
                     templateUrl: 'modalTemplates/addPage.html',
                     controller: function($scope,inputNode) {
                         $scope.input = {}
 
                         if (inputNode) {
                             //this is edit
+                            $scope.edit = true;
                             $scope.input.link = inputNode.data.source;
                             $scope.input.title = inputNode.data.title || inputNode.data.name;
 
@@ -181,12 +159,27 @@ angular.module("sampleApp")
                             $scope.pageTreeData.push(node)
 
                             //delete the previous...
+                            var inx = -1;
                             for (var i=0; i<$scope.pageTreeData.length;i++) {
-                                if ($scope.pageTreeData[i].id == vo.inputNode.id) {
+                                var item = $scope.pageTreeData[i];
+
+                                if (item.id == vo.inputNode.id) {
                                     $scope.pageTreeData.splice(i,1);
-                                    break;
+                                    inx = i;
+                                    //update the links for any page that has this one as the parent
+
+
+                                   // break;
+                                } else if (item.parent == vo.inputNode.id) {
+                                    item.parent = id;
                                 }
+
                             }
+                            if (inx > -1) {
+                                $scope.pageTreeData.splice(inx,1);
+                            }
+
+
 
 
                         } else {
