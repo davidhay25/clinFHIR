@@ -32,6 +32,52 @@ angular.module("sampleApp")
             };
 
 
+            //download a single item (profile or extension)
+            $scope.downLoadItem = function(ev,item,notes) {
+                ev.stopPropagation();
+
+                profileDiffSvc.getSD(item.url).then(
+                    function (SD) {
+                        displayDownLoadDlg(SD)
+                    },function(err){
+                        alert('Error getting SD: '+angular.toJson(err))
+                    });
+
+            };
+
+            function displayDownLoadDlg(resource,notes,fileName) {
+
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/downLoad.html',
+                    size:'lg',
+                    controller: function($scope,resource,notes,fileName) {
+                        $scope.notes = notes;
+                        $scope.resource = resource;
+                        $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(resource, true)],
+                            {type: "text/text"}));
+                        $scope.downloadLinkJsonName = fileName;
+                        $scope.downloadLinkJsonName = $scope.downloadLinkJsonName || resource.url;
+
+                        $scope.downloadClicked = function(){
+                            $scope.$close();
+                        }
+
+                    },
+                    resolve : {
+                        resource : function () {
+                            return resource;
+                        },
+                        notes : function () {
+                            return notes;
+                        },
+                        fileName : function () {
+                            return fileName;
+                        }
+                    }
+
+                })
+            }
+
             // ===================  page links ===============
             $scope.page = {}
             $scope.pageDirty = false;       //true if changes have been made...
@@ -322,14 +368,26 @@ angular.module("sampleApp")
             };
 
             $scope.createDownload = function(){
+                var fileName = $scope.currentIG.name;
                 profileDiffSvc.createDownloadBundle($scope.currentIG).then(
                     function(bundle) {
-                        console.log(bundle);
+                        //console.log(bundle);
+
+                        displayDownLoadDlg(bundle,['Only Profiles and Extension Definitions included'],fileName)
+
                     },function(bundle) {
-                        console.log(bundle);
+                        //console.log(bundle);
+                        displayDownLoadDlg(bundle,['Only Profiles and Extension Definitions included'],fileName)
+
+                        //setDownloadLink(bundle,'IG')
                     }
                 );
             };
+
+            function setDownloadLinkDEP(bundle,downLoadName) {
+                $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(bundle, true)], {type: "text/text"}));
+                $scope.downloadLinkJsonName = downLoadName;
+            }
 
             $scope.importItem = function(itemType){
 

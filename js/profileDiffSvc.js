@@ -327,7 +327,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                     display = ar.join('.')
                 }
 
-
                 if (ed.label) {
                     display=ed.label
                 } else if (ed.name) {
@@ -335,9 +334,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                 }else if (ed.short) {
                     display=ed.short;
                 }
-
-
-
 
                 if (ed.slicing) {
                     display += " D"
@@ -452,8 +448,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                                 node.icon='/icons/icon_reference.png';
                             }
 
-
-
                         }
 
                     }
@@ -485,6 +479,7 @@ angular.module("sampleApp").service('profileDiffSvc',
         },
 
         createDownloadBundle : function(IG){
+            //only include profiles and extensions for now. Could add the others...
             var deferred = $q.defer();
             var that = this;
             var bundle = {resourceType:'Bundle',type:'collection',entry:[]}
@@ -492,7 +487,11 @@ angular.module("sampleApp").service('profileDiffSvc',
             bundle.entry.push({resource:IG});
             IG.package.forEach(function (package) {
                 package.resource.forEach(function (resource) {
-                    arQuery.push(addResource(that,resource.sourceReference.reference,bundle));
+                    var purpose = resource.purpose || resource.acronym;     //<<< todo - 'purpose' was removed in R3...
+                    if (purpose == 'profile' || purpose == 'extension') {
+                        arQuery.push(addResource(that,resource.sourceReference.reference,bundle));
+                    }
+
                 })
             });
 
@@ -509,7 +508,10 @@ angular.module("sampleApp").service('profileDiffSvc',
 
             function addResource(that,url,bundle) {
                 var deferred1 = $q.defer();
-                console.log(url)
+                //console.log(url)
+
+
+
                 that.getSD(url).then(
                     function (SD) {
                         bundle.entry.push({resource:SD});

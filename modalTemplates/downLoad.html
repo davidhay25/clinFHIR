@@ -1,0 +1,68 @@
+
+<div>
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-6 col-sm-6">
+                <h3 class="modal-title">Download</h3>
+
+            </div>
+            <div class="col-md-6 col-sm-6 ">
+                <div class="pull-right">
+                    <button  class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+
+        <div class="row">
+            <div class="col-md-10 col-sm-10">
+                <div ng-show="resource.resourceType == 'Bundle'">
+                    <h4>Files in download</h4>
+
+                    <div style=" height: 700px; overflow-y: scroll;">
+                        <ul class="list-unstyled">
+                            <li ng-repeat="entry in resource.entry">
+                                {{entry.resource.url}}
+                            </li>
+                        </ul>
+                    </div>
+
+
+
+                </div>
+
+                <div ng-hide="resource.resourceType == 'Bundle'">
+                    {{downloadLinkJsonName}}
+                </div>
+
+                <div ng-repeat="note in notes">
+                    <em>{{note}}</em>
+                </div>
+
+
+            </div>
+            <div class="col-md-2 col-sm-2 ">
+                <div ng-click="downloadClicked()">
+                    <a class="btn btn-primary pull-right" download="{{downloadLinkJsonName}}.json"
+                       href="{{downloadLinkJsonContent}}" title="{{downloadLinkJsonName}}" >
+                        Download
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+
+
+    </div>
+
+
+</div>

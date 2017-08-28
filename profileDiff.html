@@ -31,6 +31,11 @@
             $locationProvider.html5Mode(true);
             $locationProvider.hashPrefix('!');
         });
+
+        angular.module("sampleApp").config(['$compileProvider', function ($compileProvider) {
+            $compileProvider.aHrefSanitizationWhitelist(/^\s*(|blob|):/);
+        }]);
+
         angular.module("sampleApp").constant("moment", moment);
 
         window.onerror = function(message, url, linenumber) {
@@ -39,10 +44,7 @@
             } else {
                 alert("An unexpected error occurred: " + message + " on line " + linenumber + " for " + url);
             }
-
         }
-
-
 
     </script>
 
@@ -73,28 +75,6 @@
     <script src="js/libs/angular-bootstrap-checkbox.js"></script>
 
 
-    <!--
-
-
-  <script src="js/appConfigSvc.js"></script>
-  <script src="js/libs/ngStorage.min.js"></script>
-  <script src="resourceBuilder/rbServices.js"></script>
-  <script src="js/components/dataTypes.js"></script>
-
-  <script src="js/services.js"></script>
-
-  <script src="js/filters.js"></script>
-  <script src="js/documentBuilder.js"></script>
-  <script src="resourceBuilder/rbServices.js"></script>
-  <script src="js/reporterCtrl.js"></script>
-
-  <script src="js/libs/ngStorage.min.js"></script>
-
-
-
-  <script src="js/profileCreatorSvc.js"></script>
-  -->
-
     <script>
         var config = {
             apiKey: "AIzaSyBNMohLbPiSKwpGwfARopdeW_6LLXujcUo",
@@ -103,11 +83,10 @@
             storageBucket: ""
         };
 
-        //  console.log(firebase)
         if (firebase) {
             firebase.initializeApp(config);
-
         }
+
     </script>
 
     <style>
@@ -175,7 +154,20 @@
             <div class="col-md-2 col-sm-2">
                 <div class="navbar-text">
                     <div><a href="#" ng-click="clearCache()">Clear Cache</a></div>
-                    <div><a href="#" ng-click="createDownload()">Create download</a></div>
+                    <div><a href="#" ng-show="currentIG" ng-click="createDownload()">Download</a>
+<!--
+                        <a class="pull-right" ng-show="downloadLinkJsonContent" download="{{downloadLinkJsonName}}.json"
+                           href="{{downloadLinkJsonContent}}" title="{{downloadLinkJsonName}}" >
+                            <i class="glyphicon glyphicon-cloud" class="iconSpacing"
+                                 title="{{downloadLinkJsonName}}.json"
+                                 style="cursor: pointer">
+
+                        </i></a>
+                        -->
+
+
+
+                    </div>
                 </div>
             </div>
 
@@ -208,10 +200,6 @@
                         <uib-tab heading="Implementation Guide">
                             <br/>
 
-
-<!--
-                    <h4>Implementation Guides</h4>
--->
                     <div class="row">
                         <div class="col-sm-9 col-md-9">
                             <select class="form-control" ng-model="input.selIG"
@@ -243,6 +231,18 @@
                                 <li ng-class="{'list-group-item':true, listItemSelected:selectedItem == item}"
                                     ng-repeat="item in artifacts.profile"
                                     ng-click = "selectItem(item,'profile')">
+
+
+                                    <div class="pull-right" ng-click="downLoadItem($event,item)">
+
+                                        <i class="glyphicon glyphicon-cloud clickable"
+                                           title="Download"
+                                           style="cursor: pointer">
+
+
+                                        </i></div>
+
+
                                     <div class="clickable">{{item.url | referenceType}}</div>
                                     <div><em>{{item.description}}</em></div>
                                 </li>
