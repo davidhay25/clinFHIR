@@ -62,25 +62,33 @@ angular.module("sampleApp")
 
             //update the IG on the server..
             $scope.savePages = function(){
+
                 var pageRoot = {page:[]}
                 var tree = $('#pagesTreeView').jstree().get_json('#');
-                var top = tree[0];
+                var topNode = tree[0];
 
-                getChildren(pageRoot,top);
+                getChildren(pageRoot,topNode);
+/*
+                if (topNode.children) {
+                    getChildren(pageRoot,topNode.children[0]);
 
-                if (top.children) {
                     for (var j = 0; j < top.children.length;j++) {
                         getChildren(pageRoot,top.children[j]);
                     }
-                }
 
+                }
+*/
                 //now copy to IG
+                /*
 
                 var frontPage = {source:"about:blank",kind:'page'};
                 setTitle(frontPage,"Front Page");
                 frontPage.page = pageRoot.page;
+                */
 
-                $scope.currentIG.page = frontPage;// pageRoot.page;
+                console.log(pageRoot)
+
+                $scope.currentIG.page = pageRoot.page[0];// pageRoot.page;
 
                 //return;
 
@@ -94,14 +102,15 @@ angular.module("sampleApp")
                     }
                 );
 
-                function getChildren(parent,node) {
+                function getChildren(parentPage,node) {
                     var page = node.data;     //this is a child page off the parent
-                    console.log(parent,page);
+                    console.log(parentPage,page);
                     if (page) {
-                        parent.page = parent.page || []
-                        parent.page.push(page)
+                        parentPage.page = parentPage.page || []
+                        parentPage.page.push(page)
                     }
-                    if (node.children) {
+
+                    if (node.children && node.children.length > 0) {
                         for (var i = 0; i < node.children.length; i++) {
                             var node1 = node.children[i];
                              getChildren(page,node1)

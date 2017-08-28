@@ -39,12 +39,17 @@ angular.module("sampleApp").service('profileDiffSvc',
     return {
 
         generatePageTree : function(IG){
-            var treeData = []
+            var treeData = [];
 
             if (IG.page) {
-
                 addPage(treeData,IG.page,{id:'#'});
+            } else {
+                //create a front page...
+                var frontPage = {source:"about:blank",kind:'page',page:[]};
+                setTitle(frontPage,"Front Page");
+                addPage(treeData,frontPage,{id:'#'});
             }
+
 
             return treeData;
 
@@ -60,13 +65,24 @@ angular.module("sampleApp").service('profileDiffSvc',
                 node.data = pageInTree;
                 treeData.push(node);
 
-                if (page.page) {
+
+                if (page.page && page.page.length > 0) {
                     for (var i=0; i< page.page.length; i++) {
                         var page1 = page.page[i];
                         addPage(treeData,page1,node);
                     }
                 }
             }
+
+            function setTitle(page,text) {
+                var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
+                if (fhirVersion == 2) {
+                    page.name = text
+                } else {
+                    page.title = text;
+                }
+            }
+
 
         },
 
