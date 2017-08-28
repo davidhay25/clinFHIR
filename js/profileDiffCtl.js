@@ -784,7 +784,10 @@ angular.module("sampleApp")
                     delete $scope.LMSD
                     profileDiffSvc.getSD(item.url).then(
                         function (SD) {
-                            $scope.LMtreeData = logicalModelSvc.createTreeArrayFromSD(angular.copy(SD))
+                            $scope.LMtreeData = logicalModelSvc.createTreeArrayFromSD(angular.copy(SD));
+
+                            console.log( $scope.LMtreeData )
+
                             $scope.LMSD = SD;
                             logicalModelSvc.resetTreeState($scope.LMtreeData);
 

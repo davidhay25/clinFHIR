@@ -398,7 +398,7 @@
 
 
                                 <table class="table table-bordered table-condensed">
-                                    <tr><th>Element</th><th>DataType</th><th>isRef</th><th>Mult.</th><th>Description</th></tr>
+                                    <tr><th>Element</th><th>DataType</th><th>isRef</th><th>Mult.</th><th>Mappings</th><th>Description</th></tr>
                                     <tr ng-repeat="row in LMtreeData">
 
                                         <td>
@@ -411,6 +411,11 @@
                                         </td>
                                         <td><div ng-show="row.data.isReference">Y</div></td>
                                         <td>{{row.data.min}}..{{row.data.max}}</td>
+                                        <td>
+                                            <div ng-repeat="map in row.data.mappingFromED">
+                                                {{map.identity}}: {{map.map}}
+                                            </div>
+                                        </td>
                                         <td>{{row.data.description}}</td>
 
                                     </tr>
