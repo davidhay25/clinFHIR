@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-08-20-a';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-08-30';     //will trigger a reload when this changes
 
 
         defaultConfig.standardExtensionUrl = {};
@@ -41,7 +41,7 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.discriminatorUrl = 'http:www.clinfhir.com/StructureDefinition/discriminatorUrl';
         defaultConfig.standardExtensionUrl.conceptMapUrl = 'http:www.clinfhir.com/StructureDefinition/conceptMapUrl';
 
-
+        defaultConfig.standardExtensionUrl.resourceTypeUrl = 'http:www.clinfhir.com/StructureDefinition/resourceTypeUrl';
 
 
 

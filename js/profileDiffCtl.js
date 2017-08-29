@@ -58,6 +58,11 @@ angular.module("sampleApp")
                     //add the profile to the IG - then find any extensions and add them as well. todo - should we check whether they exist first?
 
                     var res = {sourceReference:{reference:url}};
+                    res.description = vo.description;
+
+                    var resourceTypeUrl = appConfigSvc.config().standardExtensionUrl.resourceTypeUrl;
+                    Utilities.addExtensionOnce(res,resourceTypeUrl,{valueString:vo.type});
+
                     if (fhirVersion ==2) {
                         res.purpose = 'example'
                     } else {
@@ -66,6 +71,7 @@ angular.module("sampleApp")
                     pkg.resource.push(res);
 
                     $scope.saveIG()
+                    $scope.selectIG($scope.currentIG);
 
                 });
 
@@ -808,6 +814,7 @@ angular.module("sampleApp")
 
             //note that we're using an IG to hold all the resources in this collection
             $scope.selectIG = function(IG){
+                var extDef = appConfigSvc.config().standardExtensionUrl.resourceTypeUrl;
                 clearRightPane();
                 $scope.currentIG=IG;     //the List the holds this collection
 
@@ -816,13 +823,19 @@ angular.module("sampleApp")
                 $scope.currentIG.package.forEach(function (package) {
                     package.resource.forEach(function (resource) {
                         var purpose = resource.purpose || resource.acronym;     //<<< todo - 'purpose' was removed in R3...
-
-                        if (resource.example) {         //another R2/3 difference...
+                        var type;
+                        if (resource.example || resource.purpose == 'example') {         //another R2/3 difference...
                             purpose = 'example'
+                            var t = Utilities.getSingleExtensionValue(resource,extDef);
+                            if (t) {
+                                type = t.valueString;
+                            }
                         }
 
                         $scope.artifacts[purpose] = $scope.artifacts[purpose] || []
-                        $scope.artifacts[purpose].push({url:resource.sourceReference.reference, description:resource.description})
+                        $scope.artifacts[purpose].push(
+                            {url:resource.sourceReference.reference, description:resource.description,type:type}
+                        )
                     })
                 });
 
@@ -878,22 +891,15 @@ angular.module("sampleApp")
                 $scope.selectedItemType = type;
                 $scope.selectedItem = item;
 
+                delete $scope.exampleResource
+
 
                //console.log(item)
                 centerNodeInGraph(item.url)
 
                 //right now we assume that examples are on the data server...
                 if (type == 'example') {
-                    var url = appConfigSvc.getCurrentDataServer().url + item.url;
-                    GetDataFromServer.adHocFHIRQuery(url).then (
-                        function(data) {
-                            $scope.exampleResource = data.data
-                        },
-                        function (err) {
-                            alert("Can't find an example with the url: "+ url + " on the data server")
-                        }
-                    )
-
+                    $scope.getExample(item)
                 }
 
                 if (type == 'logical') {
@@ -1001,9 +1007,11 @@ angular.module("sampleApp")
 
 
                    profileDiffSvc.getSD(url).then(
-                   //GetDataFromServer.findConformanceResourceByUri(url).then(
                        function(SD){
                            //console.log(SD);
+
+
+                           $scope.constrainedType = SD.constrainedType;     //todo different for R3...
 
                            //always check if there are any extension definitions or valuesets references by this profile (in case they have been externally changed)
                            if (profileDiffSvc.updateExtensionsAndVSInProfile($scope.currentIG,SD)) {
@@ -1044,6 +1052,20 @@ angular.module("sampleApp")
 
 
             };
+
+            //called directly and from the getItem()
+            $scope.getExample = function(item) {
+                var url = appConfigSvc.getCurrentDataServer().url + item.url;
+                GetDataFromServer.adHocFHIRQuery(url).then (
+                    function(data) {
+                        $scope.exampleResource = data.data
+                    },
+                    function (err) {
+                        alert("Can't find an example with the url: "+ url + " on the data server")
+                    }
+                )
+            }
+
 
             function setupProfile(SD) {
                 $scope.selectedSD = SD;

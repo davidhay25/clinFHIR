@@ -311,13 +311,13 @@
                             <ul class="list-group">
                                 <li class="list-group-item" ng-repeat="item in artifacts.example"
                                     ng-click = "selectItem(item,'example')">
-                                    <div class="clickable">{{item.url | referenceType}}</div>
+                                    <div class="clickable">{{item.url}}</div>
                                     <div><em>{{item.description}}</em></div>
                                 </li>
                             </ul>
-                            <!--
-                            <div class="pull-right"><a href="#" ng-click="importItem({type:'logical',display:'Logical Model'})">Import new</a> </div>
-                            -->
+
+                            <div class="pull-right"><a href="#" ng-click="uploadExample(selectedItem)">Import new</a> </div>
+
                         </div>
 
                         <div uib-accordion-group class="panel-default">
@@ -389,6 +389,7 @@
 
                     <div ng-show="selectedItemType == 'example'">
                         <h4>Example</h4>
+                        {{selectedItem.description}}
                         <pre>{{exampleResource | json}}</pre>
                     </div>
 
@@ -703,7 +704,6 @@
                                 </div>
                             </uib-tab>
 
-
                             <uib-tab heading="Table">
 
                                 <p class="banner"><em>A tabular view of the Profile. </em></p>
@@ -711,8 +711,6 @@
                                    show-e-d-e="showED" select-extension-from-profile-e="selectExtensionFromProfile"
                                    show-value-set-e="showValueSet"></profile-table>
                             </uib-tab>
-
-
 
                             <uib-tab heading="Extensions">
 
@@ -726,23 +724,21 @@
                                 <div class="row">
                                     <div class="col-sm-3 col-md-3">
 
+                                        <strong>Type: {{constrainedType}}</strong>
 
-                                        <div>
-                                            <button class="btn btn-link" ng-click="uploadExample(selectedItem)">
-                                                Upload example
-                                            </button>
+                                        <ul class="list-group">
+                                            <li  class="list-group-item" ng-repeat="item in artifacts.example"
+                                                ng-click = "getExample(item)"
+                                                ng-show = "item.type == constrainedType">
+                                                <div class="clickable">{{item.url}}</div>
+                                                <div><em>{{item.description}}</em></div>
 
+                                            </li>
+                                        </ul>
 
-
-
-
-
-
-
-                                        </div>
                                     </div>
                                     <div class="col-sm-9 col-md-9">
-
+                                        <pre ng-show="exampleResource">{{exampleResource | json}}</pre>
                                     </div>
                                 </div>
                             </uib-tab>

@@ -1,6 +1,12 @@
 
 <div>
 
+    <style>
+        .spacer {
+            margin-bottom: 8px;
+        }
+    </style>
+
     <div class="modal-header">
 
         <div class="row">
@@ -23,14 +29,19 @@
 
                 <h5>Upload new file</h5>
 
-                <input class="btn btn-primary" type="file" id="inputFileName"/>
+                <input class="btn btn-primary spacer" type="file" id="inputFileName"/>
 
-                <textarea class="form-control" placeholder="Description" ng-model="fileDescription"></textarea>
+                <textarea class="form-control spacer" placeholder="Description" ng-model="input.description"></textarea>
 
-                <button class="btn btn-success" ng-click="loadFile()">Load File</button>
+                <button class="btn btn-success spacer" ng-click="loadFile()">Load File</button>
 
-                <button class="btn btn-danger" ng-show="fileToUpload"
+                <button class="btn btn-danger spacer" ng-show="fileToUpload"
                         ng-click="uploadFile()">Upload</button>
+
+                <div>
+                    <checkbox ng-model="input.resetId"></checkbox> Reset Id
+                </div>
+
 
             </div>
             <div class="col-sm-8 col-md-8">
