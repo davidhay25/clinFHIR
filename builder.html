@@ -180,7 +180,7 @@
                 </div>
 
 
-                <div class="col-md-2 col-sm-2">
+                <div ng-show = "1==2" class="col-md-1 col-sm-1">
                     <div class="navbar-text">
                         <!-- <a href="#" ng-hide="recording" ng-click="recording = true">Start Recording</a>
                         <a href="#" ng-show="recording" ng-click="recording = false">Stop Recording</a>
@@ -216,7 +216,7 @@
                 </div>
 
 
-                <div class="col-md-2 col-sm-2">
+                <div class="col-md-3 col-sm-3">
 
                     <div class="navbar-text" ng-show="thingToDisplay=='scenario'">
                         <div class="clickable" ng-click="validateAll()">Validate All</div>
@@ -224,7 +224,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-1 col-sm-1">
+                <div class="col-md-2 col-sm-2">
 
                     <div class="pull-right navbar-form" ng-show="waiting">
                         <img src="css/ajax_loader_blue_32.gif"/>
@@ -277,6 +277,24 @@
                                 <li ng-show="thingToDisplay=='library'">
                                     <a href="#" ng-click="thingToDisplay = 'scenario'">Hide Library</a>
                                 </li>
+
+
+                                <li ng-hide="thingToDisplay=='recording' || selectedContainer.tracker.length < 1">
+                                    <a href="#"
+                                       ng-click="thingToDisplay='recording'">View all changes
+                                        <span class="badge">{{selectedContainer.tracker.length}}</span> </a>
+                                </li>
+
+                                <li ng-show="thingToDisplay=='recording'">
+                                    <a href="#" ng-click="thingToDisplay='scenario'">View Scenario</a>
+                                </li>
+
+
+
+
+
+
+
                             </ul>
                         </li>
                     </ul>
