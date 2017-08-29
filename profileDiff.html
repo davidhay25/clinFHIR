@@ -73,6 +73,7 @@
     <script src="js/components/extensionDirective.js"></script>
     <script src="js/resourceSvc.js"></script>
     <script src="js/libs/angular-bootstrap-checkbox.js"></script>
+    <script src="js/uploadCtrl.js"></script>
 
 
     <script>
@@ -155,15 +156,7 @@
                 <div class="navbar-text">
                     <div><a href="#" ng-click="clearCache()">Clear Cache</a></div>
                     <div><a href="#" ng-show="currentIG" ng-click="createDownload()">Download</a>
-<!--
-                        <a class="pull-right" ng-show="downloadLinkJsonContent" download="{{downloadLinkJsonName}}.json"
-                           href="{{downloadLinkJsonContent}}" title="{{downloadLinkJsonName}}" >
-                            <i class="glyphicon glyphicon-cloud" class="iconSpacing"
-                                 title="{{downloadLinkJsonName}}.json"
-                                 style="cursor: pointer">
 
-                        </i></a>
-                        -->
 
 
 
@@ -312,8 +305,25 @@
 
                         <div uib-accordion-group class="panel-default">
                             <uib-accordion-heading>
+                                Examples
+                                <div class="pull-right badge">{{artifacts.example.length}}</div>
+                            </uib-accordion-heading>
+                            <ul class="list-group">
+                                <li class="list-group-item" ng-repeat="item in artifacts.example"
+                                    ng-click = "selectItem(item,'example')">
+                                    <div class="clickable">{{item.url | referenceType}}</div>
+                                    <div><em>{{item.description}}</em></div>
+                                </li>
+                            </ul>
+                            <!--
+                            <div class="pull-right"><a href="#" ng-click="importItem({type:'logical',display:'Logical Model'})">Import new</a> </div>
+                            -->
+                        </div>
+
+                        <div uib-accordion-group class="panel-default">
+                            <uib-accordion-heading>
                                 Other artifacts
-                                <div class="pull-right badge">{{artifacts.logical.length}}</div>
+                                <div class="pull-right badge">{{artifacts.other.length}}</div>
                             </uib-accordion-heading>
                             <ul class="list-group">
                                 <li class="list-group-item" ng-repeat="item in artifacts.other"
@@ -375,6 +385,12 @@
 
                             <uib-tab-heading>Details of Resource: <strong>{{selectedItem.url | referenceType}}</strong></uib-tab-heading>
 
+
+
+                    <div ng-show="selectedItemType == 'example'">
+                        <h4>Example</h4>
+                        <pre>{{exampleResource | json}}</pre>
+                    </div>
 
                     <div ng-show="selectedItemType == 'logical'">
                         <h4>Logical Model</h4>
@@ -705,6 +721,32 @@
                                                show-e-d-e="showED" select-extension-from-profile-e="selectExtensionFromProfile"
                                                show-value-set-e="showValueSet"></profile-table>
                             </uib-tab>
+
+                            <uib-tab heading="Examples">
+                                <div class="row">
+                                    <div class="col-sm-3 col-md-3">
+
+
+                                        <div>
+                                            <button class="btn btn-link" ng-click="uploadExample(selectedItem)">
+                                                Upload example
+                                            </button>
+
+
+
+
+
+
+
+
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-9 col-md-9">
+
+                                    </div>
+                                </div>
+                            </uib-tab>
+
 
                             <uib-tab heading="Required Elements">
 

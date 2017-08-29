@@ -32,6 +32,48 @@ angular.module("sampleApp")
             };
 
 
+            $scope.uploadExample = function(item) {
+
+
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/upLoad.html',
+                    size:'lg',
+                    backdrop: 'static',
+                    controller: 'uploadCtrl',
+                    resolve : {
+                        resource : function () {
+                            return '';
+                        }
+                    }
+
+                }).result.then(function(vo){
+                    var url = vo.url;       //the resource where the resource was saved
+                    console.log(url)
+                    //now create an entry for this example in the IG...
+
+
+                    //get a reference to the first package...
+                    var pkg = $scope.currentIG.package[0];  //just stuff everything into the first package for the moment...
+                    pkg.resource = pkg.resource || []
+                    //add the profile to the IG - then find any extensions and add them as well. todo - should we check whether they exist first?
+
+                    var res = {sourceReference:{reference:url}};
+                    if (fhirVersion ==2) {
+                        res.purpose = 'example'
+                    } else {
+                        res.example=true;
+                    }
+                    pkg.resource.push(res);
+
+                    $scope.saveIG()
+
+                });
+
+                console.log(item)
+            };
+
+
+
             //download a single item (profile or extension)
             $scope.downLoadItem = function(ev,item,notes) {
                 ev.stopPropagation();
@@ -301,8 +343,6 @@ angular.module("sampleApp")
                             } else {
                                 $scope.pageTreeData.push(newNode)
                             }
-
-
 
                         } else {
                             //add...
@@ -776,13 +816,18 @@ angular.module("sampleApp")
                 $scope.currentIG.package.forEach(function (package) {
                     package.resource.forEach(function (resource) {
                         var purpose = resource.purpose || resource.acronym;     //<<< todo - 'purpose' was removed in R3...
+
+                        if (resource.example) {         //another R2/3 difference...
+                            purpose = 'example'
+                        }
+
                         $scope.artifacts[purpose] = $scope.artifacts[purpose] || []
                         $scope.artifacts[purpose].push({url:resource.sourceReference.reference, description:resource.description})
                     })
                 });
 
                 //sort 'em all...
-                ['extension','profile','terminology','logical','other'].forEach(function (purpose) {
+                ['extension','profile','terminology','logical','other','example'].forEach(function (purpose) {
                     if ($scope.artifacts[purpose]) {
                         $scope.artifacts[purpose].sort(function(item1,item2) {
                             var typ1 =  $filter('getLogicalID')(item1.url);
@@ -799,7 +844,6 @@ angular.module("sampleApp")
 
                 $scope.pageTreeData = profileDiffSvc.generatePageTree($scope.currentIG);
                 drawPageTree();
-
 
             };
 
@@ -837,6 +881,20 @@ angular.module("sampleApp")
 
                //console.log(item)
                 centerNodeInGraph(item.url)
+
+                //right now we assume that examples are on the data server...
+                if (type == 'example') {
+                    var url = appConfigSvc.getCurrentDataServer().url + item.url;
+                    GetDataFromServer.adHocFHIRQuery(url).then (
+                        function(data) {
+                            $scope.exampleResource = data.data
+                        },
+                        function (err) {
+                            alert("Can't find an example with the url: "+ url + " on the data server")
+                        }
+                    )
+
+                }
 
                 if (type == 'logical') {
                     delete $scope.LMSD

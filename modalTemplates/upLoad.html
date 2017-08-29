@@ -1,0 +1,55 @@
+
+<div>
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-6 col-sm-6">
+                <h3 class="modal-title">Upload file</h3>
+
+            </div>
+            <div class="col-md-6 col-sm-6 ">
+                <div class="pull-right">
+                    <button  class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-body">
+
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+
+                <h5>Upload new file</h5>
+
+                <input class="btn btn-primary" type="file" id="inputFileName"/>
+
+                <textarea class="form-control" placeholder="Description" ng-model="fileDescription"></textarea>
+
+                <button class="btn btn-success" ng-click="loadFile()">Load File</button>
+
+                <button class="btn btn-danger" ng-show="fileToUpload"
+                        ng-click="uploadFile()">Upload</button>
+
+            </div>
+            <div class="col-sm-8 col-md-8">
+                <pre ng-show="fileToUpload" class="myScroll">{{fileToUpload | json}}</pre>
+            </div>
+
+
+        </div>
+
+    </div>
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <div ng-show="url" >POST {{url}}</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
