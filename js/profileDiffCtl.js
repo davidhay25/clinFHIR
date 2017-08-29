@@ -1069,6 +1069,10 @@ angular.module("sampleApp")
 
             function setupProfile(SD) {
                 $scope.selectedSD = SD;
+                $scope.arV2 = profileDiffSvc.generateV2MapFromSD(SD);
+
+
+
 
 
 /*

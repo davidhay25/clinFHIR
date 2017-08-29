@@ -419,7 +419,6 @@
                                     <tr ng-repeat="row in LMtreeData">
 
                                         <td>
-
                                             <div  ng-style="{ 'padding-left': (row.data.path | pathindent) }"
                                                   ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path| lastInPath}}</div>
                                         </td>
@@ -822,6 +821,67 @@
                                     </div>
 
                                 </div>
+
+                            </uib-tab>
+
+                            <uib-tab heading="Mappings">
+                                <br/>
+
+                                <uib-tabset>
+
+
+                                    <uib-tab heading="From HL7 v2">
+                                        <table class="table table-bordered">
+                                            <tr ng-repeat="v2 in arV2">
+                                                <td>{{v2.hl7}}</td>
+                                                <td>
+                                                    <div ng-repeat="v in v2.fhir">
+                                                        {{v.path}}
+                                                    </div>
+
+                                                </td>
+                                                <td>
+                                                    <div ng-repeat="v in v2.fhir">
+                                                        {{v.comment}}
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </uib-tab>
+
+
+
+
+                                <uib-tab heading="Detail">
+                                    <br/>
+                                    <table class="table table-bordered table-condensed">
+                                        <tr><th>Element</th><th>DataType</th><th>Mult.</th><th>Mappings</th><th>Description</th></tr>
+                                        <tr ng-repeat="ed in selectedSD.snapshot.element">
+
+                                            <td>
+                                                <div  ng-style="{ 'padding-left': (ed.path | pathindent) }">{{ed.path| lastInPath}}</div>
+                                            </td>
+                                            <td>
+                                                <div ng-repeat="typ in ed.type">
+                                                    {{typ.code}}
+                                                </div>
+
+                                            </td>
+
+                                            <td>{{ed.min}}..{{ed.max}}</td>
+                                            <td>
+                                                <div ng-repeat="map in ed.mapping">
+                                                    {{map.identity}}: {{map.map}}
+                                                </div>
+                                            </td>
+                                            <td>{{ed.definition}}</td>
+                                        </tr>
+
+                                    </table>
+
+                                </uib-tab>
+                                </uib-tabset>
 
                             </uib-tab>
 

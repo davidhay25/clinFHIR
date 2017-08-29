@@ -38,6 +38,44 @@ angular.module("sampleApp").service('profileDiffSvc',
 
     return {
 
+        generateV2MapFromSD : function(SD) {
+            if (!SD || !SD.snapshot) {return;}
+
+            var v2Hash = {}
+            SD.snapshot.element.forEach(function (ed) {
+                if (ed.mapping) {
+
+                    ed.mapping.forEach(function (map) {
+                        if (map.identity == 'hl7V2') {
+                            var ar = map.map.split('|')
+                            var v2Field = ar[0]
+                            v2Hash[v2Field] = v2Hash[v2Field] ||[]
+                            v2Hash[v2Field].push({path:ed.path,comment:ar[1]})
+                        }
+                    })
+                }
+
+            })
+
+            var arV2 = []
+            angular.forEach(v2Hash,function (v,k) {
+                arV2.push({hl7:k,fhir:v})
+            })
+
+            arV2.sort(function (a,b) {
+                if (a.hl7 > b.hl7) {
+                    return 1
+                } else {
+                    return -1
+                }
+
+            })
+
+            console.log(arV2);
+            return arV2;
+
+        },
+
         generatePageTree : function(IG){
             var treeData = [];
 
