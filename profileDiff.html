@@ -113,10 +113,9 @@
 </head>
 
 
-<body style="padding: 8px;padding-top: 80px" >
+<body style="padding: 8px;padding-top: 100px" >
 
 <div ng-app="sampleApp" ng-controller="profileDiffCtrl" class="container-fluid">
-
 
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 
@@ -133,6 +132,7 @@
                 <div class="navbar-text">
                     Conformance:{{appConfigSvc.getCurrentConformanceServer().name}}
                     <div>Terminology:{{appConfigSvc.getCurrentTerminologyServer().name}}</div>
+                    <div>Data:{{appConfigSvc.getCurrentDataServer().name}}</div>
                 </div>
             </div>
 
@@ -383,14 +383,22 @@
 
                         <uib-tab>
 
-                            <uib-tab-heading>Details of Resource: <strong>{{selectedItem.url | referenceType}}</strong></uib-tab-heading>
+                            <uib-tab-heading>Details of Resource: <strong>{{selectedItem.url | referenceType}}</strong>
+                            </uib-tab-heading>
 
 
 
                     <div ng-show="selectedItemType == 'example'">
                         <h4>Example</h4>
                         {{selectedItem.description}}
-                        <pre>{{exampleResource | json}}</pre>
+                        <div class="row">
+                            <div class="col-sm-6 col-md-6">
+                                <pre>{{exampleResource | json}}</pre>
+                            </div>
+                            <div class="col-sm-6 col-md-6">
+                                <pre>{{exampleResourceXml}}</pre>
+                            </div>
+                        </div>
                     </div>
 
                     <div ng-show="selectedItemType == 'logical'">

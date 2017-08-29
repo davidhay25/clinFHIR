@@ -892,6 +892,7 @@ angular.module("sampleApp")
                 $scope.selectedItem = item;
 
                 delete $scope.exampleResource
+                delete $scope.exampleResourceXml
 
 
                //console.log(item)
@@ -1056,15 +1057,32 @@ angular.module("sampleApp")
             //called directly and from the getItem()
             $scope.getExample = function(item) {
                 var url = appConfigSvc.getCurrentDataServer().url + item.url;
+                //this is the Json verson...
                 GetDataFromServer.adHocFHIRQuery(url).then (
                     function(data) {
                         $scope.exampleResource = data.data
                     },
                     function (err) {
-                        alert("Can't find an example with the url: "+ url + " on the data server")
+                        alert("Can't find an example at the url: "+ url )
                     }
                 )
-            }
+
+                //
+                url += "?_format=xml&_pretty=true";
+                GetDataFromServer.adHocFHIRQuery(url).then (
+                    function(data) {
+                        $scope.exampleResourceXml = data.data
+                       // console.log($scope.exampleResourceXml)
+                    },
+                    function (err) {
+                        alert("Can't find an example at the url: "+ url)
+                    }
+                )
+
+
+
+
+            };
 
 
             function setupProfile(SD) {
