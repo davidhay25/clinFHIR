@@ -32,6 +32,69 @@ angular.module("sampleApp")
             };
 
 
+
+            $scope.editResourceItem = function(item) {
+
+
+                console.log(item)
+
+                var igResource = profileDiffSvc.findItem(item.url,$scope.currentIG)
+
+                console.log(igResource);
+
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/editIGResource.html',
+                    //size:'lg',
+                    backdrop: 'static',
+                    controller: function($scope,igResource){
+                        $scope.description = igResource.description;
+                        $scope.save = function(){
+                            var vo = {description: $scope.description}
+                            $scope.$close(vo);
+                        }
+                    },
+                    resolve : {
+                        igResource : function () {
+                            return igResource;
+                        }
+                    }
+
+                }).result.then(function(vo){
+                    igResource.description = vo.description;    //the underlying item
+                    item.description = vo.description;      //the display item
+                    $scope.saveIG()
+                    $scope.selectItem(item,'example')
+                });
+
+                //
+
+
+
+               // $scope.selectIG($scope.currentIG);
+
+            };
+
+            $scope.deleteResourceItem = function(item) {
+                var modalOptions = {
+                    closeButtonText: "No, I've changed my mind",
+                    actionButtonText: 'Yes, please remove it',
+                    headerText: 'Remove Item',
+                    bodyText: 'Are you sure you wish to remove this item'
+                };
+
+
+                modalService.showModal({}, modalOptions).then(
+                    function(){
+                        profileDiffSvc.deleteItem(item.url,$scope.currentIG)
+                        $scope.saveIG()
+                        $scope.selectIG($scope.currentIG);
+                    }
+                )
+
+                console.log(item)
+
+            };
+
             $scope.uploadExample = function(item) {
 
 
@@ -956,7 +1019,7 @@ angular.module("sampleApp")
 
                 }
 
-               if (type == 'terminology') {
+                if (type == 'terminology') {
                    //really only works for ValueSet at this point...
                    profileDiffSvc.getTerminologyResource(item.url,'ValueSet').then(
                        function (vs) {
@@ -967,7 +1030,7 @@ angular.module("sampleApp")
                    )
                }
 
-               if (type=='extension') {
+                if (type=='extension') {
                     profileDiffSvc.getSD(item.url).then(
                         function (SD) {
                             $scope.selectedExtension = SD;
@@ -980,7 +1043,7 @@ angular.module("sampleApp")
                     )
                }
 
-               if (type=='profile') {
+                if (type=='profile') {
                    //this is a profiled resource - - an SD
                    // $scope.extensionSelected = true;
 

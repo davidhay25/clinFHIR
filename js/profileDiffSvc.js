@@ -38,6 +38,51 @@ angular.module("sampleApp").service('profileDiffSvc',
 
     return {
 
+        findItem : function(url,IG) {
+            //find an item from the IG package/resource based on the url. We assume the url is unique
+            var inx = -1;
+            for (var i=0; i< IG.package.length; i++) {
+                var package = IG.package[i];
+                for (var j=0; j < package.resource.length; j++) {
+                    var resource = package.resource[j]
+                    if (resource.sourceReference && resource.sourceReference.reference == url) {
+                        return resource;
+                        i = IG.package.length;      //to break the outer loop as well (may not be necesary)
+                        break;
+                    }
+                }
+            }
+
+
+        },
+
+        deleteItem : function(url,IG) {
+            //remove an item from the IG package/resource based on the url. We assume the url is unique
+            var inx = -1;
+            for (var i=0; i< IG.package.length; i++) {
+                var package = IG.package[i];
+                for (var j=0; j < package.resource.length; j++) {
+                    var resource = package.resource[j]
+                    if (resource.sourceReference && resource.sourceReference.reference == url) {
+                        if (package.resource.length == 1) {
+                            //remove the whole package
+                            IG.package.splice(i,1);
+                            i = IG.package.length;      //to break the outer loop as well
+                            break;
+                        } else {
+                            //just remove this one
+                            package.resource.splice(j,1)
+                            i = IG.package.length;      //to break the outer loop as well
+                            break;
+                        }
+                    }
+                }
+            }
+
+
+        },
+
+
         generateV2MapFromSD : function(SD) {
             if (!SD || !SD.snapshot) {return;}
 

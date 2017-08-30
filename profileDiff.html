@@ -312,7 +312,7 @@
                                 <li class="list-group-item" ng-repeat="item in artifacts.example"
                                     ng-click = "selectItem(item,'example')">
                                     <div class="clickable">{{item.url}}</div>
-                                    <div><em>{{item.description}}</em></div>
+                                    <div><em>{{item.description | limitTo : 40}}</em></div>
                                 </li>
                             </ul>
 
@@ -385,76 +385,95 @@
 
                             <uib-tab-heading>Details of Resource: <strong>{{selectedItem.url | referenceType}}</strong>
                             </uib-tab-heading>
-
-
-
-                    <div ng-show="selectedItemType == 'example'">
-                        <h4>Example</h4>
-                        {{selectedItem.description}}
-                        <div class="row">
-                            <div class="col-sm-6 col-md-6">
-                                <pre>{{exampleResource | json}}</pre>
-                            </div>
-                            <div class="col-sm-6 col-md-6">
-                                <pre>{{exampleResourceXml}}</pre>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div ng-show="selectedItemType == 'logical'">
-                        <h4>Logical Model</h4>
-
-                        <uib-tabset>
-                            <uib-tab heading="Tree">
-                                <br/>
-                                <div class="row">
+                            <br />
+                            <div ng-show="selectedItemType == 'example'">
+                                <div class="row rounded-box">
                                     <div class="col-sm-4 col-md-4">
-                                        <div id="lmTreeView"></div>
+                                        <strong>Example:{{selectedItem.url}} </strong>
                                     </div>
-                                    <div class="col-sm-4 col-md-4">
-                                        <ng-include src="'/includes/lmItem.html'"></ng-include>
+
+                                    <div class="col-sm-5 col-md-5">
+                                        <em>{{selectedItem.description}}</em>
+                                    </div>
+                                    <div class="col-sm-3 col-md-3">
+                                        <div class="pull-right" style="margin-top: 8px">
+                                            <i class="glyphicon glyphicon-edit clickable iconSpacing"
+                                               ng-click="editResourceItem(selectedItem)"></i>
+
+                                            <i class="glyphicon glyphicon-remove clickable iconSpacing"
+                                               ng-click="deleteResourceItem(selectedItem)"></i>
+                                        </div>
+
                                     </div>
                                 </div>
 
 
-                            </uib-tab>
-                            <uib-tab heading="Table">
-                                <br/>
 
 
-                                <table class="table table-bordered table-condensed">
-                                    <tr><th>Element</th><th>DataType</th><th>isRef</th><th>Mult.</th><th>Mappings</th><th>Description</th></tr>
-                                    <tr ng-repeat="row in LMtreeData">
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6">
+                                        <pre>{{exampleResource | json}}</pre>
+                                    </div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <pre>{{exampleResourceXml}}</pre>
+                                    </div>
+                                </div>
+                            </div>
 
-                                        <td>
-                                            <div  ng-style="{ 'padding-left': (row.data.path | pathindent) }"
-                                                  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path| lastInPath}}</div>
-                                        </td>
-                                        <td>{{row.data.type[0].code}}
+                            <div ng-show="selectedItemType == 'logical'">
+                                <h4>Logical Model</h4>
 
-                                        </td>
-                                        <td><div ng-show="row.data.isReference">Y</div></td>
-                                        <td>{{row.data.min}}..{{row.data.max}}</td>
-                                        <td>
-                                            <div ng-repeat="map in row.data.mappingFromED">
-                                                {{map.identity}}: {{map.map}}
+                                <uib-tabset>
+                                    <uib-tab heading="Tree">
+                                        <br/>
+                                        <div class="row">
+                                            <div class="col-sm-4 col-md-4">
+                                                <div id="lmTreeView"></div>
                                             </div>
-                                        </td>
-                                        <td>{{row.data.description}}</td>
-
-                                    </tr>
-
-                                </table>
-                            </uib-tab>
-                            <uib-tab heading="Json">
-                                <pre>{{LMSD | json}}</pre>
-                            </uib-tab>
-                        </uib-tabset>
+                                            <div class="col-sm-4 col-md-4">
+                                                <ng-include src="'/includes/lmItem.html'"></ng-include>
+                                            </div>
+                                        </div>
 
 
-                    </div>
+                                    </uib-tab>
+                                    <uib-tab heading="Table">
+                                        <br/>
 
-                    <div ng-show="selectedItemType == 'profile'">
+
+                                        <table class="table table-bordered table-condensed">
+                                            <tr><th>Element</th><th>DataType</th><th>isRef</th><th>Mult.</th><th>Mappings</th><th>Description</th></tr>
+                                            <tr ng-repeat="row in LMtreeData">
+
+                                                <td>
+                                                    <div  ng-style="{ 'padding-left': (row.data.path | pathindent) }"
+                                                          ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path| lastInPath}}</div>
+                                                </td>
+                                                <td>{{row.data.type[0].code}}
+
+                                                </td>
+                                                <td><div ng-show="row.data.isReference">Y</div></td>
+                                                <td>{{row.data.min}}..{{row.data.max}}</td>
+                                                <td>
+                                                    <div ng-repeat="map in row.data.mappingFromED">
+                                                        {{map.identity}}: {{map.map}}
+                                                    </div>
+                                                </td>
+                                                <td>{{row.data.description}}</td>
+
+                                            </tr>
+
+                                        </table>
+                                    </uib-tab>
+                                    <uib-tab heading="Json">
+                                        <pre>{{LMSD | json}}</pre>
+                                    </uib-tab>
+                                </uib-tabset>
+
+
+                            </div>
+
+                            <div ng-show="selectedItemType == 'profile'">
                         <h4>Profiled resource</h4>
 
                         <uib-tabset>
@@ -594,7 +613,6 @@
 
 
                             </uib-tab>
-
 
                             <uib-tab heading="Logical View">
 

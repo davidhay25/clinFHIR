@@ -15,7 +15,7 @@ angular.module("sampleApp")
 
             if (appConfigSvc.checkConfigVersion()) {
                 var txt = 'The default configuration has been updated (including the patient data and conformance server). Please re-load the page for it to take effect.';
-                //todo txt += " (Note that you will need to re-enter any direct servers you have added via the 'gear' icon)"
+                txt += " (Note that the servers have been re-set to the defaults, and also you will need to re-enter any direct servers you have added via the 'gear' icon)"
                 modalService.showModal({}, {bodyText: txt})
             }
 

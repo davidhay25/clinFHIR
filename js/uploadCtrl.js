@@ -55,6 +55,24 @@ angular.module("sampleApp")
                         if (! serverUrl) {
                             serverUrl = data.headers('Location');
                         }
+
+
+
+                        if (serverUrl.substr(0,4)== 'http') {
+                            //convert to a logical url
+                            var ar = serverUrl.split('/');
+
+                            if (ar[ar.length-2] == '_history') {
+                                ar.pop();
+                                ar.pop();
+                            }
+
+
+                            var l = ar.length;
+                            serverUrl = ar[l-2]+ "/"+ar[l-1];
+                        }
+
+
                         //close the dialog, passing back the url where ther resource was stored.
                         $scope.$close({url:serverUrl,description:$scope.input.description, type:$scope.fileToUpload.resourceType})
 
