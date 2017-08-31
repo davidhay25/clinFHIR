@@ -122,8 +122,6 @@ angular.module("sampleApp")
                 }
             }
 
-
-
             $scope.testServer = function(type) {
                 var opn = 'getCurrent'+type + 'Server'
                 var svr = appConfigSvc[opn]()
@@ -173,6 +171,14 @@ angular.module("sampleApp")
 
             };
 
+
+            $scope.allTheSame = function(){
+                var url = appConfigSvc.getCurrentDataServer().url;
+                appConfigSvc.setServerType('terminology',url);
+                appConfigSvc.setServerType('conformance',url);
+                $scope.$broadcast('setDefault');        //will just refresh the display...
+                $scope.showServers = false;
+            }
 
             $scope.setToDefault = function(){
                 $scope.testing = {};

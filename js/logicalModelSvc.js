@@ -1857,7 +1857,14 @@ angular.module("sampleApp")
 
                         }
 
-                        item.data.comments = ed.comments;
+
+
+                        if (fhirVersion == 2) {
+                            item.data.comments = ed.comments;
+                        } else {
+                            item.data.comments = ed.comment;
+                        }
+
 
                         //note that we don't retrieve the complete valueset...
                         if (ed.binding) {
@@ -1978,8 +1985,10 @@ angular.module("sampleApp")
                     //the 'name'(stu2) or 'label'(r3) is used for the display in the logical model generated from the profile
                     if (fhirVersion == 2) {
                         ed.name = item.text;
+                        ed.comments = data.comments;
                     } else {
                         ed.label = item.text;
+                        ed.comment = data.comments;
                     }
 
 
@@ -1989,7 +1998,9 @@ angular.module("sampleApp")
                     ed.definition = data.description || 'No description';
                     ed.min = data.min;
                     ed.max = data.max;
-                    ed.comments = data.comments;
+
+
+
 
                     //a conceptMap associated with this element
                     if (data.conceptMap) {

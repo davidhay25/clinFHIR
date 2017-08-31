@@ -276,7 +276,8 @@
                                 <div class="pull-right badge">{{artifacts.terminology.length}}</div>
                             </uib-accordion-heading>
                             <ul class="list-group">
-                                <li class="list-group-item" ng-repeat="item in artifacts.terminology"
+                                <li ng-class="{'list-group-item':true, listItemSelected:selectedItem == item}"
+                                    ng-repeat="item in artifacts.terminology"
                                     ng-click = "selectItem(item,'terminology')">
                                     <div class="clickable">{{item.url | referenceType}}
                                         <span ng-show="item.url.indexOf('hl7.org/fhir') > -1"   class="pull-right">
@@ -294,7 +295,8 @@
                                 <div class="pull-right badge">{{artifacts.logical.length}}</div>
                             </uib-accordion-heading>
                             <ul class="list-group">
-                                <li class="list-group-item" ng-repeat="item in artifacts.logical"
+                                <li ng-class="{'list-group-item':true, listItemSelected:selectedItem == item}"
+                                    ng-repeat="item in artifacts.logical"
                                     ng-click = "selectItem(item,'logical')">
                                     <div class="clickable">{{item.url | referenceType}}</div>
                                     <div><em>{{item.description}}</em></div>
@@ -309,7 +311,10 @@
                                 <div class="pull-right badge">{{artifacts.example.length}}</div>
                             </uib-accordion-heading>
                             <ul class="list-group">
-                                <li class="list-group-item" ng-repeat="item in artifacts.example"
+
+
+                                <li ng-class="{'list-group-item':true,listItemSelected:selectedItem == item}"
+                                    ng-repeat="item in artifacts.example"
                                     ng-click = "selectItem(item,'example')">
                                     <div class="clickable">{{item.url}}</div>
                                     <div><em>{{item.description | limitTo : 40}}</em></div>

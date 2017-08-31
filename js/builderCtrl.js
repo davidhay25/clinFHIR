@@ -19,6 +19,12 @@ angular.module("sampleApp")
                 //$scope.markResult = markerSvc.mark($scope.selectedContainer,$scope.builderBundles[0]) ; //compare to first bundle - testing!
             };
 
+
+            $scope.generateDocument = function(){
+                var doc = builderSvc.generateDocument($scope.selectedContainer)
+                console.log(doc)
+            }
+
             var idPrefix = 'cf-';   //prefix for the id. todo should probably be related to the userid in some way...
             //load the library. todo THis will become slow with large numbers of sets...
             function refreshLibrary() {
