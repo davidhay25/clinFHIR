@@ -4,7 +4,7 @@ angular.module("sampleApp")
     .controller('logicalModellerCtrl',
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
                   GetDataFromServer,$firebaseObject,$firebaseArray,$location,igSvc,SaveDataToServer,$window,RenderProfileSvc,
-                  $q,Utilities, securitySvc) {
+                  $q,Utilities, securitySvc,$filter) {
             $scope.input = {};
 
             $scope.code = {};
@@ -1538,7 +1538,7 @@ angular.module("sampleApp")
                 $scope.relativeMappings = logicalModelSvc.getRelativeMappings($scope.treeData); //items with both v2 & fhir mappings
 
 
-
+                $window.document.title = 'LM: ' + entry.resource.id;
 
 
                 logicalModelSvc.openTopLevelOnly($scope.treeData);
@@ -1860,6 +1860,10 @@ angular.module("sampleApp")
 
 
                 var parentPath = $scope.selectedNode.data.path;
+                var ar = parentPath.split('.');
+                ar.pop()
+                parentPath = ar.join('.')
+
 
                 editNode($scope.selectedNode,parentPath);         //will edit the node
 
@@ -1899,9 +1903,34 @@ angular.module("sampleApp")
                         },
                         baseType : function() {
                             var baseType = null
+                            //is there a base type set for this whole model?
                             if ($scope.treeData && $scope.treeData[0] && $scope.treeData[0].data &&  $scope.treeData[0].data.header)  {
                                 baseType = $scope.treeData[0].data.header.baseType;
                             }
+
+                            //if not, then is the parent a reference to a resource?
+                            if (!baseType) {
+                                var node = findNodeWithPath(parentPath)
+                                console.log(node.data.ed.type)
+                                if (node && node.data && node.data.ed && node.data.ed.type) {
+                                    node.data.ed.type.forEach(function (typ) {
+                                        if (typ.code == 'Reference') {
+                                            //r2/r3 difference
+                                            var profile = typ.targetProfile
+                                            if (!profile && typ.profile) {
+                                                profile = typ.profile[0]
+                                            }
+                                            if (profile) {
+                                                baseType  = $filter('referenceType')(profile);
+                                            }
+
+                                        }
+                                    })
+                                }
+
+                            }
+
+
                             return baseType;
                         },
                         allResourceTypes : function() {
@@ -1995,12 +2024,14 @@ angular.module("sampleApp")
                             }
 
 
-
+/*
                             //the currently selected parent node type should now be set to 'BackBone element'
                             var node = findNodeWithPath(parentPath);
                             if (node){
                            //     node.data.type = [{code:'BackboneElement'}]
                             }
+
+                            */
 
                         }
 
@@ -2028,8 +2059,6 @@ angular.module("sampleApp")
 
                                     //can't rely on the name as this gets changed during the expand function...
                                     var segment = node.data.pathSegment || node.data.name;
-
-                                   // var childPath = parentPath + '.' + node.data.name;
                                     var childPath = parentPath + '.' + segment;
                                     node.data.path = childPath;
                                     setPath(childPath,node.id)

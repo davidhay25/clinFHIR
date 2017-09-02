@@ -630,9 +630,7 @@ angular.module("sampleApp")
                 sc.shortCut = shortCut;     //the full shortcut
                 sc.$save().then(
                     function(){
-
                         modalService.showModal({}, {bodyText: "The shortcut  " +  shortCut + "  has been generated for this IG"})
-
                     }
                 )
             };

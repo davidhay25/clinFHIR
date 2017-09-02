@@ -21,9 +21,11 @@ angular.module("sampleApp")
 
 
             $scope.generateDocument = function(){
-                var doc = builderSvc.generateDocument($scope.selectedContainer)
-                console.log(doc)
-            }
+                var doc = builderSvc.generateDocument($scope.selectedContainer.bundle)
+                doc.type='collection';
+                var binary = {resourceType:'Binary'};
+                console.log(JSON.stringify(doc))
+            };
 
             var idPrefix = 'cf-';   //prefix for the id. todo should probably be related to the userid in some way...
             //load the library. todo THis will become slow with large numbers of sets...

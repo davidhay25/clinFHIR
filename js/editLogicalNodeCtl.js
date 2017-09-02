@@ -38,9 +38,9 @@ angular.module("sampleApp")
                 $scope.input.multiplicity = 'opt';
             }
 
+            $scope.baseType = baseType;
 
             if (baseType) {
-
                 logicalModelSvc.getAllPathsForType(baseType).then(
                     function(listOfPaths) {
 
@@ -356,32 +356,7 @@ angular.module("sampleApp")
 
                 }
                 isDiscriminatorRequired();
-                /*
 
-                //work out the path for the element...
-                var pathForThisElement = parentPath + '.'+$scope.input.name;
-                if (editNode) {
-                    //if editing, thne the 'parentPath' is actually the path...
-                    var ar = parentPath.split('.')
-                    ar.pop();
-                    pathForThisElement = ar.join('.')+ '.'+$scope.input.name;
-                }
-
-
-
-                var duplicateNode = findNodeWithPath(pathForThisElement)
-                if (duplicateNode) {
-                    $scope.canSave = false;
-                    modalService.showModal({},{bodyText:"This name is a duplicate of another and cannot be used. Try again."})
-                }
-
-
-
-                if ($scope.canSave) {
-                    //set the short element to the same as the name
-                    $scope.input.short = $scope.input.name;
-                }
-                */
             };
 
 
@@ -532,7 +507,7 @@ angular.module("sampleApp")
 
                     vo.type = [{code:$scope.input.dataType.code}];
                     vo.editNode = editNode;
-                    vo.parentPath = parentPath;
+                    //I don't think this is used .... vo.parentPath = parentPath;
                     vo.fixedString = $scope.input.fixedString;
 
                     vo.extensionAnalyse = $scope.extensionAnalyse;

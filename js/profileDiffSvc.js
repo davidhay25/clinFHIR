@@ -653,7 +653,8 @@ angular.module("sampleApp").service('profileDiffSvc',
                         if (url) {
                              //console.log(url,purpose)
 
-                            var label = path = $filter('referenceType')(url);
+                            //var label = path = $filter('referenceType')(url);  this can't be right???
+                            var label = $filter('referenceType')(url);
                             var node = {id: IdToUse, label: label, shape: 'box',color:objColours[purpose]};
 
 
@@ -673,7 +674,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                 })
             });
 
-           // console.log(hash)
+           // console.log(hash)    var label = path = $filter('referenceType')(url);
 
 
             //now load all the profiles, and figure out the references to extensions and other types. Do need to create all the nodes first...
