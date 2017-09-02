@@ -8,19 +8,16 @@ angular.module("sampleApp")
 
             $scope.input={}
 
-            // define several shared Brushes
             var bluegrad = $$(go.Brush, "Linear", { 0: "rgb(150, 150, 250)", 0.5: "rgb(86, 86, 186)", 1: "rgb(86, 86, 186)" });
             var greengrad = $$(go.Brush, "Linear", { 0: "rgb(158, 209, 159)", 1: "rgb(67, 101, 56)" });
             var redgrad = $$(go.Brush, "Linear", { 0: "rgb(206, 106, 100)", 1: "rgb(180, 56, 50)" });
             var yellowgrad = $$(go.Brush, "Linear", { 0: "rgb(254, 221, 50)", 1: "rgb(254, 182, 50)" });
             var lightgrad = $$(go.Brush, "Linear", { 1: "#E6E6FA", 0: "#FFFAF0" });
 
-            var itemsHash = {};
 
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(lst) {
                     $scope.resources = lst
-
                 }
             );
 
@@ -33,6 +30,14 @@ angular.module("sampleApp")
                     function(data) {
                         $scope.input.elements = data.elements;
                         $scope.input.label = type.name;
+
+
+                        //create a node as the 'possible references' function required a node. we don't do anything with it...
+                        var item = {url:url,elements:data.elements};     //my data about this node
+                        var tempNode = designerSvc.newNode(type,item);
+
+                        designerSvc.possibleReferences(tempNode,$scope.nodeDataArray);
+
                         console.log(data)
                     }, function(err) {
                         console.log(err)
@@ -58,72 +63,45 @@ angular.module("sampleApp")
             };
 
             $scope.updateNode = function () {
-
-
                 var key = $scope.selectedItem.key;
-
                 var node = myDiagram.findNodeForKey(key);
-
-                console.log(node.part.data)
-
+                var myData = node.part.data;
                 var model = myDiagram.model;
                 model.startTransaction("Update Model");
-
-                node.part.data.items.length = 0;
+                myData.items.length = 0;
 
                 $scope.selectedItem.elements.forEach(function (ed) {
                     if (ed.meta.include) {
-                        node.part.data.items.push({name:ed.meta.displayPath, iskey:false, myData: ed})
+                        myData.items.push({name:ed.meta.displayPath, iskey:false, myData: ed})
                     }
                 });
 
                 model.commitTransaction("Update Model");
                 myDiagram.model = new go.GraphLinksModel($scope.nodeDataArray, $scope.linkDataArray);
-
                 delete $scope.input.displayMode;
-
             }
 
             $scope.addNode = function() {
 
-                var data = {url:$scope.profileUrl,elements:$scope.input.elements}
+                var item = {url:$scope.profileUrl,elements:$scope.input.elements};     //my data about this node
+                var newNode = designerSvc.newNode($scope.input.label,item);             //the new node
+                $scope.nodeDataArray.push(angular.copy(newNode));                       //add to the array of nodes
 
-                var newNode = designerSvc.newNode($scope.input.label,data);
-                $scope.nodeDataArray.push(angular.copy(newNode));
-
-                /*
-                var key = "NewNode" + new Date().getTime();
-
-               // var item = {key:key,resourceType:'Condition'};
-                var newNode = {key:key,items:[]}
-                newNode.myData = {element:$scope.input.elements,key:key};
-                newNode.myTitle = $scope.input.label;
-                $scope.input.elements.forEach(function (ed) {
-                   if (ed.meta.include) {
-                       newNode.items.push({name:ed.meta.displayPath, iskey:false, myData: ed})
-                   }
-                });
-                //newNode.items.push({name:"newNodeID", iskey:true, figure:"lineH", font:"18px serif",myData:"test" })
-                //newNode.items.push({name:"subject", iskey:false, myData:{type:"Reference"} })
-                itemsHash[key] = newNode;
-                $scope.nodeDataArray.push(angular.copy(newNode))
-                console.log(newNode);
-                var link = { from: key, to: "Suppliers", text: "author", toText: "1"};
-                $scope.linkDataArray.push(link)
-
-
-                */
                 var link = { from: newNode.myData.key, to: "Suppliers", text: "author", toText: "1"};
                 $scope.linkDataArray.push(link)
 
-                myDiagram.model = new go.GraphLinksModel($scope.nodeDataArray, $scope.linkDataArray);
+                myDiagram.model = new go.GraphLinksModel($scope.nodeDataArray, $scope.linkDataArray);   //rebuild diagram
 
                 delete $scope.input.displayMode;
 
 
+            };
 
-            }
 
+            $scope.nodeDataArray = [];
+            $scope.linkDataArray = [];
+
+            /*
             $scope.nodeDataArray = [
                 { key: "Products",
                     items: [ { name: "ProductID", iskey: true, figure: "Decision", color: yellowgrad },
@@ -152,7 +130,7 @@ angular.module("sampleApp")
                 { from: "Products", to: "Categories", text: "0..N", toText: "1" },
                 { from: "Order Details", to: "Products", text: "0..N", toText: "1" }
             ];
-
+*/
             var myDiagram =
                 $$(go.Diagram, "myDiagramDiv",  // must name or refer to the DIV HTML element
                     {
@@ -241,6 +219,8 @@ angular.module("sampleApp")
                         },
                         $$(go.Shape,  // the link shape
                             { stroke: "#303B45", strokeWidth: 2.5 }),
+                        $$(go.Shape,   // the arrowhead
+                            { toArrow: "Triangle", fill: '#303B45' }),
                         $$(go.TextBlock,  // the "from" label
                             {
                                 textAlign: "center",
@@ -263,21 +243,37 @@ angular.module("sampleApp")
                             new go.Binding("text", "toText"))
                     );
 
-                myDiagram.model = new go.GraphLinksModel($scope.nodeDataArray, $scope.linkDataArray);
+               // myDiagram.model = new go.GraphLinksModel($scope.nodeDataArray, $scope.linkDataArray);
             }
 
             init();
+            designerSvc.initGraph($scope.nodeDataArray, $scope.linkDataArray).then(
+                function(data) {
+                    $scope.nodeDataArray = $scope.nodeDataArray.concat(data.nodes)
+                    $scope.linkDataArray = $scope.linkDataArray.concat(data.links)
+                    myDiagram.model = new go.GraphLinksModel($scope.nodeDataArray, $scope.linkDataArray);
+                    console.log(data)
+                },
+                function (err) {
+                    console.log(err)
+                }
+            )
+
+
+
             myDiagram.addDiagramListener("ObjectSingleClicked",function(ev){
-                $scope.input.displayMode='edit'
+                $scope.input.displayMode='edit';
                 console.log(ev.subject.part.data)
                 delete $scope.selectedItem;
-                var key = ev.subject.part.data.key
+                //var key = ev.subject.part.data.key
 
 
-                var node = myDiagram.findNodeForKey(key);
+                //var node = myDiagram.findNodeForKey(key);
+
+                designerSvc.possibleReferences(ev.subject.part.data,$scope.nodeDataArray);
 
 
-                $scope.selectedItem = ev.subject.part.data.myData ;// itemyDatasHash[key];
+                $scope.selectedItem = ev.subject.part.data.myData ;
 
 
                 console.log($scope.selectedItem)
@@ -287,27 +283,7 @@ angular.module("sampleApp")
 
 
 
-        })
-
-
-
-
-/*
-var $$ = go.GraphObject.make;
-var myDiagram =
-    $$(go.Diagram, "myDiagramDiv",
-        {
-            initialContentAlignment: go.Spot.Center, // center Diagram contents
-            "undoManager.isEnabled": true // enable Ctrl-Z to undo and Ctrl-Y to redo
         });
 
-var myModel = $$(go.Model);
-// in the model data, each node is represented by a JavaScript object:
-myModel.nodeDataArray = [
-    { key: "Alpha" },
-    { key: "Beta" },
-    { key: "Gamma" }
-];
-myDiagram.model = myModel;
 
-*/
+
