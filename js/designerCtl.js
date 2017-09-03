@@ -7,13 +7,23 @@ angular.module("sampleApp")
             var $$ = go.GraphObject.make;  // for conciseness in defining templates
 
             $scope.input={}
+            $scope.input.showAllFields = true;      //show all the possible fields from the SD
 
-            var bluegrad = $$(go.Brush, "Linear", { 0: "rgb(150, 150, 250)", 0.5: "rgb(86, 86, 186)", 1: "rgb(86, 86, 186)" });
-            var greengrad = $$(go.Brush, "Linear", { 0: "rgb(158, 209, 159)", 1: "rgb(67, 101, 56)" });
-            var redgrad = $$(go.Brush, "Linear", { 0: "rgb(206, 106, 100)", 1: "rgb(180, 56, 50)" });
-            var yellowgrad = $$(go.Brush, "Linear", { 0: "rgb(254, 221, 50)", 1: "rgb(254, 182, 50)" });
+            $scope.nodeDataArray = [];
+            $scope.linkDataArray = [];
+
             var lightgrad = $$(go.Brush, "Linear", { 1: "#E6E6FA", 0: "#FFFAF0" });
 
+            $scope.createLink = function(item,ed,toKey) {
+                console.log(toKey,item,ed)
+
+                var fromKey = item.key;
+                var path = ed.path;     //where from
+                var link = designerSvc.addReference($scope.nodeDataArray,fromKey,path,toKey);
+                $scope.linkDataArray.push(link)
+                myDiagram.model = new go.GraphLinksModel($scope.nodeDataArray, $scope.linkDataArray);
+
+            }
 
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(lst) {
@@ -94,12 +104,10 @@ angular.module("sampleApp")
 
                 delete $scope.input.displayMode;
 
-
             };
 
 
-            $scope.nodeDataArray = [];
-            $scope.linkDataArray = [];
+
 
             /*
             $scope.nodeDataArray = [
@@ -139,7 +147,7 @@ angular.module("sampleApp")
                         allowCopy: false,
 
                         layout: $$(go.ForceDirectedLayout),
-                        "undoManager.isEnabled": true
+                        "undoManager.isEnabled": false
                     });
 
             myDiagram.animationManager.isEnabled = false;
@@ -257,7 +265,7 @@ angular.module("sampleApp")
                 function (err) {
                     console.log(err)
                 }
-            )
+            );
 
 
 
@@ -265,14 +273,11 @@ angular.module("sampleApp")
                 $scope.input.displayMode='edit';
                 console.log(ev.subject.part.data)
                 delete $scope.selectedItem;
-                //var key = ev.subject.part.data.key
-
-
-                //var node = myDiagram.findNodeForKey(key);
 
                 designerSvc.possibleReferences(ev.subject.part.data,$scope.nodeDataArray);
 
 
+                //This is my data tyep
                 $scope.selectedItem = ev.subject.part.data.myData ;
 
 

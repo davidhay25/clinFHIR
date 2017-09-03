@@ -7,6 +7,7 @@
     <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
 
     <script>
         angular.module("sampleApp",['ngStorage','ui.bootstrap']).config(function($locationProvider) {
@@ -24,8 +25,9 @@
     <script src="js/modalDialogSvc.js"></script>
     <script src="js/designerSvc.js"></script>
     <script src="js/services.js"></script>
+    <script src="js/filters.js"></script>
     <meta charset="UTF-8">
-    <title>GoTest</title>
+    <title>Document Designer</title>
 </head>
 <body>
 
@@ -33,14 +35,14 @@
 <div ng-app="sampleApp" ng-controller="designerCtrl" class="container-fluid">
     <div class="row">
 
-        <div class="col-sm-8 col-md-8">
+        <div class="col-sm-7 col-md-7">
             <div id="myDiagramDiv"
                  style="width:100%; height:500px; background-color: #DAE4E4;"></div>
 
             <pre>{{selectedItem.myData | json}}</pre>
         </div>
 
-        <div class="col-sm-4 col-md-4">
+        <div class="col-sm-5 col-md-5">
             <button class="btn btn-link" ng-click="input.displayMode='new'">New node</button>
 
             <div ng-show="input.displayMode=='edit'">
@@ -60,12 +62,38 @@
                 </div>
 
 
-                <h5>Edit Fields:</h5>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        <h5>Edit Fields:</h5>
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        <div class="pull-right">
+                            <input checked="input.showAllFields" type="checkbox"
+                                   ng-click="input.showAllFields = ! input.showAllFields"/> Show all fields
+                        </div>
+
+                    </div>
+                </div>
+
                 <table class="table table-bordered">
-                    <tr ng-repeat="ed in selectedItem.elements">
+                    <tr ng-repeat="ed in selectedItem.elements"
+                        ng-show="input.showAllFields || ed.meta.include">
                         <td><input type="checkbox" ng-model="ed.meta.include"/> </td>
                         <td>{{ed.meta.displayPath}}</td>
-                        <td></td>
+                        <td>
+                            <em ng-show="ed.meta.references">References:</em>
+                            <div ng-repeat="ref in ed.meta.references">
+                                {{ref.to}}
+                            </div>
+                            <hr ng-show="ed.meta.references"/>
+                            <em ng-show="ed.meta.links.length > 0">Can Link to:</em>
+                            <div class="clickable" ng-repeat="link in ed.meta.links track by $index"
+                                ng-click="createLink(selectedItem,ed,link)">
+
+                                {{link}}
+                            </div>
+
+                        </td>
                     </tr>
                 </table>
 
@@ -109,22 +137,9 @@
 
             </div>
 
-            <br/>
 
 
 
-            <!--
-            <div class="row">
-
-                <div class="col-sm-8 col-md-8">
-                    <input class="form-control" ng-model="text">
-                </div>
-                <div class="col-sm-4 col-md-4">
-                    <button class="btn btn-link" ng-click="addElement(text)">Add Line</button>
-                </div>
-            </div>
-
-            -->
 
         </div>
 

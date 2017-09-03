@@ -1,7 +1,7 @@
 
 angular.module("sampleApp")
 
-    .service('designerSvc', function(GetDataFromServer,$localStorage,$http,$timeout,$q) {
+    .service('designerSvc', function(GetDataFromServer,$localStorage,$http,$timeout,$q,$filter) {
 
         var elementsToIgnore =['id','meta','implicitRules','language','text','contained','extension','modifierExtension'];
 /*
@@ -9,6 +9,39 @@ angular.module("sampleApp")
 
 */
         return {
+            findNodeWithKey : function(nodes,key) {
+                //todo - set up a hash so we can index direcrly. this will do for now...
+                for (var i=0; i< nodes.length; i++) {
+                    var node = nodes[i];
+                    if (node.key == key) {
+                        return node;
+                        break;
+                    }
+                }
+            },
+
+            addReference : function(nodes,fromKey,fromPath,toKey){
+                //add a reference
+                var fromNode = this.findNodeWithKey(nodes,fromKey);
+                var toNode = this.findNodeWithKey(nodes,toKey);
+                if (fromNode && toNode) {
+                    //now find the path in the from node
+                    var item = fromNode.myData;
+                    for (var i=0; i< item.elements.length; i++) {
+                        var element = item.elements[i];
+                        if (element.path == fromPath) {
+                            element.meta.references = element.meta.references || []
+                            var link = {from:fromKey,path:fromPath,to:toKey}
+                            element.meta.references.push(link)
+                            return link;
+                            break;
+                        }
+                    }
+
+                }
+
+
+            },
 
             initGraph : function(arNodes, arLinks) {
                 //add the starting nodes that all graphs will need - composition patient etc.
@@ -16,13 +49,13 @@ angular.module("sampleApp")
                 var that = this;
 
                 var nodesToAdd = [];
-                nodesToAdd.push({type:'Patient',key:'patient'});
-                nodesToAdd.push({type:'Practitioner',key:'practitioner'});
-                nodesToAdd.push({type:'Composition',key:'composition',links:[
-                    {from: 'composition', path:'subject',to:'patient'},
-                    {from: 'composition', path:'author',to:'practitioner'}
+                nodesToAdd.push({type:'Patient',key:'patient1'});
+                nodesToAdd.push({type:'Practitioner',key:'practitioner1'});
+                nodesToAdd.push({type:'Composition',key:'composition1',links:[
+                    {from: 'composition1', path:'Composition.subject',to:'patient1'},
+                    {from: 'composition1', path:'Composition.author',to:'practitioner1'}
                     ]});
-
+                nodesToAdd.push({type:'Encounter',key:'encounter1'});
                 var arQuery = [];
 
                 //first get all the nodes....
@@ -31,7 +64,6 @@ angular.module("sampleApp")
                     arQuery.push(
                        process(that,url,arNodes,thing)
                     )
-
                 });
 
                 $q.all(arQuery).then(
@@ -43,7 +75,31 @@ angular.module("sampleApp")
                         nodesToAdd.forEach(function (thing) {
                             if (thing.links) {
                                 thing.links.forEach(function (link) {
+                                    var newLink = that.addReference(vo.nodes,link.from,link.path,link.to)
+                                    if (newLink) {
+                                        vo.links.push(newLink);     //this is the list of links for the graph...
+                                    } else {
+                                        console.log("can't link ",link)
+                                    }
+
+                                    /*
+                                    //find the 'from' node and add the reference to it..
+                                    console.log(vo)
+                                    for (var i=0; i< vo.nodes.length; i++) {
+                                        var n = vo.nodes[i];
+                                        if (n.key == link.from) {
+                                            that.addReference(nodes,n,link.path,toNode)
+
+                                           // n.myData.meta = n.myData.meta || {}
+                                            n.meta.references = n.meta.references || {}
+                                            n.meta.references[link.to] = link;
+                                            break;
+                                        }
+                                    }
+
+
                                     vo.links.push(link);
+                                    */
                                 })
                             }
 
@@ -58,7 +114,7 @@ angular.module("sampleApp")
                         console.log(err)
                         deferred.reject(err)
                     }
-                )
+                );
 
                 function process(svc,url,arNodes,thing) {
                     var deferred = $q.defer();
@@ -72,7 +128,7 @@ angular.module("sampleApp")
                            }, function(err){
                                console.log(err)
                                deferred.reject(err)
-                           })
+                           });
 
                     return deferred.promise;
                 }
@@ -82,12 +138,23 @@ angular.module("sampleApp")
 
             possibleReferences : function(node,allNodes) {
                 //return a list of all the nodes that this one can create a reference to
-                var ar = []
+
+                //construct a hash of all resource types in the current model todo - create and maintina this separately...
+                var hashResources = {};
+                allNodes.forEach(function (node) {
+                    var type = node.myData.type;        //the resource type. When we support profiles, this will be the constained type...
+                    hashResources[type] = hashResources[type] || []
+                    hashResources[type].push(node.key);
+                   // console.log(node)
+                });
+
+                var ar = [];
                 var item = node.myData;
                 item.elements.forEach(function (ed) {
-                    if (ed.meta.include) {
+                   // if (ed.meta.include) {
                         var path = ed.path;
                         if (ed.type) {
+                            ed.meta.links = []
                             ed.type.forEach(function (typ) {
                                 if (typ.code == 'Reference') {
 
@@ -97,35 +164,55 @@ angular.module("sampleApp")
                                     if (!profile && type.profile) {profile = profile[0]}    //R2
 
                                     if (profile) {
-                                        //now find all existing models that match that profile...
+                                        var type = $filter('referenceType')(profile);   //todo this will only work for core types. Will need to tidy for real profiles...
+
+                                        //now, find all existing models with this type and add to the link array as possible references
+
+
+
+                                        ed.meta.links = ed.meta.links.concat(hashResources[type]);
+
+                                        console.log(ed.meta)
+
+                                        /* redundant (I think)
+                                        //now find all existing models that match the target profile...
+                                        var targetItemKey;
                                         allNodes.forEach(function (eNode) {
                                             var eItem = eNode.myData;
                                             if (eItem && eItem.url == profile) {
-                                                console.log('--> ' + eItem.key)
+                                                //this model (eNode) is a potential target..
+                                                ed.meta.links = ed.meta.links || []
+                                               // console.log('--> ' + eItem.key)
+                                                targetItemKey = eItem.key
                                             }
                                         })
+                                        */
+
+                                       // ed.meta.links.push({profile:profile,model:targetItemKey})
+
 
                                     }
 
 
-                                    console.log(path,profile)
+                                   // console.log(path,profile)
                                 }
                             })
                         }
-                    }
+                    //}
                 });
 
 
             },
-            newNode : function(label,item,key) {
+            newNode : function(type,item,key) {
 
                 key = key || "NewNode" + new Date().getTime();
                 item.key = key;
+                item.type = type;
 
                 // var item = {key:key,resourceType:'Condition'};
                 var newNode = {key:key,items:[]}
                 newNode.myData = item;
-                newNode.myTitle = label;
+                newNode.myTitle = type;
                 item.elements.forEach(function (ed) {
                     if (ed.meta.include) {
                         newNode.items.push({name:ed.meta.displayPath, iskey:false, myData: ed})
