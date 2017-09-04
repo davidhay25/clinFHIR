@@ -719,7 +719,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                     }
 
 
-                    if (include) {
+                    if (include && item.sourceReference) {
                         var url = item.sourceReference.reference;   //the url of the node
                         if (url) {
                              //console.log(url,purpose)

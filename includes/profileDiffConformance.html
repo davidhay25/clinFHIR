@@ -36,7 +36,7 @@
                             <table class="table table-bordered">
                                 <tr><th>Name</th><th>Expect</th><th>Type</th></tr>
                                 <tr ng-repeat="srch in input.selectedRest.search">
-                                    <td>{{srch.name}}</td>
+                                    <td><span title="{{srch.definition}}" class="clickable"> {{srch.name}}</span> </td>
                                     <td>{{srch.expectation}}</td>
                                     <td>{{srch.type}}</td>
                                 </tr>
@@ -47,7 +47,6 @@
                             <h5>Combo Search</h5>
                             <table class="table table-bordered">
                                 <tr><th>#</th><th>Parameters</th></tr>
-
 
                                 <tr ng-repeat="combo in input.selectedRest.comboSearch">
                                     <td>{{$index}}</td>
