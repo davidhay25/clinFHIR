@@ -1,6 +1,6 @@
 angular.module('sampleApp').component('fhirExtension',{
     templateUrl: '/js/components/extensionDirectiveTempl.html',
-    bindings: {analyse:'<'},
+    bindings: {analyse:'<',showvs:'&'},
     controller : function(){
 
 

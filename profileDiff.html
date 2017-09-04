@@ -237,7 +237,7 @@
 
 
                                     <div class="clickable">{{item.url | referenceType}}</div>
-                                    <div><em>{{item.description}}</em></div>
+                                    <div><em>{{item.description | limitTo : 100}}</em></div>
                                 </li>
 
                             </ul>
@@ -264,7 +264,7 @@
 
 
                                     </div>
-                                    <div><em>{{item.description}}</em></div>
+                                    <div><em>{{item.description | limitTo : 100}}</em></div>
                                 </li>
                             </ul>
                             <div class="pull-right"><a href="#" ng-click="importItem({type:'extension',display:'Extension Definition'})">Import new</a> </div>
@@ -1028,7 +1028,8 @@
 
                             <uib-tab heading="Analysis">
                                 <br/>
-                                <fhir-extension analyse="selectedExtensionAnalysis" ></fhir-extension>
+
+                                <fhir-extension analyse="selectedExtensionAnalysis" showvs="showValueSet(url)"  ></fhir-extension>
 
 
                                 <div ng-show="igGraphHash[selectedItem.url].usedBy">

@@ -20,16 +20,16 @@
                     <tr>
                         <td>Context</td>
                         <td>
-                    <span ng-repeat="ctx in $ctrl.analyse.context">
-                        {{ctx}}
-                    </span>
+                            <span ng-repeat="ctx in $ctrl.analyse.context">
+                                {{ctx}}
+                            </span>
                         </td>
                     </tr>
 
                     <tr ng-show = "$ctrl.analyse.isComplexExtension"><td>Children</td>
                         <td>
                             <table class="table">
-                                <tr><th>Name</th><th>Short</th><th>Mult</th><th>Types</th></tr>
+                                <tr><th>Name</th><th>Short</th><th>Mult</th><th>Types</th><th></th></tr>
                                 <tr ng-repeat="item in $ctrl.analyse.children">
                                     <td>{{item.ed.name}}</td>
                                     <td>{{item.ed.short}}</td>
@@ -37,10 +37,20 @@
 
                                     <td>
                                         <div ng-repeat="type in item.ed.type">
+
                                             {{type.code}}
+
+
+
+
                                         </div>
 
 
+                                    </td>
+                                    <td>
+                                        <div class="clickable" ng-click="$ctrl.showvs({url:item.boundValueSet})">
+                                            {{item.boundValueSet}}
+                                        </div>
                                     </td>
                                 </tr>
                             </table>
@@ -66,8 +76,12 @@
                     <tr ng-show = "$ctrl.analyse.binding">
                         <td>Binding</td>
                         <td>
-                            <div>{{$ctrl.analyse.binding.valueSetUri}}
-                                {{$ctrl.analyse.binding.valueSetUrl}}
+                            <div>
+
+                                <div class="clickable" ng-click="$ctrl.showvs({url:$ctrl.analyse.binding.valueSetReference.reference})">
+                                    {{$ctrl.analyse.binding.valueSetReference.reference}}
+                                </div>
+                                    {{$ctrl.analyse.binding.valueSetUri}}
                                 ({{$ctrl.analyse.binding.strength}})
                             </div>
                             <div>{{$ctrl.analyse.binding.description}}</div>

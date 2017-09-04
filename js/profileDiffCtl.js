@@ -938,6 +938,8 @@ angular.module("sampleApp")
             };
 
             $scope.showValueSet = function(uri,type) {
+                console.log(uri)
+
                 //treat the reference as lookup in the repo...
                 GetDataFromServer.getValueSet(uri).then(
                     function(vs) {
