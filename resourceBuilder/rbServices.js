@@ -1820,6 +1820,26 @@ console.log(summary);
             }
 
             return extension;
+        },
+        getComplexExtensions : function(resource,url) {
+            //get an array of complex extensions, assuming there can be multiple
+            var ar = [];
+            if (resource) {
+                resource.extension = resource.extension || []
+                resource.extension.forEach(function(ext){
+                    if (ext.url == url) {
+                        var extension = {children:[]}
+                        //now get the children of this extension
+                        ext.extension.forEach(function (child) {
+                            extension.children.push(child)
+                        })
+
+                        ar.push(extension)
+                    }
+                });
+            }
+
+            return ar;
         }
     }
 })

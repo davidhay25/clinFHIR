@@ -11,9 +11,6 @@ angular.module('sampleApp').service('modalService', ['$uibModal',
 
         var modalOptions = {
             closeButtonText: 'Ok',
-          //  actionButtonText: 'OK',
-           // headerText: 'Proceed?',
-          //  showAction:true,        //mine...
             bodyText: 'Perform this action?'
         };
 

@@ -191,6 +191,7 @@ angular.module("sampleApp")
             $scope.$on('serverUpdate',function() {
 
                 $scope.testing = {};
+                $scope.showServers = false;
 
                 var version = appConfigSvc.getCurrentDataServer().version;
                 if (appConfigSvc.getCurrentTerminologyServer().version !== version ||
@@ -201,7 +202,7 @@ angular.module("sampleApp")
                     modalService.showModal({}, {bodyText:'The servers that clinFHIR will access has been updated for all modules.'});
                 }
 
-                $scope.showServers = false;
+
 
             })
 

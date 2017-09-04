@@ -284,7 +284,9 @@
                                             <i title="Official FHIR resource" style = 'color: red' class="glyphicon glyphicon-fire" ></i>
                                         </span>
                                     </div>
-                                    <div><em>{{item.description}}</em></div>
+                                    <div><em>{{item.description | limitTo : 100}}</em></div>
+                                    <div>({{item.url | typeFromUrl}})</div>
+
                                 </li>
                             </ul>
                         </div>
@@ -334,13 +336,12 @@
                                 <li class="list-group-item" ng-repeat="item in artifacts.other"
                                     ng-click = "selectItem(item,'other')">
                                     <div class="clickable">{{item.url | referenceType}}</div>
+                                    <div>{{item.url}}</div>
                                     <div><em>{{item.description}}</em></div>
                                 </li>
                             </ul>
-                            <!--
-                            <div class="pull-right"><a href="#" ng-click="importItem({type:'logical',display:'Logical Model'})">Import new</a> </div>
-                            -->
                         </div>
+
 
 
                     </uib-accordion>
@@ -391,6 +392,12 @@
                             <uib-tab-heading>Details of Resource: <strong>{{selectedItem.url | referenceType}}</strong>
                             </uib-tab-heading>
                             <br />
+
+                            <div ng-show="selectedItemType == 'other'">
+                                <ng-include src="'/includes/profileDiffConformance.html'"></ng-include>
+
+                            </div>
+
                             <div ng-show="selectedItemType == 'example'">
                                 <div class="row rounded-box">
                                     <div class="col-sm-4 col-md-4">
@@ -1015,7 +1022,7 @@
 
                     </div>
 
-                    <div ng-show="selectedItemType == 'extension'">
+                            <div ng-show="selectedItemType == 'extension'">
                         <h4>Extension: {{selectedExtension.url}}</h4>
                         <uib-tabset>
 
@@ -1049,8 +1056,9 @@
 
                     </div>
 
-                    <div ng-show="selectedItemType == 'terminology'">
-                        <h4>Terminology</h4>
+                            <div ng-show="selectedItemType == 'terminology'">
+                        <h4>Terminology: {{selectedTerminology.resourceType}}</h4>
+
                         <uib-tabset>
 
                             <uib-tab heading="Description">
@@ -1060,29 +1068,40 @@
                                     <div class="col-sm-6 col-md-6">
                                         <div class="row">
                                             <div class="col-sm-2 col-md-2">Name</div>
-                                            <div class="col-sm-10 col-md-10">{{selectedValueSet.name}}</div>
+                                            <div class="col-sm-10 col-md-10">{{selectedTerminology.name}}</div>
                                         </div>
                                         <div class="row">
                                             <div class="col-sm-2 col-md-2">Description</div>
-                                            <div class="col-sm-10 col-md-10">{{selectedValueSet.description}}</div>
+                                            <div class="col-sm-10 col-md-10">{{selectedTerminology.description}}</div>
+                                        </div>
+                                        <div class="row" ng-show="selectedTerminology.valueSet">
+                                            <div class="col-sm-2 col-md-2">ValueSet</div>
+                                            <div class="col-sm-10 col-md-10">{{selectedTerminology.valueSet}}</div>
                                         </div>
                                     </div>
                                     <div class="col-sm-6 col-md-6">
                                         <div class="row">
                                             <div class="col-sm-2 col-md-2">Url</div>
-                                            <div class="col-sm-10 col-md-10">{{selectedValueSet.url}}</div>
+                                            <div class="col-sm-10 col-md-10">{{selectedTerminology.url}}</div>
                                         </div>
                                         <div class="row">
                                             <div class="col-sm-2 col-md-2">Publisher</div>
-                                            <div class="col-sm-10 col-md-10">{{selectedValueSet.publisher}}</div>
+                                            <div class="col-sm-10 col-md-10">{{selectedTerminology.publisher}}</div>
+                                        </div>
+                                        <div class="row" ng-show="selectedTerminology.content">
+                                            <div class="col-sm-2 col-md-2">Content</div>
+                                            <div class="col-sm-10 col-md-10">{{selectedTerminology.content}}</div>
                                         </div>
                                     </div>
                                 </div>
 
+
+
+
                                 <div ng-show="igGraphHash[selectedItem.url].usedBy">
                                     <h5>Used By:
                                         <ul class="list-unstyled">
-                                            <li ng-repeat="url in igGraphHash[selectedValueSet.url].usedBy track by $index">
+                                            <li ng-repeat="url in igGraphHash[selectedTerminology.url].usedBy track by $index">
                                                 {{url}}
                                             </li>
                                         </ul>
@@ -1091,14 +1110,33 @@
                                 </div>
 
                                 <br/> <br/>
-                                <a href="#" ng-click="showValueSet(selectedValueSet.url)">Explore ValueSet</a>
+                                <a href="#" ng-show="selectedTerminology.resourceType=='ValueSet'"
+
+                                   ng-click="showValueSet(selectedTerminology.url)">Explore ValueSet</a>
+
+                                <div ng-show="selectedTerminology.resourceType=='CodeSystem'">
+                                    <table class="table table-bordered">
+                                        <tr><th>Code</th><th>Display</th><th>Definition</th></tr>
+                                        <tr ng-repeat="code in selectedTerminology.concept">
+                                            <td>{{code.code}}</td>
+                                            <td>{{code.display}}</td>
+                                            <td>{{code.definition}}</td>
+
+
+
+                                        </tr>
+
+                                    </table>
+
+                                </div>
+
 
 
                             </uib-tab>
 
                             <uib-tab heading="Json">
                                 <br/>
-                                <pre>{{selectedValueSet | json}}</pre>
+                                <pre>{{selectedTerminology | json}}</pre>
                             </uib-tab>
 
 

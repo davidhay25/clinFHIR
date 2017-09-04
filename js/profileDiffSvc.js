@@ -1,5 +1,6 @@
 angular.module("sampleApp").service('profileDiffSvc',
-    function($q,$http,GetDataFromServer,Utilities,appConfigSvc,$filter,resourceSvc,profileCreatorSvc,$localStorage,modalService) {
+    function($q,$http,GetDataFromServer,Utilities,appConfigSvc,$filter,resourceSvc,profileCreatorSvc,
+             $localStorage,Utilities) {
 
         $localStorage.extensionDefinitionCache = $localStorage.extensionDefinitionCache || {}
 
@@ -37,6 +38,68 @@ angular.module("sampleApp").service('profileDiffSvc',
         objColours.Medication = '#FF9900';
 
     return {
+
+        makeCapStmt : function(cs) {
+
+            var extProfileLink = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-profile-link";
+            var extCapExpect="http://hl7.org/fhir/StructureDefinition/capabilitystatement-expectation";
+            var extCapCombo = "http://hl7.org/fhir/StructureDefinition/capabilitystatement-search-parameter-combination"
+
+            //create a 'displayable' capability statement from the CapStmt in the core profiles (eg US-Code). Uses lots of extensions...
+            var capStmt = {profile:[],rest:[]}
+            cs.profile.forEach(function (prof) {
+                var profItem = {reference:prof.reference,display:prof.display}
+                var ext = Utilities.getSingleExtensionValue(prof,extProfileLink);
+                profItem.code = ext.valueCode;
+                capStmt.profile.push(profItem)
+            });
+
+            var endpoint = cs.rest[0];  //assume a single endpoint only...
+            endpoint.resource.forEach(function (res) {
+                //this is a single resource (like 'Patient')
+                var resItem = {type:res.type,interaction:[],search:[]};
+                if (res.interaction) {
+                    res.interaction.forEach(function (int) {
+                        var intItem = {code:int.code,documentation:int.documentation}
+                        var ext = Utilities.getSingleExtensionValue(int,extCapExpect);
+                        intItem.expectation = ext.valueCode;
+                        resItem.interaction.push(intItem)
+
+                    });
+                }
+
+
+                if (res.searchParam) {
+                    res.searchParam.forEach(function (srch) {
+                        var srchItem = {type:'single',name:srch.name,definition:srch.definition,type:srch.type}
+                        var ext = Utilities.getSingleExtensionValue(srch,extCapExpect);
+                        srchItem.expectation = ext.valueCode;
+                        resItem.search.push(srchItem)
+                    });
+
+                }
+
+                if (res.extension) {
+                    //combination searches
+                    var ar = Utilities.getComplexExtensions(res,extCapCombo)
+                    if (ar.length > 0) {
+                        resItem.comboSearch = ar;
+                    }
+
+                    console.log(ar)
+                }
+
+
+
+
+
+                capStmt.rest.push(resItem)
+            });
+
+
+
+            return capStmt;
+        },
 
         findItem : function(url,IG) {
             //find an item from the IG package/resource based on the url. We assume the url is unique

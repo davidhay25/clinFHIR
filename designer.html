@@ -83,7 +83,18 @@
                         <td>
                             <em ng-show="ed.meta.references">References:</em>
                             <div ng-repeat="ref in ed.meta.references">
-                                {{ref.to}}
+                                <div class="row">
+                                    <div class="col-sm-10 col-md-10">
+                                        {{ref.to}}
+                                    </div>
+                                    <div class="col-sm-2 col-md-2">
+                                        <i class="glyphicon glyphicon-remove clickable"
+
+                                           ng-click="deleteLink(ed.meta.references,$index,ref)"></i>
+
+                                    </div>
+                                </div>
+
                             </div>
                             <hr ng-show="ed.meta.references"/>
                             <em ng-show="ed.meta.links.length > 0">Can Link to:</em>

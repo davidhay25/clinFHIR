@@ -5,6 +5,20 @@
 
 angular.module("sampleApp")
 
+
+
+
+    .filter('typeFromUrl', function() {
+        return function(s) {
+            //assume a url in the format: (http://hl7.org/fhir/us/core/CodeSystem/careplan-category
+            if (s) {
+                var ar = s.split('/')
+                return ar[ar.length-2]
+            }
+
+        }
+    })
+
     .filter('manualText',['builderSvc',function(builderSvc){
         return function(resource) {
 
@@ -23,16 +37,7 @@ angular.module("sampleApp")
     })
     .filter('addSpace', function() {
         return function(s) {
-            //https://stackoverflow.com/questions/1144783/how-to-replace-all-occurrences-of-a-string-in-javascript
-
-
             return s.replace(/\./g, '. ');
-
-
-          //  var ar = s.split('.')
-          //  return ar.join('. ')
-
-
         }
     })
 

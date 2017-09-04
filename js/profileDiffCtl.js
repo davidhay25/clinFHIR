@@ -894,9 +894,19 @@ angular.module("sampleApp")
                         }
 
                         $scope.artifacts[purpose] = $scope.artifacts[purpose] || []
-                        $scope.artifacts[purpose].push(
-                            {url:resource.sourceReference.reference, description:resource.description,type:type}
-                        )
+
+                        var item2 = {description:resource.description,type:type}
+
+                        if (resource.sourceReference) {
+                            item2.url = resource.sourceReference.reference;
+                        }
+
+                        if (resource.sourceUri) {
+                            item2.url = resource.sourceUri;
+                            item2.uri = resource.sourceUri;     //for OID type references...
+                        }
+
+                        $scope.artifacts[purpose].push(item2)
                     })
                 });
 
@@ -1019,9 +1029,24 @@ angular.module("sampleApp")
 
                 if (type == 'terminology') {
                    //really only works for ValueSet at this point...
-                   profileDiffSvc.getTerminologyResource(item.url,'ValueSet').then(
+                    var tType = 'ValueSet';
+                    if (item.url.indexOf('/CodeSystem/') > -1) {
+                        tType = 'CodeSystem';
+                    }
+
+                    var urlToGet = item.url;
+                    if (item.uri) {
+                        urlToGet = item.uri;
+                        tType = 'CodeSystem';   //todo hack for UScore
+                    }
+
+
+                    console.log(item.url)
+
+
+                   profileDiffSvc.getTerminologyResource(urlToGet,tType).then(
                        function (vs) {
-                           $scope.selectedValueSet = vs;
+                           $scope.selectedTerminology = vs;
                        }, function (err) {
                            console.log(err)
                        }
@@ -1111,6 +1136,36 @@ angular.module("sampleApp")
                    })
 
                }
+
+                if (type=='other') {
+                    delete $scope.otherResource
+                    //assume url is in the format http://hl7.org/fhir/us/core/CapabilityStatement/server
+                    var url = item.url;
+                    var ar = url.split('/');
+                    var type = ar[ar.length-2];
+
+                    GetDataFromServer.findConformanceResourceByUri(url,appConfigSvc.getCurrentConformanceServer().url,type).then(
+                        function(data) {
+                            $scope.input.selectedRest = {}
+                            $scope.otherResource = data;
+                            if (data.resourceType == 'CapabilityStatement') {
+                                $scope.analyseCapStmt = profileDiffSvc.makeCapStmt(data);
+
+                            }
+
+
+
+                            console.log(data)
+                        },function(err){
+                            console.log(err)
+                        }
+                    )
+
+
+                    $scope.selectedOther =""
+
+
+                }
 
 
             };
@@ -1369,8 +1424,7 @@ angular.module("sampleApp")
                                 if ($scope.selectedNodeFromGraph.data.purpose == 'terminology') {
                                     delete $scope.valueSetOptions;
                                     console.log($scope.selectedNodeFromGraph.data)
-                                    //var vsUrl =
-                                    //selectedValueSet.vs.url
+
                                     var vo = {selectedValueSet : {vs: {url: $scope.selectedNodeFromGraph.data.url}}}
 
                                     logicalModelSvc.getOptionsFromValueSet(vo).then(

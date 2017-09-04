@@ -15,7 +15,7 @@ angular.module("sampleApp")
             var lightgrad = $$(go.Brush, "Linear", { 1: "#E6E6FA", 0: "#FFFAF0" });
 
             $scope.createLink = function(item,ed,toKey) {
-                console.log(toKey,item,ed)
+
 
                 var fromKey = item.key;
                 var path = ed.path;     //where from
@@ -23,7 +23,47 @@ angular.module("sampleApp")
                 $scope.linkDataArray.push(link)
                 myDiagram.model = new go.GraphLinksModel($scope.nodeDataArray, $scope.linkDataArray);
 
-            }
+            };
+
+            $scope.deleteLink = function(references,inx,ref){
+
+                console.log(ref);
+
+                for (var i=0; i<  $scope.linkDataArray.length-1;i++){
+                    var link = $scope.linkDataArray[i];
+                    if (link.from == ref.from && link.to ==ref.to && link.path == ref.path) {
+
+                        var key = link.key;
+
+
+                        myDiagram.startTransaction("Update Model");
+
+                        var obj = myDiagram.model.getKeyForLinkData(key);
+                        myDiagram.model.removeLinkData(obj);
+                        myDiagram.commitTransaction("Update Model");
+
+
+
+
+
+/*
+                        references.splice(inx,1)
+                        console.log('del ' + i);
+                        $scope.linkDataArray.splice(i,1);
+                        myDiagram.model = new go.GraphLinksModel($scope.nodeDataArray, $scope.linkDataArray);
+                        */
+                        break;
+                    }
+                }
+
+
+                return
+
+
+
+
+
+            };
 
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(lst) {
@@ -33,7 +73,7 @@ angular.module("sampleApp")
 
 
             $scope.showType = function(type){
-                console.log(type)
+
                 var url = "http://hl7.org/fhir/StructureDefinition/"+type.name;
                 $scope.profileUrl = url;
                 designerSvc.getProfileElements(url).then(
@@ -48,7 +88,7 @@ angular.module("sampleApp")
 
                         designerSvc.possibleReferences(tempNode,$scope.nodeDataArray);
 
-                        console.log(data)
+
                     }, function(err) {
                         console.log(err)
                     }
@@ -56,21 +96,7 @@ angular.module("sampleApp")
             }
 
 
-            $scope.addElementDEP = function(text){
-                var key = $scope.selectedItem.key;
 
-                var node = myDiagram.findNodeForKey(key);
-
-                console.log(node.part.data)
-
-                var model = myDiagram.model;
-                model.startTransaction("Add line");
-                node.part.data.items.push({name:text, iskey:false, myData:{type:"Reference"}})
-
-                model.commitTransaction("Add line");
-                myDiagram.model = new go.GraphLinksModel($scope.nodeDataArray, $scope.linkDataArray);
-
-            };
 
             $scope.updateNode = function () {
                 var key = $scope.selectedItem.key;
@@ -95,6 +121,7 @@ angular.module("sampleApp")
 
                 var item = {url:$scope.profileUrl,elements:$scope.input.elements};     //my data about this node
                 var newNode = designerSvc.newNode($scope.input.label,item);             //the new node
+
                 $scope.nodeDataArray.push(angular.copy(newNode));                       //add to the array of nodes
 
                 var link = { from: newNode.myData.key, to: "Suppliers", text: "author", toText: "1"};
@@ -229,11 +256,15 @@ angular.module("sampleApp")
                             { stroke: "#303B45", strokeWidth: 2.5 }),
                         $$(go.Shape,   // the arrowhead
                             { toArrow: "Triangle", fill: '#303B45' }),
-                        $$(go.TextBlock,  // the "from" label
+                        $$(go.Shape, "RoundedRectangle",  { height:18,fill: "yellow", stroke: "gray" }),
+                        $$(go.TextBlock,                        // this is a Link label
+                            new go.Binding("text", "text"))
+
+                       /* $$(go.TextBlock,  // the "from" label
                             {
                                 textAlign: "center",
                                 font: "bold 14px sans-serif",
-                                stroke: "#1967B3",
+                                stroke: "#303B45",
                                 segmentIndex: 0,
                                 segmentOffset: new go.Point(NaN, NaN),
                                 segmentOrientation: go.Link.OrientUpright
@@ -248,7 +279,7 @@ angular.module("sampleApp")
                                 segmentOffset: new go.Point(NaN, NaN),
                                 segmentOrientation: go.Link.OrientUpright
                             },
-                            new go.Binding("text", "toText"))
+                            new go.Binding("text", "toText"))*/
                     );
 
                // myDiagram.model = new go.GraphLinksModel($scope.nodeDataArray, $scope.linkDataArray);
@@ -260,7 +291,7 @@ angular.module("sampleApp")
                     $scope.nodeDataArray = $scope.nodeDataArray.concat(data.nodes)
                     $scope.linkDataArray = $scope.linkDataArray.concat(data.links)
                     myDiagram.model = new go.GraphLinksModel($scope.nodeDataArray, $scope.linkDataArray);
-                    console.log(data)
+
                 },
                 function (err) {
                     console.log(err)
