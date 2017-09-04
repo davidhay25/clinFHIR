@@ -31,8 +31,6 @@ angular.module("sampleApp")
                 )
             };
 
-
-
             $scope.editResourceItem = function(item) {
 
 
@@ -852,6 +850,30 @@ angular.module("sampleApp")
             };
             
             //load the IG's that describe 'collections' of conformance artifacts - like CareConnect & Argonaut
+
+            var url = appConfigSvc.getCurrentConformanceServer().url + "ImplementationGuide";
+            GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
+                function(data) {
+                    $scope.listOfIG = []
+                    if (data.data && data.data.entry) {
+                        data.data.entry.forEach(function (entry) {
+                            var ig = entry.resource;
+
+                            //console.log(ig.id)
+                            if (Utilities.isAuthoredByClinFhir(ig)) {
+                                ig.name = ig.name || ig.description;
+                                $scope.listOfIG.push(ig)
+                            }
+                        })
+                    }
+                    $scope.input.selIG = $scope.listOfIG[0]
+                },
+                function(err){
+                    console.log(err)
+                }
+            );
+
+            /*
             var url = appConfigSvc.getCurrentConformanceServer().url + "ImplementationGuide";
             $http.get(url).then(
                 function(data) {
@@ -872,7 +894,7 @@ angular.module("sampleApp")
                     console.log(err)
                 }
             );
-
+*/
             //note that we're using an IG to hold all the resources in this collection
             $scope.selectIG = function(IG){
                 var extDef = appConfigSvc.config().standardExtensionUrl.resourceTypeUrl;

@@ -22,6 +22,7 @@ if (!ig) {
 }
 
 var IG = JSON.parse(ig);
+IG.extension = [{url: "http://clinfhir.com/fhir/StructureDefinition/cfAuthor",valueBoolean:true}]
 
 
 //upload the referenced artifacts

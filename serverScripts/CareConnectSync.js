@@ -22,6 +22,7 @@ List.id = 'cf-artifacts-cc'
 var IG = {resourceType:'ImplementationGuide',status:'draft',package:[{name:'complete',resource:[]}]};
 IG.id = 'cf-artifacts-cc';
 IG.description = "Care Connect";
+IG.extension = [{url: "http://clinfhir.com/fhir/StructureDefinition/cfAuthor",valueBoolean:true}]
 
 //var localFileRoot = __dirname;
 var localFileRoot = "/Users/davidha/Dropbox/orion/careConnect";

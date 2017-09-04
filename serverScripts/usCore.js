@@ -6,9 +6,9 @@ var fs = require('fs');
 var syncRequest = require('sync-request');
 
 
-//var remoteFhirServer = "http://fhirtest.uhn.ca/baseDstu2/";
+var remoteFhirServer = "http://fhirtest.uhn.ca/baseDstu3/";
 //var remoteFhirServer = "http://snapp.clinfhir.com:8080/baseDstu2/";
-var remoteFhirServer = "http://localhost:8080/baseDstu3/";
+//var remoteFhirServer = "http://localhost:8080/baseDstu3/";
 
 /*
 var List = {resourceType:'List',status:'current',mode:'snapshot',entry:[]};
@@ -22,6 +22,8 @@ List.id = 'cf-artifacts-cc'
 var IG = {resourceType:'ImplementationGuide',status:'draft',package:[{name:'complete',resource:[]}]};
 IG.id = 'cf-artifacts-uscore';
 IG.description = "USCore";
+
+IG.extension = [{url: "http://clinfhir.com/fhir/StructureDefinition/cfAuthor",valueBoolean:true}]
 
 //var localFileRoot = __dirname;
 var localFileRoot = "/Users/davidha/Dropbox/IGs/US-core/";
@@ -39,7 +41,7 @@ arFileNames.sort(function (a,b) {
     }
 })
 
-console.log(arFileNames)
+//console.log(arFileNames)
 
 var errors=0,count=0,ignore=0
 
@@ -169,7 +171,7 @@ if (response.statusCode !== 200 && response.statusCode !== 201) {
     console.log("Error saving ImplementationGuide:" + response.body.toString())
 } else {
 
-    console.log("Uploaded ImplementationGuide.")
+    console.log("Uploaded ImplementationGuide. id: "+IG.id)
 }
 
 
