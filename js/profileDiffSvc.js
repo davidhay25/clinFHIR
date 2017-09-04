@@ -473,13 +473,21 @@ angular.module("sampleApp").service('profileDiffSvc',
                     display = ar.join('.')
                 }
 
-                if (ed.label) {
-                    display=ed.label
-                } else if (ed.name) {
-                    display=ed.name;
-                }else if (ed.short) {
-                    display=ed.short;
+                if (display == 'extension') {
+                    if (ed.sliceName) {
+                        display=ed.sliceName
+                    } else
+                    if (ed.label) {
+                        display=ed.label
+                    } else if (ed.name) {
+                        display=ed.name;
+                    } else if (ed.short) {
+                        display=ed.short;
+                    }
                 }
+
+
+
 
                 if (ed.slicing) {
                     display += " D"

@@ -93,7 +93,7 @@ arFileNames.forEach(function (name) {
                     json.snapshot.element.forEach(function (ed) {
                         if (! ed.label) {
                             var ar = ed.path.split('.');
-                            ar.splice(1,0);
+                            ar.splice(0,1);
                             ed.label = ar.join('.')
                         }
                     })
