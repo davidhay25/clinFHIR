@@ -1911,7 +1911,7 @@ angular.module("sampleApp")
                             //if not, then is the parent a reference to a resource?
                             if (!baseType) {
                                 var node = findNodeWithPath(parentPath)
-                                console.log(node.data.ed.type)
+                               
                                 if (node && node.data && node.data.ed && node.data.ed.type) {
                                     node.data.ed.type.forEach(function (typ) {
                                         if (typ.code == 'Reference') {
