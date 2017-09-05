@@ -336,6 +336,11 @@ angular.module("sampleApp")
                 }
 
 
+                if ($scope.input.name.indexOf(" ") > -1) {
+                    $scope.canSave = false;
+                    modalService.showModal({},{bodyText:"The name cannot have spaces in it. Try again."})
+                }
+
                 //for now, only do duplicate checking for adding new nodes - not renaming - todo
 
                 if (! editNode) {
