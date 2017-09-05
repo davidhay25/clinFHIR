@@ -1052,7 +1052,8 @@ angular.module("sampleApp")
                 }
 
                 if (type == 'terminology') {
-                   //really only works for ValueSet at this point...
+                    delete $scope.valueSetOptions;
+                   //really only works for ValueSet and CodeSystemat this point...
                     var tType = 'ValueSet';
                     if (item.url.indexOf('/CodeSystem/') > -1) {
                         tType = 'CodeSystem';
@@ -1071,6 +1072,42 @@ angular.module("sampleApp")
                    profileDiffSvc.getTerminologyResource(urlToGet,tType).then(
                        function (vs) {
                            $scope.selectedTerminology = vs;
+
+
+
+                           if (tType == 'ValueSet') {
+                               var vo = {selectedValueSet : {vs: {url: vs.url}}}
+
+                               logicalModelSvc.getOptionsFromValueSet(vo).then(
+                                   function(lst) {
+
+
+
+                                       if (lst) {
+                                           lst.sort(function(a,b){
+                                               if (a.display > b.display) {
+                                                   return 1
+                                               } else {
+                                                   return -1;
+                                               }
+                                           })
+                                           $scope.valueSetOptions = lst;
+                                       }
+                                        console.log(lst)
+
+
+
+                                   },
+                                   function(err){
+                                       //$scope.valueSetOptions = [{code:'notExpanded',display:'Unable to get list, may be too long'}]
+                                       $scope.valueSetOptions = [{code:'notExpanded',display:err}]
+                                   }
+                               )
+                           }
+
+
+
+
                        }, function (err) {
                            console.log(err)
                        }
@@ -1092,9 +1129,6 @@ angular.module("sampleApp")
 
                 if (type=='profile') {
                    //this is a profiled resource - - an SD
-                   // $scope.extensionSelected = true;
-
-
 
                    var url;
                    if (item && item.url) {
@@ -1109,13 +1143,7 @@ angular.module("sampleApp")
                        }
                    }
 
-
                    $scope.waiting = true;
-                   //console.log($scope.selectedItem.url)
-
-                   //?? !!!!!!!!!!! temp
-                  // url = "http://hl7.org/fhir/us/sdc/"+url
-
 
                    profileDiffSvc.getSD(url).then(
                        function(SD){
@@ -1135,8 +1163,15 @@ angular.module("sampleApp")
                                        console.log(data)
                                        $scope.selectIG($scope.currentIG);       //re-draw the lists
                                        //need to reset these as they are cleared in the select routine...
+
+
                                        $scope.selectedItemType = type;
                                        $scope.selectedItem = item;
+                                       //$scope.selectItem(item,type);    //todo. hmmm this is calling itself!
+                                       setupProfile(SD)
+
+
+
                                    }, function (err) {
                                        alert('Error updating IG '+angular.toJson(err))
                                    }
@@ -1145,11 +1180,13 @@ angular.module("sampleApp")
 
 
 
+                           } else {
+                               setupProfile(SD)
                            }
 
 
 
-                           setupProfile(SD)
+
                            addToHistory('profile',SD)
 
                        }, function (err) {
@@ -1244,24 +1281,11 @@ angular.module("sampleApp")
                     }
                 }
 */
-               /* Not sure why I was doing this. Comment out for the moment...
-                if (baseType) {
-                    profileDiffSvc.findProfilesOnBase(baseType).then(
-                        function (bundle) {
-                            console.log(bundle)
-                            $scope.profilesOnTypeBdl = bundle
-
-                        },
-                        function (err) {
-                            console.log("Error getting profiles on "+baseType,err);
-                        }
-                    )
-                }
-                */
 
 
 
-             //  var clone = angular.copy(SD);
+
+
 
                 delete $scope.errorsInLM;
                 //-------- logical model
@@ -1271,14 +1295,7 @@ angular.module("sampleApp")
                         //display any errors...
                         if (vo.errors.length) {
                             $scope.errorsInLM = vo.errors;
-                            /*
-                            var display = "";
-                            vo.errors.forEach(function (err) {
-                                display += err.type + err.value;
-                            });
 
-                            modalService.showModal({}, {bodyText: display})
-                            */
 
                         }
 
@@ -1312,7 +1329,7 @@ angular.module("sampleApp")
                 //------- raw model
                 var treeData = logicalModelSvc.createTreeArrayFromSD(angular.copy(SD))
 
-                //console.log(treeData)
+
 
                 $('#profileTree').jstree('destroy');
                 $('#profileTree').jstree(
@@ -1441,7 +1458,9 @@ angular.module("sampleApp")
 
                                 $scope.selectedNodeFromGraph = graphData.nodes.get(nodeId);
 
-
+                                //hack for the r2/3 issue...
+                                $scope.selectedNodeFromGraph.data.purpose =
+                                    $scope.selectedNodeFromGraph.data.purpose || $scope.selectedNodeFromGraph.data.acronym
 
 
                                 //retrieve the valueset properties if a valueset
@@ -1510,7 +1529,7 @@ angular.module("sampleApp")
 
             $scope.selectNodeFromGraph = function(){
 
-                //find the idem in the artifacts list
+                //find the item in the artifacts list
                 var item = {}
                 $scope.artifacts['profile'].forEach(function (art) {
                     if (art.url == $scope.selectedNodeFromGraph.data.url) {
@@ -1519,7 +1538,7 @@ angular.module("sampleApp")
                 });
 
 
-                if (item) {
+                if (item.url) {
                     $scope.selectItem(item,'profile')
                 }
 

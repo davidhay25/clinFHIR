@@ -612,7 +612,11 @@
                                             <br />
                                             <div>{{selectedNodeFromGraph.data.description}}</div>
 
-                                            <button ng-show = "selectedNodeFromGraph.data.purpose == 'profile'" class="btn btn-link" ng-click="selectNodeFromGraph()">Select node</button>
+                                            <button ng-show = "selectedNodeFromGraph.data.purpose == 'profile'"
+                                                    class="btn btn-link" ng-click="selectNodeFromGraph()">Select node</button>
+
+
+
 
                                         </div>
 
@@ -756,6 +760,67 @@
                                                show-value-set-e="showValueSet"></profile-table>
                             </uib-tab>
 
+                            <uib-tab heading="ValueSets used">
+
+                                <p class="banner"><em>ValueSets used by this Profile, including binding information</em></p>
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-12">
+                                        <table class="table">
+                                            <tr><th>ValueSet</th>
+                                                <th uib-popover="If true, ValueSet was included in the IG"
+                                                    popover-placement="left"
+                                                    popover-trigger="'mouseenter'">Included</th>
+                                                <th>Paths & Binding Strength</th></tr>
+                                            <tr ng-repeat="item in profileReport.valueSetArray">
+                                                <td width="40%"><span class="clickable"  ng-click="showValueSet(item.url)">{{item.url}}</span> </td>
+                                                <td><div ng-show="item.included">Yes</div></td>
+                                                <td>
+                                                    <table width="100%">
+                                                        <tr ng-repeat="row in item.paths">
+                                                            <td>{{row.path}} ({{row.min}}..{{row.max}})</td>
+                                                            <td width="15%">{{row.strength}}</td>
+                                                        </tr>
+                                                    </table>
+
+                                                </td>
+                                                <!--
+                                                <td><pre>{{item | json}}</pre></td>
+                                                -->
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </uib-tab>
+
+                            <uib-tab heading="References">
+
+                                <p class="banner"><em>The references from this Profile to some other resource</em></p>
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-12">
+                                        <table class="table">
+                                            <tr><th>Reference</th><th>Paths</th></tr>
+                                            <tr ng-repeat="item in profileReport.referenceArray">
+                                                <td width="40%">{{item.url}} </td>
+                                                <td>
+                                                    <table width="100%">
+                                                        <tr ng-repeat="row in item.paths">
+                                                            <td>{{row.path}} ({{row.min}}..{{row.max}})</td>
+
+                                                        </tr>
+                                                    </table>
+
+                                                </td>
+
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                </div>
+
+                            </uib-tab>
+
+
                             <uib-tab heading="Examples">
                                 <div class="row">
                                     <div class="col-sm-3 col-md-3">
@@ -801,65 +866,6 @@
                                 </div>
                             </uib-tab>
 
-                            <uib-tab heading="ValueSets used">
-
-                                <p class="banner"><em>ValueSets used by this Profile, including binding information</em></p>
-                                <div class="row">
-                                    <div class="col-sm-12 col-md-12">
-                                        <table class="table">
-                                            <tr><th>ValueSet</th>
-                                                <th uib-popover="If true, ValueSet was included in the IG"
-                                                    popover-placement="left"
-                                                    popover-trigger="'mouseenter'">Included</th>
-                                                <th>Paths & Binding Strength</th></tr>
-                                            <tr ng-repeat="item in profileReport.valueSetArray">
-                                                <td width="40%"><span class="clickable"  ng-click="showValueSet(item.url)">{{item.url}}</span> </td>
-                                                <td><div ng-show="item.included">Yes</div></td>
-                                                <td>
-                                                    <table width="100%">
-                                                        <tr ng-repeat="row in item.paths">
-                                                            <td>{{row.path}} ({{row.min}}..{{row.max}})</td>
-                                                            <td width="15%">{{row.strength}}</td>
-                                                        </tr>
-                                                    </table>
-
-                                                </td>
-                                                <!--
-                                                <td><pre>{{item | json}}</pre></td>
-                                                -->
-                                            </tr>
-                                        </table>
-                                    </div>
-
-                                </div>
-                            </uib-tab>
-
-                            <uib-tab heading="References">
-
-                                <p class="banner"><em>The references from this Profile to some other resource</em></p>
-                                <div class="row">
-                                    <div class="col-sm-12 col-md-12">
-                                        <table class="table">
-                                            <tr><th>Reference</th><th>Paths</th></tr>
-                                            <tr ng-repeat="item in profileReport.referenceArray">
-                                                <td width="40%"><span class="clickable">{{item.url}}</span> </td>
-                                                <td>
-                                                    <table width="100%">
-                                                        <tr ng-repeat="row in item.paths">
-                                                            <td>{{row.path}} ({{row.min}}..{{row.max}})</td>
-
-                                                        </tr>
-                                                    </table>
-
-                                                </td>
-
-                                            </tr>
-                                        </table>
-                                    </div>
-
-                                </div>
-
-                            </uib-tab>
 
                             <uib-tab heading="Mappings">
                                 <br/>
@@ -922,23 +928,6 @@
 
                             </uib-tab>
 
-<!--
-
-                            <uib-tab heading="Raw tree">
-                                <div class="row">
-                                    <div class="col-sm-4 col-md-4">
-                                        <div class="myScroll">
-                                            <div id="profileTree"></div>
-                                        </div>
-
-                                    </div>
-                                    <div class="col-sm-8 col-md-8">
-                                        <pre>{{selectedED | json}}</pre>
-                                    </div>
-                                </div>
-                            </uib-tab>
-
-                            -->
 
                             <uib-tab heading="Paths">
 
@@ -1110,9 +1099,21 @@
                                 </div>
 
                                 <br/> <br/>
-                                <a href="#" ng-show="selectedTerminology.resourceType=='ValueSet'"
+                                <div ng-show="valueSetOptions">
+                                    <h5>Options</h5>
+                                    <ul>
+                                        <li ng-repeat="option in valueSetOptions">{{option.display}} ({{option.code}})</li>
+                                    </ul>
+                                    <br/>
+                                </div>
 
+                                <a href="#" ng-show="selectedTerminology.resourceType=='ValueSet'"
                                    ng-click="showValueSet(selectedTerminology.url)">Explore ValueSet</a>
+
+
+
+
+
 
                                 <div ng-show="selectedTerminology.resourceType=='CodeSystem'">
                                     <table class="table table-bordered">

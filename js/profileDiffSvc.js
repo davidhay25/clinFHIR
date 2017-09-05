@@ -1348,23 +1348,19 @@ angular.module("sampleApp").service('profileDiffSvc',
                                 }
 
 
-                            if (typ.code == 'Reference' && typ.profile) {
+                            if (typ.code == 'Reference' && (typ.profile || typ.targetProfile)) {
 
-                            //    var thisUrl =  typ.profile;
-                              //  if (angular.isArray(typ.profile)) {
-                                //    thisUrl = typ.profile[0];
-                               // }
+                                var profile = typ.profile;      //todo - might want to change from Array to string
+                                if (typ.targetProfile){
+                                    profile = [typ.targetProfile];
+                                }
 
-                                var item = {url:typ.profile,path:el.path, min:el.min, max:el.max}
-                                result.reference[typ.profile] = result.reference[typ.profile] || []
+                                var item = {url:profile,path:el.path, min:el.min, max:el.max}
+                                result.reference[profile] = result.reference[profile] || []
 
 
 
-                              //  if (hashUrl[thisUrl]) {
-                                //    item.included = true;
-                               // }
-
-                                result.reference[typ.profile].push(item);
+                                result.reference[profile].push(item);
                             }
                         })
                     }
@@ -1699,6 +1695,9 @@ angular.module("sampleApp").service('profileDiffSvc',
             delete $localStorage.extensionDefinitionCache[url];
         },
         getSD : function(url) {
+//console.log(url)
+
+
             var deferred = $q.defer();
             if ($localStorage.extensionDefinitionCache[url]) {
 

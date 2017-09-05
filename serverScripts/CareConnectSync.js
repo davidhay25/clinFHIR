@@ -7,8 +7,8 @@ var syncRequest = require('sync-request');
 
 
 //var remoteFhirServer = "http://fhirtest.uhn.ca/baseDstu2/";
-//var remoteFhirServer = "http://snapp.clinfhir.com:8080/baseDstu2/";
-var remoteFhirServer = "http://localhost:8079/baseDstu2/";
+var remoteFhirServer = "http://snapp.clinfhir.com:8080/baseDstu2/";
+//var remoteFhirServer = "http://localhost:8079/baseDstu2/";
 
 /*
 var List = {resourceType:'List',status:'current',mode:'snapshot',entry:[]};
