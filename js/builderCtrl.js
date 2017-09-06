@@ -21,10 +21,11 @@ angular.module("sampleApp")
 
 
             $scope.generateDocument = function(){
-                var doc = builderSvc.generateDocument($scope.selectedContainer.bundle)
+                var doc = builderSvc.generateDocument($scope.selectedContainer.bundle).doc
                 doc.type='collection';
+                $scope.generatedDocument = doc;
                 var binary = {resourceType:'Binary'};
-                console.log(JSON.stringify(doc))
+                //console.log(JSON.stringify(doc))
             };
 
             var idPrefix = 'cf-';   //prefix for the id. todo should probably be related to the userid in some way...

@@ -675,7 +675,7 @@ angular.module("sampleApp")
                         //vo is {vs,strength}
                         console.log(vo)
                         $scope.selectedValueSet = vo;
-                        dtCode.vs = vo;         //save the valueset against the datatype
+                     //   dtCode.vs = vo;         //save the valueset against the datatype
                     }
                 )
             };
@@ -684,7 +684,7 @@ angular.module("sampleApp")
                 var vs = $scope.input.vsFromIg;
                 var vo={vs:{url:vs.sourceUri,name:vs.name},strength:'preferred'}
                 $scope.selectedValueSet = vo;
-                dtCode.vs = vo;
+                //dtCode.vs = vo;
 
                 console.log(vo)
 

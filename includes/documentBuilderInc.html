@@ -193,6 +193,8 @@
 
         <uib-tab heading="Document">
            <button class="btn btn-link" ng-click="generateDocument()">Generate Document</button>
+
+            <pre ng-show="generatedDocument">{{generatedDocument | json}}</pre>
         </uib-tab>
 
     </uib-tabset>

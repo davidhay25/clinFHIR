@@ -446,7 +446,7 @@ angular.module("sampleApp").
 
             return deferred.promise;
         },
-        getValueSet : function(ref,cb) {
+        getValueSet : function(ref) {
             var deferred = $q.defer();
             Utilities.getValueSetIdFromRegistry(ref,function(resp){
                 if (resp) {

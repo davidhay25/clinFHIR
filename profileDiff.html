@@ -126,13 +126,12 @@
                 </a>
             </div>
 
-
-
             <div class="col-md-5 col-sm-5">
                 <div class="navbar-text">
-                    Conformance:{{appConfigSvc.getCurrentConformanceServer().name}}
-                    <div>Terminology:{{appConfigSvc.getCurrentTerminologyServer().name}}</div>
                     <div>Data:{{appConfigSvc.getCurrentDataServer().name}}</div>
+                    <div>Conformance:{{appConfigSvc.getCurrentConformanceServer().name}}</div>
+                    <div>Terminology:{{appConfigSvc.getCurrentTerminologyServer().name}}</div>
+
                 </div>
             </div>
 
@@ -799,14 +798,13 @@
                                 <div class="row">
                                     <div class="col-sm-12 col-md-12">
                                         <table class="table">
-                                            <tr><th>Reference</th><th>Paths</th></tr>
+                                            <tr><th>Paths</th><th>Reference</th></tr>
                                             <tr ng-repeat="item in profileReport.referenceArray">
-                                                <td width="40%">{{item.url}} </td>
                                                 <td>
                                                     <table width="100%">
                                                         <tr ng-repeat="row in item.paths">
                                                             <td>{{row.path}} ({{row.min}}..{{row.max}})</td>
-
+                                                            <td width="40%">{{item.url}} </td>
                                                         </tr>
                                                     </table>
 

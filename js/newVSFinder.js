@@ -24,6 +24,32 @@ angular.module("sampleApp").controller('vsFinderCtrl',
             $scope.$close({vs: $scope.input.vspreview,strength:$scope.input.strength,description : $scope.input.description});
         };
 
+
+        $scope.addUrlDirectly = function(url) {
+            delete $scope.expansion;
+            delete $scope.input.filter;
+            delete $scope.queryError;
+            //  http://hl7.org/fhir/ValueSet/conditional-read-status
+
+            //see if this url exists on the terminology servver
+            GetDataFromServer.getValueSet(url).then(
+                function(resource) {
+                    console.log(resource)
+                    if (resource) {
+                        $scope.input.vspreview = resource;
+                    } else {
+                        $scope.input.vspreview = {resourceType: 'ValueSet', url: url};
+                    }
+                },function(err) {
+                    $scope.input.vspreview = {resourceType: 'ValueSet', url: url};
+                    console.log(err)
+            })
+
+
+
+
+        }
+
         //find matching ValueSets based on name
         $scope.search = function(filter){
             $scope.showWaiting = true;

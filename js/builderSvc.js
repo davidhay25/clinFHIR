@@ -58,8 +58,9 @@ angular.module("sampleApp")
         objColours.Medication = '#FF9900';
 
         return {
-            generateDocument : function(container) {
-                return container;
+            generateDocument : function(bundle) {
+                //move composition to top
+                return {doc:bundle};
 
             },
             makeResourceArrayDEP : function(treeData) {

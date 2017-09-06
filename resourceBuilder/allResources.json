@@ -70,7 +70,6 @@
   {"name": "MeasureReport"},
   {"name": "MessageDefinition"},
   {"name": "OperationDefinition","reference":true},
-  {"name": "NutritionRequest"},
   {"name": "NutritionOrder"},
   {"name": "SearchParameter","reference":true},
   {"name": "ClaimResponse"},
