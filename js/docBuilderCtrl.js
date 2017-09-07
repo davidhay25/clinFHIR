@@ -163,14 +163,14 @@ angular.module("sampleApp")
                 var ar = $scope.currentSection.entry;
                 moveThing(ar,inx, dirn);
 
-            }
+            };
 
             $scope.moveSection = function(inx,dirn) {
                 //console.log(dirn,inx);
                 var ar = $scope.compositionResource.section;
                 moveThing(ar,inx, dirn);
 
-            }
+            };
 
 
             function moveThing(ar,inx,dirn) {

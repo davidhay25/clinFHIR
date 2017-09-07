@@ -78,6 +78,7 @@ angular.module("sampleApp")
                 var rootId = getId();
                 var rootItem = {id: rootId, parent: '#', text: 'Composition', state: {opened: true, selected: false}}
                 rootItem['a_attr'] = {class : 'resourceInDocTree'};
+                rootItem.data = {resource:comp}
                 tree.push(rootItem);
 
                 //add all the resources referenced by the composition.
@@ -98,12 +99,17 @@ angular.module("sampleApp")
                     //add the title
                     var id = getId();
                     var item = {id: id, parent: sectParentId, text: sect.title, state: {opened: true, selected: false}}
+                    if (sect.code && sect.code.coding) {
+                        item.text += " ("+sect.code.coding[0].code + ")"
+                    }
+
                     tree.push(item);
                     //now, add the resources that are directly refereced by the section...
                     sect.entry.forEach(function (entry) {
                         var sectId = getId();
                         var sectItem = {id: sectId, parent: id, text: entry.reference, state: {opened: true, selected: false}}
                         sectItem['a_attr'] = {class : 'resourceInDocTree'};
+                        sectItem.data = {resource:hashByRef[entry.reference]}
                         tree.push(sectItem);
                         //if it's a list, then display the resources they reference...
                         if (entry.reference.indexOf('List') > -1) {
@@ -112,7 +118,7 @@ angular.module("sampleApp")
                                 list.entry.forEach(function (entry) {
                                     var entryId = getId();
                                     var entryItem = {id: entryId, parent: sectId, text: entry.item.reference, state: {opened: true, selected: false}}
-
+                                    entryItem.data = {resource:hashByRef[entry.item.reference]}
                                     //entryItem.data = {attributes : {class : 'rounded-box'}};
                                     entryItem['a_attr'] = {class : 'resourceInDocTree'};
                                    // entryItem['li_attr'] = {style : 'margin-bottom:8px'};
@@ -143,6 +149,7 @@ angular.module("sampleApp")
 
                             //entryItem.data = {attributes : {class : 'rounded-box'}};
                             item['a_attr'] = {class : 'resourceInDocTree'};
+                            item.data = {resource:hashByRef[t.reference]}
                             // entryItem['li_attr'] = {style : 'margin-bottom:8px'};
                             tree.push(item);
                         }

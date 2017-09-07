@@ -21,7 +21,14 @@ angular.module("sampleApp")
                 $('#docTreeView').jstree(
                     {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
                 ).on('select_node.jstree', function (e, data) {
+                    console.log(data)
+                    delete $scope.currentResource;      //todo - there's a setResource() in the service too...
 
+                    if (data.node.data){
+                        $scope.selectResource({resource:data.node.data.resource});
+
+                    }
+                    $scope.$digest()
                 })
 
 
