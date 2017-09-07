@@ -93,7 +93,7 @@ angular.module("sampleApp")
                 $http.get('orionTest/getSamples').then(
                     function(data) {
                         $scope.samples = data.data;
-                        // console.log($scope.samples)
+                         console.log($scope.samples)
                     }
                 );
             }

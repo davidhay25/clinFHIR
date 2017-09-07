@@ -54,7 +54,7 @@
 
 
                     <div>
-                        <button class="btn btn-link pull-right" ng-click="editSection()">Add</button>
+                        <button class="btn btn-link pull-right" ng-click="editSection()">Add Section</button>
                     </div>
                 </div>
                 <div class="col-md-6 col-sm-6">
@@ -206,6 +206,10 @@
             <br/> <br/>
 
             <div id="docTreeView"></div>
+
+            <em>Note that this view only includes the resources that are directly connected to the Composition.section.entry
+            element, and to any List resources referenced by a section. To see the complete list, and all the references
+            between resources (such as to the Patient) then use the Graph tab.</em>
 
         </uib-tab>
 
