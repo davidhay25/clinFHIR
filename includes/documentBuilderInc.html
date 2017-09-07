@@ -26,6 +26,13 @@
 
                                     <br/>
                                     <div class="pull-right" ng-show="showMoveArrows">
+
+                                        <i class="glyphicon glyphicon-remove"
+                                           title="Delete section"
+                                           ng-click="deleteSection($index)" style="cursor: pointer">
+
+                                        </i>
+
                                         <i class="glyphicon glyphicon-arrow-down" ng-show="$index < compositionResource.section.length-1"
                                            title="Move Down"
                                            ng-click="moveSection($index,'dn')" style="cursor: pointer">

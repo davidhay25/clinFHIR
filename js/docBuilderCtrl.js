@@ -166,10 +166,26 @@ angular.module("sampleApp")
             };
 
             $scope.moveSection = function(inx,dirn) {
-                //console.log(dirn,inx);
+
                 var ar = $scope.compositionResource.section;
                 moveThing(ar,inx, dirn);
 
+            };
+
+            $scope.deleteSection = function(inx) {
+                var modalOptions = {
+                    closeButtonText: "No, I changed my mind",
+                    actionButtonText: 'Yes, please delete',
+                    headerText: 'Delete section',
+                    bodyText: 'Are you sure you wish to delete this section? (The referenced resources will not be removed). '
+                };
+
+                modalService.showModal({}, modalOptions).then(
+                    function (){
+                        $scope.compositionResource.section.splice(inx,1);
+                    }
+                )
+                
             };
 
 
