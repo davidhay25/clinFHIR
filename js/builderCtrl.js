@@ -14,15 +14,33 @@ angular.module("sampleApp")
 
             GetDataFromServer.registerAccess('scnBld');
 
+
+            $scope.generateDocTree = function(){
+                var treeData = builderSvc.makeDocumentTree($scope.selectedContainer.bundle)
+                $('#docTreeView').jstree('destroy');
+                $('#docTreeView').jstree(
+                    {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+                ).on('select_node.jstree', function (e, data) {
+
+                })
+
+
+            }
+
             $scope.scoreBundle = function(ref) {
                 $scope.markResult = markerSvc.mark($scope.selectedContainer,ref) ; //compare to first bundle - testing!
                 //$scope.markResult = markerSvc.mark($scope.selectedContainer,$scope.builderBundles[0]) ; //compare to first bundle - testing!
             };
 
 
+            $scope.makeElementsPopulatedReport = function(){
+                var report = builderSvc.makeElementsPopulatedReport($scope.selectedContainer.bundle);
+                $scope.populatedReport = report;
+                console.log(report);
+            };
+
             $scope.generateDocument = function(){
                 var doc = builderSvc.generateDocument($scope.selectedContainer.bundle).doc
-                doc.type='collection';
                 $scope.generatedDocument = doc;
                 var binary = {resourceType:'Binary'};
                 //console.log(JSON.stringify(doc))
@@ -240,7 +258,10 @@ angular.module("sampleApp")
                    //$scope.input.selectedLibraryCategory = cs.concept[0];    //to set the default in the library
                    //$scope.makeLibraryDisplayList($scope.input.selectedLibraryCategory);
                       // console.log(cs);
-               }
+               },function(){
+                    $scope.libraryCategories = {concept:[]}
+                    $scope.libraryCategories.concept.push({code:'default',display:'Default'});
+                }
             );
 
             $scope.changeSelectedScenarioConcept = function(category){

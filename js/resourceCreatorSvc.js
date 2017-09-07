@@ -3501,6 +3501,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
 
         buildResourceTree: function (resource) {
+            //pass in a resource instance...
             if (! resource) {
                 //function is called when clicking on the space between resources...
                 return;
@@ -3508,31 +3509,34 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var tree = [];
             var idRoot = 0;
             //console.log(resource)
-            function processNode(tree, parentId, element, key, level) {
+            function processNode(tree, parentId, element, key, level,pathRoot) {
 
                 if (angular.isArray(element)) {
                     var aNodeId1 = getId()
                     var newLevel = level++;
-                    var data = {key:key, element:element,level:newLevel}
+                    var data = {key:key, element:element,level:newLevel,path:pathRoot+'.'+key}
                     var newNode1 = {id: aNodeId1, parent: parentId, data:data, text: key, state: {opened: true, selected: false}};
                     tree.push(newNode1);
 
                     newLevel++
                     element.forEach(function (child, inx) {
-                        processNode(tree, aNodeId1, child, '[' + inx + ']',newLevel);
+                        processNode(tree, aNodeId1, child, '[' + inx + ']',newLevel,pathRoot+'.'+key);
                     })
 
                 } else if (angular.isObject(element)) {
                     var newLevel = level++;
                     var oNodeId = getId();
-                    var data = {key:key, element:element,level:newLevel}
+                    var data = {key:key, element:element,level:newLevel,path:pathRoot+'.'+key}
                     var newNode2 = {id: oNodeId, parent: parentId, data: data, text: key, state: {opened: true, selected: false}};
+
+
+
                     tree.push(newNode2);
 
                     //var newLevel = level++;
                     newLevel++
-                    angular.forEach(element, function (child, key) {
-                        processNode(tree, oNodeId, child, key,newLevel);
+                    angular.forEach(element, function (child, key1) {
+                        processNode(tree, oNodeId, child, key1,newLevel,pathRoot+'.'+key);
 
                     })
                 } else {
@@ -3541,7 +3545,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                     } else {
                         var display = key + " " + '<strong>' + element + '</strong>';
-                        var data = {key:key, element:element,level:level}
+                        var data = {key:key, element:element,level:level,path:pathRoot+'.'+key}
                         data.element = element;
                         var newNode = {
                             id: getId(),
@@ -3561,7 +3565,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             tree.push(rootItem);
 
             angular.forEach(resource, function (element, key) {
-                processNode(tree, rootId, element, key, 1);
+                processNode(tree, rootId, element, key, 1,resource.resourceType);
             });
 
             //var parentId = '#';

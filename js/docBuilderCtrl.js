@@ -46,8 +46,6 @@ angular.module("sampleApp")
 
                 if (vsDetails) {
 
-
-
                     GetDataFromServer.getExpandedValueSet(vsDetails.id).then(
                         function (vs) {
                             sectionCodes = vs.expansion.contains;
@@ -96,12 +94,22 @@ angular.module("sampleApp")
 
                         if (inSection) {
                             $scope.input.title = inSection.title;
+                            if (inSection.code && inSection.code.coding && inSection.code.coding.length > 0 && inSection.code.coding[0]) {       //this is a Coding...
+                                sectionCodes.forEach(function (c) {
+                                    if (c.code == inSection.code.coding[0].code) {
+                                        $scope.input.sectionCode = c;
+                                    }
+                                })
+                            }
                             $scope.mode="Edit";
                         }
                         //section = section;
 
                         $scope.selectCode = function(code){
-                            $scope.input.title = code.display;
+                            if (! $scope.input.title) {
+                                $scope.input.title = code.display;
+                            }
+
                         };
 
                         $scope.save = function(){

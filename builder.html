@@ -28,6 +28,16 @@
     <style>
 
 
+        .resourceInDocTree {
+            border: 1px solid gainsboro;
+            padding : 5px;
+            margin: 8px;
+            padding-bottom: 25px;
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
+            background-color: #f3f3f3;
+        }
 
         #resourceGraph {
             width: 100%;
@@ -591,6 +601,53 @@
                             <div class="row"  style="height:550px; overflow-y: auto;" >
                                 <div class="col-md-12 col-sm-12">
 
+                                    <button class="btn btn-link" ng-click="makeElementsPopulatedReport()">Make report</button>
+
+
+                                    <div ng-repeat="res in populatedReport">
+                                        <div class="row">
+                                            <div class="col-md-12 col-sm-12">
+                                                <div class="banner">{{res.resourceType}}</div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="row" ng-repeat="ele in res.elements">
+                                            <div class="col-md-6 col-sm-6">
+                                                {{ele.path}}
+                                            </div>
+                                            <div class="col-md-6 col-sm-6">
+                                                {{ele.text}}
+                                            </div>
+                                        </div>
+
+
+
+
+                                    </div>
+
+                                    <!-- <div ng-repeat="res in populatedReport">
+                                        <div class="row">
+                                            <div class="col-md-3 col-sm-3">
+                                                {{res.resourceType}}
+                                            </div>
+                                            <div class="col-md-9 col-sm-9">
+                                                <div class="row" ng-repeat="ele in res.elements">
+                                                    <div class="col-md-6 col-sm-6">
+                                                        {{ele.path}}
+                                                    </div>
+                                                    <div class="col-md-6 col-sm-6">
+                                                        {{ele.text}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                    </div>-->
+
+
+
 
 
                                     <table class="table table-bordered table-condensed">
@@ -617,7 +674,12 @@
                                                 </div>
 
                                             </td>
-                                            <td><p ng-bind-html="entry.resource.text.div"></p></td>
+                                            <td>
+                                                <p ng-bind-html="entry.resource.text.div"></p>
+
+
+
+                                            </td>
                                             <td>
                                                 <div ng-hide="entry.isLogical" ng-switch on="entry.valid" ng-click="validate(entry)">    <!-- todo - not a real bundlemember-->
                                                     <div ng-switch-when="yes">

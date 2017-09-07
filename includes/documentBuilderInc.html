@@ -1,9 +1,9 @@
 <div>
-
+    <br/>
     <uib-tabset>
 
         <uib-tab heading="Sections">
-
+            <br/>
 
             <div class="row">
                 <div class="col-md-6 col-sm-6">
@@ -15,6 +15,7 @@
                             <div class="row" ng-mouseover="showMoveArrows = true" ng-mouseleave="showMoveArrows = false">
                                 <div class="col-md-9 col-sm-9" ng-click="selectSection(section)">
                                     {{section.title}}
+                                    <div>{{section.code.coding[0].code}}</div>
                                 </div>
                                 <div class="col-md-3 col-sm-3">
                                     <i class="glyphicon glyphicon-edit iconSpacing pull-right " ng-show="showMoveArrows"
@@ -184,17 +185,28 @@
 
 
 
-        </uib-tab>
+        </uib-tab>section
 
         -->
         <uib-tab heading="Generated text">
+            <br/>
             <div class="rounded-box"><p ng-bind-html="generatedHtml"></p></div>
         </uib-tab>
 
-        <uib-tab heading="Document">
+        <uib-tab heading="Document Bundle">
+            <br/>
            <button class="btn btn-link" ng-click="generateDocument()">Generate Document</button>
 
             <pre ng-show="generatedDocument">{{generatedDocument | json}}</pre>
+        </uib-tab>
+
+        <uib-tab heading="Tree view">
+            <br/>
+            <button class="btn btn-link" ng-click="generateDocTree()">Generate Tree</button>
+            <br/> <br/>
+
+            <div id="docTreeView"></div>
+
         </uib-tab>
 
     </uib-tabset>

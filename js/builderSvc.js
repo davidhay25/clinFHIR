@@ -1,5 +1,6 @@
 angular.module("sampleApp")
-    .service('builderSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities,$filter,supportSvc,SaveDataToServer) {
+    .service('builderSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities,$filter,supportSvc,
+                                    resourceCreatorSvc,SaveDataToServer) {
 
         var gAllReferences = []
         var gSD = {};   //a has of all SD's reas this session by type
@@ -58,58 +59,186 @@ angular.module("sampleApp")
         objColours.Medication = '#FF9900';
 
         return {
-            generateDocument : function(bundle) {
-                //move composition to top
-                return {doc:bundle};
+            makeDocumentTree : function(bundle) {
+                var tree = []
+                var hashByType = {};
+                var hashByRef = {};
+                var idRoot = 0;
+
+                bundle.entry.forEach(function (entry) {
+                    var resource = entry.resource;
+                    hashByType[resource.resourceType] = hashByType[resource.resourceType] || []
+                    hashByType[resource.resourceType].push(resource);
+                    hashByRef[resource.resourceType + "/" + resource.id] = resource;
+                })
+
+                var comp = getResource(hashByType,'Composition',false);
+                var patient = getResource(hashByType,'Patient',false);
+
+                var rootId = getId();
+                var rootItem = {id: rootId, parent: '#', text: 'Composition', state: {opened: true, selected: false}}
+                rootItem['a_attr'] = {class : 'resourceInDocTree'};
+                tree.push(rootItem);
+
+                //add all the resources referenced by the composition.
+                addResourceToRoot(comp, tree,'subject',rootId,hashByRef)
+
+
+
+
+                //add all the sections...
+
+                //first a section element...
+                var sectParentId = getId();
+                var item = {id: sectParentId, parent: rootId, text: 'Sections', state: {opened: true, selected: false}}
+
+                tree.push(item);
+
+                comp.section.forEach(function (sect) {
+                    //add the title
+                    var id = getId();
+                    var item = {id: id, parent: sectParentId, text: sect.title, state: {opened: true, selected: false}}
+                    tree.push(item);
+                    //now, add the resources that are directly refereced by the section...
+                    sect.entry.forEach(function (entry) {
+                        var sectId = getId();
+                        var sectItem = {id: sectId, parent: id, text: entry.reference, state: {opened: true, selected: false}}
+                        sectItem['a_attr'] = {class : 'resourceInDocTree'};
+                        tree.push(sectItem);
+                        //if it's a list, then display the resources they reference...
+                        if (entry.reference.indexOf('List') > -1) {
+                            var list = hashByRef[entry.reference];
+                            if (list) {
+                                list.entry.forEach(function (entry) {
+                                    var entryId = getId();
+                                    var entryItem = {id: entryId, parent: sectId, text: entry.item.reference, state: {opened: true, selected: false}}
+
+                                    //entryItem.data = {attributes : {class : 'rounded-box'}};
+                                    entryItem['a_attr'] = {class : 'resourceInDocTree'};
+                                   // entryItem['li_attr'] = {style : 'margin-bottom:8px'};
+                                    tree.push(entryItem);
+
+
+                                })
+
+                            }
+                        }
+
+
+                    })
+
+                })
+
+
+                return tree;
+
+
+                function addResourceToRoot(comp, tree,type,parentId,hashByRef) {
+                    var t = comp[type]
+                    if (t && t.reference) {
+                        var resource = hashByRef[t.reference];
+                        if (resource) {
+                            var id = getId();
+                            var item = {id: id, parent: parentId, text: t.reference, state: {opened: true, selected: false}}
+
+                            //entryItem.data = {attributes : {class : 'rounded-box'}};
+                            item['a_attr'] = {class : 'resourceInDocTree'};
+                            // entryItem['li_attr'] = {style : 'margin-bottom:8px'};
+                            tree.push(item);
+                        }
+                    }
+                }
+
+                function getResource(hash,type,multiple) {
+                    var ar = hash[type];
+                    if (multiple) {return ar;}
+                    return ar[0]
+                }
+
+                //generate a new ID for an element in the tree...
+                function getId() {
+                    idRoot++;
+                    return idRoot;
+
+                }
 
             },
-            makeResourceArrayDEP : function(treeData) {
-               // console.log(treeData)
-                var ar = []
-                ar.push({title:'title',value:'value'})
-           //     treeData.forEach(function (node) {
-                  //  var data = node.data;
-                   // var title = node.text
-          //      })
+
+            makeElementsPopulatedReport : function(bundle){
+                var hide=['resourceType','id','text','[1]','[2]','[3]'];
+                //var segmentsToRemove=['<strong>','</strong>','.[0]']
 
 
-                return ar
+                var report = []
+                bundle.entry.forEach(function(entry){
+                    var resource = entry.resource;
+                    var treeData = resourceCreatorSvc.buildResourceTree(resource);
+                    var item = {elements:[]}
+                    item.resourceType = treeData[0].text;       //first element is always the resource type
+                    treeData.forEach(function (line) {
+                        if (line.data && line.data.path) {
+                            var ar = line.data.path.split('.');
+                            var include = true;
+                            ar.forEach(function (segment) {
+                                if (hide.indexOf(segment) > -1) {
+                                    include = false;
+                                }
+                            });/*
+                            //remove entries I don't want in the display
+                            for (var i=0; i<ar.length;i++) {
+                                if (segmentsToRemove.indexOf(ar[i])>-1) {
+                                    ar.splice(i);
+                                    break;
+                                }
+                            }*/
+
+
+                            var text = line.text
+                            text = text.replace('<strong>','')
+                            text = text.replace('</strong>','')
+
+                           // var path = ed.path
+                            if (include) {
+                                var t = {path:ar.join('.'),text:text}
+                                item.elements.push(t)
+                            }
+
+                        }
+
+
+
+                    })
+                    report.push(item)
+
+
+
+
+                    //console.log(treeData);
+                })
+
+
+            return report;
+
+           },
+            generateDocument : function(bundle) {
+                //todo move composition to top
+                var newBundle = {resourceType:'Bundle', type:'document',entry:[]}
+                bundle.entry.forEach(function (entry) {
+                    var resource = entry.resource;
+                    if (resource.resourceType == 'Composition') {
+                        //composition goes first
+                        newBundle.entry.splice(0,0,{resource:resource})
+                    } else {
+                        newBundle.entry.push({resource:resource})
+                    }
+                });
+
+                return {doc:newBundle};
+
             },
             createProvenance : function(responseBundle,scenario,note) {
 
-                /*
-                var list = {resourceType:'List',status:'current',mode:'snapshot',entry:[]}
-                responseBundle.entry.forEach(function (ent,inx) {
-                    var res = ent.response;  //{eTag, lastModified, location, status}
-                    if (res.location.indexOf('Patient') > -1) {
-                        list.subject = {reference:res.location}
-                    }
 
-
-
-                    var entry = {item: {reference: res.location}};
-                    // Utilities.addExtensionOnce(item,provTargetUrl,{valueString:res.location});
-                    list.entry.push(entry)
-
-                });
-
-                return list;
-
-
-
-                var group = {resourceType:'Group',type:'person',actual:true,member:[]}
-                responseBundle.entry.forEach(function (ent,inx) {
-                    var res = ent.response;  //{eTag, lastModified, location, status}
-                    var item = {entity: {reference: res.location}};
-                    // Utilities.addExtensionOnce(item,provTargetUrl,{valueString:res.location});
-                    group.member.push(item)
-
-                });
-
-                return group;
-
-
-*/
 
                 //if there's no provenance resource, then add one that points to all the resources in the bundle
                 //>>>> just add one...
@@ -162,66 +291,11 @@ angular.module("sampleApp")
 
 
             },
-            addProvenanceDEP : function(container,note) {
-                //if there's no provenance resource, then add one that points to all the resources in the bundle
-                //>>>> just add one...
-                //var provExt = appConfigSvc.standardExtensionUrl().scenarioProvenance;
-                var provExt = appConfigSvc.config().standardExtensionUrl.scenarioProvenance;
-                var provNoteUrl = appConfigSvc.config().standardExtensionUrl.scenarioNote;
 
-                console.log(container)
-                var currentProvenanceInx;
-                var prov = {resourceType:'Provenance', target:[]}
-                prov.recorded = moment().toISOString();
-                prov.id = 'cf-'+new Date().getTime();
-
-                //mark that this provenance is being used to track the contents of a scenario
-                Utilities.addExtensionOnce(prov,provExt,{valueString:container.name});
-
-                if (note) {
-                    //mark that this provenance is being used to track the contents of a scenario
-                    Utilities.addExtensionOnce(prov,provNoteUrl,{valueString:note});
-                }
-
-
-
-                //build a provenance resource pointing to all the resources in the bundle...
-                container.bundle.entry.forEach(function (ent,inx) {
-                    var res = ent.resource;
-
-                    if (res.resourceType == 'Provenance') {
-
-                        //is this the provenance used to track a scenario?
-                        var ext = Utilities.getSingleExtensionValue(res,provExt);
-                        if (ext) {
-                            //yep - it will be removed
-                            currentProvenanceInx = inx
-                        }
-
-                    } else {
-                        //don't create a reference to a provenance resource...
-                        var ref = res.resourceType + "/" + res.id;
-                        prov.target.push({reference: ref})
-                    }
-
-
-                })
-
-                return prov;
-
-                /*
-                 if (currentProvenanceInx) {
-                 container.bundle.entry.slice(currentProvenanceInx,1)
-                 }
-
-                 container.bundle.entry.push({resource:prov});
-
-                 */
-            },
             updateMostRecentVersion : function(container,bundle) {
                 //when editing - make sure the most current history is updated as well...
                 if (!container.history) {       //when migrating from existing scenarios...
-                    container.history = []
+                    container.history = [];
                     container.index = 0;
                 }
 
@@ -336,7 +410,10 @@ angular.module("sampleApp")
                 $http.get(url).then(
                     function(data){
                         deferred.resolve(data.data)
+                    },function(err) {
+                        deferred.reject();
                     }
+
                 );
                 return deferred.promise;
 
