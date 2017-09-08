@@ -226,8 +226,11 @@ angular.module("sampleApp")
                     display = resource.text.div
                 }
 
-                $scope.currentSection.entry.push({reference:reference.reference,
-                    display: display})
+                var ent = {reference:reference.reference};
+                if (display) {
+                    ent.display = display
+                }
+                $scope.currentSection.entry.push(ent)
 
                 $rootScope.$emit('docUpdated',$scope.compositionResource);      //generates the graph
 
