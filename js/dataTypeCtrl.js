@@ -4,6 +4,7 @@ angular.module("sampleApp").controller('dataTypeCtrl',
         $scope.results = {timing:{}}
 
 
+
         $scope.routeCodes = {id:'route-codes'}
 
         //$scope.input.dt has already been set by the parent controller

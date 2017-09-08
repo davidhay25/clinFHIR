@@ -1,6 +1,21 @@
 <div ng-controller="dataTypeCtrl">
 
 
+
+    <div ng-show="dataTypeBeingEntered == 'instant'">
+        <div class="row">
+            <div class="col-md-7  col-sm-7 col-centered">
+                <div uib-datepicker ng-model="input.dt.instant" class="well well-sm"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div ng-show="dataTypeBeingEntered == 'Attachment'">
+        <input placeholder = 'Enter title' type="text" class="form-control" ng-model="input.dt.attachment.title"/>
+    </div>
+
+
     <div ng-show="dataTypeBeingEntered == 'Quantity'">
 
 

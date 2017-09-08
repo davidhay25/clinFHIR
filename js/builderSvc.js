@@ -519,7 +519,7 @@ angular.module("sampleApp")
                 bundle.entry.forEach(function(entry){
 
                     if (entry.isLogical) {
-                        console.log('Ignoring Logical Model: '+resource.resourceType)
+                       // console.log('Ignoring Logical Model: '+resource.resourceType)
                     } else {
                         queries.push(
                             Utilities.validate(entry.resource).then(
@@ -1304,6 +1304,18 @@ angular.module("sampleApp")
                 var valueSaved;     //needed for tracking;
 
                 switch (dt) {
+                    case 'instant' :
+                        //value is a Date object...
+                        var v = moment(value.date).format();
+                        simpleInsert(insertPoint,info,path,v,dt);
+                        this.addStringToText(insertPoint,path+": "+ v)
+                        break;
+                    case 'Attachment' :
+                        var insrt = {title:value.attachment.title}
+                        simpleInsert(insertPoint,info,path,insrt,dt);
+                        this.addStringToText(insertPoint,path+": "+ insrt.title)
+                        break;
+
                     case 'Quantity' :
 
                         var v = parseFloat(value.quantity.value)
