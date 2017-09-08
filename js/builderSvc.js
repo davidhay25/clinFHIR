@@ -487,10 +487,10 @@ angular.module("sampleApp")
                         //the response contains the location where all resources were stored. Create a provenance resource...
 
 
-                        console.log(data.data)
+                        //console.log(data.data)
 
                         var prov = that.createProvenance(data.data,container.name,note)
-                        console.log(prov);
+                  //      console.log(prov);
                         SaveDataToServer.saveResource(prov).then(
                             function(data) {
                                 deferred.resolve()
@@ -500,13 +500,6 @@ angular.module("sampleApp")
                                 deferred.resolve();
                             }
                         )
-
-
-
-
-
-
-
                     },
                     function(err) {
                         alert(angular.toJson(err));
@@ -848,49 +841,38 @@ angular.module("sampleApp")
                         if (resource.resourceType == 'List') {
                             //get the text from all of the references resoruces...
                             var manual = that.splitNarrative(resource.text.div).manual;  //manually entered text
-                            var generated = "";     //will replace the genereated text...
-
-
-                            //resource.text.div = $filter('addTextDiv')(result.userText + builderSvc.getManualMarker() + vo.generated);
+                            var generated = "";     //will replace the generated text...
 
                             if (resource.entry) {
                                 resource.entry.forEach(function(entry){
-                                    //var ref = entry.item.reference;
+
                                     var refResource = that.resourceFromReference(entry.item.reference);
                                     if (refResource) {
-                                        html += refResource.text.div;
-                                        //add the text of the referenced element to the list...
-                                        //var raw = $filter('cleanTextDiv')(refResource.text.div)
+
+                                        //remove the div as we are concatenating strings here
+                                        //$filter('getLogicalID')(profileUrl);
+
+                                        html +=   $filter('cleanTextDiv')(refResource.text.div)+ " ";
 
                                         //we only want the manually entered text...
                                         generated += that.splitNarrative(refResource.text.div).manual;  //manually entered text
-                                        //generated +=  $filter('cleanTextDiv')(refResource.text.div);
 
                                     }
-
                                 })
                             }
 
-                            //var t = resource.text.div;
-
                             resource.text.div = that.addGeneratedText(manual,generated);
 
-
-
-
-
-
                         } else {
+                            //html += resource.text.div
+                            html +=  $filter('cleanTextDiv')(resource.text.div) + " ";
                             html += resource.text.div
                         }
-
-
                     }
+                });
 
-
-                })
-
-                section.text = html;
+                var div = $filter('addTextDiv')(html)
+                section.text = {div:div,status:'generated'} ;
                 return html;
 
 

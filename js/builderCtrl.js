@@ -80,7 +80,7 @@ angular.module("sampleApp")
                 console.log(report);
             };
 
-            $scope.generateDocument = function(){
+            $scope.generateDocumentDEP = function(){
                 var doc = builderSvc.generateDocument($scope.selectedContainer.bundle).doc
                 $scope.generatedDocument = doc;
                 var binary = {resourceType:'Binary'};
@@ -675,7 +675,7 @@ angular.module("sampleApp")
                 var bundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
 
 
-                var note = window.prompt("Enter a note about this update");
+                var note = window.prompt("Enter a note about this update (This will be saved in a Provenance resource)");
 
                 //builderSvc.addProvenance(container,note);    //add a provenance resource to the bundle
 
@@ -695,7 +695,6 @@ angular.module("sampleApp")
                             function (){
                                 saveX(bundle)
                             })
-
 
                     } else {
                         saveX(bundle)

@@ -220,7 +220,7 @@ angular.module("sampleApp")
             $scope.addResourceToSection = function(reference) {
                 //add the resource to this section and remove from the 'potentials' list
 
-                var display = ""
+                var display = "";
                 var resource = builderSvc.resourceFromReference(reference);
                 if (resource) {
                     display = resource.text.div
@@ -228,8 +228,6 @@ angular.module("sampleApp")
 
                 $scope.currentSection.entry.push({reference:reference.reference,
                     display: display})
-
-
 
                 $rootScope.$emit('docUpdated',$scope.compositionResource);      //generates the graph
 
@@ -241,10 +239,7 @@ angular.module("sampleApp")
                     }
                 }
 
-                // removeStringFromArray($scope.resourcesNotInThisSection,reference);   //remove from the 'not in section' array...
-
                 //These are all scope variables from the parent controller...
-                //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
                 $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedContainer.bundle)
 
             };
@@ -252,8 +247,6 @@ angular.module("sampleApp")
 
             $scope.removeReferenceFromSection = function(index) {
                 var reference = $scope.currentSection.entry.splice(index,1);
-
-
                 var display = "";
 
                 var resource = builderSvc.resourceFromReference(reference[0].reference);

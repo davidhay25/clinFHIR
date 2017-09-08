@@ -13,11 +13,11 @@
                             ng-repeat="section in compositionResource.section">
 
                             <div class="row" ng-mouseover="showMoveArrows = true" ng-mouseleave="showMoveArrows = false">
-                                <div class="col-md-9 col-sm-9" ng-click="selectSection(section)">
+                                <div class="col-md-8 col-sm-8" ng-click="selectSection(section)">
                                     {{section.title}}
                                     <div>{{section.code.coding[0].code}}</div>
                                 </div>
-                                <div class="col-md-3 col-sm-3">
+                                <div class="col-md-4 col-sm-4">
                                     <i class="glyphicon glyphicon-edit iconSpacing pull-right " ng-show="showMoveArrows"
                                        title="Edit text"
                                        ng-click="editSection(section)" style="cursor: pointer">
@@ -49,16 +49,8 @@
 
                                 </div>
                             </div>
-
-
-
-
-
-
                         </li>
                     </ul>
-
-
 
                     <div>
                         <button class="btn btn-link pull-right" ng-click="editSection()">Add Section</button>
@@ -82,7 +74,7 @@
                                         <span popover-trigger="'mouseenter'"
                                               uib-popover-html = "entry.reference | resourceTextFromReference"
                                               ng-click = "selectResourceFromSection(entry.reference)">
-                                            <!--{{entry.reference}}-->
+
 
                                             <p ng-bind-html="entry.reference | resourceTextFromReference"></p>
                                             <!--
@@ -138,7 +130,7 @@
                                     <div class="col-md-10 col-sm-10">
                                         <span popover-trigger="'mouseenter'" uib-popover-html = "reference.reference + '<br/>' + reference.display"
                                               ng-click = "selectResourceFromSection(reference.reference)">
-                                            <!--{{reference.reference}}-->
+
 
                                         <p ng-bind-html="reference.reference | resourceTextFromReference  "></p>
 

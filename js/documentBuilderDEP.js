@@ -1,4 +1,4 @@
-angular.module("sampleApp").controller('documentBuilderCtrl',
+angular.module("sampleApp").controller('documentBuilderCtrlDEP',
     function ($scope,$rootScope, $http,ResourceUtilsSvc,$uibModal,appConfigSvc,$localStorage,$window) {
 
         $scope.ResourceUtilsSvc = ResourceUtilsSvc;
@@ -281,19 +281,12 @@ angular.module("sampleApp").controller('documentBuilderCtrl',
 
 
                 if (section.emptyReason) {
-                    //if the section is marked as empty, then create a section with the reason...
-                    //var compSection = {};       //the section element in the composition
                     comp.section.push(compSection);     //add to the composition
-                   // compSection.title = section.display;
-                    //compSection.code = {coding:[{code:section.code}]};
                     compSection.emptyReason = {coding:[{code:section.emptyReason,system:"http://hl7.org/fhir/ValueSet/list-empty-reason"}]}
                 } else if (section.resources && section.resources.length > 0) {
 
-                    //var compSection = {};       //the section element in the composition
+
                     comp.section.push(compSection);     //add to the composition
-                    //compSection.title = section.display;
-                 //   compSection.code = {coding:[{code:section.sectionCode}]};
-                   // compSection.entry = [];
                     compSection.entry = compSection.entry || [];
                     section.resources.forEach(function(res){
                         addToBundle(res);       //add the resource to the bundle
