@@ -59,6 +59,35 @@ angular.module("sampleApp")
         objColours.Medication = '#FF9900';
 
         return {
+            makeDisplayBundle : function(bundle) {
+                //remove extensions (track validation & stuff) todo = will likely need to be more granular in teh future...
+
+                var newBundle = {resourceType:'Bundle',id:bundle.id,type: bundle.type,entry:[]}
+                if (bundle && bundle.entry) {
+                    bundle.entry.forEach(function(entry){
+                        var resource = entry.resource;
+                        if (resource.extension && resource.extension.length == 0) {
+                            delete resource.extension;
+                        }
+
+                        if (resource.resourceType == 'Composition') {
+                            //composition goes first
+                            newBundle.entry.splice(0,0,{resource:resource})
+                            newBundle.type = 'document'
+                        } else if (resource.resourceType == 'MessageHeader') {
+                            //composition goes first
+                            newBundle.entry.splice(0,0,{resource:resource})
+                            newBundle.type = 'message'
+                        } else {
+                            newBundle.entry.push({resource:resource})
+                        }
+
+                        //response.entry.push({resource:resource})
+                    })
+
+                }
+                return newBundle;
+            },
             makeDocumentTree : function(bundle) {
                 var tree = []
                 var hashByType = {};
@@ -463,12 +492,14 @@ angular.module("sampleApp")
                 );
                 return deferred.promise;
             },
+
             sendToFHIRServer : function(container,note) {
                 //create a new bundle to submit as a transaction. excludes logical models
                 var that=this;
-                var bundle = container.bundle;
+                var bundle = this.makeDisplayBundle(container.bundle);      //does things like make it a correce document..
                 var deferred = $q.defer();
                 var transBundle = {resourceType:'Bundle',type:'transaction',entry:[]}
+                transBundle.id = bundle.id;     //needed when saving against /Bundle
                 bundle.entry.forEach(function(entry) {
 
                     if (entry.isLogical) {
@@ -484,32 +515,50 @@ angular.module("sampleApp")
 
                 $http.post(url,transBundle).then(
                     function(data) {
+
+                        var responseBundle = data.data;
+                        //save the bundle directly against the /Bundle endpoint. Use the original bundle...
+                        //transBundle.type = bundle.type;     //set the bundle type
+                        SaveDataToServer.saveResource(bundle).then(
+                            function(data){
+                                //saveProvenance will resolve the promise...
+                                saveProvenance(responseBundle,container.name,note,deferred)
+
+
+                            },function (err) {
+                                //??? add error status
+                                alert('error saving bundle ' + angular.toJson(err))
+                                saveProvenance(responseBundle,container.name,note,deferred);
+                            }
+                        );
+
+
                         //the response contains the location where all resources were stored. Create a provenance resource...
 
-
-                        //console.log(data.data)
-
-                        var prov = that.createProvenance(data.data,container.name,note)
-                  //      console.log(prov);
-                        SaveDataToServer.saveResource(prov).then(
-                            function(data) {
-                                deferred.resolve()
-                            },
-                            function(err) {
-                                alert(angular.toJson(err));
-                                deferred.resolve();
-                            }
-                        )
                     },
                     function(err) {
                         alert(angular.toJson(err));
                     }
-                )
-
-
-             //   deferred.resolve()
+                );
 
                 return deferred.promise
+
+                //save the provenence resource and resolve the promise. Note that we resolve anyway
+                //?? todo what to do if the provenance save fails??
+                function saveProvenance(data,name,note,deferred) {
+                    var prov = that.createProvenance(data,name,note);
+                    SaveDataToServer.saveResource(prov).then(
+                        function(data) {
+                            deferred.resolve()
+                        },
+                        function(err) {
+                            alert('error saving provenance ' + angular.toJson(err))
+
+                            deferred.resolve();
+                        }
+                    )
+                }
+
 
             },
             validateAll : function(bundle) {
