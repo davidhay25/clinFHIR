@@ -503,8 +503,19 @@ angular.module("sampleApp")
                 bundle.entry.forEach(function(entry) {
 
                     if (entry.isLogical) {
-                        console.log('Ignoring Logical Model: ' + resource.resourceType)
+                        console.log('Ignoring Logical Model: ' + entry.resource.resourceType)
                     } else {
+
+                        if (entry.resource.resourceType == 'DocumentReference') {
+                            //need to set the attackent uri to the location of the bundle...
+                            var bundleUrl = appConfigSvc.getCurrentDataServer().url + 'Bundle/'+bundle.id;
+                            var resource = entry.resource;
+                            if (resource.content) {
+                                resource.content[0].attachment.url=bundleUrl;
+                            }
+
+                        }
+
                         var transEntry = {resource:entry.resource};
                         transEntry.request = {method:'PUT',url:entry.resource.resourceType+'/'+entry.resource.id}
                         transBundle.entry.push(transEntry)
@@ -513,10 +524,13 @@ angular.module("sampleApp")
 
                 var url = appConfigSvc.getCurrentDataServer().url;
 
+
                 $http.post(url,transBundle).then(
                     function(data) {
 
                         var responseBundle = data.data;
+
+
                         //save the bundle directly against the /Bundle endpoint. Use the original bundle...
                         //transBundle.type = bundle.type;     //set the bundle type
                         SaveDataToServer.saveResource(bundle).then(

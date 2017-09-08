@@ -22,6 +22,34 @@ angular.module("sampleApp")
             });
 
 
+            //load a bundle (used by the document function)
+            $scope.loadBundle = function() {
+
+            }
+
+            $scope.selectDocument = function(resource) {
+
+                $scope.documentReference = resource;
+
+                $scope.docAttachments = []
+                resource.content.forEach(function (con) {
+                    var url = con.attachment.url;      //assume a complete url
+                    if (url) {
+                        GetDataFromServer.adHocFHIRQuery(url).then(
+                            function(data) {
+                                var attachment = data.data;     //the resource returned by the call...
+                                $scope.docAttachments.push(attachment);
+                            }
+                        )
+                    }
+
+
+                })
+
+
+
+            };
+
             //==== for fhirpath ===
 
             $scope.selectFPResource = function(resource){
@@ -37,7 +65,7 @@ angular.module("sampleApp")
             //======== document functions
 
             //display the docment graph. Only works for one document per patient
-            $scope.selectDocument = function(composition) {
+            $scope.selectCCDADocument = function(composition) {
                 console.log(composition);
 
                 //work on copies
@@ -182,17 +210,16 @@ angular.module("sampleApp")
                             appConfigSvc.setCurrentPatient(resource)
 
                              supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
-                             //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
+                                //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
                                 function(data){
-                                    //$scope.resourcesFromServer = data;
+
+                                    $scope.documentReferenceList = data.DocumentReference.entry;
 
                                     renderPatientDetails(data)
-
-
                                     $scope.$broadcast('patientObservations',data['Observation']);//used to draw the observation charts...
 
 
-                                    console.log(data);
+                                    //console.log(data);
                                  },
                                  function(err){
                                     console.log(err)
@@ -209,8 +236,6 @@ angular.module("sampleApp")
                 $scope.hasVitals = false;
                 delete $scope.vitalsTable;
                 delete $scope.outcome.selectedResource;
-
-
 
                 //the order is significant - allResources must be set first...
                 appConfigSvc.setAllResources(allResources);

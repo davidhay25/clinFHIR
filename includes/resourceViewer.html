@@ -29,8 +29,6 @@
 
             <div class="col-md-10 col-sm-10">
 
-
-
                 <div class="row">
                     <div class="col-md-4 col-sm-4">
 
@@ -46,9 +44,6 @@
                         </div>
                     </div>
                     <div class="col-md-8 col-sm-8">
-
-
-
 
                         <div ng-show="outcome.selectedResource">
 
@@ -511,14 +506,59 @@
     </uib-tab>
 
 
+
     <uib-tab heading="Documents">
+
+        <div class="row">
+
+            <div class="col-md-2 col-sm-2">
+                <h4>Documents</h4>
+                <div class="list-group">
+                    <a href="#"  ng-click="selectDocument(entry.resource)"
+                       ng-class="{'list-group-item':true,'active':documentReference.id == entry.resource.id}"
+                       ng-repeat="entry in documentReferenceList">
+                        {{entry.resource.type.text}}
+                    </a>
+                </div>
+
+                <!-- Show the vitals if there are any observations
+                <div class="list-group">
+                    <a ng-show="hasVitals" href="#" class="list-group-item" ng-click="getVitals()">Vitals</a>
+                </div>-->
+            </div>
+
+            <div class="col-md-10 col-sm-10">
+                <uib-tabset>
+                    <uib-tab heading="DocumentReference Json">
+                        <pre>{{documentReference | json}}</pre>
+                    </uib-tab>
+
+                    <uib-tab heading="Document">
+
+                        <div ng-repeat="doc in docAttachments">
+                            <pre>{{doc | json}}</pre>
+                        </div>
+
+                    </uib-tab>
+                </uib-tabset>
+
+
+            </div>
+        </div>
+
+
+
+
+    </uib-tab>
+
+    <uib-tab heading="CCDA-migrated Documents">
 
 
         <br/>
         <div class="row">
             <div class="col-md-2 col-sm-2">
                 <div class="list-group">
-                    <a href="#"  ng-click="selectDocument(entry.resource)"
+                    <a href="#"  ng-click="selectCCDADocument(entry.resource)"
                        ng-class="{'list-group-item':true,'active':entry.resource.id == currentComposition.id}"
                        ng-repeat="entry in allResources.Composition.entry">
                         {{entry.resource.type.coding[0].display}}
