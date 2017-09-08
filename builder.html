@@ -9,6 +9,7 @@
     <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
 
     <script src="js/libs/moment.min.js"></script>
+    <script src="js/libs/lodash.core.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
     <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
@@ -91,6 +92,12 @@
             $locationProvider.hashPrefix('!');
         });
         angular.module("sampleApp").constant("moment", moment);
+
+        angular.module("sampleApp").config(['$compileProvider', function ($compileProvider) {
+            $compileProvider.aHrefSanitizationWhitelist(/^\s*(|blob|):/);
+        }]);
+
+
 
     </script>
     <script src="js/builderCtrl.js"></script>
@@ -626,29 +633,6 @@
 
                                     </div>
 
-                                    <!-- <div ng-repeat="res in populatedReport">
-                                        <div class="row">
-                                            <div class="col-md-3 col-sm-3">
-                                                {{res.resourceType}}
-                                            </div>
-                                            <div class="col-md-9 col-sm-9">
-                                                <div class="row" ng-repeat="ele in res.elements">
-                                                    <div class="col-md-6 col-sm-6">
-                                                        {{ele.path}}
-                                                    </div>
-                                                    <div class="col-md-6 col-sm-6">
-                                                        {{ele.text}}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-
-                                    </div>-->
-
-
-
-
 
                                     <table class="table table-bordered table-condensed">
                                         <tr><th>Type</th><th>Text</th><th>Valid</th></tr>
@@ -715,24 +699,7 @@
                         </uib-tab>
 
 
-                        <uib-tab heading="FHIRPath">
-                            <br/>
 
-                            <fhirpath resource="selectedContainer.bundle"></fhirpath>
-                            <hr/>
-                            <pre>{{selectedContainer.bundle | json}}</pre>
-                            <!--
-                            <div class="row">
-                                <div class="col-md-6 col-sm-6">
-                                    <pre>{{selectedContainer.bundle | json}}</pre>
-                                </div>
-                                <div class="col-md-6 col-sm-6">
-                                    <fhirpath resource="selectedContainer.bundle"></fhirpath>
-                                </div>
-                            </div>
-                            -->
-
-                        </uib-tab>
 
                         <uib-tab heading="Description">
                             <br/>
@@ -741,15 +708,6 @@
                                 <uib-tab heading = "Summary">
 
                                     <br/>
-
-                                    <!-- temp
-                                    <div>
-                                        <a class=" rounded-box pull-right" ng-show="downloadLinkJsonContent" download="{{downloadLinkJsonName}}.json"
-                                           href="{{downloadLinkJsonContent}}"> Download scenario
-                                        </a>
-
-                                    </div>
-                                    -->
 
                                     <form class="form-horizontal" role="form">
 
@@ -918,19 +876,22 @@
 
                                 </uib-tab>
 
-                                <uib-tab heading = "Json">
-                                    <div>
-                                        <a class=" rounded-box pull-right" ng-show="downloadLinkJsonContent" download="{{downloadLinkJsonName}}.json"
-                                           href="{{downloadLinkJsonContent}}"> Download scenario
-                                        </a>
+                                <uib-tab heading = "Bundle Json">
+                                    <br/>
+                                    <div  class="clearfix">
+                                    <em>All the resources in the scenario as a bundle</em>
+
+                                        <button class="btn btn-link pull-right" ng-click="downloadBundle()">Download</button>
 
                                     </div>
-                                    <pre>{{selectedContainer.bundle | bundleDisplay | json}}</pre>
+                                    <pre>{{getBundleDisplay(selectedContainer.bundle)  | json}}</pre>
+                                    <!-- <pre>{{selectedContainer.bundle | bundleDisplay | json}}</pre>-->
                                 </uib-tab>
 
 
 
-                                <uib-tab heading = "JsonContainer">
+                                <uib-tab heading = "Container Json">
+                                    <br/>
                                     <div>
                                         <a class=" rounded-box pull-right" ng-show="downloadLinkJsonContent" download="{{downloadLinkJsonName}}.json"
                                            href="{{downloadLinkJsonContent}}"> Download scenario
@@ -955,7 +916,7 @@
                                            ng-click="showAllInGraph()">Show All</span>
 
                                     <span class="clickable iconSpacing pull-right"
-                                          ng-click="hidePatient()">Hide Patient</span>
+                                          ng-hide="hidePatientFlag" ng-click="hidePatient()">Hide Patient</span>
 
 
                                     <span class="clickable iconSpacing pull-right"
@@ -976,6 +937,14 @@
                             </div>
                         </uib-tab>
 
+                        <uib-tab heading="FHIRPath">
+                            <br/>
+
+                            <fhirpath resource="selectedContainer.bundle"></fhirpath>
+                            <hr/>
+                            <pre>{{selectedContainer.bundle | json}}</pre>
+
+                        </uib-tab>
 
                         <uib-tab heading="Mark">
                             <br/>

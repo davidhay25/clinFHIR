@@ -73,7 +73,12 @@ angular.module("sampleApp")
                 })
 
                 var comp = getResource(hashByType,'Composition',false);
-                var patient = getResource(hashByType,'Patient',false);
+                if (! comp) {
+                    alert('No Composition');    //shouldn't ever get this
+                    return;
+                }
+                //var patient = getResource(hashByType,'Patient',false);
+
 
                 var rootId = getId();
                 var rootItem = {id: rootId, parent: '#', text: 'Composition', state: {opened: true, selected: false}}
@@ -83,9 +88,6 @@ angular.module("sampleApp")
 
                 //add all the resources referenced by the composition.
                 addResourceToRoot(comp, tree,'subject',rootId,hashByRef)
-
-
-
 
                 //add all the sections...
 
@@ -159,7 +161,12 @@ angular.module("sampleApp")
                 function getResource(hash,type,multiple) {
                     var ar = hash[type];
                     if (multiple) {return ar;}
-                    return ar[0]
+                    if (ar) {
+                        return ar[0]
+                    } else {
+                        return null;
+                    }
+
                 }
 
                 //generate a new ID for an element in the tree...
@@ -227,7 +234,7 @@ angular.module("sampleApp")
             return report;
 
            },
-            generateDocument : function(bundle) {
+            generateDocumentDEP : function(bundle) {
                 //todo move composition to top
                 var newBundle = {resourceType:'Bundle', type:'document',entry:[]}
                 bundle.entry.forEach(function (entry) {

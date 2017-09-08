@@ -77,7 +77,6 @@ angular.module("sampleApp")
 
 
 
-
             $scope.editSection = function(section) {
                 var editing = false;
                 if (section) {
@@ -86,11 +85,18 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editSection.html',
                     //size: 'lg',
-                    controller: function($scope,inSection,sectionCodes){
+                    controller: function($scope,inSection,sectionCodes,appConfigSvc){
                         inSection = inSection || {}
                         $scope.input = {};
                         $scope.mode="New";
                         $scope.sectionCodes = sectionCodes;
+
+                        if (! sectionCodes) {
+                            $scope.message = "The Valueset 'http://hl7.org/fhir/ValueSet/doc-section-codes' " +
+                                "(which holds the list of section codes) was not found on the Terminology server" +
+                                " ("+ appConfigSvc.getCurrentConformanceServer().name + "). " +
+                                "You can enter text for a section, but not a code."
+                        }
 
                         if (inSection) {
                             $scope.input.title = inSection.title;
@@ -185,7 +191,7 @@ angular.module("sampleApp")
                         $scope.compositionResource.section.splice(inx,1);
                     }
                 )
-                
+
             };
 
 
@@ -206,13 +212,9 @@ angular.module("sampleApp")
                 $rootScope.$emit('docUpdated',$scope.compositionResource);
 
                 //These are all scope variables from the parent controller...
-                //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
                 $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedContainer.bundle)
             }
 
-            $scope.initializeDocumentDEP = function() {
-                $scope.docInit = true;
-            };
 
 
             $scope.addResourceToSection = function(reference) {

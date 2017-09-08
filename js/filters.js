@@ -269,13 +269,19 @@ angular.module("sampleApp")
     return function(text) {
         return text;
     }
-    }).filter('bundleDisplay',function(){
+    }).filter('bundleDisplayDEP',function(){
         //return a display version of the bundle
         return function(bundle) {
+            //is this a message or a document?
+
+            var msg = findResourceType(bundle,'MessageHeader')
+
+            console.log(msg)
+
             var response = {resourceType:'Bundle',entry:[]}
             if (bundle && bundle.entry) {
                 bundle.entry.forEach(function(entry){
-                    var resource =entry.resource;
+                    var resource = entry.resource;
                     if (resource.extension && resource.extension.length == 0) {
                         delete resource.extension;
                     }
@@ -284,6 +290,13 @@ angular.module("sampleApp")
 
             }
             return response;
+
+            function findResourceType(b,type) {
+                return _.find(bundle.entry,function(o){
+                    return o.resource.resourceType==type;
+                });
+            }
+
         }
     }).filter('containerMeta',function(){
     //return the metadata in the container

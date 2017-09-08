@@ -3544,9 +3544,18 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     if (key == 'div') {
 
                     } else {
+
+                        //console.log(key,element)
+                        //http://itsolutionstuff.com/post/angularjs-how-to-remove-html-tags-using-filterexample.html
+                        //strip out the html tags...
+                        if (element.indexOf('xmlns=')>-1) {
+                            element = element.replace(/<[^>]+>/gm, ' ')
+                        }
+
+
                         var display = key + " " + '<strong>' + element + '</strong>';
                         var data = {key:key, element:element,level:level,path:pathRoot+'.'+key}
-                        data.element = element;
+                        //data.element = element;
                         var newNode = {
                             id: getId(),
                             parent: parentId,

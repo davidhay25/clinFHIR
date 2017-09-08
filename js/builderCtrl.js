@@ -15,6 +15,40 @@ angular.module("sampleApp")
             GetDataFromServer.registerAccess('scnBld');
 
 
+            $scope.getBundleDisplay = function(bundle) {
+
+                //remove extensions (track validation & stuff) todo = will likely need to be more granular in teh future...
+                var newBundle = {resourceType:'Bundle',type: 'batch',entry:[]}
+                if (bundle && bundle.entry) {
+                    bundle.entry.forEach(function(entry){
+                        var resource = entry.resource;
+                        if (resource.extension && resource.extension.length == 0) {
+                            delete resource.extension;
+                        }
+
+                        if (resource.resourceType == 'Composition') {
+                            //composition goes first
+                            newBundle.entry.splice(0,0,{resource:resource})
+                            newBundle.type = 'document'
+                        } else if (resource.resourceType == 'MessageHeader') {
+                            //composition goes first
+                            newBundle.entry.splice(0,0,{resource:resource})
+                            newBundle.type = 'message'
+                        } else {
+                            newBundle.entry.push({resource:resource})
+                        }
+
+                        //response.entry.push({resource:resource})
+                    })
+
+                }
+
+                //$scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(newBundle, true)], {type: "text/text"}));
+               // $scope.downloadLinkJsonName = 'ScenarioBuilder bundle';
+
+                return newBundle;
+            }
+
             $scope.generateDocTree = function(){
                 var treeData = builderSvc.makeDocumentTree($scope.selectedContainer.bundle)
                 $('#docTreeView').jstree('destroy');
@@ -563,9 +597,43 @@ angular.module("sampleApp")
 
 
 
-            function createDownLoad(container){
-                $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(container.bundle, true)], {type: "text/text"}));
-                $scope.downloadLinkJsonName = 'Scenario'; //container.name;
+            $scope.downloadBundle = function(){
+
+
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/downLoad.html',
+                    size:'lg',
+                    controller: function($scope,resource,notes,fileName) {
+                        $scope.notes = notes;
+                        $scope.resource = resource;
+                        $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(resource, true)],
+                            {type: "text/text"}));
+                        $scope.downloadLinkJsonName = fileName;
+                        $scope.downloadLinkJsonName = $scope.downloadLinkJsonName || resource.url;
+
+                        $scope.downloadClicked = function(){
+                            $scope.$close();
+                        }
+
+                    },
+                    resolve : {
+                        resource : function () {
+                            return $scope.getBundleDisplay($scope.selectedContainer.bundle);
+                        },
+                        notes : function () {
+                            return "";
+                        },
+                        fileName : function () {
+                            return "SB";
+                        }
+                    }
+
+                })
+
+
+
+                //$scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(container.bundle, true)], {type: "text/text"}));
+                //$scope.downloadLinkJsonName = 'Scenario'; //container.name;
             }
 
             //note that the way we are recording validation is a non-compliant bundle...
@@ -1085,6 +1153,7 @@ angular.module("sampleApp")
 
             //select a bundle from the local list
             $scope.selectBundle = function(inx){
+                delete $scope.hidePatientFlag;          //flag to hide the patient resource...
                 delete $scope.resourcesFromServer;
                 delete $scope.markResult;
                 delete $scope.input.renameScenario;
@@ -1096,7 +1165,7 @@ angular.module("sampleApp")
 
                 builderSvc.setMostRecentVersionActive( $scope.selectedContainer);
 
-                createDownLoad($scope.selectedContainer)
+                //createDownLoad($scope.selectedContainer)
 
                 builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
                 $scope.currentPatient = builderSvc.getPatientResource();
@@ -1393,21 +1462,33 @@ angular.module("sampleApp")
 
             };
 
+            //hide resources that aren't attached to the current resource
             $scope.hideOthers = function() {
+                delete $scope.hidePatientFlag;
                 makeGraph($scope.currentResource)
-            }
+            };
 
+            //show all resources
             $scope.showAllInGraph = function(){
+                delete $scope.hidePatientFlag;
                 makeGraph()
-            }
+            };
 
+            //hide the patient
             $scope.hidePatient = function() {
+                $scope.hidePatientFlag = true;
                 makeGraph($scope.currentPatient,true)
 
-            }
+            };
 
             //generate the graph of resources and references between them
             makeGraph = function(centralResource,hideMe) {
+
+                //save the previous state of hideMe. Not the most elegant, I must admit...
+                hideMe = $scope.hidePatientFlag;
+                if (hideMe) {
+                    centralResource = $scope.currentPatient;
+                }
 
                 var showText = true;
 
@@ -1751,7 +1832,7 @@ angular.module("sampleApp")
                                             var type = $filter('getLogicalID')(targetProfile);
 
 
-                                            console.log('getting resources of type '+targetProfile)
+
 
 
                                             var ar = builderSvc.getResourcesOfType(type,$scope.selectedContainer.bundle);
@@ -1926,7 +2007,6 @@ angular.module("sampleApp")
                 //update the tracker...
                 var details = {path:pth,resourceType: $scope.currentResource.resourceType,
                     to:{resourceType:resource.resourceType,id:resource.id},ip:insertPoint};
-
                 sbHistorySvc.addItem('link',$scope.currentResource.id,true,details,$scope.selectedContainer);
 
                 makeGraph();    //this will update the list of all paths in this model...
@@ -1950,7 +2030,6 @@ angular.module("sampleApp")
 
                 if (pos > -1) {
                     $scope.hashReferences[type].splice(pos,1);
-                    // if ()
                 }
 
 
@@ -1967,8 +2046,31 @@ angular.module("sampleApp")
                         $scope.displayMode = 'view';
                         return;
                     }
+                    //make sure there isn't a messageHeader
+
+                    var mh = _.find($scope.selectedContainer.bundle.entry,function(o){
+                        return o.resource.resourceType=='MessageHeader';
+                    });
+
+                    if (mh) {
+                        modalService.showModal({}, {bodyText:'There is already a MessageHeader in this set - Composition is not allowed.'});
+                        $scope.displayMode = 'view';
+                        return;
+                    }
+
+                } else  if (type == 'MessageHeader') {
+                    var mh = _.find($scope.selectedContainer.bundle.entry,function(o){
+                        return o.resource.resourceType=='Composition';
+                    });
+
+                    if (mh) {
+                        modalService.showModal({}, {bodyText:'There is already a Composition  in this set - MessageHeader is not allowed.'});
+                        $scope.displayMode = 'view';
+                        return;
+                    }
 
                 }
+
 
                 $scope.waiting = true;
                 $scope.selectedContainer.isDirty = true;
@@ -2066,7 +2168,6 @@ angular.module("sampleApp")
                 var treeData = resourceCreatorSvc.buildResourceTree(newResource);
 
 
-                //$scope.resourceAsArray =builderSvc.makeResourceArray(treeData);
 
                 //show the tree structure of this resource version
                 $('#builderResourceTree').jstree('destroy');
