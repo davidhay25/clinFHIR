@@ -3462,7 +3462,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             bbED.cfAnalysis = ext.analysis;   //ditto...
 
 
-                            //bbED.myData = {displayClass:'elementExtension'}
+
 
                             profile.snapshot.element.splice(ext.inx, 0, bbED)   //insert the root
                             //now add the child elements
@@ -3479,7 +3479,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                            // console.log(ext);
 
 
-                        })
+                        });
                         deferred.resolve(profile);
                     },
                     function (err) {

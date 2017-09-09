@@ -1,6 +1,17 @@
 
 /* classes for the tree view icons...*/
 
+.resourceInDocTree {
+    border: 1px solid gainsboro;
+    padding : 5px;
+    margin: 8px;
+    padding-bottom: 25px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    background-color: #f3f3f3;
+}
+
 .inset {
     margin-left: 12px;
 }

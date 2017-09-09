@@ -99,7 +99,16 @@ angular.module("sampleApp")
                     var resource = entry.resource;
                     hashByType[resource.resourceType] = hashByType[resource.resourceType] || []
                     hashByType[resource.resourceType].push(resource);
-                    hashByRef[resource.resourceType + "/" + resource.id] = resource;
+
+                    if (entry.fullUrl && entry.fullUrl.indexOf('urn:uuid') > -1 ) {
+                        //this is a urn... (the ccda transform uses)
+                        hashByRef[entry.fullUrl] = resource;
+                    } else {
+                        //assume a relative reference (that cf uses)
+                        hashByRef[resource.resourceType + "/" + resource.id] = resource;
+                    }
+
+
                 })
 
                 var comp = getResource(hashByType,'Composition',false);
@@ -134,36 +143,43 @@ angular.module("sampleApp")
                     if (sect.code && sect.code.coding) {
                         item.text += " ("+sect.code.coding[0].code + ")"
                     }
-
+                    item.data = {text:sect.text};
                     tree.push(item);
-                    //now, add the resources that are directly refereced by the section...
-                    sect.entry.forEach(function (entry) {
-                        var sectId = getId();
-                        var sectItem = {id: sectId, parent: id, text: entry.reference, state: {opened: true, selected: false}}
-                        sectItem['a_attr'] = {class : 'resourceInDocTree'};
-                        sectItem.data = {resource:hashByRef[entry.reference]}
-                        tree.push(sectItem);
-                        //if it's a list, then display the resources they reference...
-                        if (entry.reference.indexOf('List') > -1) {
-                            var list = hashByRef[entry.reference];
-                            if (list) {
-                                list.entry.forEach(function (entry) {
-                                    var entryId = getId();
-                                    var entryItem = {id: entryId, parent: sectId, text: entry.item.reference, state: {opened: true, selected: false}}
-                                    entryItem.data = {resource:hashByRef[entry.item.reference]}
-                                    //entryItem.data = {attributes : {class : 'rounded-box'}};
-                                    entryItem['a_attr'] = {class : 'resourceInDocTree'};
-                                   // entryItem['li_attr'] = {style : 'margin-bottom:8px'};
-                                    tree.push(entryItem);
+                    //now, add the resources that are directly refereced by the section (if any)...
+                    if (sect.entry) {
+                        sect.entry.forEach(function (entry) {
+                            var sectId = getId();
+                            var sectItem = {id: sectId, parent: id, text: entry.reference, state: {opened: true, selected: false}}
+                            sectItem['a_attr'] = {class : 'resourceInDocTree'};
+                            sectItem.data = {resource:hashByRef[entry.reference]}
+                            tree.push(sectItem);
+                            //if it's a list, then display the resources they reference...
+                            if (entry.reference.indexOf('List') > -1) {
+                                var list = hashByRef[entry.reference];
+                                if (list) {
+                                    list.entry.forEach(function (entry) {
+                                        var entryId = getId();
+                                        var entryItem = {id: entryId, parent: sectId, text: entry.item.reference, state: {opened: true, selected: false}}
+                                        entryItem.data = {};
+                                        entryItem.data.resource = hashByRef[entry.item.reference]
+                                       // entryItem.data.sectionText =
 
 
-                                })
+                                        //entryItem.data = {attributes : {class : 'rounded-box'}};
+                                        entryItem['a_attr'] = {class : 'resourceInDocTree'};
+                                        // entryItem['li_attr'] = {style : 'margin-bottom:8px'};
+                                        tree.push(entryItem);
 
+
+                                    })
+
+                                }
                             }
-                        }
 
 
-                    })
+                        })
+                    }
+
 
                 })
 

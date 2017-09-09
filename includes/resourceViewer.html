@@ -523,24 +523,45 @@
             </div>
 
             <div class="col-md-10 col-sm-10">
-                <uib-tabset>
+                <uib-tabset ng-show="docAttachment">
+
+                    <uib-tab heading="Document tree">
+
+                        <div class="row">
+                            <div class="col-sm-6 col-md-6">
+                                <div id="docTreeView1"></div>
+                            </div>
+                            <div class="col-sm-6 col-md-6">
+
+                                <p ng-bind-html="docSectionText.div"></p>
+
+                                <pre ng-show="docTreeResource">{{docTreeResource | json}}</pre>
+                            </div>
+                        </div>
+
+
+
+                        <em>Note that this view only includes the resources that are directly connected to the Composition.section.entry
+                            element, and to any List resources referenced by a section. To see the complete list, and all the references
+                            between resources (such as to the Patient) then use the Graph tab.</em>
+
+                    </uib-tab>
+
+                    <uib-tab heading="Document Text">
+                        <p ng-bind-html="docAttachment.html  "></p>
+                    </uib-tab>
+
+                    <uib-tab heading="Bundle Json">
+                        <pre>{{docAttachment.bundle | json}}</pre>
+                    </uib-tab>
+
+
                     <uib-tab heading="DocumentReference Json">
                         <pre>{{documentReference | json}}</pre>
                     </uib-tab>
 
-                    <uib-tab heading="Document">
 
 
-                        <uib-tabset>
-                            <uib-tab heading="Bundle Json">
-                                <pre>{{docAttachment.bundle | json}}</pre>
-                            </uib-tab>
-                            <uib-tab heading="Document Text">
-                                <p ng-bind-html="docAttachment.html  "></p>
-                            </uib-tab>
-                        </uib-tabset>
-
-                    </uib-tab>
                 </uib-tabset>
 
 

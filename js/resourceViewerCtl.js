@@ -50,6 +50,32 @@ angular.module("sampleApp")
                                 }
 
 
+                                var treeData = builderSvc.makeDocumentTree(bundle)
+                                $('#docTreeView1').jstree('destroy');
+                                $('#docTreeView1').jstree(
+                                    {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+                                ).on('select_node.jstree', function (e, data) {
+                                    console.log(data)
+                                    delete $scope.docTreeResource;
+                                    delete $scope.docSectionText;
+
+                                    delete $scope.currentResource;      //todo - there's a setResource() in the service too...
+
+                                    if (data.node.data){
+                                        if (data.node.data.resource) {
+                                            $scope.selectResourceInDocTree({resource:data.node.data.resource});
+                                        }
+                                        if (data.node.data.text) {
+                                            $scope.docSectionText = data.node.data.text;
+                                        }
+
+                                    }
+                                    $scope.$digest()
+                                })
+
+
+
+
                             }
                         )
                         //$scope.firstAttachment =
@@ -60,6 +86,10 @@ angular.module("sampleApp")
 
 
             };
+
+            $scope.selectResourceInDocTree = function(resource) {
+                $scope.docTreeResource = resource;
+            }
 
 
             //assuming that this is a fhir document - generate the document views - html & tree
