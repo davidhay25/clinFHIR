@@ -3547,10 +3547,15 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                         //console.log(key,element)
                         //http://itsolutionstuff.com/post/angularjs-how-to-remove-html-tags-using-filterexample.html
-                        //strip out the html tags...
-                        if (element.indexOf('xmlns=')>-1) {
-                            element = element.replace(/<[^>]+>/gm, ' ')
+                        //strip out the html tags... - elemenyt is not always a string - bit don't care...
+                        try {
+                            if (element.indexOf('xmlns=')>-1) {
+                                element = element.replace(/<[^>]+>/gm, ' ')
+                            }
+                        } catch (ex) {
+
                         }
+
 
 
                         var display = key + " " + '<strong>' + element + '</strong>';

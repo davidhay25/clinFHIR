@@ -241,7 +241,10 @@ angular.module("sampleApp")
                                 //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
                                 function(data){
 
-                                    $scope.documentReferenceList = data.DocumentReference.entry;
+                                    if (data.DocumentReference) {
+                                        $scope.documentReferenceList = data.DocumentReference.entry;
+                                    }
+
 
                                     renderPatientDetails(data)
                                     $scope.$broadcast('patientObservations',data['Observation']);//used to draw the observation charts...
