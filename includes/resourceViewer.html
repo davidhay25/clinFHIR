@@ -520,11 +520,6 @@
                         {{entry.resource.type.text}}
                     </a>
                 </div>
-
-                <!-- Show the vitals if there are any observations
-                <div class="list-group">
-                    <a ng-show="hasVitals" href="#" class="list-group-item" ng-click="getVitals()">Vitals</a>
-                </div>-->
             </div>
 
             <div class="col-md-10 col-sm-10">
@@ -535,9 +530,15 @@
 
                     <uib-tab heading="Document">
 
-                        <div ng-repeat="doc in docAttachments">
-                            <pre>{{doc | json}}</pre>
-                        </div>
+
+                        <uib-tabset>
+                            <uib-tab heading="Bundle Json">
+                                <pre>{{docAttachment.bundle | json}}</pre>
+                            </uib-tab>
+                            <uib-tab heading="Document Text">
+                                <p ng-bind-html="docAttachment.html  "></p>
+                            </uib-tab>
+                        </uib-tabset>
 
                     </uib-tab>
                 </uib-tabset>

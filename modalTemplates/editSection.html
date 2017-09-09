@@ -24,23 +24,47 @@
     <div class="modal-body">
 
         <div class="row">
-            <div class="col-sm-6 col-md-6">
-                <form>
-                    <div class="form-group">
-                        <label>Code</label>
-                        <select class="form-control" ng-model="input.sectionCode"
-                                ng-change="selectCode(input.sectionCode)"
-                                ng-options="item.display for item in sectionCodes">
-                        </select>
-                    </div>
 
-                </form>
+            <div class="col-sm-6 col-md-6">
+                <uib-tabset>
+                    <uib-tab heading="Section Details">
+
+
+                            <form>
+                                <div class="form-group">
+                                    <label>Code</label>
+                                    <select class="form-control" ng-model="input.sectionCode"
+                                            ng-change="selectCode(input.sectionCode)"
+                                            ng-options="item.display for item in sectionCodes">
+                                    </select>
+                                </div>
+
+                            </form>
+                            <form>
+                                <div class="form-group">
+                                    <label>Title</label>
+                                    <input type='text' class="form-control" ng-model="input.title"/>
+                                </div>
+
+                            </form>
+
+
+
+
+                    </uib-tab>
+                    <uib-tab heading="Contents">
+                        <textarea class="form-control" ng-model="input.generated" rows="8"></textarea>
+                    </uib-tab>
+                </uib-tabset>
+
             </div>
-            <div class="col-sm-6 col-md-6">
 
+            <div class="col-sm-6 col-md-6">
+                <textarea class="form-control" ng-model="input.text" rows="8"></textarea>
             </div>
         </div>
 
+        <!--
         <div class="row">
             <div class="col-sm-6 col-md-6">
                 <form>
@@ -52,16 +76,19 @@
                 </form>
             </div>
             <div class="col-sm-6 col-md-6">
+                <textarea class="form-control" ng-model="input.text" rows="8">
 
+                </textarea>
             </div>
         </div>
+        -->
 
 
 
     </div>
 
     <div class="modal-header">
-        <div class="alert alert-warning" role="alert">{{message}}</div>
+        <div ng-show="message" class="alert alert-warning" role="alert">{{message}}</div>
 
 
 

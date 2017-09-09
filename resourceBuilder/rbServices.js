@@ -2851,21 +2851,24 @@ console.log(summary);
                 return txt;
             }
         },
-        getOneLineSummaryOfResource : function(resource,fhirVersionDEP) {
+        getOneLineSummaryOfResource : function(resource,extend) {
 
             var fhirVersion = appConfigSvc.getCurrentFhirVersion(); //defaults to 3 unless both data and conformance servers are on 2...
 
-
-            //fhirVersion = fhirVersion || 3;
             if (resource) {
                 switch (resource.resourceType) {
                     case  "MedicationRequest":
+                    case  "MedicationStatement":
+                    case  "MedicationOrder":
                         var txt = "";
                         if (resource.medicationCodeableConcept) {
                             txt +=  getCCSummary(resource.medicationCodeableConcept);
                         } else {
                             txt =  resource.resourceType;
                         }
+
+
+
                         return txt;
                         break;
 

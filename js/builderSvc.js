@@ -56,6 +56,7 @@ angular.module("sampleApp")
         objColours.Location = '#cc9900';
         objColours.HealthcareService = '#FFFFCC';
         objColours.MedicationDispense = '#FFFFCC';
+        objColours.Composition = '#FFFFCC';
         objColours.Medication = '#FF9900';
 
         return {
@@ -998,10 +999,6 @@ angular.module("sampleApp")
                     var that = this;
                     var html = "";
 
-
-                    //generate the composition text
-                    //var cHtml = ';'
-
                     var manual = that.splitNarrative(composition.text.div).manual;  //manually entered text
                     var generated = "";     //will replace the genereated text...
 
@@ -1023,8 +1020,6 @@ angular.module("sampleApp")
                                 arResources.push(that.resourceFromReference(composition[key].reference))
                             }
 
-
-
                         }
 
                         //this was a resource reference
@@ -1033,13 +1028,8 @@ angular.module("sampleApp")
                                 if (resource) {
                                     generated += "<div><strong class='inset'>"+key+": </strong>" + that.splitNarrative(resource.text.div).manual + "</div>";
                                 }
-
                             })
-
                         }
-
-
-
                     });
 
                     composition.text.div = that.addGeneratedText(manual,generated);
@@ -1050,12 +1040,11 @@ angular.module("sampleApp")
 
                     composition.section.forEach(function(section){
 
-
-
                         html += "<h4>"+section.title+"</h4>";
                         html += "<div class='inset'>";
 
-                        html += that.generateSectionText(section)
+                        // - don't do that here any more... html += that.generateSectionText(section)
+                        html += section.text.div;
                         html += "</div>";
 
 

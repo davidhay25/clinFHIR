@@ -2,7 +2,7 @@
 angular.module("sampleApp")
     .controller('resourceViewerCtrl',
         function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,
-                  $uibModal, $timeout,GetDataFromServer,modalService,ResourceUtilsSvc) {
+                  $uibModal, $timeout,GetDataFromServer,modalService,ResourceUtilsSvc,builderSvc) {
 
         //outcome.resourceTypes
             $scope.outcome = {};
@@ -27,9 +27,11 @@ angular.module("sampleApp")
 
             }
 
+            //when a document is selected in from the list of documents...
             $scope.selectDocument = function(resource) {
 
                 $scope.documentReference = resource;
+                delete $scope.docAttachment;
 
                 $scope.docAttachments = []
                 resource.content.forEach(function (con) {
@@ -37,18 +39,44 @@ angular.module("sampleApp")
                     if (url) {
                         GetDataFromServer.adHocFHIRQuery(url).then(
                             function(data) {
-                                var attachment = data.data;     //the resource returned by the call...
-                                $scope.docAttachments.push(attachment);
+                                var bundle = data.data;     //the resource returned by the call...
+                                $scope.docAttachments.push(bundle);
+
+                                //for now, only look at the fist attachment. Need to think about the UI for multiple attachments...
+                                if (! $scope.docAttachment) {
+
+                                    $scope.docAttachment = {bundle:bundle};
+                                    $scope.docAttachment.html = getDocHtml(bundle);
+                                }
+
+
                             }
                         )
+                        //$scope.firstAttachment =
                     }
-
-
                 })
 
 
 
+
             };
+
+
+            //assuming that this is a fhir document - generate the document views - html & tree
+            var getDocHtml = function(bundle) {
+
+                var comp = _.find(bundle.entry,function(o){
+                    return o.resource.resourceType=='Composition';
+                });
+
+                if (comp) {
+                    return(builderSvc.makeDocumentText(comp.resource,bundle))
+                }
+
+                //
+
+
+            }
 
             //==== for fhirpath ===
 

@@ -5,7 +5,7 @@ angular.module("sampleApp")
         function ($scope,$rootScope,builderSvc,$uibModal,Utilities,GetDataFromServer,modalService) {
 
 
-            //$scope.resourcesBundle - bundle representing current document - defined in parent Controller
+            var that = this;
 
             $scope.builderSvc = builderSvc;         //so we can access service functions from the page...
             $scope.resourcesNotInThisSection = [];  //a list of resources that aren't in this section todo make recursive based on references
@@ -84,12 +84,52 @@ angular.module("sampleApp")
                 }
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editSection.html',
-                    //size: 'lg',
-                    controller: function($scope,inSection,sectionCodes,appConfigSvc){
+                    size: 'lg',
+                    controller: function($scope,inSection,sectionCodes,appConfigSvc,$filter,
+                                         builderSvc, ResourceUtilsSvc){
                         inSection = inSection || {}
+                        //var that=this;
+                        $scope.inSection = inSection
                         $scope.input = {};
                         $scope.mode="New";
                         $scope.sectionCodes = sectionCodes;
+
+
+                        //https://github.com/netgusto/upndown
+                        var und = new upndown();    //this is an ordinary library on the global scope...
+
+                        $scope.generateText = function(sect){
+                            //create text as markdown
+                            var text = "";
+                            sect.entry.forEach(function (entry) {
+                                var ref = entry.reference;
+                                if (ref) {
+                                    var resource = builderSvc.resourceFromReference(ref);
+                                    if (resource) {
+                                        text += ResourceUtilsSvc.getOneLineSummaryOfResource(resource) +'\n';
+
+                                        if (resource.resourceType == 'List') {
+                                            if (resource.entry && resource.entry.length > 0) {
+                                                resource.entry.forEach(function (entry) {
+                                                    var refChild = entry.item.reference;
+                                                    var resChild = builderSvc.resourceFromReference(refChild);
+                                                    text += '* ' + ResourceUtilsSvc.getOneLineSummaryOfResource(resChild) +'\n';
+                                                })
+                                            }
+
+                                        }
+                                    }
+                                }
+
+
+                            })
+
+                            console.log(text);
+                            return text;
+
+
+
+                        }
 
                         if (! sectionCodes) {
                             $scope.message = "The Valueset 'http://hl7.org/fhir/ValueSet/doc-section-codes' " +
@@ -100,6 +140,24 @@ angular.module("sampleApp")
 
                         if (inSection) {
                             $scope.input.title = inSection.title;
+                            if (inSection.text) {
+
+                                $scope.input.generated = $scope.generateText(inSection);
+                                //convert into markdown for display
+                                var rawText = $filter('cleanTextDiv')(inSection.text.div);
+
+                                und.convert(rawText,function(err,md){
+                                    if (err) {
+                                        $scope.input.text = rawText;
+                                    } else {
+                                        $scope.input.text = md;
+                                    }
+                                })
+
+                            }
+
+
+
                             if (inSection.code && inSection.code.coding && inSection.code.coding.length > 0 && inSection.code.coding[0]) {       //this is a Coding...
                                 sectionCodes.forEach(function (c) {
                                     if (c.code == inSection.code.coding[0].code) {
@@ -108,8 +166,8 @@ angular.module("sampleApp")
                                 })
                             }
                             $scope.mode="Edit";
+
                         }
-                        //section = section;
 
                         $scope.selectCode = function(code){
                             if (! $scope.input.title) {
@@ -119,10 +177,17 @@ angular.module("sampleApp")
                         };
 
                         $scope.save = function(){
+                            var section = {title:$scope.input.title};
+                            if ($scope.input.text) {
+                                //convert from markdown to html
+                                var html = $filter('markDown')($scope.input.text)
+                                section.text = {status:'additional',div:$filter('addTextDiv')(html)}
+                            }
 
-                            var section = {title:$scope.input.title,text : ""};
                             section.entry = inSection.entry || [];
-                            section.code = {coding:[$scope.input.sectionCode]}
+                            if ($scope.input.sectionCode) {
+                                section.code = {coding:[$scope.input.sectionCode]}
+                            }
 
                             $scope.$close(section);
                         }
@@ -133,6 +198,12 @@ angular.module("sampleApp")
                         },
                         sectionCodes : function () {
                             return sectionCodes;
+                        },
+                        children : function() {
+
+
+
+                            return $scope.selectedContainer.bundle;     //note that this is from in the parent scope
                         }
                     }
                 }).result.then(function (sect) {
@@ -142,6 +213,8 @@ angular.module("sampleApp")
                         //only update the properties that the modal can change...
                         section.title = sect.title;
                         section.code = sect.code;
+                        section.text = sect.text;
+
                     } else {
                         $scope.compositionResource.section = $scope.compositionResource.section || [];
                         $scope.compositionResource.section.push(sect);
@@ -150,8 +223,8 @@ angular.module("sampleApp")
                     $scope.selectSection(sect)
                     $rootScope.$emit('docUpdated',$scope.compositionResource);
 
-                    //These are all scope variables from the parent controller...
-                    //$scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.selectedContainer,bundle)
+                    //make document text used to invoke builderService.generateSectionText() whicg generated the section text from
+                    //the references resources. Have changed that...
                     $scope.generatedHtml = builderSvc.makeDocumentText($scope.compositionResource,$scope.resourcesBundle)
                 })
             };
@@ -269,24 +342,13 @@ angular.module("sampleApp")
             };
 
 
-            //remove a string from an array based on it's value
-            removeStringFromArrayDEP = function(arr, ref) {
-                var g = arr.indexOf(ref);
-                if (g > -1) {
-                    arr.splice(g,1)
-                }
-            };
-
-
             $scope.selectSection = function(section) {
                 $scope.currentSection = section;
 
                 //now compile the list of resources that aren't in this section
                 $scope.resourcesNotInThisSection.length = 0;
-                //$scope.resourcesBundle.entry.forEach(function(entry){
                 $scope.selectedContainer.bundle.entry.forEach(function(entry){
                     var resource= entry.resource;
-                    //var reference = resource.resourceType + "/" + resource.id;
 
                     var reference =  builderSvc.referenceFromResource(resource);
                     var isInSection = false;
@@ -298,8 +360,6 @@ angular.module("sampleApp")
                         }
                     }
 
-
-
                     if (! isInSection && resource.resourceType !== 'Composition') {
                         var refItem = {reference:builderSvc.referenceFromResource(resource)}
                         if (resource.text) {
@@ -309,10 +369,7 @@ angular.module("sampleApp")
                         }
 
                         $scope.resourcesNotInThisSection.push(refItem)
-                        /*
-                        $scope.resourcesNotInThisSection.push(
-                            {reference:builderSvc.referenceFromResource(resource),display:resource.text.div});
-                        */
+
                     }
 
                 })

@@ -16,8 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-08-30';     //will trigger a reload when this changes
-
+        defaultConfig.lastUpdated='2017-09-09';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -25,9 +24,7 @@ angular.module("sampleApp")
         
         //if a valueset has concepts entered directly but not in snomed (so terminology services won't expand)
         defaultConfig.standardExtensionUrl.vsDirectConcept = 'http://clinfhir.com/fhir/StructureDefinition/vsDirectConcept';
-        
-        
-        //comments on the mapping for an element in the ElementDefinition
+
         defaultConfig.standardExtensionUrl.edMappingComment = 'http://clinfhir.com/fhir/StructureDefinition/edMappingComment';
         defaultConfig.standardExtensionUrl.mapToModel = 'http://clinfhir.com/fhir/StructureDefinition/mapToModel';
         defaultConfig.standardExtensionUrl.baseTypeForModel = 'http://clinfhir.com/fhir/StructureDefinition/baseTypeForModel';
@@ -152,7 +149,12 @@ angular.module("sampleApp")
 
         defaultConfig.allKnownServers.push({name:'GoFHIR',version:3,url:"https://syntheticmass.mitre.org/fhir/",everythingOperation:true});
 
-        defaultConfig.allKnownServers.push({name:'HSPC',version:3,url:"https://api3.hspconsortium.org/fhirconnect14/open/",everythingOperation:true});
+        //defaultConfig.allKnownServers.push({name:'HSPC',version:3,url:"https://api3.hspconsortium.org/fhirconnect14/open/",everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:'HSPC Careplan',version:3,url:"https://api-stu3.hspconsortium.org/careplantest/open/",everythingOperation:true});
+
+        //https://api-stu3.hspconsortium.org/careplantest/open
+
+
         //defaultConfig.allKnownServers.push({name:'hsp2',version:3,url:"https://api2.hspconsortium.org/careplan2/open/",everythingOperation:true});
         //defaultConfig.allKnownServers.push({name:'hsp3',version:3,url:"https://api2.hspconsortium.org/careplan3/open/",everythingOperation:true});
 
