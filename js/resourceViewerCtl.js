@@ -25,35 +25,46 @@ angular.module("sampleApp")
             //load a bundle (used by the document function)
             $scope.loadBundle = function() {
 
-            }
+            };
 
             //when a document is selected in from the list of documents...
-            $scope.selectDocument = function(resource) {
+            $scope.selectDocument = function(docRef) {
 
-                $scope.documentReference = resource;
+                $scope.documentReference = docRef;
                 delete $scope.docAttachment;
 
-                $scope.docAttachments = []
-                resource.content.forEach(function (con) {
-                    var url = con.attachment.url;      //assume a complete url
+                //$scope.docAttachments = []
+
+                if (docRef.content && docRef.content.length > 0) {
+                    var con = docRef.content[0];        //only the first one...
+
+                    // docRef.content.forEach(function (con) {
+                    var url = con.attachment.url;      //assume a complete url to the document bundle...
                     if (url) {
                         GetDataFromServer.adHocFHIRQuery(url).then(
-                            function(data) {
+                            function (data) {
                                 var bundle = data.data;     //the resource returned by the call...
-                                $scope.docAttachments.push(bundle);
+                               // $scope.docAttachments.push(bundle);
 
                                 //for now, only look at the fist attachment. Need to think about the UI for multiple attachments...
-                                if (! $scope.docAttachment) {
+                                //if (!$scope.docAttachment) {
 
-                                    $scope.docAttachment = {bundle:bundle};
+                                    $scope.docAttachment = {bundle: bundle};
                                     $scope.docAttachment.html = getDocHtml(bundle);
-                                }
+                               // }
 
+                                generateDocGraph(bundle);
 
                                 var treeData = builderSvc.makeDocumentTree(bundle)
                                 $('#docTreeView1').jstree('destroy');
                                 $('#docTreeView1').jstree(
-                                    {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+                                    {
+                                        'core': {
+                                            'multiple': false,
+                                            'data': treeData,
+                                            'themes': {name: 'proton', responsive: true}
+                                        }
+                                    }
                                 ).on('select_node.jstree', function (e, data) {
                                     console.log(data)
                                     delete $scope.docTreeResource;
@@ -61,9 +72,9 @@ angular.module("sampleApp")
 
                                     delete $scope.currentResource;      //todo - there's a setResource() in the service too...
 
-                                    if (data.node.data){
+                                    if (data.node.data) {
                                         if (data.node.data.resource) {
-                                            $scope.selectResourceInDocTree({resource:data.node.data.resource});
+                                            $scope.selectResourceInDocTree({resource: data.node.data.resource});
                                         }
                                         if (data.node.data.text) {
                                             $scope.docSectionText = data.node.data.text;
@@ -74,13 +85,12 @@ angular.module("sampleApp")
                                 })
 
 
-
-
                             }
                         )
                         //$scope.firstAttachment =
                     }
-                })
+                    //   })
+                }
 
 
 
@@ -89,7 +99,151 @@ angular.module("sampleApp")
 
             $scope.selectResourceInDocTree = function(resource) {
                 $scope.docTreeResource = resource;
+            };
+
+            //generate the docment graph from the bundle
+            var generateDocGraph = function(bundle) {
+
+                var allResources = [];
+
+                //assemble a list of all the resources in the bundle...
+                bundle.entry.forEach(function (entry) {
+                    var resource = entry.resource;
+                    //if the resource has no id, then set thu id to the full url (hopefully a urn) as that is what the references to it will use
+                    if (! resource.id) {
+                        resource.id = entry.fullUrl;
+                    }
+
+                    allResources.push(resource);
+
+                });
+
+                var graphData = resourceCreatorSvc.createGraphOfInstances(allResources);
+                var container = document.getElementById('documentGraph');
+                var docGraph = new vis.Network(container, graphData, {});
+
+
+                docGraph.on("click", function (obj) {
+                    // console.log(obj)
+                    var nodeId = obj.nodes[0];  //get the first node
+                    //var node = graphData.nodes.get(nodeId);
+
+                    var selectedGraphNode = graphData.nodes.get(nodeId);
+
+                    console.log(selectedGraphNode)
+
+                    delete $scope.graphDocResource
+                   // delete $scope.currentDocumentSection;
+
+
+                    $scope.graphDocResource = selectedGraphNode.resource;
+
+/*
+
+                    if (selectedGraphNode && selectedGraphNode.resource && selectedGraphNode.resource.text) {
+                        $scope.currentDocumentSectionText = selectedGraphNode.resource.text.div;
+
+
+                    }
+*/
+
+                    //drawResourceTree($scope.selectedGraphNode.resource)
+
+                    $scope.$digest();
+                });
+
+
+                //graphDocResource
+
+
+                return;
+
+                //=========================================
+
+                console.log(composition);
+
+                //work on copies
+                $scope.currentComposition = angular.copy(composition);
+                var localAllResourcesList = angular.copy($scope.allResourcesAsList)
+
+                //not currently used - was going to support a separate node for sections linked from the document
+                var sectionNodeMaster = {resourceType:"Section",id:'sectionNodeMaster'};
+                sectionNodeMaster.entry = [];
+                //temp disable $scope.currentComposition.sectionNodeMasterNode = {'reference':'Section/sectionNodeMaster'}
+                //temp disable localAllResourcesList.push(sectionNodeMaster)
+
+
+
+
+                //move through sections and create a node to represent that, moving the references from the composition to the node...
+                $scope.currentComposition.section.forEach(function(section,inx){
+                    var newNode = angular.copy(section);
+                    newNode.resourceType = "Section";
+                    newNode.id = 'sectionNode'+inx;
+
+                    delete section.entry
+                    delete section.text
+
+                    //the reference from the Composition to the section
+                    section.section = {'reference':'Section/sectionNode'+inx}
+                    sectionNodeMaster.entry.push({'reference':'Section/sectionNode'+inx})
+
+                    localAllResourcesList.push(newNode)
+                })
+
+                //move through the list of all resources, remove the current composition & insert the updated one
+                for (var i=0; i < localAllResourcesList.length; i++) {
+                    var resource = localAllResourcesList[i]
+
+                    if (resource.resourceType == 'Composition' && resource.id == $scope.currentComposition.id) {
+                        localAllResourcesList.splice(i,1,$scope.currentComposition);
+                        break;
+                    }
+                }
+
+
+
+                //create and draw the graph representation...
+                var graphData = resourceCreatorSvc.createGraphOfInstances(localAllResourcesList);
+                var container = document.getElementById('documentGraph');
+                var docGraph = new vis.Network(container, graphData, {});
+                // $scope.graph['mynetwork'] = network;
+                docGraph.on("click", function (obj) {
+                    // console.log(obj)
+                    var nodeId = obj.nodes[0];  //get the first node
+                    var node = graphData.nodes.get(nodeId);
+
+                    var selectedGraphNode = graphData.nodes.get(nodeId);
+
+                    console.log(selectedGraphNode)
+                    delete $scope.currentDocumentSectionText;
+                    delete $scope.currentDocumentSection
+                    if (selectedGraphNode.resource && selectedGraphNode.resource) {
+                        $scope.currentDocumentSection = selectedGraphNode.resource;
+                        // delete $scope.currentDocumentSection.text;
+                    }
+
+
+                    if (selectedGraphNode && selectedGraphNode.resource && selectedGraphNode.resource.text) {
+                        $scope.currentDocumentSectionText = selectedGraphNode.resource.text.div;
+
+
+                    }
+
+
+                    //drawResourceTree($scope.selectedGraphNode.resource)
+
+                    $scope.$digest();
+                });
+
+
+                //createGraphOneResource(composition,"documentGraph")
+
+
             }
+
+
+
 
 
             //assuming that this is a fhir document - generate the document views - html & tree

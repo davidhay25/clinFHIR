@@ -547,6 +547,40 @@
 
                     </uib-tab>
 
+
+                    <uib-tab heading="Document Graph">
+
+
+                        <br/>
+                        <div class="row">
+
+                            <div class="col-md-7 col-sm-7">
+                                <div id="documentGraph"></div>
+                                <em>The Patient resource is not displayed</em>
+                            </div>
+                            <div class="col-md-5 col-sm-5">
+
+
+
+                                <pre>{{graphDocResource | json}}</pre>
+<!--
+                                <uib-tabset>
+                                    <uib-tab heading="Text">
+                                        <div ng-bind-html="currentDocumentSectionText"/>
+                                    </uib-tab>
+                                    <uib-tab heading="Json">
+                                        <pre>{{currentDocumentSection | json}}</pre>
+                                    </uib-tab>
+                                </uib-tabset>
+                                -->
+
+
+                            </div>
+                        </div>
+                    </uib-tab>
+
+
+
                     <uib-tab heading="Document Text">
                         <p ng-bind-html="docAttachment.html  "></p>
                     </uib-tab>
@@ -573,41 +607,7 @@
 
     </uib-tab>
 
-    <uib-tab heading="CCDA-migrated Documents">
 
-
-        <br/>
-        <div class="row">
-            <div class="col-md-2 col-sm-2">
-                <div class="list-group">
-                    <a href="#"  ng-click="selectCCDADocument(entry.resource)"
-                       ng-class="{'list-group-item':true,'active':entry.resource.id == currentComposition.id}"
-                       ng-repeat="entry in allResources.Composition.entry">
-                        {{entry.resource.type.coding[0].display}}
-                        <span class="pull-right badge">{{value.list.length}}</span>
-                    </a>
-                </div>
-                <em>Currently only works for one document per patient</em>
-            </div>
-            <div class="col-md-7 col-sm-7">
-                <div id="documentGraph"></div>
-                <em>The Patient resource is not displayed</em>
-            </div>
-            <div class="col-md-3 col-sm-3">
-
-                <uib-tabset>
-                    <uib-tab heading="Text">
-                        <div ng-bind-html="currentDocumentSectionText"/>
-                    </uib-tab>
-                    <uib-tab heading="Json">
-                        <pre>{{currentDocumentSection | json}}</pre>
-                    </uib-tab>
-                </uib-tabset>
-
-
-            </div>
-        </div>
-    </uib-tab>
 
 
 

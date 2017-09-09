@@ -2905,11 +2905,18 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             //create the array for the graph
             var arNodes = [];
-            var objNodes = {};
+            var objNodes = {};      //nodes by reference
 
 
             allResources.forEach(function (resource, inx) {
-                objNodes[resource.resourceType + "/" + resource.id] = inx;
+
+                if (resource.id.indexOf('urn:')>-1) {
+                    objNodes[resource.id] = inx;
+                } else {
+                    objNodes[resource.resourceType + "/" + resource.id] = inx;
+                }
+
+
                 var node = {id: inx, label: that.createResourceLabel(resource), shape: 'box'};
                 node.resource = resource;
                 if (objColours[resource.resourceType]) {
@@ -2928,7 +2935,17 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             //now generate the edges for each resource
             var arEdges = [];
             allResources.forEach(function (resource, inx) {
-                var thisNodeId = objNodes[resource.resourceType + "/" + resource.id];
+
+                var thisNodeId;
+
+                if (resource.id.indexOf('urn:')>-1) {
+                    thisNodeId = objNodes[resource.id];
+                } else {
+                    thisNodeId = objNodes[resource.resourceType + "/" + resource.id];
+                }
+
+
+
                 //console.log(thisNodeId)
                 var resourceReferences = resourceSvc.getReference(resource);    //get the outward links for this resource
                 resourceReferences.outwardLinks.forEach(function (link) {
@@ -2942,7 +2959,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     }
 
                 })
-
 
             })
 
