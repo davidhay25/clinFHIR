@@ -101,6 +101,19 @@ angular.module("sampleApp")
                 $scope.docTreeResource = resource;
             };
 
+            //called when the tab is selected...
+            $scope.redrawChart = function(){
+                $timeout(function(){
+                    if ($scope.docGraph) {
+                        $scope.docGraph.fit();
+
+                    }
+
+                },1000)
+
+            }
+
+
             //generate the docment graph from the bundle
             var generateDocGraph = function(bundle) {
 
@@ -120,10 +133,10 @@ angular.module("sampleApp")
 
                 var graphData = resourceCreatorSvc.createGraphOfInstances(allResources);
                 var container = document.getElementById('documentGraph');
-                var docGraph = new vis.Network(container, graphData, {});
+                $scope.docGraph = new vis.Network(container, graphData, {});
 
 
-                docGraph.on("click", function (obj) {
+                $scope.docGraph.on("click", function (obj) {
                     // console.log(obj)
                     var nodeId = obj.nodes[0];  //get the first node
                     //var node = graphData.nodes.get(nodeId);
