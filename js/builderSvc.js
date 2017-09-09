@@ -144,6 +144,7 @@ angular.module("sampleApp")
                         item.text += " ("+sect.code.coding[0].code + ")"
                     }
                     item.data = {text:sect.text};
+                    item.data.section = sect;
                     tree.push(item);
                     //now, add the resources that are directly refereced by the section (if any)...
                     if (sect.entry) {
@@ -152,9 +153,27 @@ angular.module("sampleApp")
                             var sectItem = {id: sectId, parent: id, text: entry.reference, state: {opened: true, selected: false}}
                             sectItem['a_attr'] = {class : 'resourceInDocTree'};
                             sectItem.data = {resource:hashByRef[entry.reference]}
-                            tree.push(sectItem);
-                            //if it's a list, then display the resources they reference...
+                           // sectItem.data.entry = entry;
+
+                            var isList = false;
                             if (entry.reference.indexOf('List') > -1) {
+                                isList = true;
+                            }
+                            var res = hashByRef[entry.reference];
+                            if (res) {
+                                sectItem.text = res.resourceType;
+                                if (res.resourceType == 'List') {
+                                    isList = true;
+                                }
+                            }
+
+                            tree.push(sectItem);
+
+                            //if it's a list, then display the resources they reference...
+
+
+                            if (isList){
+                            //if (entry.reference.indexOf('List') > -1) {
                                 var list = hashByRef[entry.reference];
                                 if (list) {
                                     list.entry.forEach(function (entry) {
@@ -162,6 +181,7 @@ angular.module("sampleApp")
                                         var entryItem = {id: entryId, parent: sectId, text: entry.item.reference, state: {opened: true, selected: false}}
                                         entryItem.data = {};
                                         entryItem.data.resource = hashByRef[entry.item.reference]
+                                        entryItem.data.entry = entry;
                                        // entryItem.data.sectionText =
 
 
@@ -199,6 +219,11 @@ angular.module("sampleApp")
                             item['a_attr'] = {class : 'resourceInDocTree'};
                             item.data = {resource:hashByRef[t.reference]}
                             // entryItem['li_attr'] = {style : 'margin-bottom:8px'};
+
+                            item.text = resource.resourceType;
+
+
+
                             tree.push(item);
                         }
                     }

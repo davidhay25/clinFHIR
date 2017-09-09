@@ -44,14 +44,9 @@ angular.module("sampleApp")
                         GetDataFromServer.adHocFHIRQuery(url).then(
                             function (data) {
                                 var bundle = data.data;     //the resource returned by the call...
-                               // $scope.docAttachments.push(bundle);
 
-                                //for now, only look at the fist attachment. Need to think about the UI for multiple attachments...
-                                //if (!$scope.docAttachment) {
-
-                                    $scope.docAttachment = {bundle: bundle};
-                                    $scope.docAttachment.html = getDocHtml(bundle);
-                               // }
+                                $scope.docAttachment = {bundle: bundle};
+                                $scope.docAttachment.html = getDocHtml(bundle);
 
                                 generateDocGraph(bundle);
 
@@ -67,29 +62,34 @@ angular.module("sampleApp")
                                     }
                                 ).on('select_node.jstree', function (e, data) {
                                     console.log(data)
-                                    delete $scope.docTreeResource;
+                                    //delete $scope.docTreeResource;
                                     delete $scope.docSectionText;
-
+                                    delete $scope.docTreeResource;
+                                    delete $scope.docSection
                                     delete $scope.currentResource;      //todo - there's a setResource() in the service too...
 
                                     if (data.node.data) {
+                                        if (data.node.data.section) {
+                                            $scope.docSection = angular.copy(data.node.data.section);
+                                            $scope.docSection.text = {div:'text removed'};
+                                        }
+
                                         if (data.node.data.resource) {
                                             $scope.selectResourceInDocTree({resource: data.node.data.resource});
                                         }
                                         if (data.node.data.text) {
                                             $scope.docSectionText = data.node.data.text;
+
                                         }
 
                                     }
                                     $scope.$digest()
                                 })
 
-
                             }
                         )
-                        //$scope.firstAttachment =
+
                     }
-                    //   })
                 }
 
 
@@ -114,7 +114,7 @@ angular.module("sampleApp")
             }
 
 
-            //generate the docment graph from the bundle
+            //generate the document graph from the bundle
             var generateDocGraph = function(bundle) {
 
                 var allResources = [];
@@ -126,7 +126,6 @@ angular.module("sampleApp")
                     if (! resource.id) {
                         resource.id = entry.fullUrl;
                     }
-
                     allResources.push(resource);
 
                 });
@@ -137,36 +136,20 @@ angular.module("sampleApp")
 
 
                 $scope.docGraph.on("click", function (obj) {
-                    // console.log(obj)
                     var nodeId = obj.nodes[0];  //get the first node
-                    //var node = graphData.nodes.get(nodeId);
-
                     var selectedGraphNode = graphData.nodes.get(nodeId);
 
                     console.log(selectedGraphNode)
 
                     delete $scope.graphDocResource
-                   // delete $scope.currentDocumentSection;
-
 
                     $scope.graphDocResource = selectedGraphNode.resource;
-
-/*
-
-                    if (selectedGraphNode && selectedGraphNode.resource && selectedGraphNode.resource.text) {
-                        $scope.currentDocumentSectionText = selectedGraphNode.resource.text.div;
-
-
-                    }
-*/
-
-                    //drawResourceTree($scope.selectedGraphNode.resource)
 
                     $scope.$digest();
                 });
 
 
-                //graphDocResource
+               /*
 
 
                 return;
@@ -252,11 +235,8 @@ angular.module("sampleApp")
 
                 //createGraphOneResource(composition,"documentGraph")
 
-
+*/
             }
-
-
-
 
 
             //assuming that this is a fhir document - generate the document views - html & tree
@@ -273,24 +253,23 @@ angular.module("sampleApp")
                 //
 
 
-            }
+            };
 
             //==== for fhirpath ===
 
             $scope.selectFPResource = function(resource){
                 $scope.fpResource = resource
-            }
+            };
 
             $scope.selectSingleBundle = function(bundle){
                 $scope.fpResource = bundle
-               // $scope.outcome.selectedResource = bundle;
 
-            }
+            };
 
             //======== document functions
 
             //display the docment graph. Only works for one document per patient
-            $scope.selectCCDADocument = function(composition) {
+            $scope.selectCCDADocumentDEP = function(composition) {
                 console.log(composition);
 
                 //work on copies
@@ -419,6 +398,15 @@ angular.module("sampleApp")
 
             //used by patientViewer to select a patient to display
             $scope.findPatient = function(){
+
+                delete $scope.graphDocResource;
+                delete $scope.docTreeResource;
+                delete $scope.docAttachment;
+                delete $scope.docSectionText;
+                delete $scope.docGraph;
+                delete $scope.fpResource;
+                delete $scope.docSection;
+
                 delete $scope.resourcesFromServer;
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
@@ -445,9 +433,6 @@ angular.module("sampleApp")
 
                                     renderPatientDetails(data)
                                     $scope.$broadcast('patientObservations',data['Observation']);//used to draw the observation charts...
-
-
-                                    //console.log(data);
                                  },
                                  function(err){
                                     console.log(err)
@@ -457,7 +442,7 @@ angular.module("sampleApp")
 
                     }
                 )
-            }
+            };
 
 
             function renderPatientDetails(allResources) {

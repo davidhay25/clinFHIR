@@ -535,6 +535,10 @@
 
                                 <p ng-bind-html="docSectionText.div"></p>
 
+                                <pre ng-show="docSection">{{docSection | json}}</pre>
+
+
+
                                 <pre ng-show="docTreeResource">{{docTreeResource | json}}</pre>
                             </div>
                         </div>
