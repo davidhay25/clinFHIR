@@ -60,6 +60,53 @@ angular.module("sampleApp")
         objColours.Medication = '#FF9900';
 
         return {
+
+            documentQualityReport : function(nodes,edges) {
+                //how good is the document
+                var report = {cntNodes:nodes.length,cntEdges:edges.length}
+                //find nodes with no links
+                var hash = {};
+                nodes.forEach(function (node) {
+                    hash[node.id] = {from:0,to:0,node:node};      //number of
+                })
+
+                edges.forEach(function (edge) {
+                    var from = edge.from;
+                    var nodeFrom = hash[from]
+                    if (nodeFrom) {
+                        nodeFrom.from++
+                    } else {
+                        console.log(from);  //can this happen???
+                    }
+
+                    var nodeTo = hash[edge.to]
+                    if (nodeTo) {
+                        nodeTo.to++
+                    } else {
+                        //this will occur when the reference is to the patient, as that node is not in the graph...
+                        //todo - do I need to look into this further??  Ignore for now...
+                        console.log(edge.to);  //can this happen???
+                    }
+
+                });
+
+                report.hash = hash;
+                report.orphans = []
+                //now find the nodes with to references to them...
+                angular.forEach(hash,function (v,k) {
+                   // console.log(v,k)
+                    if (v.to == 0) {
+                        if (v.node.resource.resourceType !== 'Composition') {
+                            report.orphans.push(v.node.resource)
+                        }
+                    }
+
+                });
+
+                console.log(report)
+                return report
+
+            },
             makeDisplayBundle : function(bundle) {
                 //remove extensions (track validation & stuff) todo = will likely need to be more granular in teh future...
 

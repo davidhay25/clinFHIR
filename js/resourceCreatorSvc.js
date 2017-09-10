@@ -2968,7 +2968,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             // provide the data in the vis format
             var data = {
                 nodes: nodes,
-                edges: edges
+                edges: edges,
+                rawData : {nodes:arNodes,edges:arEdges}
             };
             return data;
         },

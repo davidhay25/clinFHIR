@@ -131,6 +131,9 @@ angular.module("sampleApp")
                 });
 
                 var graphData = resourceCreatorSvc.createGraphOfInstances(allResources);
+
+                $scope.docQuality = builderSvc.documentQualityReport(graphData.rawData.nodes,graphData.rawData.edges)
+
                 var container = document.getElementById('documentGraph');
                 $scope.docGraph = new vis.Network(container, graphData, {});
 

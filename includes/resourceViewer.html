@@ -523,6 +523,7 @@
             </div>
 
             <div class="col-md-10 col-sm-10">
+                <br/>
                 <uib-tabset ng-show="docAttachment">
 
                     <uib-tab heading="Document tree">
@@ -553,8 +554,6 @@
 
 
                     <uib-tab heading="Document Graph" select="redrawChart()">
-
-
                         <br/>
                         <div class="row">
 
@@ -564,21 +563,7 @@
                             </div>
                             <div class="col-md-5 col-sm-5">
 
-
-
                                 <pre>{{graphDocResource | json}}</pre>
-<!--
-                                <uib-tabset>
-                                    <uib-tab heading="Text">
-                                        <div ng-bind-html="currentDocumentSectionText"/>
-                                    </uib-tab>
-                                    <uib-tab heading="Json">
-                                        <pre>{{currentDocumentSection | json}}</pre>
-                                    </uib-tab>
-                                </uib-tabset>
-                                -->
-
-
                             </div>
                         </div>
                     </uib-tab>
@@ -587,6 +572,25 @@
 
                     <uib-tab heading="Document Text">
                         <p ng-bind-html="docAttachment.html  "></p>
+                    </uib-tab>
+
+                    <uib-tab heading="Document Quality Report">
+                        <div>There are {{docQuality.cntNodes}} resources in this document.</div>
+                        <div>There are {{docQuality.cntEdges}} references between them.</div>
+
+                        <div ng-show="docQuality.orphans.length > 0">
+                            There are {{docQuality.orphans.length}} resources that have no reference to them:
+
+                            <table class="table table-bordered">
+                                <tr ng-repeat="orphan in docQuality.orphans">
+                                    <td>{{orphan.resourceType}}</td>
+                                    <td>{{orphan.id}}</td>
+                                    <td><p ng-bind-html="orphan.text.div"></p> </td>
+                                </tr>
+                            </table>
+                        </div>
+
+
                     </uib-tab>
 
                     <uib-tab heading="Bundle Json">
