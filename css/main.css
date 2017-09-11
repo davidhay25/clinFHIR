@@ -130,6 +130,12 @@
     cursor: pointer;
 }
 
+.clickableDotted {
+    color: rgb(79, 155, 214);
+    cursor: pointer;
+    text-decoration: underline dotted;
+}
+
 .tabMargin {
     margin: 8px
 }

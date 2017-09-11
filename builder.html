@@ -135,6 +135,7 @@
     <script src="js/markerSvc.js"></script>
     <script src="js/sbHistorySvc.js"></script>
     <script src="js/sbHistoryCtl.js"></script>
+    <script src="js/refreshScenario.js"></script>
     <script src="directive/fhirpath/fhirpath.js"></script>
 
     <script>
@@ -236,7 +237,7 @@
                 </div>
 
 
-                <div class="col-md-3 col-sm-3">
+                <div class="col-md-2 col-sm-2">
 
                     <div class="navbar-text" ng-show="thingToDisplay=='scenario'">
                         <div class="clickable" ng-click="validateAll()">Validate All</div>
@@ -244,7 +245,16 @@
                     </div>
                 </div>
 
+
                 <div class="col-md-2 col-sm-2">
+
+                    <div class="navbar-text" ng-show="thingToDisplay=='scenario'">
+                        <div class="clickable" ng-click="refreshScenarioFromServer()">Refresh Scenario</div>
+
+                    </div>
+                </div>
+
+                <div class="col-md-1 col-sm-1">
 
                     <div class="pull-right navbar-form" ng-show="waiting">
                         <img src="css/ajax_loader_blue_32.gif"/>

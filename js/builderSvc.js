@@ -585,7 +585,7 @@ angular.module("sampleApp")
             sendToFHIRServer : function(container,note) {
                 //create a new bundle to submit as a transaction. excludes logical models
                 var that=this;
-                var bundle = this.makeDisplayBundle(container.bundle);      //does things like make it a correce document..
+                var bundle = this.makeDisplayBundle(container.bundle);      //does things like make it a correct document..
                 var deferred = $q.defer();
                 var transBundle = {resourceType:'Bundle',type:'transaction',entry:[]}
                 transBundle.id = bundle.id;     //needed when saving against /Bundle
@@ -613,15 +613,17 @@ angular.module("sampleApp")
 
                 var url = appConfigSvc.getCurrentDataServer().url;
 
-
+                //post the transaction bundle to the server root so the individual resources are saved...
                 $http.post(url,transBundle).then(
                     function(data) {
 
                         var responseBundle = data.data;
 
 
+                        console.log(responseBundle);
+
+
                         //save the bundle directly against the /Bundle endpoint. Use the original bundle...
-                        //transBundle.type = bundle.type;     //set the bundle type
                         SaveDataToServer.saveResource(bundle).then(
                             function(data){
                                 //saveProvenance will resolve the promise...
@@ -629,7 +631,7 @@ angular.module("sampleApp")
 
 
                             },function (err) {
-                                //??? add error status
+                                //??? add error status to provenance
                                 alert('error saving bundle ' + angular.toJson(err))
                                 saveProvenance(responseBundle,container.name,note,deferred);
                             }
@@ -640,7 +642,7 @@ angular.module("sampleApp")
 
                     },
                     function(err) {
-                        alert(angular.toJson(err));
+                        alert('Error saving scenario resources\n'+angular.toJson(err));
                     }
                 );
 

@@ -1,0 +1,51 @@
+
+<div>
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-6 col-sm-6">
+                <h3 class="modal-title">Refresh scenario</h3>
+
+            </div>
+            <div class="col-md-6 col-sm-6 ">
+                <div class="pull-right">
+                    <button  class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+                    <button  class="btn btn-primary" ng-click="update()">Update</button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+
+                <table class="table table-bordered table-condensed">
+                    <tr><th>Type</th><th>Id</th><th>Version</th><th>Last Updated</th><th>Progress</th></tr>
+                    <tr ng-repeat="entry in bundle.entry">
+                        <td>{{entry.resource.resourceType}}</td>
+                        <td>{{entry.resource.id}}</td>
+                        <td>{{entry.resource.meta.versionId}}</td>
+                        <td>{{entry.resource.meta.lastUpdated | getAgeSeconds}}</td>
+                    </tr>
+                </table>
+
+            </div>
+            <div class="col-md-2 col-sm-2 ">
+
+
+            </div>
+        </div>
+
+
+
+    </div>
+
+
+</div>

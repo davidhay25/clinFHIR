@@ -30,7 +30,7 @@
         </td>
         <td>
             <div>{{item.extension.name}}</div>
-            <div ng-show="item.extension.url" class="clickable" ng-click="selectExtensionFromProfile(item.extension)">
+            <div ng-show="item.extension.url" class="clickableDotted" ng-click="selectExtensionFromProfile(item.extension)">
                 Ext: {{item.extension.url}}</div>
 
 
@@ -66,17 +66,17 @@
             <!-- If a coded item...-->
             <div ng-show="item.coded.valueSetUri">
                 VS:
-                <span class="clickable" ng-click="showValueSet(item.coded.valueSetUri,'uri')">
+                <span class="clickableDotted" ng-click="showValueSet(item.coded.valueSetUri,'uri')">
                     {{item.coded.valueSetUri}}
                 </span>
-                <span class="clickable" ng-click="showValueSet(item.coded.valueSetReference,'uri')">
+                <span class="clickableDotted" ng-click="showValueSet(item.coded.valueSetReference,'uri')">
                     {{item.coded.valueSetReference}}
                 </span>
             </div>
 
             <!-- if a coded simple extension -->
             <div ng-show="item.extension.analysis.binding">
-                <span class="clickable" ng-click="showValueSet(item.extension.analysis.boundValueSet,'uri')">
+                <span class="clickableDotted" ng-click="showValueSet(item.extension.analysis.boundValueSet,'uri')">
                     VS: {{item.extension.analysis.boundValueSet}} ({{item.extension.analysis.binding.strength}})
                 </span>
             </div>

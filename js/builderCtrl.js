@@ -14,11 +14,25 @@ angular.module("sampleApp")
 
             GetDataFromServer.registerAccess('scnBld');
 
+            $scope.refreshScenarioFromServer = function(){
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/refreshScenario.html',
+                    size: 'lg',
+                    controller: 'refreshScenarioCtrl',
+                    resolve : {
+                        container: function () {          //the default config
+                            return $scope.selectedContainer;
+                        }
+                    }
+                }).result.then(function(vo){
+
+                })
+            };
 
             //create a version of the bundle to display to the user and download...
             $scope.getBundleDisplay = function(bundle) {
                 return builderSvc.makeDisplayBundle(bundle);
-            }
+            };
 
             $scope.generateDocTree = function(){
                 var treeData = builderSvc.makeDocumentTree($scope.selectedContainer.bundle)
@@ -35,8 +49,6 @@ angular.module("sampleApp")
                     }
                     $scope.$digest()
                 })
-
-
             }
 
             $scope.scoreBundle = function(ref) {
@@ -304,7 +316,7 @@ angular.module("sampleApp")
             };
 
             $scope.addExtensionDirectly = function() {
-                console.log($scope.hashPath)
+                //console.log($scope.hashPath)
                 $uibModal.open({
                     templateUrl: 'modalTemplates/addExtension.html',
                    // size: 'lg',
@@ -642,7 +654,6 @@ angular.module("sampleApp")
                 var container = $localStorage.builderBundles[$scope.currentBundleIndex]
                 var bundle = $localStorage.builderBundles[$scope.currentBundleIndex].bundle;
 
-
                 var note = window.prompt("Enter a note about this update (This will be saved in a Provenance resource)");
 
                 //builderSvc.addProvenance(container,note);    //add a provenance resource to the bundle
@@ -680,6 +691,9 @@ angular.module("sampleApp")
                     builderSvc.sendToFHIRServer(container,note).then(
                         function(data){
                             //console.log(data.data)
+
+
+
 
                             bundle.entry.forEach(function(entry){
                                 entry.valid='saved'
