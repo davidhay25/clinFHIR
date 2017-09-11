@@ -25,7 +25,7 @@ angular.module("sampleApp")
                         }
                     }
                 }).result.then(function(vo){
-
+                    console.log(vo)
                 })
             };
 
