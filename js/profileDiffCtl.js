@@ -1414,6 +1414,7 @@ angular.module("sampleApp")
                 profileDiffSvc.createGraphOfIG(IG,graphOptions).then(
                     function(graphData) {
                         //$scope.graphData = graphData;
+                        console.log(graphData)
                         var hashRelationships = graphData.hashRelationships;  //details of relationships (like path) = hash is <from>-<to>
 
                         $scope.igGraphHash = graphData.hash;    //the hash generated during the IG analysis. Contains useful stuff like extension usedBy

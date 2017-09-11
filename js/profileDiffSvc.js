@@ -954,7 +954,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                                             if (ref) {
                                                 //hurrah! we have a target resource
                                                 arEdges.push({from: parentId, to: ref.nodeId, data:{path:ed.path,ed:ed}})
-                                                ref.usedBy.push(url)
+                                                ref.usedBy.push(SD.url)
                                             }
                                         }
                                     }
