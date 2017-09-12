@@ -5,6 +5,92 @@ angular.module("sampleApp")
 
 
         return {
+            parseED : function(SD) {
+                //parse a SD into the internal representation of an ED - the voED object
+                //if a simple ED then there will be 3 ElementDefinition children
+                //if a complex ED then there will be 2 + (n*3) elements.
+                //each triplet corresponds to a single childElement[] in the voED
+
+                var arED = SD.snapshot.element;     //all the child elements in the
+
+
+                var voED = {};
+                voED.extensionName = SD.name;
+                voED.url = SD.url;
+                voED.description = SD.description;
+                voED.short = SD.short;
+                voED.publisher = SD.publisher;
+                if (SD.context) {
+                    voED.selectedResourceTypes = []
+                    if (SD.context[0] !== '*'){
+                        SD.context.forEach(function(ctx){
+                            voED.selectedResourceTypes.push(ctx)
+                        })
+                    }
+                }
+                voED.childElements = [];
+                var isComplex = false;
+                if (SD.snapshot.element.length > 3) {
+                    isComplex = true;
+                }
+
+                if (isComplex) {
+
+
+                } else {
+
+                    var item = {};
+                    item.code = analysis.name;
+                    item.description = analysis.description;
+                    item.short = analysis.short;
+                    var dt = analysis.dataTypes[0];         //there's only 1 for a simple extension...
+                    item.dataTypes = analysis.dataTypes;    //{code: description: isCoded:
+
+                    voED.childElements.push({dataTypes: [{code: dt.code,description: dt.code}],
+                        description:item.description,
+                        isCoded:analysis.isCoded});
+                }
+
+
+
+console.log(voED)
+
+                //process 3 sequential ED elements into a single entry for childElements.
+                //This sill only work reliably on SD's published by CF
+                function processTriplet() {
+                    var child = {};     //the child element
+                    //first has the descriptive stuff
+                    var ed1 = ed[0];
+                    child.code = ed1.name;
+                    child.min = ed1.min;
+                    child.max = ed1.max;
+                    child.short = ed1.short;
+                    child.description = ed1.definition;
+                    child.comments = ed1.comments;
+                    
+/*
+                    var ed1 = {path : extensionRoot,name: vo.code,min:vo.min,max:vo.max,
+                        short:vo.short,definition:vo.description,
+                        comments:vo.comments,type:[{code:'Extension'}]};
+*/
+
+                    //third has the the value...
+/* var ed3 = {path : extensionRoot + '.value'+valueName,name: vo.code,short:vo.short,definition:vo.definition,
+                        comments:vo.comments,definition:vo.description,min:vo.min,max:vo.max,type:[]};
+
+
+                    vo.dataTypes.forEach(function(type){
+                        ed3.base = {path: ed3.path,min:ed3.min, max:ed3.max};
+                        ed3.type.push({code:type.code})
+
+                        if (type.vs) {
+                            //this is a bound valueset
+                            ed3.binding = {strength : type.vs.strength,valueSetUri:type.vs.vs.url,description:vo.description}
+                        }*/
+
+                }
+
+            },
             makeED : function(voED) {
                 //construct the ED (a StructureDefinition) from a VO
                 /*
@@ -174,7 +260,7 @@ angular.module("sampleApp")
                     var arED = [];
                     var ed1 = {path : extensionRoot,name: vo.code,min:vo.min,max:vo.max,
                         short:vo.short,definition:vo.description,
-                        comments:vo.comments,min:vo.min,max:vo.max,type:[{code:'Extension'}]};
+                        comments:vo.comments,type:[{code:'Extension'}]};
 
                     ed1.base = {path: ed1.path,min:ed1.min, max:ed1.max};
 
@@ -190,9 +276,6 @@ angular.module("sampleApp")
                         valueName = vo.dataTypes[0].code;
                         valueName = valueName[0].toUpperCase()+valueName.substr(1);
                     }
-
-                    // var ed3 = {path : extensionRoot + '.value'+valueName,name: vo.name,short:vo.short,definition:vo.definition,
-                    //   comments:vo.comments,definition:vo.description,min:vo.min,max:vo.max,type:[]};
 
                     var ed3 = {path : extensionRoot + '.value'+valueName,name: vo.code,short:vo.short,definition:vo.definition,
                         comments:vo.comments,definition:vo.description,min:vo.min,max:vo.max,type:[]};
@@ -224,8 +307,6 @@ angular.module("sampleApp")
 
 
 
-            },parseED : function(SD) {
-                //parse a SD into the internal representation of an ED - the voED object
             }
         }
 

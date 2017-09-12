@@ -8,7 +8,11 @@ angular.module("sampleApp").controller('extensionDefCtrl',
             $scope.input.multiplicity = 'opt';
             $scope.selectedResourceTypes = [];
 
+            //if being edited...
             if (currentExt) {
+
+                edBuilderSvc.parseED(currentExt)
+
                 $scope.canSaveEd = true;
                 $scope.currentExt = currentExt;
                 $scope.input.name = currentExt.name;
@@ -59,7 +63,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
             $scope.selectContextType = function(type) {
                 //get the paths for the given type...
-                delete $scope.paths;
+
                 var url = "http://hl7.org/fhir/StructureDefinition/"+type.name
                 console.log(url)
                 GetDataFromServer.findConformanceResourceByUri(url).then(
@@ -82,7 +86,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
             };
 
             $scope.selectContext = function(context) {
-                console.log(context);
+
                 if (context) {
                     if ($scope.selectedResourceTypes.indexOf(context) == -1) {
                         $scope.selectedResourceTypes.push(context)
@@ -114,7 +118,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                             },function(){
                                 //this is the 'cancel' option - but it's the one fired when there's only a single button...
                                 $scope.$close({url:url,sd:sd});
-                                console.log('close')
+
                             })
 
                         }, function(err){
@@ -316,7 +320,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 */
 
 
-
+/*
 
                 var extensionDefinition = {resourceType:'StructureDefinition'};
 
@@ -427,16 +431,6 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 });
 
 
-                /*  We *may* need to add this with a complex extension (don't know) keep for the moment...
-
-                //the url of this extension. It's at the bottom (not sure why)..
-                var edUrl = {path : 'Extension.url',name: name,short:short,definition:definition,
-                    min:1,max:"1",type:[{code:'uri'}],fixedUri:$scope.conformanceSvr.url + name};
-
-                edUrl.id = edUrl.path;
-                extensionDefinition.snapshot.element.push(edUrl);
-*/
-
                 $scope.jsonED = extensionDefinition;    //just for display
 
 
@@ -459,8 +453,10 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
                 return extensionDefinition;
 
-            };
 
+                */
+            };
+/*
             //build the ElementDefinitions for a single child
             function makeChildED(vo,isComplex,index){
 
@@ -525,6 +521,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
             }
 
 
+            */
     }
 
 
