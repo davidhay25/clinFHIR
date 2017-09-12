@@ -1,7 +1,7 @@
 
 angular.module("sampleApp").controller('extensionDefCtrl',
         function ($rootScope,$scope,$uibModal,appConfigSvc,GetDataFromServer,Utilities,modalService,
-                  RenderProfileSvc,$http,currentExt,securitySvc) {
+                  RenderProfileSvc,$http,currentExt,securitySvc,edBuilderSvc) {
 
             $scope.childElements = [];      //array of child elements
             $scope.input ={};
@@ -271,6 +271,53 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
             //build the StructueDefinition that describes this extension
             makeSD = function() {
+
+                //here is where we construct the vo and call the makeSD service...
+                var voED = {};
+                voED.extensionName = $scope.input.name;
+                voED.description = $scope.input.description;
+                voED.short = $scope.input.short;
+                voED.url =  $scope.input.url;
+                voED.publisher = $scope.input.publisher;
+                voED.selectedResourcePaths = $scope.selectedResourceTypes
+                voED.fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
+                voED.multiplicity = $scope.input.multiplicity;
+                voED.childElements = $scope.childElements;
+
+                var extensionDefinition = edBuilderSvc.makeED(voED);
+                $scope.jsonED = extensionDefinition;    //just for display
+                return extensionDefinition;
+
+
+
+
+                /*
+                   voED.extensionName - name of the extension (as entered by the user ($scope.input.name)
+                   voED.description    ($scope.input.description)
+                   voED.short
+                   voED.url  ($scope.input.url)
+                   voED.publisher; //$scope.input.publisher;
+                   voED.selectedResourcePaths[]        - the resource paths that this extension can apply to ($scope.selectedResourceTypes)
+                   voED.fhirVersion
+                   voED.multiplicity //$scope.input.multiplicity
+                   voED.childElements[]        //the description of the contents of the ED. both 'simple' and complex
+                       description
+                       code
+                       short
+                       comments
+                       datatypes[]
+                           code
+                           vs
+                               strength
+                               vs
+                                   url
+
+
+                */
+
+
+
+
                 var extensionDefinition = {resourceType:'StructureDefinition'};
 
                 Utilities.setAuthoredByClinFhir(extensionDefinition);      //adds the 'made by clinfhir' extension...
