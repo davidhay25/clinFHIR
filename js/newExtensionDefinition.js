@@ -1,4 +1,3 @@
-/*has been deprectde - don't call make function - expensive! */
 
 angular.module("sampleApp").controller('extensionDefCtrl',
         function ($rootScope,$scope,$uibModal,appConfigSvc,GetDataFromServer,Utilities,modalService,
@@ -43,23 +42,17 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                         description:item.description,
                         isCoded:analysis.isCoded});
                 }
-
-
-
-                /*
-                
-                 */
             }
 
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(standardResourceTypes) {
                     $scope.allResourceTypes = standardResourceTypes;       //use to define the context for an extension...
-
                 }
             );
 
             $scope.conformanceSvr = appConfigSvc.getCurrentConformanceServer();
 
+            //not sure about this...
             if ($rootScope.userProfile && $rootScope.userProfile.extDef) {
                 $scope.input.publisher = $rootScope.userProfile.extDef.defaultPublisher;
             }
@@ -79,16 +72,13 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                                 if (['id','meta','implicitRules','language','contained','extension','modifierExtension'].indexOf(ar[ar.length-1]) == -1){
                                     $scope.paths.push(path);
                                 }
-
                             })
                         }
-
                     },
                     function(err) {
                         console.log(err)
                     }
                 )
-
             };
 
             $scope.selectContext = function(context) {
@@ -102,10 +92,6 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                     }
                 }
             };
-
-
-
-
 
             $scope.removeResourceType = function(inx) {
                 $scope.selectedResourceTypes.splice(inx,1);
@@ -131,8 +117,6 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                                 console.log('close')
                             })
 
-
-
                         }, function(err){
                             console.log(err)
                             $scope.validateResults = err.data;
@@ -141,30 +125,13 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                         $scope.showWaiting = false;
                     });
 
-
-
-
-
-
                 } else {
                     $scope.showWaiting = false;
                 }
 
             };
             
-            $scope.setBindingDEP = function() {
-                $uibModal.open({
-                    backdrop: 'static',      //means can't close by clicking on the backdrop.
-                    keyboard: false,       //same as above.
-                    templateUrl: 'modalTemplates/vsFinder.html',
-                    size: 'lg',
-                    controller: 'vsFinderCtrl'
-                }).result.then(
-                    function (vo) {
-                        console.log(vo)
-                    }
-                )
-            };
+
 
             //?? should do this when about to save as well
             $scope.checkEDExists = function(name) {
@@ -207,19 +174,16 @@ angular.module("sampleApp").controller('extensionDefCtrl',
             //add a new child element...
             $scope.addChild = function () {
                 $uibModal.open({
-
                     templateUrl: 'modalTemplates/newExtensionChild.html',
-
                     controller: function($scope,resourceCreatorSvc){
                         var that = this;
 
-                        
                         $scope.selectedDataTypes = [];     //array of selected datatypes
                         $scope.dataTypes = resourceCreatorSvc.getDataTypesForProfileCreator();
 
-
+                        //add a new type for this child
                         $scope.addDataType = function () {
-                            //make sure it's not already in the list...
+                            //make sure it's not already in the list of selected types...
                             for (var i=0; i< $scope.selectedDataTypes.length; i++){
                                 if ($scope.selectedDataTypes[i].description == $scope.dataType.description) {
                                     return;
@@ -232,7 +196,6 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                         };
 
                         $scope.removeDT = function(inx) {
-                            //console.log(inx)
                             $scope.selectedDataTypes.splice(inx,1)
                         };
 
@@ -262,7 +225,6 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                             var result = {};
                             result.code = $scope.code;
                             result.description = $scope.description;
-                          //  result.short = $scope.description;
                             result.dataTypes = $scope.selectedDataTypes;
                             $scope.$close(result);
 
@@ -274,14 +236,8 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                     function(result) {
                         //console.log(result)
                         $scope.childElements.push(result);
-
-                        makeSD()
-
-
-
+                        makeSD(); //update the SD for display...
                     })
-
-
                 };
 
 
@@ -327,10 +283,10 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                         {valueString:currentUser.email})
                 }
 
-
-
                 //the version of fhir that this SD is being deployed against...
-                var fhirVersion = $scope.conformanceSvr.version;        //get from the conformance server
+                //var fhirVersion = $scope.conformanceSvr.version;        //get from the conformance server
+
+                var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
                 var name = $scope.input.name;       //the name of the extension
                 var definition = $scope.input.description || $scope.input.name;       //the defintion of the extension. It is required...
                 var comments = $scope.input.description;       //the name of the extension
@@ -338,10 +294,6 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 
                 extensionDefinition.id = name;
                 extensionDefinition.url = $scope.input.url;
-
-                //to allow for proxied requests...
-                //var cannonicalUrl =  $scope.conformanceSvr.realUrl || $scope.conformanceSvr.url;
-                //extensionDefinition.url = cannonicalUrl + "StructureDefinition/"+name;
 
                 //the format for a simple extensionDefinition SD is different to a complex one...
                 var extensionTypeIsMultiple = false;
@@ -358,8 +310,6 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 extensionDefinition.contextType = "resource";
                 extensionDefinition.description = comments;
 
-                //if no context defined, then allow all
-
                 if ($scope.selectedResourceTypes.length == 0) {
                     extensionDefinition.context = ['*'];
                 } else {
@@ -371,12 +321,11 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 }
 
                 //at the time of writing (Oct 12), the implementaton of stu3 varies wrt 'code' & 'keyword'. Remove this eventually...
-                extensionDefinition.identifier = [{system:"http://clinfhir.com",value:"author"}]
+                //sep 2017 - extensionDefinition.identifier = [{system:"http://clinfhir.com",value:"author"}]
 
                 if (fhirVersion == 2) {
                     extensionDefinition.kind='datatype';
                     extensionDefinition.constrainedType = 'Extension';      //was set to 'kind' which is the search name!
-                   // extensionDefinition.code = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
                     extensionDefinition.base = 'http://hl7.org/fhir/StructureDefinition/Extension';
                 } else if (fhirVersion ==3) {
                     extensionDefinition.kind='complex-type';
@@ -385,9 +334,6 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                     extensionDefinition.baseDefinition = 'http://hl7.org/fhir/StructureDefinition/Extension';
                     extensionDefinition.derivation = 'constraint';
 
-                   // extensionDefinition.contextType = "resource";// "datatype";
-                   // extensionDefinition.context=["Element"];
-                   // extensionDefinition.keyword = [{system:'http://fhir.hl7.org.nz/NamingSystem/application',code:'clinfhir'}]
                 }
 
                 var min,max;
@@ -446,21 +392,22 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
                 $scope.jsonED = extensionDefinition;    //just for display
 
-                //console.log(JSON.stringify(extensionDefinition));
-
-
 
                 if (fhirVersion == 3 && extensionDefinition.snapshot && extensionDefinition.snapshot.element
                     && extensionDefinition.snapshot.element.length > 0) {
                     delete extensionDefinition.snapshot.element[0].type;
                 }
 
-
-
                 //ensure that all the elements have the name set...
                 extensionDefinition.snapshot.element.forEach(function(ed){
-                    ed.name = name;
-                })
+                    //sep 2017 - why on earth am I doing this ????
+                    //ed.name = name;
+
+                    if (!ed.name) {
+                        ed.name = 'Name not set'
+                    }
+
+                });
 
 
                 return extensionDefinition;
@@ -499,12 +446,15 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                     valueName = valueName[0].toUpperCase()+valueName.substr(1);
                 }
 
-                var ed3 = {path : extensionRoot + '.value'+valueName,name: vo.name,short:vo.short,definition:vo.definition,
+               // var ed3 = {path : extensionRoot + '.value'+valueName,name: vo.name,short:vo.short,definition:vo.definition,
+                 //   comments:vo.comments,definition:vo.description,min:vo.min,max:vo.max,type:[]};
+
+                var ed3 = {path : extensionRoot + '.value'+valueName,name: vo.code,short:vo.short,definition:vo.definition,
                     comments:vo.comments,definition:vo.description,min:vo.min,max:vo.max,type:[]};
+
+
                 vo.dataTypes.forEach(function(type){
-
                     ed3.base = {path: ed3.path,min:ed3.min, max:ed3.max};
-
                     ed3.type.push({code:type.code})
 
                     if (type.vs) {

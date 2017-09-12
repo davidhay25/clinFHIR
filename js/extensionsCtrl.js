@@ -84,7 +84,7 @@ angular.module("sampleApp")
 
                 if (user) {
                     console.log(user)
-                    //$rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+
                     securitySvc.setCurrentUser(user);
                     $scope.$digest() ;  //as this event occurs outside of angular apparently..
                 }
@@ -284,8 +284,6 @@ angular.module("sampleApp")
                 }
                 getExtensions(query,downLoadName)
 
-                //because I have to proxy Grahames server. Don't really like this...
-               // $scope.conformanceServer = conformanceServer.realUrl || conformanceServer.url;  //for the detail display
 
             }
 
