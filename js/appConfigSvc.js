@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-09-09';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-09-14';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -31,14 +31,25 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.docrefDescription = 'http://clinfhir.com/fhir/StructureDefinition/docrefDescription';
         defaultConfig.standardExtensionUrl.simpleExtensionUrl = 'http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl';
         defaultConfig.standardExtensionUrl.clinFHIRCreated = 'http://clinfhir.com/fhir/StructureDefinition/cfAuthor';
-        defaultConfig.standardExtensionUrl.userEmail = 'http:www.clinfhir.com/StructureDefinition/userEmail';
-        defaultConfig.standardExtensionUrl.scenarioProvenance = 'http:www.clinfhir.com/StructureDefinition/scenarioProvenance';
-        defaultConfig.standardExtensionUrl.scenarioNote = 'http:www.clinfhir.com/StructureDefinition/scenarioNote';
-        defaultConfig.standardExtensionUrl.provenanceTargetUrl = 'http:www.clinfhir.com/StructureDefinition/provenanceTargetUrl';
-        defaultConfig.standardExtensionUrl.discriminatorUrl = 'http:www.clinfhir.com/StructureDefinition/discriminatorUrl';
-        defaultConfig.standardExtensionUrl.conceptMapUrl = 'http:www.clinfhir.com/StructureDefinition/conceptMapUrl';
+        defaultConfig.standardExtensionUrl.userEmail = 'http://clinfhir.com/StructureDefinition/userEmail';
+        //defaultConfig.standardExtensionUrl.userEmail = 'http:www.clinfhir.com/StructureDefinition/userEmail';
+       // defaultConfig.standardExtensionUrl.scenarioProvenance = 'http:www.clinfhir.com/StructureDefinition/scenarioProvenance';
+      //  defaultConfig.standardExtensionUrl.scenarioNote = 'http:www.clinfhir.com/StructureDefinition/scenarioNote';
+      //  defaultConfig.standardExtensionUrl.provenanceTargetUrl = 'http:www.clinfhir.com/StructureDefinition/provenanceTargetUrl';
+      //  defaultConfig.standardExtensionUrl.discriminatorUrl = 'http:www.clinfhir.com/StructureDefinition/discriminatorUrl';
+      //  defaultConfig.standardExtensionUrl.conceptMapUrl = 'http:www.clinfhir.com/StructureDefinition/conceptMapUrl';
 
-        defaultConfig.standardExtensionUrl.resourceTypeUrl = 'http:www.clinfhir.com/StructureDefinition/resourceTypeUrl';
+        //defaultConfig.standardExtensionUrl.resourceTypeUrl = 'http:www.clinfhir.com/StructureDefinition/resourceTypeUrl';
+
+
+        defaultConfig.standardExtensionUrl.scenarioProvenance = 'http://clinfhir.com/StructureDefinition/scenarioProvenance';
+        defaultConfig.standardExtensionUrl.scenarioNote = 'http://clinfhir.com/StructureDefinition/scenarioNote';
+        defaultConfig.standardExtensionUrl.provenanceTargetUrl = 'http://clinfhir.com/StructureDefinition/provenanceTargetUrl';
+        defaultConfig.standardExtensionUrl.discriminatorUrl = 'http://clinfhir.com/StructureDefinition/discriminatorUrl';
+        defaultConfig.standardExtensionUrl.conceptMapUrl = 'http://clinfhir.com/StructureDefinition/conceptMapUrl';
+
+        defaultConfig.standardExtensionUrl.resourceTypeUrl = 'http://clinfhir.com/StructureDefinition/resourceTypeUrl';
+
 
 
 

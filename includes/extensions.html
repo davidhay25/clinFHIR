@@ -249,10 +249,10 @@
                         <div class="col-md-10 col-sm-10">
                             <div class="panel panel-default">
                                 <table class="table table-condensed table-bordered">
-                                    <tr><th>Name</th><th>Short</th><th>Mult</th><th>DataType</th><th>Binding</th></tr>
+                                    <tr><th>Code</th><th>Definition</th><th>Mult</th><th>DataType</th><th>Binding</th></tr>
                                     <tr ng-repeat="child in analysis.children">
-                                        <td>{{child.ed.name}}</td>
-                                        <td>{{child.ed.short}}</td>
+                                        <td>{{child.code}}</td>
+                                        <td>{{child.ed.definition}}</td>
                                         <td>{{child.ed.min}}...{{child.ed.max}}</td>
                                         <td>
                                             <div ng-repeat="dt in child.ed.type track by $index">

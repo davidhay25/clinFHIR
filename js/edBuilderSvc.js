@@ -44,7 +44,7 @@ angular.module("sampleApp")
 
                 if (isComplex) {
                     //process in 3-element segments...
-                    for (var i=3; i< arED.length; i=i+3) {
+                    for (var i=2; i< arED.length; i=i+3) {
                         var ar = arED.slice(i,i+3);
                         var child = processTriplet(ar);
                         console.log(child);
@@ -88,13 +88,13 @@ console.log(voED)
                         var lastSegment = ar[ar.length-1];
 
                         if (lastSegment == 'url') {
-                            child.code = ed.name;      //present in all 3 EDs
+                            child.code = ed.fixedUri;
                         } else if (lastSegment.indexOf('value')>-1) {
                             //This has the the value - and the types...
 
-                            child.dataTypes = []
+                            child.dataTypes = [];
                             ed.type.forEach(function (typ) {
-                                var t = {code:typ.code,description:typ.code}
+                                var t = {code:typ.code,description:typ.code};
                                 if (ed.binding) {
                                     t.vs = {strength: ed.binding.strength};
                                     t.vs.vs = {url: ed.binding.valueSetUri};
@@ -106,9 +106,9 @@ console.log(voED)
                         } else {
                             child.min = ed.min;
                             child.max = ed.max;
-                            child.short = ed.short;
+                           // child.short = ed.short;
                             child.description = ed.definition;
-                            child.comments = ed.comments;
+                           // child.comments = ed.comments;
                         }
 
 
@@ -255,15 +255,21 @@ console.log(voED)
                 var extensionTypeIsMultiple = false;
                 if (voED.childElements.length > 1) {
                     extensionTypeIsMultiple = true;
-                    var ed1 = {path : 'Extension',name: voED.extensionName,short:voED.short,definition:definition,
+                    var ed1 = {path : 'Extension',short:voED.short,definition:definition,
                         comments:comments,min:min,max:max,type:[{code:'Extension'}]};
 
                     ed1.id = ed1.path;
                     extensionDefinition.snapshot.element.push(ed1);
 
-                    var edSlicing = {path : 'Extension.extension',name: voED.extensionName,short:voED.short,definition:definition,
+                    var edSlicing = {path : 'Extension.extension',short:voED.short,definition:definition,
                         comments:comments,min:min,max:max,type:[{code:'Extension'}]};
-                    edSlicing.slicing = {discriminator:['url'],ordered:false,rules:'open'}
+
+                    if (fhirVersion == 2) {
+                        edSlicing.slicing = {discriminator:['url'],ordered:false,rules:'open'}
+                    } else {
+                        edSlicing.slicing = {discriminator:[{type:'value',path:'url'}],ordered:false,rules:'open'}
+                    }
+
 
                     edSlicing.id = edSlicing.path;
                     extensionDefinition.snapshot.element.push(edSlicing);
@@ -271,17 +277,11 @@ console.log(voED)
                 }
 
 
-                //the format for a simple extensionDefinition SD is different to a complex one...
-               // var extensionTypeIsMultiple = false;
-               // if ($scope.childElements.length > 1) {
-                 //   extensionTypeIsMultiple = true;
-               // }
-
                 //for each defined child, add the component ElementDefinition elements...
                 voED.childElements.forEach(function(ce,inx){
                     var vo = ce;
-                    vo.min = voED.min;
-                    vo.max = voED.max;
+                    vo.min = min;   //set from code above...
+                    vo.max = max;
 
                     extensionDefinition.snapshot.element =
                         extensionDefinition.snapshot.element.concat(makeChildED(vo,extensionTypeIsMultiple,inx))
@@ -290,18 +290,19 @@ console.log(voED)
                 });
 
 
+                //type in first element isn't allowed...
                 if (voED.fhirVersion == 3 && extensionDefinition.snapshot && extensionDefinition.snapshot.element
                     && extensionDefinition.snapshot.element.length > 0) {
                     delete extensionDefinition.snapshot.element[0].type;
                 }
-
+/*
                 //ensure that all the elements have the name set as it's a required element...
                 extensionDefinition.snapshot.element.forEach(function(ed){
                     if (!ed.name) {
                         ed.name = 'Name not set'
                     }
                 });
-
+*/
 
                 return extensionDefinition;
 
@@ -318,16 +319,17 @@ console.log(voED)
                         extensionRoot = 'Extension.extension';
                     }
 
+                    //todo - do we want label at all? it's optional, what value does it have
                     var arED = [];
-                    var ed1 = {path : extensionRoot,name: vo.code,min:vo.min,max:vo.max,
+                    var ed1 = {path : extensionRoot,label: vo.code,min:vo.min,max:vo.max,
                         short:vo.short,definition:vo.description,
-                        comments:vo.comments,type:[{code:'Extension'}]};
+                        type:[{code:'Extension'}]};
 
                     ed1.base = {path: ed1.path,min:ed1.min, max:ed1.max};
 
 
-                    var ed2 = {path : extensionRoot + '.url',name: vo.code,representation:['xmlAttr'],
-                        comments:vo.comments,definition:vo.description,min:1,max:"1",type:[{code:'uri'}],fixedUri:vo.code};
+                    var ed2 = {path : extensionRoot + '.url',label: vo.code,representation:['xmlAttr'],
+                        definition:vo.description,min:1,max:"1",type:[{code:'uri'}],fixedUri:vo.code};
 
                     ed2.base = {path: ed2.path,min:ed2.min, max:ed2.max};
 
@@ -338,8 +340,8 @@ console.log(voED)
                         valueName = valueName[0].toUpperCase()+valueName.substr(1);
                     }
 
-                    var ed3 = {path : extensionRoot + '.value'+valueName,name: vo.code,short:vo.short,definition:vo.definition,
-                        comments:vo.comments,definition:vo.description,min:vo.min,max:vo.max,type:[]};
+                    var ed3 = {path : extensionRoot + '.value'+valueName,label: vo.code,short:vo.short,definition:vo.definition,
+                        definition:vo.description,min:vo.min,max:vo.max,type:[]};
 
 
                     vo.dataTypes.forEach(function(type){
