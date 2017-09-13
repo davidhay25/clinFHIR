@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-09-14';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-09-14a';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -160,7 +160,7 @@ angular.module("sampleApp")
 
         defaultConfig.allKnownServers.push({name:'GoFHIR',version:3,url:"https://syntheticmass.mitre.org/fhir/",everythingOperation:true});
 
-        //defaultConfig.allKnownServers.push({name:'HSPC',version:3,url:"https://api3.hspconsortium.org/fhirconnect14/open/",everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:'HSPC-14',version:3,url:"https://api3.hspconsortium.org/fhirconnect14/open/",everythingOperation:true});
         defaultConfig.allKnownServers.push({name:'HSPC Careplan',version:3,url:"https://api-stu3.hspconsortium.org/careplantest/open/",everythingOperation:true});
 
         //https://api-stu3.hspconsortium.org/careplantest/open

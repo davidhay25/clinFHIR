@@ -8,10 +8,9 @@ angular.module("sampleApp")
             parseED : function(SD) {
                 //parse a SD into the internal representation of an ED - the voED object
                 //if a simple ED then there will be 3 ElementDefinition children
-                //if a complex ED then there will be 3 + (n*3) elements.
+                //if a complex ED then there will be 2 + (n*3) elements.
                 //each triplet corresponds to a single childElement[] in the voED
 
-                console.log(SD);
 
                 if (!SD || !SD.snapshot || !SD.snapshot.element || SD.snapshot.element.length < 3) {
                     return;
@@ -43,7 +42,7 @@ angular.module("sampleApp")
                 }
 
                 if (isComplex) {
-                    //process in 3-element segments...
+                    //process in 3-element batches...
                     for (var i=2; i< arED.length; i=i+3) {
                         var ar = arED.slice(i,i+3);
                         var child = processTriplet(ar);
@@ -54,26 +53,7 @@ angular.module("sampleApp")
                 } else {
                     var child = processTriplet(arED);   //will look at the first 3 EDs,,
                     voED.childElements.push(child);
-/*
-                    return voED;
-
-                    var item = {};
-                    item.code = analysis.name;
-                    item.description = analysis.description;
-                    item.short = analysis.short;
-                    var dt = analysis.dataTypes[0];         //there's only 1 for a simple extension...
-                    item.dataTypes = analysis.dataTypes;    //{code: description: isCoded:
-
-                    voED.childElements.push({dataTypes: [{code: dt.code,description: dt.code}],
-                        description:item.description,
-                        isCoded:analysis.isCoded});
-                    */
                 }
-
-
-
-
-console.log(voED)
 
                 return voED;
 
@@ -106,9 +86,7 @@ console.log(voED)
                         } else {
                             child.min = ed.min;
                             child.max = ed.max;
-                           // child.short = ed.short;
                             child.description = ed.definition;
-                           // child.comments = ed.comments;
                         }
 
 
@@ -117,35 +95,6 @@ console.log(voED)
 
 
 
-
-                    //first has the descriptive stuff
-                    //var ed1 = arED[0];
-
-
-
-                    //second has the url used for complex ED. It's also
-
-/*
-                    var ed1 = {path : extensionRoot,name: vo.code,min:vo.min,max:vo.max,
-                        short:vo.short,definition:vo.description,
-                        comments:vo.comments,type:[{code:'Extension'}]};
-*/
-
-
-
-
-/* var ed3 = {path : extensionRoot + '.value'+valueName,name: vo.code,short:vo.short,definition:vo.definition,
-                        comments:vo.comments,definition:vo.description,min:vo.min,max:vo.max,type:[]};
-
-
-                    vo.dataTypes.forEach(function(type){
-                        ed3.base = {path: ed3.path,min:ed3.min, max:ed3.max};
-                        ed3.type.push({code:type.code})
-
-                        if (type.vs) {
-                            //this is a bound valueset
-                            ed3.binding = {strength : type.vs.strength,valueSetUri:type.vs.vs.url,description:vo.description}
-                        }*/
 
                     return child;
 
@@ -295,14 +244,7 @@ console.log(voED)
                     && extensionDefinition.snapshot.element.length > 0) {
                     delete extensionDefinition.snapshot.element[0].type;
                 }
-/*
-                //ensure that all the elements have the name set as it's a required element...
-                extensionDefinition.snapshot.element.forEach(function(ed){
-                    if (!ed.name) {
-                        ed.name = 'Name not set'
-                    }
-                });
-*/
+
 
                 return extensionDefinition;
 
@@ -311,7 +253,12 @@ console.log(voED)
                 //build the ElementDefinitions for a single child
                 function makeChildED(vo,isComplex,index){
 
-                    vo.description = vo.description || 'No Description'
+                    //code is required for complex extensions, so make one up if not present...
+                    if (! vo.code && vo.dataTypes && vo.dataTypes.length > 0) {
+                        vo.code = vo.dataTypes[0].code + index
+                    }
+
+                    vo.description = vo.description || 'No Description';
 
                     //if complex, then the root is '1 level down'. Remember we only support a single level of complexity...
                     var extensionRoot = 'Extension';

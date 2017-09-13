@@ -112,6 +112,7 @@ angular.module("sampleApp")
                     templateUrl: 'modalTemplates/newExtension.html',
                     size: 'lg',
                     controller: "extensionDefCtrl",
+                    backdrop: 'static',
                     resolve : {
                         currentExt: function () {          //the default extension
                             return null;
@@ -155,6 +156,7 @@ angular.module("sampleApp")
                     templateUrl: 'modalTemplates/newExtension.html',
                     size: 'lg',
                     controller: "extensionDefCtrl",
+                    backdrop : 'static',
                     resolve : {
                         currentExt: function () {          //the default extension
                             return $scope.selectedExtension;
@@ -347,6 +349,14 @@ angular.module("sampleApp")
 
             function configureForExtensionDef(ed) {
                 $scope.selectedExtension = ed ;
+
+
+                $scope.extensionDefForDisplay = angular.copy(ed);
+                $scope.extensionDefForDisplay.snapshot.element.forEach(function (ed) {
+                    delete ed.myMeta;
+                })
+
+
                 $scope.permissions = securitySvc.getPermissons(ed);     //what the current user can do with this resource...
                 $scope.isAuthoredByClinFhir = Utilities.isAuthoredByClinFhir(ed);
 

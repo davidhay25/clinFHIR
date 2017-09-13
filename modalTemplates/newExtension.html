@@ -97,9 +97,9 @@
 
 
                                 <h5>Resources (and paths) that can use this Extension</h5>
-                                <div class="row"  ng-repeat="typ in selectedResourceTypes">
+                                <div class="row"  ng-repeat="pth in selectedResourcePaths">
                                     <div class="col-sm-11 col-md-11">
-                                        {{typ}}
+                                        {{pth}}
                                     </div>
 
                                     <div class="col-sm-1 col-md-1">
@@ -108,7 +108,11 @@
                                     </div>
                                 </div>
 
+                                <button class="btn btn-link pull-right" class="btn btn-link" ng-click="addContext()">Add Context</button>
 
+
+
+                                <!--
                                 <select ng-change="selectContextType(input.type)" ng-model="input.type" class="form-control"
                                         uib-popover="Select the resource type in this dropdown, then the path in the next dropdown"
                                         popover-placement="left"
@@ -125,10 +129,10 @@
                                         ng-options="path for path in paths">
                                 </select>
 
+                                -->
+
 
                             </div>
-
-
                     </div>
                 </div>
 
@@ -149,7 +153,14 @@
                         <td>{{child.code}}</td>
                         <td>{{child.description}}</td>
                         <td>
-                            <div ng-repeat="dt in child.dataTypes">{{dt.description}}</div>
+                            <div ng-repeat="dt in child.dataTypes">{{dt.description}}
+                                <div><em>{{dt.vs.vs.url}}  {{dt.vs.strength}}</em></div>
+
+
+                            </div>
+
+
+
                         </td>
                         <td><i class="glyphicon glyphicon-remove" ng-click="removeChild($index)"></i> </td>
                     </tr>

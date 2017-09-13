@@ -472,7 +472,7 @@
 
                 </uib-tab>
                 <uib-tab heading="Json">
-                    <pre>{{selectedExtension | json}}</pre>
+                    <pre>{{extensionDefForDisplay | json}}</pre>
                 </uib-tab>
                 <uib-tab heading="Analysis">
                     <pre>{{analysis | json}}</pre>
@@ -483,7 +483,7 @@
                     <div class="row">
                         <div class="col-md-7 col-sm-7 col-xs-7">
                             <table class="table table-condensed">
-                                <tr ng-repeat="element in selectedExtension.snapshot.element">
+                                <tr ng-repeat="element in extensionDefForDisplay.snapshot.element">
                                     <td>
                                         <a href="#" ng-click="input.selectedElement=element">{{element.path}}</a>
                                     </td>

@@ -76,31 +76,9 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 $scope.input.publisher = $rootScope.userProfile.extDef.defaultPublisher;
             }
 
-            $scope.selectContextType = function(type) {
-                //get the paths for the given type...
 
-                var url = "http://hl7.org/fhir/StructureDefinition/"+type.name
-                console.log(url)
-                GetDataFromServer.findConformanceResourceByUri(url).then(
-                    function(profile) {
-                        $scope.paths = [];
-                        if (profile && profile.snapshot && profile.snapshot.element) {
-                            profile.snapshot.element.forEach(function(ed){
-                                var path = ed.path;
-                                var ar = path.split('.')
-                                if (['id','meta','implicitRules','language','contained','extension','modifierExtension'].indexOf(ar[ar.length-1]) == -1){
-                                    $scope.paths.push(path);
-                                }
-                            })
-                        }
-                    },
-                    function(err) {
-                        console.log(err)
-                    }
-                )
-            };
 
-            $scope.selectContext = function(context) {
+            $scope.selectContextDEP = function(context) {
 
                 if (context) {
                     if ($scope.selectedResourcePaths.indexOf(context) == -1) {
@@ -190,6 +168,65 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 })
             };
 
+
+            $scope.addContext = function(){
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/addContext.html',
+                    controller: function ($scope,allResourceTypes,GetDataFromServer) {
+                        var that = this;
+                        $scope.input = {};
+                        $scope.allResourceTypes = allResourceTypes;
+
+                        $scope.add= function () {
+                            var vo = {path:$scope.input.path};
+                            $scope.$close(vo)
+                        }
+
+                        $scope.selectContextType = function(type) {
+                            //get the paths for the given type...
+
+                            var url = "http://hl7.org/fhir/StructureDefinition/"+type.name
+                            console.log(url)
+                            GetDataFromServer.findConformanceResourceByUri(url).then(
+                                function(profile) {
+                                    $scope.paths = [];
+                                    if (profile && profile.snapshot && profile.snapshot.element) {
+                                        profile.snapshot.element.forEach(function(ed){
+                                            var path = ed.path;
+                                            var ar = path.split('.')
+                                            if (['id','meta','implicitRules','language','contained','extension','modifierExtension'].indexOf(ar[ar.length-1]) == -1){
+                                                $scope.paths.push(path);
+                                            }
+                                        })
+                                    }
+                                    $scope.input.path = $scope.paths[0];
+
+                                },
+                                function(err) {
+                                    console.log(err)
+                                }
+                            )
+                        };
+
+                    },
+                    resolve  : {
+                        allResourceTypes: function () {          //the default config
+                            return $scope.allResourceTypes;
+                        }
+                    }
+                }).result.then(
+                    function(result) {
+                        var contextPath = result.path;
+                        if (contextPath) {
+                            if ($scope.selectedResourcePaths.indexOf(contextPath) == -1) {
+                                $scope.selectedResourcePaths.push(contextPath)
+
+                                makeSD();
+                            }
+                        }
+                    })
+            };
+
             //add a new child element...
             $scope.addChild = function () {
                 $uibModal.open({
@@ -217,6 +254,11 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                         $scope.removeDT = function(inx) {
                             $scope.selectedDataTypes.splice(inx,1)
                         };
+
+
+
+
+
 
                         $scope.setBinding = function(dt) {
                             console.log(dt);
@@ -254,6 +296,9 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                     //this is called when the 'add child element' has been saved
                     function(result) {
                         //console.log(result)
+
+
+
                         $scope.childElements.push(result);
                         makeSD(); //update the SD for display...
                     })
