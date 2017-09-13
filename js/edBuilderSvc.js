@@ -8,8 +8,14 @@ angular.module("sampleApp")
             parseED : function(SD) {
                 //parse a SD into the internal representation of an ED - the voED object
                 //if a simple ED then there will be 3 ElementDefinition children
-                //if a complex ED then there will be 2 + (n*3) elements.
+                //if a complex ED then there will be 3 + (n*3) elements.
                 //each triplet corresponds to a single childElement[] in the voED
+
+                console.log(SD);
+
+                if (!SD || !SD.snapshot || !SD.snapshot.element || SD.snapshot.element.length < 3) {
+                    return;
+                }
 
                 var arED = SD.snapshot.element;     //all the child elements in the
 
@@ -20,24 +26,36 @@ angular.module("sampleApp")
                 voED.description = SD.description;
                 voED.short = SD.short;
                 voED.publisher = SD.publisher;
+                voED.selectedResourcePaths = []
                 if (SD.context) {
-                    voED.selectedResourceTypes = []
+
                     if (SD.context[0] !== '*'){
+
                         SD.context.forEach(function(ctx){
-                            voED.selectedResourceTypes.push(ctx)
+                            voED.selectedResourcePaths.push(ctx)
                         })
                     }
                 }
                 voED.childElements = [];
                 var isComplex = false;
-                if (SD.snapshot.element.length > 3) {
+                if (arED.length > 3) {
                     isComplex = true;
                 }
 
                 if (isComplex) {
-
+                    //process in 3-element segments...
+                    for (var i=3; i< arED.length; i=i+3) {
+                        var ar = arED.slice(i,i+3);
+                        var child = processTriplet(ar);
+                        console.log(child);
+                        voED.childElements.push(child);
+                    }
 
                 } else {
+                    var child = processTriplet(arED);   //will look at the first 3 EDs,,
+                    voED.childElements.push(child);
+/*
+                    return voED;
 
                     var item = {};
                     item.code = analysis.name;
@@ -49,32 +67,73 @@ angular.module("sampleApp")
                     voED.childElements.push({dataTypes: [{code: dt.code,description: dt.code}],
                         description:item.description,
                         isCoded:analysis.isCoded});
+                    */
                 }
+
 
 
 
 console.log(voED)
 
+                return voED;
+
                 //process 3 sequential ED elements into a single entry for childElements.
-                //This sill only work reliably on SD's published by CF
-                function processTriplet() {
+                //This will only work reliably on SD's published by CF
+                function processTriplet(arED) {
                     var child = {};     //the child element
+
+                    //retrieve a specific part of the data from different elements...
+                    arED.forEach(function (ed) {
+                        var ar = ed.path.split('.');
+                        var lastSegment = ar[ar.length-1];
+
+                        if (lastSegment == 'url') {
+                            child.code = ed.name;      //present in all 3 EDs
+                        } else if (lastSegment.indexOf('value')>-1) {
+                            //This has the the value - and the types...
+
+                            child.dataTypes = []
+                            ed.type.forEach(function (typ) {
+                                var t = {code:typ.code,description:typ.code}
+                                if (ed.binding) {
+                                    t.vs = {strength: ed.binding.strength};
+                                    t.vs.vs = {url: ed.binding.valueSetUri};
+                                }
+                                //t.description = typ.description;
+                                child.dataTypes.push(t)
+
+                            })
+                        } else {
+                            child.min = ed.min;
+                            child.max = ed.max;
+                            child.short = ed.short;
+                            child.description = ed.definition;
+                            child.comments = ed.comments;
+                        }
+
+
+
+                    })
+
+
+
+
                     //first has the descriptive stuff
-                    var ed1 = ed[0];
-                    child.code = ed1.name;
-                    child.min = ed1.min;
-                    child.max = ed1.max;
-                    child.short = ed1.short;
-                    child.description = ed1.definition;
-                    child.comments = ed1.comments;
-                    
+                    //var ed1 = arED[0];
+
+
+
+                    //second has the url used for complex ED. It's also
+
 /*
                     var ed1 = {path : extensionRoot,name: vo.code,min:vo.min,max:vo.max,
                         short:vo.short,definition:vo.description,
                         comments:vo.comments,type:[{code:'Extension'}]};
 */
 
-                    //third has the the value...
+
+
+
 /* var ed3 = {path : extensionRoot + '.value'+valueName,name: vo.code,short:vo.short,definition:vo.definition,
                         comments:vo.comments,definition:vo.description,min:vo.min,max:vo.max,type:[]};
 
@@ -88,6 +147,8 @@ console.log(voED)
                             ed3.binding = {strength : type.vs.strength,valueSetUri:type.vs.vs.url,description:vo.description}
                         }*/
 
+                    return child;
+
                 }
 
             },
@@ -99,7 +160,7 @@ console.log(voED)
                     voED.short
                     voED.url  ($scope.input.url)
                     voED.publisher; //$scope.input.publisher;
-                    voED.selectedResourcePaths[]        - the resource paths that this extension can apply to ($scope.selectedResourceTypes)
+                    voED.selectedResourceTypes[]        - the resource paths that this extension can apply to ($scope.selectedResourceTypes)
                     voED.fhirVersion
                     voED.multiplicity //$scope.input.multiplicity
                     voED.childElements[]        //the description of the contents of the ED. both 'simple' and complex

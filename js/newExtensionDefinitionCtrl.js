@@ -6,20 +6,33 @@ angular.module("sampleApp").controller('extensionDefCtrl',
             $scope.childElements = [];      //array of child elements
             $scope.input ={};
             $scope.input.multiplicity = 'opt';
-            $scope.selectedResourceTypes = [];
+            $scope.selectedResourcePaths = [];
 
             //if being edited...
             if (currentExt) {
 
-                edBuilderSvc.parseED(currentExt)
+
+                var parsedED = edBuilderSvc.parseED(currentExt);
+                console.log(parsedED);
+
 
                 $scope.canSaveEd = true;
                 $scope.currentExt = currentExt;
-                $scope.input.name = currentExt.name;
-                $scope.input.url = currentExt.url;
-                $scope.input.description = currentExt.description;
-                $scope.input.short = currentExt.short;
-                $scope.input.publisher = currentExt.publisher;
+
+
+
+                $scope.input.name = parsedED.extensionName; //currentExt.name;
+                $scope.input.url = parsedED.url;// currentExt.url;
+                $scope.input.description = parsedED.description; // currentExt.description;
+                $scope.input.short = parsedED.short; //currentExt.short;
+                $scope.input.publisher = parsedED.publisher; //) currentExt.publisher;
+
+
+                $scope.selectedResourcePaths = parsedED.selectedResourcePaths;      //the types (actually paths) where this extension can be applied
+
+                $scope.childElements = parsedED.childElements;
+
+                /*
                 if (currentExt.context) {
                     if (currentExt.context[0] !== '*'){
                         currentExt.context.forEach(function(ctx){
@@ -46,6 +59,8 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                         description:item.description,
                         isCoded:analysis.isCoded});
                 }
+
+                )*/
             }
 
             RenderProfileSvc.getAllStandardResourceTypes().then(
@@ -88,8 +103,8 @@ angular.module("sampleApp").controller('extensionDefCtrl',
             $scope.selectContext = function(context) {
 
                 if (context) {
-                    if ($scope.selectedResourceTypes.indexOf(context) == -1) {
-                        $scope.selectedResourceTypes.push(context)
+                    if ($scope.selectedResourcePaths.indexOf(context) == -1) {
+                        $scope.selectedResourcePaths.push(context)
                         delete $scope.paths;
                         delete $scope.input.type;
                         makeSD();
@@ -98,7 +113,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
             };
 
             $scope.removeResourceType = function(inx) {
-                $scope.selectedResourceTypes.splice(inx,1);
+                $scope.selectedResourcePaths.splice(inx,1);
                 makeSD();
             };
 
@@ -273,9 +288,8 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 delete $scope.validateResults;
             };
 
-            //build the StructueDefinition that describes this extension
+            //build the StructureDefinition that describes this extension
             makeSD = function() {
-
                 //here is where we construct the vo and call the makeSD service...
                 var voED = {};
                 voED.extensionName = $scope.input.name;
@@ -283,13 +297,15 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 voED.short = $scope.input.short;
                 voED.url =  $scope.input.url;
                 voED.publisher = $scope.input.publisher;
-                voED.selectedResourcePaths = $scope.selectedResourceTypes
+                voED.selectedResourcePaths = $scope.selectedResourcePaths;
                 voED.fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
                 voED.multiplicity = $scope.input.multiplicity;
                 voED.childElements = $scope.childElements;
 
                 var extensionDefinition = edBuilderSvc.makeED(voED);
                 $scope.jsonED = extensionDefinition;    //just for display
+
+                console.log(edBuilderSvc.parseED(extensionDefinition))
                 return extensionDefinition;
 
 
