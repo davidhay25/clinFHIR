@@ -201,6 +201,26 @@ angular.module("sampleApp")
                 + "<div>Term: " + appConfigSvc.getCurrentTerminologyServer().name + "</div>";
 
             $scope.showSelector = true;
+
+
+       //     $scope.toggleGraphZoom = function() {
+                $scope.toggleGraphZoom = function(){
+                    if ($scope.graphZoom) {
+                        $scope.leftPaneClass = "col-sm-2 col-md-2"
+                        $scope.midPaneClass = "col-md-5 col-sm-5"
+                        $scope.rightPaneClass = "col-md-5 col-sm-5";
+                    } else {
+                        $scope.leftPaneClass = "hidden"
+                        $scope.midPaneClass = "col-md-12 col-sm-12"
+                        $scope.rightPaneClass = "hidden";
+                    }
+                    $scope.graphZoom = !$scope.graphZoom
+                }
+
+                //$scope.toggleSelector()
+
+//            }
+
             $scope.toggleSelector = function(){
                 if ($scope.showSelector) {
                     $scope.leftPaneClass = "col-sm-2 col-md-2"

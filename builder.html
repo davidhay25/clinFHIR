@@ -215,7 +215,6 @@
                             {{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}}
                         </div>
 
-
                         <a ng-show = "showSelector && thingToDisplay=='scenario' " href="#" ng-click="toggleSelector()">Show Selector</a>
                         <a ng-hide = "showSelector || thingToDisplay!=='scenario'" href="#" ng-click="toggleSelector()">Hide Selector</a>
 
@@ -966,6 +965,13 @@
                         <uib-tab heading="Graph" select="redrawChart()">
                             <div class="row">
                                 <div class="col-md-12 col-sm-12">
+
+
+                                    <a ng-show = "graphZoom" href="#" ng-click="toggleGraphZoom()">UnZoom Graph</a>
+                                    <a ng-hide = "graphZoom" href="#" ng-click="toggleGraphZoom()">Zoom Graph</a>
+
+
+
                                      <span class="clickable iconSpacing pull-right" ng-show="filteredGraphView"
                                            ng-click="showAllInGraph()">Show All</span>
 
