@@ -661,88 +661,102 @@
                             <div class="row"  style="height:550px; overflow-y: auto;" >
                                 <div class="col-md-12 col-sm-12">
 
-                                    <button class="btn btn-link" ng-click="makeElementsPopulatedReport()">Make report</button>
 
+                                    <uib-tabset>
+                                        <uib-tab heading="List">
 
-                                    <div ng-repeat="res in populatedReport">
-                                        <div class="row">
-                                            <div class="col-md-12 col-sm-12">
-                                                <div class="banner">{{res.resourceType}}</div>
-                                            </div>
-                                        </div>
+                                            <table class="table table-bordered table-condensed">
+                                                <tr><th>Type</th><th>Text</th><th>Valid</th></tr>
+                                                <tr ng-repeat="entry in selectedContainer.bundle.entry">
+                                                    <td width="30%">
+                                                        <div class='clickable' ng-click="selectResource(entry)">
+                                                            {{entry.resource.resourceType}}
 
+                                                            <span ng-show="entry.isProfile"
+                                                                  uib-popover="{{entry.profile}}"
+                                                                  popover-placement="right"
+                                                                  popover-trigger="'mouseenter'"
 
-                                        <div class="row" ng-repeat="ele in res.elements">
-                                            <div class="col-md-6 col-sm-6">
-                                                {{ele.path}}
-                                            </div>
-                                            <div class="col-md-6 col-sm-6">
-                                                {{ele.text}}
-                                            </div>
-                                        </div>
-
-
-
-
-                                    </div>
-
-
-                                    <table class="table table-bordered table-condensed">
-                                        <tr><th>Type</th><th>Text</th><th>Valid</th></tr>
-                                        <tr ng-repeat="entry in selectedContainer.bundle.entry">
-                                            <td width="30%">
-                                                <div class='clickable' ng-click="selectResource(entry)">
-                                                    {{entry.resource.resourceType}}
-
-                                                    <span ng-show="entry.isProfile"
-                                                          uib-popover="{{entry.profile}}"
-                                                          popover-placement="right"
-                                                          popover-trigger="'mouseenter'"
-
-                                                          class="rounded-box profile">profile
+                                                                  class="rounded-box profile">profile
                                                     </span>
-                                                    <span ng-show="entry.isLogical"
-                                                          uib-popover="Logical models cannot be saved on the FHIR server"
-                                                          popover-placement="right"
-                                                          popover-trigger="'mouseenter'"
-                                                          class="rounded-box logical">logical
+                                                            <span ng-show="entry.isLogical"
+                                                                  uib-popover="Logical models cannot be saved on the FHIR server"
+                                                                  popover-placement="right"
+                                                                  popover-trigger="'mouseenter'"
+                                                                  class="rounded-box logical">logical
                                                     </span>
 
+                                                        </div>
+
+                                                    </td>
+                                                    <td>
+                                                        <p ng-bind-html="entry.resource.text.div"></p>
+
+
+
+                                                    </td>
+                                                    <td>
+                                                        <div ng-hide="entry.isLogical" ng-switch on="entry.valid" ng-click="validate(entry)">    <!-- todo - not a real bundlemember-->
+                                                            <div ng-switch-when="yes">
+                                                                <i class="glyphicon glyphicon-ok clickable pass"
+                                                                   title="Resource is valid">
+                                                                </i>
+                                                            </div>
+                                                            <div ng-switch-when="no">
+                                                                <i class="glyphicon glyphicon-remove clickable fail"
+                                                                   title="Resource is not valid">
+                                                                </i>
+                                                            </div>
+                                                            <div ng-switch-when="saved">
+                                                                <i class="glyphicon glyphicon-thumbs-up pass"
+                                                                   title="Resource is not valid">
+                                                                </i>
+                                                            </div>
+                                                            <div ng-switch-default>
+                                                                <i class="glyphicon glyphicon-question-sign clickable"
+                                                                   title="Validity not yet checked">
+                                                                </i>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+
+
+                                        </uib-tab>
+                                        <uib-tab heading="Report">
+                                            <button class="btn btn-link" ng-click="makeElementsPopulatedReport()">Make report</button>
+
+
+                                            <div ng-repeat="res in populatedReport">
+                                                <div class="row">
+                                                    <div class="col-md-12 col-sm-12">
+                                                        <div class="banner">{{res.resourceType}}</div>
+                                                    </div>
                                                 </div>
 
-                                            </td>
-                                            <td>
-                                                <p ng-bind-html="entry.resource.text.div"></p>
 
-
-
-                                            </td>
-                                            <td>
-                                                <div ng-hide="entry.isLogical" ng-switch on="entry.valid" ng-click="validate(entry)">    <!-- todo - not a real bundlemember-->
-                                                    <div ng-switch-when="yes">
-                                                        <i class="glyphicon glyphicon-ok clickable pass"
-                                                           title="Resource is valid">
-                                                        </i>
+                                                <div class="row" ng-repeat="ele in res.elements">
+                                                    <div class="col-md-6 col-sm-6">
+                                                        {{ele.path}}
                                                     </div>
-                                                    <div ng-switch-when="no">
-                                                        <i class="glyphicon glyphicon-remove clickable fail"
-                                                           title="Resource is not valid">
-                                                        </i>
-                                                    </div>
-                                                    <div ng-switch-when="saved">
-                                                        <i class="glyphicon glyphicon-thumbs-up pass"
-                                                           title="Resource is not valid">
-                                                        </i>
-                                                    </div>
-                                                    <div ng-switch-default>
-                                                        <i class="glyphicon glyphicon-question-sign clickable"
-                                                           title="Validity not yet checked">
-                                                        </i>
+                                                    <div class="col-md-6 col-sm-6">
+                                                        {{ele.text}}
                                                     </div>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    </table>
+
+
+
+
+                                            </div>
+                                        </uib-tab>
+                                    </uib-tabset>
+
+
+
+
+
+
                                 </div>
 
                             </div>
