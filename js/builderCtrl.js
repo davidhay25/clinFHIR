@@ -203,23 +203,20 @@ angular.module("sampleApp")
             $scope.showSelector = true;
 
 
-       //     $scope.toggleGraphZoom = function() {
-                $scope.toggleGraphZoom = function(){
-                    if ($scope.graphZoom) {
-                        $scope.leftPaneClass = "col-sm-2 col-md-2"
-                        $scope.midPaneClass = "col-md-5 col-sm-5"
-                        $scope.rightPaneClass = "col-md-5 col-sm-5";
-                    } else {
-                        $scope.leftPaneClass = "hidden"
-                        $scope.midPaneClass = "col-md-12 col-sm-12"
-                        $scope.rightPaneClass = "hidden";
-                    }
-                    $scope.graphZoom = !$scope.graphZoom
+            $scope.toggleGraphZoom = function(){
+                if ($scope.graphZoom) {
+                    $scope.leftPaneClass = "col-sm-2 col-md-2"
+                    $scope.midPaneClass = "col-md-5 col-sm-5"
+                    $scope.rightPaneClass = "col-md-5 col-sm-5";
+                } else {
+                    $scope.leftPaneClass = "hidden"
+                    $scope.midPaneClass = "col-md-12 col-sm-12"
+                    $scope.rightPaneClass = "hidden";
                 }
+                $scope.graphZoom = !$scope.graphZoom
+            }
 
-                //$scope.toggleSelector()
 
-//            }
 
             $scope.toggleSelector = function(){
                 if ($scope.showSelector) {
@@ -987,6 +984,32 @@ angular.module("sampleApp")
                 $scope.currentLibraryIndex = inx;
                 $scope.selectedLibraryContainer = container;
 
+
+                    var vo = builderSvc.makeGraph(container.bundle) ;  //todo - may not be the right place...
+
+                   // $scope.allReferences = vo.allReferences;                //all references in the entire set.
+
+                    var graphDiv = document.getElementById('libraryGraph');
+                    var options = {
+                        physics: {
+                            enabled: true,
+                            barnesHut: {
+                                gravitationalConstant: -10000,
+                            }
+                        }
+                    };
+
+
+                    $scope.libraryGraph = new vis.Network(graphDiv, vo.graphData, options);
+
+
+
+
+
+
+
+                //
+
                 var user = logicalModelSvc.getCurrentUser();
                 if (user) {
                     //as don't have to log in to see scenarios
@@ -1009,8 +1032,6 @@ angular.module("sampleApp")
             };
 
             $scope.deleteScenario = function(container){
-
-
 
                 var modalOptions = {
                     closeButtonText: "No, I changed my mind",

@@ -351,8 +351,16 @@ angular.module("sampleApp")
 
 
                 $scope.permissions = securitySvc.getPermissons(ed);     //what the current user can do with this resource...
-
                 $scope.isAuthoredByClinFhir = Utilities.isAuthoredByClinFhir(ed);
+
+                if (! $scope.isAuthoredByClinFhir) {
+                    $scope.permissions.canEdit = false;
+                    $scope.permissions.canDelete = false;
+                    $scope.permissions.canActivate = false;
+                    $scope.permissions.canRetire=false;
+                }
+
+
 
 
                 $scope.selectedExtension.localMeta = {};
