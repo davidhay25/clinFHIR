@@ -139,20 +139,14 @@ angular.module("sampleApp")
                 }
 
                 //the version of fhir that this SD is being deployed against...
-                //var fhirVersion = $scope.conformanceSvr.version;        //get from the conformance server
-
                 var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
-                //var name = voED.extensionName;       //the name of the extension
                 var definition = voED.description || voED.extensionName;       //the definition of the extension. It is required...
                 var comments = voED.description;       //the name of the extension
-               // var short = $scope.input.short;
 
                 extensionDefinition.id = voED.extensionName;
                 extensionDefinition.url = voED.url;
 
 
-
-                //the code is used so clinfhir knows which SD resources it has authored - and can modify...
 
                 extensionDefinition.name = voED.extensionName;
                 extensionDefinition.status = 'draft';
@@ -170,9 +164,6 @@ angular.module("sampleApp")
                     })
 
                 }
-
-                //at the time of writing (Oct 12), the implementaton of stu3 varies wrt 'code' & 'keyword'. Remove this eventually...
-                //sep 2017 - extensionDefinition.identifier = [{system:"http://clinfhir.com",value:"author"}]
 
                 if (voED.fhirVersion == 2) {
                     extensionDefinition.kind='datatype';

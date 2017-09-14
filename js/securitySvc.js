@@ -17,12 +17,15 @@ angular.module("sampleApp").service('securitySvc', function(Utilities,appConfigS
                 var permission = {canView:true};
 
                 if (! currentUser) { return permission};
-                //I have super powers! )so does Rod - I'm not THAT special ....
 
-                if (currentUser.email == 'david.hay25@gmail.com' || currentUser.email == 'rod.mcdonald@orionhealth.com') {
+                //September 2017 - allow any logged in user to edit. todo need to think about overall access model...
+
+                //I have super powers! )
+                if (1==1 || currentUser.email == 'david.hay25@gmail.com') {
                     permission.canEdit = true;
                     permission.canDelete = true;
                     permission.canActivate = true;
+                    permission.canRetire=true;
                     return permission;
                 }
 

@@ -63,7 +63,6 @@ angular.module("sampleApp")
                 )
             }
 
-
             $scope.generateShortCut = function() {
                 var hash = Utilities.generateHash();
                 var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
@@ -76,8 +75,6 @@ angular.module("sampleApp")
                     }
                 )
             };
-
-
 
             firebase.auth().onAuthStateChanged(function(user) {
                 delete $scope.input.mdComment;
@@ -93,15 +90,12 @@ angular.module("sampleApp")
             $rootScope.$on('userLoggedOut',function() {
                 $scope.input = {param:'hl7',searchParam:'publisher',searchStatus:'all'};
             });
-
             $rootScope.$on('setDisplayMode',function(ev,mode) {
                 if (mode.newMode == 'extensions') {
                     delete $scope.extensionsArray;
                     delete $scope.selectedExtension;
                 }
             });
-
-
 
             $scope.errors = [];
             $scope.appConfigSvc = appConfigSvc;
@@ -173,7 +167,6 @@ angular.module("sampleApp")
 
                     });
 
-                ///modalService.showModal({}, {bodyText : "Sorry, editing is not yet enabled"})
             };
 
             $scope.retireExtension = function(){
@@ -185,7 +178,7 @@ angular.module("sampleApp")
                 };
                 modalService.showModal({}, modalOptions).then(
                     function(){
-                        $scope.selectedExtension.status = 'retire';
+                        $scope.selectedExtension.status = 'retired';
                         SaveDataToServer.updateStructureDefinition(appConfigSvc.getCurrentConformanceServer(),$scope.selectedExtension).then(
                             function(data){
 
@@ -204,7 +197,7 @@ angular.module("sampleApp")
                     closeButtonText: "No, don't Activate",
                     actionButtonText: 'Yes please',
                     headerText: 'Activate ' + $scope.selectedExtension.name,
-                    bodyText: 'Are you sure you want to activate this Extension Definition?'
+                    bodyText: 'Are you sure you want to activate this Extension Definition? After this it cannot be edited...'
                 };
                 modalService.showModal({}, modalOptions).then(
                     function(){
@@ -358,6 +351,7 @@ angular.module("sampleApp")
 
 
                 $scope.permissions = securitySvc.getPermissons(ed);     //what the current user can do with this resource...
+
                 $scope.isAuthoredByClinFhir = Utilities.isAuthoredByClinFhir(ed);
 
 
