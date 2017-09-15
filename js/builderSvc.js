@@ -1473,7 +1473,7 @@ angular.module("sampleApp")
 
 
                         break;
-                    case 'DosageInstruction' :
+                    case 'Dosage' :
                         var insrt = {};
                         //addIfNotEmpty(value.HumanName.use,insrt,'use');
 

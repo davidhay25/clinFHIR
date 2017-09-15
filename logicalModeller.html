@@ -927,7 +927,9 @@
                                     <tr ng-show="treeData[0].data.header.mapping">
                                         <td>Mapping</td><td>{{treeData[0].data.header.mapping}}</td></tr>
 
-                                    <tr><td>Profile Url<div>(When generated)</div></td><td>{{treeData[0].data.header.SDUrl + '-cf-profile'}}</td></tr>
+                                    <tr ng-show="treeData[0].data.header.SDUrl">
+                                        <td >Profile Url<div>(When generated)</div></td><td>{{treeData[0].data.header.SDUrl + '-cf-profile'}}</td>
+                                    </tr>
 
 
 
@@ -1052,7 +1054,7 @@
 
                         <div class="row">
                             <div class="col-sm-12 col-md-12">
-                                <button class=" btn btn-link pull-right" ng-click="generateFHIRProfile()">Generate Profile</button>
+                                <button class=" btn btn-primary pull-right" ng-click="generateFHIRProfile()">Generate Profile</button>
                             </div>
                         </div>
 

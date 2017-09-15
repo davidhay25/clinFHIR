@@ -821,7 +821,7 @@ angular.module("sampleApp")
                 'instant','Attachment']
 
 
-            $scope.supportedDt.push('DosageInstruction');
+            $scope.supportedDt.push('Dosage');
 
             function getExistingData(patient) {
                 delete $scope.resourcesFromServer;
