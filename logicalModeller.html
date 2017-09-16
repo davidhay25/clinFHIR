@@ -90,7 +90,7 @@
     <script src="js/profileCreatorSvc.js"></script>
     <script src="js/resourceCreatorSvc.js"></script>
     <script src="js/filters.js"></script>
-    <script src="js/documentBuilder.js"></script>
+
     <script src="resourceBuilder/rbServices.js"></script>
 
 
@@ -101,7 +101,7 @@
     <script src="js/libs/vis.min.js"></script>
     <script src="js/loginCtrl.js"></script>
     <script src="js/fileCopyCtrl.js"></script>
-    <script src="js/newExtensionDefinition.js"></script>
+
     <script src="resourceBuilder/vsBrowser.js"></script>
     <script src="js/modellerFilters.js"></script>
     <script src="js/igSvc.js"></script>
@@ -113,6 +113,12 @@
     <script src="js/securitySvc.js"></script>
     <script src="js/editLogicalNodeCtl.js"></script>
     <script src="js/components/extensionDirective.js"></script>
+
+
+    <!--
+      <script src="js/newExtensionDefinition.js"></script>
+    <script src="js/documentBuilder.js"></script>
+    -->
 
     <script>
         var config = {
@@ -580,6 +586,28 @@
 
                     <uib-tabset>
 
+                        <uib-tab heading="Fromt his model">
+                            <table class="table table-bordered table-condensed">
+                                <tr><th>Path</th><th>Referenced Model</th><th>Description</th></tr>
+                                <tr ng-repeat="row in treeData" ng-show="row.data.isReference">
+                                    <td>
+                                        <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path | dropFirstInPath}}</div>
+                                    </td>
+                                    <td>{{row.data.referenceUrl | getLogicalID}}</td>
+                                    <td>{{row.data.description}}</td>
+
+                                </tr>
+                            </table>
+                        </uib-tab>
+                        <uib-tab heading="Graph" select="redrawReferencesChart()">
+                            <div id="refLogicalModel"></div>
+                        </uib-tab>
+
+                        <uib-tab heading="Sample Document">
+                            <pre>{{docBundle | json}}</pre>
+                        </uib-tab>
+
+
                         <uib-tab heading="All references">
                             <table class="table table-bordered table-condensed">
                                 <tr><th>Source Model</th><th>Path</th><th>Target Model</th></tr>
@@ -596,22 +624,8 @@
                                 </tr>
                             </table>
                         </uib-tab>
-                        <uib-tab heading="Graph" select="redrawReferencesChart()">
-                            <div id="refLogicalModel"></div>
-                        </uib-tab>
-                        <uib-tab heading="This model only">
-                            <table class="table table-bordered table-condensed">
-                                <tr><th>Element</th><th>Referenced Model</th><th>Description</th></tr>
-                                <tr ng-repeat="row in treeData" ng-show="row.data.isReference">
-                                    <td>
-                                        <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path | dropFirstInPath}}</div>
-                                    </td>
-                                    <td>{{row.data.referenceUri | getLogicalID}}</td>
-                                    <td>{{row.data.description}}</td>
 
-                                </tr>
-                            </table>
-                        </uib-tab>
+
 
                     </uib-tabset>
 

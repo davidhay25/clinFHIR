@@ -38,7 +38,6 @@
   {"name": "Immunization"},
   {"name": "Subscription","reference":true},
   {"name": "DetectedIssue"},
-  {"name": "EventHistory"},
   {"name": "ConceptMap","reference":true},
   {"name": "Practitioner","reference":true},
   {"name": "ImagingStudy"},

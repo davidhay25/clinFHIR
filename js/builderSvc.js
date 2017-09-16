@@ -485,19 +485,24 @@ angular.module("sampleApp")
 
                     resource.entry.forEach(function(ent){
                         var res = ent.resource;
-                        if (! res.id) {
-                            if (ent.fullUrl) {
-                                res.id = ent.fullUrl;
-                            } else {
-                                res.id = idPrefix+new Date().getTime();
+                        if (res) {
+                            if (! res.id) {
+                                if (ent.fullUrl) {
+                                    res.id = ent.fullUrl;
+                                } else {
+                                    res.id = idPrefix+new Date().getTime();
+                                }
                             }
+
+                            importOneResource(res,scope);
+                            if (! importedResource) {
+                                //make the first resource in the bundle the selected one...
+                                importedResource = res;
+                            }
+
                         }
 
-                        importOneResource(res,scope);
-                        if (! importedResource) {
-                            //make the first resource in the bundle the selected one...
-                            importedResource = res;
-                        }
+
 
                     })
 

@@ -1597,14 +1597,22 @@ angular.module("sampleApp")
 
                // checkDifferences(entry.resource)
 
-                /* WARNING todo - this calls teh 'makeTree' function in the service and mucks things up.. (particularly the momments)
-                //var vo = logicalModelSvc.makeReferencedMapsModel(entry.resource,$scope.bundleModels);   //todo - may not be the right place...
 
+
+
+                // WARNING todo - this calls teh 'makeTree' function in the service and mucks things up.. (particularly the momments)
+
+                //2017-09-17 - resurrected this call (down to the indicsted line)
+
+                var vo = logicalModelSvc.makeReferencedMapsModel(entry.resource,$scope.bundleModels);   //todo - may not be the right place...
+
+                console.log(vo)
                 //so that we can draw a table with the references in it...
                 $scope.modelReferences = vo.references;
                 $scope.uniqueModelsList = vo.lstNodes;
+                $scope.docBundle = logicalModelSvc.makeDocBundle(vo.references);    //construct a sample document bundle
                 
-                
+                console.log(vo)
 
                 var allNodesObj = vo.nodes;
 
@@ -1620,9 +1628,11 @@ angular.module("sampleApp")
                 };
 
                 $scope.refNetwork = new vis.Network(container, vo.graphData, options);
+
                 $scope.refNetwork.on("click", function (obj) {
                     
                     //this is selecting a model
+                    return;     //disable for now...
 
                     if ($scope.isDirty) {
                         modalService.showModal({},{bodyText:"There are unsaved changes to the current model."})
@@ -1648,7 +1658,9 @@ angular.module("sampleApp")
                 });
 
 
-                 */
+                //-----  2017-09-17  whole section above was commented out
+
+
                 $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                 drawTree();
 
