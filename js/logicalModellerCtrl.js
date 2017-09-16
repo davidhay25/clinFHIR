@@ -38,6 +38,22 @@ angular.module("sampleApp")
             $scope.input.newCommentboxInxDEP = -1;
 
 
+            $scope.editLMDoc = function(){
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/editLMDoc.html',
+                    size: 'lg',
+                    controller: "editLMDocCtrl",
+                    resolve : {
+                        doc: function () {          //the default extension
+                            return  $scope.docBundle;
+                        }
+                    }
+                }).result.then(
+                    function(result) {
+
+                    })
+            }
+
             $scope.resetLayout = function(){
                 logicalModelSvc.resetTreeState($scope.treeData);
                 $scope.treeData.forEach(function (item) {

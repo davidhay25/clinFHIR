@@ -1146,7 +1146,7 @@ console.log(reference)
                         composition.subject = {reference:'Patient/'+resource.id}
                     } else {
                         //for now, every references resource (other than the Patient) is in a separate section...
-                        var sect = {}
+                        var sect = {title:item.path}
                         sect.entry = [{reference:resource.resourceType + "/"+ resource.id}]
                         composition.section.push(sect);
                     }
