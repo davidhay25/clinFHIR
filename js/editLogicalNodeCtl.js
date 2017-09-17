@@ -526,27 +526,27 @@ angular.module("sampleApp")
                     if ($scope.input.mapToModelEnt && $scope.input.mapToModelEnt.resource) {
                         //this element is mapped to another model (eventually a profile)
                         vo.isReference = true;
-                        vo.referenceUri = $scope.input.mapToModelEnt.resource.url; // for the reference table...
+                        vo.referenceUrl = $scope.input.mapToModelEnt.resource.url; // for the reference table...
                         vo.mapToModelUrl = $scope.input.mapToModelEnt.resource.url;        //this is the actual model being references
                     }
 
                     //for a reference type...
                     if ($scope.input.dataType.code == 'Reference') {
-                        //vo.referenceUri = $scope.input.referenceFromIg.resource.url;
 
+                        vo.isReference = true;
                         //set the default to any...
-                        vo.referenceUri = "http://hl7.org/fhir/StructureDefinition/Resource";
+                        vo.referenceUrl = "http://hl7.org/fhir/StructureDefinition/Resource";
                         if ($scope.input.referenceToCoreFromIg) {
-                            vo.referenceUri = "http://hl7.org/fhir/StructureDefinition/" + $scope.input.referenceToCoreFromIg.name;
+                            vo.referenceUrl = "http://hl7.org/fhir/StructureDefinition/" + $scope.input.referenceToCoreFromIg.name;
                         }
 
-                        vo.type[0].targetProfile = vo.referenceUri;
+                        vo.type[0].targetProfile = vo.referenceUrl;     //we use targetProfile here - service will downgrade to R2...
 
 
 
                         if ($scope.input.referenceFromIg) {
-                            vo.isReference = true;
-                            vo.referenceUri = $scope.input.referenceFromIg.resource.url; // for the reference table...
+                            //vo.isReference = true;
+                            vo.referenceUrl = $scope.input.referenceFromIg.resource.url; // for the reference table...
                             // (this is the older stu3 veriosn)  vo.type[0].profile = $scope.input.referenceFromIg.resource.url;
                             vo.type[0].targetProfile = $scope.input.referenceFromIg.resource.url;   //not quite sure why we need both...
                             console.log($scope.input.referenceFromIg)

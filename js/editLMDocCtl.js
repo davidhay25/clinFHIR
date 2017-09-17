@@ -5,4 +5,8 @@ angular.module("sampleApp")
             $scope.doc = doc;
             $scope.compositon = doc.entry[0].resource;
 
+            $scope.selectSection = function (sect) {
+                $scope.sect = sect;
+            }
+
         })

@@ -434,6 +434,7 @@ angular.module("sampleApp")
 
                                     ar.splice(0,1);     //remove the first part of the path (the dt name eg CodeableConcept)
 
+                                    //pathSegment used when adding a datatype to th emodel...
                                     var pathSegment = ar.join('.') + "_"+suffix;
                                     var pathForThisElement = parentPath + '.'+  pathSegment;
 
@@ -1146,12 +1147,16 @@ console.log(reference)
                         composition.subject = {reference:'Patient/'+resource.id}
                     } else {
                         //for now, every references resource (other than the Patient) is in a separate section...
-                        var sect = {title:item.path}
+
+                        var ar = item.path.split('.');
+                        ar.splice(0,1);
+                        var display = ar.join('.')
+
+
+                        var sect = {title:display}
                         sect.entry = [{reference:resource.resourceType + "/"+ resource.id}]
                         composition.section.push(sect);
                     }
-
-
 
                 });
                 return bundle;
@@ -1685,7 +1690,6 @@ console.log(reference)
                         item.id = path
 
                         var text = arPath[arPath.length - 1];   //the text will be the last entry in the path...
-                        //item.text = arPath[arPath.length - 1];   //the text will be the last entry in the path...
 
                         //if the text has an underscore, then remove it...
                         var ar = text.split('_');
@@ -1699,16 +1703,12 @@ console.log(reference)
 
                             cntExtension++;
 
-
-
-
                             //see if this extension points to an extension definition
-                            if (ed.type && ed.type[0].profile) {
+                            if (ed.type && (ed.type[0].profile || ed.type[0].targetProfile) ) {
 
                             } else {
                                 include = false;
                             }
-
 
                         }
 

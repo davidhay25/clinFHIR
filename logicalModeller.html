@@ -209,17 +209,10 @@
 
                     <form ng-show="SD && !loadedFromBookmark && !treeData.shortCut.shortCut" class="navbar-form">
                         <button class="btn btn-success pull-right iconSpacing" ng-click="generateShortCut()">Share</button>
-<!--
-                        <button class="btn btn-warning pull-right" ng-click="copyFiles()">Copy</button>
--->
 
 
                     </form>
-<!--
-                    <form ng-hide="currentSD && !loadedFromBookmark" class="navbar-form">
-                        <button class="btn btn-warning pull-right" ng-click="findProfile()">Import</button>
-                    </form>
-                    -->
+
 
                 </div>
 
@@ -677,7 +670,7 @@
                     <br />
                     <uib-tabset>
 
-                        <uib-tab heading="Json">
+                        <uib-tab heading="LM Json">
                             <pre>{{SD | json}}</pre>
                         </uib-tab>
 
@@ -854,10 +847,10 @@
                                         <button ng-show="!selectedNode.data.isRoot  && !isHistory"
                                                 class="btn btn-link" ng-click="deleteNode()">Remove Element</button>
 
-                                        <!-- todo work on in madrid
+
                                         <button ng-show="!selectedNode.data.isRoot  && !isHistory"
                                                 class="btn btn-link" ng-click="copyNode()">Copy Element</button>
--->
+                                        <!-- todo work on in madrid-->
 
                                         <div>
 <!--

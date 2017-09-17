@@ -1458,7 +1458,6 @@ angular.module("sampleApp")
                 
                 var SDToSave = angular.copy($scope.SD);
 
-
                 SDToSave.snapshot.element.forEach(function (element) {
                     //remove invalid property
                     if (element.type){
@@ -1470,20 +1469,9 @@ angular.module("sampleApp")
 
                 });
 
+                console.log(SDToSave);
 
-
-                
-                //this is a hack as only grahames server is on the latest (post baltimore) version of stu3.
-                //it can be removed when the others (ie hapi) are confrmant also...
-               /* if (url.indexOf('tersections') == -1) {
-                    SDToSave.requirements = SDToSave.purpose;
-                    SDToSave.display = SDToSave.title;
-                    delete SDToSave.purpose;
-                    delete SDToSave.title
-
-                }
-
-                */
+                //return;
                 
                 $http.put(url,SDToSave).then(
                     function(data) {
@@ -1529,15 +1517,9 @@ angular.module("sampleApp")
                             selectEntry(entry)
                         }
                     );
-
-
-
                 } else {
                     selectEntry(entry)
                 }
-
-
-
             };
 
             //select a model - whether from the 'all' list or the palette
@@ -1980,6 +1962,9 @@ angular.module("sampleApp")
                                     delete clone.editNode;
                                     item.data = clone;
                                     item.text = clone.name;
+
+                                    item.data.pathSegment = clone.name;     //this will re-write the path in setPath() below....
+
                                     $scope.selectedNode = item;
                                 }
                             })
@@ -2081,6 +2066,7 @@ angular.module("sampleApp")
                         setAllMappings();   //update any mappings
 
                         //set the path of the element based on the name - and the parent names up the hierarchy..
+                        //>>>>>>>> This is an important function! Note the use of pathSegment...
                         function setPath(parentPath,parentId) {
                             $scope.treeData.forEach(function(node){
                                 if (node.parent == parentId) {
@@ -2103,42 +2089,112 @@ angular.module("sampleApp")
             $scope.copyNode = function() {
                 //make a copy of the current node (with a new id)
 
+                var newName = $window.prompt('Enter Name');
+
+                //the path of the new element is as a sibling of the current path
+                var ar = $scope.selectedNode.data.path.split('.')
+                ar.pop();
+
+                var newPath = ar.join('.') + '.'+newName;      //todo check for unique
 
 
-                //var newNode = angular.copy($scope.selectedNode);
+                $scope.isDirty = true;
 
                 var newNode = {
-
                     "parent": $scope.selectedNode.parent,
                     "text": $scope.selectedNode.text,
-                    state: {opened: true},
-                    data : angular.copy($scope.selectedNode.data)
+                    state: {opened: true}
                 };
+                newNode.data = angular.copy($scope.selectedNode.data)
+               // var path = newNode.data.path;
+
+               // var ar = path.split('_');
+               // var realPath = ar[0];   // in case this has already been copied...
 
 
-                var path = newNode.data.path;
-                var ar = path.split('_');
-                var realPath = ar[0];   // in case this has already been copied...
-                var ctr,pos = 0;
+                var pos = 0;
 
                 $scope.treeData.forEach(function (node,inx) {
-                    if (node.data.path ==realPath) {
+                    if (node.data.path ==$scope.selectedNode.data.path) {   //was realPath
                         pos = inx;      //the index in the tree array where the node we are copying is located
                     }
-
                 });
+
+/*
+                var cnt = 1;
                 if (ar[1]) {
                     newNode.data.path = realPath + '_'+ ar[1]++      //there was already a copy
+                    cnt= ar[1]
                 } else {
                     newNode.data.path = realPath + '_1';             //this is the first copy
                 }
+*/
 
-                newNode.id = newNode.data.path;         //must have a unique id...
+                newNode.data.path = newPath;    //a sibling to the current element...
+
+
+
+
+                newNode.id = newPath; //newNode.data.path;         //must have a unique id...
+              //  newNode.data.ed.id = newNode.data.path;
+              //  newNode.data.ed.path = newNode.data.path;
+               // var parentNodeId = newNode.data.path;
 
                 newNode.state.selected = false;
-                newNode.text += "_copy";
-                newNode.data.name = newNode.text;
+                //newNode.text += newName; //"_copy";
+                newNode.text = newName; //"_copy";
+
+                //newNode.data.name =  newNode.text;
+                newNode.data.name =  newName; //newNode.text; //$scope.selectedNode.text+'_'+cnt;      //needed for the setPath() function
+                //newNode.data.pathSegment = $scope.selectedNode.text+'_'+cnt;
+
+                newNode.data.pathSegment = newName; //needed for the setPath() function
+
                 $scope.treeData.splice(pos+1,0,newNode);
+                
+                
+                //copy any direct children - todo should be recursive...
+                var children = [];
+                $scope.treeData.forEach(function (item) {
+                    if (item.parent == $scope.selectedNode.id) {
+                        //this is a child
+                        var path=item.data.path;
+                        var ar1 = path.split('.');
+                        var segment = ar1[ar1,ar1.length-1];    //the last part of the path
+
+
+                        console.log(item)
+                        var childNode = {
+                                "parent": newNode.id,
+                            "text": item.text,
+                            state: {opened: true,selected:false}
+                        };
+                        childNode.data = angular.copy(item.data)
+                        //the path for the child is the parent (which will have the _n) plus the same
+                        //var childPath = newNode.data.path + '.' + segment;
+                        var childPath = newPath + '.' + segment;
+                        childNode.id = childPath;
+                        childNode.data.path = childPath;
+                        childNode.data.pathSegment = segment;
+
+                      //  childNode.data.ed.id = childPath;
+                      //  childNode.data.ed.path = childPath;
+
+                        childNode.data.name = segment;
+                        children.push(childNode);
+
+                    }
+                    
+                });
+
+                console.log(children);
+
+                children.forEach(function (child) {
+                    $scope.treeData.splice(pos+2,0,child);
+                    pos++
+                });
+
+
 
                 drawTree();
                 makeSD();
