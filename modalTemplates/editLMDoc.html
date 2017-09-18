@@ -42,6 +42,27 @@
             </uib-tab>
 
 
+            <uib-tab heading="DocTree">
+
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <button class="btn btn-link" ng-click="generateDocTree(doc)">Build Tree</button>
+                        <div id="docTreeView"></div>
+
+                    </div>
+                    <div class="col-md-6 col-sm-6">
+                        <pre>{{selectedResource | json}}</pre>
+                    </div>
+
+                </div>
+
+
+
+
+            </uib-tab>
+
+
+
             <uib-tab heading="Json">
                 <pre>{{doc | json}}</pre>
             </uib-tab>

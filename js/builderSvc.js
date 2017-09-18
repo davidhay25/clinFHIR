@@ -173,7 +173,10 @@ angular.module("sampleApp")
                 tree.push(rootItem);
 
                 //add all the resources referenced by the composition.
-                addResourceToRoot(comp, tree,'subject',rootId,hashByRef)
+                addResourceToRoot(comp, tree,'subject',rootId,hashByRef);
+                addResourceToRoot(comp, tree,'encounter',rootId,hashByRef);
+                addResourceToRoot(comp, tree,'custodian',rootId,hashByRef);
+
 
                 //add all the sections...
 
@@ -1091,9 +1094,10 @@ angular.module("sampleApp")
             makeDocumentText : function(composition,allResourcesBundle){
                 //construct the text representation of a document
                 // order is patient.text, composition.text, sections.text
+                var html = "";
                 if (composition) {
                     var that = this;
-                    var html = "";
+
 
                     var manual = that.splitNarrative(composition.text.div).manual;  //manually entered text
                     var generated = "";     //will replace the genereated text...
@@ -1147,10 +1151,10 @@ angular.module("sampleApp")
 
                     })
 
-                    return html;
+
                 }
 
-
+                return html;
 
 
 

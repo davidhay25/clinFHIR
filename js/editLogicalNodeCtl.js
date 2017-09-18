@@ -247,7 +247,7 @@ angular.module("sampleApp")
                                 });
 
                                 //$scope.bundle = data.data;
-                                console.log($scope.bundle);
+
                             }
                         ).finally(function(){
                             $scope.showWaiting = false;
@@ -260,7 +260,7 @@ angular.module("sampleApp")
                             //need to pass this back so we can add children of complex extensions...
                            // $scope.selectedExtension = $scope.analyse;
 
-                            console.log($scope.analyse)
+
 
                             /*
                              //set the dataType
@@ -289,7 +289,7 @@ angular.module("sampleApp")
                 }).result.then(
                     function(extensionDef) {
                         //an extension definition was selected -
-                        //console.log(extensionDef);
+
                         if (extensionDef && extensionDef.url) {
                             $scope.isDirty = true;
                             $scope.input.fhirMappingExtensionUrl = extensionDef.url;
@@ -416,7 +416,7 @@ angular.module("sampleApp")
                 $scope.input.mappingFromED = $scope.input.mappingFromED || []
 
                 $scope.input.mappingFromED.forEach(function(map){
-                    console.log(identity,map)
+
                     if (map.identity == identity) {
                         $scope.currentMap = map;      //the current map  {identity:, map:, comment:}
                     }
@@ -549,7 +549,7 @@ angular.module("sampleApp")
                             vo.referenceUrl = $scope.input.referenceFromIg.resource.url; // for the reference table...
                             // (this is the older stu3 veriosn)  vo.type[0].profile = $scope.input.referenceFromIg.resource.url;
                             vo.type[0].targetProfile = $scope.input.referenceFromIg.resource.url;   //not quite sure why we need both...
-                            console.log($scope.input.referenceFromIg)
+
                         }
 
                     }
@@ -604,7 +604,7 @@ angular.module("sampleApp")
             $scope.setDataType = function(dt) {
                 $scope.isDirty = true;
                 $scope.dt = dt;
-                console.log(dt);
+
                 $scope.isCoded = false;
                 if (dt.isCoded) {
                     $scope.isCoded = true;
@@ -672,10 +672,9 @@ angular.module("sampleApp")
                     }
                 }).result.then(
                     function (vo) {
-                        //vo is {vs,strength}
-                        console.log(vo)
+
                         $scope.selectedValueSet = vo;
-                     //   dtCode.vs = vo;         //save the valueset against the datatype
+
                     }
                 )
             };
@@ -684,9 +683,7 @@ angular.module("sampleApp")
                 var vs = $scope.input.vsFromIg;
                 var vo={vs:{url:vs.sourceUri,name:vs.name},strength:'preferred'}
                 $scope.selectedValueSet = vo;
-                //dtCode.vs = vo;
 
-                console.log(vo)
 
             }
 

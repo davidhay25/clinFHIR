@@ -57,12 +57,12 @@ angular.module("sampleApp")
             $scope.resetLayout = function(){
                 logicalModelSvc.resetTreeState($scope.treeData);
                 $scope.treeData.forEach(function (item) {
-                    console.log(item)
+
                     if (item.data && item.data.ed && item.data.ed.type) {
                         item.data.ed.type.forEach(function (typ) {
                             if (typ.code == 'BackboneElement') {
                                 item.state.opened = true;
-                                console.log('---> open')
+
                             }
                         })
                     }
@@ -92,7 +92,7 @@ angular.module("sampleApp")
 
                 logicalModelSvc.getConceptMapMappings(url).then(
                     function (vo) {
-                        console.log(vo)
+
 
                         $uibModal.open({
                             templateUrl: 'modalTemplates/showCM.html',
@@ -123,7 +123,7 @@ angular.module("sampleApp")
                 //locate all the child nodes that will need to be added...
                 var lst = []
                 findChildNodes(lst,node.id)
-                console.log(lst)
+
 
                 //create the parent node for the copy...
                 var parentNode = {
@@ -466,7 +466,7 @@ angular.module("sampleApp")
                 }
 
 
-                //console.log(parent);
+
             }
 
             $scope.explodeDT = function(dt) {
@@ -657,7 +657,7 @@ angular.module("sampleApp")
 
 
                 } else {
-                    console.log('no user')
+
                     logicalModelSvc.setCurrentUser(null);
                     $scope.showNotLoggedIn = true;
                     delete $scope.Practitioner;
@@ -1469,9 +1469,7 @@ angular.module("sampleApp")
 
                 });
 
-                console.log(SDToSave);
 
-                //return;
                 
                 $http.put(url,SDToSave).then(
                     function(data) {
@@ -1544,11 +1542,11 @@ angular.module("sampleApp")
                 //temp little routine to generate a mapping file -
                 var map = []
                 $scope.relativeMappings.forEach(function(m) {
-                    //console.log(m)
+
                     map.push({description: m.branch.data.path,v2:m.sourceMap,fhir:m.targetMap})
                 })
 
-                console.log(angular.toJson(map))
+
 
                 var baseType = $scope.treeData[0].data.header.baseType
 
@@ -1604,13 +1602,20 @@ angular.module("sampleApp")
 
                 var vo = logicalModelSvc.makeReferencedMapsModel(entry.resource,$scope.bundleModels);   //todo - may not be the right place...
 
-                console.log(vo)
+
                 //so that we can draw a table with the references in it...
                 $scope.modelReferences = vo.references;
                 $scope.uniqueModelsList = vo.lstNodes;
-                $scope.docBundle = logicalModelSvc.makeDocBundle(vo.references);    //construct a sample document bundle
-                
-                console.log(vo)
+
+
+                //>>>> $scope.docBundle = logicalModelSvc.makeDocBundle(vo.references);    //construct a sample document bundle
+
+
+
+                var b = logicalModelSvc.makeDocBundleWithComposition(entry.resource)
+                console.log(b)
+
+                $scope.docBundle = b;
 
                 var allNodesObj = vo.nodes;
 
@@ -1709,7 +1714,7 @@ angular.module("sampleApp")
                     }
                 })
 
-                //console.log($scope.allMappings)
+
 
             }
 
@@ -2163,7 +2168,7 @@ angular.module("sampleApp")
                         var segment = ar1[ar1,ar1.length-1];    //the last part of the path
 
 
-                        console.log(item)
+
                         var childNode = {
                                 "parent": newNode.id,
                             "text": item.text,
@@ -2187,7 +2192,7 @@ angular.module("sampleApp")
                     
                 });
 
-                console.log(children);
+
 
                 children.forEach(function (child) {
                     $scope.treeData.splice(pos+2,0,child);

@@ -1180,6 +1180,7 @@ angular.module("sampleApp")
                 delete $scope.resourcesFromServer;
                 delete $scope.markResult;
                 delete $scope.input.renameScenario;
+                delete $scope.generatedHtml;
 
                 $scope.currentBundleIndex = inx;
 

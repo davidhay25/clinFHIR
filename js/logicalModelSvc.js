@@ -13,7 +13,7 @@ angular.module("sampleApp")
         $http.get("artifacts/dt.json").then(
             function(data) {
                 dataTypes = data.data;
-                console.log(dataTypes)
+
             }
         )
 
@@ -84,11 +84,11 @@ angular.module("sampleApp")
 
                         var map = []
                         relativeMappings.forEach(function(m) {
-                            //console.log(m)
+
                             map.push({description: m.branch.data.path,v2:m.sourceMap,fhir:m.targetMap,fhirPath:m.fhirPath})
                         })
 
-                        //console.log(angular.toJson(map))
+
                         deferred.resolve(map)
 
                     },
@@ -224,7 +224,7 @@ angular.module("sampleApp")
                         hashTreeState[node.id] = {opened:opened}
                     })
                 }
-                console.log(hashTreeState)
+
             },
             resetTreeState : function(tree) {
                 //reset the tree state wrt opened/closed nodes
@@ -259,7 +259,7 @@ angular.module("sampleApp")
                     }
 
                 })
-                console.log(treeData)
+
 
             },
             isDiscriminatorRequired : function(node,treeData){
@@ -309,7 +309,7 @@ angular.module("sampleApp")
                 //todo need to exlute text if path length is 2...
                 var arExclude=['id','extension','meta','implicitRules','modifierExtension','contained','language','text'];
                 var deferred = $q.defer();
-                console.log(node)
+
                 var parentId = node.id;
                 var parentPath = node.data.path;        //the path of the element that is being expanded...
                 var lmRoot = treeData[0].data.path;     //the root of this model... (eg OhEncounter)
@@ -329,7 +329,7 @@ angular.module("sampleApp")
                         if (dtSD.snapshot && dtSD.snapshot.element) {
 
                             dtSD.snapshot.element.forEach(function (ele,inx) {
-                                console.log(ele)
+
                                 var originalPath = ele.path;        //used for the FHIR mapping in the 'imported' resource...
                                 //the first letter needs to be lowercase, as it will be part of a path...
                                 ele.path = ele.path.charAt(0).toLowerCase() + ele.path.slice(1);
@@ -395,7 +395,7 @@ angular.module("sampleApp")
             explodeDataType : function(treeData,node,dt) {
                 var arExclude=['id','extension','modifierExtension'];
                 var deferred = $q.defer();
-                //console.log(node)
+
                 var parentId = node.id;
                 var parentPath = node.data.path;            //the path of the element that is being expanded...
                 var suffix = generateSuffix(treeData,node); //new Date().getTime();      //a prefix for the path to support multiple expands
@@ -423,7 +423,7 @@ angular.module("sampleApp")
                         if (dtSD.snapshot && dtSD.snapshot.element) {
 
                             dtSD.snapshot.element.forEach(function (ele,inx) {
-                                //console.log(ele)
+
                                 //the first letter needs to be lowercase, as it will be part of a path...
                                 ele.path = ele.path.charAt(0).toLowerCase() + ele.path.slice(1);    //this will be a codeableconcept
 
@@ -645,7 +645,7 @@ angular.module("sampleApp")
                 if (arQueries.length > 0) {
                     $q.all(queries).then(
                         function () {
-                            console.log('DONE')
+
                             deferred.resolve(treeData)
                         },
                         function (err) {
@@ -682,7 +682,7 @@ angular.module("sampleApp")
                 }
 
 
-                console.log(internalLM);
+
                 var realProfile = angular.copy(internalLM);      //the profile that we will build...
                 realProfile.snapshot = {element:[]};            //get rid of the current element defintiions...
                 realProfile.id = realProfile.id+'-cf-profile';   //construct an id
@@ -763,7 +763,7 @@ angular.module("sampleApp")
 
                     });
 
-                  //  console.log(listOfDataTypes)
+
 
                     //now work through the model. if there's no mapping, then an error. If an extension then insert the url...
                     internalLM.snapshot.element.forEach(function(ed,inx){
@@ -1031,14 +1031,14 @@ angular.module("sampleApp")
 
             makeReferencedMapsModel: function (SD, bundle) {
                 //builds the model that has all the models referenced by the indicated SD, recursively...
-                //console.log(SD)
+
                 var that = this;
                 var lst = [];
 
                 //not recursive any more (ie just references from this model)
                 getModelReferences(lst, SD, SD.url);      //recursively find all the references between models...
 
-                //console.log(lst);
+
 
                 //build the tree model...
 
@@ -1048,7 +1048,7 @@ angular.module("sampleApp")
 
                 //build all the edges - ie references
                 lst.forEach(function (reference) {
-console.log(reference)
+
                     var srcNode = getNodeByUrl(reference.src, reference.path, objNodes, arNodes);
                     var targNode = getNodeByUrl(reference.targ, reference.path, objNodes, arNodes);
 
@@ -1084,7 +1084,7 @@ console.log(reference)
 
 
                 function getNodeByUrl(url, label, nodes) {
-                    console.log(url)
+
                     if (nodes[url]) {
                         return nodes[url];
                     } else {
@@ -1109,7 +1109,7 @@ console.log(reference)
 
                     treeData.forEach(function (item) {
                         if (item.data) {
-                            console.log(item.data.referenceUrl);
+
                             if (item.data.referenceUrl) {
                                 var resourceType = $filter('referenceType')(item.data.referenceUrl)  //todo currently only supports references to core resourc etypes...
                                 var ref = {src: srcUrl, targ: item.data.referenceUrl, path: item.data.path, type: resourceType}
@@ -1128,6 +1128,98 @@ console.log(reference)
 
 
             },
+
+            makeDocBundleWithComposition : function(SD) {
+
+              //  return;
+
+                //make a Bundle, assuming that the SD profiles a Composition
+                var bundle = {resourceType:'Bundle',type:'document',entry:[]};
+
+                var composition = {resourceType:'Composition',status:'preliminary',type:{text:'unknown'},title:'Autogenerated doc from Logical Modeller'}
+                composition.date = moment().format();
+                composition.section=[];
+                composition.text = $filter('addTextDiv')('Composition')
+                bundle.entry.push({resource:composition});
+                var sectHash = {};
+                var currentSectHash;
+                var sectionReferences = [];     //all the references from a section...
+
+                //all the non-sections for now...
+                SD.snapshot.element.forEach(function (ed,inx) {
+
+                    var mapPath = _.find(ed.mapping, {identity: 'fhir'});
+
+                    var arPath = ed.path.split('.');
+                    if (mapPath && mapPath.map && mapPath.map.indexOf('.section') > -1) {
+                        if (arPath.length == 2) {
+                            //the first entry for this section..
+                            var sectName = arPath[1];   //the namm given to this section
+                            sectHash[sectName] = {entry: []}
+                            currentSectHash = sectHash[sectName]
+                            composition.section.push(currentSectHash)
+
+                        } else if (arPath.length == 3) {
+                            //a section property - is there a fixed value? todo - currently only strings
+                            if (ed.fixedString) {
+                                var prop = arPath[2];   //?? should get this from the mapping???
+                                if (prop != 'entry') {
+                                    currentSectHash[prop] = ed.fixedString;
+                                }
+                            }
+                        }
+                    }
+
+                    if (ed.type) {
+                        ed.type.forEach(function (typ) {
+
+                            if (typ.code == 'Reference') {
+
+                                var profile = typ.targetProfile;        //internal represntation is this...
+                                if (profile) {
+                                    var type = $filter('getLogicalID')(profile) //todo only work for core types
+
+                                    var resource = {resourceType: type};
+                                    bundle.entry.push({resource: resource});
+                                    resource.id = 'auto' + inx;
+                                    resource.text = $filter('addTextDiv')(type);
+
+                                    var ref = {reference: type + "/" + resource.id};
+                                    //this will only work for sections directly off the root...
+                                    if (mapPath && mapPath.map && mapPath.map.indexOf('.section.') > -1) {
+                                        //this is a reference within a section. add a reference to it from the current section hash
+
+                                       // var ref = {reference: type + "/" + resource.id};
+                                        currentSectHash.entry.push(ref);
+
+                                        //sectionReferences.push({type:type, section:arPath[1], map:mapPath.map, path:ed.path,  ed:ed})
+                                        console.log(mapPath)
+                                    } else {
+                                        //this is a reference that is not off a section
+                                        if (arPath.length ==2) {    //todo - are there references off the root?
+                                            var segment = arPath[1];
+                                            if (ed.max == 1) {
+                                                composition[segment] = ref;
+                                            } else {
+                                                composition[segment] = composition[segment] || []
+                                                composition[segment].push(ref)
+                                            }
+
+                                        }
+
+                                    }
+
+                                }
+                            }
+                        })
+                    }
+
+                });
+
+                console.log(composition)
+                return bundle;
+            },
+
             makeDocBundle : function(lst){
                 //lst {src:, targ:, path:, type} = from getModelReferences function()
                 //make a bundle that has an instance of all the referenced models (and their paths). suitable for Scenario Builder
@@ -1193,7 +1285,7 @@ console.log(reference)
 
                         $q.all(queries).then(
                             function () {
-                                console.log('DONE')
+
                                 deferred.resolve(treeData)
                             },
                             function (err) {
@@ -1211,14 +1303,14 @@ console.log(reference)
                                     if (bundle && bundle.entry) {
                                         var extensionDef = bundle.entry[0].resource;     //should really only be one...
                                         var analysis = Utilities.analyseExtensionDefinition3(extensionDef);
-                                        //console.log(analysis)
+
                                         if (analysis.name) {
                                             item.text = analysis.name;
-                                            //console.log(item)
+
                                         }
                                         item.data.analysis = analysis;
                                     }
-                                    //console.log(data.data)
+
                                     deferred.resolve();
                                 },
                                 function (err) {
@@ -1305,10 +1397,6 @@ console.log(reference)
 
 
                 function processNode(resource, node) {
-                    console.log(node, node.children);
-
-
-                    //resource[node.text] = {};
 
 
                     if (node.children && node.children.length > 0) {
@@ -1334,20 +1422,20 @@ console.log(reference)
                 var sample = {};
                 processNode(sample, treeObject[0])
 
-                console.log(sample)
+
                 return sample;
             },
 
             getOptionsFromValueSet: function (element) {
                 //return the expanded set of options from the ValueSet
                 var deferred = $q.defer();
-                //console.log(element);
+
 
 
                 if (element && element.selectedValueSet && element.selectedValueSet.vs && element.selectedValueSet.vs.url) {
                     GetDataFromServer.getValueSet(element.selectedValueSet.vs.url).then(
                         function (vs) {
-                            //console.log(vs)
+
 
                             //the extension that indicates the vs (authored by CF) has direct concepts that are not snomed so can't be expanded
                             var extensionUrl = appConfigSvc.config().standardExtensionUrl.vsDirectConcept;
@@ -1469,15 +1557,7 @@ console.log(reference)
 
                 var serverUrl;  //set this for STU-2 - will default to the current one if not set...
 
-/*
-                if (useStu2) {
-                    //for now get the st2 resources directly off HAPI server. todo - this needs to be configurable in some way...
-                    serverUrl = "http://fhirtest.uhn.ca/baseDstu2/";
-                    //serverUrl = "http://fhir2.healthintersections.com.au/open/";
-                    console.log('getting from STU-2')
 
-                }
-*/
 
                 GetDataFromServer.findConformanceResourceByUri(url, serverUrl).then(
                     function (SD) {
@@ -1824,7 +1904,7 @@ console.log(reference)
                                             item.data.referenceUrl = typ.targetProfile;
                                         }
 
-                                        //console.log(typ)
+
 
                                     }
 
@@ -1845,7 +1925,7 @@ console.log(reference)
 
                             })
 
-                            //console.log(tvType)
+
 
                             item.data.type = tvType;
 
@@ -1911,7 +1991,7 @@ console.log(reference)
 
 
 
-                //console.log(arTree)
+
 
                 return arTree;
             },
@@ -1999,7 +2079,7 @@ console.log(reference)
 
                 treeData.forEach(function (item) {
                     var data = item.data;
-                    // console.log(data);
+
                     var ed = {}
                     //this element is mapped to a simple extension. Do this first so the extensions are at the top...
                     if (data.fhirMappingExtensionUrl) {
@@ -2144,8 +2224,7 @@ console.log(reference)
                         if (node.parent == parentId) {
                             arTree.push(node);
                             var childPath = parentPath + '.' + node.data.name;
-                            //console.log(childPath);
-                            // node.data.path = childPath;
+
                             findChildren(childPath, node.id, arTree)
                         }
                     })
@@ -2179,22 +2258,22 @@ console.log(reference)
 
                 parseComment(ar, 0, chatFromServer);
 
-                console.log(ar)
+
 
                 return ar
 
 
             },
-            resolveProfile: function (url) {
+            resolveProfileDEP: function (url) {
                 //return a SD as a logical model from a profile that resolves extensions....
                 var deferred = $q.defer();
                 GetDataFromServer.findConformanceResourceByUri(url).then(
                     function (SD) {
-                        console.log(SD)
+
 
                         if (SD && SD.snapshot && SD.snapshot.element) {
                             SD.snapshot.element.forEach(function (ed) {
-                                console.log(ed.path)
+
                             })
 
                         }
@@ -2247,16 +2326,16 @@ console.log(reference)
                     var baseType = extensionValue.valueString;      //the type name of the core resource this one is based on.
                     baseProfileUrl = "http://hl7.org/fhir/StructureDefinition/"+baseType
                     var lmHash = getSDHash(lm);     //a hash keyed by path
-                    console.log(lmHash,baseType)
+
                     GetDataFromServer.findConformanceResourceByUri(baseProfileUrl).then(
                         function(SD) {
                             var baseTypeHash = getSDHash(SD)
-                            //console.log(baseTypeHash)
+
                             var analysis = {removed:[],added:[],changed:[]}
                             //first, move through all the elements in the lm. If there is not a corresponding path in the base profile (allowing for name changes) then it was added...
                             lm.snapshot.element.forEach(function(ed){
                                 var adjustedPath = ed.path.setFirstSegment(baseType)    //note the setFirstSegment function was added to the string prototype at the top of this service
-                                //console.log(adjustedPath)
+
                                 if (! baseTypeHash[adjustedPath]) {
                                     analysis.added.push(ed);
                                 } else {
@@ -2286,7 +2365,7 @@ console.log(reference)
 
 
 
-                            //console.log(analysis);
+
                             deferred.resolve(analysis)
 
                         },

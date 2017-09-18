@@ -43,9 +43,6 @@ angular.module("sampleApp")
                 makeGraph($scope.selectedResource);
 
 
-
-
-
             };
 
             $scope.read = function(nhi) {
