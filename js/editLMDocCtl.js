@@ -24,9 +24,10 @@ angular.module("sampleApp")
                 ).on('select_node.jstree', function (e, data) {
                     console.log(data)
                     delete $scope.currentResource;      //todo - there's a setResource() in the service too...
-
+                    delete $scope.currentPath;
                     if (data.node.data){
                         $scope.selectResource({resource:data.node.data.resource});
+                        $scope.currentPath = data.node.data.path;
 
                     }
                     $scope.$digest()

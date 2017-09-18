@@ -154,16 +154,13 @@ angular.module("sampleApp")
                         //assume a relative reference (that cf uses)
                         hashByRef[resource.resourceType + "/" + resource.id] = resource;
                     }
-
-
-                })
+                });
 
                 var comp = getResource(hashByType,'Composition',false);
                 if (! comp) {
                     alert('No Composition');    //shouldn't ever get this
                     return;
                 }
-                //var patient = getResource(hashByType,'Patient',false);
 
 
                 var rootId = getId();
@@ -202,7 +199,7 @@ angular.module("sampleApp")
                             var sectId = getId();
                             var sectItem = {id: sectId, parent: id, text: entry.reference, state: {opened: true, selected: false}}
                             sectItem['a_attr'] = {class : 'resourceInDocTree'};
-                            sectItem.data = {resource:hashByRef[entry.reference]}
+                            sectItem.data = {resource:hashByRef[entry.reference],path:entry.display}
                            // sectItem.data.entry = entry;
 
                             var isList = false;
@@ -257,8 +254,8 @@ angular.module("sampleApp")
                 return tree;
 
 
-                function addResourceToRoot(comp, tree,type,parentId,hashByRef) {
-                    var t = comp[type]
+                function addResourceToRoot(comp, tree,segment,parentId,hashByRef) {
+                    var t = comp[segment]      //the element on the composition
                     if (t && t.reference) {
                         var resource = hashByRef[t.reference];
                         if (resource) {
@@ -267,7 +264,7 @@ angular.module("sampleApp")
 
                             //entryItem.data = {attributes : {class : 'rounded-box'}};
                             item['a_attr'] = {class : 'resourceInDocTree'};
-                            item.data = {resource:hashByRef[t.reference]}
+                            item.data = {resource:hashByRef[t.reference],path:segment}
                             // entryItem['li_attr'] = {style : 'margin-bottom:8px'};
 
                             item.text = resource.resourceType;

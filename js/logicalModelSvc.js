@@ -1184,16 +1184,17 @@ angular.module("sampleApp")
                                     resource.id = 'auto' + inx;
                                     resource.text = $filter('addTextDiv')(type);
 
-                                    var ref = {reference: type + "/" + resource.id};
+                                    var ref = {reference: type + "/" + resource.id,display:$filter('dropFirstInPath')(ed.path)};
+
+
+
                                     //this will only work for sections directly off the root...
                                     if (mapPath && mapPath.map && mapPath.map.indexOf('.section.') > -1) {
                                         //this is a reference within a section. add a reference to it from the current section hash
 
-                                       // var ref = {reference: type + "/" + resource.id};
                                         currentSectHash.entry.push(ref);
 
-                                        //sectionReferences.push({type:type, section:arPath[1], map:mapPath.map, path:ed.path,  ed:ed})
-                                        console.log(mapPath)
+
                                     } else {
                                         //this is a reference that is not off a section
                                         if (arPath.length ==2) {    //todo - are there references off the root?

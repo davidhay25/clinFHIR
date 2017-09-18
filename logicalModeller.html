@@ -935,12 +935,22 @@
 
                                     <tr ng-show="treeData[0].data.header.baseType">
                                         <td>Base Resource Type</td><td>{{treeData[0].data.header.baseType}}</td></tr>
+
+                                    <tr ng-show="treeData[0].data.header.baseType == 'Composition'">
+                                        <td >Sample Document</td>
+                                        <td><button class="btn btn-link" ng-click="editLMDoc()">Show Document</button></td>
+                                    </tr>
+
                                     <tr ng-show="treeData[0].data.header.mapping">
                                         <td>Mapping</td><td>{{treeData[0].data.header.mapping}}</td></tr>
 
                                     <tr ng-show="treeData[0].data.header.SDUrl">
                                         <td >Profile Url<div>(When generated)</div></td><td>{{treeData[0].data.header.SDUrl + '-cf-profile'}}</td>
                                     </tr>
+
+
+
+
 
 
 

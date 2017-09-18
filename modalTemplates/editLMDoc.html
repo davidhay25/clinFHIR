@@ -5,7 +5,7 @@
 
         <div class="row">
             <div class="col-md-8 col-sm-8">
-                <h3 class="modal-title">Edit document</h3>
+                <h3 class="modal-title">Document references</h3>
             </div>
 
             <div class="col-md-4 col-sm-4">
@@ -23,7 +23,32 @@
 
         <uib-tabset>
 
-            <uib-tab heading="Edit">
+
+
+
+            <uib-tab heading="DocTree">
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <!-- <button class="btn btn-link" ng-click="generateDocTree(doc)">Build Tree</button>
+                        -->
+                        <div id="docTreeView"></div>
+
+                    </div>
+                    <div class="col-md-6 col-sm-6">
+                        <h4>{{currentPath}}</h4>
+                        <pre>{{selectedResource | json}}</pre>
+                    </div>
+
+                </div>
+            </uib-tab>
+
+
+
+            <uib-tab heading="Json">
+                <pre>{{doc | json}}</pre>
+            </uib-tab>
+
+            <uib-tab ng-show ="1==2" heading="Edit">
                 <div class="row">
                     <div class="col-md-3 col-sm-3">
 
@@ -41,31 +66,6 @@
                 </div>
             </uib-tab>
 
-
-            <uib-tab heading="DocTree">
-
-                <div class="row">
-                    <div class="col-md-6 col-sm-6">
-                        <button class="btn btn-link" ng-click="generateDocTree(doc)">Build Tree</button>
-                        <div id="docTreeView"></div>
-
-                    </div>
-                    <div class="col-md-6 col-sm-6">
-                        <pre>{{selectedResource | json}}</pre>
-                    </div>
-
-                </div>
-
-
-
-
-            </uib-tab>
-
-
-
-            <uib-tab heading="Json">
-                <pre>{{doc | json}}</pre>
-            </uib-tab>
 
         </uib-tabset>
 
