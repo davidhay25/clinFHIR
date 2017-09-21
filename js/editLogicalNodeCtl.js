@@ -84,6 +84,7 @@ angular.module("sampleApp")
 
                     isDiscriminatorRequired();      //true if there is another fhir mapping the same
                     $scope.input.mappingPathV2 = getMapValueForIdentity('hl7V2');
+                    $scope.input.mappingPathSnomed = getMapValueForIdentity('snomed');
 
                     $scope.input.fhirMappingExtensionUrl = data.fhirMappingExtensionUrl;
 
@@ -108,8 +109,17 @@ angular.module("sampleApp")
 
                     $scope.dt = data.type[0];   //the selected datatype...
 
+
+
+
+
                     var dtCode = data.type[0].code;     //only the first datatype (we only support 1 right now)
-                    $scope.allDataTypes.forEach(function(dt1){
+
+                if (dtCode == 'code' || dtCode == 'Codeing' || dtCode == 'CodeableConcept') {
+                    $scope.isCoded = true;
+                }
+
+                $scope.allDataTypes.forEach(function(dt1){
                         if (dt1.code == dtCode) {
                             $scope.input.dataType = dt1;
                         }
@@ -499,6 +509,7 @@ angular.module("sampleApp")
                     vo.mappingPath = $scope.input.mappingPath;      //this is the FHIR path
                     vo.mappingFromED = $scope.input.mappingFromED;      //all mappings
                     vo.mappingPathV2 = $scope.input.mappingPathV2;
+                    vo.mappingPathSnomed = $scope.input.mappingPathSnomed;
 
                     //if mapping to an extension, the include the oath to the extension
                     if (vo.mappingPath && vo.mappingPath.indexOf('xtension') > -1) {
@@ -509,6 +520,8 @@ angular.module("sampleApp")
                     //make sure the v2 & fhir mappings align with the
                     alignMap('hl7V2',vo.mappingPathV2,vo.mappingFromED)
                     alignMap('fhir',vo.mappingPath,vo.mappingFromED)
+
+                    alignMap('snomed',vo.mappingPathSnomed,vo.mappingFromED)
 
                     vo.type = [{code:$scope.input.dataType.code}];
                     vo.editNode = editNode;

@@ -239,7 +239,11 @@
                                        ng-change="updateCurrentMapValue(input.mappingPathV2)"/>
                             </uib-tab>
 
-
+                            <uib-tab heading="SNOMED" select="setCurrentMap('snomed')">
+                                <br/>
+                                <input type="text" class="form-control" ng-model="input.mappingPathSnomed"
+                                       ng-change="updateCurrentMapValue(input.mappingPathSnomed)"/>
+                            </uib-tab>
 
 
 
@@ -249,7 +253,7 @@
                                 <br/>
 
                                 <div class="row" ng-repeat="map in input.mappingFromED"
-                                    ng-hide="map.identity=='fhir' || map.identity=='hl7V2'"
+                                    ng-hide="map.identity=='fhir' || map.identity=='hl7V2' ||  map.identity=='snomed'"
                                     ng-click="setCurrentMap(map.identity)">
                                     <div class="col-sm-3">{{map.identity}}</div>
                                     <div class="col-sm-8"><input type="text" class="form-control" ng-model="map.map"/></div>

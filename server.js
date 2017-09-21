@@ -78,10 +78,10 @@ proxy.on('error', function (err, req, res) {
 });
 
 proxy.on('proxyRes', function (proxyRes, req, res) {
-    //console.log('RAW Response from the target', JSON.stringify(proxyRes.headers, true, 2));
+    console.log('RAW Response from the target', JSON.stringify(proxyRes.headers, true, 2));
 });
 proxy.on('proxyReq', function (proxyRes, req, res) {
-    //console.log('sending');
+    console.log('sending');
 });
 
 
@@ -115,10 +115,19 @@ function recordAccess(req,data) {
 }
 
 
-
 //return status pages, index is resourceCeator.html
 //app.use('/', express.static(__dirname,{index:'/resourceCreator.html'}));
 app.use('/', express.static(__dirname,{index:'/launcher.html'}));
+
+
+app.all('/proxy/*',function(req,res){
+    console.log(req.url)
+    req.url = req.url.replace('proxy/','')
+    console.log('-->'+req.url)
+    proxy.web(req, res, { target: 'http://snapp.clinfhir.com:8081/baseDstu3/' });
+});
+
+
 
 /*
 //--- proxies for Grahames server. Could generalize this using - eg - headers,but will need to update allservices making $http calls...
