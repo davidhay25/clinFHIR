@@ -114,8 +114,15 @@
     <script src="js/editLogicalNodeCtl.js"></script>
     <script src="js/editLMDocCtl.js"></script>
     <script src="js/components/extensionDirective.js"></script>
+    <script src="directive/questionnaire/questionnaire.js"></script>
 
     <script src="js/builderSvc.js"></script>
+
+
+    <!-- for Q-->
+    <script src="js/addPropertyInBuilderCtrl.js"></script>
+    <script src="js/sbHistorySvc.js"></script>
+    <script src="js/dataTypeCtrl.js"></script>
     <!--
       <script src="js/newExtensionDefinition.js"></script>
     <script src="js/documentBuilder.js"></script>
@@ -253,6 +260,10 @@
     </div>
 
 
+    <!-- temp location -->
+
+    <questionnaire model="Q"></questionnaire>
+
 
     <div class="row">
         <div ng-class="leftPaneClass">
@@ -344,7 +355,6 @@
         <div ng-class="midPaneClass">
 
             <div ng-show="isHistory" class="alert alert-warning">
-
                 <div class="row">
                     <div class="col-sm-6 col-md-6">
                         <strong>Viewing history</strong>
@@ -355,10 +365,6 @@
                         <div class="clickable pull-right" ng-click="revert()">Revert to this version</div>
                     </div>
                 </div>
-
-
-
-
             </div>
 
             <uib-tabset ng-show="treeData.length > 0">
@@ -678,6 +684,13 @@
                             <pre>{{treeData | json}}</pre>
                         </uib-tab>
 
+                        <uib-tab heading="Questionnaire">
+                            <pre>{{Q | json}}</pre>
+                        </uib-tab>
+
+                        <uib-tab heading="Questionnaire Form">
+                            <questionnaire model="Q"></questionnaire>
+                        </uib-tab>
 
                     </uib-tabset>
                 </uib-tab>
@@ -686,8 +699,6 @@
 
             </uib-tabset>
         </div>
-
-
         <div ng-class="rightPaneClass">
 
             <div ng-show="treeData.length > 0">
@@ -1184,10 +1195,13 @@
         -->
 
 
+
          <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
                 vs-selected="vsSelected"></vs-browser>
 
         </div>
-    </div>
+
+
+</div>
 </body>
 </html>

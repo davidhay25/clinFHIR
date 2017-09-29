@@ -1527,10 +1527,12 @@ angular.module("sampleApp")
                 delete $scope.commentTask;      //the task to comment on this model...
                 delete $scope.input.mdComment;  //the comment
                 delete $scope.taskOutputs;      //the outputs of the task (Communication resource currently)
+                delete $scope.Q;                //the Questionnaire
                 $scope.canSaveModel = true;     //allow edits to the model to be saved
 
                 $scope.isDirty = false;
-                $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource)
+                $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource);
+                $scope.Q = logicalModelSvc.makeQ($scope.treeData);
                 $scope.relativeMappings = logicalModelSvc.getRelativeMappings($scope.treeData); //items with both v2 & fhir mappings
 
 
@@ -2062,13 +2064,14 @@ angular.module("sampleApp")
                             $scope.treeIdToSelect = $scope.selectedNode.id;
                         }
 
-
-
                         drawTree();
                         $scope.isDirty = true;
                         makeSD();       //create the StructureDefinition resource...
 
                         setAllMappings();   //update any mappings
+
+                        $scope.Q = logicalModelSvc.makeQ($scope.treeData);  //update the Questionnaire
+                        console.log( $scope.Q)
 
                         //set the path of the element based on the name - and the parent names up the hierarchy..
                         //>>>>>>>> This is an important function! Note the use of pathSegment...

@@ -1113,7 +1113,7 @@ angular.module("sampleApp").
             vo.publisher = SD.publisher;
             vo.url = SD.url;
             vo.description = SD.description;
-
+           // vo.sliceName = SD.sliceName;
             //console.log(vo.url)
 
             //vo.eds = [];     //a suppary of element definitions - so I can see them in the UI
@@ -2856,6 +2856,27 @@ console.log(summary);
     }
 
     return {
+        getTextSummaryOfDataType : function(dt,value) {
+            //a single line summary of a datatype (started for questionnaire
+            var txt="";
+            switch (dt) {
+                case "Identifier" :
+                    txt = value.value
+                    if (value.system) {
+                        txt = txt + " ("+value.system+")"
+                    }
+                break;
+                case "CodeableConcept" :
+                    if (value.text) {txt += value.text};
+                    if (value.coding) {
+                        value.coding.forEach(function (coding) {
+                            txt += " (" + coding.system + "|"+coding.value +")";
+                        })
+                    }
+
+            }
+            return txt;
+        },
         getCCSummary : function(data) {
             //being able to summarize a codeableconcept is useful. todo - refactor to use this...
             if (!data) {
@@ -2896,7 +2917,6 @@ console.log(summary);
 
                         return txt;
                         break;
-
                     case  "Immunization":
                         if (resource.vaccineCode) {
                             return getCCSummary(resource.vaccineCode);

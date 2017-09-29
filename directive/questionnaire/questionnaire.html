@@ -1,0 +1,84 @@
+<h3>Form</h3>
+
+
+<div class="row">
+    <div class="col-sm-3 col-md-3">
+        <ul class="list-group">
+            <li ng-class="{'list-group-item':true}" ng-repeat="item in model.item">
+                <span class="pull-right" ng-show="item.repeats"><i class="glyphicon glyphicon-asterisk"></i></span>
+                <div class="clickable" ng-click="selectSection(item)">{{item.text}}</div>
+
+            </li>
+        </ul>
+
+    </div>
+    <div class="col-sm-9 col-md-9">
+        <div class="row rounded-box-filled">
+            <div class="col-sm-4 col-md-4">
+                <h5>{{selectedSection.text}}</h5>
+            </div>
+            <div class="col-sm-8 col-md-8">
+                <i ng-show="selectedSection.repeats" class="pull-right glyphicon glyphicon-plus clickable" ng-click="addSection()"></i>
+            </div>
+        </div>
+
+
+        <form>
+            <div class="form-group" ng-repeat="item in selectedSection.item">
+   <!--
+                <label class="capitalize">{{item.text}}</label>
+-->
+
+                <div class="row">
+                    <div class="col-sm-2 col-md-2">
+                        <label class="capitalize">{{item.text}}</label>
+                    </div>
+
+                    <div class="col-sm-6 col-md-6">
+
+                        <div ng-repeat="answer in item.myMeta.answer">
+                            {{answer.display}}
+                        </div>
+
+                        <input class="form-control" type="text" placeholder="{{item.linkId}}" ng-model="input[item.linkId]"/>
+
+
+                        <div>
+                            <span class="iconSpacing clickable" ng-click = "selectDt(item,type.code)" ng-repeat="type in item.myMeta.ed.type">
+                                {{type.code}}
+                            </span>
+                        </div>
+                    </div>
+
+
+                    <div class="col-sm-3 col-md-3">
+
+                    </div>
+
+                    <div class="col-sm-1 col-md-1">
+                        <i class="glyphicon glyphicon-plus"
+                           title="Add"
+                           ng-click="addAnswer(item,input[item.linkId])" style="cursor: pointer">
+
+                        </i>
+
+
+
+                    </div>
+                </div>
+
+
+
+            </div>
+        </form>
+
+
+    </div>
+
+</div>
+
+
+
+
+
+

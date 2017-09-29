@@ -1,6 +1,10 @@
 
 /* classes for the tree view icons...*/
 
+.capitalize::first-letter {
+    text-transform: uppercase;
+}
+
 .resourceInDocTree {
     border: 1px solid gainsboro;
     padding : 5px;

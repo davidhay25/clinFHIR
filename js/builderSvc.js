@@ -12,12 +12,19 @@ angular.module("sampleApp")
 
         //return the profile url of the current resource. This is needed for getEDInfoForPath() and assumes we're tracking the current resource...
         var getProfileUrlCurrentResource = function() {
-            var profileUrl = baseHl7ConformanceUrl+"StructureDefinition/"+gCurrentResource.resourceType;
-            if (gCurrentResource && gCurrentResource.meta && gCurrentResource.meta.profile) {
-                profileUrl= gCurrentResource.meta.profile[0]
-            } else {
 
+            var profileUrl="";
+            if (gCurrentResource){
+                profileUrl = baseHl7ConformanceUrl+"StructureDefinition/"+gCurrentResource.resourceType;
+
+                if (gCurrentResource.meta && gCurrentResource.meta.profile) {
+                    profileUrl= gCurrentResource.meta.profile[0]
+                } else {
+
+                }
             }
+
+
             return profileUrl;
 
         };
@@ -1141,7 +1148,10 @@ angular.module("sampleApp")
                         html += "<div class='inset'>";
 
                         // - don't do that here any more... html += that.generateSectionText(section)
-                        html += section.text.div;
+                        if (section.text) {
+                            html += section.text.div;
+                        }
+
                         html += "</div>";
 
 
@@ -1971,13 +1981,16 @@ angular.module("sampleApp")
                 var profileUrl = getProfileUrlCurrentResource();
                 var SD = gSD[profileUrl];     //it must have been read at this point...
 
-                if (!SD) {
-                    alert("whoops - can't find the profile for this resource - I cannot continue.")
-                    return {};
-                }
-
                 //var SD = gSD[type];     //it must have been read at this point...
                 var info = {path:path};          //this will be the info about this element...
+
+
+                if (!SD) {
+                    //when usig=ng this for the questionnaire
+                   // alert("whoops - can't find the profile for this resource - I cannot continue.")
+                    return info;
+                }
+
 
                 //find the path
                 if (SD.snapshot && SD.snapshot.element) {

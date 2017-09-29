@@ -216,8 +216,6 @@ angular.module("sampleApp")
                 $scope.graphZoom = !$scope.graphZoom
             }
 
-
-
             $scope.toggleSelector = function(){
                 if ($scope.showSelector) {
                     $scope.leftPaneClass = "col-sm-2 col-md-2"
@@ -230,8 +228,36 @@ angular.module("sampleApp")
                 }
                 $scope.showSelector = !$scope.showSelector
             }
-
             $scope.toggleSelector()
+
+
+            //inputMode hides the selector, reduces the mid panel and shows the current resource as well as the input
+
+            $scope.inputTreeClass ="col-sm-5 col-md-5";
+            $scope.inputDTSelectClass = "col-sm-7 col-md-7";
+            $scope.inputResourceClass = "hidden";
+            $scope.toggleInputMode = function(){
+                if ($scope.inputMode) {
+                    //turning inputmode off
+                    $scope.leftPaneClass = "col-sm-2 col-md-2"
+                    $scope.midPaneClass = "col-md-5 col-sm-5"
+                    $scope.rightPaneClass = "col-md-5 col-sm-5";
+
+                    $scope.inputTreeClass ="col-sm-5 col-md-5";
+                    $scope.inputDTSelectClass = "col-sm-7 col-md-7"
+                    $scope.inputResourceClass = "hidden";
+                    $scope.showSelector = true;
+                } else {
+                    $scope.leftPaneClass = "hidden"
+                    $scope.midPaneClass = "col-md-4 col-sm-4"
+                    $scope.rightPaneClass = "col-md-8 col-sm-8";
+
+                    $scope.inputTreeClass ="col-sm-3 col-md-3";
+                    $scope.inputDTSelectClass = "col-sm-4 col-md-4";
+                    $scope.inputResourceClass = "col-sm-5 col-md-5";
+                }
+                $scope.inputMode = ! $scope.inputMode;
+            }
 
 
 

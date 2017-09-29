@@ -796,14 +796,14 @@ angular.module("sampleApp")
                 }
             );
             
-            $scope.findAdhHocProfile = function (baseType) {
+            $scope.findAdHocProfile = function (baseType) {
                 var svr =  appConfigSvc.getCurrentConformanceServer();
                 var searchString = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition?";
 
 
 
                 if (svr.version == 3) {
-                    searchString += "kind=resource&base=http://hl7.org/fhir/StructureDefinition/"+$scope.results.profileType.name
+                    searchString += "kind=resource&base=http://hl7.org/fhir/StructureDefinition/"+baseType.name
                 } else {
                     //var base = "http://hl7.org/fhir/StructureDefinition/DomainResource";
                     searchString += "kind=resource&type="+baseType.name;
@@ -844,9 +844,12 @@ angular.module("sampleApp")
 
             }
 
-            $scope.selectAdhHocProfile = function(SD) {
-                $scope.selectedItemType = 'profile';
+            $scope.selectAdHocProfile = function(SD) {
+
+
                 setupProfile(SD)
+                $scope.selectedItemType = 'profile';
+                $scope.currentIG = {};      //to show the tabset
             };
             
             //load the IG's that describe 'collections' of conformance artifacts - like CareConnect & Argonaut
@@ -1360,8 +1363,11 @@ angular.module("sampleApp")
                     }
                 );
 
-                //------ report
-                $scope.profileReport = profileDiffSvc.reportOneProfile(angular.copy(SD),$scope.currentIG);
+                //------ report - if this profile is part of an IG... (not a profile selected directly)
+                if ($scope.currentIG) {
+                    $scope.profileReport = profileDiffSvc.reportOneProfile(angular.copy(SD),$scope.currentIG);
+                }
+
 
             }
 

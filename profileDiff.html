@@ -354,7 +354,7 @@
                                 <div class="col-sm-9 col-md-9">
                                     <select class="form-control" ng-model="input.selResourceType"
                                             ng-options="typ.name for typ in allResourceTypes"
-                                            ng-change="findAdhHocProfile(input.selResourceType)">
+                                            ng-change="findAdHocProfile(input.selResourceType)">
 
                                     </select>
                                 </div>
@@ -369,7 +369,7 @@
                             <ul class="list-group">
                                 <li ng-class="{'list-group-item':true, profileSelected:selectedItem == item}"
                                     ng-repeat="entry in profilesOnBaseType.entry"
-                                    ng-click = "selectAdhHocProfile(entry.resource)">
+                                    ng-click = "selectAdHocProfile(entry.resource)">
                                     <div class="clickable">{{entry.resource.url | referenceType}}</div>
                                     <div><em>{{item.description}}</em></div>
                                 </li>

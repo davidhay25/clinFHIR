@@ -645,7 +645,7 @@
                         <hr/>
                     </div>
 
-                    <button ng-hide="displayMode == 'new' || ! builderSvc.isVersionMostRecent(selectedContainer)"
+                    <button ng-hide="displayMode == 'new' || ! builderSvc.isVersionMostRecent(selectedContainer) || inputMode"
                             ng-click="displayMode = 'new'"
                             class="btn btn-primary pull-right">Add Resource</button>
 
@@ -1072,7 +1072,6 @@
 
 
             </div>
-
             <div ng-class="rightPaneClass" >
 
 <!--
@@ -1105,30 +1104,34 @@
                             <uib-tab  ng-show="builderSvc.isVersionMostRecent(selectedContainer)" heading="Structure & Reference">
 
 
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-12">
+                                        <span class="clickable pull-right" ng-click="toggleInputMode()">Toggle Input Mode</span>
+                                    </div>
+                                </div>
+
                                 <div class="row"  ng-show="builderSvc.isVersionMostRecent(selectedContainer)" >
-                                    <div class="col-sm-5 col-md-5">
-                                        <br />
+
+                                    <div ng-class="inputTreeClass" classDEP="col-sm-5 col-md-5">
+
                                         <span class="pull-right">
-                                        <a target="_blank" ng-href="{{fhirBasePath}}{{currentResource.resourceType | getLogicalID | lowercase}}.html">
+                                            <a target="_blank" ng-href="{{fhirBasePath}}{{currentResource.resourceType | getLogicalID | lowercase}}.html">
                                             <i class="glyphicon glyphicon-globe"
                                                title="View Resource definition in spec">
                                             </i>
 
                                         </a>
-                                    </span>
-
+                                        </span>
 
                                         <div id="SDtreeView"></div>
-
-
                                     </div>
 
 
 
-                                    <div class="col-sm-7 col-md-7">
+                                    <div ng-class="inputDTSelectClass"  classDEP="col-sm-7 col-md-7">
 
 
-                                        <br/>
+
 
                                         <div class="row">
                                             <div class="col-md-9 col-sm-9">
@@ -1344,7 +1347,12 @@
 
 
                                     </div>
+
+                                    <div ng-class="inputResourceClass">
+                                        <pre>{{currentResource | json}}</pre>
+                                    </div>
                                 </div>
+
 
 
                             </uib-tab>
@@ -1437,7 +1445,7 @@
                                             </table>
                                         </div>
 
-                                       <!-- <hr/> -->
+
                                     </uib-tab>
 
                                 </uib-tabset>

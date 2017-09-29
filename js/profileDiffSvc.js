@@ -330,8 +330,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                             node.state.hidden=true;
                         }
 
-                        //node.text = getDisplay(node);
-
                         //find the hash of the parent, and set the id in the node
                         var pos = hashPath[parent];
                         if (pos!== undefined) {
@@ -356,11 +354,16 @@ angular.module("sampleApp").service('profileDiffSvc',
                            // node.a_attr = {style:'color:blue'}
                         }
 
+
+
                         node.text = getDisplay(node);
 
 
                         if (segment == 'extension') {
-                       // if (ar[ar.length - 1] == 'extension') {
+
+                            //set the text to a better display (not the path)
+                            node.text = item.name || item.short || node.text;
+
 
                             node.a_attr = {style:'color:blueviolet'}
                             //if the extension has a profile type then include it, otherwise not...
@@ -382,15 +385,10 @@ angular.module("sampleApp").service('profileDiffSvc',
                                     }
                                 })
                             }
-
-
                         }
-
                     }
+                });
 
-
-                })
-                //console.log(hashPath)
 
 
                 if (queries.length) {
@@ -402,12 +400,12 @@ angular.module("sampleApp").service('profileDiffSvc',
                                 if (node.data && node.data.ed && node.data.ed.myMeta) {
                                     var analysis = node.data.ed.myMeta.analysis;
                                     if (analysis && analysis.isComplexExtension) {
-                                        //console.log(node)
-                                        //console.log(analysis.children)
                                         if (analysis.children) {
                                             //add the child nodes for the complex extension...
                                             analysis.children.forEach(function(child){
                                                 var id = 'ce'+lstTree.length+newNodes.length;
+
+
                                                 var newNode = {id:id,parent:node.id,text:child.code,state:{opened:false,selected:false},
                                                     a_attr:{title: + id}};
                                                 newNode.data = {ed : child.ed};
