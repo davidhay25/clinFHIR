@@ -1,0 +1,121 @@
+<h3>Form</h3>
+
+
+<uib-tabset>
+    <uib-tab heading="Edit">
+
+        <div class="row">
+            <div class="col-sm-3 col-md-3">
+                <ul class="list-group">
+                    <li ng-class="{'list-group-item':true}" ng-repeat="item in model.item">
+                        <span class="pull-right" ng-show="item.repeats">*</span>
+                        <div class="clickable" ng-click="selectSection(item)">{{item.text}}</div>
+
+                    </li>
+                </ul>
+
+            </div>
+            <div class="col-sm-9 col-md-9">
+                <div class="row rounded-box-filled">
+                    <div class="col-sm-4 col-md-4">
+                        <h5>{{selectedSection.text}}</h5>
+                    </div>
+                    <div class="col-sm-8 col-md-8">
+                        <i ng-show="selectedSection.repeats" class="pull-right glyphicon glyphicon-plus clickable" ng-click="addSection()"></i>
+                    </div>
+                </div>
+                <br/>
+
+                <form>
+                    <div class="form-group" ng-repeat="item in selectedSection.item">
+                        <div class="row underline">
+                            <div class="col-sm-2 col-md-2">
+                                <label class="capitalize popoverHint"
+                                       uib-popover="{{item.myMeta.ed.definition}}"
+                                       popover-placement="top"
+                                       popover-trigger="'mouseenter'">
+                                    {{item.text}} <span ng-show="item.repeats"> *</span>
+                                </label>
+                            </div>
+
+                            <div class="col-sm-5 col-md-5">
+
+                                <div ng-repeat="answer in item.myMeta.answer">
+                                    <div class="answer">
+                                        {{answer.display}}
+                                    </div>
+
+                                </div>
+
+                                <!-- Possible datatypes -->
+                                <div class="pull-right">
+                                    <span class="iconSpacing clickable" ng-click = "selectDt(item,type.code)" ng-repeat="type in item.myMeta.ed.type">
+
+                                        <span ng-hide="type.code == 'Reference'"> {{type.code}}</span>
+                                        <span ng-show="type.code == 'Reference'">
+                                            {{type.targetProfile | referenceType}}
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+
+
+                            <div class="col-sm-3 col-md-3">
+                                <!--<span ng-show="item.repeats"><i class="glyphicon glyphicon-asterisk"></i></span>-->
+                                {{item.myMeta.ed.short}}
+                            </div>
+
+                        </div>
+
+
+
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+    </uib-tab>
+
+    <uib-tab heading="Resource">
+        <pre>{{QR.resource | json}}</pre>
+    </uib-tab>
+
+    <uib-tab heading="View">
+
+        <div ng-repeat="section in display">
+            <div><strong>{{section.sectionItem.text}}</strong></div>
+            <div ng-repeat="item in section.item">
+                <div class="row">
+                    <div class="col-sm-3 col-md-3 col-sm-offset-1 col-md-offset-1">
+                       {{item.text}}
+                    </div>
+                    <div class="col-sm-8 col-md-8">
+                        <div ng-repeat="answer in item.myMeta.answer">
+                            <div uib-popover="{{answer.detail}}"
+                                popover-placement="top"
+                                popover-trigger="'mouseenter'">
+                                {{answer.display}}</div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <pre>{{display | json}}</pre>
+
+    </uib-tab>
+    <uib-tab heading="Json" select="makeDisplayJson()" >
+        <pre>{{displayModel | json}}</pre>
+    </uib-tab>
+    <uib-tab heading="QuestionnaireResponse">
+        <pre>{{QR.QR | json}}</pre>
+    </uib-tab>
+
+</uib-tabset>
+
+
+
+
+

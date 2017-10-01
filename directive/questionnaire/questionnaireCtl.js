@@ -8,9 +8,9 @@ angular.module('sampleApp')
             },
 
             templateUrl: 'directive/questionnaire/questionnaire.html',
-            controller: function($scope,$uibModal,builderSvc,ResourceUtilsSvc,Utilities,GetDataFromServer){
+            controller: function($scope,$uibModal,builderSvc,ResourceUtilsSvc,Utilities,GetDataFromServer,questionnaireSvc){
 
-                $scope.answers = [];    //an array of sections with answers. (We'll think about the QR later...)
+                //$scope.answers = [];    //an array of sections with answers. (We'll think about the QR later...)
 
                 $scope.currentSection;  //the
 
@@ -61,10 +61,6 @@ angular.module('sampleApp')
                         getDtValue(item,dt)
                     }
 
-
-
-
-
                     function getDtValue(item,dt,vsDetails,expandedValueSet) {
                         $uibModal.open({
                             templateUrl: 'modalTemplates/addPropertyInBuilder.html',
@@ -75,7 +71,7 @@ angular.module('sampleApp')
                                     return dt;
                                 },
                                 hashPath: function () {
-                                    return {path:"Condition",noSave:true}; //<<<<< will just return the value...
+                                    return {path:"Model",noSave:true}; //<<<<< will just return the value...
                                 },
                                 insertPoint: function () {          //the point where the insert is to occur ...
                                     return {}
@@ -88,8 +84,16 @@ angular.module('sampleApp')
                                     console.log(expandedValueSet)
                                     return expandedValueSet;
                                 },
-                                currentValue : function(){
-                                    return {};
+                                currentStringValue : function(){
+                                    if (item.myMeta.answer.length > 0) {
+                                        var ans = item.myMeta.answer[0]
+                                        if (ans.dt == 'string') {
+                                            return ans.display;
+                                        }
+                                    } else {
+                                        return "";
+                                    }
+
                                 },
                                 container : function() {
                                     return {};
@@ -102,11 +106,17 @@ angular.module('sampleApp')
                             var out = {};
                             //construct a value[x] corrrect for the datatype...
                             builderSvc.addPropertyValue (out,{path:'Value'},dt,value)
-                            //console.log(out)
 
-                            var text = ResourceUtilsSvc.getTextSummaryOfDataType(dt,out.Value);
-                            //console.log(text)
-                            item.myMeta.answer.push({display:text})
+                            var vo = ResourceUtilsSvc.getTextSummaryOfDataType(dt,out.Value);
+
+                            var ans = {display:vo.summary,dt:dt,value:out.Value,detail:vo.detail};
+                            if (item.repeats) {
+                                item.myMeta.answer.push(ans)
+                            } else {
+                                item.myMeta.answer = [ans]
+                            }
+                            makeDisplay();
+                            makeDisplayJson();
                         })
                     }
 
@@ -115,7 +125,7 @@ angular.module('sampleApp')
 
                 }
 
-                $scope.addAnswer = function(item,value){
+                $scope.addAnswerDEP = function(item,value){
                     console.log(item,value)
                     item.myMeta.answer.push({"valueString":value})
                 }
@@ -123,14 +133,86 @@ angular.module('sampleApp')
                 $scope.selectSection = function(item) {
                     console.log(item)
                     $scope.selectedSection = item;
+                };
+
+                function makeDisplayJson() {
+                    $scope.displayModel = angular.copy($scope.model)
+
+                    function removeED(model) {
+
+                        if (model.item) {
+                            model.item.forEach(function (item) {
+
+                                if (item && item.myMeta) {
+                                    //  var ed = item.myMeta.ed;
+                                    // if (ed && ed.type && ed.type[0].code == 'BackboneElement') {
+                                    //   removeED(item)
+                                    // }
+                                    delete item.myMeta.ed
+                                }
+                                removeED(item)
+
+                            })
+                        }
+
+                    }
+
+                    removeED($scope.displayModel)
+                }
+                $scope.makeDisplayJson = function() {
+                    makeDisplayJson();
                 }
 
-
+                //add another copy of this section
                 $scope.addSection = function() {
-                    console.log('add')
+                    //right now, the section will always be off the root. May need to re-visit this for more complex Resources...
+                    var newSection = angular.copy($scope.selectedSection);
+
+                    function removeAnswers(node){
+                        node.item.forEach(function (item) {
+                            if (item.myMeta &&item.myMeta.answer) {
+                                item.myMeta.answer.length = 0;
+                            }
+                            if (item.item) {
+                                removeAnswers(item)
+                            }
+                        })
+                    }
+
+                    removeAnswers(newSection)
+                    $scope.model.item.push(newSection);
+                    $scope.selectedSection = newSection;
+
+                };
+
+                //create a display object
+                //for now, assume 2 dimensions - section (off the 'root', and items in that section. Note that a single item can have multiple answers...
+                function makeDisplay() {
+                    $scope.display = [];
+                    $scope.QR = questionnaireSvc.makeQR($scope.model)
+                    $scope.model.item.forEach(function (item) {
+
+                        var section = {sectionItem:angular.copy(item) ,item:[]};
+                        delete section.sectionItem.item;        //we don;t want the children here...
+                        if (section.sectionItem.myMeta){
+                            delete section.sectionItem.myMeta.ed;   //or the ed...
+                        }
+
+                        $scope.display.push(section);
+
+                        item.item.forEach(function (child) {
+                            if (child.myMeta.answer.length > 0) {
+                                //only questions for which there has been an answer...
+                                var clone = angular.copy(child)
+                                delete clone.myMeta.ed;
+
+                                section.item.push(clone)
+                            }
+                        })
+
+                    })
+                    console.log($scope.display)
                 }
-
-
             }
         }
     });

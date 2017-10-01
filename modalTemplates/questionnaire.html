@@ -1,0 +1,59 @@
+
+<div>
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-6 col-sm-6 col-xs-6">
+
+                <h3 ng-hide="edit" class="modal-title">Add Page link</h3>
+                <h3 ng-show="edit" class="modal-title">Edit Page link</h3>
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-6">
+
+                <button ng-show="input.link && input.title" class="btn btn-success pull-right" ng-click="add()">
+                    <span ng-hide="edit"> Add Page</span>
+                    <span ng-show="edit"> Update Page</span>
+                </button>
+                <button class="btn btn-link pull-right" ng-click="$dismiss()">Cancel</button>
+
+            </div>
+
+
+
+
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+        <div class="row" style="margin-bottom: 8px">
+            <div class="col-md-2 col-sm-2 col-xs-2">
+                <div>Title</div>
+            </div>
+            <div class="col-md-10 col-sm-10">
+                <input class='form-control' type="text" ng-model="input.title"/>
+            </div>
+
+        </div>
+
+        <div class="row" style="margin-bottom: 8px">
+            <div class="col-md-2 col-sm-2 col-xs-2">
+                <div>Link</div>
+            </div>
+            <div class="col-md-10 col-sm-10">
+                <input class='form-control' type="text" ng-model="input.link"/>
+            </div>
+
+        </div>
+
+
+</div>
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+            </div>
+        </div>
+    </div>
+</div>
