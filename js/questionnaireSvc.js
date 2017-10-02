@@ -166,15 +166,10 @@ angular.module("sampleApp")
 
                             if (ed.type[0].code == 'BackboneElement') {
                                 //This is a bbe with child elements - but not a data input field...
-                                //item.type = 'group'
-                                console.log('bbe '+ ed.path)
+                                //console.log('bbe '+ ed.path)
 
                                 item.item = [];
                                 addItemsFromNode(item,ed.path)
-                                //addItemsFromNode(node,ed.path)      //<<< careplan.activity.detail
-
-
-
 
                             } else {
                                 //item.type = 'string'

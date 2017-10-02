@@ -7,7 +7,12 @@
                 <ul class="list-group">
                     <li ng-class="{'list-group-item':true}" ng-repeat="item in model.item">
                         <span class="pull-right" ng-show="item.repeats">*</span>
-                        <div class="clickable" ng-click="selectSection(item)">{{item.text}}</div>
+                        <div class="clickable capitalize" ng-click="selectSection(item)"
+
+                             uib-popover="{{item.myMeta.ed.definition}}"
+                             popover-placement="top"
+                             popover-trigger="'mouseenter'">
+                        {{item.text}}</div>
 
                     </li>
                 </ul>
@@ -85,10 +90,10 @@
     <uib-tab heading="Text view">
 
         <div ng-repeat="section in display">
-            <div><strong>{{section.sectionItem.text}}</strong></div>
+            <div><div class="capitalize">{{section.sectionItem.text}}</div></div>
             <div ng-repeat="item in section.item">
                 <div class="row">
-                    <div class="col-sm-3 col-md-3 col-sm-offset-1 col-md-offset-1">
+                    <div class="col-sm-2 col-md-2 col-sm-offset-1 col-md-offset-1">
                        {{item.text}}
                     </div>
                     <div class="col-sm-8 col-md-8">

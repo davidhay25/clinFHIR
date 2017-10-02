@@ -11,6 +11,26 @@ angular.module("sampleApp")
 
             //input.dt.string
 
+
+            //the ValueSet lookup & select for CodeableConcept
+            $scope.showVSBrowserDialog = {};
+            $scope.showVs = function(vs) {
+
+                $scope.showVSBrowserDialog.open(vs);
+
+            }
+
+            //when a concept is selected in the VS Browser (after expansion)
+            $scope.conceptSelected = function(concept) {
+
+                $scope.input.dt.cc = $scope.input.dt.cc || {}
+                $scope.input.dt.cc.coding = concept;
+                $scope.save();
+
+            }
+
+
+
             $scope.hashPath = hashPath;
 
             $scope.vsDetails = vsDetails;

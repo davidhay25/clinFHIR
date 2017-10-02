@@ -11,8 +11,9 @@
             <div class="col-md-3 col-sm-3" >
                 <div class="pull-right">
                     <button class="btn btn-warning" ng-click="close()">Close</button>
+   <!--
                     <button ng-show="showVSSelectButton" class="btn btn-primary" ng-click="selectNewVS()">Select</button>
-
+-->
 
 
                 </div>
@@ -173,13 +174,6 @@
 
                     </uib-tab>
 
-
-
-
-
-
-
-
             <uib-tab heading="JSON"  select="setHelpTopic('json')">
                 <br />
                 <pre>{{selectedvsJSON}}</pre>
@@ -189,7 +183,8 @@
                 <br />
                 <div class="row">
                     <div class="col-md-2">Filter</div>
-                    <div class="col-md-8"><input type="text" ng-model="results.filter" class="form-control"/> </div>
+                    <div class="col-md-8"><input type="text" placeholder="Enter filter text (or leave empty for all)"
+                                                 ng-model="results.filter" class="form-control"/> </div>
                     <div class="col-md-2"><button class="btn btn-primary" ng-click="expand()">Expand</button> </div>
                 </div>
 
@@ -205,7 +200,7 @@
                     <tr><th>Code</th><th>System</th><th>Display</th></tr>
                     <tr ng-repeat="concept in data | orderBy : 'display'">
 
-                        <td>{{concept.code}}</td>
+                        <td><div ng-click="selectConcept(concept)">{{concept.code}}</div></td>
                         <td>{{concept.system}}</td>
                         <td>{{concept.display}}</td>
                     </tr>

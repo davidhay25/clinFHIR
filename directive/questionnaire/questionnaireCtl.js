@@ -19,10 +19,10 @@ angular.module('sampleApp')
                 if ($scope.sd) {
                     questionnaireSvc.makeLMFromProfile($scope.sd).then(
                         function (data) {
-                            console.log(data)
+                           // console.log(data)
 
                             $scope.model = questionnaireSvc.makeQ(data.treeData);
-                            console.log($scope.Q)
+                           // console.log($scope.Q)
 
                         },function(err) {
                             alert(angular.toJson(err))

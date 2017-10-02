@@ -7,12 +7,13 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
             allowsearch: '=',
             showcreate : '=',
             hidesearch: '=',
-            vsSelected : '&'
+            vsSelected : '&',
+            conceptSelected : '&'
         },
         template: '<div></div>',
 
         link : function ($scope, element, attrs) {
-
+/*
             $scope.tabCtrl = {};
 
             //default is to show the search tab unless overwritten...
@@ -26,7 +27,7 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
             if ($scope.showcreate) {
                 $scope.tabCtrl.showcreate = true;
             }
-
+*/
 
             //console.log($scope.vs)
             $scope.internalControl = $scope.trigger || {};
@@ -49,15 +50,20 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
 
                     templateUrl: 'resourceBuilder/vsBrowser.html',
                     size:'lg',
-                    controller: function($scope,selectedvs,GetDataFromServer,$filter,selectVSFn,$localStorage) {
+                    controller: function($scope,selectedvs,GetDataFromServer,$filter,$localStorage) {  //selectVSFn
 
 
                         $scope.config = $localStorage.config;
                         $scope.newVS = {canSave : false};
-                        //console.log(selectedvs)
+
+                        $scope.selectConcept = function(concept) {
+                            $scope.$close(concept)
+                        }
 
                         //when the close button is clicked
                         $scope.close = function(){
+                            $scope.$dismiss();
+                            /*
                             if ($scope.newVS.canSave) {
                                 if (confirm("It looks like you're creating a ValueSet - do you really want to Close, without saving? " +
                                         "If this is a mistake, then click 'Cancel' in this dialog, then click the 'Save' button to save the ValueSet " +
@@ -67,48 +73,22 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                             }  else {
                                 $scope.$dismiss();
                             }
+                            */
                         };
 
-                        $scope.selectVSFn = selectVSFn;
+                       // $scope.selectVSFn = selectVSFn;
 
                         $scope.tab = {};
                         $scope.tab.tabDescription = true;
 
+                        /*
                         //when the directive is being used to select a valueset...
-                        $scope.showVSSelectButton = false;
+                       // $scope.showVSSelectButton = false;
                         $scope.selectNewVS = function() {
                             $scope.selectVSFn()($scope.selectedvs);
                             $scope.$close();
                         };
 
-
-                        //======= for the new vs
-
-                      //  $scope.vs= {define : {concept:[]}}
-
-/*
-                        //upload a text file to populate a valueset. Assumed to be a csv file with 2 clumns...
-                        //https://github.com/danialfarid/ng-file-upload
-                        $scope.uploadConceptList = function(file) {
-                            Upload.upload({
-                                url: 'upload/url',
-                                data: {file: file}
-                            }).then(function (resp) {
-                                //$timeout(function () {
-                                    console.log(resp)
-                                //});
-
-                                console.log('Success ' + resp.config.data.file.name + 'uploaded. Response: ' + resp.data);
-                            }, function (resp) {
-                                console.log('Error status: ' + resp.status);
-                            }, function (evt) {
-                                var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
-                                console.log('progress: ' + progressPercentage + '% ' + evt.config.data.file.name);
-                            });
-                        }; */
-
-
-                        //$scope.tab.showSearch= false;
                         //if there is no vs passed in, then disable the expand tab...
                         if (!selectedvs) {
                             $scope.tab.noexpand = true;
@@ -117,6 +97,8 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                         }
 
                         $scope.searchParams = {};
+                        */
+
                         $scope.results = {};
                         //$scope.results.filter = "diab"; //<< temp
                         $scope.selectedvs = selectedvs;
@@ -129,7 +111,7 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                         };
 
 
-                        $scope.searchForVS = function() {
+                        $scope.searchForVSDEP = function() {
 
                             var searchString = "ValueSet?";
                             ['name','description','type','publisher','url'].forEach(function(param){
@@ -148,8 +130,6 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                             //console.log(searchString);
                             $scope.query=searchString;
 
-                            //console.log($scope.query);
-                            //return;
                             $scope.showWaiting = true;
                             GetDataFromServer.queryFHIRServer(searchString,true).then(
                                 function(bundle){
@@ -178,7 +158,7 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
 
 
 
-                        $scope.showVS = function(ev,entry) {
+                        $scope.showVSDEP = function(ev,entry) {
 
                             //this is the callback when a user selects the valueset
                             if ($scope.selectVSFn) {
@@ -289,23 +269,18 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                     resolve : {
                         selectedvs : function() {
                             return $scope.selectedvs;
-                        },
+                        }/*,
                         selectVSFn : function() {
                             return $scope.vsSelected
-                        }
+                        }*/
                     }
-                }).result.then(function(selectedProfile){
+                }).result.then(function(selectedConcept){
                         //User clicked save
-                        //console.log(selectedProfile)
+                        //console.log(selectedConcept)
                         //$scope.profileSelected()(selectedProfile)
+                    $scope.conceptSelected()(selectedConcept)
 
-                    },
-                    function(){
-                        //alert('Resource not saved. You can continue editing.')
-                    });
-
-
-
+                    })
 
             };
 

@@ -1,7 +1,5 @@
 <div ng-controller="dataTypeCtrl">
 
-
-
     <div ng-show="dataTypeBeingEntered == 'instant'">
         <div class="row">
             <div class="col-md-7  col-sm-7 col-centered">
@@ -10,11 +8,9 @@
         </div>
     </div>
 
-
     <div ng-show="dataTypeBeingEntered == 'Attachment'">
         <input placeholder = 'Enter title' type="text" class="form-control" ng-model="input.dt.attachment.title"/>
     </div>
-
 
     <div ng-show="dataTypeBeingEntered == 'Quantity'">
 
@@ -54,8 +50,6 @@
 
 
     </div>
-
-
 
     <div ng-show="dataTypeBeingEntered == 'Dosage'">
 
@@ -201,7 +195,6 @@
 
     </div>
 
-
     <div ng-show="dataTypeBeingEntered == 'Identifier'">
 
 
@@ -224,7 +217,6 @@
 
 
     </div>
-
 
     <div ng-show="dataTypeBeingEntered == 'boolean'">
 
@@ -249,8 +241,6 @@
         </div>
 
     </div>
-
-
 
     <div ng-show="dataTypeBeingEntered == 'date' || dataTypeBeingEntered == 'dateTime'">
         <div class="row">
@@ -432,8 +422,6 @@
         </div>
     </div>
 
-
-
     <div ng-show="dataTypeBeingEntered == 'Coding'">
 
         <div ng-switch on="vsDetails.type">
@@ -476,8 +464,6 @@
         </div>
     </div>
 
-
-
     <div ng-show="dataTypeBeingEntered == 'CodeableConcept'">
 
         <div ng-switch on="vsDetails.type">
@@ -509,7 +495,7 @@
                 <div class="row">
                     <div class="col-md-6 col-sm-6">
                         <input type="text" ng-model="input.dt.cc.coding"
-                               placeholder="{{vsDetails.id}} (minimum {{vsDetails.minLength}} characters)"
+                               placeholder="autocomplete from {{vsDetails.minLength}} characters"
                                typeahead-min-length="3"
                                typeahead-wait-ms="1000"
                                typeahead-on-select="selectCCfromList($item, $model, $label)"
@@ -523,7 +509,6 @@
                 </div>
                 <br/>
 
-
                 <input placeholder = 'Text value if not coded' type="text" class="form-control" ng-model="input.dt.cc.text"/>
             </div>
         </div>
@@ -534,7 +519,7 @@
                     <pre>{{vsDetails | json}}</pre>-->
     </div>
 
-    <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
+    <vs-browser trigger="showVSBrowserDialog" hidesearch="true" concept-selected="conceptSelected"
                 vs-selected="vsSelected"></vs-browser>
 
 
