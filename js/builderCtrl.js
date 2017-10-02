@@ -1402,6 +1402,9 @@ angular.module("sampleApp")
                             currentValue : function(){
                                 return currentValue;
                             },
+                            currentStringValue : function() {
+                                return ""
+                            },
                             container : function() {
                                 return $scope.selectedContainer;
                             }, resource : function(){
