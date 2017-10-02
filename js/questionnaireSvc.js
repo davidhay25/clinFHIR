@@ -249,7 +249,7 @@ angular.module("sampleApp")
             },
             makeLMFromProfile : function(inProfile) {
                 //copied from profileDiff service - adapt to needs of Questionnaire...
-                var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained','DomainResource'];
+                var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'contained','DomainResource','modifierExtension'];
                 var deferred = $q.defer();
                 var profile = angular.copy(inProfile);
                 var lstTree = [];
@@ -273,9 +273,19 @@ angular.module("sampleApp")
                             var node = {id:inx, text:path, state: {}, data: {ed : item, myMeta:{}}};
 
                             //standard element names like 'text' or 'language'. Note that hidden elements are actually removed form the tree b4 returning...
-                            if (ar.length == 1 && elementsToDisable.indexOf(segment) > -1) {
+                            if (elementsToDisable.indexOf(segment) > -1) {
                                 node.state.hidden=true;
                             }
+
+                            //the narrative text. The Q adds this in manually...
+                            if (ar.length == 1 && segment == 'text') {
+                                node.state.hidden=true;
+                            }
+
+                            /*if (ar.length == 1 && elementsToDisable.indexOf(segment) > -1) {
+                                node.state.hidden=true;
+                            }*/
+                            
 
                             //find the hash of the parent, and set the id in the node
                             var pos = hashPath[parent];
@@ -309,24 +319,30 @@ angular.module("sampleApp")
                                 //set the text to a better display (not the path)
                                 node.text = item.name || item.short || node.text;
 
-
-                                //node.a_attr = {style:'color:blueviolet'}
                                 //if the extension has a profile type then include it, otherwise not...
                                 if (item.type) {
                                     item.type.forEach(function (it) {
-                                        if (it.code == 'Extension' && it.profile) {
+                                        if (it.code == 'Extension') {
                                             //load the extension definition
-                                            queries.push(GetDataFromServer.findConformanceResourceByUri(it.profile).then(
-                                                function(sdef) {
-                                                    var analysis = Utilities.analyseExtensionDefinition3(sdef);
-                                                    item.myMeta.analysis = analysis;
+                                            if (it.profile) {
+                                                queries.push(GetDataFromServer.findConformanceResourceByUri(it.profile).then(
+                                                    function (sdef) {
+                                                        var analysis = Utilities.analyseExtensionDefinition3(sdef);
+                                                        item.myMeta.analysis = analysis;
 
-                                                }, function(err) {
-                                                    // modalService.showModal({}, {bodyText: 'makeProfileDisplayFromProfile: Error retrieving '+ it.profile + " "+ angular.toJson(err)})
-                                                    loadErrors.push({type:'missing StructureDefinition',value:it.profile})
-                                                    item.myMeta.analysis = {}
-                                                }
-                                            ));
+                                                    }, function (err) {
+                                                        loadErrors.push({
+                                                            type: 'missing StructureDefinition',
+                                                            value: it.profile
+                                                        });
+                                                        item.myMeta.analysis = {}
+                                                    }
+                                                ));
+                                            } else {
+                                                //this is an extension with no profile...
+                                                node.state.hidden = true;
+
+                                            }
                                         }
                                     })
                                 }
@@ -336,6 +352,7 @@ angular.module("sampleApp")
 
 
 
+                    //resolve any extensions
                     if (queries.length) {
                         $q.all(queries).then(
                             function() {
@@ -361,11 +378,7 @@ angular.module("sampleApp")
 
                                 });
 
-
                                 lstTree = lstTree.concat(newNodes)
-
-
-
                                 deferred.resolve({treeData:removeHidden(lstTree),errors: loadErrors})
                             }
                         )
@@ -403,10 +416,13 @@ angular.module("sampleApp")
                     var display = ed.path;
 
                     var ar = ed.path.split('.');
-                    if (ar.length > 1) {
+                    display = ar[ar.length-1]
+                    /*if (ar.length > 1) {
+
                         ar.splice(0,1)
                         display = ar.join('.')
                     }
+                    */
 
                     if (display == 'extension') {
                         if (ed.sliceName) {
