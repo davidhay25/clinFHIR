@@ -114,16 +114,22 @@
     <script src="js/editLogicalNodeCtl.js"></script>
     <script src="js/editLMDocCtl.js"></script>
     <script src="js/components/extensionDirective.js"></script>
-    <script src="directive/questionnaire/questionnaire.js"></script>
+
+    <script src="directive/questionnaire/questionnaireCtl.js"></script>
+    <script src="js/questionnaireSvc.js"></script>
+
 
     <script src="js/builderSvc.js"></script>
 
 
     <!-- for Q-->
+
     <script src="js/addPropertyInBuilderCtrl.js"></script>
     <script src="js/sbHistorySvc.js"></script>
     <script src="js/dataTypeCtrl.js"></script>
     <!--
+    <script src="js/profileDiffSvc.js"></script>
+
       <script src="js/newExtensionDefinition.js"></script>
     <script src="js/documentBuilder.js"></script>
     -->
@@ -262,7 +268,7 @@
 
     <!-- temp location -->
 
-    <questionnaire model="Q"></questionnaire>
+    <questionnaireDEP model="Q"></questionnaireDEP>
 
 
     <div class="row">
@@ -378,6 +384,10 @@
                                  <button class="btn btn-link" ng-click="">Collapse all</button>-->
                                    <button class="btn btn-link" ng-click="resetLayout()">Expand Layout</button>
                                   <button class="btn btn-link" ng-click="collapseLayout()">Collapse Layout</button>
+                                 <button class="btn btn-link" ng-click="showQuest()">Questionnaire</button>
+
+
+
 
                                 <button ng-hide="isInPalette" class="btn btn-link" ng-click="addToPalette()">Add to Palette</button>
                                 <button ng-show="isInPalette" class="btn btn-link" ng-click="removeFromPalette()">Remove from Palette</button>
@@ -689,7 +699,7 @@
                         </uib-tab>
 
                         <uib-tab heading="Questionnaire Form">
-                            <questionnaire model="Q"></questionnaire>
+                            <questionnaireDEP model="Q"></questionnaireDEP>
                         </uib-tab>
 
                     </uib-tabset>

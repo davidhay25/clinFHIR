@@ -1,5 +1,18 @@
 
-/* classes for the tree view icons...*/
+
+.modal-xl {
+    width:1200px;
+}
+
+.answer {
+    border: 1px solid gainsboro;
+    padding : 1px;
+    margin: 1px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
 
 .capitalize::first-letter {
     text-transform: uppercase;
@@ -30,9 +43,14 @@
     background-image: url('/icons/icon_reference.png');
 }
 
+.underline {
+    border-bottom: 1px solid #eeeeee;
+}
+
 .popoverHint {
     border-bottom: 1px dotted #000;
     text-decoration: none;
+    cursor: pointer;
 }
 
 .myScroll {

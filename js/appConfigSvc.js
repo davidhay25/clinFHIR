@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-09-22a';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-10-01a';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -49,6 +49,8 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.conceptMapUrl = 'http://clinfhir.com/StructureDefinition/conceptMapUrl';
 
         defaultConfig.standardExtensionUrl.resourceTypeUrl = 'http://clinfhir.com/StructureDefinition/resourceTypeUrl';
+        defaultConfig.standardExtensionUrl.qPath = 'http://clinfhir.com/StructureDefinition/qPathUrl';
+        defaultConfig.standardExtensionUrl.qMult = 'http://clinfhir.com/StructureDefinition/qMultUrl';
 
 
 

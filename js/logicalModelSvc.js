@@ -9,6 +9,11 @@ angular.module("sampleApp")
         var elementsToIgnore =['id','meta','implicitRules','language','text','contained','extension','modifierExtension'];
         var hashTreeState = {};   //save the state of the tree wrt expanded nodes so it can be restored after editing
 
+        //VS that are too large to expand in full...
+        var expansionBlacklist = [];
+        expansionBlacklist.push('http://hl7.org/fhir/ValueSet/observation-codes')
+
+
         var dataTypes = [];
         $http.get("artifacts/dt.json").then(
             function(data) {
@@ -23,7 +28,6 @@ angular.module("sampleApp")
             ar[0] = firstSegment;
             return ar.join('.')
         };
-
         String.prototype.getLastSegment = function() {
             var ar = this.split('.');
             return ar[ar.length-1]
@@ -72,153 +76,7 @@ angular.module("sampleApp")
 
 
         return {
-            makeQ : function(treeData) {
-                //construct a Questionnaire from the tree data - resource style...
-                //note that for ease of use we include the answer in the questionnaire - these need to be pulled out to a separate resource if saving...
-                var Q = {resourceType:'Questionnaire',status:'draft'}
-                var clone = angular.copy(treeData)
-                var childHash = {}
-                var linkId=0
-                clone.forEach(function (node) {
-                    childHash[node.parent] = childHash[node.parent] || []
-                    childHash[node.parent].push(node)
-                });
-                console.log(childHash);
 
-                //this routine is used for bbe off the root
-                var addItemsFromNode = function(node,parentPath){
-                    //add all nodes with the given parentparentPath
-                    console.log(parentPath, childHash[parentPath]);
-                    //node.item = []
-                    childHash[parentPath].forEach(function(child) {
-                        var ed = child.data.ed;          //the ElementDefinition from the LM...
-                        if (ed && ed.type && ed.type.length > 0) {
-                            var item = {linkId:'id'+linkId++,myMeta:{answer:[],ed:ed}};
-                            item.text = child.text;
-                            if (ed.max == '*') {
-                                item.repeats = true;
-                            }
-                            node.item.push(item);
-
-                            if (ed.type[0].code == 'BackboneElement') {
-                                //This is a bbe possibly with child elements - but not a data input field...
-                                item.type = 'group'
-                               //temp addItemsFromNode(item,child.id)
-                            } else {
-                                item.type = 'string'
-                            }
-
-                        } else {
-                            console.log(child.text +': Element with no type')
-                        }
-
-                    })
-                };
-
-
-                 //add the first question. the root children will be off that
-                var rootItem = {linkId:'id'+linkId++,item:[]};
-                rootItem.text = 'Root';
-                Q.item = [rootItem];
-
-                var arRootChildren = childHash[clone[0].id];        //nodes that are chilren of the first element
-                arRootChildren.forEach(function (child) {
-                    //add a question for each child...
-                   // var item = {linkId:'id'+linkId++,item:[]};
-                   // item.text = child.text;
-                   // rootItem.item.push(item)
-                    var ed = child.data.ed;          //the ElementDefinition from the LM...
-                    if (ed && ed.type && ed.type.length > 0) {
-                        if (ed.type[0].code == 'BackboneElement' ) {
-
-                            var parentItem = {linkId:'id'+linkId++,item:[]};
-                            parentItem.text = child.text;
-                            if (ed.max == '*') {
-                                parentItem.repeats = true;
-                            }
-                            Q.item.push(parentItem)
-
-                            addItemsFromNode(parentItem,child.id)
-                        } else {
-                            var item = {linkId:'id'+linkId++,item:[],myMeta:{answer:[],ed:ed}};
-                            item.text = child.text;
-
-                            if (ed.max == '*') {
-                                item.repeats = true;
-                            }
-
-                            rootItem.item.push(item)
-                        }
-
-                    }
-                })
-
-
-                //addItemsFromNode(Q,clone[0].id)
-
-                console.log(Q);
-                return Q;
-                
-             //   treeData.fo
-
-            },
-
-            makeQ1 : function(treeData) {
-                //construct a Questionnaire from the tree data
-                var Q = {resourceType:'Questionnaire',status:'draft'}
-                var clone = angular.copy(treeData)
-                var childHash = {}
-                var linkId=0
-                clone.forEach(function (node) {
-                    childHash[node.parent] = childHash[node.parent] || []
-                    childHash[node.parent].push(node)
-                });
-
-                console.log(childHash);
-
-                var addItemsFromNote = function(node,parentPath){
-                    //add all nodes with the given parentparentPath
-                    console.log(parentPath);
-                    node.item = []
-                    childHash[parentPath].forEach(function(child) {
-                        var ed = child.data.ed;          //the ElementDefinition from the LM...
-                        if (ed && ed.type && ed.type.length > 0) {
-                            var item = {linkId:'id'+linkId++};
-                            item.text = child.text;
-                            if (ed.max == '*') {
-                                item.repeats = true;
-                            }
-                            node.item.push(item);
-
-                            if (ed.type[0].code == 'BackboneElement') {
-                                //This is a bbe possibly with child elements - but not a data input field...
-                                item.type = 'group'
-                                addItemsFromNote(item,child.id)
-                            } else {
-                                item.type = 'string'
-                            }
-
-                        } else {
-                            console.log(child.text +': Element with no type')
-                        }
-
-                    })
-                };
-
-                // var root = clone[0];
-                // root.data = {ed: {type : [{code:'BackboneElement'}]}}
-
-                // var item = {linkId:'id'+linkId++};
-                // item.text = 'Root';
-                // Q.item = [item];
-
-                addItemsFromNote(Q,clone[0].id)
-
-                return Q;
-
-                //   treeData.fo
-
-            },
             getMappingFile : function(url) {
                 url = url || "http://fhir.hl7.org.nz/baseDstu2/StructureDefinition/OhEncounter";    //testing
                 var deferred = $q.defer();
@@ -1578,16 +1436,20 @@ angular.module("sampleApp")
                 //return the expanded set of options from the ValueSet
                 var deferred = $q.defer();
 
-
-
                 if (element && element.selectedValueSet && element.selectedValueSet.vs && element.selectedValueSet.vs.url) {
+
+                    if (expansionBlacklist.indexOf(element.selectedValueSet.vs.url) > -1) {
+                        deferred.resolve([{display:'Not expanded - list too long'}]);
+                        return deferred.promise;
+                    }
+
                     GetDataFromServer.getValueSet(element.selectedValueSet.vs.url).then(
                         function (vs) {
 
 
                             //the extension that indicates the vs (authored by CF) has direct concepts that are not snomed so can't be expanded
                             var extensionUrl = appConfigSvc.config().standardExtensionUrl.vsDirectConcept;
-                            var ext = Utilities.getSingleExtensionValue(vs, extensionUrl)
+                            var ext = Utilities.getSingleExtensionValue(vs, extensionUrl);
                             if (ext && ext.valueBoolean) {
                                 //first, create an array with all of the composed concepts...
                                 var ar = [];
@@ -1608,7 +1470,8 @@ angular.module("sampleApp")
                             } else {
                                 var id = vs.id;
 
-                                GetDataFromServer.getExpandedValueSet(id).then(
+                                //return only 100
+                                GetDataFromServer.getExpandedValueSet(id,100).then(
                                     function (data) {
                                         if (data.expansion && data.expansion.contains) {
                                             deferred.resolve(data.expansion.contains);

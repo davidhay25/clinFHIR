@@ -529,12 +529,16 @@ angular.module("sampleApp").
             );
             return deferred.promise;
         },
-        getExpandedValueSet : function(id) {
+        getExpandedValueSet : function(id,count) {
             //return an expanded valueset. Used by renderProfile Should only use for valuesets that aren't too large...
             //takes the Id of the valueset on the terminology server - not the url...
             var deferred = $q.defer();
             var config = appConfigSvc.config();
+
             var qry = config.servers.terminology + "ValueSet/"+id + "/$expand";
+            if (count) {
+                qry += "?count="+count
+            }
             config.log(qry,'rbServices:getExpandedValueSet')
 
             $http.get(qry).then(
@@ -2858,24 +2862,40 @@ console.log(summary);
     return {
         getTextSummaryOfDataType : function(dt,value) {
             //a single line summary of a datatype (started for questionnaire
-            var txt="";
+            console.log(dt,value)
+
+            var vo = {summary:"",detail:""}
             switch (dt) {
                 case "Identifier" :
-                    txt = value.value
+                    vo.summary = value.value
                     if (value.system) {
-                        txt = txt + " ("+value.system+")"
+                        vo.summary += " ("+value.system+")"
                     }
                 break;
                 case "CodeableConcept" :
-                    if (value.text) {txt += value.text};
+                    if (value.text) {vo.summary = value.text};
                     if (value.coding) {
                         value.coding.forEach(function (coding) {
-                            txt += " (" + coding.system + "|"+coding.value +")";
+                            vo.detail += coding.display + " (" + coding.system + "|"+coding.code +")";
+                            if (!vo.summary) {
+                                vo.summary = coding.display;
+                            }
                         })
                     }
-
+                break;
+                case "Quantity":
+                    vo.summary =value.value;
+                    var t = value.unit;
+                    if (t) {vo.summary += " " + t}
+                    break;
+                case "code" :
+                case "string" :
+                case "dateTime":
+                case "Annotation":
+                    vo.summary = value;
+                    break;
             }
-            return txt;
+            return vo;
         },
         getCCSummary : function(data) {
             //being able to summarize a codeableconcept is useful. todo - refactor to use this...
@@ -3080,6 +3100,6 @@ console.log(summary);
             }
         }
     }
-})
+});
 
 

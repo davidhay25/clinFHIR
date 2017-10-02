@@ -891,8 +891,9 @@ angular.module("sampleApp")
             },
             setCurrentResource : function(resource) {
                 gCurrentResource = resource;
-
-
+            },
+            getCurrentResource : function(resource) {
+                return gCurrentResource;
             },
             analyseInstanceForPath : function(resource,path){
                 //analyse the path. if it has an ancestor of type backbone element that is multiple, then show the current entries in the instance

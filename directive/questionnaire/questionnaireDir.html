@@ -1,11 +1,9 @@
-<h3>Form</h3>
-
 
 <uib-tabset>
     <uib-tab heading="Edit">
-
+        <br/>
         <div class="row">
-            <div class="col-sm-3 col-md-3">
+            <div class="col-sm-2 col-md-2">
                 <ul class="list-group">
                     <li ng-class="{'list-group-item':true}" ng-repeat="item in model.item">
                         <span class="pull-right" ng-show="item.repeats">*</span>
@@ -15,7 +13,7 @@
                 </ul>
 
             </div>
-            <div class="col-sm-9 col-md-9">
+            <div class="col-sm-10 col-md-10">
                 <div class="row rounded-box-filled">
                     <div class="col-sm-4 col-md-4">
                         <h5>{{selectedSection.text}}</h5>
@@ -38,10 +36,11 @@
                                 </label>
                             </div>
 
-                            <div class="col-sm-5 col-md-5">
+                            <div class="col-sm-7 col-md-7">
 
                                 <div ng-repeat="answer in item.myMeta.answer">
                                     <div class="answer">
+                                        <i class="pull-right glyphicon glyphicon-minus-sign clickable" ng-click="deleteAnswer(item,$index)"></i>
                                         {{answer.display}}
                                     </div>
 
@@ -53,22 +52,17 @@
 
                                         <span ng-hide="type.code == 'Reference'"> {{type.code}}</span>
                                         <span ng-show="type.code == 'Reference'">
-                                            {{type.targetProfile | referenceType}}
+                                            ->{{type.targetProfile | referenceType}}
                                         </span>
                                     </span>
                                 </div>
                             </div>
 
-
                             <div class="col-sm-3 col-md-3">
-                                <!--<span ng-show="item.repeats"><i class="glyphicon glyphicon-asterisk"></i></span>-->
                                 {{item.myMeta.ed.short}}
                             </div>
 
                         </div>
-
-
-
                     </div>
                 </form>
             </div>
@@ -81,7 +75,7 @@
         <pre>{{QR.resource | json}}</pre>
     </uib-tab>
 
-    <uib-tab heading="View">
+    <uib-tab heading="Text view">
 
         <div ng-repeat="section in display">
             <div><strong>{{section.sectionItem.text}}</strong></div>
@@ -103,13 +97,13 @@
             </div>
 
         </div>
-        <pre>{{display | json}}</pre>
+
 
     </uib-tab>
-    <uib-tab heading="Json" select="makeDisplayJson()" >
+    <uib-tab heading="Questionnaire Json" select="makeDisplayJson()" >
         <pre>{{displayModel | json}}</pre>
     </uib-tab>
-    <uib-tab heading="QuestionnaireResponse">
+    <uib-tab heading="QuestionnaireResponse Json">
         <pre>{{QR.QR | json}}</pre>
     </uib-tab>
 

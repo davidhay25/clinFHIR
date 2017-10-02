@@ -4,7 +4,7 @@ angular.module("sampleApp")
     .controller('logicalModellerCtrl',
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
                   GetDataFromServer,$firebaseObject,$firebaseArray,$location,igSvc,SaveDataToServer,$window,RenderProfileSvc,
-                  $q,Utilities, securitySvc,$filter) {
+                  $q,Utilities, securitySvc,$filter,questionnaireSvc) {
             $scope.input = {};
 
             $scope.code = {};
@@ -37,6 +37,25 @@ angular.module("sampleApp")
 
             $scope.input.newCommentboxInxDEP = -1;
 
+
+            $scope.showQuest = function(){
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/questionnaire.html',
+                    size: 'xl',
+                    controller: function($scope,Q){
+                        console.log(Q)
+                        $scope.Q = Q;
+                    },
+                    resolve : {
+                        Q: function () {          //the default extension
+                            return  $scope.Q;
+                        }
+                    }
+                }).result.then(
+                    function(result) {
+
+                    })
+            }
 
             $scope.editLMDoc = function(){
                 $uibModal.open({
@@ -1532,7 +1551,7 @@ angular.module("sampleApp")
 
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource);
-                $scope.Q = logicalModelSvc.makeQ($scope.treeData);
+                $scope.Q = questionnaireSvc.makeQ($scope.treeData);
                 $scope.relativeMappings = logicalModelSvc.getRelativeMappings($scope.treeData); //items with both v2 & fhir mappings
 
 

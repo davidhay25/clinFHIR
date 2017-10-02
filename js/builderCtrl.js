@@ -29,6 +29,43 @@ angular.module("sampleApp")
                 })
             };
 
+
+            $scope.showQuest = function(){
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/questionnaire.html',
+                    size: 'lg',
+                    controller: function($scope,Q,SD,bundle,title,resource){
+                        console.log(Q)
+                        $scope.Q = Q;
+                        $scope.sd = SD;
+                        $scope.bundle = bundle;
+                        $scope.title = title;
+                        $scope.resource = resource;
+                    },
+                    resolve : {
+                        Q: function () {          //the default extension
+                            return  $scope.Q;
+                        },
+                        SD : function(){
+                            console.log($scope.currentSD)
+                            return $scope.currentSD;
+                        },
+                        bundle : function(){
+                            return $scope.selectedContainer.bundle
+                        },
+                        title : function() {
+                            return 'Editing '+builderSvc.getCurrentResource().resourceType;
+                        },
+                        resource : function(){
+                            return builderSvc.getCurrentResource()
+                        }
+                    }
+                }).result.then(
+                    function(result) {
+
+                    })
+            }
+
             //create a version of the bundle to display to the user and download...
             $scope.getBundleDisplay = function(bundle) {
                 return builderSvc.makeDisplayBundle(bundle);
@@ -1754,6 +1791,9 @@ angular.module("sampleApp")
 
                     function(SD) {
 
+                        $scope.currentSD = SD //added for Q testing...
+
+
                         processSD(SD,resource);
 
                         if (cb) {
@@ -1769,7 +1809,6 @@ angular.module("sampleApp")
                 ).finally(function(){
                     $scope.waiting = false;
                 })
-
 
             };
 

@@ -4,15 +4,51 @@ angular.module('sampleApp')
             restrict: 'EA', //E = element, A = attribute, C = class, M = comment
             scope: {
                 //@ reads the attribute value, = provides two-way binding, & works with functions
-                model: '='
+                model: '=',
+                sd : '=',
+                bundle : '='
             },
 
-            templateUrl: 'directive/questionnaire/questionnaire.html',
-            controller: function($scope,$uibModal,builderSvc,ResourceUtilsSvc,Utilities,GetDataFromServer,questionnaireSvc){
+            templateUrl: 'directive/questionnaire/questionnaireDir.html',
+            controller: function($scope,$uibModal,builderSvc,ResourceUtilsSvc,Utilities,GetDataFromServer,
+                                 questionnaireSvc){
+
+                //console.log($scope.sd)
+
+                //if an SD is passed in, then create a model from the SD. Intended especially for profiles...
+                if ($scope.sd) {
+                    questionnaireSvc.makeLMFromProfile($scope.sd).then(
+                        function (data) {
+                            console.log(data)
+
+                            $scope.model = questionnaireSvc.makeQ(data.treeData);
+                            console.log($scope.Q)
+
+                        },function(err) {
+                            alert(angular.toJson(err))
+                        }
+                    )
+                }
+
+                //if a bundle is passed in (which could be a source of references) then create a hash of resources
+                var resourceHash = {}
+                if ($scope.bundle) {
+                    $scope.bundle.entry.forEach(function (entry) {
+                        var resource = entry.resource;
+                        var type = resource.resourceType;
+                        resourceHash[type] = resourceHash[type] || []
+                        resourceHash[type].push(resource)
+                    })
+                    console.log(resourceHash)
+                }
+
+                $scope.deleteAnswer = function(item,inx) {
+                    item.myMeta.answer.splice(inx,1)
+                };
 
                 //$scope.answers = [];    //an array of sections with answers. (We'll think about the QR later...)
 
-                $scope.currentSection;  //the
+                $scope.currentSection;  //the currently selected section
 
                 $scope.input = {};
 

@@ -3,12 +3,13 @@
 angular.module("sampleApp")
     .controller('addPropertyInBuilderCtrl',
         function ($scope,dataType,hashPath,builderSvc,insertPoint,vsDetails,expandedValueSet,GetDataFromServer,
-                  currentValue,container,resource,sbHistorySvc) {
+                  currentStringValue,container,resource,sbHistorySvc) {
             $scope.dataTypeBeingEntered = dataType;
             //hashPath.path is the absolute path where the insertion is to occur. The last segment in the path is
-            //the propertyname on the insert point (which can be the
+            //the propertyname on the insert point (which can be the root)
 
-            console.log(currentValue)
+
+            //input.dt.string
 
             $scope.hashPath = hashPath;
 
@@ -16,6 +17,12 @@ angular.module("sampleApp")
             $scope.expandedValueSet = expandedValueSet;
             $scope.input = {};
             $scope.input = {dt: {contactpoint: {use:'home',system:'phone'}}};
+
+            //a string value can be pre-populated
+
+            if (currentStringValue) {
+                $scope.input.dt.string = currentStringValue
+            }
 
             var path = hashPath.path;
 
@@ -32,7 +39,7 @@ angular.module("sampleApp")
 
             $scope.save = function(){
 
-                //>>>>>> just for new maker...
+                //>>>>>> just for new maker - and the questionnaire...
                 if ($scope.hashPath.noSave) {
                     $scope.$close($scope.input.dt);
                     return;
@@ -48,9 +55,7 @@ angular.module("sampleApp")
                 details.resourceType = resource.resourceType;
                 details.path = hashPath.path;
                 details.value = valueSaved;
-                //details.insertPoint = insertPoint;      //todo - this is the branch
 
-                //var details = {ip:insertPoint,dt : $scope.dataTypeBeingEntered,hp:hashPath,value:$scope.input.dt};
                 sbHistorySvc.addItem('dt',resource.id,true,details,container);
 
                 $scope.$close();
