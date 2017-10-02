@@ -3,7 +3,12 @@ angular.module("sampleApp").controller('dataTypeCtrl',
 
         $scope.results = {timing:{}}
 
+        $scope.showVSBrowserDialog = {};
+        $scope.showVs = function(vs) {
+            alert(vs.url)
+            $scope.showVSBrowserDialog.open(vs);
 
+        }
 
         $scope.routeCodes = {id:'route-codes'}
 

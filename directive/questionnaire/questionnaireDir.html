@@ -50,7 +50,11 @@
                                 <div class="pull-right">
                                     <span class="iconSpacing clickable" ng-click = "selectDt(item,type.code)" ng-repeat="type in item.myMeta.ed.type">
 
-                                        <span ng-hide="type.code == 'Reference'"> {{type.code}}</span>
+                                        <span ng-hide="type.code == 'Reference'">
+                                            {{type.code}}
+
+
+                                        </span>
                                         <span ng-show="type.code == 'Reference'">
                                             ->{{type.targetProfile | referenceType}}
                                         </span>
@@ -59,6 +63,9 @@
                             </div>
 
                             <div class="col-sm-3 col-md-3">
+                                {{}}
+
+
                                 {{item.myMeta.ed.short}}
                             </div>
 

@@ -1,13 +1,10 @@
 angular.module("sampleApp")
-//this performs marking services
-
-
     .service('questionnaireSvc', function(Utilities,appConfigSvc,$q) {
 
         var elementsToIgnore = ['id', 'meta', 'implicitRules', 'language', 'contained','extension','modifierExtension'];
 
-        var qPath = appConfigSvc.config().standardExtensionUrl.qPath;
-        var qMult = appConfigSvc.config().standardExtensionUrl.qMult;
+        var qPath = appConfigSvc.config().standardExtensionUrl.qPath;   //path in the resource
+        var qMult = appConfigSvc.config().standardExtensionUrl.qMult;   //if the element is multiple in the resource
 
         function getLastSegment(path) {
             var ar = path.split('.');
@@ -262,7 +259,7 @@ angular.module("sampleApp")
                     profile.snapshot.element.forEach(function (item, inx) {
                         item.myMeta = {id:inx} ;        //create a separate index for internal linking...
                         var path = item.path;
-                        var ar=path.split('.')
+                        var ar=path.split('.');
                         if (ar.length == 1) {
                             //this is the root
                             hashPath[path] = inx;
@@ -285,7 +282,7 @@ angular.module("sampleApp")
                             /*if (ar.length == 1 && elementsToDisable.indexOf(segment) > -1) {
                                 node.state.hidden=true;
                             }*/
-                            
+
 
                             //find the hash of the parent, and set the id in the node
                             var pos = hashPath[parent];
@@ -443,4 +440,4 @@ angular.module("sampleApp")
             }
 
         }
-    })
+    });
