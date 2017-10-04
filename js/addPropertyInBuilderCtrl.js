@@ -14,7 +14,7 @@ angular.module("sampleApp")
 
             //the ValueSet lookup & select for CodeableConcept
             $scope.showVSBrowserDialog = {};
-            $scope.showVs = function(vs) {
+            $scope.showVs = function(vs) {      //pass in the actual valueset...
 
                 $scope.showVSBrowserDialog.open(vs);
 

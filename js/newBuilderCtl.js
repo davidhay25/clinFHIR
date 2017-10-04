@@ -1,9 +1,12 @@
 
 angular.module("sampleApp")
     .controller('newBuilderCtrl',
-        function ($scope,$http,appConfigSvc,profileCreatorSvc,newBuilderSvc,Utilities) {
+        function ($scope,$http,appConfigSvc,profileCreatorSvc,newBuilderSvc,GetDataFromServer) {
 
         $scope.resource = {resourceType:'Patient'}
+
+        //this means that the data entered in 'builderDataEntry' will be in this scope. watch out for dataTypeCtrl.js & addPropertyInBuilder.js
+        $scope.input = {dt:{}}
 
         $scope.simpleData = "Test value";
         $scope.complexData = {identifier: {system:'test system',value:'test value'}}
@@ -15,17 +18,16 @@ angular.module("sampleApp")
                 newBuilderSvc.makeTree(SD).then(
                     function(vo) {
 
-                        //this is functionity to be backported into the makeTree function. Leavinf it here during dev
-
-
-
 
                         $('#SDtreeView').jstree('destroy');
                         $('#SDtreeView').jstree(
                             {'core': {'multiple': false, 'data': vo.treeData, 'themes': {name: 'proton', responsive: true}}}
                         ).on('select_node.jstree', function (e, data) {
 
+                            //clear specific properties
                             delete $scope.selectedNode;
+                            delete $scope.currentDT;
+                            $scope.$broadcast('setDT',null);      //sets an event to reset the data-entry form
 
                             if (data.node && data.node.data && data.node.data) {
                                 $scope.selectedNode = data.node;
@@ -36,9 +38,8 @@ angular.module("sampleApp")
 
                     }
                 )
-
             }
-        )
+        );
 
 
         //once a node has been selected in the tree
@@ -47,87 +48,61 @@ angular.module("sampleApp")
             $scope.selectedElement.meta = node.data.meta;
         }
 
-
-        //special processing for extensions...
-        //note that this will only work for a single instance of each url, at the root level. todo more work is needed to support muktiple
-        function processExtension(meta,dt,value) {
-            var valueType = 'value' + dt.substr(0,1).toUpperCase()+dt.substr(1)     //ie the value[x]
-            console.log(meta,value)
-            var ar = meta.path.split('.');
-
-            if (meta.isExtensionChild) {
-                //retrieve any extensions with this url. For multiple, use the index within the new node added
-                var element = $scope.resource;      //should be able to use this at different levels in the resource...
-                var ar = Utilities.getComplexExtensions(element,meta.parentUrl);
-                console.log(ar);
-                if (ar.length ==0) {
-                    //no extensions with this url were found
-
-                    var child = {url:meta.code};
-                    child[valueType] = value
-                    var insrt = {extension:[child]}
-                    Utilities.addExtensionOnceWithReplace($scope.resource,meta.parentUrl,insrt)
-
-                } else {
-                    //need to find the one to alter...  Right now, we assume that there is only a single instance of each url
-                    //iterate through the children to see if there is one with this code. If so delete it. todo ?can there be multiple with the same code??
-                    var ext = ar[0];
-                    var pos = -1;
-                    ext.children.forEach(function (child,inx) {
-                        if (child.url == meta.code) {
-                            pos = inx
-                        }
-                    });
-                    if (pos > -1) {
-                        ext.children.splice(pos,1);     //delete any existing...
-                    }
-                    //add the new child...
-                    var newChild = {url:meta.code};
-                    newChild[valueType] = value
-                    ext.children.push(newChild);
-                    //now construct the updated complex extension
-                    var insrt = {extension:[]}
-                    ext.children.forEach(function (child) {
-                        insrt.extension.push(child)
-                    });
-                    //and update...
-                    Utilities.addExtensionOnceWithReplace($scope.resource,meta.parentUrl,insrt)
-
-                }
-
-
-
-            } else {
-                //this is a single, stand alone extension
-              //  var extension = {url : meta.url};
-              //  var valueType = 'value' + dt.substr(0,1).toUpperCase()+dt.substr(1)
-                var extValue = {};
-                extValue[valueType]= value
-                if (meta.isMultiple) {
-                    Utilities.addExtensionMultiple($scope.resource,meta.url,extValue)
-                } else {
-                    Utilities.addExtensionOnceWithReplace($scope.resource,meta.url,extValue)
-                }
-
-            }
-
-
-        }
-
-        $scope.add = function(dt){
-
-            //testing only! is this simple or complex
-            var data = $scope.simpleData;
-            if (dt.substr(0,1) == dt.substr(0,1).toUpperCase()) {
-                data = $scope.complexData;
-            }
-
-
+        //to show the data entry form...
+        $scope.showDEForm = function(dt){
+            $scope.currentDT = dt;
             var meta = $scope.selectedElement.meta;     //the specific meta node
 
+            if (meta.vs) {
+                //this element has a valueSet binding...
+                $scope.expandedValueSet = {expansion:{contains:[{display:'test'}]}}
+                $scope.vsDetails = {};
+                $scope.vsDetails.minLength = 3;
+
+                GetDataFromServer.getValueSet(meta.vs.url).then(
+                    function(vs) {
+                        $scope.vsDetails.id = vs.id;
+                        $scope.vsDetails.resource = vs;
+                    }
+                )
+            } else {
+                //testing
+                //testing only! is this simple or complex
+                var value = $scope.simpleData;
+                if (dt.substr(0,1) == dt.substr(0,1).toUpperCase()) {
+                    value = $scope.complexData;
+                }
+                addData(dt,value);
+            }
+
+            $scope.$broadcast('setDT',dt);      //sets an event to display the data-entry form
+        };
+
+        //called when the user has entered the data and clicks 'Add'
+        $scope.addDataType = function() {
+            var dt = $scope.currentDT;
+            console.log($scope.input.dt)
+
+
+            var value = $scope.input.dt[dt];
+
+            //not all input values have the datatype as the propertyname (unfortunately)
+            switch (dt) {
+                case 'CodeableConcept' :
+                    value = $scope.input.dt['cc'];
+                    break;
+            }
+
+            addData(dt,value);
+
+
+        };
+
+        var addData = function(dt,value){
+            var meta = $scope.selectedElement.meta;     //the specific meta node
             //extensions are processed separately...
             if (meta.isExtension) {
-                newBuilderSvc.processExtension(meta,dt,data,$scope.resource)
+                newBuilderSvc.processExtension(meta,dt,value,$scope.resource)
                 return;
             }
 
@@ -136,21 +111,97 @@ angular.module("sampleApp")
             if (ar.length == 2) {
                 //this is an element directly off the root.
 
-                var segment = ar[1];        //the segment name
+                var elementName = newBuilderSvc.checkElementName(ar[1],dt);        //the segment name
+
                 //if is is not a BBE, then it can be added directly
                 if (!meta.isBBE) {
                     if (meta.isMultiple) {
-                        $scope.resource[segment] = $scope.resource[segment] || []
-                        $scope.resource[segment].push(data)
+                        $scope.resource[elementName] = $scope.resource[elementName] || []
+                        $scope.resource[elementName].push(value)
                     } else {
-                        $scope.resource[segment] = data;
+                        $scope.resource[elementName] = value;
+                    }
+                } else {
+                    alert('A Backbone element does not have a value! Select one of the child nodes....')
+                }
+
+            } else if (ar.length == 3) {
+                //the child of a BBE off the root. Will need to get more sophisticated for careplan at least, but let's gte this working at least
+
+                //first locate the parent...
+                var parentName = ar[1];
+                var elementName = newBuilderSvc.checkElementName(ar[2],dt);    //the name of the element to insert
+
+                var parent = $scope.resource[parentName];
+                //if the parent exists, then if it's multiple then find the right ine based on the index
+
+               // var elementToInsert = {};
+               // elementToInsert[elementName] = data;
+               // elementToInsert = value;
+                if (!parent) {
+                    $scope.resource[parentName] = []; //todo assume that they are all multiple - shoud really check the parent.isMultiple
+
+                    //add the 'base' object for this
+                    var rootNodeForParent = {};
+                    $scope.resource[parentName].push(rootNodeForParent)
+                   // var elementToInsert = {};
+                   //    elementToInsert[elementName] = data;
+                    if (meta.isMultiple) {
+                        rootNodeForParent[elementName] = []
+                        rootNodeForParent[elementName].push(value)
+                    } else {
+                        rootNodeForParent[elementName] = value;
+                    }
+                } else {
+                    //the parent does exist - and we are assuming an array.
+                    var parentElement = parent[0];      //for now just grab the first element. eventually we'll need to find one based on an index...
+
+                    var currentElement = parentElement[elementName];
+                    if (currentElement) {
+                        //the current value for this element. If it exists it's an array add to it, otherwise replace it
+                        if (angular.isArray(currentElement)) {
+                            currentElement.push(value)
+                        } else {
+                            currentElement = value
+                        }
+
+
+                    } else {
+                        //there is not yet an element with this name. Is it multiple?
+                        if (meta.isMultiple) {
+                            //yes, make it an array...
+                            parentElement[elementName] = [];
+                            parentElement[elementName].push(value)
+                        } else {
+                            //no, just set the value...
+                            parentElement[elementName] = value;
+                        }
+
                     }
 
 
 
-                } else {
-                    alert('A Backbone element does not have a value! Select one of the child nodes....')
                 }
+
+            }
+        };
+
+
+        //this is called when the vsBrowser is displayed and a concept is selected. The binding occures in builderDataEntry.html
+        if (! $scope.conceptSelected) { //this happens when being called from newBuilder...
+            $scope.conceptSelected = function(concept) {
+                console.log(concept)
+
+                switch ($scope.currentDT) {
+                    case 'Coding' :
+                        addData($scope.currentDT,concept)
+                        break;
+                    default:
+                        //a codeableconcept
+                        addData($scope.currentDT,{Coding:[concept]})
+                }
+
+
 
             }
         }

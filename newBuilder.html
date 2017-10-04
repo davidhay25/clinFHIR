@@ -43,6 +43,10 @@
 
     <script src="js/newBuilderCtl.js"></script>
     <script src="js/services.js"></script>
+    <script src="js/dataTypeCtrl.js"></script>
+    <script src="js/addPropertyInBuilderCtrl.js"></script>
+    <script src="resourceBuilder/vsBrowser.js"></script>
+    <script src="js/libs/angular-bootstrap-checkbox.js"></script>
     <!--
 
     <script src="js/resourceCreatorSvc.js"></script>
@@ -70,34 +74,55 @@
 <h3>Builder</h3>
 
 
-
     <div class="row">
         <div class="col-md-3 col-sm-3">
             <div id="SDtreeView"></div>
 
         </div>
-        <div class="col-md-4 col-sm-4">
+        <div class="col-md-5 col-sm-5">
             <div ng-show="selectedNode.data.meta.isMultiple">
                 <!-- add a new node in the tree for multiple nodes. have an index to tell them apart...-->
-                <span class="clickable" ng-click="clear()">Add new node</span>
+                <span class="clickable" ng-click="addNewNode()">Add new node</span>
             </div>
 
             <pre>{{selectedElement.meta | json}}</pre>
 
             <ul class="list-unstyled">
                 <li ng-repeat="typ in selectedElement.meta.type">
-                    <span class="clickable" ng-click="add(typ.code)">{{typ.code}}</span>
+                    <span class="clickable" ng-click="showDEForm(typ.code)">{{typ.code}}</span>
                 </li>
             </ul>
             <!--
             <pre>{{selectedNode | json}}</pre>
             -->
+
+
+            <ng-include src="'/includes/builderDataEntry.html'"></ng-include>
+
+
+            <div>
+                <button ng-show="currentDT" class="btn btn-primary pull-right" ng-click="addDataType()">Add</button>
+            </div>
+
+            <!--
+
+            <div ng-controller="addPropertyInBuilderCtrl">
+                <ng-include src="'/includes/builderDataEntry.html'"></ng-include>
+            </div>
+-->
+
+
+
         </div>
-        <div class="col-md-5 col-sm-5">
+        <div class="col-md-4 col-sm-4">
 
+            <uib-tabset>
+                <uib-tab heading="Json">
+                    <pre>{{resource | json}}</pre>
 
+                </uib-tab>
+            </uib-tabset>
 
-            <pre>{{resource | json}}</pre>
 
             <span class="clickable" ng-click="clear()">Clear resource</span>
 

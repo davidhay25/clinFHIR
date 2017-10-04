@@ -1,28 +1,34 @@
 angular.module("sampleApp").controller('dataTypeCtrl',
     function ($scope,RenderProfileSvc) {
 
-        $scope.results = {timing:{}}
 
-        /*
-        $scope.showVSBrowserDialog = {};
-        $scope.showVs = function(vs) {
+        //this is for new builder to signal what datatype has been seelcted - todo = try to refactor...
+        $scope.$on('setDT',function(event,dt){
+            $scope.dataTypeBeingEntered = dt;
+            console.log(dt)
+        });
 
-            $scope.showVSBrowserDialog.open(vs);
+        $scope.results = {timing:{}};
 
-        }
 
-        //when a concept is selected in the VS Browser (after expansion)
-        $scope.conceptSelected = function(concept) {
-            console.log(concept)
+        $scope.routeCodes = {id:'route-codes'};
 
-        }
-*/
 
-        $scope.routeCodes = {id:'route-codes'}
-
-        //$scope.input.dt has already been set by the parent controller
+        //These may have been set in a parent scope so be careful!
+        $scope.input = $scope.input || {}
+        $scope.input.dt = $scope.input.dt || {}
         $scope.input.dt.dosage = {timing:{}};
+        $scope.input.dt.cc =  $scope.input.dt.cc || {}
 
+        if (! $scope.showVs) {      //this happens when being called from newBuilder...
+
+            //the ValueSet lookup & select for CodeableConcept
+            $scope.showVSBrowserDialog = {};
+            $scope.showVs = function(vs){ //pass in the actual valueset...
+                console.log(vs)
+                $scope.showVSBrowserDialog.open(vs);
+            }
+        }
 
         $scope.timingArray = RenderProfileSvc.populateTimingList();
 

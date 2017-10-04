@@ -200,7 +200,7 @@
                     <tr><th>Code</th><th>System</th><th>Display</th></tr>
                     <tr ng-repeat="concept in data | orderBy : 'display'">
 
-                        <td><div ng-click="selectConcept(concept)">{{concept.code}}</div></td>
+                        <td><div class="clickable" ng-click="selectConcept(concept)">{{concept.code}}</div></td>
                         <td>{{concept.system}}</td>
                         <td>{{concept.display}}</td>
                     </tr>

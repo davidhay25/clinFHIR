@@ -79,6 +79,15 @@ angular.module("sampleApp")
 
             },
 
+            checkElementName : function(name,dt) {
+            //if the name ends in [x] then change it to one that has the DataType in it...
+                if (name.substr(name.length-3)== '[x]') {
+                    return name.substr(0,name.length-3) + dt.substr(0,1).toUpperCase()+dt.substr(1);
+                } else {
+                    return name;
+                }
+
+            },
 
             makeTree : function(inProfile) {
                 var loadErrors = [];        //any errors during loading
@@ -146,26 +155,6 @@ angular.module("sampleApp")
                                     if (it.code == 'Extension' && it.profile) {
                                         item.myMeta.profile = it.profile;
                                         include=true;
-
-                                        //load the extension definition
-                                        /*
-                                        queries.push(GetDataFromServer.findConformanceResourceByUri(it.profile).then(
-                                            function(sdef) {
-                                                var analysis = Utilities.analyseExtensionDefinition3(sdef);
-                                                item.myMeta.analysis = analysis;
-
-                                                //console.log(analysis)
-                                            }, function(err) {
-                                                modalService.showModal({}, {bodyText: 'makeProfileDisplayFromProfile: Error retrieving '+ it.profile + " "+ angular.toJson(err)})
-                                                loadErrors.push({type:'missing StructureDefinition',value:it.profile})
-                                                //13 sep - not adding to list?
-                                                item.myMeta.analysis = {}
-                                            }
-                                        ));
-                                        */
-
-                                        //use the name rather than 'Extension'...
-                                        //not sure if this is doing anything... ar[ar.length - 1] = "*"+   item.name;
                                     }
                                 })
                             }
@@ -314,6 +303,13 @@ angular.module("sampleApp")
                             node.data.meta.path = item.path;
                             node.data.meta.originalPath = item.path;
                             node.data.meta.type = item.type;
+                            if (item.binding) {
+                                if (item.binding.valueSetReference) {
+                                    node.data.meta.vs = {url:item.binding.valueSetReference.reference};
+                                    node.data.meta.vs.strength = item.binding.strength;
+                                }
+                            }
+
                             if (item.type) {
                                 item.type.forEach(function (typ) {
                                     if (typ.code == 'BackboneElement') {
