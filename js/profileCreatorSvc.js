@@ -214,7 +214,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             include = false;
                         }
 
-                        //obviously if the max is 0 then don't show  (might waant an option later to show
+                        //obviously if the max is 0 then don't show  (might want an option later to show
                         if (item.max == 0) {
                             include = false;
                             addLog('excluding '+ item.path + ' as max == 0')
@@ -367,7 +367,9 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                             //there should always be a name  - but just in case there isn't, grab the profile name...
                             if (text == 'extension') {
-                                if (item.short) {
+                                if (item.sliceName) {
+                                    text = item.sliceName;
+                                } else if (item.short) {
                                     text = item.short;
                                 } else if (item.name) {
                                     text = item.name;
@@ -381,8 +383,6 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                         } else {
                                             var ar = prof.split('/');
                                         }
-
-
                                         text = ar[ar.length-1];
                                     }
                                 }
@@ -446,7 +446,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
 
                 }
 
-
+                //ie if there are any extensions...
                 if (queries.length) {
                     $q.all(queries).then(
                         function() {
@@ -455,6 +455,10 @@ angular.module("sampleApp").service('profileCreatorSvc',
                             lstTree.forEach(function(node){
                                 if (node.data && node.data.ed && node.data.ed.myMeta) {
                                     var analysis = node.data.ed.myMeta.analysis;
+
+                                    //experimental!!
+                                    //node.data.ed.type = [{code:'BackboneElement'}]
+
                                     if (analysis && analysis.isComplexExtension) {
                                         //console.log(node)
                                         //console.log(analysis.children)
@@ -472,7 +476,7 @@ angular.module("sampleApp").service('profileCreatorSvc',
                                     }
                                 }
 
-                            })
+                            });
 
 
                             lstTree = lstTree.concat(newNodes)

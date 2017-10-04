@@ -882,8 +882,6 @@ angular.module("sampleApp")
             $scope.supportedDt = ['decimal','integer','Coding','uri','ContactPoint','Identifier','CodeableConcept',
                 'Quantity', 'string','code','date','Period','dateTime','Address','HumanName','Annotation','boolean',
                 'instant','Attachment']
-
-
             $scope.supportedDt.push('Dosage');
 
             function getExistingData(patient) {
@@ -1126,8 +1124,6 @@ angular.module("sampleApp")
 
             }
 
-            //------------  Library functions ------------
-            //$scope.libraries = [];
 
             $scope.downloadFromLibrary = function(inContainer){
                 //note that the entry is a DocumentReference with a bundle as an attachment...
@@ -1274,6 +1270,12 @@ angular.module("sampleApp")
 
             //displays the data entry screen for adding a datatype value
             $scope.addValueForDt = function(hashPath,dt,currentValue) {
+/*
+                var x = angular.copy(hashPath)
+                delete x.ed;
+                alert(angular.toJson(x))
+                return;
+*/
 
                 console.log(currentValue)
                 //if this is not adding to the root, check that there is a branch selected...
@@ -1374,9 +1376,6 @@ angular.module("sampleApp")
                     $scope.selectedContainer.isDirty = true;
                     delete $scope.input.dt;
                     $scope.resetValidation();
-
-
-
 
                     $uibModal.open({
                         templateUrl: 'modalTemplates/addPropertyInBuilder.html',
@@ -1830,8 +1829,6 @@ angular.module("sampleApp")
 
                 profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
                     function(vo) {
-
-
                         $('#SDtreeView').jstree('destroy');
                         $('#SDtreeView').jstree(
                             {'core': {'multiple': false, 'data': vo.treeData, 'themes': {name: 'proton', responsive: true}}}
@@ -2335,9 +2332,6 @@ angular.module("sampleApp")
 
             $scope.showVSBrowserDialog = {};
 
-
-
-
             //------- select a profile --------
             $scope.showFindProfileDialog = {};
             $scope.findProfile = function(cheat) {
@@ -2349,17 +2343,7 @@ angular.module("sampleApp")
             //called when a profile has been selected
             $scope.selectedProfileFromDialog = function (profile) {
                 $scope.input.selectedProfile = profile;
-                /*
-                builderSvc.makeLogicalModelFromSD(profile).then(
-                    function (lm) {
-                        selectLogicalModal(lm,profile.url)
-                    },
-                    function(vo) {
-                        //if cannot locate an extension. returns the error and the incomplete LM
-                        selectLogicalModal(vo.lm,profile.url)
-                    }
-                )
-                */
+
             };
 
 

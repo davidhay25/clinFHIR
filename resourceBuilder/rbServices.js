@@ -1820,6 +1820,17 @@ console.log(summary);
             resource.extension.push(ext)
 
         },
+        addExtensionMultiple : function(resource,url,value) {
+            //add the extension with this url regardless---
+
+            resource.extension = resource.extension || []
+
+
+            var ext = {url:url}
+            angular.extend(ext,value);
+            resource.extension.push(ext)
+
+        },
         addExtensionOnce : function(resource,url,value) {
             //add the extension with this url if it does not already exist
             if (resource) {
@@ -1861,13 +1872,12 @@ console.log(summary);
                         //now get the children of this extension
                         ext.extension.forEach(function (child) {
                             extension.children.push(child)
-                        })
+                        });
 
                         ar.push(extension)
                     }
                 });
             }
-
             return ar;
         }
     }

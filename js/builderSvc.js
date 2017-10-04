@@ -766,14 +766,9 @@ angular.module("sampleApp")
                                             var analysis = Utilities.analyseExtensionDefinition3(sdef);
 
 
-                                            //analysis.isComplexExtension = false;        //<<<<<
-
-
                                             if (! analysis.isComplexExtension) {
 
-                                               // console.log(ed,analysis)
 
-                                                //ed.short = analysis.name;   //will become the tree name
                                                 if (! ed.name) {
                                                     ed.name = analysis.name;
                                                 }
@@ -783,7 +778,10 @@ angular.module("sampleApp")
                                                 //now update the path and other key properties of the ed
                                                 var text = $filter('getLogicalID')(profileUrl);
 
+                                                //oct3-2017 why did I do this???
                                                 ed.path = ed.path.replace('extension',text)
+
+
                                                 //ed.builderMeta || {}
                                                 ed.builderMeta = {isExtension : true};  //to colourize it, and help with the build..
                                                 ed.builderMeta.extensionUrl = profileUrl;
@@ -1740,6 +1738,9 @@ angular.module("sampleApp")
                     } else {
                         //is this an extension?
                         if (info && info.isExtension) {
+
+                            
+
 
                             var dtValue = 'value' + info.extensionType.substr(0,1).toUpperCase() + info.extensionType.substr(1);
                             var ext = {}
