@@ -113,7 +113,7 @@ angular.module("sampleApp")
                 var nodeHash = {};      //a hash of nodes indexed by path... (used to detect expanded datatypes0
                 function isParentNodeBBE(node) {
                     //return true if the parent to this node is a BBE
-                    var isBBE;
+                    var isBBE = false;
                     var parentNode = nodeHash[node.parent];
                     if (parentNode && parentNode.data && parentNode.data.meta && parentNode.data.meta.type) {
                         parentNode.data.meta.type.forEach(function (typ) {
@@ -303,6 +303,8 @@ angular.module("sampleApp")
                             node.data.meta.path = item.path;
                             node.data.meta.originalPath = item.path;
                             node.data.meta.type = item.type;
+                            node.data.meta.index = 0;   //used for multiple instances...
+                            node.data.meta.canCopy = true;  //allow this node to be copied (if a BBE and multiple - todo ?maybe check???)
                             if (item.binding) {
                                 if (item.binding.valueSetReference) {
                                     node.data.meta.vs = {url:item.binding.valueSetReference.reference};
@@ -319,7 +321,7 @@ angular.module("sampleApp")
                             }
                             if (item.max == '*') {
                                 node.data.meta.isMultiple = true;
-                                node.data.meta.index = 0;       //used to track multiple instances of this node
+                               // node.data.meta.index = 0;       //used to track multiple instances of this node
                             }
 
                             node.data.meta.isParentNodeBBE = isParentNodeBBE(node); //is the parentNode a BBE. If not. it's an expanded datatype (I think)

@@ -153,38 +153,38 @@ angular.module("sampleApp")
                     //add all nodes with the given parentparentPath
                     console.log(parentPath, childHash[parentPath]);
                     //node.item = []
-                    childHash[parentPath].forEach(function(child) {
 
-                        var ed = child.data.ed;          //the ElementDefinition from the LM...
-                        if (ed && ed.type && ed.type.length > 0) {
-                            var item = {linkId:'id'+linkId++, text:child.text,  myMeta:{answer:[],ed:ed}};
-                            if (ed.max == '*') {
-                                item.repeats = true;
-                            }
-                            item.myMeta.path = ed.path;
-                            node.item.push(item);
 
-                            if (ed.type[0].code == 'BackboneElement') {
-                                //This is a bbe with child elements - but not a data input field...
-                                //console.log('bbe '+ ed.path)
 
-                                item.item = [];
-                                addItemsFromNode(item,ed.path)
+                    if (childHash[parentPath]) {
+                        childHash[parentPath].forEach(function (child) {
+
+                            var ed = child.data.ed;          //the ElementDefinition from the LM...
+                            if (ed && ed.type && ed.type.length > 0) {
+                                var item = {linkId: 'id' + linkId++, text: child.text, myMeta: {answer: [], ed: ed}};
+                                if (ed.max == '*') {
+                                    item.repeats = true;
+                                }
+                                item.myMeta.path = ed.path;
+                                node.item.push(item);
+
+                                if (ed.type[0].code == 'BackboneElement') {
+                                    //This is a bbe with child elements - but not a data input field...
+                                    //console.log('bbe '+ ed.path)
+
+                                    item.item = [];
+                                    addItemsFromNode(item, ed.path)
+
+                                } else {
+                                    //item.type = 'string'
+                                }
 
                             } else {
-                                //item.type = 'string'
+                                console.log(child.text + ': Element with no type')
                             }
 
-
-
-
-
-
-                        } else {
-                            console.log(child.text +': Element with no type')
-                        }
-
-                    })
+                        })
+                    }
                 };
 
 

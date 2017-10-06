@@ -38,7 +38,15 @@ angular.module("sampleApp")
 
                 if (data.node && data.node.data && data.node.data) {
                     $scope.selectedNode = data.node;
-                    processNode($scope.selectedNode);
+                    //if there is only a single possible datatype for this node then display it...
+                    if ($scope.selectedNode.data.meta.type && $scope.selectedNode.data.meta.type.length == 1){
+                        $scope.showDEForm($scope.selectedNode.data.meta.type[0].code)
+                    }
+
+                    //
+
+
+
                 }
                 $scope.$digest();
             })
@@ -48,17 +56,17 @@ angular.module("sampleApp")
             //todo note that this only works for direct children right now
         $scope.addNewNode = function() {
             var nodeId = $scope.selectedNode.id;
+            $scope.selectedNode.data.meta.canCopy = false;    //so this node can't be copied - only the new one...
+            var newIndex = $scope.selectedNode.data.meta.index + 1;  //the index for this copy. assume that last one was selected todo: need to check
             //find the children that we'll need to duplicate. Right now, it's not repeatible - so fail for carePlan for example..
             var arNewNodes = [];
             var newParent = {data:{}}; //angular.copy($scope.selectedNode)
             newParent.text = $scope.selectedNode.text;
             newParent.data.meta = angular.copy($scope.selectedNode.data.meta)
-            //delete newParent.parents;
             newParent.parent = $scope.selectedNode.parent;
             var inx = $scope.treeData.length
             newParent.id = 'id'+inx ;
-            newParent.data.meta.index = 'inx'+inx     //this is used to distinguish this 'branch' from the others
-            //newParent.text += 'x'
+            newParent.data.meta.index = newIndex;     //this is used to distinguish this 'branch' from the others
             inx++;
             arNewNodes.push(newParent);
             var insertPoint = - 1;
@@ -71,11 +79,11 @@ angular.module("sampleApp")
                     newChild.text = node.text;
                     newChild.icon = node.icon;
                     newChild.data.meta = angular.copy(node.data.meta)
-                    newChild.data.meta.index = newParent.data.meta.index;
+                    newChild.data.meta.index = newIndex;
                     newChild.id = 'id'+inx ;
                     inx++;
                     newChild.parent = newParent.id;
-                    newChild.text += 'x'
+                   // newChild.text += 'x'
 
                     arNewNodes.push(newChild);
                 }
@@ -97,11 +105,7 @@ angular.module("sampleApp")
 
         };
 
-        //once a node has been selected in the tree
-        function processNode(node){
-         //   $scope.selectedElement = {};     //what is displayed...
-          //  $scope.selectedElement.meta = node.data.meta;
-        }
+
 
         //to show the data entry form...
         $scope.showDEForm = function(dt){
@@ -146,13 +150,18 @@ angular.module("sampleApp")
                 case 'CodeableConcept' :
                     value = $scope.input.dt['cc'];
                     break;
+                case 'ContactPoint' :
+                    value = $scope.input.dt['contactpoint'];
+                    break;
             }
 
-            addData(dt,value);
+
+            addData(dt,angular.copy(value));
 
 
         };
 
+        //add a new data element
         var addData = function(dt,value){
             var meta = $scope.selectedNode.data.meta;     //the specific meta node
             //extensions are processed separately...
@@ -190,26 +199,54 @@ angular.module("sampleApp")
                 var parent = $scope.resource[parentName];
                 //if the parent exists, then if it's multiple then find the right ine based on the index
 
-               // var elementToInsert = {};
-               // elementToInsert[elementName] = data;
-               // elementToInsert = value;
+
                 if (!parent) {
                     $scope.resource[parentName] = []; //todo assume that they are all multiple - shoud really check the parent.isMultiple
 
+                    //make sure that all the entries prior to this one exist - eg if the node was dupliacted and the second selected...
+                    for (var i=0; i < meta.index; i++) {
+                        $scope.resource[parentName].push({})
+                    }
+
+
                     //add the 'base' object for this
                     var rootNodeForParent = {};
+                    //rootNodeForParent['_index'] = meta.index + 't'
+
                     $scope.resource[parentName].push(rootNodeForParent)
                    // var elementToInsert = {};
                    //    elementToInsert[elementName] = data;
                     if (meta.isMultiple) {
                         rootNodeForParent[elementName] = []
                         rootNodeForParent[elementName].push(value)
+
+
                     } else {
                         rootNodeForParent[elementName] = value;
                     }
                 } else {
-                    //the parent does exist - and we are assuming an array.
-                    var parentElement = parent[0];      //for now just grab the first element. eventually we'll need to find one based on an index...
+                    //the parent does exist - and we are assuming an array. (ie that all BBE off the root are multiple - todo this may not be correct, and we may need to check
+                    //search all the parent arrays looking for one where the meta.index value is the same as this one...
+                    var parentElement;
+
+                    for (var i=0; i < parent.length; i++) {
+                       // if (parent[i])
+                    }
+                    parentElement = parent[meta.index];
+                    if (! parentElement) {  //this is the first time we've added an element to this node...
+                        parentElement = {};
+                        //make sure any preceeding elements are populated - ?? do we need to do this???
+                        /*
+                        for (var i=0; i < meta.index; i++) {
+                             if (! parent[i]) {
+                                 parent[i] = {}
+                             }
+                        }
+                        */
+
+                        parent[meta.index] = parentElement;
+                    }
+
 
                     var currentElement = parentElement[elementName];
                     if (currentElement) {
@@ -239,6 +276,8 @@ angular.module("sampleApp")
                 }
 
             }
+
+            delete $scope.currentDT;        //hide the data entry form...
         };
 
 
@@ -251,12 +290,11 @@ angular.module("sampleApp")
                     case 'Coding' :
                         addData($scope.currentDT,concept)
                         break;
+
                     default:
                         //a codeableconcept
                         addData($scope.currentDT,{Coding:[concept]})
                 }
-
-
 
             }
         }
@@ -265,4 +303,4 @@ angular.module("sampleApp")
             $scope.resource = {resourceType:'Patient'}
         }
 
-    })
+    });

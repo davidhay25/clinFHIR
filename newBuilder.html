@@ -82,9 +82,11 @@
         <div class="col-md-5 col-sm-5">
             <uib-tabset>
                 <uib-tab heading="Data Entry">
-                    <div ng-show="selectedNode.data.meta.isMultiple">
+                    <div ng-show="selectedNode.data.meta.isMultiple && selectedNode.data.meta.isBBE && selectedNode.data.meta.canCopy">
                         <!-- add a new node in the tree for multiple nodes. have an index to tell them apart...-->
                         <button class="btn btn-primary pull-right" ng-click="addNewNode()">Add new node</button>
+                        <div class="clearfix"></div>
+                        <hr/>
                     </div>
                     <div>
                         <span class="clickable iconSpacing" ng-repeat="typ in selectedNode.data.meta.type"
@@ -98,12 +100,12 @@
                         </ul>
                         -->
 
+                        <div ng-show="currentDT">
+                            <ng-include src="'/includes/builderDataEntry.html'"></ng-include>
 
-                        <ng-include src="'/includes/builderDataEntry.html'"></ng-include>
 
 
-                        <div>
-                            <button ng-show="currentDT" class="btn btn-primary pull-right" ng-click="addDataType()">Add</button>
+                            <button  class="btn btn-primary pull-right" ng-click="addDataType()">Add</button>
                         </div>
                     </div>
                 </uib-tab>
