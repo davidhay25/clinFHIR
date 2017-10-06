@@ -21,7 +21,7 @@
 
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.checkbox','ui.bootstrap','ngStorage']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -80,37 +80,43 @@
 
         </div>
         <div class="col-md-5 col-sm-5">
-            <div ng-show="selectedNode.data.meta.isMultiple">
-                <!-- add a new node in the tree for multiple nodes. have an index to tell them apart...-->
-                <span class="clickable" ng-click="addNewNode()">Add new node</span>
-            </div>
+            <uib-tabset>
+                <uib-tab heading="Data Entry">
+                    <div ng-show="selectedNode.data.meta.isMultiple">
+                        <!-- add a new node in the tree for multiple nodes. have an index to tell them apart...-->
+                        <button class="btn btn-primary pull-right" ng-click="addNewNode()">Add new node</button>
+                    </div>
+                    <div>
+                        <span class="clickable iconSpacing" ng-repeat="typ in selectedNode.data.meta.type"
+                              ng-click="showDEForm(typ.code)">{{typ.code}}</span>
 
-            <pre>{{selectedElement.meta | json}}</pre>
-
-            <ul class="list-unstyled">
-                <li ng-repeat="typ in selectedElement.meta.type">
-                    <span class="clickable" ng-click="showDEForm(typ.code)">{{typ.code}}</span>
-                </li>
-            </ul>
-            <!--
-            <pre>{{selectedNode | json}}</pre>
-            -->
+                        <!--
+                        <ul class="list-unstyled">
+                            <li ng-repeat="typ in selectedElement.meta.type">
+                                <span class="clickable" ng-click="showDEForm(typ.code)">{{typ.code}}</span>
+                            </li>
+                        </ul>
+                        -->
 
 
-            <ng-include src="'/includes/builderDataEntry.html'"></ng-include>
+                        <ng-include src="'/includes/builderDataEntry.html'"></ng-include>
 
 
-            <div>
-                <button ng-show="currentDT" class="btn btn-primary pull-right" ng-click="addDataType()">Add</button>
-            </div>
+                        <div>
+                            <button ng-show="currentDT" class="btn btn-primary pull-right" ng-click="addDataType()">Add</button>
+                        </div>
+                    </div>
+                </uib-tab>
+                <uib-tab heading="Debug">
+                    <pre>{{selectedNode.data.meta | json}}</pre>
 
-            <!--
+                       <pre>{{selectedNode | json}}</pre>
 
-            <div ng-controller="addPropertyInBuilderCtrl">
-                <ng-include src="'/includes/builderDataEntry.html'"></ng-include>
-            </div>
--->
+                    <pre>{{treeData | json}}</pre>
 
+
+                </uib-tab>
+            </uib-tabset>
 
 
         </div>
