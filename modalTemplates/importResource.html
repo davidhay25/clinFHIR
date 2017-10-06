@@ -32,12 +32,22 @@
                 <textarea ng-model="input.raw" class="form-control" rows="15"></textarea>
             </div>
         </div>
-
+        <br/>
 
         <div class="row">
-            <div class="col-sm-12 col-md-12">
+
+            <div class="col-sm-6 col-md-6">
+                <div class="pull-left">
+                 <checkbox ng-model="input.LM"></checkbox> Import as Logical Model
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-md-6">
+
+
                 <div class="pull-right">
                     <checkbox ng-model="input.stripText"></checkbox> Strip text
+
                 </div>
 
             </div>
@@ -50,9 +60,12 @@
 
     <div class="modal-header">
         <ul>
-            <li><em>Paste the XML or Json into the box and click Import.</em></li>
-            <li><em>Json can either be a single resource or a bundle. Bundle must have 'fullUrl' set on each resource</em></li>
-            <li><em>XML must be a bundle, with a type of 'collection', no Bundle Id,  and the conformance server must support the Bundle endpoint for both Json and XML</em></li>
+            <li><em>Paste the XML or Json into the box and click the Import button (top right).</em></li>
+            <li><em>Json can be a single resource, a bundle of resources or a Logical Model. A Bundle
+                must have 'fullUrl' set on each resource</em></li>
+            <li><em>For Logical Models, make sure to check the 'Logical Model' checkbox, or it will be imported as a StructureDefinition</em></li>
+            <li><em>XML must be a bundle, with a type of 'collection',
+                no Bundle Id,  and the conformance server must support the Bundle endpoint for both Json and XML</em></li>
         </ul>
     </div>
 </div>

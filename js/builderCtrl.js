@@ -498,6 +498,20 @@ angular.module("sampleApp")
                         };
 
                         importFromJson = function(json,stripText) {
+                            if ($scope.input.LM) {
+                                //this is a logical model
+                                try {
+                                    var lm = angular.fromJson(json);
+
+                                    $scope.$close({type:'lm',resource:lm});
+                                } catch (ex) {
+                                    alert("I don't think this is value JSON...")
+                                }
+                                return;
+
+                            }
+
+
                             try {
                                 var res = angular.fromJson(json)
                                 if (stripText) {
@@ -528,7 +542,7 @@ angular.module("sampleApp")
                                 return;
                             }
 
-                            $scope.$close(res);     //close the dialog, passing across the resource
+                            $scope.$close({resource:res});     //close the dialog, passing across the resource
 
                         }
 
@@ -538,19 +552,28 @@ angular.module("sampleApp")
                             return $scope.resources;
                         }
                     }
-                }).result.then(function (res) {
+                }).result.then(function (vo) {
                     //the importer will return a resource that is the one to be selected...  (might have been a bundle)
-                    var res = builderSvc.importResource(res,$scope,idPrefix);
-                    $scope.displayMode = 'view';
-                    if (res) {
-                        $scope.selectResource(res,function(){
-                            makeGraph();
-                            drawResourceTree(res);
-                            isaDocument();      //determine if this bundle is a document (has a Composition resource)
-                            $scope.currentPatient = builderSvc.getPatientResource();
-                            $rootScope.$emit('addResource',res);
-                        });       //select the resource, indicating that it is a new resource...
+
+                    if (vo.type == 'lm') {
+                        //this is a logical model (not yet validated)
+                        console.log(vo.resource)
+                        selectLogicalModal(vo.resource)
+                    } else {
+                        var res = builderSvc.importResource(vo.resource,$scope,idPrefix);
+                        $scope.displayMode = 'view';
+                        if (res) {
+                            $scope.selectResource(res,function(){
+                                makeGraph();
+                                drawResourceTree(res);
+                                isaDocument();      //determine if this bundle is a document (has a Composition resource)
+                                $scope.currentPatient = builderSvc.getPatientResource();
+                                $rootScope.$emit('addResource',res);
+                            });       //select the resource, indicating that it is a new resource...
+                        }
+
                     }
+
 
 
 
@@ -2365,55 +2388,65 @@ angular.module("sampleApp")
             //----- Logical model support
 
             function selectLogicalModal(lm,profileUrl) {
-                var type = lm.snapshot.element[0].path;
-                $scope.selectedContainer.isDirty = true;
-                var resource = {resourceType : type};
-                resource.id = idPrefix+new Date().getTime();
-                $scope.input.text = $scope.input.text || "";
-                resource.text = {status:'generated',div:  $filter('addTextDiv')($scope.input.text + builderSvc.getManualMarker())};
-                resource.meta = {profile:[lm.url]};
-                resource.implicitRules = lm.implicitRules;
+
+                if (lm && lm.snapshot && lm.snapshot.element) {
 
 
-                //is this a lm based on a core resource? If so, add an extension to the resource so it can be a reference target...
-                var baseTypeForModel = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
-                var extensionValue = Utilities.getSingleExtensionValue(lm,baseTypeForModel);
-                if (extensionValue && extensionValue.valueString) {
-                    resource.extension = [extensionValue]
-                   // Utilities.addExtensionOnceWithReplace(resource,baseTypeForModel,extensionValue)
-                }
+                    var type = lm.snapshot.element[0].path;
+                    $scope.selectedContainer.isDirty = true;
+                    var resource = {resourceType: type};
+                    resource.id = idPrefix + new Date().getTime();
+                    $scope.input.text = $scope.input.text || "";
+                    resource.text = {
+                        status: 'generated',
+                        div: $filter('addTextDiv')($scope.input.text + builderSvc.getManualMarker())
+                    };
+                    resource.meta = {profile: [lm.url]};
+                    resource.implicitRules = lm.implicitRules;
 
 
-                builderSvc.addResourceToAllResources(resource)
-                builderSvc.addSDtoCache(lm)
-
-                var item = {resource:resource};
-                if (profileUrl) {
-                    item.isProfile=true
-                    item.profile = profileUrl;
-                } else {
-                    item.isLogical = true
-                }
-                $scope.selectedContainer.bundle.entry.push(item);
-                $scope.selectedContainer.bundle.entry.sort(function(a,b){
-                    //$scope.resourcesBundle.entry.sort(function(a,b){
-                    if (a.resource.resourceType > b.resource.resourceType) {
-                        return 1
-                    } else {
-                        return -1
+                    //is this a lm based on a core resource? If so, add an extension to the resource so it can be a reference target...
+                    var baseTypeForModel = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
+                    var extensionValue = Utilities.getSingleExtensionValue(lm, baseTypeForModel);
+                    if (extensionValue && extensionValue.valueString) {
+                        resource.extension = [extensionValue]
+                        // Utilities.addExtensionOnceWithReplace(resource,baseTypeForModel,extensionValue)
                     }
-                })
-                $scope.displayMode = 'view';
-                $scope.selectResource(resource,function(){
-                    $scope.waiting = false;
-                    makeGraph();
-                    drawResourceTree(resource);
 
-                    isaDocument();      //determine if this bundle is a document (has a Composition resource)
 
-                    $rootScope.$emit('addResource',resource);
+                    builderSvc.addResourceToAllResources(resource)
+                    builderSvc.addSDtoCache(lm)
 
-                });
+                    var item = {resource: resource};
+                    if (profileUrl) {
+                        item.isProfile = true
+                        item.profile = profileUrl;
+                    } else {
+                        item.isLogical = true
+                    }
+                    $scope.selectedContainer.bundle.entry.push(item);
+                    $scope.selectedContainer.bundle.entry.sort(function (a, b) {
+                        //$scope.resourcesBundle.entry.sort(function(a,b){
+                        if (a.resource.resourceType > b.resource.resourceType) {
+                            return 1
+                        } else {
+                            return -1
+                        }
+                    })
+                    $scope.displayMode = 'view';
+                    $scope.selectResource(resource, function () {
+                        $scope.waiting = false;
+                        makeGraph();
+                        drawResourceTree(resource);
+
+                        isaDocument();      //determine if this bundle is a document (has a Composition resource)
+
+                        $rootScope.$emit('addResource', resource);
+
+                    });
+                } else {
+                    alert ('There is no snapshot with elements...')
+                }
             }
 
             //load all the logical models. This won't scale...

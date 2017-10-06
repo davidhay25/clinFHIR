@@ -53,7 +53,7 @@ angular.module("sampleApp")
 
             var resource = builderSvc.resourceFromReference(reference);
             //console.log(resource)
-            if (resource) {
+            if (resource && resource.text) {
                 //if the text is empty, return the reference...
                 if (! builderSvc.isEmptyText(resource.text.div )) {
                     return resource.text.div

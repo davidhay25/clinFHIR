@@ -18,7 +18,7 @@ angular.module("sampleApp")
                 var reference =  builderSvc.referenceFromResource(resource)
 
                 var text = "No text";
-                if (resource.text.div && resource.text.div) {
+                if (resource.text && resource.text.div && resource.text.div) {
                     text = resource.text.div;
                 }
 
