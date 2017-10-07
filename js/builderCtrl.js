@@ -1293,12 +1293,7 @@ angular.module("sampleApp")
 
             //displays the data entry screen for adding a datatype value
             $scope.addValueForDt = function(hashPath,dt,currentValue) {
-/*
-                var x = angular.copy(hashPath)
-                delete x.ed;
-                alert(angular.toJson(x))
-                return;
-*/
+
 
                 console.log(currentValue)
                 //if this is not adding to the root, check that there is a branch selected...
@@ -1737,34 +1732,6 @@ angular.module("sampleApp")
 
             };
 
-            //NOT WORKING
-            $scope.removeReferenceDEP = function(fromResource,toResource,path) {
-
-                modalService.showModal({}, {bodyText:'Sorry, still working on this. Removing either of the resources will remove the reference. (A bit brutal I admit)'});
-                return
-
-                //remove a reference from a resource. currently has limitations...
-                if (path.indexOf('.') > 1) {
-                    modalService.showModal({}, {bodyText:'Sorry, at the moment I can only remove references from the root'});
-                    return;
-                }
-
-                var reference = fromResource.resourceType + '/' + fromResource.id;
-                var resource = builderSvc.resourceFromReference(reference)
-                delete resource[path];
-                $scope.selectResource(resource,function(){
-                    $scope.waiting = false;
-                    makeGraph();
-                    drawResourceTree(resource);
-                    isaDocument();      //determine if this bundle is a document (has a Composition resource)
-
-                    //$rootScope.$emit('addResource',resource);
-
-                });
-
-
-
-            };
 
             $scope.selectReference = function(edge,nodes) {
                 $scope.currentReference = {edge:edge};

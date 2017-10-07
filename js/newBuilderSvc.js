@@ -15,6 +15,7 @@ angular.module("sampleApp")
         return {
 
             processExtension : function(meta,dt,value,resource) {
+                var deferred = $q.defer();
                 var valueType = 'value' + dt.substr(0,1).toUpperCase()+dt.substr(1)     //ie the value[x]
                 var element = resource;      //should be able to use this at different levels in the resource...
                 console.log(meta,value)
@@ -59,22 +60,22 @@ angular.module("sampleApp")
                         Utilities.addExtensionOnceWithReplace(element,meta.parentUrl,insrt)
 
                     }
-
+                    deferred.resolve();
 
 
                 } else {
                     //this is a single, stand alone extension
-                    //  var extension = {url : meta.url};
-                    //  var valueType = 'value' + dt.substr(0,1).toUpperCase()+dt.substr(1)
                     var extValue = {};
-                    extValue[valueType]= value
+                    extValue[valueType]= value;
                     if (meta.isMultiple) {
                         Utilities.addExtensionMultiple(element,meta.url,extValue)
                     } else {
                         Utilities.addExtensionOnceWithReplace(element,meta.url,extValue)
                     }
-
+                    deferred.resolve();
                 }
+
+                return deferred.promise;
 
 
             },
@@ -393,7 +394,17 @@ angular.module("sampleApp")
                                                         a_attr:{title: + id}};
                                                     newNode.data = {meta:{}};
                                                     newNode.data.meta = {path:node.data.meta.path + "."+child.code};
-                                                    newNode.data.meta.binding = child.ed.binding;
+
+                                                    if (child.ed.binding) {
+                                                        newNode.data.meta.binding = child.ed.binding;
+
+                                                        if (child.ed.binding.valueSetReference) {
+                                                            newNode.data.meta.vs = {url:child.ed.binding.valueSetReference.reference};
+                                                            newNode.data.meta.vs.strength = child.ed.binding.strength;
+                                                        }
+
+                                                    }
+
                                                     newNode.data.meta.type = child.ed.type;
                                                     newNode.data.meta.isExtension = true;
                                                     newNode.data.meta.parentUrl = node.data.meta.url;
@@ -413,6 +424,16 @@ angular.module("sampleApp")
                                             //this is a simple extension...
                                             console.log(analysis)
                                             node.data.meta.type = analysis.dataTypes;   //replace the 'Extension' dataytype
+
+                                            if (analysis.binding) {
+                                                node.data.meta.binding = analysis.binding;
+
+                                                if (analysis.binding.valueSetReference) {
+                                                    node.data.meta.vs = {url:analysis.binding.valueSetReference.reference};
+                                                    node.data.meta.vs.strength = analysis.binding.strength;
+                                                }
+
+                                            }
 
 
                                         }

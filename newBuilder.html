@@ -44,15 +44,20 @@
     <script src="js/newBuilderCtl.js"></script>
     <script src="js/services.js"></script>
     <script src="js/dataTypeCtrl.js"></script>
-    <script src="js/addPropertyInBuilderCtrl.js"></script>
+    <script src="js/builderSvc.js"></script>
+    <script src="js/resourceCreatorSvc.js"></script>
+    <script src="js/resourceSvc.js"></script>
+
+
+
     <script src="resourceBuilder/vsBrowser.js"></script>
     <script src="js/libs/angular-bootstrap-checkbox.js"></script>
     <!--
+ <script src="resourceBuilder/rbServices.js"></script>
 
-    <script src="js/resourceCreatorSvc.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/documentBuilder.js"></script>
-    <script src="resourceBuilder/rbServices.js"></script>
+
     <script src="js/reporterCtrl.js"></script>
 
     <script src="js/libs/ngStorage.min.js"></script>
@@ -71,8 +76,24 @@
 
 <div ng-app="sampleApp" ng-controller="newBuilderCtrl" class="container-fluid">
 
-<h3>Builder</h3>
 
+
+<h3>Builder</h3>
+    <div class="row">
+        <div class="col-md-3 col-sm-3">
+        </div>
+        <div class="col-md-3 col-sm-3">
+            <select ng-model="input.resourceType" class="form-control"
+                    ng-change="newCoreResourceType(input.resourceType)"
+                    ng-options="type.name for type in standardResourceTypes">
+
+            </select>
+        </div>
+    </div>
+
+
+
+    <button class="btn btn-link" ng-click="loadSD('Condition')">Load Condition</button>
 
     <div class="row">
         <div class="col-md-3 col-sm-3">
@@ -92,22 +113,24 @@
                         <span class="clickable iconSpacing" ng-repeat="typ in selectedNode.data.meta.type"
                               ng-click="showDEForm(typ.code)">{{typ.code}}</span>
 
-                        <!--
-                        <ul class="list-unstyled">
-                            <li ng-repeat="typ in selectedElement.meta.type">
-                                <span class="clickable" ng-click="showDEForm(typ.code)">{{typ.code}}</span>
-                            </li>
-                        </ul>
-                        -->
-
                         <div ng-show="currentDT">
-                            <ng-include src="'/includes/builderDataEntry.html'"></ng-include>
 
+                            <div class="rounded-box">
+                                <ng-include src="'/includes/builderDataEntry.html'"></ng-include>
+
+                            </div>
 
 
                             <button  class="btn btn-primary pull-right" ng-click="addDataType()">Add</button>
                         </div>
                     </div>
+                </uib-tab>
+                <uib-tab heading="Validate">
+
+                    <button class="btn btn-primary pull-right" ng-click="validate()">Validate</button>
+
+                    <pre>{{validationResult | json}}</pre>
+
                 </uib-tab>
                 <uib-tab heading="Debug">
                     <pre>{{selectedNode.data.meta | json}}</pre>
@@ -129,6 +152,16 @@
                     <pre>{{resource | json}}</pre>
 
                 </uib-tab>
+
+                <uib-tab heading="Tree">
+                    <div>
+                        <span class="clickable pull-right" ng-click="toggleTreeExpand()">Toggle Expand</span>
+                    </div>
+                    <div id="builderResourceTree"></div>
+                </uib-tab>
+
+
+
             </uib-tabset>
 
 

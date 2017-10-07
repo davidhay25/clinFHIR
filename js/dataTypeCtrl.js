@@ -1,26 +1,46 @@
+
+/*
+* This is a controller invoked by the BuilderDataEntry page. it is a child of addPropertyInBuilder...
+*       It contains common 'config' and other functions needed by the data entry form.
+*
+* */
+
+
 angular.module("sampleApp").controller('dataTypeCtrl',
-    function ($scope,RenderProfileSvc) {
-
-
-        //this is for new builder to signal what datatype has been seelcted - todo = try to refactor...
-        $scope.$on('setDT',function(event,dt){
-            $scope.dataTypeBeingEntered = dt;
-            console.log(dt)
-        });
-
-        $scope.results = {timing:{}};
-
-
-        $scope.routeCodes = {id:'route-codes'};
+    function ($scope,RenderProfileSvc,GetDataFromServer) {
 
 
         //These may have been set in a parent scope so be careful!
         $scope.input = $scope.input || {}
-        $scope.input.dt = $scope.input.dt || {}
-        $scope.input.dt.dosage = {timing:{}};
-        $scope.input.dt.cc =  $scope.input.dt.cc || {}
 
-        if (! $scope.showVs) {      //this happens when being called from newBuilder...
+        //this is for new builder to signal what datatype has been seelcted - todo = try to refactor...
+        $scope.$on('setDT',function(event,dt){
+            $scope.dataTypeBeingEntered = dt;
+
+            //reset the data entry values here...
+            $scope.input.dt = {}
+            $scope.input.dt.dosage = {timing:{}};
+            $scope.input.dt.cc = {}; // $scope.input.dt.cc || {}
+
+            $scope.input.dt.contactpoint = {use:'home',system:'phone'};
+
+            if (dt == 'date' ||dt == 'dateTime' ) {
+               // $scope.input.dt = new Date();
+            }
+
+            console.log(dt)
+        });
+
+        $scope.results = {timing:{}};
+        $scope.routeCodes = {id:'route-codes'};
+
+
+
+     //   $scope.input.dt = $scope.input.dt || {}
+       // $scope.input.dt.dosage = {timing:{}};
+       // $scope.input.dt.cc =  $scope.input.dt.cc || {}
+
+      //  if (! $scope.showVs) {      //this happens when being called from newBuilder...
 
             //the ValueSet lookup & select for CodeableConcept
             $scope.showVSBrowserDialog = {};
@@ -28,7 +48,8 @@ angular.module("sampleApp").controller('dataTypeCtrl',
                 console.log(vs)
                 $scope.showVSBrowserDialog.open(vs);
             }
-        }
+     //   }
+
 
         $scope.timingArray = RenderProfileSvc.populateTimingList();
 
@@ -49,5 +70,51 @@ angular.module("sampleApp").controller('dataTypeCtrl',
 
 
         };
+
+
+        $scope.selectCCfromList = function(item,model,label,event){
+            console.log(item,model,label,event)
+        }
+
+        //added this for the newBuilder. The scope heirarchy is bit confused I think - need to merge this controller with 'addPropertyInBuilder'
+      //  if (! $scope.vsLookup) {
+            $scope.vsLookup = function (text, vs) {
+
+                console.log(text, vs)
+                if (vs) {
+                    var id = vs.id;
+                    $scope.showWaiting = true;
+                    return GetDataFromServer.getFilteredValueSet(id, text).then(
+                        function (data, statusCode) {
+                            if (data.expansion && data.expansion.contains) {
+                                var lst = data.expansion.contains;
+                                return lst;
+                            } else {
+                                return [
+                                    {'display': 'No expansion'}
+                                ];
+                            }
+                        }, function (vo) {
+                            var statusCode = vo.statusCode;
+                            var msg = vo.error;
+
+
+                            alert(msg);
+
+                            return [
+                                {'display': ""}
+                            ];
+                        }
+                    ).finally(function () {
+                        $scope.showWaiting = false;
+                    });
+
+                } else {
+                    return [{'display': 'Select the ValueSet to query against'}];
+                }
+            };
+        //}
+
+
 
     });

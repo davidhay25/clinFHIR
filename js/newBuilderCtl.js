@@ -1,17 +1,43 @@
 
 angular.module("sampleApp")
     .controller('newBuilderCtrl',
-        function ($scope,$http,appConfigSvc,profileCreatorSvc,newBuilderSvc,GetDataFromServer) {
+        function ($scope,$http,appConfigSvc,profileCreatorSvc,newBuilderSvc,GetDataFromServer,
+                  Utilities,builderSvc,resourceCreatorSvc) {
 
         $scope.resource = {resourceType:'Patient'}
 
         //this means that the data entered in 'builderDataEntry' will be in this scope. watch out for dataTypeCtrl.js & addPropertyInBuilder.js
         $scope.input = {dt:{}}
 
-        $scope.simpleData = "Test value";
-        $scope.complexData = {identifier: {system:'test system',value:'test value'}}
+       // $scope.simpleData = "Test value";
+       // $scope.complexData = {identifier: {system:'test system',value:'test value'}}
+
+
+        $http.get('resourceBuilder/allResources.json').then(
+            function(data) {
+
+                data.data.sort(function(a,b){
+                    if (a.name > b.name) {
+                        return 1
+                    } else return -1;
+
+                });
+
+
+                $scope.standardResourceTypes = data.data;
+
+                console.log($scope.standardResourceTypes)
+
+            },
+            function(err) {
+                alert('Error loading allResources.json\n'+angular.toJson(err));
+                deferred.reject();
+            }
+        );
+
 
         var url="http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/cf-StructureDefinition-us-core-patient";
+        //var url="http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/Condition";
         $http.get(url).then(
             function(data) {
                 var SD = data.data;
@@ -24,6 +50,76 @@ angular.module("sampleApp")
                 )
             }
         );
+
+        function drawResourceTree(resource) {
+
+            //make a copy to hide all the $$ properties that angular adds...
+            var r = angular.copy(resource);
+            var newResource =  angular.fromJson(angular.toJson(r));
+
+            $scope.treeData = resourceCreatorSvc.buildResourceTree(newResource);
+
+            $scope.treeData.forEach(function (node,inx) {
+                node.state = node.state || {}
+                if (inx ==0) {
+                    node.state.opened=true;
+                } else {
+                    node.state.opened=false;
+                }
+            });
+            renderResourceTree()
+
+        }
+
+        function renderResourceTree(){
+            //show the tree structure of this resource version
+            $('#builderResourceTree').jstree('destroy');
+            $('#builderResourceTree').jstree(
+                {'core': {'multiple': false, 'data': $scope.treeData, 'themes': {name: 'proton', responsive: true}}}
+            )
+        }
+
+
+        $scope.toggleTreeExpand = function () {
+            if ($scope.resourceTreeExpanded) {
+                $scope.treeData.forEach(function (node,inx) {
+                    node.state = node.state || {}
+                    if (inx ==0) {
+                        node.state.opened=true;
+                    } else {
+                        node.state.opened=false;
+                    }
+                })
+            } else {
+                $scope.treeData.forEach(function (node,inx) {
+                    node.state = node.state || {}
+                    node.state.opened=true;
+                })
+            }
+            renderResourceTree()
+            $scope.resourceTreeExpanded = ! $scope.resourceTreeExpanded;
+        }
+
+        $scope.newCoreResourceType = function(type){
+            console.log(type)
+        };
+
+            //temp - load a specific resource
+        $scope.loadSD = function(id) {
+            var url="http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/"+id;
+            $http.get(url).then(
+                function(data) {
+                    var SD = data.data;
+                    newBuilderSvc.makeTree(SD).then(
+                        function(vo) {
+                            $scope.treeData = vo.treeData;
+                            drawTree(vo.treeData)
+
+                        }
+                    )
+                }
+            );
+        };
 
         function drawTree(treeData) {
             $('#SDtreeView').jstree('destroy');
@@ -40,7 +136,12 @@ angular.module("sampleApp")
                     $scope.selectedNode = data.node;
                     //if there is only a single possible datatype for this node then display it...
                     if ($scope.selectedNode.data.meta.type && $scope.selectedNode.data.meta.type.length == 1){
-                        $scope.showDEForm($scope.selectedNode.data.meta.type[0].code)
+
+                        //make sure it's not a BBE
+                        if ($scope.selectedNode.data.meta.type[0].code !== 'BackboneElement') {
+                            $scope.showDEForm($scope.selectedNode.data.meta.type[0].code)
+                        }
+
                     }
 
                     //
@@ -50,6 +151,10 @@ angular.module("sampleApp")
                 }
                 $scope.$digest();
             })
+
+
+
+
         }
 
         //called on a BBE that is repeatable. we want to make a copy of that node and all childnodes...
@@ -105,33 +210,40 @@ angular.module("sampleApp")
 
         };
 
-
-
         //to show the data entry form...
         $scope.showDEForm = function(dt){
+
+
+            delete $scope.vsDetails;
+            delete $scope.expandedValueSet
+
+
             $scope.currentDT = dt;
             var meta = $scope.selectedNode.data.meta;     //the specific meta node
 
             if (meta.vs) {
                 //this element has a valueSet binding...
-                $scope.expandedValueSet = {expansion:{contains:[{display:'test'}]}}
-                $scope.vsDetails = {};
-                $scope.vsDetails.minLength = 3;
+                Utilities.getValueSetIdFromRegistry(meta.vs.url,function(vsDetails) {
+                    $scope.vsDetails = vsDetails;
 
-                GetDataFromServer.getValueSet(meta.vs.url).then(
-                    function(vs) {
-                        $scope.vsDetails.id = vs.id;
-                        $scope.vsDetails.resource = vs;
+                    if ($scope.vsDetails) {
+                        if ($scope.vsDetails.type == 'list' || dt == 'code') {
+                            //this has been recognized as a VS that has only a small number of options...
+                            GetDataFromServer.getExpandedValueSet($scope.vsDetails.id).then(
+                                function (vs) {
+                                    $scope.expandedValueSet = vs;
+
+                                }, function (err) {
+                                    alert(err + ' expanding ValueSet')
+                                }
+                            )
+                        }
                     }
-                )
-            } else {
-                //testing
-                //testing only! is this simple or complex
-                var value = $scope.simpleData;
-                if (dt.substr(0,1) == dt.substr(0,1).toUpperCase()) {
-                    value = $scope.complexData;
-                }
-               // addData(dt,value);
+
+
+
+                })
+
             }
 
             $scope.$broadcast('setDT',dt);      //sets an event to display the data-entry form
@@ -142,31 +254,61 @@ angular.module("sampleApp")
             var dt = $scope.currentDT;
             console.log($scope.input.dt)
 
-
-            var value = $scope.input.dt[dt];
-
-            //not all input values have the datatype as the propertyname (unfortunately)
-            switch (dt) {
-                case 'CodeableConcept' :
-                    value = $scope.input.dt['cc'];
-                    break;
-                case 'ContactPoint' :
-                    value = $scope.input.dt['contactpoint'];
-                    break;
-            }
+            var vo = builderSvc.getDTValue(dt,$scope.input.dt);
+           console.log(vo);
+            addData(dt,angular.copy(vo.value));
 
 
-            addData(dt,angular.copy(value));
+            /*
+                       return;
 
 
+                       var value = $scope.input.dt[dt];
+
+                       //not all input values have the datatype as the propertyname (unfortunately)
+                       switch (dt) {
+                           case 'CodeableConcept' :
+                               var tmp = $scope.input.dt['cc'];
+                               value = {};
+                               if (tmp.text) {value.text = tmp.text};
+                               if (tmp.coding) {
+                                   if ( angular.isString(tmp.coding)) {            //when a cc is rendered as radio, it's a string...
+                                       value.coding = [angular.fromJson(tmp.coding)]
+                                   } else {
+                                       value.coding = [tmp.coding]
+                                   }
+
+                               }
+
+
+
+
+                              // if ( angular.isString(value)) {     //for some reason this appears to be a string???
+                                  // value = angular.fromJson(value)
+                              // }
+                               break;
+                           case 'ContactPoint' :
+                               value = $scope.input.dt['contactpoint'];
+                               break;
+                       }
+
+                       console.log(value);
+                       addData(dt,angular.copy(value));
+
+           */
         };
 
-        //add a new data element
+        //actually add a new data element
         var addData = function(dt,value){
-            var meta = $scope.selectedNode.data.meta;     //the specific meta node
+            var meta = $scope.selectedNode.data.meta;     //the specific meta node for the current element...
             //extensions are processed separately...
             if (meta.isExtension) {
-                newBuilderSvc.processExtension(meta,dt,value,$scope.resource)
+                newBuilderSvc.processExtension(meta,dt,value,$scope.resource).then(
+                    function(data){
+                        drawResourceTree($scope.resource);
+                        clearAfterDataEntry();
+                    }
+                );
                 return;
             }
 
@@ -277,8 +419,39 @@ angular.module("sampleApp")
 
             }
 
-            delete $scope.currentDT;        //hide the data entry form...
+
+
+
+            clearAfterDataEntry();
+
+            drawResourceTree($scope.resource);
+
         };
+
+        function clearAfterDataEntry(){
+            delete $scope.currentDT;        //hide the data entry form...
+            delete $scope.vsDetails;
+            delete $scope.expandedValueSet
+        }
+
+        $scope.validate = function() {
+            delete $scope.validationResult;
+            $scope.showWaiting = true;
+
+            Utilities.validate($scope.resource).then(
+                function(data){
+                    $scope.validationResult = data.data;
+
+                },
+                function(data) {
+                    $scope.validationResult = data.data;
+
+                }
+            ).finally(function(){
+                $scope.waiting = false;
+            })
+        }
+
 
 
         //this is called when the vsBrowser is displayed and a concept is selected. The binding occures in builderDataEntry.html

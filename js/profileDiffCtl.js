@@ -8,10 +8,8 @@ angular.module("sampleApp")
             $scope.input = {center:true,includeCore:true,immediateChildren:true,includeExtensions:true,includePatient:true};
             $scope.appConfigSvc = appConfigSvc;
             $scope.itemColours = profileDiffSvc.objectColours();
-            //console.log($scope.itemColours)
 
             var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
-
 
             $scope.history = [];        //
             $scope.input.tabShowing='single';
@@ -138,8 +136,6 @@ angular.module("sampleApp")
 
                 console.log(item)
             };
-
-
 
             //download a single item (profile or extension)
             $scope.downLoadItem = function(ev,item,notes) {
