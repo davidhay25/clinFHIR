@@ -18,8 +18,6 @@
     <script src="js/libs/lodash.core.js"></script>
     <script src="js/libs/jstree.min.js"></script>
 
-
-
     <script>
         angular.module("sampleApp",['ui.checkbox','ui.bootstrap','ngStorage']).config(function($locationProvider) {
 
@@ -48,9 +46,10 @@
     <script src="js/resourceCreatorSvc.js"></script>
     <script src="js/resourceSvc.js"></script>
 
-
-
     <script src="resourceBuilder/vsBrowser.js"></script>
+
+    <script src="resourceBuilder/selectProfile.js"></script>
+
     <script src="js/libs/angular-bootstrap-checkbox.js"></script>
     <!--
  <script src="resourceBuilder/rbServices.js"></script>
@@ -80,17 +79,34 @@
 
 <h3>Builder</h3>
     <div class="row">
-        <div class="col-md-3 col-sm-3">
-        </div>
-        <div class="col-md-3 col-sm-3">
-            <select ng-model="input.resourceType" class="form-control"
-                    ng-change="newCoreResourceType(input.resourceType)"
-                    ng-options="type.name for type in standardResourceTypes">
+
+
+        <div class="col-md-4 col-sm-4">
+            <select ng-model="input.nbProfile" class="form-control"
+                    ng-change="savedProfileUrl(input.nbProfile)"
+                    ng-options="url for url in nbProfile">
 
             </select>
-        </div>
-    </div>
 
+        </div>
+
+        <div class="col-md-1 col-sm-1">
+            <button class="btn btn-default" ng-click="findProfile()">Find Profile</button>
+        </div>
+
+        <div class="col-md-1 col-sm-1">
+        </div>
+
+        <div class="col-md-2 col-sm-2">
+            <img ng-show='waiting' src="css/ajax_loader_blue_32.gif"/>
+        </div>
+
+        <div class="col-md-4 col-sm-4">
+
+        </div>
+
+
+    </div>
 
 
     <button class="btn btn-link" ng-click="loadSD('Condition')">Load Condition</button>
@@ -174,6 +190,11 @@
     </div>
 
 
+    <select-profile trigger="showFindProfileDialog"
+                    all-resource-types="standardResourceTypes"
+                    profile-selected="selectedProfileFromDialog" type="'profile'">
+
+    </select-profile>
 
 </div>
 </body>

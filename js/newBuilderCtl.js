@@ -2,9 +2,9 @@
 angular.module("sampleApp")
     .controller('newBuilderCtrl',
         function ($scope,$http,appConfigSvc,profileCreatorSvc,newBuilderSvc,GetDataFromServer,
-                  Utilities,builderSvc,resourceCreatorSvc) {
+                  Utilities,builderSvc,resourceCreatorSvc,$localStorage) {
 
-        $scope.resource = {resourceType:'Patient'}
+        //$scope.resource = {resourceType:'Patient'}
 
         //this means that the data entered in 'builderDataEntry' will be in this scope. watch out for dataTypeCtrl.js & addPropertyInBuilder.js
         $scope.input = {dt:{}}
@@ -26,7 +26,7 @@ angular.module("sampleApp")
 
                 $scope.standardResourceTypes = data.data;
 
-                console.log($scope.standardResourceTypes)
+                //console.log($scope.standardResourceTypes)
 
             },
             function(err) {
@@ -41,6 +41,12 @@ angular.module("sampleApp")
         $http.get(url).then(
             function(data) {
                 var SD = data.data;
+                $scope.currentProfile = SD;
+                $scope.resourceType = getResourceType(SD);
+                $scope.clear();     //sets a base resource with type only...
+
+                $scope.input.nbProfile = SD.url;
+
                 newBuilderSvc.makeTree(SD).then(
                     function(vo) {
                         $scope.treeData = vo.treeData;
@@ -50,6 +56,86 @@ angular.module("sampleApp")
                 )
             }
         );
+
+
+        //------- select a profile --------
+        $scope.showFindProfileDialog = {};
+        $scope.findProfile = function() {
+            delete $scope.input.selectedProfile;
+            $scope.showFindProfileDialog.open();        //show the profile select modal...
+        };
+
+        //called when a new profile has been selected from the dialog
+        $scope.selectedProfileFromDialog = function (profile) {
+            console.log(profile);
+            $scope.currentProfile = profile;
+            $scope.resourceType = getResourceType(profile);
+            $scope.clear();     //sets a base resource with type only...
+            $scope.input.nbProfile = profile.url;
+            $scope.waiting = true;
+            newBuilderSvc.makeTree(profile).then(
+                function(vo) {
+                    //save url in local storage if not aleady there..
+                    $localStorage.nbProfile = $localStorage.nbProfile || []
+                    if ( $localStorage.nbProfile.indexOf(profile.url) == -1) {
+                        $localStorage.nbProfile.push(profile.url)
+                    }
+
+
+                    console.log($localStorage.nbProfile)
+
+
+
+                    $scope.treeData = vo.treeData;
+                    drawTree(vo.treeData)
+
+                }
+            ).finally(function(){
+                $scope.waiting = false;
+            })
+
+        };
+
+        //when selecting a profile from one already selected...
+        $scope.nbProfile = $localStorage.nbProfile;
+        $scope.savedProfileUrl = function(url) {
+            $scope.waiting = true;
+            GetDataFromServer.findConformanceResourceByUri(url).then(
+                function (profile) {
+
+                    console.log(profile);
+
+
+                    $scope.currentProfile = profile;
+                    $scope.resourceType = getResourceType(profile);
+                    $scope.clear();     //sets a base resource with type only...
+                    newBuilderSvc.makeTree(profile).then(
+                        function (vo) {
+                            $scope.treeData = vo.treeData;
+                            drawTree(vo.treeData)
+                        })
+
+            }).finally(function () {
+                $scope.waiting = false;
+            })
+        };
+
+
+        //find the resourceType for this profile.  todo - need to allow for stu2 (as well in maketree...
+        function getResourceType(profile) {
+            var t = profile.baseDefinition;
+            var ar = t.split('/');
+            var bt = ar[ar.length-1];
+            //for a domao=inf resource (ie from core) the first element path is the resource type. Otherwise it's the baseDefinition
+            if (bt = 'DomainResource') {
+                bt = profile.snapshot.element[0].path;
+            }
+            return bt
+
+        }
+
+        //------------------------------
+
 
         function drawResourceTree(resource) {
 
@@ -223,6 +309,7 @@ angular.module("sampleApp")
 
             if (meta.vs) {
                 //this element has a valueSet binding...
+                $scope.waiting = true;
                 Utilities.getValueSetIdFromRegistry(meta.vs.url,function(vsDetails) {
                     $scope.vsDetails = vsDetails;
 
@@ -236,8 +323,14 @@ angular.module("sampleApp")
                                 }, function (err) {
                                     alert(err + ' expanding ValueSet')
                                 }
-                            )
+                            ).finally(function () {
+                                $scope.waiting = false;
+                            })
+                        } else {
+                            $scope.waiting = false;
                         }
+                    } else {
+                        $scope.waiting = false;
                     }
 
 
@@ -473,7 +566,7 @@ angular.module("sampleApp")
         }
 
         $scope.clear = function(){
-            $scope.resource = {resourceType:'Patient'}
+            $scope.resource = {resourceType:$scope.resourceType}
         }
 
     });

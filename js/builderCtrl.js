@@ -2337,6 +2337,8 @@ angular.module("sampleApp")
             };
 
 
+
+
             //actually add the resource instance based on this profile...
             $scope.addSelectedProfile = function (profile) {
                 builderSvc.makeLogicalModelFromSD(profile).then(
