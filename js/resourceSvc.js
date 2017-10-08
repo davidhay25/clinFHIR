@@ -62,11 +62,10 @@ angular.module("sampleApp").service('resourceSvc', function() {
             angular.forEach(object, function (value, key) {
 
 
-                //assume that any value that has a refernce property is a resource refernece. Should really
+                //assume that any value that has a reference property is a resource refernece. Should really
                 //recurse down 'object' types
                 if (value.reference) {
                     //This is a reference. Is it to the resource being evaluated?
-                    //console.log(key,value,id)
                     if (value.reference == id) {
 
                         //console.log(key,resourceBeingChecked)
@@ -84,7 +83,6 @@ angular.module("sampleApp").service('resourceSvc', function() {
         };
 
         allResources.forEach(function(resource) {
-            //var resource = item.resource
 
             //both the node being checked and the resource being checked will be the same at the start...
             checkInLinks(inwardLinks, resource, resource);
@@ -103,7 +101,6 @@ angular.module("sampleApp").service('resourceSvc', function() {
                 if (allResources) {
                     getInwardLinks(resource,allResources);
                 }
-
 
 
                 //if the dictionary was passed in, then populate the actual resource as well. This is not needed by the graph generator...

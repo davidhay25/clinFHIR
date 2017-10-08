@@ -2,7 +2,7 @@
 angular.module("sampleApp")
     .controller('newBuilderCtrl',
         function ($scope,$http,appConfigSvc,profileCreatorSvc,newBuilderSvc,GetDataFromServer,
-                  Utilities,builderSvc,resourceCreatorSvc,$localStorage,appConfigSvc,$timeout) {
+                  Utilities,builderSvc,resourceCreatorSvc,$localStorage,resourceSvc,$timeout,$filter) {
 
         //$scope.resource = {resourceType:'Patient'}
 
@@ -10,12 +10,12 @@ angular.module("sampleApp")
         $scope.input = {dt:{}}
         $scope.appConfigSvc = appConfigSvc;
 
-        $scope.sunday='test'
+       // $scope.sunday='test';
        // $scope.simpleData = "Test value";
        // $scope.complexData = {identifier: {system:'test system',value:'test value'}}
 
-            console.log($scope.$parent.startProfile);
-            console.log($scope.startProfile);
+            //console.log($scope.$parent.startProfile);
+            //console.log($scope.startProfile);
 
         var myScope = $scope;
         var startProfile = $scope.startProfile;
@@ -24,33 +24,52 @@ angular.module("sampleApp")
             //this was invoked from resource builder. Need to wait to allow $scope to be initialized...
 
             $timeout(function(){
-                    console.log($scope.sunday)
-                    console.log($scope.$parent.sunday)
-                    console.log($scope)
+                   // console.log($scope.sunday)
+                   // console.log($scope.$parent.sunday)
+                   // console.log($scope)
                     $scope.currentProfile = $scope.$parent.startProfile;
                     $scope.resourceType = getResourceType($scope.$parent.startProfile);
                     //startResource
                     $scope.resource = $scope.$parent.startResource;
-                    //myScope.clear();     //sets a base resource with type only...
+                    if ($scope.resource) {
+                        drawResourceTree($scope.resource)
+                        renderResourceTree();
+                    }
+                    //if resources are passed in, create a hash based on the resource type to use in creating references...
+                    $scope.hashResources = {}
+                    if ($scope.$parent.bundle) {
+                        $scope.$parent.bundle.entry.forEach(function (ent) {
+                            var type = ent.resource.resourceType;       //todo check that the resourceType is correct in SB
+                            $scope.hashResources[type] = $scope.hashResources[type] || []
+                            $scope.hashResources[type].push(ent.resource);
+                        })
+                    }
 
+                    var bundle = $scope.$parent.bundle;
+                    var allResources=[];        //needed to get the references...
+                    if (bundle) {
+                        bundle.entry.forEach(function (entry) {
+                            allResources.push(entry.resource)
+                        })
+                    }
+
+                    //display all the references to & from this resource...
+                    var references = resourceSvc.getReference($scope.resource,allResources);
+                    console.log(references)
+
+                    $scope.references = resourceSvc.getReference($scope.resource);
                     $scope.input.nbProfile = $scope.$parent.startProfile.url;
 
                     newBuilderSvc.makeTree($scope.$parent.startProfile).then(
                         function(vo) {
                             $scope.treeData = vo.treeData;
-                            drawTree(vo.treeData)
-
+                            drawTree(vo.treeData);      //this is the 'design' tree...
                         }
                     )
-                }
-
-                ,1000)
-
-
+                },1000)
 
         } else {
             var url= appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/cf-StructureDefinition-us-core-patient";
-            //var url="http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/Condition";
             $http.get(url).then(
                 function(data) {
                     var SD = data.data;
@@ -73,6 +92,7 @@ angular.module("sampleApp")
 
 
 
+        //actually all the resource Types
         $http.get('resourceBuilder/allResources.json').then(
             function(data) {
 
@@ -94,9 +114,6 @@ angular.module("sampleApp")
                 deferred.reject();
             }
         );
-
-
-
 
 
         //------- select a profile --------
@@ -123,7 +140,7 @@ angular.module("sampleApp")
                     }
 
 
-                    console.log($localStorage.nbProfile)
+                    //console.log($localStorage.nbProfile)
 
 
 
@@ -184,9 +201,9 @@ angular.module("sampleApp")
             var r = angular.copy(resource);
             var newResource =  angular.fromJson(angular.toJson(r));
 
-            $scope.treeData = resourceCreatorSvc.buildResourceTree(newResource);
+            $scope.resourceTreeData = resourceCreatorSvc.buildResourceTree(newResource);
 
-            $scope.treeData.forEach(function (node,inx) {
+            $scope.resourceTreeData.forEach(function (node,inx) {
                 node.state = node.state || {}
                 if (inx ==0) {
                     node.state.opened=true;
@@ -202,14 +219,13 @@ angular.module("sampleApp")
             //show the tree structure of this resource version
             $('#builderResourceTree').jstree('destroy');
             $('#builderResourceTree').jstree(
-                {'core': {'multiple': false, 'data': $scope.treeData, 'themes': {name: 'proton', responsive: true}}}
+                {'core': {'multiple': false, 'data': $scope.resourceTreeData, 'themes': {name: 'proton', responsive: true}}}
             )
         }
 
-
         $scope.toggleTreeExpand = function () {
             if ($scope.resourceTreeExpanded) {
-                $scope.treeData.forEach(function (node,inx) {
+                $scope.resourceTreeData.forEach(function (node,inx) {
                     node.state = node.state || {}
                     if (inx ==0) {
                         node.state.opened=true;
@@ -218,7 +234,7 @@ angular.module("sampleApp")
                     }
                 })
             } else {
-                $scope.treeData.forEach(function (node,inx) {
+                $scope.resourceTreeData.forEach(function (node,inx) {
                     node.state = node.state || {}
                     node.state.opened=true;
                 })
@@ -248,6 +264,7 @@ angular.module("sampleApp")
             );
         };
 
+        //draw the 'navigator' profile tree
         function drawTree(treeData) {
             $('#SDtreeView').jstree('destroy');
             $('#SDtreeView').jstree(
@@ -257,19 +274,30 @@ angular.module("sampleApp")
                 //clear specific properties
                 delete $scope.selectedNode;
                 delete $scope.currentDT;
+                $scope.referenceTo = []
                 $scope.$broadcast('setDT',null);      //sets an event to reset the data-entry form
 
                 if (data.node && data.node.data && data.node.data) {
                     $scope.selectedNode = data.node;
-                    //if there is only a single possible datatype for this node then display it...
-                    if ($scope.selectedNode.data.meta.type && $scope.selectedNode.data.meta.type.length == 1){
 
-                        //make sure it's not a BBE
-                        if ($scope.selectedNode.data.meta.type[0].code !== 'BackboneElement') {
-                            $scope.showDEForm($scope.selectedNode.data.meta.type[0].code)
+
+                    if ($scope.selectedNode.data.meta.type){
+
+                        //if there is only a single possible datatype for this node then display it...
+                        if ($scope.selectedNode.data.meta.type.length == 1) {
+
+                            //make sure it's not a BBE
+                            if ($scope.selectedNode.data.meta.type[0].code !== 'BackboneElement') {
+                                $scope.showDEForm($scope.selectedNode.data.meta.type[0].code)
+                            }
                         }
 
+                        //see if there are any references...
+                        setPotentialReferences($scope.selectedNode.data.meta)
+
                     }
+
+
 
                     //
 
@@ -346,6 +374,9 @@ angular.module("sampleApp")
 
 
             $scope.currentDT = dt;
+
+
+
             var meta = $scope.selectedNode.data.meta;     //the specific meta node
 
             if (meta.vs) {
@@ -382,6 +413,51 @@ angular.module("sampleApp")
 
             $scope.$broadcast('setDT',dt);      //sets an event to display the data-entry form
         };
+
+
+        //when a reference is to be created...
+        $scope.linkToResource = function(resource) {
+            console.log(resource)
+            var dt = $scope.currentDT;
+            var value = {resource:resource.resourceType + "/"+resource.id}
+            addData(dt,value);
+
+
+        }
+
+        //return the possible references for a given element (meta). todo not yet profile aware (in terms of references)
+        function setPotentialReferences(meta) {
+            $scope.potentialReferences = {}
+            if ($scope.hashResources) {
+               console.log($scope.hashResources);
+                meta.type.forEach(function (typ) {
+
+                   if (typ.code == 'Reference') {
+
+
+
+                       var targetType = $filter('referenceType') (typ.targetProfile);      //todo  make this the same when doing stu3...
+                       if (targetType == 'Resource') {
+                           $scope.potentialReferences = $scope.hashResources
+                       } else {
+                           if ($scope.hashResources[targetType]) {
+
+
+                               $scope.potentialReferences[targetType] = $scope.hashResources[targetType]
+
+                               /*$scope.hashResources[targetType].forEach(function (resource) {
+                                   $scope.potentialReferences.push(resource)
+                               })*/
+                           }
+
+                       }
+
+                   }
+
+                })
+
+            }
+        }
 
         //called when the user has entered the data and clicks 'Add'
         $scope.addDataType = function() {
@@ -585,8 +661,6 @@ angular.module("sampleApp")
                 $scope.waiting = false;
             })
         }
-
-
 
         //this is called when the vsBrowser is displayed and a concept is selected. The binding occures in builderDataEntry.html
         if (! $scope.conceptSelected) { //this happens when being called from newBuilder...

@@ -34,10 +34,12 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/newBuilderModal.html',
                     windowClass: 'nb-modal-window',
-                    controller : function($scope,startProfile,startResource){
+                    controller : function($scope,startProfile,startResource,bundle,title){
                         $scope.startProfile = startProfile;
                         $scope.startResource = startResource;
-                        console.log(startResource)
+                        $scope.bundle = bundle;
+                        $scope.title = title;
+                        //console.log(startResource)
 
                         $scope.closeModal = function() {
                             $scope.$close($scope.startResource)
@@ -50,7 +52,14 @@ angular.module("sampleApp")
                         startResource : function() {
                             //note that the $scope.currentResource will be directly updated by new builder...
                             return $scope.currentResource;
+                        },
+                        bundle : function(){
+                            return $scope.selectedContainer.bundle;
+                        },
+                        title : function(){
+                            return "Editing "+$scope.currentResource.resourceType;
                         }
+
                     }
                 }) .result.then(
                     function(resource) {

@@ -304,6 +304,8 @@ angular.module("sampleApp")
                             node.data.meta.path = item.path;
                             node.data.meta.originalPath = item.path;
                             node.data.meta.type = item.type;
+                            node.data.meta.definition = item.definition;
+                            node.data.meta.comment = item.comment;
                             node.data.meta.index = 0;   //used for multiple instances...
                             node.data.meta.canCopy = true;  //allow this node to be copied (if a BBE and multiple - todo ?maybe check???)
                             if (item.binding) {
@@ -383,9 +385,10 @@ angular.module("sampleApp")
                                 if (node.data && node.data.ed && node.data.ed.myMeta) {
                                     //the analysis node is ONLY added when the Extension definition is retrieved and analysed
                                     var analysis = node.data.ed.myMeta.analysis;
-
+console.log(analysis)
                                     if (analysis) {
                                         if (analysis.isComplexExtension) {
+                                            node.data.meta.definition = analysis.definition;
                                             if (analysis.children) {
                                                 //add the child nodes for the complex extension...
                                                 analysis.children.forEach(function(child){
@@ -394,6 +397,7 @@ angular.module("sampleApp")
                                                         a_attr:{title: + id}};
                                                     newNode.data = {meta:{}};
                                                     newNode.data.meta = {path:node.data.meta.path + "."+child.code};
+                                                    newNode.data.meta.definition = child.ed.definition;
 
                                                     if (child.ed.binding) {
                                                         newNode.data.meta.binding = child.ed.binding;
@@ -427,7 +431,7 @@ angular.module("sampleApp")
 
                                             if (analysis.binding) {
                                                 node.data.meta.binding = analysis.binding;
-
+                                                node.data.meta.definition = analysis.definition;
                                                 if (analysis.binding.valueSetReference) {
                                                     node.data.meta.vs = {url:analysis.binding.valueSetReference.reference};
                                                     node.data.meta.vs.strength = analysis.binding.strength;

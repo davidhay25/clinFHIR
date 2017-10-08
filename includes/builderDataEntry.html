@@ -349,7 +349,7 @@
             </div>
 
             <div class="col-sm-3 col-md-3">
-                <input placeholder = 'Postal code' type="text" class="form-control" ng-model="input.dt.Address.postalCode"/>
+                <input placeholder = 'Post code' type="text" class="form-control" ng-model="input.dt.Address.postalCode"/>
             </div>
 
         </div>
@@ -485,7 +485,7 @@
 
             <div ng-switch-when="list">
                 <div class="row">
-                    <div class="col-md-3 col-sm-3" ng-repeat = "option in expandedValueSet.expansion.contains">
+                    <div class="col-md-4 col-sm-4" ng-repeat = "option in expandedValueSet.expansion.contains">
                         <input type="radio" ng-model="input.dt.cc" name="name" value="{{option}}"  />
                         <span title="{{option.system}}">{{option.display}}</span>
                     </div>
