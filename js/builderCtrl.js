@@ -32,6 +32,39 @@ angular.module("sampleApp")
 
             $scope.showQuest = function(){
                 $uibModal.open({
+                    templateUrl: 'modalTemplates/newBuilderModal.html',
+                    windowClass: 'nb-modal-window',
+                    controller : function($scope,startProfile,startResource){
+                        $scope.startProfile = startProfile;
+                        $scope.startResource = startResource;
+                        console.log(startResource)
+
+                        $scope.closeModal = function() {
+                            $scope.$close($scope.startResource)
+                        }
+
+                    }, resolve : {
+                        startProfile : function(){
+                            return $scope.currentSD
+                        },
+                        startResource : function() {
+                            //note that the $scope.currentResource will be directly updated by new builder...
+                            return $scope.currentResource;
+                        }
+                    }
+                }) .result.then(
+                    function(resource) {
+                        console.log(resource);
+                        drawResourceTree(resource)
+
+                      //  $scope.currentResource = resource;
+                    }
+                );
+
+                return;
+
+
+                $uibModal.open({
                     templateUrl: 'modalTemplates/questionnaire.html',
                     size: 'lg',
                     controller: function($scope,Q,SD,bundle,title,resource){
@@ -1785,7 +1818,7 @@ angular.module("sampleApp")
 
                         $scope.currentSD = SD //added for Q testing...
 
-
+console.log($scope.currentSD)
                         processSD(SD,resource);
 
                         if (cb) {

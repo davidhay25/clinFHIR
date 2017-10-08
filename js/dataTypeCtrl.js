@@ -79,11 +79,12 @@ angular.module("sampleApp").controller('dataTypeCtrl',
         //added this for the newBuilder. The scope heirarchy is bit confused I think - need to merge this controller with 'addPropertyInBuilder'
       //  if (! $scope.vsLookup) {
             $scope.vsLookup = function (text, vs) {
+                $scope.waiting = true;
 
                 console.log(text, vs)
                 if (vs) {
                     var id = vs.id;
-                    $scope.showWaiting = true;
+                    $scope.waiting = true;
                     return GetDataFromServer.getFilteredValueSet(id, text).then(
                         function (data, statusCode) {
                             if (data.expansion && data.expansion.contains) {
@@ -106,7 +107,7 @@ angular.module("sampleApp").controller('dataTypeCtrl',
                             ];
                         }
                     ).finally(function () {
-                        $scope.showWaiting = false;
+                        $scope.waiting = false;
                     });
 
                 } else {

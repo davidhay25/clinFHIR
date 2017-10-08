@@ -2,15 +2,75 @@
 angular.module("sampleApp")
     .controller('newBuilderCtrl',
         function ($scope,$http,appConfigSvc,profileCreatorSvc,newBuilderSvc,GetDataFromServer,
-                  Utilities,builderSvc,resourceCreatorSvc,$localStorage) {
+                  Utilities,builderSvc,resourceCreatorSvc,$localStorage,appConfigSvc,$timeout) {
 
         //$scope.resource = {resourceType:'Patient'}
 
         //this means that the data entered in 'builderDataEntry' will be in this scope. watch out for dataTypeCtrl.js & addPropertyInBuilder.js
         $scope.input = {dt:{}}
+        $scope.appConfigSvc = appConfigSvc;
 
+        $scope.sunday='test'
        // $scope.simpleData = "Test value";
        // $scope.complexData = {identifier: {system:'test system',value:'test value'}}
+
+            console.log($scope.$parent.startProfile);
+            console.log($scope.startProfile);
+
+        var myScope = $scope;
+        var startProfile = $scope.startProfile;
+
+        if (startProfile) {
+            //this was invoked from resource builder. Need to wait to allow $scope to be initialized...
+
+            $timeout(function(){
+                    console.log($scope.sunday)
+                    console.log($scope.$parent.sunday)
+                    console.log($scope)
+                    $scope.currentProfile = $scope.$parent.startProfile;
+                    $scope.resourceType = getResourceType($scope.$parent.startProfile);
+                    //startResource
+                    $scope.resource = $scope.$parent.startResource;
+                    //myScope.clear();     //sets a base resource with type only...
+
+                    $scope.input.nbProfile = $scope.$parent.startProfile.url;
+
+                    newBuilderSvc.makeTree($scope.$parent.startProfile).then(
+                        function(vo) {
+                            $scope.treeData = vo.treeData;
+                            drawTree(vo.treeData)
+
+                        }
+                    )
+                }
+
+                ,1000)
+
+
+
+        } else {
+            var url= appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/cf-StructureDefinition-us-core-patient";
+            //var url="http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/Condition";
+            $http.get(url).then(
+                function(data) {
+                    var SD = data.data;
+                    $scope.currentProfile = SD;
+                    $scope.resourceType = getResourceType(SD);
+                    $scope.clear();     //sets a base resource with type only...
+
+                    $scope.input.nbProfile = SD.url;
+
+                    newBuilderSvc.makeTree(SD).then(
+                        function(vo) {
+                            $scope.treeData = vo.treeData;
+                            drawTree(vo.treeData)
+
+                        }
+                    )
+                }
+            );
+        }
+
 
 
         $http.get('resourceBuilder/allResources.json').then(
@@ -36,26 +96,7 @@ angular.module("sampleApp")
         );
 
 
-        var url="http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/cf-StructureDefinition-us-core-patient";
-        //var url="http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/Condition";
-        $http.get(url).then(
-            function(data) {
-                var SD = data.data;
-                $scope.currentProfile = SD;
-                $scope.resourceType = getResourceType(SD);
-                $scope.clear();     //sets a base resource with type only...
 
-                $scope.input.nbProfile = SD.url;
-
-                newBuilderSvc.makeTree(SD).then(
-                    function(vo) {
-                        $scope.treeData = vo.treeData;
-                        drawTree(vo.treeData)
-
-                    }
-                )
-            }
-        );
 
 
         //------- select a profile --------
@@ -191,7 +232,7 @@ angular.module("sampleApp")
         };
 
             //temp - load a specific resource
-        $scope.loadSD = function(id) {
+        $scope.loadSDDEP = function(id) {
             var url="http://fhirtest.uhn.ca/baseDstu3/StructureDefinition/"+id;
             $http.get(url).then(
                 function(data) {

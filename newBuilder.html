@@ -76,9 +76,8 @@
 <div ng-app="sampleApp" ng-controller="newBuilderCtrl" class="container-fluid">
 
 
-
-<h3>Builder</h3>
-    <div class="row">
+    <h3>Builder</h3>
+    <div class="row rounded-box">
 
 
         <div class="col-md-4 col-sm-4">
@@ -91,7 +90,7 @@
         </div>
 
         <div class="col-md-1 col-sm-1">
-            <button class="btn btn-default" ng-click="findProfile()">Find Profile</button>
+            <button class="btn btn-primary" ng-click="findProfile()">Find Profile</button>
         </div>
 
         <div class="col-md-1 col-sm-1">
@@ -109,7 +108,42 @@
     </div>
 
 
-    <button class="btn btn-link" ng-click="loadSD('Condition')">Load Condition</button>
+    <ng-include src="'/includes/newBuilderInclude.html'"></ng-include>
+
+<!--
+
+<h3>Builder</h3>
+    <div class="row rounded-box">
+
+
+        <div class="col-md-4 col-sm-4">
+            <select ng-model="input.nbProfile" class="form-control"
+                    ng-change="savedProfileUrl(input.nbProfile)"
+                    ng-options="url for url in nbProfile">
+
+            </select>
+
+        </div>
+
+        <div class="col-md-1 col-sm-1">
+            <button class="btn btn-primary" ng-click="findProfile()">Find Profile</button>
+        </div>
+
+        <div class="col-md-1 col-sm-1">
+        </div>
+
+        <div class="col-md-2 col-sm-2">
+            <img ng-show='waiting' src="css/ajax_loader_blue_32.gif"/>
+        </div>
+
+        <div class="col-md-4 col-sm-4">
+
+        </div>
+
+
+    </div>
+
+
 
     <div class="row">
         <div class="col-md-3 col-sm-3">
@@ -120,7 +154,6 @@
             <uib-tabset>
                 <uib-tab heading="Data Entry">
                     <div ng-show="selectedNode.data.meta.isMultiple && selectedNode.data.meta.isBBE && selectedNode.data.meta.canCopy">
-                        <!-- add a new node in the tree for multiple nodes. have an index to tell them apart...-->
                         <button class="btn btn-primary pull-right" ng-click="addNewNode()">Add new node</button>
                         <div class="clearfix"></div>
                         <hr/>
@@ -149,6 +182,7 @@
 
                 </uib-tab>
                 <uib-tab heading="Debug">
+                    <pre>{{appConfigSvc.config().servers | json}}</pre>
                     <pre>{{selectedNode.data.meta | json}}</pre>
 
                        <pre>{{selectedNode | json}}</pre>
@@ -189,6 +223,14 @@
 
     </div>
 
+
+    <select-profile trigger="showFindProfileDialog"
+                    all-resource-types="standardResourceTypes"
+                    profile-selected="selectedProfileFromDialog" type="'profile'">
+
+    </select-profile>
+
+    -->
 
     <select-profile trigger="showFindProfileDialog"
                     all-resource-types="standardResourceTypes"

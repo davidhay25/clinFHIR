@@ -454,7 +454,7 @@
             <div ng-switch-default>
 
                 <div class="row">
-                    <div class="col-md-6 col-sm-6">
+                    <div class="col-md-5 col-sm-5">
 
                         <input type="text" ng-model="input.dt.coding"
                                placeholder="{{vsDetails.id}} (minimum {{vsDetails.minLength}} characters)"
@@ -464,6 +464,9 @@
                                uib-typeahead="opt as opt.display for opt in vsLookup($viewValue,vsDetails)"
                                class="form-control"/>
 
+                    </div>
+                    <div class="col-md-1 col-sm-1">
+                        <img ng-show='waiting' src="css/ajax_loader_blue_32.gif"/>
                     </div>
                     <div class="col-md-6 col-sm-6">
                         <div class="clickable pull-right"
@@ -505,7 +508,8 @@
             <div ng-switch-default>
 
                 <div class="row">
-                    <div class="col-md-6 col-sm-6">
+                    <div class="col-md-5 col-sm-5">
+
                         <input type="text" ng-model="input.dt.cc.coding"
                                placeholder="autocomplete from {{vsDetails.minLength}} characters"
                                typeahead-min-length="3"
@@ -522,6 +526,9 @@
                                                uib-typeahead="opt as opt.display for opt in vsLookup($viewValue,vsDetails)"
                                                class="form-control"/>-->
 
+                    </div>
+                    <div class="col-md-1 col-sm-1">
+                        <img ng-show='waiting' src="css/ajax_loader_blue_32.gif"/>
                     </div>
                     <div class="col-md-6 col-sm-6">
                         <div class="clickable pull-right"
