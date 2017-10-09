@@ -36,13 +36,17 @@
 
     <div class="row">
         <div class="col-md-3 col-sm-3">
-            <div id="SDtreeView"></div>
+            <div id="nbSDtreeView"></div>
 
         </div>
         <div class="col-md-5 col-sm-5">
             <uib-tabset>
                 <uib-tab heading="Data Entry">
-                    <div ng-show="selectedNode.data.meta.isMultiple && selectedNode.data.meta.isBBE && selectedNode.data.meta.canCopy">
+
+                    <!-- selectedNode.data.meta.isBBE && -->
+
+                        <div ng-show="selectedNode.data.meta.isMultiple && selectedNode.data.meta.canCopy">
+
                         <!-- add a new node in the tree for multiple nodes. have an index to tell them apart...-->
                         <button class="btn btn-primary pull-right" ng-click="addNewNode()">Add new node</button>
                         <div class="clearfix"></div>
@@ -69,7 +73,7 @@
 
                             </div>
 
-                            <table class="table table-condensed table-bordered">
+                            <table ng-show="currentDT == 'Reference'" class="table table-condensed table-bordered">
                                 <tr><th>Type</th><th>Potential resources</th></tr>
                                 <tr ng-repeat="(key,data) in potentialReferences">
                                     <td>{{key}}</td>
@@ -134,6 +138,25 @@
 
 
                 </uib-tab>
+                <uib-tab heading="Profile">
+                    <p class="banner"><em>These are the actual Element Definitions - in order - from the Profile. (StructureDefinition.snapshot.element)</em></p>
+                    <div class="row">
+                        <div class="col-sm-4 col-md-4">
+                            <div class="SDScroll">
+                                <ul class="list-group">
+                                    <li class="list-group-item clickable" ng-repeat="element in currentProfile.snapshot.element"
+                                        ng-click = "input.selectedPathED = element" >
+                                        {{element.path}}
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+                        <div class="col-sm-8 col-md-8">
+                            <pre>{{input.selectedPathED | json}}</pre>
+                        </div>
+                    </div>
+                </uib-tab>
             </uib-tabset>
 
 
@@ -150,7 +173,7 @@
                     <div>
                         <span class="clickable pull-right" ng-click="toggleTreeExpand()">Toggle Expand</span>
                     </div>
-                    <div id="builderResourceTree"></div>
+                    <div id="nbbuilderResourceTree"></div>
                 </uib-tab>
 
                 <uib-tab >

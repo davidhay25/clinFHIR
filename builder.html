@@ -1118,7 +1118,7 @@
                                 <div class="row">
                                     <div class="col-sm-12 col-md-12">
 
-                                        <span class="clickable pull-right iconSpacing" ng-click="showQuest()">Form</span>
+
 
                                         <span class="clickable pull-right iconSpacing" ng-click="toggleInputMode()">Toggle Input Mode</span>
                                     </div>
@@ -1349,16 +1349,11 @@
                                                 </div>
                                             </div>
 
-
-
                                         </div>
                                         <hr/>
                                         {{hashPath.definition}}
 
                                         {{hashPath.comments}}
-
-
-
 
                                     </div>
 
@@ -1373,6 +1368,9 @@
 
                             <uib-tab heading="Current resource views">
                                 <br/>
+
+                                <span class="clickable pull-right iconSpacing" ng-click="showQuest()">Edit</span>
+
                                 <uib-tabset>
 
 
@@ -1380,8 +1378,6 @@
                                         <br/>
                                         <button ng-show="canDeletePath()" class="btn btn-danger pull-right"
                                                 ng-click="removeResourceNode(displayResourceTreeDeletePath)">Delete</button>
-
-
 
                                         <div id="builderResourceTree"></div>
 

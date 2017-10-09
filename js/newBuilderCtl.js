@@ -126,6 +126,9 @@ angular.module("sampleApp")
         //called when a new profile has been selected from the dialog
         $scope.selectedProfileFromDialog = function (profile) {
             console.log(profile);
+
+            newBuilderSvc.cleanProfile(profile)
+
             $scope.currentProfile = profile;
             $scope.resourceType = getResourceType(profile);
             $scope.clear();     //sets a base resource with type only...
@@ -163,6 +166,7 @@ angular.module("sampleApp")
 
                     console.log(profile);
 
+                    newBuilderSvc.cleanProfile(profile)
 
                     $scope.currentProfile = profile;
                     $scope.resourceType = getResourceType(profile);
@@ -217,8 +221,8 @@ angular.module("sampleApp")
 
         function renderResourceTree(){
             //show the tree structure of this resource version
-            $('#builderResourceTree').jstree('destroy');
-            $('#builderResourceTree').jstree(
+            $('#nbbuilderResourceTree').jstree('destroy');
+            $('#nbbuilderResourceTree').jstree(
                 {'core': {'multiple': false, 'data': $scope.resourceTreeData, 'themes': {name: 'proton', responsive: true}}}
             )
         }
@@ -266,8 +270,8 @@ angular.module("sampleApp")
 
         //draw the 'navigator' profile tree
         function drawTree(treeData) {
-            $('#SDtreeView').jstree('destroy');
-            $('#SDtreeView').jstree(
+            $('#nbSDtreeView').jstree('destroy');
+            $('#nbSDtreeView').jstree(
                 {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
             ).on('select_node.jstree', function (e, data) {
 

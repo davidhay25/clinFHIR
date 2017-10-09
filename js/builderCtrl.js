@@ -64,8 +64,8 @@ angular.module("sampleApp")
                 }) .result.then(
                     function(resource) {
                         console.log(resource);
-                        drawResourceTree(resource)
-
+                        drawResourceTree($scope.currentResource)
+                        //$scope.$digest();
                       //  $scope.currentResource = resource;
                     }
                 );
@@ -2297,19 +2297,8 @@ console.log($scope.currentSD)
                 ).on('select_node.jstree', function (e, data) {
                     //console.log(data.node.data);
 
-
-
-/*
-                    //temp
-                    if (! angular.isObject(data.node.data.element)) {
-                        console.log(data.node.data.element)
-                        data.node.data.element = data.node.data.element + 'x'
-                    }
-
-                    */
-
                     delete $scope.displayResourceTreeDeletePath;
-                    if (data.node.data.level == 1) {
+                    if (data.node.data && data.node.data.level == 1) {
                         //a top level node that can be deleted
                         $scope.displayResourceTreeDeletePath = data.node.data.key;
                     }

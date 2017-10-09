@@ -14,6 +14,27 @@ angular.module("sampleApp")
 
         return {
 
+            cleanProfile : function(SD) {
+                //check that we have everything needed in the SD - basically convert to R3 (the bits we need)...
+
+                if (SD.base) {
+                    SD.baseDefinition = SD.base;
+                }
+
+                if (SD.snapshot && SD.snapshot.element) {
+                    SD.snapshot.element.forEach(function(ed){
+                        if (ed.name) {
+                            ed.sliceName = name;
+                        }
+                    })
+                }
+
+
+
+//console.log(SD)
+                return SD;
+            },
+
             processExtension : function(meta,dt,value,resource) {
                 var deferred = $q.defer();
                 var valueType = 'value' + dt.substr(0,1).toUpperCase()+dt.substr(1)     //ie the value[x]
@@ -96,6 +117,7 @@ angular.module("sampleApp")
                 var lstTree = [];
 
                 var profile = angular.copy(inProfile);      //w emuck around a bit with the profile, so use a copy
+                //this.cleanProfile(profile);     //especially STU2 -> R3
                 //console.log(profile);
                 var arIsDataType = [];          //this is a list of disabled items...
                 var lst = [];           //this will be a list of elements in the profile to show.
@@ -108,10 +130,15 @@ angular.module("sampleApp")
                 var idsInTree = {};
                 var hashTree = {};
 
+                var slicePath,sliceIndex;      //the root path of slicing...
+
                 var sliceRootPath,parent,sliceGroupParent,parentForChildren;
                 var queries = [];       //a list of queries to get the details of extensions...
 
+                var pathHash = {}; //a hash of path vs id. We need unique id's in the tree, but the path is not unique when hashed..
                 var nodeHash = {};      //a hash of nodes indexed by path... (used to detect expanded datatypes0
+
+
                 function isParentNodeBBE(node) {
                     //return true if the parent to this node is a BBE
                     var isBBE = false;
@@ -132,18 +159,64 @@ angular.module("sampleApp")
                         item.myMeta = item.myMeta || {};    //item level metadata. only used in this function ATM
 
                         var include = true;
-                        var el = {path: item.path};
-
+                        //var el = {path: item.path};
                         var path = item.path;
-
                         if (! path) {
-                            alert('empty path in Element Definition\n'+angular.toJson(item))
+                            alert('empty path in Element Definition\n'+angular.toJson(item));
+                            deferred.reject();
                             return;
                         }
 
+                        var id = path + inx;        //<<< to guarantee a unique path
+
+                        //if this is a discriminator, then set the slicePath
+                        var updatedHash = false;
+                        if (item.slicing && item.slicing.discriminator && path.indexOf('extension') == -1) {
+                            slicePath = path;
+                            sliceIndex = 0;
+                           // pathHash[path] = pathHash[path] || []
+                           // pathHash[path].push({id:id});
+                        } else {
+                            //if it's not a discriminator, the are we still in the set of elements that are part of this slice group?
+                            if (slicePath) {    //obviously not if slicePath is not set..
+                                if (path.substr(0,slicePath.length) !== slicePath ) {
+                                    //no we arent,
+                                    slicePath = null;
+                                   // pathHash[path] = pathHash[path] || []
+                                   // pathHash[path].push({id:id});
+                                } else {
+                                    //OK, we're still slicing - have we come into the next group?
+                                    if (path == slicePath) {
+
+                                        sliceIndex++;      //yes we are. incerement the index into pathHash
+                                        updatedHash = true;
+                                        pathHash[path].push({id:id});       //this should be at index position sliceIndex...
+                                        console.log('next group: '+sliceIndex,slicePath,pathHash[path])
+                                    } else {
+                                       // pathHash[path] = pathHash[path] || []
+                                       //   pathHash[path].push({id:id});
+                                    }
+                                }
+                            } else {
+                               // pathHash[path] = pathHash[path] || []
+                               // pathHash[path].push({id:id});
+                            }
+
+                        }
+                        if (!updatedHash) {
+                            pathHash[path] = pathHash[path] || []
+                            pathHash[path].push({id:id});
+                        }
+
+
+
+
+
+                        //due to slicing, a single path may have multiple elements associated with it...
+                       // pathHash[path] = pathHash[path] || []
+                        //pathHash[path].push({id:id});
+
                         var ar = path.split('.');
-
-
 
                         //process extensions first as this can set the include true or false - all the others only se false
                         //process an extension. if it has a profile, then display it with a nicer name.
@@ -174,12 +247,17 @@ angular.module("sampleApp")
 
                         if (ar.length == 1) {
                             //this is the root node
-                            var rootNode = {id:ar[0],parent:'#',text:ar[0],state:{opened:true,selected:true},path:path,data: {ed : item}}
+                            //var rootNode = {id:ar[0],parent:'#',text:ar[0],state:{opened:true,selected:true},path:path,data: {ed : item}}
+
+                            var rootNode = {id:id,parent:'#',text:ar[0],state:{opened:true,selected:true},path:path,data: {ed : item}}
+
+
                             lstTree.push(rootNode);
                             rootNode.data.meta = {type:[{code:'BackboneElement'}]};  //this is for the newBuilder to determine if a node is
                             nodeHash[path]=rootNode;
 
-                            idsInTree[ar[0]] = 'x';
+                           // idsInTree[ar[0]] = 'x';
+                            idsInTree[id] = 'x';
                             include = false;
                         }
 
@@ -188,7 +266,6 @@ angular.module("sampleApp")
                             include = false;
                             addLog('excluding '+ item.path + ' as max == 0')
                         }
-
 
                         //standard element names like 'text' or 'language'
                         if (ar.length == 2 && elementsToDisable.indexOf(ar[1]) > -1) {
@@ -236,16 +313,7 @@ angular.module("sampleApp")
                         }
 
 
-                        var id = path;
-                        var arTree = path.split('.');
-                        if (arTree[arTree.length-1] == 'extension') {
-                            text = item.name;// +inx;
-                            id = id + cntExtension;
-                            cntExtension++;
-                        }
 
-                        arTree.pop();
-                        parent = arTree.join('.');
                         if (item.name) {
                             text = item.name
                         } else if (item.label) {
@@ -256,7 +324,61 @@ angular.module("sampleApp")
 
                         item.myMeta.id = id;        //for when we add a child node it
 
+
+                        var arTree = path.split('.');
+                        if (arTree[arTree.length-1] == 'extension') {
+                            text = item.name;// +inx;
+                            id = id + cntExtension;
+                            cntExtension++;
+                        }
+
+
+
+
                         if (include) {
+
+                            //work out the parent...
+                            arTree.pop();
+
+
+                            var parentPath = arTree.join('.');  //remember, when slicing this isn't unique...
+
+
+                            if (slicePath) {
+                                //if we're slicing, then we need the index of the slice we're working on. this is how we will find the parent...
+
+                                //if this is the actual slicePath (not a parent) then we calculate the parent from the path
+                                if (path == slicePath) {
+                                    var t = pathHash[parentPath]
+                                    console.log(slicePath,sliceIndex,parentPath,t)
+                                    var tt = t[0]       //it will laways be the first..
+                                    var parentId = tt.id;
+                                } else {
+                                    // otherwise look it up in the hash based on teh index...
+                                    var t = pathHash[parentPath]
+                                    console.log(slicePath,sliceIndex,parentPath,t)
+                                    var tt = t[sliceIndex]
+                                    var parentId = tt.id;
+                                }
+
+
+                                console.log(slicePath,sliceIndex,parentId);//,parentPath,t)
+                            } else {
+                                //if we're not slicing, then the parent can be calculated directly from the path...
+                              //  arTree.pop();
+                              //  var parentPath = arTree.join('.');  //remember, when slicing this isn't unique...
+                                var t = pathHash[parentPath]
+                                if (!t) {
+                                    alert('There was an error - the path '+parentPath + ' was not found');
+                                    deferred.reject();
+                                }
+
+                                var parentId = t[0].id;   //right now we assume that it's always the first element with this path...
+
+                            }
+
+
+                            //parent = arTree.join('.');
 
                             //there should always be a name  - but just in case there isn't, grab the profile name...
                             if (text == 'extension') {
@@ -294,7 +416,7 @@ angular.module("sampleApp")
                             }
 
                             //node is the tree node. todo - create earlier..
-                            var node = {id:id,parent:parent,text:text,state:{opened:false,selected:false},
+                            var node = {id:id,parent:parentId,text:text,state:{opened:false,selected:false},
                                 a_attr:{title: dataType + ' ' + id}, path:path};
 
 
@@ -359,13 +481,13 @@ angular.module("sampleApp")
                             }
 
                             //so long as the parent is in the tree, it's safe to add...
-                            if (idsInTree[parent]) {
+                            if (idsInTree[parentId]) {
                                 lstTree.push(node);
                                 idsInTree[id] = 'x'
                                 lst.push(item);
 
                             } else {
-                                addLog('missing parent: '+parent + ' id:'+id + ' path:'+item.path,true)
+                                addLog('missing parent: '+parentId + ' id:'+id + ' path:'+item.path,true)
                             }
 
                         }
@@ -385,7 +507,7 @@ angular.module("sampleApp")
                                 if (node.data && node.data.ed && node.data.ed.myMeta) {
                                     //the analysis node is ONLY added when the Extension definition is retrieved and analysed
                                     var analysis = node.data.ed.myMeta.analysis;
-console.log(analysis)
+//console.log(analysis)
                                     if (analysis) {
                                         if (analysis.isComplexExtension) {
                                             node.data.meta.definition = analysis.definition;

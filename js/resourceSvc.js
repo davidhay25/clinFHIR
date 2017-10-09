@@ -61,7 +61,6 @@ angular.module("sampleApp").service('resourceSvc', function() {
         var checkInLinks = function (list, object, resourceBeingChecked) {
             angular.forEach(object, function (value, key) {
 
-
                 //assume that any value that has a reference property is a resource refernece. Should really
                 //recurse down 'object' types
                 if (value.reference) {
