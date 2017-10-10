@@ -284,6 +284,7 @@ angular.module("sampleApp")
                 if (data.node && data.node.data && data.node.data) {
                     $scope.selectedNode = data.node;
 
+                    getCurrentValue(data.node);
 
                     if ($scope.selectedNode.data.meta.type){
 
@@ -358,13 +359,13 @@ angular.module("sampleApp")
 
             for (var j=arNewNodes.length-1; j > -1; j--) {
                 var nodeToInsert= arNewNodes[j];
-             //   $scope.treeData.splice(insertPoint-1,0,nodeToInsert)
+
             }
-          //  $scope.treeData =  $scope.treeData.concat(arNewNodes);
+
 
             $scope.treeData = ar.slice(0,insertPoint+1).concat(arNewNodes).concat(ar.slice(insertPoint+1));
 
-          //  $scope.treeData =  $scope.treeData.slice(concat(arNewNodes);
+
             drawTree($scope.treeData)
 
         };
@@ -417,7 +418,6 @@ angular.module("sampleApp")
 
             $scope.$broadcast('setDT',dt);      //sets an event to display the data-entry form
         };
-
 
         //when a reference is to be created...
         $scope.linkToResource = function(resource) {
@@ -512,6 +512,23 @@ angular.module("sampleApp")
            */
         };
 
+
+        var getCurrentValue = function(node) {
+            delete $scope.currentValue;
+            var meta = node.data.meta;     //the specific meta node for the current element...
+            //extensions are processed separately...
+            var ar = meta.path.split('.');
+
+            if (ar.length == 2) {
+                //this is an element directly off the root.
+                var elementName = ar[1];// todo - what to do about '[x]' ?? newBuilderSvc.checkElementName(ar[1], dt);        //the segment name
+                if (meta.index > -1) {
+                    var tmp = $scope.resource[elementName];
+                    $scope.currentValue = tmp[meta.index]
+                }
+            }
+        };
+
         //actually add a new data element
         var addData = function(dt,value){
             var meta = $scope.selectedNode.data.meta;     //the specific meta node for the current element...
@@ -536,11 +553,24 @@ angular.module("sampleApp")
                 //if is is not a BBE, then it can be added directly
                 if (!meta.isBBE) {
                     if (meta.isMultiple) {
-                        $scope.resource[elementName] = $scope.resource[elementName] || []
-                        $scope.resource[elementName].push(value)
+                        if (meta.index == -1) {
+                            //this entry has not been added yet
+                            $scope.resource[elementName] = $scope.resource[elementName] || []
+                            $scope.resource[elementName].push(value)
+                        } else {
+                            //this is a replacement
+                            var tmp = $scope.resource[elementName];
+                            tmp[meta.index] = value
+                        }
+
+
+
+                        meta.index = $scope.resource[elementName].length -1;     //so we know the current value for any element
                     } else {
                         $scope.resource[elementName] = value;
                     }
+
+
                 } else {
                     alert('A Backbone element does not have a value! Select one of the child nodes....')
                 }
@@ -585,9 +615,7 @@ angular.module("sampleApp")
                     //search all the parent arrays looking for one where the meta.index value is the same as this one...
                     var parentElement;
 
-                    for (var i=0; i < parent.length; i++) {
-                       // if (parent[i])
-                    }
+
                     parentElement = parent[meta.index];
                     if (! parentElement) {  //this is the first time we've added an element to this node...
                         parentElement = {};

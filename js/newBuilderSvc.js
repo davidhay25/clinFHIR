@@ -39,14 +39,14 @@ angular.module("sampleApp")
                 var deferred = $q.defer();
                 var valueType = 'value' + dt.substr(0,1).toUpperCase()+dt.substr(1)     //ie the value[x]
                 var element = resource;      //should be able to use this at different levels in the resource...
-                console.log(meta,value)
+               // console.log(meta,value)
                 var ar = meta.path.split('.');
 
                 if (meta.isExtensionChild) {
                     //retrieve any extensions with this url. For multiple, use the index within the new node added
 
                     var ar = Utilities.getComplexExtensions(element,meta.parentUrl);
-                    console.log(ar);
+                    //console.log(ar);
                     if (ar.length ==0) {
                         //no extensions with this url were found
 
@@ -130,14 +130,13 @@ angular.module("sampleApp")
                 var idsInTree = {};
                 var hashTree = {};
 
-                var slicePath,sliceIndex;      //the root path of slicing...
+                var slicePath,sliceIndex=0;      //the root path of slicing...
 
                 var sliceRootPath,parent,sliceGroupParent,parentForChildren;
                 var queries = [];       //a list of queries to get the details of extensions...
 
                 var pathHash = {}; //a hash of path vs id. We need unique id's in the tree, but the path is not unique when hashed..
                 var nodeHash = {};      //a hash of nodes indexed by path... (used to detect expanded datatypes0
-
 
                 function isParentNodeBBE(node) {
                     //return true if the parent to this node is a BBE
@@ -167,54 +166,34 @@ angular.module("sampleApp")
                             return;
                         }
 
-                        var id = path + inx;        //<<< to guarantee a unique path
-
+                        var id = path + inx;        //<<< to guarantee a unique path - can't just use the path...
                         //if this is a discriminator, then set the slicePath
                         var updatedHash = false;
                         if (item.slicing && item.slicing.discriminator && path.indexOf('extension') == -1) {
                             slicePath = path;
                             sliceIndex = 0;
-                           // pathHash[path] = pathHash[path] || []
-                           // pathHash[path].push({id:id});
                         } else {
                             //if it's not a discriminator, the are we still in the set of elements that are part of this slice group?
                             if (slicePath) {    //obviously not if slicePath is not set..
                                 if (path.substr(0,slicePath.length) !== slicePath ) {
                                     //no we arent,
                                     slicePath = null;
-                                   // pathHash[path] = pathHash[path] || []
-                                   // pathHash[path].push({id:id});
                                 } else {
                                     //OK, we're still slicing - have we come into the next group?
                                     if (path == slicePath) {
-
                                         sliceIndex++;      //yes we are. incerement the index into pathHash
                                         updatedHash = true;
                                         pathHash[path].push({id:id});       //this should be at index position sliceIndex...
-                                        console.log('next group: '+sliceIndex,slicePath,pathHash[path])
-                                    } else {
-                                       // pathHash[path] = pathHash[path] || []
-                                       //   pathHash[path].push({id:id});
+                                        //console.log('next group: '+sliceIndex,slicePath,pathHash[path])
                                     }
                                 }
-                            } else {
-                               // pathHash[path] = pathHash[path] || []
-                               // pathHash[path].push({id:id});
                             }
-
                         }
                         if (!updatedHash) {
                             pathHash[path] = pathHash[path] || []
                             pathHash[path].push({id:id});
                         }
 
-
-
-
-
-                        //due to slicing, a single path may have multiple elements associated with it...
-                       // pathHash[path] = pathHash[path] || []
-                        //pathHash[path].push({id:id});
 
                         var ar = path.split('.');
 
@@ -332,41 +311,28 @@ angular.module("sampleApp")
                             cntExtension++;
                         }
 
-
-
-
                         if (include) {
-
                             //work out the parent...
                             arTree.pop();
-
-
                             var parentPath = arTree.join('.');  //remember, when slicing this isn't unique...
-
-
                             if (slicePath) {
                                 //if we're slicing, then we need the index of the slice we're working on. this is how we will find the parent...
 
                                 //if this is the actual slicePath (not a parent) then we calculate the parent from the path
                                 if (path == slicePath) {
                                     var t = pathHash[parentPath]
-                                    console.log(slicePath,sliceIndex,parentPath,t)
                                     var tt = t[0]       //it will laways be the first..
                                     var parentId = tt.id;
                                 } else {
                                     // otherwise look it up in the hash based on teh index...
                                     var t = pathHash[parentPath]
-                                    console.log(slicePath,sliceIndex,parentPath,t)
+                                   // console.log(slicePath,sliceIndex,parentPath,t)
                                     var tt = t[sliceIndex]
                                     var parentId = tt.id;
                                 }
 
-
-                                console.log(slicePath,sliceIndex,parentId);//,parentPath,t)
                             } else {
                                 //if we're not slicing, then the parent can be calculated directly from the path...
-                              //  arTree.pop();
-                              //  var parentPath = arTree.join('.');  //remember, when slicing this isn't unique...
                                 var t = pathHash[parentPath]
                                 if (!t) {
                                     alert('There was an error - the path '+parentPath + ' was not found');
@@ -428,7 +394,8 @@ angular.module("sampleApp")
                             node.data.meta.type = item.type;
                             node.data.meta.definition = item.definition;
                             node.data.meta.comment = item.comment;
-                            node.data.meta.index = 0;   //used for multiple instances...
+                            node.data.meta.index = -1;//sliceIndex; //0;   //used for multiple instances...
+
                             node.data.meta.canCopy = true;  //allow this node to be copied (if a BBE and multiple - todo ?maybe check???)
                             if (item.binding) {
                                 if (item.binding.valueSetReference) {
@@ -444,12 +411,18 @@ angular.module("sampleApp")
                                     }
                                 })
                             }
-                            if (item.max == '*') {
+
+                            //if this is a max or X OR a slice element, then must be multiple... (only multiples can be sliced)
+                            if (item.max == '*' || slicePath) {
                                 node.data.meta.isMultiple = true;
                                // node.data.meta.index = 0;       //used to track multiple instances of this node
                             }
 
                             node.data.meta.isParentNodeBBE = isParentNodeBBE(node); //is the parentNode a BBE. If not. it's an expanded datatype (I think)
+
+
+                            node.data.meta.ed = item
+
 
                             if (item.myMeta.isExtension){       //really, this could be set much earlier with a bit of re-org...
                                 //make the path unique
@@ -548,7 +521,7 @@ angular.module("sampleApp")
                                             }
                                         } else {
                                             //this is a simple extension...
-                                            console.log(analysis)
+                                            //console.log(analysis)
                                             node.data.meta.type = analysis.dataTypes;   //replace the 'Extension' dataytype
 
                                             if (analysis.binding) {
