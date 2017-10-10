@@ -13,6 +13,22 @@ angular.module("sampleApp").controller('dataTypeCtrl',
         //These may have been set in a parent scope so be careful!
         $scope.input = $scope.input || {}
 
+        $scope.$on('currentValue',function(ev,currentValue) {
+            if (currentValue) {
+                $scope.input.dt = $scope.input.dt || {}
+                switch ($scope.dataTypeBeingEntered) {
+                    case 'Identifier' :
+                        $scope.input.dt.identifier = {};
+                        $scope.input.dt.identifier.value = currentValue.value;
+                        $scope.input.dt.identifier.system = currentValue.system;
+                        break;
+                }
+
+            }
+
+
+        })
+
         //this is for new builder to signal what datatype has been seelcted - todo = try to refactor...
         $scope.$on('setDT',function(event,dt){
             $scope.dataTypeBeingEntered = dt;

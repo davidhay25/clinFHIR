@@ -45,7 +45,7 @@
 
                     <!-- selectedNode.data.meta.isBBE && -->
 
-                        <div ng-show="selectedNode.data.meta.isMultiple && selectedNode.data.meta.canCopy">
+                    <div ng-show="selectedNode.data.meta.isMultiple && selectedNode.data.meta.canCopy">
 
                         <!-- add a new node in the tree for multiple nodes. have an index to tell them apart...-->
                         <button class="btn btn-primary pull-right" ng-click="addNewNode()">Add new node</button>
@@ -65,6 +65,7 @@
 
                         <span class="clickable iconSpacing" ng-repeat="typ in selectedNode.data.meta.type"
                               ng-click="showDEForm(typ.code)">{{typ.code}}</span>
+                        <div class="pull-right">{{selectedNode.data.meta.index}}</div>
 
                         <div ng-show="currentDT && selectedNode.data.meta.type[0].type !== 'BackboneElement'">
 
@@ -117,7 +118,17 @@
                             <pre>{{potentialReferences | json}}</pre>
 -->
 
-                            <button  class="btn btn-primary pull-right" ng-click="addDataType()">Add</button>
+
+
+                            <button  class="btn btn-primary pull-right" ng-click="addDataType()">
+                                <span ng-hide="currentValue">Add</span>
+                                <span ng-show="currentValue">Update</span>
+                            </button>
+                            <button ng-show="currentValue" class="btn btn-danger pull-right"
+                                    style="margin-right: 8px"
+                                    ng-click="deleteElement(selectedNode.data.meta.index)">
+                                Delete
+                            </button>
                         </div>
                     </div>
 

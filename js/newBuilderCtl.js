@@ -301,13 +301,6 @@ angular.module("sampleApp")
                         setPotentialReferences($scope.selectedNode.data.meta)
 
                     }
-
-
-
-                    //
-
-
-
                 }
                 $scope.$digest();
             })
@@ -322,7 +315,7 @@ angular.module("sampleApp")
         $scope.addNewNode = function() {
             var nodeId = $scope.selectedNode.id;
             $scope.selectedNode.data.meta.canCopy = false;    //so this node can't be copied - only the new one...
-            var newIndex = $scope.selectedNode.data.meta.index + 1;  //the index for this copy. assume that last one was selected todo: need to check
+            //var newIndex = $scope.selectedNode.data.meta.index + 1;  //the index for this copy. assume that last one was selected todo: need to check
             //find the children that we'll need to duplicate. Right now, it's not repeatible - so fail for carePlan for example..
             var arNewNodes = [];
             var newParent = {data:{}}; //angular.copy($scope.selectedNode)
@@ -331,7 +324,7 @@ angular.module("sampleApp")
             newParent.parent = $scope.selectedNode.parent;
             var inx = $scope.treeData.length
             newParent.id = 'id'+inx ;
-            newParent.data.meta.index = newIndex;     //this is used to distinguish this 'branch' from the others
+            newParent.data.meta.index = -1; //ie no data yet newIndex;     //this is used to distinguish this 'branch' from the others
             inx++;
             arNewNodes.push(newParent);
             var insertPoint = - 1;
@@ -344,7 +337,7 @@ angular.module("sampleApp")
                     newChild.text = node.text;
                     newChild.icon = node.icon;
                     newChild.data.meta = angular.copy(node.data.meta)
-                    newChild.data.meta.index = newIndex;
+                    newChild.data.meta.index = -1; //newIndex;
                     newChild.id = 'id'+inx ;
                     inx++;
                     newChild.parent = newParent.id;
@@ -417,6 +410,39 @@ angular.module("sampleApp")
             }
 
             $scope.$broadcast('setDT',dt);      //sets an event to display the data-entry form
+
+            var currentValue = getCurrentValue($scope.selectedNode);
+            console.log(currentValue);
+            $scope.$broadcast('currentValue',currentValue);
+            //set current values - todo move to service and check on type...
+
+        };
+
+        //remove the specified index of the current element (if multiple) or the full element (if not)
+        $scope.deleteElement = function(inx) {
+            var meta = $scope.selectedNode.data.meta;     //the specific meta node for the current element...
+            //extensions are processed separately...
+            if (meta.isExtension) {
+                return;
+            }
+
+            var ar = meta.path.split('.');
+
+            if (ar.length == 2) {
+                //this is an element directly off the root.
+                var elementName = newBuilderSvc.checkElementName(ar[1]); //assume not a [x], dt);        //the segment name
+                if (meta.isMultiple) {
+                    $scope.resource[elementName].splice(inx,1)
+
+                } else {
+                    delete $scope.resource[elementName]
+                }
+                meta.index = -1;        //to indicate that there is no longer a value at thie element / index
+
+                clearAfterDataEntry();
+
+            }
+
         };
 
         //when a reference is to be created...
@@ -466,50 +492,12 @@ angular.module("sampleApp")
         //called when the user has entered the data and clicks 'Add'
         $scope.addDataType = function() {
             var dt = $scope.currentDT;
-            console.log($scope.input.dt)
+            //console.log($scope.input.dt)
 
             var vo = builderSvc.getDTValue(dt,$scope.input.dt);
-           console.log(vo);
+            //console.log(vo);
             addData(dt,angular.copy(vo.value));
 
-
-            /*
-                       return;
-
-
-                       var value = $scope.input.dt[dt];
-
-                       //not all input values have the datatype as the propertyname (unfortunately)
-                       switch (dt) {
-                           case 'CodeableConcept' :
-                               var tmp = $scope.input.dt['cc'];
-                               value = {};
-                               if (tmp.text) {value.text = tmp.text};
-                               if (tmp.coding) {
-                                   if ( angular.isString(tmp.coding)) {            //when a cc is rendered as radio, it's a string...
-                                       value.coding = [angular.fromJson(tmp.coding)]
-                                   } else {
-                                       value.coding = [tmp.coding]
-                                   }
-
-                               }
-
-
-
-
-                              // if ( angular.isString(value)) {     //for some reason this appears to be a string???
-                                  // value = angular.fromJson(value)
-                              // }
-                               break;
-                           case 'ContactPoint' :
-                               value = $scope.input.dt['contactpoint'];
-                               break;
-                       }
-
-                       console.log(value);
-                       addData(dt,angular.copy(value));
-
-           */
         };
 
 
@@ -522,11 +510,38 @@ angular.module("sampleApp")
             if (ar.length == 2) {
                 //this is an element directly off the root.
                 var elementName = ar[1];// todo - what to do about '[x]' ?? newBuilderSvc.checkElementName(ar[1], dt);        //the segment name
-                if (meta.index > -1) {
-                    var tmp = $scope.resource[elementName];
-                    $scope.currentValue = tmp[meta.index]
+                $scope.currentValue = getCV(meta,$scope.resource,elementName)
+                /*
+                if (meta.isMultiple) {
+                    if ( meta.index > -1) {
+                        var tmp = $scope.resource[elementName];
+                        $scope.currentValue = tmp[meta.index]
+                        return tmp[meta.index]
+                    }
+                } else {
+                    $scope.currentValue =$scope.resource[elementName]
+                }
+                */
+            } else if (ar.length == 3) {
+                //var parent = $scope.
+            }
+            
+
+
+
+            function getCV(meta,root,elementName) {
+                if (meta.isMultiple) {
+                    if ( meta.index > -1) {
+                        var tmp = root[elementName];
+                       // $scope.currentValue = tmp[meta.index]
+                        return tmp[meta.index]
+                    }
+                } else {
+                    return root[elementName]
+                    //$scope.currentValue =$scope.resource[elementName]
                 }
             }
+
         };
 
         //actually add a new data element
@@ -562,8 +577,6 @@ angular.module("sampleApp")
                             var tmp = $scope.resource[elementName];
                             tmp[meta.index] = value
                         }
-
-
 
                         meta.index = $scope.resource[elementName].length -1;     //so we know the current value for any element
                     } else {
@@ -674,6 +687,7 @@ angular.module("sampleApp")
             delete $scope.currentDT;        //hide the data entry form...
             delete $scope.vsDetails;
             delete $scope.expandedValueSet
+            delete $scope.currentValue;
         }
 
         $scope.validate = function() {
