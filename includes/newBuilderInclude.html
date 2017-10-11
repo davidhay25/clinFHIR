@@ -74,7 +74,8 @@
 
                             </div>
 
-                            <table ng-show="currentDT == 'Reference'" class="table table-condensed table-bordered">
+                            <table ng-show="currentDT == 'Reference' && Object.keys(potentialReferences).length > 0"
+                                   class="table table-condensed table-bordered">
                                 <tr><th>Type</th><th>Potential resources</th></tr>
                                 <tr ng-repeat="(key,data) in potentialReferences">
                                     <td>{{key}}</td>
@@ -82,9 +83,10 @@
                                         <table width="100%">
                                             <tr ng-repeat = "resource in data">
                                                 <td style="border-bottom: 1px solid #ddd;">
-                                                    <div title="{{resource.resourceType}}" ng-bind-html="resource.text.div"
+                                                    <div title="{{resource.resourceType}}"
+                                                         ng-bind-html="resource.text.div">
 
-                                                    ></div>
+                                                    </div>
                                                 </td>
                                                 <td>
                                                     <div class="pull-right">
@@ -143,14 +145,16 @@
 
                 </uib-tab>
                 <uib-tab heading="Debug">
-                    <pre>{{appConfigSvc.config().servers | json}}</pre>
-                    <pre>{{selectedNode.data.meta | json}}</pre>
 
-                    <pre>{{selectedNode | json}}</pre>
+                    <pre>{{selectedNode.data.meta | json}}</pre>
 
                     <pre>{{treeData | json}}</pre>
 
+                    <pre>{{selectedNode | json}}</pre>
+<!--
+                    <pre>{{treeData | json}}</pre>
 
+-->
                 </uib-tab>
                 <uib-tab heading="Profile">
                     <p class="banner"><em>These are the actual Element Definitions - in order - from the Profile. (StructureDefinition.snapshot.element)</em></p>
@@ -188,6 +192,17 @@
                         <span class="clickable pull-right" ng-click="toggleTreeExpand()">Toggle Expand</span>
                     </div>
                     <div id="nbbuilderResourceTree"></div>
+                </uib-tab>
+
+                <uib-tab heading="Text">
+                    <br/>
+                    <table class="table">
+                        <tr ng-repeat="item in textDisplay">
+                            <td>{{item.displayPath}}</td>
+                            <td>{{item.display.detail}}</td>
+
+                        </tr>
+                    </table>
                 </uib-tab>
 
                 <uib-tab >

@@ -10,6 +10,10 @@ angular.module("sampleApp")
         $scope.input = {dt:{}}
         $scope.appConfigSvc = appConfigSvc;
 
+        $scope.displayServers = "Conformance: " + appConfigSvc.getCurrentConformanceServer().name
+            + "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>"
+            + "<div>Term: " + appConfigSvc.getCurrentTerminologyServer().name + "</div>";
+
        // $scope.sunday='test';
        // $scope.simpleData = "Test value";
        // $scope.complexData = {identifier: {system:'test system',value:'test value'}}
@@ -17,6 +21,7 @@ angular.module("sampleApp")
             //console.log($scope.$parent.startProfile);
             //console.log($scope.startProfile);
 
+            //startProfile will be set when invoked from Scenario Builder...
         var myScope = $scope;
         var startProfile = $scope.startProfile;
 
@@ -69,6 +74,7 @@ angular.module("sampleApp")
                 },1000)
 
         } else {
+            /*
             var url= appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/cf-StructureDefinition-us-core-patient";
             $http.get(url).then(
                 function(data) {
@@ -88,6 +94,7 @@ angular.module("sampleApp")
                     )
                 }
             );
+            */
         }
 
 
@@ -313,25 +320,36 @@ angular.module("sampleApp")
         //called on a BBE that is repeatable. we want to make a copy of that node and all childnodes...
             //todo note that this only works for direct children right now
         $scope.addNewNode = function() {
+            var currentMeta = $scope.selectedNode.data.meta;
+
             var nodeId = $scope.selectedNode.id;
             $scope.selectedNode.data.meta.canCopy = false;    //so this node can't be copied - only the new one...
             //var newIndex = $scope.selectedNode.data.meta.index + 1;  //the index for this copy. assume that last one was selected todo: need to check
             //find the children that we'll need to duplicate. Right now, it's not repeatible - so fail for carePlan for example..
             var arNewNodes = [];
-            var newParent = {data:{}}; //angular.copy($scope.selectedNode)
+            var newParent = {data:{}}; // - this is a tree node... angular.copy($scope.selectedNode)
             newParent.text = $scope.selectedNode.text;
-            newParent.data.meta = angular.copy($scope.selectedNode.data.meta)
-            newParent.parent = $scope.selectedNode.parent;
+            var newMeta =  angular.copy($scope.selectedNode.data.meta)
+            newParent.data.meta =newMeta
+            newParent.data.meta.theNewOne = true;
+
+            $scope.selectedNode.data.meta.copied = true;        //temp to check the copied one
+
+            delete newParent.data.meta.value;
+            newParent.parent = $scope.selectedNode.parent;      //has the same parent as is a peer...
             var inx = $scope.treeData.length
             newParent.id = 'id'+inx ;
             newParent.data.meta.index = -1; //ie no data yet newIndex;     //this is used to distinguish this 'branch' from the others
             inx++;
             arNewNodes.push(newParent);
             var insertPoint = - 1;
+
             $scope.treeData.forEach(function (node,pos) {
                 if (node.parent == nodeId) {
                     insertPoint = pos;     //finds the last element with this one as the parent
                 }
+
+
                 if (node.parent == nodeId) {
                     var newChild = {data:{}}; //angular.copy(node);
                     newChild.text = node.text;
@@ -343,17 +361,21 @@ angular.module("sampleApp")
                     newChild.parent = newParent.id;
                    // newChild.text += 'x'
 
+                    console.log(newChild)
                     arNewNodes.push(newChild);
                 }
 
             });
 
-            var ar = $scope.treeData;
+
+            var ar = $('#nbSDtreeView').jstree(true).get_json('#', {flat:true})
+           // var ar = $scope.treeData;
 
             for (var j=arNewNodes.length-1; j > -1; j--) {
                 var nodeToInsert= arNewNodes[j];
 
             }
+
 
 
             $scope.treeData = ar.slice(0,insertPoint+1).concat(arNewNodes).concat(ar.slice(insertPoint+1));
@@ -412,7 +434,7 @@ angular.module("sampleApp")
             $scope.$broadcast('setDT',dt);      //sets an event to display the data-entry form
 
             var currentValue = getCurrentValue($scope.selectedNode);
-            console.log(currentValue);
+            //console.log(currentValue);
             $scope.$broadcast('currentValue',currentValue);
             //set current values - todo move to service and check on type...
 
@@ -492,7 +514,6 @@ angular.module("sampleApp")
         //called when the user has entered the data and clicks 'Add'
         $scope.addDataType = function() {
             var dt = $scope.currentDT;
-            //console.log($scope.input.dt)
 
             var vo = builderSvc.getDTValue(dt,$scope.input.dt);
             //console.log(vo);
@@ -525,7 +546,7 @@ angular.module("sampleApp")
             } else if (ar.length == 3) {
                 //var parent = $scope.
             }
-            
+
 
 
 
@@ -547,6 +568,8 @@ angular.module("sampleApp")
         //actually add a new data element
         var addData = function(dt,value){
             var meta = $scope.selectedNode.data.meta;     //the specific meta node for the current element...
+            meta.value = {value:value,dt:dt};     //save the data for the text rendering..
+
             //extensions are processed separately...
             if (meta.isExtension) {
                 newBuilderSvc.processExtension(meta,dt,value,$scope.resource).then(
@@ -676,6 +699,10 @@ angular.module("sampleApp")
 
 
 
+            //need to get the json for the current tree (including updated metadata)
+            var tree = $('#nbSDtreeView').jstree(true).get_json('#', {flat:true})
+            $scope.textDisplay = newBuilderSvc.renderResource(tree);
+
 
             clearAfterDataEntry();
 
@@ -720,7 +747,7 @@ angular.module("sampleApp")
 
                     default:
                         //a codeableconcept
-                        addData($scope.currentDT,{Coding:[concept]})
+                        addData($scope.currentDT,{coding:[concept]})
                 }
 
             }
@@ -728,6 +755,18 @@ angular.module("sampleApp")
 
         $scope.clear = function(){
             $scope.resource = {resourceType:$scope.resourceType}
+            if ($scope.treeData) {
+                $scope.treeData.forEach(function(item){
+                    var meta = item.data.meta;
+                    delete meta.value;
+
+                });
+
+                drawTree($scope.treeData)
+                $scope.textDisplay = newBuilderSvc.renderResource($scope.treeData);
+
+            }
+
         }
 
     });

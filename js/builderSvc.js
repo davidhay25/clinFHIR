@@ -1412,7 +1412,7 @@ angular.module("sampleApp")
                         display = rawValue;
 
                         //figure out the display
-                        if (rawValue.coding) {
+                        if (rawValue.coding && angular.isArray(rawValue.coding)) {
                             //this is a cc
                             display = rawValue.coding[0].display;
                             //display = rawValue.coding[0].code + " ("+rawValue.coding[0].system+")";
@@ -1454,12 +1454,22 @@ angular.module("sampleApp")
                 //get the value for a datatype - implemented for newBuilder...
                 var v,text;
                 switch (dt) {
+                    case 'Reference':
+                        v = {};
+                        v.reference = value.reference.url;
+                        v.identifier = value.reference.identifier;
+                        v.display = value.reference.display;
+                        break;
+
+                    case 'Narrative' :
+                        v = {div:value.narrative.div,status:'additional'};
+                        break;
                     case 'instant' :
                         //value is a Date object...
-                        var v = moment(value.date).format();
+                        v = moment(value.date).format();
                         break;
                     case 'Attachment' :
-                        v = {title:value.attachment.title}
+                        v = {title:value.attachment.title};
                         break;
 
                     case 'Quantity' :
@@ -1468,7 +1478,7 @@ angular.module("sampleApp")
                         if (f !== f) {      //test for Nan (http://stackoverflow.com/questions/30314447/how-do-you-test-for-nan-in-javascript)
                             alert('Must be a numeric value')        //todo - shouldn't really use alert here...
                         } else {
-                            v = {value:v,unit:value.quantity.unit}
+                            v = {value:f,unit:value.quantity.unit}
                         }
 
                         break;
@@ -1591,8 +1601,22 @@ angular.module("sampleApp")
                         break;
                     case 'dateTime' :
                         //value is a Date object...
-                        //var v = moment(valuedate).format();
+
+                        //var v = moment(value.date).format();
+
                         v = moment(value.date).format('YYYY-MM-DD');
+                        if (value.time) {
+                            value.date.setHours(value.time.getHours());
+                            value.date.setMinutes(value.time.getMinutes());
+                        }
+
+
+                        console.log(value.time)
+                        v = moment(value.date).format();
+
+
+
+
                         break;
 
                     case 'code' :
@@ -1615,15 +1639,23 @@ angular.module("sampleApp")
 
 
                             if (value.cc.coding && value.cc.coding.code) {
-                                cc.coding = [value.cc.coding]
-                                if (value.cc.coding.display) {
-                                    text = value.cc.coding.display
-                                }
+
+                                cc.coding = [] ; //[value.cc.coding]
+                                var coding = {}
+                                coding.code = value.cc.coding.code;      //from the specific input box
+                                coding.system = value.cc.coding.system;
+                                coding.display = value.cc.coding.display;
+                                cc.coding.push(coding)
+                              //  if (value.cc.coding.display) {
+                                   // text = value.cc.coding.display
+                               // }
                             }
                             if (value.cc.text) {
                                 cc.text = value.cc.text;
                                 text = value.cc.text;
                             }
+
+
 
                             v = cc;
 
@@ -1671,6 +1703,16 @@ angular.module("sampleApp")
                 //=============  TODO - USE THE getDTValue() FUNCTION ABOVE IN PLACE OF THE SWITCH...
 
                 switch (dt) {
+
+
+                    case 'Reference':
+                        var v = {};
+                        v.reference = value.reference.url;
+                        v.identifier = value.reference.identifier;
+                        v.display = value.reference.display;
+                        simpleInsert(insertPoint,info,path,v,dt);
+                        break;
+
                     case 'instant' :
                         //value is a Date object...
                         var v = moment(value.date).format();
@@ -1836,6 +1878,12 @@ angular.module("sampleApp")
                         //value is a Date object...
                         //var v = moment(valuedate).format();
                         var v = moment(value.date).format('YYYY-MM-DD');
+
+                        if (value.time) {
+                            value.date.setHours(v.time.getHours());
+                            value.date.setMinutes(v.time.getMinutes());
+                        }
+
                         simpleInsert(insertPoint,info,path,v,dt);
                         this.addStringToText(insertPoint,path+": "+ v)
                         break;
@@ -1862,13 +1910,26 @@ angular.module("sampleApp")
                                 delete value.cc.coding.extension;
                             }
 
-
                             if (value.cc.coding && value.cc.coding.code) {
+
+                                cc.coding = [] ; //[value.cc.coding]
+                                var coding = {}
+                                coding.code = value.cc.coding.code;      //from the specific input box
+                                coding.system = value.cc.coding.system;
+                                coding.display = value.cc.coding.display;
+                                cc.coding.push(coding)
+
+                                //  if (value.cc.coding.display) {
+                                // text = value.cc.coding.display
+                                // }
+                            }
+
+                           /* if (value.cc.coding && value.cc.coding.code) {
                                 cc.coding = [value.cc.coding]
                                 if (value.cc.coding.display) {
                                     text = value.cc.coding.display
                                 }
-                            }
+                            }*/
                             if (value.cc.text) {
                                 cc.text = value.cc.text;
                                 text = value.cc.text;

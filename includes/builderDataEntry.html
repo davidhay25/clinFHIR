@@ -3,10 +3,56 @@
 <div ng-controller="dataTypeCtrl">
     <!--<div ng-controller="dataTypeCtrl"> -->
 
+
+    <div ng-show="dataTypeBeingEntered == 'Reference'">
+
+        <div class="row">
+            <div class="col-md-2  col-sm-2">
+                Url
+            </div>
+            <div class="col-md-10  col-sm-10">
+                <input placeholder = 'eg Patient/101' type="text" class="form-control" ng-model="input.dt.reference.url"/>
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="col-md-2  col-sm-2">
+                Display
+            </div>
+            <div class="col-md-10  col-sm-10">
+                <input placeholder = 'eg John Doe' type="text" class="form-control" ng-model="input.dt.reference.display"/>
+            </div>
+
+        </div>
+        <br/>
+        <div class="row">
+            <div class="col-md-2  col-sm-2">
+                Identifier (R3 only)
+            </div>
+            <div class="col-md-10  col-sm-10">
+                <input placeholder = 'eg http://nhi.moh.govt.nz|WER25610' type="text" class="form-control" ng-model="input.dt.reference.identifier"/>
+            </div>
+
+        </div>
+
+
+
+
+    </div>
+
     <div ng-show="dataTypeBeingEntered == 'instant'">
         <div class="row">
             <div class="col-md-7  col-sm-7 col-centered">
                 <div uib-datepicker ng-model="input.dt.instant" class="well well-sm"></div>
+            </div>
+        </div>
+    </div>
+
+    <div ng-show="dataTypeBeingEntered == 'Narrative'">
+        <!-- The status is 'additional' if any user text is entered...-->
+        <div class="row">
+            <div class="col-md-7  col-sm-7 col-centered">
+                <textarea rows="8" class="form-control"ng-model="input.dt.narrative.div"></textarea>
             </div>
         </div>
     </div>
@@ -245,12 +291,29 @@
 
     </div>
 
-    <div ng-show="dataTypeBeingEntered == 'date' || dataTypeBeingEntered == 'dateTime'">
+    <div ng-show="dataTypeBeingEntered == 'date'">
         <div class="row">
             <div class="col-md-7  col-sm-7 col-centered">
                 <div uib-datepicker ng-model="input.dt.date" class="well well-sm"></div>
             </div>
         </div>
+
+    </div>
+
+    <div ng-show="dataTypeBeingEntered == 'dateTime'">
+        <div class="row">
+            <div class="col-md-7  col-sm-7 ">
+                <div uib-datepicker ng-model="input.dt.date" class="well well-sm"></div>
+            </div>
+            <div class="col-md-5  col-sm-5 ">
+                <div uib-timepicker ng-model="input.dt.time"></div>
+            </div>
+
+        </div>
+        <div class="row">
+
+        </div>
+
 
     </div>
 
@@ -530,11 +593,30 @@
                     <div class="col-md-1 col-sm-1">
                         <img ng-show='waiting' src="css/ajax_loader_blue_32.gif"/>
                     </div>
+
+
+
                     <div class="col-md-6 col-sm-6">
                         <div class="clickable pull-right"
                              ng-click="showVs(vsDetails.resource)">{{vsDetails.resource.url}}</div>
                     </div>
                 </div>
+
+                <br/>
+                <div class="row">
+                    <div class="col-md-4 col-sm-4">
+                        <input placeholder = 'System' uib-typeahead="system for system in systemArray"
+                               type="text" class="form-control" ng-model="input.dt.cc.coding.system"/>
+                    </div>
+                    <div class="col-md-4 col-sm-4">
+                        <input placeholder = 'Code' type="text" class="form-control" ng-model="input.dt.cc.coding.code"/>
+                    </div>
+                    <div class="col-md-4 col-sm-4">
+                        <input placeholder = 'Display' type="text" class="form-control" ng-model="input.dt.cc.coding.display"/>
+                    </div>
+                </div>
+
+
                 <br/>
 
                 <input placeholder = 'Text value if not coded' type="text" class="form-control" ng-model="input.dt.cc.text"/>

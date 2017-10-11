@@ -44,7 +44,7 @@ angular.module("sampleApp").controller('dataTypeCtrl',
                // $scope.input.dt = new Date();
             }
 
-            console.log(dt)
+
         });
 
         $scope.results = {timing:{}};
@@ -61,12 +61,15 @@ angular.module("sampleApp").controller('dataTypeCtrl',
             //the ValueSet lookup & select for CodeableConcept
             $scope.showVSBrowserDialog = {};
             $scope.showVs = function(vs){ //pass in the actual valueset...
-                console.log(vs)
+
                 $scope.showVSBrowserDialog.open(vs);
             }
      //   }
 
 
+        $scope.systemArray = [];
+        $scope.systemArray.push('http://loinc.org')
+        $scope.systemArray.push('http://snomed.info/sct')
         $scope.timingArray = RenderProfileSvc.populateTimingList();
 
 
@@ -83,21 +86,23 @@ angular.module("sampleApp").controller('dataTypeCtrl',
                 $scope.input.dt.dosage.timing.when = item.timing.when;
             }
 
-
-
         };
 
 
         $scope.selectCCfromList = function(item,model,label,event){
-            console.log(item,model,label,event)
+           // console.log(item,model,label,event)
+
+            $scope.input.dt.cc = $scope.input.dt.cc || {}
+            $scope.input.dt.cc.coding = $scope.input.dt.cc.coding || {}
+            $scope.input.dt.cc.coding.system = item.system;
+            $scope.input.dt.cc.coding.code = item.code;
         }
 
-        //added this for the newBuilder. The scope heirarchy is bit confused I think - need to merge this controller with 'addPropertyInBuilder'
-      //  if (! $scope.vsLookup) {
+        //  if (! $scope.vsLookup) {
             $scope.vsLookup = function (text, vs) {
                 $scope.waiting = true;
 
-                console.log(text, vs)
+
                 if (vs) {
                     var id = vs.id;
                     $scope.waiting = true;

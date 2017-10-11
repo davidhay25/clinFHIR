@@ -1,5 +1,5 @@
 angular.module("sampleApp")
-    .service('newBuilderSvc', function(Utilities,appConfigSvc,$q,GetDataFromServer) {
+    .service('newBuilderSvc', function(Utilities,appConfigSvc,$q,GetDataFromServer,ResourceUtilsSvc) {
 
         function getLastNameInPath(path) {
             if (path) {
@@ -8,11 +8,26 @@ angular.module("sampleApp")
             }
         }
 
-        var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained','DomainResource'];
-
-
+        var elementsToDisable = ['id', 'meta', 'implicitRules', 'language',  'contained','DomainResource']; //'text',
 
         return {
+
+            renderResource : function(treeData){
+                var display = [];       //the display array
+                treeData.forEach(function (item) {
+                    var meta = item.data.meta;
+                    if (meta.value) {
+                        var ar = meta.path.split('.');
+                        ar.splice(0,1);
+                        var displayPath =ar.join('.')
+
+                        var disp = ResourceUtilsSvc.getTextSummaryOfDataType(meta.value.dt,meta.value.value);
+                        display.push({displayPath:displayPath,value:meta.value,display:disp})
+                    }
+                })
+                console.log(display)
+                return display;
+            },
 
             cleanProfile : function(SD) {
                 //check that we have everything needed in the SD - basically convert to R3 (the bits we need)...
@@ -29,9 +44,6 @@ angular.module("sampleApp")
                     })
                 }
 
-
-
-//console.log(SD)
                 return SD;
             },
 
@@ -421,7 +433,7 @@ angular.module("sampleApp")
                             node.data.meta.isParentNodeBBE = isParentNodeBBE(node); //is the parentNode a BBE. If not. it's an expanded datatype (I think)
 
 
-                            node.data.meta.ed = item
+                            //node.data.meta.ed = item
 
 
                             if (item.myMeta.isExtension){       //really, this could be set much earlier with a bit of re-org...
@@ -607,6 +619,20 @@ angular.module("sampleApp")
 
                         }
 
+                        //set the '[x]' if there is more than one datatype
+                        if (node.text && node.text.indexOf('[x]') == -1) {
+                            var refDt = {};
+                            if (node.data && node.data.ed && node.data.ed.type) {
+                                for (var i = 0; i < node.data.ed.type.length; i++) {
+                                    var dt = node.data.ed.type[i].code;
+                                    refDt[dt] = 'x'
+                                }
+                                if (Object.keys(refDt).length > 1) {
+                                    node.text += '[x]'
+                                }
+                            }
+                        }
+                        /* - not sure about this....
                         //set the '[x]' suffix unless already there...
                         if (node.text && node.text.indexOf('[x]') == -1) {
                             //set the '[x]' for code elements
@@ -620,7 +646,7 @@ angular.module("sampleApp")
                                 node.text += '[x]'
                             }
                         }
-
+*/
 
                         //set the display icon
                         if (node.data && node.data.ed && node.data.ed.myMeta){

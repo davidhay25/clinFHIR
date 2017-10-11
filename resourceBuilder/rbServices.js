@@ -2872,16 +2872,25 @@ console.log(summary);
     return {
         getTextSummaryOfDataType : function(dt,value) {
             //a single line summary of a datatype (started for questionnaire
-            console.log(dt,value)
+            //console.log(dt,value)
 
             var vo = {summary:"",detail:""}
             switch (dt) {
+                case "Reference" :
+                    vo.detail = value.display;
+                    vo.detail += " (";
+                    addIfNotEmpty(vo.detail,value.reference);
+                    addIfNotEmpty(vo.detail,value.identifier);
+                    vo.detail += ")";
+                    break;
+
                 case "Identifier" :
                     vo.summary = value.value
                     if (value.system) {
                         vo.summary += " ("+value.system+")"
                     }
-                break;
+                    vo.detail = vo.summary
+                    break;
                 case "CodeableConcept" :
                     if (value.text) {vo.summary = value.text};
                     if (value.coding) {
@@ -2891,21 +2900,37 @@ console.log(summary);
                                 vo.summary = coding.display;
                             }
                         })
+                        if (value.text) { vo.detail += value.text};
+
                     }
-                break;
+
+                    break;
                 case "Quantity":
                     vo.summary =value.value;
                     var t = value.unit;
                     if (t) {vo.summary += " " + t}
+                    vo.detail = vo.summary;
                     break;
                 case "code" :
                 case "string" :
                 case "dateTime":
                 case "Annotation":
+                case "instant":
                     vo.summary = value;
+                    vo.detail = value;
                     break;
+                default :
+                    vo.summary = value;
+                    vo.detail = value;
+                    break
             }
             return vo;
+
+            function addIfNotEmpty(targ,string) {
+                if (string !== undefined) {
+                    targ += string + " "
+                }
+            }
         },
         getCCSummary : function(data) {
             //being able to summarize a codeableconcept is useful. todo - refactor to use this...

@@ -50,7 +50,7 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
 
                     templateUrl: 'resourceBuilder/vsBrowser.html',
                     size:'lg',
-                    controller: function($scope,selectedvs,GetDataFromServer,$filter,$localStorage) {  //selectVSFn
+                    controller: function($scope,selectedvs,GetDataFromServer,$filter,$localStorage) {
 
 
                         $scope.config = $localStorage.config;
@@ -58,22 +58,12 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
 
                         $scope.selectConcept = function(concept) {
                             $scope.$close(concept)
-                        }
+                        };
 
                         //when the close button is clicked
                         $scope.close = function(){
                             $scope.$dismiss();
-                            /*
-                            if ($scope.newVS.canSave) {
-                                if (confirm("It looks like you're creating a ValueSet - do you really want to Close, without saving? " +
-                                        "If this is a mistake, then click 'Cancel' in this dialog, then click the 'Save' button to save the ValueSet " +
-                                        "before closing")) {
-                                    $scope.$dismiss();
-                                }
-                            }  else {
-                                $scope.$dismiss();
-                            }
-                            */
+
                         };
 
                        // $scope.selectVSFn = selectVSFn;

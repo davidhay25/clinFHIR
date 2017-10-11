@@ -19,7 +19,7 @@
     <script src="js/libs/jstree.min.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.checkbox','ui.bootstrap','ngStorage']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.checkbox','ngSanitize','ui.bootstrap','ngStorage']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -71,16 +71,22 @@
 </head>
 
 
-<body style="padding: 8px" >
+<body style="padding: 8px; padding-top: 80px" >
 
 <div ng-app="sampleApp" ng-controller="newBuilderCtrl" class="container-fluid">
 
 
-    <h3>Resource builder</h3>
-    <div class="row rounded-box">
-
+    <nav ng-hide="startupParams.hideNav" class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="col-md-2 col-sm-2">
+            <div
+               uib-popover-html="displayServers"
+               popover-trigger="'mouseenter'"
+               popover-placement="right">
+                <h3>Resource builder</h3>
+            </div>
+        </div>
         <div class="col-md-4 col-sm-4">
-            <select ng-model="input.nbProfile" class="form-control"
+            <select ng-model="input.nbProfile" class="form-control navbar-text"
                     ng-change="savedProfileUrl(input.nbProfile)"
                     ng-options="url for url in nbProfile">
 
@@ -89,147 +95,28 @@
         </div>
 
         <div class="col-md-1 col-sm-1">
-            <button class="btn btn-primary" ng-click="findProfile()">Find Profile</button>
+            <div class="navbar-text">
+                <button class="btn btn-primary  " ng-click="findProfile()">Find Profile</button>
+            </div>
+
         </div>
 
         <div class="col-md-1 col-sm-1">
         </div>
 
         <div class="col-md-2 col-sm-2">
-            <img ng-show='waiting' src="css/ajax_loader_blue_32.gif"/>
+            <img ng-show='waiting' class=" navbar-text" src="css/ajax_loader_blue_32.gif"/>
         </div>
 
-        <div class="col-md-4 col-sm-4">
+        <div class="col-md-2 col-sm-2">
 
         </div>
 
 
-    </div>
+    </nav>
 
 
     <ng-include src="'/includes/newBuilderInclude.html'"></ng-include>
-
-<!--
-
-<h3>Builder</h3>
-    <div class="row rounded-box">
-
-
-        <div class="col-md-4 col-sm-4">
-            <select ng-model="input.nbProfile" class="form-control"
-                    ng-change="savedProfileUrl(input.nbProfile)"
-                    ng-options="url for url in nbProfile">
-
-            </select>
-
-        </div>
-
-        <div class="col-md-1 col-sm-1">
-            <button class="btn btn-primary" ng-click="findProfile()">Find Profile</button>
-        </div>
-
-        <div class="col-md-1 col-sm-1">
-        </div>
-
-        <div class="col-md-2 col-sm-2">
-            <img ng-show='waiting' src="css/ajax_loader_blue_32.gif"/>
-        </div>
-
-        <div class="col-md-4 col-sm-4">
-
-        </div>
-
-
-    </div>
-
-
-
-    <div class="row">
-        <div class="col-md-3 col-sm-3">
-            <div id="SDtreeView"></div>
-
-        </div>
-        <div class="col-md-5 col-sm-5">
-            <uib-tabset>
-                <uib-tab heading="Data Entry">
-                    <div ng-show="selectedNode.data.meta.isMultiple && selectedNode.data.meta.isBBE && selectedNode.data.meta.canCopy">
-                        <button class="btn btn-primary pull-right" ng-click="addNewNode()">Add new node</button>
-                        <div class="clearfix"></div>
-                        <hr/>
-                    </div>
-                    <div>
-                        <span class="clickable iconSpacing" ng-repeat="typ in selectedNode.data.meta.type"
-                              ng-click="showDEForm(typ.code)">{{typ.code}}</span>
-
-                        <div ng-show="currentDT">
-
-                            <div class="rounded-box">
-                                <ng-include src="'/includes/builderDataEntry.html'"></ng-include>
-
-                            </div>
-
-
-                            <button  class="btn btn-primary pull-right" ng-click="addDataType()">Add</button>
-                        </div>
-                    </div>
-                </uib-tab>
-                <uib-tab heading="Validate">
-
-                    <button class="btn btn-primary pull-right" ng-click="validate()">Validate</button>
-
-                    <pre>{{validationResult | json}}</pre>
-
-                </uib-tab>
-                <uib-tab heading="Debug">
-                    <pre>{{appConfigSvc.config().servers | json}}</pre>
-                    <pre>{{selectedNode.data.meta | json}}</pre>
-
-                       <pre>{{selectedNode | json}}</pre>
-
-                    <pre>{{treeData | json}}</pre>
-
-
-                </uib-tab>
-            </uib-tabset>
-
-
-        </div>
-        <div class="col-md-4 col-sm-4">
-
-            <uib-tabset>
-                <uib-tab heading="Json">
-                    <pre>{{resource | json}}</pre>
-
-                </uib-tab>
-
-                <uib-tab heading="Tree">
-                    <div>
-                        <span class="clickable pull-right" ng-click="toggleTreeExpand()">Toggle Expand</span>
-                    </div>
-                    <div id="builderResourceTree"></div>
-                </uib-tab>
-
-
-
-            </uib-tabset>
-
-
-            <span class="clickable" ng-click="clear()">Clear resource</span>
-
-        </div>
-
-
-
-    </div>
-
-
-    <select-profile trigger="showFindProfileDialog"
-                    all-resource-types="standardResourceTypes"
-                    profile-selected="selectedProfileFromDialog" type="'profile'">
-
-    </select-profile>
-
-    -->
 
     <select-profile trigger="showFindProfileDialog"
                     all-resource-types="standardResourceTypes"
