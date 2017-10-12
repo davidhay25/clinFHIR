@@ -48,7 +48,7 @@
                     <div ng-show="selectedNode.data.meta.isMultiple && selectedNode.data.meta.canCopy">
 
                         <!-- add a new node in the tree for multiple nodes. have an index to tell them apart...-->
-                        <button class="btn btn-primary pull-right" ng-click="addNewNode()">Add new node</button>
+                        <button class="btn btn-primary pull-right" ng-click="addNewNode()">Add new element</button>
                         <div class="clearfix"></div>
                         <hr/>
                     </div>
@@ -59,10 +59,7 @@
                     </div>
 
 
-
                     <div>
-
-
                         <span class="clickable iconSpacing" ng-repeat="typ in selectedNode.data.meta.type"
                               ng-click="showDEForm(typ.code)">{{typ.code}}</span>
                         <div class="pull-right">{{selectedNode.data.meta.index}}</div>
@@ -109,19 +106,6 @@
                                 </tr>
                             </table>
 
-                            <!--  <table class="table table-bordered">
-                                <tr ng-repeat="ref in potentialReferences">
-                                    <td>{{ref.resourceType}}
-                                        <div title="{{ref.resourceType}}" ng-bind-html="ref.text.div"></div>
-                                    </td>
-                                </tr>
-                            </table>
-
-                            <pre>{{potentialReferences | json}}</pre>
--->
-
-
-
                             <button  class="btn btn-primary pull-right" ng-click="addDataType()">
                                 <span ng-hide="currentValue">Add</span>
                                 <span ng-show="currentValue">Update</span>
@@ -141,7 +125,30 @@
 
                     <button class="btn btn-primary pull-right" ng-click="validate()">Validate</button>
 
-                    <pre>{{validationResult | json}}</pre>
+
+                    <uib-tabset>
+                        <br/>
+                        <uib-tab heading="issues">
+                            <table class="table table-bordered">
+                                <tr><th>Severity</th><th>Details/Diagnostics</th></tr>
+                                <tr ng-repeat = "iss in validationResult.issue">
+                                    <td>{{iss.severity}}</td>
+
+                                    <td>{{iss.details.text}}
+                                        <div>{{iss.diagnostics}}</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </uib-tab>
+
+                        <uib-tab heading="json">
+                            <pre>{{validationResult | json}}</pre>
+                        </uib-tab>
+
+
+                    </uib-tabset>
+
+                   <!-- <pre>{{validationResult | json}}</pre> -->
 
                 </uib-tab>
                 <uib-tab heading="Debug">

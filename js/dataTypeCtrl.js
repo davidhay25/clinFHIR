@@ -14,6 +14,10 @@ angular.module("sampleApp").controller('dataTypeCtrl',
         $scope.input = $scope.input || {}
 
         $scope.$on('currentValue',function(ev,currentValue) {
+
+            console.log($scope.dataTypeBeingEntered,currentValue)
+
+
             if (currentValue) {
                 $scope.input.dt = $scope.input.dt || {}
                 switch ($scope.dataTypeBeingEntered) {
@@ -52,20 +56,12 @@ angular.module("sampleApp").controller('dataTypeCtrl',
 
 
 
-     //   $scope.input.dt = $scope.input.dt || {}
-       // $scope.input.dt.dosage = {timing:{}};
-       // $scope.input.dt.cc =  $scope.input.dt.cc || {}
-
-      //  if (! $scope.showVs) {      //this happens when being called from newBuilder...
-
-            //the ValueSet lookup & select for CodeableConcept
-            $scope.showVSBrowserDialog = {};
-            $scope.showVs = function(vs){ //pass in the actual valueset...
+        //the ValueSet lookup & select for CodeableConcept
+        $scope.showVSBrowserDialog = {};
+        $scope.showVs = function(vs){ //pass in the actual valueset...
 
                 $scope.showVSBrowserDialog.open(vs);
             }
-     //   }
-
 
         $scope.systemArray = [];
         $scope.systemArray.push('http://loinc.org')
@@ -98,8 +94,8 @@ angular.module("sampleApp").controller('dataTypeCtrl',
             $scope.input.dt.cc.coding.code = item.code;
         }
 
-        //  if (! $scope.vsLookup) {
-            $scope.vsLookup = function (text, vs) {
+
+        $scope.vsLookup = function (text, vs) {
                 $scope.waiting = true;
 
 
@@ -135,7 +131,7 @@ angular.module("sampleApp").controller('dataTypeCtrl',
                     return [{'display': 'Select the ValueSet to query against'}];
                 }
             };
-        //}
+
 
 
 

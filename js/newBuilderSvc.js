@@ -414,6 +414,13 @@ angular.module("sampleApp")
                                     node.data.meta.vs = {url:item.binding.valueSetReference.reference};
                                     node.data.meta.vs.strength = item.binding.strength;
                                 }
+
+                                //todo this is not strictly correct, but clinFHIR incorrecty used uri, so we'll allow for that...
+                                if (item.binding.valueSetUri) {
+                                    node.data.meta.vs = {url:item.binding.valueSetUri};
+                                    node.data.meta.vs.strength = item.binding.strength;
+                                }
+
                             }
 
                             if (item.type) {

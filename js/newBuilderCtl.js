@@ -14,14 +14,8 @@ angular.module("sampleApp")
             + "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>"
             + "<div>Term: " + appConfigSvc.getCurrentTerminologyServer().name + "</div>";
 
-       // $scope.sunday='test';
-       // $scope.simpleData = "Test value";
-       // $scope.complexData = {identifier: {system:'test system',value:'test value'}}
 
-            //console.log($scope.$parent.startProfile);
-            //console.log($scope.startProfile);
-
-            //startProfile will be set when invoked from Scenario Builder...
+        //startProfile will be set when invoked from Scenario Builder...
         var myScope = $scope;
         var startProfile = $scope.startProfile;
 
@@ -189,7 +183,6 @@ angular.module("sampleApp")
             })
         };
 
-
         //find the resourceType for this profile.  todo - need to allow for stu2 (as well in maketree...
         function getResourceType(profile) {
             var t = profile.baseDefinition;
@@ -204,7 +197,6 @@ angular.module("sampleApp")
         }
 
         //------------------------------
-
 
         function drawResourceTree(resource) {
 
@@ -295,16 +287,20 @@ angular.module("sampleApp")
 
                     if ($scope.selectedNode.data.meta.type){
 
-                        //if there is only a single possible datatype for this node then display it...
-                        if ($scope.selectedNode.data.meta.type.length == 1) {
+                        //if there is only a single possible datatype for this node then display it. Otherwise the user will select..
+                        var refDt={};
+                        $scope.selectedNode.data.meta.type.forEach(function (typ) {
+                            refDt[typ.code] = 'x'
+                        });
 
+                        if (Object.keys(refDt).length == 1) {
                             //make sure it's not a BBE
                             if ($scope.selectedNode.data.meta.type[0].code !== 'BackboneElement') {
                                 $scope.showDEForm($scope.selectedNode.data.meta.type[0].code)
                             }
                         }
 
-                        //see if there are any references...
+                        //see if there are any references (when invoked from SB)...
                         setPotentialReferences($scope.selectedNode.data.meta)
 
                     }
@@ -318,69 +314,76 @@ angular.module("sampleApp")
         }
 
         //called on a BBE that is repeatable. we want to make a copy of that node and all childnodes...
-            //todo note that this only works for direct children right now
         $scope.addNewNode = function() {
             var currentMeta = $scope.selectedNode.data.meta;
 
             var nodeId = $scope.selectedNode.id;
-            $scope.selectedNode.data.meta.canCopy = false;    //so this node can't be copied - only the new one...
-            //var newIndex = $scope.selectedNode.data.meta.index + 1;  //the index for this copy. assume that last one was selected todo: need to check
-            //find the children that we'll need to duplicate. Right now, it's not repeatible - so fail for carePlan for example..
+
             var arNewNodes = [];
             var newParent = {data:{}}; // - this is a tree node... angular.copy($scope.selectedNode)
             newParent.text = $scope.selectedNode.text;
+
             var newMeta =  angular.copy($scope.selectedNode.data.meta)
             newParent.data.meta =newMeta
-            newParent.data.meta.theNewOne = true;
+            //newParent.data.meta.theNewOne = true;
+            newParent.icon = $scope.selectedNode.icon;          //same icon...
 
-            $scope.selectedNode.data.meta.copied = true;        //temp to check the copied one
+            delete newParent.data.meta.value;                   //we don't want to copy the data as well!
+            $scope.selectedNode.data.meta.canCopy = false;    //so this node can't be copied - only the new one...
 
-            delete newParent.data.meta.value;
+            $scope.selectedNode.text = $scope.selectedNode.text.substr(0,$scope.selectedNode.text.length-2);          //chop off the '*' from the element that was copied...
+
             newParent.parent = $scope.selectedNode.parent;      //has the same parent as is a peer...
+
+            //create a unique id. Will also be used for the children of a BBE...
             var inx = $scope.treeData.length
             newParent.id = 'id'+inx ;
-            newParent.data.meta.index = -1; //ie no data yet newIndex;     //this is used to distinguish this 'branch' from the others
+            newParent.data.meta.index = -1; //ie no data yet newIndex;
             inx++;
-            arNewNodes.push(newParent);
+
+            arNewNodes.push(newParent);     //add the new element (a BBE or a single DT)
             var insertPoint = - 1;
 
+            //now figure out the point to insert (so it all lines up nicely). This is different for a BBE & a root child...
             $scope.treeData.forEach(function (node,pos) {
-                if (node.parent == nodeId) {
-                    insertPoint = pos;     //finds the last element with this one as the parent
+
+                if (currentMeta.isBBE) {
+                    if (node.parent == nodeId) {
+                        insertPoint = pos;     //finds the last element with this one as the parent
+                    }
+                } else {
+                    if (node.id == nodeId) {
+                        insertPoint = pos;     //finds the element being copied...
+                    }
                 }
 
-
-                if (node.parent == nodeId) {
+                //if a BBE, then we need to copy the child elements as well. todo ?do we need to update the insertPoint as well
+                if (currentMeta.isBBE && node.parent == nodeId) {
                     var newChild = {data:{}}; //angular.copy(node);
                     newChild.text = node.text;
                     newChild.icon = node.icon;
                     newChild.data.meta = angular.copy(node.data.meta)
-                    newChild.data.meta.index = -1; //newIndex;
+                    newChild.data.meta.index = -1;
                     newChild.id = 'id'+inx ;
                     inx++;
                     newChild.parent = newParent.id;
-                   // newChild.text += 'x'
 
-                    console.log(newChild)
                     arNewNodes.push(newChild);
                 }
 
             });
 
 
+            //we need to get a serialization of the current contents of teh tree view...
             var ar = $('#nbSDtreeView').jstree(true).get_json('#', {flat:true})
-           // var ar = $scope.treeData;
 
             for (var j=arNewNodes.length-1; j > -1; j--) {
                 var nodeToInsert= arNewNodes[j];
-
             }
 
 
-
+            ///insert the new nodes...
             $scope.treeData = ar.slice(0,insertPoint+1).concat(arNewNodes).concat(ar.slice(insertPoint+1));
-
-
             drawTree($scope.treeData)
 
         };
@@ -434,6 +437,7 @@ angular.module("sampleApp")
             $scope.$broadcast('setDT',dt);      //sets an event to display the data-entry form
 
             var currentValue = getCurrentValue($scope.selectedNode);
+
             //console.log(currentValue);
             $scope.$broadcast('currentValue',currentValue);
             //set current values - todo move to service and check on type...
@@ -532,24 +536,13 @@ angular.module("sampleApp")
                 //this is an element directly off the root.
                 var elementName = ar[1];// todo - what to do about '[x]' ?? newBuilderSvc.checkElementName(ar[1], dt);        //the segment name
                 $scope.currentValue = getCV(meta,$scope.resource,elementName)
-                /*
-                if (meta.isMultiple) {
-                    if ( meta.index > -1) {
-                        var tmp = $scope.resource[elementName];
-                        $scope.currentValue = tmp[meta.index]
-                        return tmp[meta.index]
-                    }
-                } else {
-                    $scope.currentValue =$scope.resource[elementName]
-                }
-                */
+
             } else if (ar.length == 3) {
                 //var parent = $scope.
             }
 
-
-
-
+            return $scope.currentValue;
+            
             function getCV(meta,root,elementName) {
                 if (meta.isMultiple) {
                     if ( meta.index > -1) {
@@ -606,7 +599,6 @@ angular.module("sampleApp")
                         $scope.resource[elementName] = value;
                     }
 
-
                 } else {
                     alert('A Backbone element does not have a value! Select one of the child nodes....')
                 }
@@ -614,87 +606,49 @@ angular.module("sampleApp")
             } else if (ar.length == 3) {
                 //the child of a BBE off the root. Will need to get more sophisticated for careplan at least, but let's gte this working at least
 
-                //first locate the parent...
-                var parentName = ar[1];
-                var elementName = newBuilderSvc.checkElementName(ar[2],dt);    //the name of the element to insert
-
-                var parent = $scope.resource[parentName];
-                //if the parent exists, then if it's multiple then find the right ine based on the index
-
-
-                if (!parent) {
-                    $scope.resource[parentName] = []; //todo assume that they are all multiple - shoud really check the parent.isMultiple
-
-                    //make sure that all the entries prior to this one exist - eg if the node was dupliacted and the second selected...
-                    for (var i=0; i < meta.index; i++) {
-                        $scope.resource[parentName].push({})
-                    }
-
-
-                    //add the 'base' object for this
-                    var rootNodeForParent = {};
-                    //rootNodeForParent['_index'] = meta.index + 't'
-
-                    $scope.resource[parentName].push(rootNodeForParent)
-                   // var elementToInsert = {};
-                   //    elementToInsert[elementName] = data;
-                    if (meta.isMultiple) {
-                        rootNodeForParent[elementName] = []
-                        rootNodeForParent[elementName].push(value)
-
-
+                //first locate the parent node. We can't just use the path (as we did above) as there ..
+                var parentNode = findNode($scope.selectedNode.parent);    //this is the node in the tree
+                var parentMeta = parentNode.data.meta;      //the meta data for parent
+                var parentRoot;     //this is the root for this element (ie has all the children)
+                var parentName = ar[1];     //the element name of the parent - eg component
+                if (parentMeta.index == -1) {
+                    //there is no entry for this parent (eg Observation.component). wee need to add it and create a root
+                    var tmp = $scope.resource[parentName];
+                    if ($scope.resource[parentName]) {
+                        //there's already some data for this element name - create and add a new parentRoot;
+                        //var tmp = $scope.resource[parentName];
+                        parentRoot = {}
+                        tmp.push(parentRoot)
+                        parentMeta.index = tmp.length-1;      //set the index...
                     } else {
-                        rootNodeForParent[elementName] = value;
+                        //this will be the first 'instance' of this element. Add an array, and the preent root to it..
+                        $scope.resource[parentName] = []
+                        parentRoot = {}
+                        $scope.resource[parentName].push(parentRoot)
+                        parentMeta.index = 0;      //set the index...
                     }
+
                 } else {
-                    //the parent does exist - and we are assuming an array. (ie that all BBE off the root are multiple - todo this may not be correct, and we may need to check
-                    //search all the parent arrays looking for one where the meta.index value is the same as this one...
-                    var parentElement;
-
-
-                    parentElement = parent[meta.index];
-                    if (! parentElement) {  //this is the first time we've added an element to this node...
-                        parentElement = {};
-                        //make sure any preceeding elements are populated - ?? do we need to do this???
-                        /*
-                        for (var i=0; i < meta.index; i++) {
-                             if (! parent[i]) {
-                                 parent[i] = {}
-                             }
-                        }
-                        */
-
-                        parent[meta.index] = parentElement;
-                    }
-
-
-                    var currentElement = parentElement[elementName];
-                    if (currentElement) {
-                        //the current value for this element. If it exists it's an array add to it, otherwise replace it
-                        if (angular.isArray(currentElement)) {
-                            currentElement.push(value)
-                        } else {
-                            currentElement = value
-                        }
-
-
-                    } else {
-                        //there is not yet an element with this name. Is it multiple?
-                        if (meta.isMultiple) {
-                            //yes, make it an array...
-                            parentElement[elementName] = [];
-                            parentElement[elementName].push(value)
-                        } else {
-                            //no, just set the value...
-                            parentElement[elementName] = value;
-                        }
-
-                    }
-
-
-
+                    //there's aleady a root (as an index was assigned) - get it so we can attach child elements to it
+                    var tmp = $scope.resource[parentName];
+                    parentRoot = tmp[parentMeta.index]
                 }
 
+                //at this point, parentRoot is the object that we want to attach the elements to...
+               // var childName = ar[2];      //this is the name of the element to add...
+                var childName = newBuilderSvc.checkElementName(ar[2],dt);    //the name of the element to insert
+
+                if (meta.isMultiple) {
+                    parentRoot[childName] = parentRoot[childName] || []
+                    parentRoot[childName].push(value)
+                    meta.index = parentRoot[childName].length -1;
+
+                } else {
+                    parentRoot[childName] = value
+                    meta.index = 0
+                }
+            } else if (ar.length == 4) {
+                alert("Sorry, haven't enabled that yet")
             }
 
 
@@ -709,6 +663,11 @@ angular.module("sampleApp")
             drawResourceTree($scope.resource);
 
         };
+
+        //find the parent node based on an id
+        function findNode(id) {
+            return $('#nbSDtreeView').jstree(true).get_node(id);
+        }
 
         function clearAfterDataEntry(){
             delete $scope.currentDT;        //hide the data entry form...
