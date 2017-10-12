@@ -2892,7 +2892,7 @@ console.log(summary);
                     vo.detail = vo.summary
                     break;
                 case "CodeableConcept" :
-                    if (value.text) {vo.summary = value.text};
+                    if (value.text) {vo.summary = value.text; vo.detail = value.text;};
                     if (value.coding) {
                         value.coding.forEach(function (coding) {
                             vo.detail += coding.display + " (" + coding.system + "|"+coding.code +")";

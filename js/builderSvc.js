@@ -1456,9 +1456,11 @@ angular.module("sampleApp")
                 switch (dt) {
                     case 'Reference':
                         v = {};
-                        v.reference = value.reference.url;
-                        v.identifier = value.reference.identifier;
-                        v.display = value.reference.display;
+                        if (value.reference) {
+                            v.reference = value.reference.url;
+                            v.identifier = value.reference.identifier;
+                            v.display = value.reference.display;
+                        }
                         break;
 
                     case 'Narrative' :

@@ -325,7 +325,6 @@ angular.module("sampleApp")
 
             var newMeta =  angular.copy($scope.selectedNode.data.meta)
             newParent.data.meta =newMeta
-            //newParent.data.meta.theNewOne = true;
             newParent.icon = $scope.selectedNode.icon;          //same icon...
 
             delete newParent.data.meta.value;                   //we don't want to copy the data as well!
@@ -344,6 +343,9 @@ angular.module("sampleApp")
             arNewNodes.push(newParent);     //add the new element (a BBE or a single DT)
             var insertPoint = - 1;
 
+            var parents = {};   //the parent
+            parents[nodeId] =  {parentId:newParent.id}
+
             //now figure out the point to insert (so it all lines up nicely). This is different for a BBE & a root child...
             $scope.treeData.forEach(function (node,pos) {
 
@@ -358,7 +360,10 @@ angular.module("sampleApp")
                 }
 
                 //if a BBE, then we need to copy the child elements as well. todo ?do we need to update the insertPoint as well
-                if (currentMeta.isBBE && node.parent == nodeId) {
+                if (currentMeta.isBBE && parents[node.parent]) {
+//console.log(node)
+                    var parent = parents[node.parent];
+                    //if (currentMeta.isBBE && node.parent == nodeId) {
                     var newChild = {data:{}}; //angular.copy(node);
                     newChild.text = node.text;
                     newChild.icon = node.icon;
@@ -366,9 +371,18 @@ angular.module("sampleApp")
                     newChild.data.meta.index = -1;
                     newChild.id = 'id'+inx ;
                     inx++;
-                    newChild.parent = newParent.id;
-
+                    //newChild.parent = newParent.id;
+                    newChild.parent = parent.parentId;
+//console.log(newChild)
                     arNewNodes.push(newChild);
+
+                    if (node.data.meta.isBBE) {
+                        //This is a child BBE (Careplan.activity.detail)
+                        //parents[node.id] = {parentId:node.id}
+                        parents[node.id] = {parentId:newChild.id}       //set the parent to this node
+                        //console.log(parents)
+                    }
+
                 }
 
             });
@@ -380,7 +394,6 @@ angular.module("sampleApp")
             for (var j=arNewNodes.length-1; j > -1; j--) {
                 var nodeToInsert= arNewNodes[j];
             }
-
 
             ///insert the new nodes...
             $scope.treeData = ar.slice(0,insertPoint+1).concat(arNewNodes).concat(ar.slice(insertPoint+1));
@@ -542,7 +555,7 @@ angular.module("sampleApp")
             }
 
             return $scope.currentValue;
-            
+
             function getCV(meta,root,elementName) {
                 if (meta.isMultiple) {
                     if ( meta.index > -1) {
@@ -648,7 +661,45 @@ angular.module("sampleApp")
                     meta.index = 0
                 }
             } else if (ar.length == 4) {
-                alert("Sorry, haven't enabled that yet")
+                var parentNode = findNode($scope.selectedNode.parent);    //this is the parent node in the tree
+                var parentMeta = parentNode.data.meta;
+                var parentName = ar[2]
+                var gpNode = findNode(parentNode.parent);    //this is the node in the tree
+                var gpMeta = gpNode.data.meta;
+                var gpName = ar[1]
+                var elementName = ar[3];        //todo need to check for [x]
+                console.log(parentNode,gpNode)
+
+                //start with the grandParent...
+                var gpRoot,parentRoot;
+                console.log(gpMeta.index)
+                if (gpMeta.index == -1) {
+                    //there is no grand parent yet..
+                    gpRoot = {};
+                    $scope.resource[gpName] = $scope.resource[gpName] || []    //assume multiple, may need to check...
+                    gpMeta.index = $scope.resource[gpName].length; //0;
+
+                    $scope.resource[gpName].push(gpRoot);
+                } else {
+                    var tmp = $scope.resource[gpName];
+                    gpRoot = tmp[gpMeta.index]
+                }
+                //so gpRoot (eg Careplan.activity) is ready to have the parent added...
+
+                if (parentMeta.index == -1) {
+                    //no parent on the grandparent
+                    parentRoot = {};
+                    parentMeta.index = 0;
+                    gpRoot[parentName] = parentRoot    //todo assume single for now (for careplan, will need to check (auditevent)...
+                   // gpRoot[gpName] = gpRoot;
+                } else {
+                    parentRoot =  gpRoot[parentName];   //todo only works when single...
+                }
+                console.log(parentRoot)
+                //so now we have parentRoot -
+                parentRoot[elementName] = value;    //todo check for multiple
+
+
             }
 
 
@@ -659,7 +710,6 @@ angular.module("sampleApp")
 
 
             clearAfterDataEntry();
-
             drawResourceTree($scope.resource);
 
         };

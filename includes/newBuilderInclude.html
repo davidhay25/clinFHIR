@@ -1,4 +1,12 @@
 <div>
+
+    <style>
+        .myScroll {
+
+            height: 500px;
+            overflow-y: scroll;
+        }
+    </style>
 <!--
     <h3>Builder</h3>
     <div class="row rounded-box">
@@ -36,7 +44,10 @@
 
     <div class="row">
         <div class="col-md-3 col-sm-3">
-            <div id="nbSDtreeView"></div>
+            <div class="myScroll">
+                <div id="nbSDtreeView"></div>
+            </div>
+
 
         </div>
         <div class="col-md-5 col-sm-5">
@@ -205,7 +216,9 @@
                     <br/>
                     <table class="table">
                         <tr ng-repeat="item in textDisplay">
-                            <td>{{item.displayPath}}</td>
+                            <!--<td>{{item.displayPath}}</td>-->
+                            <td>{{item.path1}}</td>
+                            <td>{{item.path2}}</td>
                             <td>{{item.display.detail}}</td>
 
                         </tr>

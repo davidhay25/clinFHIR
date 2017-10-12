@@ -20,9 +20,22 @@ angular.module("sampleApp")
                         var ar = meta.path.split('.');
                         ar.splice(0,1);
                         var displayPath =ar.join('.')
-
+                        var path1 = ar[0];
+/*
+                        var show2;
+                        if (ar.length == 1) {
+                            show2 = true
+                        }
+                        if (ar.length ==2) {
+                            if (show2) {
+                                show2 = false
+                            } else {
+                                path1=""
+                            }
+                        }
+*/
                         var disp = ResourceUtilsSvc.getTextSummaryOfDataType(meta.value.dt,meta.value.value);
-                        display.push({displayPath:displayPath,value:meta.value,display:disp})
+                        display.push({displayPath:displayPath,path1:path1,path2:ar[1],value:meta.value,display:disp})
                     }
                 })
                 console.log(display)
@@ -40,6 +53,10 @@ angular.module("sampleApp")
                     SD.snapshot.element.forEach(function(ed){
                         if (ed.name) {
                             ed.sliceName = name;
+                        }
+                        if (ed.contentReference) {
+                            //this is a reference to another path (preceeded by a #). all of the children with that path need to be inserted...
+                            //Observation.component.referenceRange (and makes it a l3 :( )
                         }
                     })
                 }
