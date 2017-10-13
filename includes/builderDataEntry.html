@@ -58,7 +58,74 @@
     </div>
 
     <div ng-show="dataTypeBeingEntered == 'Attachment'">
-        <input placeholder = 'Enter title' type="text" class="form-control" ng-model="input.dt.attachment.title"/>
+
+
+        <div class="row">
+            <div class="col-md-3  col-sm-3 ">
+                Title
+            </div>
+            <div class="col-md-6  col-sm-6 ">
+                <input placeholder = 'Enter title' type="text" class="form-control" ng-model="input.dt.attachment.title"/>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-3  col-sm-3 ">
+                ContentType
+            </div>
+            <div class="col-md-6  col-sm-6 ">
+                <input placeholder = 'Enter content type' type="text" class="form-control" ng-model="input.dt.attachment.contentType"/>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3  col-sm-3 ">
+                Language
+            </div>
+            <div class="col-md-6  col-sm-6 ">
+                <input placeholder = 'Enter language' type="text" class="form-control" ng-model="input.dt.attachment.language"/>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3  col-sm-3 ">
+                Url
+            </div>
+            <div class="col-md-6  col-sm-6 ">
+                <input placeholder = 'Enter Url to content' type="text" class="form-control" ng-model="input.dt.attachment.url"/>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3  col-sm-3 ">
+                Size
+            </div>
+            <div class="col-md-6  col-sm-6 ">
+                <input placeholder = 'Enter size of the content' type="text" class="form-control" ng-model="input.dt.attachment.size"/>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3  col-sm-3 ">
+                Hash
+            </div>
+            <div class="col-md-6  col-sm-6 ">
+                <input placeholder = 'Enter content hash' type="text" class="form-control" ng-model="input.dt.attachment.hash"/>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3  col-sm-3 ">
+                Creation
+            </div>
+            <div class="col-md-6  col-sm-6 ">
+                <div uib-datepicker ng-model="input.dt.attachment.creation" class="well well-sm"></div>
+
+            </div>
+        </div>
+
+
     </div>
 
     <div ng-show="dataTypeBeingEntered == 'Quantity'">
@@ -69,12 +136,7 @@
                 Value
             </div>
             <div class="col-md-6  col-sm-6 ">
-
                 <input placeholder = 'Enter quantity value (must be a number)' type="text" class="form-control" ng-model="input.dt.quantity.value"/>
-
-
-
-
             </div>
         </div>
         <div class="row">
@@ -317,7 +379,7 @@
 
     </div>
 
-    <div ng-show="dataTypeBeingEntered == 'integer'">
+    <div ng-show="dataTypeBeingEntered == 'integer' || dataTypeBeingEntered == 'positiveInt' || dataTypeBeingEntered == 'unsignedInt'">
         <input placeholder = 'Enter integer value' type="text" class="form-control" ng-model="input.dt.integer"/>
     </div>
 

@@ -1454,6 +1454,15 @@ angular.module("sampleApp")
                 //get the value for a datatype - implemented for newBuilder...
                 var v,text;
                 switch (dt) {
+
+                    case 'positiveInt' :
+                        v = parseInt(value.integer,10);
+                        break;
+                    case 'unsignedInt' :
+                        v = parseInt(value.integer,10);
+                        break;
+
+
                     case 'Reference':
                         v = {};
                         if (value.reference) {
@@ -1472,6 +1481,25 @@ angular.module("sampleApp")
                         break;
                     case 'Attachment' :
                         v = {title:value.attachment.title};
+
+                        addIfNotEmpty(value.attachment.contentType,v,'contentType');
+                        addIfNotEmpty(value.attachment.language,v,'language');
+                        addIfNotEmpty(value.attachment.url,v,'url');
+                        addIfNotEmpty(value.attachment.size,v,'size');
+                        addIfNotEmpty(value.attachment.hash,v,'hash');
+
+                        if (value.attachment.creation) {
+                            var cr = moment(value.attachment.creation).format();
+                            addIfNotEmpty(cr,v,'creation');
+
+                        }
+
+
+                        //simpleInsert(insertPoint,info,path,insrt,dt);
+
+
+
+
                         break;
 
                     case 'Quantity' :
@@ -1707,6 +1735,20 @@ angular.module("sampleApp")
                 switch (dt) {
 
 
+                    case 'positiveInt' :
+
+                        simpleInsert(insertPoint,info,path,parseInt(value.integer,10),dt);
+
+                       // v = parseInt(value.integer,10);
+                        break;
+                    case 'unsignedInt' :
+                        simpleInsert(insertPoint,info,path,parseInt(value.integer,10),dt);
+
+                       // v = parseInt(value.integer,10);
+                        break;
+
+
+
                     case 'Reference':
                         var v = {};
                         v.reference = value.reference.url;
@@ -1723,8 +1765,24 @@ angular.module("sampleApp")
                         break;
                     case 'Attachment' :
                         var insrt = {title:value.attachment.title}
-                        simpleInsert(insertPoint,info,path,insrt,dt);
+
+
                         this.addStringToText(insertPoint,path+": "+ insrt.title)
+                        addIfNotEmpty(value.attachment.contentType,insrt,'contentType');
+                        addIfNotEmpty(value.attachment.language,insrt,'language');
+                        addIfNotEmpty(value.attachment.url,insrt,'url');
+                        addIfNotEmpty(value.attachment.size,insrt,'size');
+                        addIfNotEmpty(value.attachment.hash,insrt,'hash');
+
+                        if (value.attachment.creation) {
+                            var cr = moment(value.attachment.creation).format();
+                            addIfNotEmpty(cr,insrt,'creation');
+
+                        }
+
+
+                        simpleInsert(insertPoint,info,path,insrt,dt);
+
                         break;
 
                     case 'Quantity' :

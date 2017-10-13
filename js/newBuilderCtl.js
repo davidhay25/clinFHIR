@@ -8,6 +8,8 @@ angular.module("sampleApp")
 
         //this means that the data entered in 'builderDataEntry' will be in this scope. watch out for dataTypeCtrl.js & addPropertyInBuilder.js
         $scope.input = {dt:{}}
+        $scope.input.textDisplaySummary = true;
+
         $scope.appConfigSvc = appConfigSvc;
 
         $scope.displayServers = "Conformance: " + appConfigSvc.getCurrentConformanceServer().name

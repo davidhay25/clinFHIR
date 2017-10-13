@@ -225,11 +225,19 @@
 
                 <uib-tab heading="Text">
                     <br/>
-                    <table>
+
+                    Summary <checkbox ng-model="input.textDisplaySummary"></checkbox>
+
+
+
+                    <table width="100%">
                         <tr ng-repeat="item in textDisplay">
-                            <td>{{item.path1}}</td>
-                            <td>{{item.path2}}</td>
-                            <td>{{item.display.detail}}</td>
+                            <td valign="top">{{item.path1}}</td>
+                            <td valign="top">{{item.path2}}</td>
+                            <td valign="top">
+                                <div ng-show = "input.textDisplaySummary">{{item.display.summary}}</div>
+                                <div ng-show = "! input.textDisplaySummary">{{item.display.detail}}</div>
+                            </td>
                         </tr>
                     </table>
                 </uib-tab>
