@@ -6,6 +6,17 @@
             height: 500px;
             overflow-y: scroll;
         }
+
+        table {
+            width: 100%;
+        }
+
+        th, td {
+            padding: 2px;
+            text-align: left;
+        }
+
+
     </style>
 <!--
     <h3>Builder</h3>
@@ -214,13 +225,11 @@
 
                 <uib-tab heading="Text">
                     <br/>
-                    <table class="table">
+                    <table>
                         <tr ng-repeat="item in textDisplay">
-                            <!--<td>{{item.displayPath}}</td>-->
                             <td>{{item.path1}}</td>
                             <td>{{item.path2}}</td>
                             <td>{{item.display.detail}}</td>
-
                         </tr>
                     </table>
                 </uib-tab>

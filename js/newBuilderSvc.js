@@ -14,6 +14,66 @@ angular.module("sampleApp")
 
             renderResource : function(treeData){
                 var display = [];       //the display array
+
+                treeData.forEach(function (item) {
+                    var meta = item.data.meta;
+
+                    //console.log(meta)
+                    if (meta && meta.path) {
+                        var ar = meta.path.split('.')
+                        if (ar.length == 2 || meta.isBBE) {
+                            var hadValue = false;
+                            if (meta.value) {
+                                hadValue = true;
+                                //this is a top level node
+                                var path1 = ar[1];
+                                var disp = ResourceUtilsSvc.getTextSummaryOfDataType(meta.value.dt,meta.value.value);
+                                display.push({path1:path1,value:meta.value,display:disp})
+                            }
+                            getChildValues(item,hadValue,ar[1])
+                        }
+                    }
+
+                });
+
+
+                console.log(display)
+                return display;
+
+                function getChildValues(item,hadValue,path1) {
+
+                    var parents = {}
+                    parents[item.id] = 'x';
+
+                    treeData.forEach(function (node) {
+
+                        if (parents[node.parent]) {
+                            //this node is a child
+                            var meta = node.data.meta;
+                            if (meta.value) {
+                                if (!hadValue) {
+                                    //there was no value for the parent (eg it was a BBE) - push a 'title' line...
+                                    display.push({path1:path1,display:""})
+                                    hadValue = true;
+                                }
+
+                                var ar = meta.path.split('.')
+                                var path2 = ar[ar.length - 1];
+                                var disp = ResourceUtilsSvc.getTextSummaryOfDataType(meta.value.dt,meta.value.value);
+                                display.push({path2:path2,value:meta.value,display:disp})
+                            }
+
+                            if (node.data.meta.isBBE) {
+                                parents[node.id] = 'x'
+                            }
+
+                        }
+
+                    });
+
+
+                }
+
                 treeData.forEach(function (item) {
                     var meta = item.data.meta;
                     if (meta.value) {

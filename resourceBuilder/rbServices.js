@@ -2919,6 +2919,10 @@ console.log(summary);
                     vo.summary = value;
                     vo.detail = value;
                     break;
+                case "Narrative" :
+                    vo.summary = value.div;
+                    vo.detail = value.div;
+                    break;
                 default :
                     vo.summary = value;
                     vo.detail = value;

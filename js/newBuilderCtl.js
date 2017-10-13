@@ -368,6 +368,7 @@ angular.module("sampleApp")
                     newChild.text = node.text;
                     newChild.icon = node.icon;
                     newChild.data.meta = angular.copy(node.data.meta)
+                    delete newChild.data.meta.value;
                     newChild.data.meta.index = -1;
                     newChild.id = 'id'+inx ;
                     inx++;
