@@ -15,7 +15,7 @@ angular.module("sampleApp").controller('dataTypeCtrl',
 
         $scope.$on('currentValue',function(ev,currentValue) {
 
-            console.log($scope.dataTypeBeingEntered,currentValue)
+            //console.log($scope.dataTypeBeingEntered,currentValue)
 
 
             if (currentValue) {

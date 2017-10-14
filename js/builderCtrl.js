@@ -34,15 +34,15 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/newBuilderModal.html',
                     windowClass: 'nb-modal-window',
-                    controller : function($scope,startProfile,startResource,bundle,title){
+                    controller : function($scope,startProfile,startResource,bundle,title,container){
                         $scope.startProfile = startProfile;
                         $scope.startResource = startResource;
                         $scope.bundle = bundle;
                         $scope.title = title;
-                        //console.log(startResource)
+                        $scope.container = container;
 
                         $scope.closeModal = function() {
-                            $scope.$close($scope.startResource)
+                            $scope.$close()
                         }
 
                     }, resolve : {
@@ -54,19 +54,22 @@ angular.module("sampleApp")
                             return $scope.currentResource;
                         },
                         bundle : function(){
+                            //used for the references...
                             return $scope.selectedContainer.bundle;
                         },
                         title : function(){
                             return "Editing "+$scope.currentResource.resourceType;
+                        },
+                        container : function(){
+                            //used for the references...
+                            return $scope.selectedContainer;
                         }
 
                     }
                 }) .result.then(
-                    function(resource) {
-                        console.log(resource);
-                        drawResourceTree($scope.currentResource)
-                        //$scope.$digest();
-                      //  $scope.currentResource = resource;
+                    function(vo) {
+                        drawResourceTree($scope.currentResource)    //as this is a reference, it gets updated automatically...
+
                     }
                 );
 
@@ -983,7 +986,7 @@ angular.module("sampleApp")
 
 
                     //set the .bundle property to the most recent version
-                    builderSvc.setMostRecentVersionActive($scope.selectedContainer)
+                    builderSvc.setMostRecentVersionActive($scope.selectedContainer);
 /*
 
                     if ($scope.selectedContainer.history) {

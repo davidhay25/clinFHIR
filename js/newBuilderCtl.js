@@ -74,18 +74,30 @@ angular.module("sampleApp")
                     }
 
                     //display all the references to & from this resource...
-                    var references = resourceSvc.getReference($scope.resource,allResources);
-                    console.log(references)
+                    //temp todo var references = resourceSvc.getReference($scope.resource,allResources);
+                    //console.log(references)
 
                     $scope.references = resourceSvc.getReference($scope.resource);
                     $scope.input.nbProfile = $scope.$parent.startProfile.url;
 
-                    newBuilderSvc.makeTree($scope.$parent.startProfile).then(
-                        function(vo) {
-                            $scope.treeData = vo.treeData;
-                            drawTree(vo.treeData);      //this is the 'design' tree...
-                        }
-                    )
+                    if ($scope.$parent.container && $scope.$parent.container.nbTree) {
+                        console.log('tree passed back')
+                        $scope.treeData = $scope.$parent.container.nbTree;
+                        drawTree($scope.treeData);      //this is the 'design' tree...
+                        $scope.textDisplay = newBuilderSvc.renderResource($scope.treeData);
+
+                    } else {
+                        newBuilderSvc.makeTree($scope.$parent.startProfile).then(
+                            function(vo) {
+                                $scope.$parent.container.nbTree = vo.treeData;
+                                $scope.treeData = vo.treeData;
+                                drawTree(vo.treeData);      //this is the 'design' tree...
+                            }
+                        )
+                    }
+
+
+
                 },1000)
 
         } else {
@@ -104,6 +116,9 @@ angular.module("sampleApp")
                     newBuilderSvc.makeTree(SD).then(
                         function(vo) {
                             $scope.treeData = vo.treeData;
+
+                            console.log(newBuilderSvc.getObjectSize($scope.treeData))
+
                             drawTree(vo.treeData)
 
                         }
@@ -669,9 +684,6 @@ angular.module("sampleApp")
                             $scope.resource[parentName] = parentRoot;
                             parentMeta.index = 0;      //set the index...
                         }
-
-
-
                     }
 
                 } else {
@@ -745,6 +757,16 @@ angular.module("sampleApp")
             clearAfterDataEntry();
             drawResourceTree($scope.resource);
             $scope.parseResource(angular.toJson($scope.resource));
+
+            //if true, this was called from Scenario Builder...
+            if ($scope.$parent && $scope.$parent.container && $scope.$parent.container.nbTree) {
+                $scope.$parent.container.nbTree = tree;
+            }
+
+
+            console.log(newBuilderSvc.getObjectSize($scope.resource))
+
+
 
         };
 

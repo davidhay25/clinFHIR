@@ -180,10 +180,10 @@
                     <pre>{{treeData | json}}</pre>
 
                     <pre>{{selectedNode | json}}</pre>
-<!--
+
                     <pre>{{treeData | json}}</pre>
 
--->
+
                 </uib-tab>
                 <uib-tab heading="Profile">
                     <p class="banner"><em>These are the actual Element Definitions - in order - from the Profile. (StructureDefinition.snapshot.element)</em></p>
@@ -245,7 +245,7 @@
                     </table>
                 </uib-tab>
 
-                <uib-tab heading="Parsed resource">
+                <uib-tab ng-show="1==2"  heading="Parsed resource">
                     <div ng-repeat="item in parsedTree">
                         <div class="rounded-box" ng-show="item.data.meta.value">
                             <div><strong>{{item.data.meta.path | dropFirstInPath}}</strong></div>

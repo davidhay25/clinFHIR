@@ -18,6 +18,37 @@ angular.module("sampleApp")
 
         return {
 
+            getObjectSize : function(obj) {
+                //http://www.russwurm.com/uncategorized/calculate-memory-size-of-javascript-object/
+
+                function roughSizeOfObject( object ) {
+                    var objectList = [];
+                    var recurse = function( value ) {
+                        var bytes = 0;
+
+                        if ( typeof value === 'boolean' ) {
+                            bytes = 4;
+                        } else if ( typeof value === 'string' ) {
+                            bytes = value.length * 2;
+                        } else if ( typeof value === 'number' ) {
+                            bytes = 8;
+                        } else if (typeof value === 'object'
+                            && objectList.indexOf( value ) === -1) {
+                            objectList[ objectList.length ] = value;
+                            for( i in value ) {
+                                bytes+= 8; // assumed existence overhead
+                                bytes+= recurse( value[i] )
+                            }
+                        }
+                        return bytes;
+                    }
+
+                    return recurse( object );
+                }
+
+                return roughSizeOfObject(obj)
+            },
+
             //populate the meta.value element of the treeData array (treeData is a parsed SD - by this.makeTree()...
             parseResource : function(treeData,resource) {
                 //strategy similar to builder builder (in rever
@@ -435,8 +466,9 @@ angular.module("sampleApp")
                             //this is the root node
                             //var rootNode = {id:ar[0],parent:'#',text:ar[0],state:{opened:true,selected:true},path:path,data: {ed : item}}
 
-                            var rootNode = {id:id,parent:'#',text:ar[0],state:{opened:true,selected:true},path:path,data: {ed : item}}
+                            var rootNode = {id:id,parent:'#',text:ar[0],state:{opened:true,selected:true},path:path,data: {}}
 
+                            // Don't think this is needed.. rootNode.data.ed  = item;
 
                             lstTree.push(rootNode);
                             rootNode.data.meta = {type:[{code:'BackboneElement'}]};  //this is for the newBuilder to determine if a node is
@@ -594,7 +626,11 @@ angular.module("sampleApp")
 
 
                             //attributes required for newBuilder. Hopefully can rationalize some of the other cruft in this function...
-                            node.data = {meta:{},ed : item};
+                            node.data = {meta:{}};
+
+                            //I don't think I'm using the ed anywhere - and would like to keep the tree as small as feasible...
+                            //temp node.data.ed = item;
+
                             nodeHash[item.path] = node;
                             node.data.meta.path = item.path;
                             node.data.meta.originalPath = item.path;
@@ -620,10 +656,24 @@ angular.module("sampleApp")
 
                             if (item.type) {
                                 item.type.forEach(function (typ) {
-                                    if (typ.code == 'BackboneElement') {
+                                    var cd = typ.code;
+                                    if (cd == 'BackboneElement') {
                                         node.data.meta.isBBE = true;
                                     }
+
+                                    if (cd.substr(0,1) === cd.substr(0,1).toUpperCase()) {
+                                        node.data.meta.isComplex = true;
+                                    }
+
+                                    if (cd == 'Reference') {
+                                        node.data.meta.isReference = true;
+                                    }
+
                                 })
+                            }
+
+                            if (item.min !== 0) {
+                                node.data.meta.isRequired = true;
                             }
 
                             //if this is a max or X OR a slice element, then must be multiple... (only multiples can be sliced)
@@ -633,10 +683,6 @@ angular.module("sampleApp")
                             }
 
                             node.data.meta.isParentNodeBBE = isParentNodeBBE(node); //is the parentNode a BBE. If not. it's an expanded datatype (I think)
-
-
-                            //node.data.meta.ed = item
-
 
                             if (item.myMeta.isExtension){       //really, this could be set much earlier with a bit of re-org...
                                 //make the path unique
@@ -799,6 +845,29 @@ angular.module("sampleApp")
                     lstTree.forEach(function(node){
 
                         //set the 'required' colour
+
+                        var meta = node.data.meta;
+
+                        if (meta.isRequired) {
+                            node['li_attr'] = {class : 'elementRequired elementRemoved'};
+                        } else {
+                            //have to formally add an 'optional' class else the required colour 'cascades' in the tree...
+                            node['li_attr'] = {class : 'elementOptional'};
+                        }
+
+                        if (meta.isComplex) {
+                            node.icon='/icons/icon_datatype.gif';
+                        } else {
+                            node.icon='/icons/icon_primitive.png';
+                        }
+
+
+                        if (meta.isReference) {
+                            node.icon='/icons/icon_reference.png';
+                        }
+
+/*
+
                         if (node.data && node.data.ed) {
                             if (node.data.ed.min == 1) {
                                 //console.log('REQUIRED')
@@ -834,21 +903,7 @@ angular.module("sampleApp")
                                 }
                             }
                         }
-                        /* - not sure about this....
-                        //set the '[x]' suffix unless already there...
-                        if (node.text && node.text.indexOf('[x]') == -1) {
-                            //set the '[x]' for code elements
-                            if (node.data && node.data.ed && node.data.ed.type && node.data.ed.type.length > 1) {
-                                node.text += '[x]'
-                            }
 
-                            //set the '[x]' for extensions (whew!)
-                            if (node.data && node.data.ed && node.data.ed.myMeta && node.data.ed.myMeta.analysis &&
-                                node.data.ed.myMeta.analysis.dataTypes && node.data.ed.myMeta.analysis.dataTypes.length > 1) {
-                                node.text += '[x]'
-                            }
-                        }
-*/
 
                         //set the display icon
                         if (node.data && node.data.ed && node.data.ed.myMeta){
@@ -879,6 +934,8 @@ angular.module("sampleApp")
                             }
 
                         }
+
+                        */
                     })
                 }
 
