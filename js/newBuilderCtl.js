@@ -17,6 +17,25 @@ angular.module("sampleApp")
             + "<div>Term: " + appConfigSvc.getCurrentTerminologyServer().name + "</div>";
 
 
+        $scope.pastedResource='{  "resourceType": "Condition",  "identifier": [{"value": "v2","system": "s2"},{"value": "v1","system": "s1"}]}'
+        $scope.parseResource = function(r1) {
+            var resource = angular.fromJson(r1)
+            console.log(resource);
+            var tree = angular.copy($scope.treeData)
+            console.log(tree);
+            var vo = newBuilderSvc.parseResource(tree,resource);
+
+            console.log(tree);
+
+            $scope.parsedTree = tree;
+
+
+
+            console.log(vo);
+
+        };
+
+
         //startProfile will be set when invoked from Scenario Builder...
         var myScope = $scope;
         var startProfile = $scope.startProfile;
@@ -70,8 +89,9 @@ angular.module("sampleApp")
                 },1000)
 
         } else {
-            /*
-            var url= appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/cf-StructureDefinition-us-core-patient";
+
+            //temp !!
+            var url= appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/Condition";
             $http.get(url).then(
                 function(data) {
                     var SD = data.data;
@@ -90,7 +110,7 @@ angular.module("sampleApp")
                     )
                 }
             );
-            */
+
         }
 
 
@@ -322,9 +342,9 @@ angular.module("sampleApp")
             var nodeId = $scope.selectedNode.id;
 
             var arNewNodes = [];
+
             var newParent = {data:{}}; // - this is a tree node... angular.copy($scope.selectedNode)
             newParent.text = $scope.selectedNode.text;
-
             var newMeta =  angular.copy($scope.selectedNode.data.meta)
             newParent.data.meta =newMeta
             newParent.icon = $scope.selectedNode.icon;          //same icon...
@@ -714,6 +734,7 @@ angular.module("sampleApp")
 
             clearAfterDataEntry();
             drawResourceTree($scope.resource);
+            $scope.parseResource(angular.toJson($scope.resource));
 
         };
 

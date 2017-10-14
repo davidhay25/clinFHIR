@@ -51,10 +51,11 @@
     <script src="resourceBuilder/selectProfile.js"></script>
 
     <script src="js/libs/angular-bootstrap-checkbox.js"></script>
+    <script src="js/filters.js"></script>
     <!--
  <script src="resourceBuilder/rbServices.js"></script>
 
-    <script src="js/filters.js"></script>
+
     <script src="js/documentBuilder.js"></script>
 
     <script src="js/reporterCtrl.js"></script>
@@ -109,14 +110,49 @@
         </div>
 
         <div class="col-md-2 col-sm-2">
-
+            <a ng-click="input.showDev = ! input.showDev">Toggle dev</a>
         </div>
 
 
     </nav>
 
 
-    <ng-include src="'/includes/newBuilderInclude.html'"></ng-include>
+    <div ng-show="input.showDev">
+        <h3>Dev & testing</h3>
+
+        <div class="row">
+            <div class="col-md-6">
+                <textarea class="form-control" rows="10" ng-model = 'pastedResource'>
+
+                </textarea>
+
+                <button class="btn btn-link" ng-show="treeData" ng-click="parseResource(pastedResource)">Parse</button>
+
+            </div>
+            <div class="col-md-6">
+                <div ng-repeat="item in parsedTree">
+                    <div class="rounded-box" ng-show="item.data.meta.value">
+                        <div class="pull-right">{{item.data.meta.path}}</div>
+                        <br/>
+                        <div>
+                            {{item.data.meta.value | json}}
+                        </div>
+                    </div>
+
+
+                </div>
+
+            </div>
+        </div>
+
+
+    </div>
+
+
+    <div ng-hide="input.showDev">
+        <ng-include src="'/includes/newBuilderInclude.html'"></ng-include>
+
+    </div>
 
     <select-profile trigger="showFindProfileDialog"
                     all-resource-types="standardResourceTypes"

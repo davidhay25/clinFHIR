@@ -226,8 +226,11 @@
                 <uib-tab heading="Text">
                     <br/>
 
-                    Summary <checkbox ng-model="input.textDisplaySummary"></checkbox>
+                    <div class="pull-right">
+                        Summary <checkbox ng-model="input.textDisplaySummary"></checkbox>
+                    </div>
 
+                    <hr/>
 
 
                     <table width="100%">
@@ -240,6 +243,20 @@
                             </td>
                         </tr>
                     </table>
+                </uib-tab>
+
+                <uib-tab heading="Parsed resource">
+                    <div ng-repeat="item in parsedTree">
+                        <div class="rounded-box" ng-show="item.data.meta.value">
+                            <div><strong>{{item.data.meta.path | dropFirstInPath}}</strong></div>
+
+                            <div>
+                                {{item.data.meta.value | json}}
+                            </div>
+                        </div>
+
+
+                    </div>
                 </uib-tab>
 
                 <uib-tab >

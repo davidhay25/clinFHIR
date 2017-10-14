@@ -10,8 +10,98 @@ angular.module("sampleApp")
 
         var elementsToDisable = ['id', 'meta', 'implicitRules', 'language',  'contained','DomainResource']; //'text',
 
+        String.prototype.startsWithDEP = function(s){
+            if (this.substr(0,s.length === s )) {
+                return true;
+            }
+        }
+
         return {
 
+            //populate the meta.value element of the treeData array (treeData is a parsed SD - by this.makeTree()...
+            parseResource : function(treeData,resource) {
+                //strategy similar to builder builder (in rever
+
+
+                function processChildNodes(basePath,pathObj,arNewNodes) {
+                    //based on path - not an object hierarchy
+                    //pathObj is the object at this point in the eval. starts with the full resource, but will be a branch for a BBE
+                    //iterate through the array and find children of this base path
+                    var ar = basePath.split('.')
+                    var cnt = ar.length
+                    treeData.forEach(function (item) {
+                        var meta = item.data.meta;
+                        if (meta && meta.path) {
+                            var path = meta.path;
+                            var ar1 = path.split('.');
+                            if ((ar1.length == cnt+1) && (ar1[cnt-1] == ar[cnt-1]) ) {
+                                //this is a direct child
+                                console.log(item)
+
+                                //is this a BBE? (If so, then we need to check the child nodes as welll
+                                if (meta.isBBE) {
+                                    //yep. recurse into the children
+                                } else {
+                                    //nope. see if the resource has any values for this child off the passed in root...
+                                    var segmentName = ar1[cnt];
+                                    console.log(segmentName);
+                                    if (pathObj[segmentName]) {
+                                        //yes! there is data here...  todo: need to 'mark' par
+                                        var obj = pathObj[segmentName];
+                                        if (angular.isArray(obj)) {
+                                            meta.value = obj[0];
+                                            meta.index = 1;
+                                            if (obj.length > 1) {
+                                                //if there is more than 1 element in the array, we need to add extra elements to the tree...
+                                                for (var i=1; i < obj.length;i++) {
+
+                                                    var newNode = {data:{}};
+                                                    newNode.text = item.text;
+                                                    var newMeta =  angular.copy(item.data.meta);
+                                                    newMeta.index = i;
+                                                    newMeta.value = obj[i];
+                                                    newNode.data.meta =newMeta
+                                                    newNode.icon = item.icon;          //same icon...
+                                                    newNode.parent = item.parent;      //has the same parent as is a peer...
+                                                    newNode.id = 'id'+item.id + '-'+i ;
+
+                                                    newNode.data.meta.index = -1; //ie no data yet newIndex;
+                                                    arNewNodes.push(newNode);
+
+                                                }
+                                            }
+                                        } else {
+                                            meta.value = obj;
+                                        }
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+
+                    })
+
+                }
+
+
+
+                var arNewNodes = []
+                processChildNodes('Condition',resource,arNewNodes)
+
+                arNewNodes.forEach(function (newNode) {
+                    treeData.push(newNode)
+                })
+
+
+
+
+
+
+            },
             renderResource : function(treeData){
                 var display = [];       //the display array
 
@@ -74,6 +164,7 @@ angular.module("sampleApp")
 
                 }
 
+                /*
                 treeData.forEach(function (item) {
                     var meta = item.data.meta;
                     if (meta.value) {
@@ -81,25 +172,15 @@ angular.module("sampleApp")
                         ar.splice(0,1);
                         var displayPath =ar.join('.')
                         var path1 = ar[0];
-/*
-                        var show2;
-                        if (ar.length == 1) {
-                            show2 = true
-                        }
-                        if (ar.length ==2) {
-                            if (show2) {
-                                show2 = false
-                            } else {
-                                path1=""
-                            }
-                        }
-*/
+
                         var disp = ResourceUtilsSvc.getTextSummaryOfDataType(meta.value.dt,meta.value.value);
                         display.push({displayPath:displayPath,path1:path1,path2:ar[1],value:meta.value,display:disp})
                     }
                 })
                 console.log(display)
                 return display;
+
+                */
             },
 
             cleanProfile : function(SD) {
