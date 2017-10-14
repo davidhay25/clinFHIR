@@ -23,7 +23,7 @@ angular.module("sampleApp")
                 //strategy similar to builder builder (in rever
 
 
-                function processChildNodes(basePath,pathObj,arNewNodes) {
+                function processRootNodes(basePath,pathObj,arNewNodes) {
                     //based on path - not an object hierarchy
                     //pathObj is the object at this point in the eval. starts with the full resource, but will be a branch for a BBE
                     //iterate through the array and find children of this base path
@@ -36,20 +36,37 @@ angular.module("sampleApp")
                             var ar1 = path.split('.');
                             if ((ar1.length == cnt+1) && (ar1[cnt-1] == ar[cnt-1]) ) {
                                 //this is a direct child
-                                console.log(item)
+                                //console.log(item)
 
                                 //is this a BBE? (If so, then we need to check the child nodes as welll
                                 if (meta.isBBE) {
                                     //yep. recurse into the children
-                                } else {
-                                    //nope. see if the resource has any values for this child off the passed in root...
+                                    //is there any data in the resource at this point?
                                     var segmentName = ar1[cnt];
                                     console.log(segmentName);
                                     if (pathObj[segmentName]) {
+                                        //yes, there is data...
+                                        processChildBranch(meta.path,pathObj[segmentName],arNewNodes)
+                                    }
+
+
+                                } else {
+                                    //nope. see if the resource has any values for this child off the passed in root...
+                                    var segmentName = ar1[cnt];
+                                    //console.log(segmentName);
+                                    //pathObj might be an array (eg a BBE that is multiple)
+
+
+                                    //if (Object.keys(pathObj).indexOf(segmentName) > -1){
+                                    if (pathObj[segmentName]) {
                                         //yes! there is data here...  todo: need to 'mark' par
+
+
                                         var obj = pathObj[segmentName];
+
+
                                         if (angular.isArray(obj)) {
-                                            meta.value = obj[0];
+                                            meta.value = obj[0];        //set the first element...
                                             meta.index = 1;
                                             if (obj.length > 1) {
                                                 //if there is more than 1 element in the array, we need to add extra elements to the tree...
@@ -90,14 +107,34 @@ angular.module("sampleApp")
 
 
                 var arNewNodes = []
-                processChildNodes('Condition',resource,arNewNodes)
+                processRootNodes('Condition',resource,arNewNodes)
 
                 arNewNodes.forEach(function (newNode) {
                     treeData.push(newNode)
-                })
+                });
+
+
+                //this is a child branch - eg Condition.evidence
+                function processChildBranch(basePath,pathObj,arNewNodes){
+                    console.log(basePath,pathObj,arNewNodes)
+
+                    if (angular.isArray(pathObj)) {
+                        //most are arrays
 
 
 
+                        pathObj.forEach(function (item,ctr) {
+
+
+
+
+                        })
+
+
+                    } else {
+
+                    }
+                }
 
 
 

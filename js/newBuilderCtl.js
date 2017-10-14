@@ -658,10 +658,20 @@ angular.module("sampleApp")
                         parentMeta.index = tmp.length-1;      //set the index...
                     } else {
                         //this will be the first 'instance' of this element. Add an array, and the preent root to it..
-                        $scope.resource[parentName] = []
-                        parentRoot = {}
-                        $scope.resource[parentName].push(parentRoot)
-                        parentMeta.index = 0;      //set the index...
+                        //make sure it's multiple
+                        if (parentMeta.isMultiple) {
+                            $scope.resource[parentName] = []
+                            parentRoot = {}
+                            $scope.resource[parentName].push(parentRoot)
+                            parentMeta.index = 0;      //set the index...
+                        } else {
+                            parentRoot = {}
+                            $scope.resource[parentName] = parentRoot;
+                            parentMeta.index = 0;      //set the index...
+                        }
+
+
+
                     }
 
                 } else {
