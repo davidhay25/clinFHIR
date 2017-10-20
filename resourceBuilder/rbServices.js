@@ -612,8 +612,6 @@ angular.module("sampleApp").
                     var bundle = data.data;
                     if (bundle && bundle.entry && bundle.entry.length > 0) {
                         //return the first on if more than one... - updated: check the resource type! - added because of a bug, but it's not safe to assume that the response doesn't have other resources - like an OO
-                       //var res;
-
 
                         var entry = _.find(bundle.entry,function(o){
                             return o.resource.resourceType==typeOfConformanceResource;

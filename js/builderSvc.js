@@ -66,8 +66,57 @@ angular.module("sampleApp")
         objColours.Composition = '#FFFFCC';
         objColours.Medication = '#FF9900';
 
+        var hashProfile = {};   //hash of profile url & core type
+
         return {
 
+            getBaseTypeForProfile : function(url) {
+                //retrieve the base type for any profile - core or derived...
+                console.log(url)
+                var deferred = $q.defer();
+
+                //stu2/3 thing
+                if (angular.isArray(url)) {
+                    url = url[0]
+                }
+
+                var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
+
+                //is this a core profile?
+                var coreRoot='http://hl7.org/fhir/StructureDefinition/';
+                if (url.indexOf(coreRoot) > -1) {
+                    deferred.resolve($filter('getLogicalID')(url))
+                   //return $filter('getLogicalID')(url);
+                } else if (hashProfile[url]) {
+                    //have we already retrieved this url?
+                    deferred.resolve(hashProfile[url])
+                    //return hashProfile[url];
+                } else {
+                    //no, this is a derived profile. Retrieve the definition and determine the core resource..
+                    GetDataFromServer.findConformanceResourceByUri(url).then(
+                        function(profile){
+
+                            var baseType;
+                            if (fhirVersion == 2) {
+                                baseType = profile.constrainedType || $filter('getLogicalID')(profile.base);
+                            } else {
+                                baseType = profile.baseDefinition;
+                            }
+                            if (baseType) {
+                                hashProfile[url] = baseType;
+                                deferred.resolve(baseType)
+                            }
+                            return baseType;
+                        },
+                        function(){
+                            alert("The profile url "+url + " was not found on the conformance server: "+ appConfigSvc.getCurrentConformanceServer().name)
+                        }
+                    )
+
+                }
+                return deferred.promise;
+
+            },
             documentQualityReport : function(nodes,edges) {
                 //how good is the document
                 var report = {cntNodes:nodes.length,cntEdges:edges.length}
@@ -2688,8 +2737,19 @@ angular.module("sampleApp")
 
 
             },
-            getResourcesOfType : function(type,bundle){
-                //get all the resources in the bundle of the given type
+            getResourcesOfType : function(type,bundle,fullProfile){
+                //get all the resources in the bundle of the given type. fullProfile is the complete profile - not just the type (at the end of the url)
+
+                console.log(type)
+               if (fullProfile) {
+                   //new search - will replace the other eventually...
+                   // note that LMs can refer to 'core' types, but not other LM's (at present)
+                  // var type =
+
+
+               }
+
+
                 var ar = [];
                 var baseTypeForModel = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
                 bundle.entry.forEach(function(entry){
@@ -2704,6 +2764,7 @@ angular.module("sampleApp")
                             ar.push(resource);
                         } else {
                             //could be a profiled resource. see if the resource being examined claims to be confirmant...
+                            //todo - this may no longer be needed as we're deriving the core type from the profile...
                             if (resource.meta && resource.meta.profile) {
                                 //so it does claim conformance to some resources...
                                 for (var i=0; i < resource.meta.profile.length; i++) {

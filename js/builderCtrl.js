@@ -29,7 +29,6 @@ angular.module("sampleApp")
                 })
             };
 
-
             $scope.showQuest = function(){
                 $uibModal.open({
                     templateUrl: 'modalTemplates/newBuilderModal.html',
@@ -137,7 +136,6 @@ angular.module("sampleApp")
                 $scope.markResult = markerSvc.mark($scope.selectedContainer,ref) ; //compare to first bundle - testing!
                 //$scope.markResult = markerSvc.mark($scope.selectedContainer,$scope.builderBundles[0]) ; //compare to first bundle - testing!
             };
-
 
             $scope.makeElementsPopulatedReport = function(){
                 var report = builderSvc.makeElementsPopulatedReport($scope.selectedContainer.bundle);
@@ -1485,6 +1483,10 @@ angular.module("sampleApp")
             };
             //adds a new value to a property
 
+            $scope.selectConceptFromVSBrowser = function(concept) {
+                console.log(concept)
+            }
+
             //edit the resource text
             $scope.editResource = function(resource){
                 $scope.selectedContainer.isDirty = true;
@@ -1861,7 +1863,6 @@ console.log($scope.currentSD)
                 var url = resource.resourceType+'/'+resource.id;
                 $scope.currentResourceRefs = builderSvc.getSrcTargReferences(url)
 
-
                 profileCreatorSvc.makeProfileDisplayFromProfile(SD).then(
                     function(vo) {
                         $('#SDtreeView').jstree('destroy');
@@ -1888,9 +1889,6 @@ console.log($scope.currentSD)
                                 //existing branches that could allow an element on this path...
                                 $scope.existingElements = builderSvc.analyseInstanceForPath($scope.currentResource, path)
 
-
-                                //get the type information
-                                //console.log(ed)
 
                                 if (!ed.type) {
                                     //R3 seems to have no type for the root element in the resource. I need it for the extension adding...
@@ -1948,19 +1946,52 @@ console.log($scope.currentSD)
 
                                         //is this a resource reference?
                                         var targetProfile = typ.profile || typ.targetProfile;       //different in STU2 & 3
+
+
+
                                         if (typ.code == 'Reference' && targetProfile) {
                                             //get all the resources of this type  (that are not already referenced by this element
                                             $scope.hashPath.isReference = true;
 
-
-                                            var type = $filter('getLogicalID')(targetProfile);
-
+                                           // var type = $filter('getLogicalID')(targetProfile);
 
 
+                                            //want to allow for references to profiled resources being able to link to the core type, so is async...
+                                            builderSvc.getBaseTypeForProfile(targetProfile).then(
+                                                function(type) {
+                                                    var ar = builderSvc.getResourcesOfType(type,$scope.selectedContainer.bundle,targetProfile);
 
+                                                    if (ar.length > 0) {
+                                                        ar.forEach(function(resource){
+                                                            var reference = builderSvc.referenceFromResource(resource); //get the reference (type/id)
 
-                                            var ar = builderSvc.getResourcesOfType(type,$scope.selectedContainer.bundle);
+                                                            //search all the references for ones from this path. Don't include them in the list
+                                                            //$scope.allReferences created when the graph is built...
+                                                            var alreadyReferenced = false;
 
+                                                            $scope.currentResourceRefs.src.forEach(function(item){
+                                                                if (item.path == path && item.targ == reference) {
+                                                                    alreadyReferenced = true;
+                                                                }
+                                                            });
+
+                                                            //todo - trouble is that the search is by resource type not instance... if (! alreadyReferenced) {
+                                                            type = resource.resourceType;   //allows for Reference
+                                                            $scope.hashReferences[type] = $scope.hashReferences[type] || []
+                                                            $scope.hashReferences[type].push(resource);
+                                                            //}
+
+                                                        })
+                                                    }
+                                                },
+                                                function(err) {
+
+                                                }
+                                            )
+
+                                            //var ar = builderSvc.getResourcesOfType(type,$scope.selectedContainer.bundle,targetProfile);
+
+                                            /*
                                             if (ar.length > 0) {
                                                 ar.forEach(function(resource){
                                                     var reference = builderSvc.referenceFromResource(resource); //get the reference (type/id)
@@ -1968,7 +1999,6 @@ console.log($scope.currentSD)
                                                     //search all the references for ones from this path. Don't include them in the list
                                                     //$scope.allReferences created when the graph is built...
                                                     var alreadyReferenced = false;
-
 
                                                     $scope.currentResourceRefs.src.forEach(function(item){
                                                         if (item.path == path && item.targ == reference) {
@@ -1984,6 +2014,7 @@ console.log($scope.currentSD)
 
                                                 })
                                             }
+                                            */
 
                                         } else {
                                             //if not a refernece, then peform the analysis of the instance - potentially rejecting the addition...
@@ -2021,7 +2052,6 @@ console.log($scope.currentSD)
 
                             $scope.$digest();
 
-
                         })
 
                     }
@@ -2048,11 +2078,8 @@ console.log($scope.currentSD)
                         var type = $filter('getLogicalID')(ref.profile);
 
                         var ar = builderSvc.getResourcesOfType(type,$scope.selectedContainer.bundle);
-                        //var ar = builderSvc.getResourcesOfType(type,$scope.resourcesBundle);
                         if (ar.length > 0) {
                             ar.forEach(function(resource){
-
-                                //objReferences[path].ref = ref;
                                 objReferences[path].resource.push(resource);
                             })
                         }
@@ -2127,6 +2154,13 @@ console.log($scope.currentSD)
                  }
 
                 builderSvc.insertReferenceAtPath($scope.currentResource,pth,resource,insertPoint)
+
+
+                //temp!!!
+               // makeGraph();
+               // return;
+
+
 
                 //update the tracker...
                 var details = {path:pth,resourceType: $scope.currentResource.resourceType,
