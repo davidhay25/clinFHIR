@@ -1,10 +1,9 @@
-//upload conformance files in a folder structire to a FHOR server
-//currently set for careconnect profiles
-//works synchronously - easier to programme, and easier on the target server...
+//CareConnect version 3 profiles...
 
 var fs = require('fs');
 var syncRequest = require('sync-request');
 
+var upload = false;
 
 //var remoteFhirServer = "http://fhirtest.uhn.ca/baseDstu2/";
 var remoteFhirServer = "http://snapp.clinfhir.com:8080/baseDstu2/";
@@ -25,15 +24,23 @@ IG.description = "Care Connect";
 IG.extension = [{url: "http://clinfhir.com/fhir/StructureDefinition/cfAuthor",valueBoolean:true}]
 
 //var localFileRoot = __dirname;
-var localFileRoot = "/Users/davidha/Dropbox/orion/careConnect";
+var localFileRoot = "/Users/davidha/Dropbox/orion/careConnect3/CareConnect-profiles-feature-stu3/";
 
 
 console.log('------ Uploading ValueSets -------')
-var filePath = localFileRoot + "/CareConnectAPI/ValueSets";
+var filePath = localFileRoot + "valuesets";
+
+
+
 
 console.log(filePath);
 var fileNames = getFilesInFolder(filePath);
-uploadFiles(remoteFhirServer,filePath,fileNames,'ValueSet')
+uploadValueSets(remoteFhirServer,filePath,fileNames)
+
+
+
+return;
+
 
 console.log('-------- Uploading StructureDefinitions --------')
 var filePath = localFileRoot + "/CareConnectAPI/StructureDefinitions";
@@ -79,6 +86,17 @@ function addPages(fileRoot) {
 }
 
 
+function uploadValueSets(serverRoot,filePath,arFiles) {
+    arFiles.forEach(function (fileName) {
+        console.log(fileName);
+
+        var ar = fileName.split('-');
+        varIGEntry = {purpose:'Terminology',description:ar[2],sourceReference:{reference:json.url}}
+        IG.package[0].resource.push(varIGEntry);
+
+    })
+}
+
 
 //send all the xml files in the filepath to the indicated server (serverRoot)
 //for now, only use json files to avoid duplication
@@ -87,6 +105,9 @@ function uploadFiles(serverRoot,filePath,arFiles,resourceType) {
     var errors = 0, count = 0;
 
     arFiles.forEach(function (fileName) {
+
+
+
         if (fileName.indexOf('.json')> -1) {     //only json for now
 
             var pathToFile = filePath+'/'+fileName;
@@ -168,7 +189,7 @@ function uploadFiles(serverRoot,filePath,arFiles,resourceType) {
                         var response = syncRequest('PUT', url, options);
                         console.log('-->' + response.statusCode)
                         if (response.statusCode !== 200 && response.statusCode !== 201) {
-                            errors++
+                            errors++;
                             console.log(response.body.toString())
                         } else {
                             count ++

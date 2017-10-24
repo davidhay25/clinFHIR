@@ -215,14 +215,16 @@ angular.module("sampleApp")
                             drawTree(vo.treeData)
                         })
 
-            }).finally(function () {
+            },function(err){
+                    alert(err.msg)
+                }).finally(function () {
                 $scope.waiting = false;
             })
         };
 
         //find the resourceType for this profile.  todo - need to allow for stu2 (as well in maketree...
         function getResourceType(profile) {
-            var t = profile.baseDefinition;
+            var t = profile.baseDefinition || profile.base;     //stu3/2
             var ar = t.split('/');
             var bt = ar[ar.length-1];
             //for a domao=inf resource (ie from core) the first element path is the resource type. Otherwise it's the baseDefinition

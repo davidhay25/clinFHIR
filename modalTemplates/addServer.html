@@ -128,6 +128,15 @@
             <div class="col-md-12 col-sm-6 col-xs-12">
                 <strong>Note that the server must support
                     <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS" target="_blank">CORS</a>  as clinFHIR is a web application</strong>
+
+                <div>
+                    <br/>
+                    There are 2 headers needed in particular:
+                    <ul>
+                        <li>Access-Control-Allow-Origin:*</li>
+                        <li>Access-Control-Expose-Headers:Location, Content-Location</li>
+                    </ul>
+
             </div>
         </div>
 

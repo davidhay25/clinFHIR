@@ -1801,6 +1801,10 @@ console.log(summary);
         },
         addExtensionOnceWithReplace : function(resource,url,value) {
             //add the extension with this url if it does not already exist
+            if (angular.isArray(url)) {
+                url = url[0];       //stus/3
+            }
+
             var pos = -1;
             resource.extension = resource.extension || []
 
@@ -1821,6 +1825,10 @@ console.log(summary);
         addExtensionMultiple : function(resource,url,value) {
             //add the extension with this url regardless---
 
+            if (angular.isArray(url)) {
+                url = url[0];       //stus/3
+            }
+
             resource.extension = resource.extension || []
 
 
@@ -1831,6 +1839,9 @@ console.log(summary);
         },
         addExtensionOnce : function(resource,url,value) {
             //add the extension with this url if it does not already exist
+            if (angular.isArray(url)) {
+                url = url[0];       //stus/3
+            }
             if (resource) {
                 var found = false;
                 resource.extension = resource.extension || []

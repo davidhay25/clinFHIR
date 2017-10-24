@@ -464,7 +464,6 @@ angular.module("sampleApp")
 
                         if (ar.length == 1) {
                             //this is the root node
-                            //var rootNode = {id:ar[0],parent:'#',text:ar[0],state:{opened:true,selected:true},path:path,data: {ed : item}}
 
                             var rootNode = {id:id,parent:'#',text:ar[0],state:{opened:true,selected:true},path:path,data: {}}
 
@@ -474,7 +473,7 @@ angular.module("sampleApp")
                             rootNode.data.meta = {type:[{code:'BackboneElement'}]};  //this is for the newBuilder to determine if a node is
                             nodeHash[path]=rootNode;
 
-                           // idsInTree[ar[0]] = 'x';
+
                             idsInTree[id] = 'x';
                             include = false;
                         }
@@ -531,8 +530,9 @@ angular.module("sampleApp")
                         }
 
 
-
-                        if (item.name) {
+                        if (item.sliceName) {
+                            text = item.sliceName
+                        } else if (item.name) {
                             text = item.name
                         } else if (item.label) {
                             text = item.label
@@ -545,7 +545,9 @@ angular.module("sampleApp")
 
                         var arTree = path.split('.');
                         if (arTree[arTree.length-1] == 'extension') {
-                            text = item.name;// +inx;
+
+                            //text = item.name;// +inx;
+
                             id = id + cntExtension;
                             cntExtension++;
                         }
@@ -585,6 +587,7 @@ angular.module("sampleApp")
 
                             //parent = arTree.join('.');
 
+                            /* I don't think that text will ever have this value (and if it does, then these won't help...
                             //there should always be a name  - but just in case there isn't, grab the profile name...
                             if (text == 'extension') {
                                 if (item.sliceName) {
@@ -608,6 +611,7 @@ angular.module("sampleApp")
                                 }
 
                             }
+                            */
 
                             if (!text) {
                                 text = 'Unknown element'
@@ -629,7 +633,7 @@ angular.module("sampleApp")
                             node.data = {meta:{}};
 
                             //I don't think I'm using the ed anywhere - and would like to keep the tree as small as feasible...
-                            //temp node.data.ed = item;
+                            node.data.ed = item;
 
                             nodeHash[item.path] = node;
                             node.data.meta.path = item.path;
@@ -657,17 +661,22 @@ angular.module("sampleApp")
                             if (item.type) {
                                 item.type.forEach(function (typ) {
                                     var cd = typ.code;
-                                    if (cd == 'BackboneElement') {
-                                        node.data.meta.isBBE = true;
+                                    if (cd) {
+                                        if (cd == 'BackboneElement') {
+                                            node.data.meta.isBBE = true;
+                                        }
+
+                                        if (cd.substr(0,1) === cd.substr(0,1).toUpperCase()) {
+                                            node.data.meta.isComplex = true;
+                                        }
+
+                                        if (cd == 'Reference') {
+                                            node.data.meta.isReference = true;
+                                        }
+                                    } else {
+                                        alert('type without a code at '+ node.path)
                                     }
 
-                                    if (cd.substr(0,1) === cd.substr(0,1).toUpperCase()) {
-                                        node.data.meta.isComplex = true;
-                                    }
-
-                                    if (cd == 'Reference') {
-                                        node.data.meta.isReference = true;
-                                    }
 
                                 })
                             }
