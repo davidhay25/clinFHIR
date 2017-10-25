@@ -681,7 +681,13 @@ angular.module("sampleApp").
         },
         registerAccess : function(module){
             //register access for the logs...
-            $http.post('/stats/login',{module:module}).then(
+
+            var servers = {};
+            servers.conformance = appConfigSvc.getCurrentConformanceServer().name;
+            servers.terminology = appConfigSvc.getCurrentTerminologyServer().name;
+            servers.data = appConfigSvc.getCurrentDataServer().name;
+
+            $http.post('/stats/login',{module:module,servers:servers}).then(
                 function(data){
                     //console.log(data);
                 },
