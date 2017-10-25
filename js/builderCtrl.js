@@ -340,7 +340,6 @@ angular.module("sampleApp")
             }
 
 
-
             //---------- login stuff
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
             firebase.auth().onAuthStateChanged(function(user) {
@@ -625,8 +624,6 @@ angular.module("sampleApp")
                 })
 
             }
-
-
 
             //---------- related to document builder -------
             $rootScope.$on('docUpdated',function(event,composition){

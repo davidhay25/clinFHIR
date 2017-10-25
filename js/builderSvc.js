@@ -100,12 +100,16 @@ angular.module("sampleApp")
                             if (fhirVersion == 2) {
                                 baseType = profile.constrainedType || $filter('getLogicalID')(profile.base);
                             } else {
-                                baseType = profile.baseDefinition;
+                                //baseType = profile.baseDefinition;
+                                baseType = $filter('getLogicalID')(profile.baseDefinition);
                             }
                             if (baseType) {
                                 hashProfile[url] = baseType;
                                 deferred.resolve(baseType)
                             }
+
+
+
                             return baseType;
                         },
                         function(){

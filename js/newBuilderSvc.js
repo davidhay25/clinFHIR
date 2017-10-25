@@ -773,6 +773,10 @@ angular.module("sampleApp")
 
                                                     }
 
+                                                    if (child.ed.min !== 0) {
+                                                        newNode.data.meta.isRequired = true;
+                                                    }
+
                                                     newNode.data.meta.type = child.ed.type;
                                                     newNode.data.meta.isExtension = true;
                                                     newNode.data.meta.parentUrl = node.data.meta.url;
@@ -815,6 +819,12 @@ angular.module("sampleApp")
                             lstTree = lstTree.concat(newNodes)
 
                             setNodeIcons(lstTree);
+
+                            //remove all the ed's to save space....
+                            lstTree.forEach(function(node){
+                                delete node.ed;
+                            })
+
 
 
                             deferred.resolve({table:lst,treeData:lstTree,errors: loadErrors})
