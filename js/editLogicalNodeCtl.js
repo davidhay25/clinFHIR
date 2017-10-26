@@ -48,7 +48,7 @@ angular.module("sampleApp")
                                 var ar = item.split('.');
                                 var name = ar[ar.length-1];
                                 name = name.replace(dt.code,'');
-                                $scope.input.name = name
+                                $scope.input.name = name;
 
 
                                 $scope.input.dataType = dt;
@@ -56,6 +56,24 @@ angular.module("sampleApp")
 
                             }
                         }
+
+                        if (ed && ed.binding) {
+                            //this is a coded element...
+                            var ref = ed.binding.valueSetReference;
+                            if (ref) {
+                                var url = ref.reference;
+                                var ar = url.split('/');
+                                var name = ar[ar.length-1];
+                                var vo={vs:{url:url,name:name},strength:ed.binding.strength}
+                                $scope.selectedValueSet = vo;
+                            }
+//console.log(ed)
+
+
+
+                        }
+
+
 
                     }
 
@@ -741,6 +759,9 @@ angular.module("sampleApp")
                     }
                 }).result.then(
                     function (vo) {
+
+
+                       // console.log(vo)
 
                         $scope.selectedValueSet = vo;
 
