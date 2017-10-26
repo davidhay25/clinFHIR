@@ -422,9 +422,6 @@
                 </uib-tab>
 
 
-
-
-
                 <uib-tab heading="Table">
                     <br/>
 
@@ -439,6 +436,9 @@
                                         ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path| lastInPath}}</div>
                             </td>
                             <td>{{row.data.type[0].code}}
+
+                                <div ng-show="row.data.type[0].targetProfile">-> {{row.data.type[0].targetProfile | getLogicalID}}</div>
+
 
                             </td>
                             <td><div ng-show="row.data.isReference">Y</div></td>
@@ -468,7 +468,9 @@
                                         <div  ng-click="selectNodeFromTable(ed.path)" class="clickable"
                                               ng-style="{ 'padding-left': (ed.path | pathindent) }">{{ed.path | lastInPath}}</div>
                                     </td>
-                                    <td>{{ed.type[0].code}}</td>
+                                    <td>{{ed.type[0].code}}
+                                        <div ng-show="ed.type[0].targetProfile">-> {{ed.type[0].targetProfile | getLogicalID}}</div>
+                                    </td>
                                     <td>{{ed.min}}..{{ed.max}}</td>
                                     <td>{{ed.definition}}</td>
                                     <td>
@@ -786,12 +788,13 @@
 
                                         {{typ.code}}
 
+                                        <!-- - hiding this for the moment as it might be confusing (was added for rod & mapping)
                                         <span class="clickable" ng-click="explodeDT(typ.code)" ng-show = "typ.isComplexDT">Expand</span>
 
                                         <span class="clickable" ng-click="explodeReference(selectedNode)"
                                               ng-show = "selectedNode.text == 'reference'">Expand</span>
 
-
+-->
 
 
 

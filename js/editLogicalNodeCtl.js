@@ -27,13 +27,13 @@ angular.module("sampleApp")
             };
 
 
-            //when a fhor path is selected from the type-ahead...
+            //when a fhir path is selected from the type-ahead...
             $scope.fhirPathSelect = function(item) {
                 console.log(item)
                 //if the name is empty, set it to the last value in the path and set the datatype...
                 if (! $scope.input.name && item) {
-                    var ar = item.split('.');
-                    $scope.input.name = ar[ar.length-1]
+                  //  var ar = item.split('.');
+                   // $scope.input.name = ar[ar.length-1]
 
                     var ed = $scope.allPathsHash[item];
                     if (ed && ed.type) {
@@ -43,13 +43,19 @@ angular.module("sampleApp")
                         for (var i=0; i< $scope.allDataTypes.length; i++) {
                             if ($scope.allDataTypes[i].code == code ){
                                 var dt = $scope.allDataTypes[i];
-                                $scope.input.dataType = dt
+
+                                //split off the datatype from the name
+                                var ar = item.split('.');
+                                var name = ar[ar.length-1];
+                                name = name.replace(dt.code,'');
+                                $scope.input.name = name
+
+
+                                $scope.input.dataType = dt;
                                 $scope.setDataType(dt);
 
                             }
                         }
-
-
 
                     }
 

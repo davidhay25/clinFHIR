@@ -1522,8 +1522,29 @@ angular.module("sampleApp")
                         if (SD && SD.snapshot && SD.snapshot.element) {
                             var lst = [], hash={};
                             SD.snapshot.element.forEach(function (ed) {
-                                lst.push(ed.path)
-                                hash[ed.path] = ed;
+                                var path = ed.path;
+                                //expand the [x] element. Todo - this might muck up the profile generation... ?could just look for multiple types
+                                if (path.indexOf('[x]')> -1 && ed.type) {
+                                    var pathRoot = path.substr(0,path.length-3);
+                                    ed.type.forEach(function(typ){
+                                        if (typ.code) {
+                                            var cd = typ.code[0].toUpperCase()+typ.code.substr([1]);
+                                            var newPath = pathRoot + cd;
+                                            lst.push(newPath)
+                                            hash[newPath] = ed;
+                                        }
+
+                                    })
+
+
+                                } else {
+                                    lst.push(path)
+                                    hash[path] = ed;
+                                }
+
+
+
+
                             });
                             deferred.resolve({list:lst,hash:hash})
                         }
