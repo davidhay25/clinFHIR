@@ -1948,8 +1948,9 @@ angular.module("sampleApp")
                             if (!baseType) {
                                 var node = findNodeWithPath(parentPath)
 
-                                if (node && node.data && node.data.ed && node.data.ed.type) {
-                                    node.data.ed.type.forEach(function (typ) {
+                                if (node && node.data && node.data.type) {
+                                //if (node && node.data && node.data.ed && node.data.ed.type) {
+                                    node.data.type.forEach(function (typ) {
                                         if (typ.code == 'Reference') {
                                             //r2/r3 difference
                                             var profile = typ.targetProfile
@@ -2089,7 +2090,7 @@ angular.module("sampleApp")
 
                         setAllMappings();   //update any mappings
 
-                        $scope.Q = logicalModelSvc.makeQ($scope.treeData);  //update the Questionnaire
+                        //$scope.Q = logicalModelSvc.makeQ($scope.treeData);  //update the Questionnaire
                         console.log( $scope.Q)
 
                         //set the path of the element based on the name - and the parent names up the hierarchy..
