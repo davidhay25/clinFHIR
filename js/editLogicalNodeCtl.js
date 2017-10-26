@@ -21,7 +21,41 @@ angular.module("sampleApp")
                 if (map && map.indexOf('xtension') > -1) {
                     $scope.isExtension = true;
                 }
+
+
+
             };
+
+
+            //when a fhor path is selected from the type-ahead...
+            $scope.fhirPathSelect = function(item) {
+                console.log(item)
+                //if the name is empty, set it to the last value in the path and set the datatype...
+                if (! $scope.input.name && item) {
+                    var ar = item.split('.');
+                    $scope.input.name = ar[ar.length-1]
+
+                    var ed = $scope.allPathsHash[item];
+                    if (ed && ed.type) {
+                        //set the datatype to the first type in the list...
+                        var code = ed.type[0].code; // the datatype as a string...
+
+                        for (var i=0; i< $scope.allDataTypes.length; i++) {
+                            if ($scope.allDataTypes[i].code == code ){
+                                var dt = $scope.allDataTypes[i];
+                                $scope.input.dataType = dt
+                                $scope.setDataType(dt);
+
+                            }
+                        }
+
+
+
+                    }
+
+                }
+            };
+
 
 
             if (editNode) {
@@ -44,7 +78,10 @@ angular.module("sampleApp")
                 logicalModelSvc.getAllPathsForType(baseType).then(
                     function(listOfPaths) {
 
-                        $scope.allPaths = listOfPaths;
+                        $scope.allPaths = listOfPaths.list;
+                        $scope.allPathsHash = listOfPaths.hash;
+                    },function(err) {
+                        alert("A Base type of "+ baseType +" was selected, but I couldn't locate the profile to get the element paths")
                     }
                 )
 
@@ -346,7 +383,7 @@ angular.module("sampleApp")
                 }
 
 
-                if ($scope.input.name.indexOf(" ") > -1) {
+                if ($scope.input.name && $scope.input.name.indexOf(" ") > -1) {
                     $scope.canSave = false;
                     modalService.showModal({},{bodyText:"The name cannot have spaces in it. Try again."})
                 }
@@ -458,10 +495,18 @@ angular.module("sampleApp")
                 delete $scope.input.addOtherMap;    //
             };
 
-            $scope.updateCurrentMapValue = function(value) {
-                $scope.currentMap.map = value;
-                $scope.isDirty = true;
+
+            $scope.updateCurrentMapValue = function(path) {
+                if (path) {
+                    $scope.currentMap.map = path;
+                    $scope.isDirty = true;
+
+
+                }
+//setDataType(input.dataType)
+
             }
+
 
             $scope.deleteCurrentMap = function(){
                 delete $scope.currentMap;
@@ -493,6 +538,13 @@ angular.module("sampleApp")
                 if ($scope.input.addOtherMap) {
                     $scope.addNewMap($scope.input.newMapIdentity,$scope.input.newMapValue)
                 }
+
+                //make sure there is a vaid name. Moved here (rather than the onblur) to allow the name to be set from the fhir path...
+                $scope.checkName();
+                if (! $scope.canSave) {
+                    return
+                }
+
 
                     var vo = {};
                     vo.name = $scope.input.name;
@@ -622,8 +674,6 @@ angular.module("sampleApp")
                 if (dt.isCoded) {
                     $scope.isCoded = true;
                 }
-
-
             }
 
             $scope.selectVsFromServer = function(){

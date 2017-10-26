@@ -1520,11 +1520,12 @@ angular.module("sampleApp")
                 GetDataFromServer.findConformanceResourceByUri(url).then(
                     function (SD) {
                         if (SD && SD.snapshot && SD.snapshot.element) {
-                            var lst = []
+                            var lst = [], hash={};
                             SD.snapshot.element.forEach(function (ed) {
                                 lst.push(ed.path)
-                            })
-                            deferred.resolve(lst)
+                                hash[ed.path] = ed;
+                            });
+                            deferred.resolve({list:lst,hash:hash})
                         }
 
 
