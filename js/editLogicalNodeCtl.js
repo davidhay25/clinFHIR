@@ -6,7 +6,6 @@ angular.module("sampleApp")
 
             $scope.allResourceTypes = allResourceTypes;
             $scope.references = references;
-            //console.log(references);
             $scope.rootForDataType = rootForDataType;
             $scope.canSave = true;
             $scope.allDataTypes = allDataTypes;
@@ -21,9 +20,6 @@ angular.module("sampleApp")
                 if (map && map.indexOf('xtension') > -1) {
                     $scope.isExtension = true;
                 }
-
-
-
             };
 
 
@@ -32,8 +28,6 @@ angular.module("sampleApp")
                 console.log(item)
                 //if the name is empty, set it to the last value in the path and set the datatype...
                 if (! $scope.input.name && item) {
-                  //  var ar = item.split('.');
-                   // $scope.input.name = ar[ar.length-1]
 
                     var ed = $scope.allPathsHash[item];
                     if (ed && ed.type) {
@@ -67,16 +61,8 @@ angular.module("sampleApp")
                                 var vo={vs:{url:url,name:name},strength:ed.binding.strength}
                                 $scope.selectedValueSet = vo;
                             }
-//console.log(ed)
-
-
-
                         }
-
-
-
                     }
-
                 }
             };
 

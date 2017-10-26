@@ -1,4 +1,6 @@
-
+.nb-modal-window .modal-dialog {
+    width: 1200px;
+}
 
 .modal-xl {
     width:1200px;

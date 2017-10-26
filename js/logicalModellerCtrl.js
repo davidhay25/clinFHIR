@@ -37,8 +37,55 @@ angular.module("sampleApp")
 
             $scope.input.newCommentboxInxDEP = -1;
 
+            $scope.showForm = function(){
+
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/newBuilderModal.html',
+                    windowClass: 'nb-modal-window',
+                    controller : function($scope,startProfile,startResource,bundle,title,container){
+                        $scope.startProfile = startProfile;
+                        $scope.startResource = startResource;
+                        $scope.bundle = bundle;
+                        $scope.title = title;
+                        $scope.container = container;
+
+                        $scope.closeModal = function() {
+                            $scope.$close()
+                        }
+
+                    }, resolve : {
+                        startProfile : function(){
+                            return $scope.SD;
+                        },
+                        startResource : function() {
+                            //note that the $scope.currentResource will be directly updated by new builder...
+                            return {};
+                        },
+                        bundle : function(){
+                            //used for the references...
+                            return {resourceType:'Bundle',entry:[]};
+                        },
+                        title : function(){
+                            return "Form ";
+                        },
+                        container : function(){
+                            //used for the references...
+                            return {};
+                        }
+
+                    }
+                })
+
+
+            }
+
 
             $scope.showQuest = function(){
+                $scope.showForm()
+
+                return
+
+
                 $uibModal.open({
                     templateUrl: 'modalTemplates/questionnaire.html',
                     size: 'xl',
