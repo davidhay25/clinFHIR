@@ -1155,10 +1155,13 @@ angular.module("sampleApp")
                         $scope.profileNetwork.on("click", function (obj) {
                             var nodeId = obj.nodes[0];  //get the first node
                             var node = graphData.nodes.get(nodeId);
-                            var pathOfSelectedNode = node.ed.path; //node.ed.base.path not working with merged...
-                            $scope.selectedNode = findNodeWithPath(pathOfSelectedNode); //note this is the node for the tree view, not the graph
+                            if (node.ed) {
+                                var pathOfSelectedNode = node.ed.path; //node.ed.base.path not working with merged...
+                                $scope.selectedNode = findNodeWithPath(pathOfSelectedNode); //note this is the node for the tree view, not the graph
 
-                            $scope.$digest();
+                                $scope.$digest();
+                            }
+
 
                         });
                     }
