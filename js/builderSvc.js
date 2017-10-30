@@ -282,7 +282,7 @@ angular.module("sampleApp")
                             if (isList){
                             //if (entry.reference.indexOf('List') > -1) {
                                 var list = hashByRef[entry.reference];
-                                if (list) {
+                                if (list && list.entry) {
                                     list.entry.forEach(function (entry) {
                                         var entryId = getId();
                                         var entryItem = {id: entryId, parent: sectId, text: entry.item.reference, state: {opened: true, selected: false}}
