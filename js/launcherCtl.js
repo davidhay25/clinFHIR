@@ -6,9 +6,6 @@ angular.module("sampleApp")
             GetDataFromServer.registerAccess('launcher');
 
 
-
-
-
             $scope.testing = {};
             $scope.showServers = false;
             $scope.displayMode = 'front';

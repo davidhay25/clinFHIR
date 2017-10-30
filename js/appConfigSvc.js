@@ -203,7 +203,7 @@ angular.module("sampleApp")
         if (! $localStorage.config) {
             $localStorage.config = defaultConfig;
         }
-        
+
         return {
             setToDefault : function(){
                 //this.setServerType('terminology',"http://fhir3.healthintersections.com.au/open/");
