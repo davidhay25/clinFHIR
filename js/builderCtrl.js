@@ -124,7 +124,7 @@ angular.module("sampleApp")
                     console.log(data)
                     delete $scope.currentResource;      //todo - there's a setResource() in the service too...
 
-                    if (data.node.data){
+                    if (data.node.data && data.node.data.resource){
                         $scope.selectResource({resource:data.node.data.resource});
 
                     }

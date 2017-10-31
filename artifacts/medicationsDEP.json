@@ -3,9 +3,9 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": " 320176004","system":"http://snomed.info/ct","display":" salbutamol 100micrograms/inhaler "}
+        {"code": "91143003","system":"http://snomed.info/ct","display":"salbutamol 90 mcg/spray"}
       ],
-      "text" : " salbutamol 100micrograms/inhaler"
+      "text" : "salbutamol 90 mcg/spray"
     },
     "status": "active",
 
@@ -43,12 +43,12 @@
         "code": {
           "coding": [
             {
-              "code": "370167008 ",
+              "code": "7947003",
               "system": "http://snomed.info/ct",
-              "display": "aspirin 81mg e/c tablet "
+              "display": "aspirin 81 mg"
             }
           ],
-          "text": "aspirin 81mg e/c tablet"
+          "text": "aspirin 81 mg"
         },
         "isBrand" : false
       }
@@ -56,17 +56,15 @@
     ],
     "medicationReference" : {
       "reference": "#med1",
-      "display" : "aspirin 81mg e/c tablet"
+      "display" : "aspirin 81 mg"
     },
     "status": "active",
 
     "reasonForUseCode" : [{
       "coding" : [
-        {
-        "code":"49436004",
-        "system":"http://snomed.info/ct",
-        "display":"atrial fibrillation (disorder)"}],
-      "text" : "atrial fibrillation"
+        {"code":"73211009","system":"http://snomed.info/ct","display":"diabetes (disorder)"}
+      ],
+      "text" : "diabetes"
     }],
     "dosage" : [
       {
@@ -89,9 +87,9 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "376733004","system":"http://snomed.info/ct","display":"beclomethasone dipropionate 40mcg aerosol"}
+        {"code": "1389007","system":"http://snomed.info/ct","display":"beclomethasone HFA 40 mcg/spray"}
       ],
-      "text" : "beclomethasone dipropionate 40mcg aerosol"
+      "text" : "beclomethasone HFA"
     },
     "status": "active",
 
@@ -123,9 +121,9 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "318632005","system":"http://snomed.info/ct","display":"carvedilol 25 mg"}
+        {"code": "108551001","system":"http://snomed.info/ct","display":"carvedilol"}
       ],
-      "text" : "carvedilol 25 mg"
+      "text" : "carvedilol"
     },
     "status": "active",
 
@@ -156,9 +154,9 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "376321007","system":"http://snomed.info/ct","display":"chlortalidone 15 mg"}
+        {"code": "108551001","system":"http://snomed.info/ct","display":"chlorthalidone"}
       ],
-      "text" : "chlortalidone 15 mg"
+      "text" : "chlorthalidone"
     },
     "status": "active",
 
@@ -189,9 +187,9 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "321987003","system":"http://snomed.info/ct","display":"citalopram 20 mg"}
+        {"code": "321986007","system":"http://snomed.info/ct","display":"citalopram"}
       ],
-      "text" : "citalopram 20 mg"
+      "text" : "citalopram"
     },
     "status": "active",
 
@@ -222,9 +220,9 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "323021008","system":"http://snomed.info/ct","display":"gabapentin 600mg"}
+        {"code": "10840200","system":"http://snomed.info/ct","display":"gabapentin"}
       ],
-      "text" : "gabapentin 600mg"
+      "text" : "gabapentin"
     },
     "status": "active",
 
@@ -255,9 +253,9 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "400847007","system":"http://snomed.info/ct","display":"insulin glargine 100units/mL injection"}
+        {"code": "126212009","system":"http://snomed.info/ct","display":"insulin glargine"}
       ],
-      "text" : "insulin glargine 100units/mL injection"
+      "text" : "insulin glargine"
     },
     "status": "active",
 
@@ -289,9 +287,9 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "444639002","system":"http://snomed.info/ct","display":"losartan 100mg + hydrochlorothiazide 12.5mg"}
+        {"code": "96309000","system":"http://snomed.info/ct","display":"losartan"}
       ],
-      "text" :  "losartan 100mg + hydrochlorothiazide 12.5mg"
+      "text" : "losartan 100mg"
     },
     "status": "active",
 
@@ -322,7 +320,7 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "411533003","system":"http://snomed.info/ct","display":"metformin 1000mg"}
+        {"code": "7947003","system":"http://snomed.info/ct","display":"metformin 1000mg"}
       ],
       "text" : "metformin 1000mg"
     },
@@ -355,9 +353,9 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "329839005","system":"http://snomed.info/ct","display":"naproxen 500mg e/c tablet"}
+        {"code": "11847009","system":"http://snomed.info/ct","display":"naproxen 500mg"}
       ],
-      "text" : "naproxen 500mg e/c tablet"
+      "text" : "naproxen 500mg"
     },
     "status": "active",
 
@@ -388,9 +386,9 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "407848004","system":"http://snomed.info/ct","display":"omeprazole 40mg e/c tablet"}
+        {"code": "11847009","system":"http://snomed.info/ct","display":"omeprazole 40mg"}
       ],
-      "text" : "omeprazole 40mg e/c tablet "
+      "text" : "omeprazole 40mg"
     },
     "status": "active",
 
@@ -421,7 +419,7 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "325456002","system":"http://snomed.info/ct","display":"prednisone 20mg"}
+        {"code": "91143003","system":"http://snomed.info/ct","display":"prednisone 20mg"}
       ],
       "text" : "prednisone 20mg"
     },
@@ -455,7 +453,7 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "429374003","system":"http://snomed.info/ct","display":"simvastatin 40mg"}
+        {"code": "10312003","system":"http://snomed.info/ct","display":"simvastatin 40mg"}
       ],
       "text" : "simvastatin 40mg"
     },
@@ -489,7 +487,7 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "324718007","system":"http://snomed.info/ct","display":"terbinafine 250mg"}
+        {"code": "108925005","system":"http://snomed.info/ct","display":"terbinafine 250mg"}
       ],
       "text" : "terbinafine 250mg"
     },
@@ -523,9 +521,9 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "442160008","system":"http://snomed.info/ct","display":"zolpidem 5mg sublingual tablet"}
+        {"code": "96231005","system":"http://snomed.info/ct","display":"zolpidem 5mg"}
       ],
-      "text" : "zolpidem 5mg sublingual tablet"
+      "text" : "zolpidem 5mg"
     },
     "status": "active",
 
@@ -557,7 +555,7 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "318860005","system":"http://snomed.info/ct","display":"lisinopril 20mg"}
+        {"code": "108551001","system":"http://snomed.info/ct","display":"lisinopril 20mg"}
       ],
       "text" : "lisinopril 20mg"
     },
@@ -590,7 +588,7 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "319134001","system":"http://snomed.info/ct","display":"isosorbide mononitrate 20mg"}
+        {"code": "108484003","system":"http://snomed.info/ct","display":"isosorbide mononitrate 20mg"}
       ],
       "text" : "isosorbide mononitrate 20mg"
     },
@@ -623,7 +621,7 @@
     "resourceType" : "MedicationStatement",
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "321323009","system":"http://snomed.info/ct","display":"buspirone 5mg"}
+        {"code": "91452003","system":"http://snomed.info/ct","display":"buspirone 5mg"}
       ],
       "text" : "buspirone 5mg"
     },
@@ -653,3 +651,4 @@
     ]
   }
 ]
+

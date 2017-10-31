@@ -1191,7 +1191,6 @@ angular.module("sampleApp")
                     composition.text.div = that.addGeneratedText(manual,generated);
 
                     html += "<h3>Composition</h3>" + "<div class='inset'>"+ composition.text.div + "</div>";
-
                     html += "<h3>Sections</h3>";
 
                     composition.section.forEach(function(section){
