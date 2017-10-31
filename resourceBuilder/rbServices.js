@@ -2983,9 +2983,13 @@ console.log(summary);
                         var txt = "";
                         if (resource.medicationCodeableConcept) {
                             txt +=  getCCSummary(resource.medicationCodeableConcept);
+                        } else if (resource.medicationReference && resource.medicationReference.display) {
+
+                            txt = resource.medicationReference.display;
                         } else {
                             txt =  resource.resourceType;
                         }
+
 
 
 
