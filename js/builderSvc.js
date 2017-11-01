@@ -169,32 +169,36 @@ angular.module("sampleApp")
             },
             makeDisplayBundle : function(bundle) {
                 //remove extensions (track validation & stuff) todo = will likely need to be more granular in teh future...
+                if (bundle) {
+                    var newBundle = {resourceType:'Bundle',id:bundle.id,type: bundle.type,entry:[]}
+                    if (bundle && bundle.entry) {
+                        bundle.entry.forEach(function(entry){
+                            var resource = entry.resource;
+                            if (resource.extension && resource.extension.length == 0) {
+                                delete resource.extension;
+                            }
 
-                var newBundle = {resourceType:'Bundle',id:bundle.id,type: bundle.type,entry:[]}
-                if (bundle && bundle.entry) {
-                    bundle.entry.forEach(function(entry){
-                        var resource = entry.resource;
-                        if (resource.extension && resource.extension.length == 0) {
-                            delete resource.extension;
-                        }
+                            if (resource.resourceType == 'Composition') {
+                                //composition goes first
+                                newBundle.entry.splice(0,0,{resource:resource})
+                                newBundle.type = 'document'
+                            } else if (resource.resourceType == 'MessageHeader') {
+                                //composition goes first
+                                newBundle.entry.splice(0,0,{resource:resource})
+                                newBundle.type = 'message'
+                            } else {
+                                newBundle.entry.push({resource:resource})
+                            }
 
-                        if (resource.resourceType == 'Composition') {
-                            //composition goes first
-                            newBundle.entry.splice(0,0,{resource:resource})
-                            newBundle.type = 'document'
-                        } else if (resource.resourceType == 'MessageHeader') {
-                            //composition goes first
-                            newBundle.entry.splice(0,0,{resource:resource})
-                            newBundle.type = 'message'
-                        } else {
-                            newBundle.entry.push({resource:resource})
-                        }
+                            //response.entry.push({resource:resource})
+                        })
 
-                        //response.entry.push({resource:resource})
-                    })
-
+                    }
+                    return newBundle;
+                } else {
+                    return {}
                 }
-                return newBundle;
+
             },
             makeDocumentTree : function(bundle) {
                 var tree = []

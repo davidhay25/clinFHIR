@@ -143,6 +143,10 @@
 
 */
 
+        window.onerror = function(message, url, linenumber) {
+            alert("An unexpected error occurred: " + message + " on line " + linenumber + " for " + url);
+        }
+
     </script>
     <script src="js/builderCtrl.js"></script>
     <script src="js/builderSvc.js"></script>

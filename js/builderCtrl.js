@@ -967,12 +967,12 @@ angular.module("sampleApp")
 
             $scope.currentBundleIndex = 0;     //the index of the bundle currently being used
 
-
             //select the initial container
             if (! $localStorage.builderBundles) {
 
                 //modalService.showModal({}, {bodyText:'To get started, either create a new set or download one from the Library.'});
-                $localStorage.builderBundles = []
+                $localStorage.builderBundles = [];
+
                 $scope.currentBundleIndex = -1;
 
             } else {
@@ -1084,9 +1084,11 @@ angular.module("sampleApp")
                         $scope.selectedContainer = newBundleContainer;
                         $scope.currentBundleIndex= $localStorage.builderBundles.length -1;
 
-                       // console.log(newBundleContainer)
 
-                        //sbHistorySvc.addItem('scenario',newBundle.id,true,newBundleContainer);      //track changes
+                        //for some reason, the first bundle is not displayed in the list...  There's probably a more elegant fix...
+                        if ($scope.builderBundles.length == 0) {
+                            $scope.builderBundles = $localStorage.builderBundles
+                        }
 
                         makeGraph();
                         delete $scope.currentResource;
