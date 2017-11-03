@@ -32,7 +32,7 @@ function setup(app,db) {
 
     })
 
-    app.post('/orionTest/executeFP',function(req,res){
+    app.post('/clinFHIR/executeFP',function(req,res){
 
         var body = "";
 

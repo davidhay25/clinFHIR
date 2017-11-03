@@ -2130,7 +2130,7 @@ console.log($scope.currentSD)
                     $scope.input.selectedExistingElement = $scope.existingElements.list.length -1;
 
                 } else {
-                    alert('cannot add new branch');
+                    alert('cannot add new branch - select another resource, then come back and try again.');
                 }
 
             };

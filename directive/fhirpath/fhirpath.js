@@ -29,7 +29,7 @@ angular.module('sampleApp')
                 $scope.executeJSONPath = function(path) {
                     delete $scope.FHIRPathResult;
 
-                    var url = "orionTest/executeFP";
+                    var url = "clinFHIR/executeFP";
 
                     var data = {path:path,resource:$scope.resource}
                     $http.post(url,data).then(
