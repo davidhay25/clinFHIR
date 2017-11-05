@@ -601,6 +601,9 @@
                                             <div ng-show = "selectedNodeFromGraph.data.purpose == 'extension'">
                                             <span class = 'clickable' ng-click="showExtension(selectedNodeFromGraph.data.SD)">
                                                 {{selectedNodeFromGraph.data.url}}</span>
+
+
+
                                             </div>
 
                                             <div ng-show = "selectedNodeFromGraph.data.purpose == 'profile'">
@@ -1016,7 +1019,8 @@
                             <uib-tab heading="Analysis">
                                 <br/>
 
-                                <fhir-extension analyse="selectedExtensionAnalysis" showvs="showValueSet(url)"  ></fhir-extension>
+                                <fhir-extension analyse="selectedExtensionAnalysis"
+                                                showvs="showValueSet(url)"></fhir-extension>
 
 
                                 <div ng-show="igGraphHash[selectedItem.url].usedBy">

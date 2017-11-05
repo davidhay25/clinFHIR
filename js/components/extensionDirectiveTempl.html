@@ -53,11 +53,17 @@
 
                                     </td>
                                     <td>
-                                        <!--  fundValueSet() needs the real binding--->
+                                        <!--  fundValueSet() needs the real binding
                                         <a ng-click="findValueSet(child.ed.binding)"
                                            href="#" title="Edit/View ValueSet">
                                             {{child.boundValueSet}}
                                         </a>
+
+                                        --->
+
+                                        <div class="clickable" ng-click="$ctrl.showvs({url:child.boundValueSet})">
+                                            {{child.boundValueSet}}
+                                        </div>
 
 
                                     </td>

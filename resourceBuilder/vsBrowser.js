@@ -259,18 +259,20 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                     resolve : {
                         selectedvs : function() {
                             return $scope.selectedvs;
-                        }/*,
-                        selectVSFn : function() {
-                            return $scope.vsSelected
-                        }*/
+                        }
                     }
                 }).result.then(function(selectedConcept){
                         //User clicked save
-                        //console.log(selectedConcept)
-                        //$scope.profileSelected()(selectedProfile)
-                    $scope.conceptSelected()(selectedConcept)
 
-                    })
+                    //if there's no handler for selectinf a concept, then catch but ignore the exception...
+                    try {
+                        $scope.conceptSelected()(selectedConcept)
+                    } catch (ex){
+
+                    }
+
+
+                })
 
             };
 

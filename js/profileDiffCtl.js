@@ -582,12 +582,21 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/showExtension.html',
                     size: 'lg',
-                    controller: function($scope,ext,Utilities) {
+                    controller: function($scope,ext,Utilities,fnShowVS) {
                         $scope.extensionAnalysis = Utilities.analyseExtensionDefinition3(ext)
+
+                        $scope.mShowVS = function(url) {
+                            console.log(url)
+                            fnShowVS(url)
+
+                        }
                     },
                     resolve : {
                         ext: function () {          //the default config
                             return SD;
+                        },
+                        fnShowVS : function() {
+                           return $scope.showValueSet
                         }
                     }
 
@@ -1462,7 +1471,7 @@ angular.module("sampleApp")
 
                     $timeout(function(){
                         $scope.profileNetwork.fit();
-                        
+
                     },1000)
                 }
 
