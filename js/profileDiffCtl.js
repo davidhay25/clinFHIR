@@ -32,15 +32,15 @@ angular.module("sampleApp")
             $scope.editResourceItem = function(item) {
 
 
-                console.log(item)
+
 
                 var igResource = profileDiffSvc.findItem(item.url,$scope.currentIG)
 
-                console.log(igResource);
+
 
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editIGResource.html',
-                    //size:'lg',
+
                     backdrop: 'static',
                     controller: function($scope,igResource){
                         $scope.description = igResource.description;
@@ -62,11 +62,7 @@ angular.module("sampleApp")
                     $scope.selectItem(item,'example')
                 });
 
-                //
 
-
-
-               // $scope.selectIG($scope.currentIG);
 
             };
 
@@ -87,7 +83,7 @@ angular.module("sampleApp")
                     }
                 )
 
-                console.log(item)
+
 
             };
 
@@ -107,7 +103,7 @@ angular.module("sampleApp")
 
                 }).result.then(function(vo){
                     var url = vo.url;       //the resource where the resource was saved
-                    console.log(url)
+
                     //now create an entry for this example in the IG...
 
 
@@ -134,7 +130,7 @@ angular.module("sampleApp")
 
                 });
 
-                console.log(item)
+
             };
 
             //download a single item (profile or extension)
@@ -202,11 +198,11 @@ angular.module("sampleApp")
 
                     }
 
-                    //console.log()
+
                     $scope.$digest();       //as the event occurred outside of angular...
 
                 }).on('redraw.jstree',function(e,data){
-                    console.log(data)
+
                 })
             }
 
@@ -219,25 +215,8 @@ angular.module("sampleApp")
                 var topNode = tree[0];
 
                 getChildren(pageRoot,topNode);
-/*
-                if (topNode.children) {
-                    getChildren(pageRoot,topNode.children[0]);
 
-                    for (var j = 0; j < top.children.length;j++) {
-                        getChildren(pageRoot,top.children[j]);
-                    }
 
-                }
-*/
-                //now copy to IG
-                /*
-
-                var frontPage = {source:"about:blank",kind:'page'};
-                setTitle(frontPage,"Front Page");
-                frontPage.page = pageRoot.page;
-                */
-
-                console.log(pageRoot)
 
                 $scope.currentIG.page = pageRoot.page[0];// pageRoot.page;
 
@@ -245,7 +224,7 @@ angular.module("sampleApp")
 
                 SaveDataToServer.saveResource($scope.currentIG).then(
                     function (data) {
-                        console.log(data)
+
                         $scope.pageDirty = false;
                         alert("Implementation Guide has been updated.")
                     }, function (err) {
@@ -255,7 +234,7 @@ angular.module("sampleApp")
 
                 function getChildren(parentPage,node) {
                     var page = node.data;     //this is a child page off the parent
-                    console.log(parentPage,page);
+
                     if (page) {
                         parentPage.page = parentPage.page || []
                         parentPage.page.push(page)
@@ -452,7 +431,7 @@ angular.module("sampleApp")
                         GetDataFromServer.adHocFHIRQuery(url).then(
                             function(data){
                                 var IG = data.data;
-                                console.log(IG);
+
                                 $scope.selectIG(IG);
                             },
                             function(){
@@ -474,15 +453,15 @@ angular.module("sampleApp")
                 var fileName = $scope.currentIG.name;
                 profileDiffSvc.createDownloadBundle($scope.currentIG).then(
                     function(bundle) {
-                        //console.log(bundle);
+
 
                         displayDownLoadDlg(bundle,['Only Profiles and Extension Definitions included'],fileName)
 
                     },function(bundle) {
-                        //console.log(bundle);
+
                         displayDownLoadDlg(bundle,['Only Profiles and Extension Definitions included'],fileName)
 
-                        //setDownloadLink(bundle,'IG')
+
                     }
                 );
             };
@@ -494,13 +473,13 @@ angular.module("sampleApp")
 
             $scope.importItem = function(itemType){
 
-                console.log(itemType)
+
 
                 var url = $window.prompt('Enter the Url of the '+itemType.display);
                 if (url) {
                     profileDiffSvc.getSD(url).then(
                         function (SD) {
-                            console.log(SD);
+
 
                             //get a reference to the package...
                             var pkg = $scope.currentIG.package[0];  //just stuff everything into the first package for the moment...
@@ -532,57 +511,7 @@ angular.module("sampleApp")
 
                                 profileDiffSvc.updateExtensionsAndVSInProfile($scope.currentIG,SD,pkg);
 
-                                /*
-                                SD.snapshot.element.forEach(function (ed) {
-                                    if (ed.type) {
-                                        ed.type.forEach(function (typ) {
-                                            if (typ.code == 'Extension' && typ.profile) {
-                                                var profileUrl = typ.profile;
-                                                if (angular.isArray(profileUrl)) {
-                                                    profileUrl = typ.profile[0]
-                                                }
-                                                console.log(profileUrl);
 
-                                                //make sure this is not already in the list
-                                                //var found = false;
-                                                var res = profileDiffSvc.findResourceInIGPackage($scope.currentIG,profileUrl);
-
-                                                if (!res) {
-                                                    var res = {sourceReference:{reference:profileUrl}};
-                                                    //todo - should likely move to an extension for R3
-                                                    if (appConfigSvc.getCurrentConformanceServer().version ==2) {
-                                                        res.purpose = 'extension'
-                                                    } else {
-                                                        res.acronym = 'extension'
-                                                    }
-                                                    pkg.resource.push(res);
-                                                }
-
-
-
-                                            }
-
-                                        })
-                                    }
-                                    if (ed.binding) {
-                                        var vsUrl = ed.binding.valueSetReference || ed.binding.valueSetUri;
-                                        if (vsUrl) {
-                                            var res = profileDiffSvc.findResourceInIGPackage($scope.currentIG,vsUrl);
-
-                                            if (!res) {
-                                                var res = {sourceReference:{reference:vsUrl}};
-                                                //todo - should likely move to an extension for R3
-                                                if (appConfigSvc.getCurrentConformanceServer().version ==2) {
-                                                    res.purpose = 'terminology'
-                                                } else {
-                                                    res.acronym = 'terminology'
-                                                }
-                                                pkg.resource.push(res);
-                                            }
-                                        }
-                                    }
-                                })
-                                */
                             }
 
 
@@ -593,7 +522,7 @@ angular.module("sampleApp")
 
                             SaveDataToServer.saveResource($scope.currentIG).then(
                                 function (data) {
-                                    console.log(data)
+
                                 }, function (err) {
                                    alert('Error updating IG '+angular.toJson(err))
                                 }
@@ -683,7 +612,7 @@ angular.module("sampleApp")
                         searchString += "kind=resource&type="+type.name;
                     }
 
-                    console.log(searchString)
+
                     $scope.waiting = true;
 
                     $http.get(searchString).then(       //first the profiles on that server ...
@@ -713,7 +642,7 @@ angular.module("sampleApp")
 
 
 
-                            console.log(data.data)
+
                         },
                     function (err) {
                         console.log(err)
@@ -722,12 +651,12 @@ angular.module("sampleApp")
                     });
                 }
 
-                console.log(side,svr,type)
+
             };
 
             //select a single profile to display as a table...
             $scope.selectCompProfile = function(entry,side) {
-              //  console.log(entry)
+
                 var canonicalName = 'canonical'+side;
                 var profilesBdl = $scope.input['matchingProfiles'+side];
                 if (profilesBdl && profilesBdl.entry) {
@@ -747,7 +676,7 @@ angular.module("sampleApp")
                 function setCanonical(SD,canonicalName) {
                     profileDiffSvc.makeCanonicalObj(SD).then(
                         function (vo) {
-                            //console.log(vo)
+
                             $scope[canonicalName] = vo.canonical;
 
                         },function (err) {
@@ -760,7 +689,7 @@ angular.module("sampleApp")
 
             function addToHistory(type,resource) {
                 $scope.history.push({type:type,resource:resource})
-                //console.log($scope.history);
+
             }
 
             function popHistoryDEP() {
@@ -805,7 +734,7 @@ angular.module("sampleApp")
                     searchString += "kind=resource&type="+baseType.name;
                 }
 
-                //console.log(searchString)
+
                 $scope.waiting = true;
 
                 $http.get(searchString).then(       //first the profiles on that server ...
@@ -816,7 +745,7 @@ angular.module("sampleApp")
                         $http.get(url1).then(       //and then get the base type
                             function (data) {
                                 if (data.data) {
-                                    //console.log(data.data)
+
                                     $scope.profilesOnBaseType.entry = $scope.profilesOnBaseType.entry || []
                                     $scope.profilesOnBaseType.entry.push({resource:data.data});
 
@@ -827,7 +756,7 @@ angular.module("sampleApp")
                                 //just ignore if we don't fine the base..
                             }
                         ).finally(function () {
-                            //console.log($scope.profilesOnBaseType)
+
                         })
 
                     },
@@ -858,7 +787,7 @@ angular.module("sampleApp")
                         data.data.entry.forEach(function (entry) {
                             var ig = entry.resource;
 
-                            //console.log(ig.id)
+
                             if (Utilities.isAuthoredByClinFhir(ig)) {
                                 ig.name = ig.name || ig.description;
                                 $scope.listOfIG.push(ig)
@@ -872,28 +801,7 @@ angular.module("sampleApp")
                 }
             );
 
-            /*
-            var url = appConfigSvc.getCurrentConformanceServer().url + "ImplementationGuide";
-            $http.get(url).then(
-                function(data) {
-                    $scope.listOfIG = []
-                    if (data.data && data.data.entry) {
-                        data.data.entry.forEach(function (entry) {
-                            //make sure there is a name field for display...
-                            var ig = entry.resource;
-                            ig.name = ig.name || ig.description;
 
-
-                            $scope.listOfIG.push(ig)
-                        })
-                    }
-                    $scope.input.selIG = $scope.listOfIG[0]
-                },
-                function(err){
-                    console.log(err)
-                }
-            );
-*/
             //note that we're using an IG to hold all the resources in this collection
             $scope.selectIG = function(IG){
                 var extDef = appConfigSvc.config().standardExtensionUrl.resourceTypeUrl;
@@ -959,7 +867,7 @@ angular.module("sampleApp")
             };
 
             $scope.showValueSet = function(uri,type) {
-                console.log(uri)
+
 
                 //treat the reference as lookup in the repo...
                 GetDataFromServer.getValueSet(uri).then(
@@ -989,7 +897,7 @@ angular.module("sampleApp")
                 delete $scope.exampleResourceXml
 
 
-               //console.log(item)
+
                 centerNodeInGraph(item.url)
 
                 //right now we assume that examples are on the data server...
@@ -1003,7 +911,7 @@ angular.module("sampleApp")
                         function (SD) {
                             $scope.LMtreeData = logicalModelSvc.createTreeArrayFromSD(angular.copy(SD));
 
-                            console.log( $scope.LMtreeData )
+
 
                             $scope.LMSD = SD;
                             logicalModelSvc.resetTreeState($scope.LMtreeData);
@@ -1015,7 +923,7 @@ angular.module("sampleApp")
                                     item.data.ed.type.forEach(function (typ) {
                                         if (typ.code == 'BackboneElement') {
                                             item.state.opened = true;
-                                            console.log(item)
+
                                         }
                                     })
                                 }
@@ -1065,7 +973,7 @@ angular.module("sampleApp")
                     }
 
 
-                    console.log(item.url)
+
 
 
                    profileDiffSvc.getTerminologyResource(urlToGet,tType).then(
@@ -1092,7 +1000,7 @@ angular.module("sampleApp")
                                            })
                                            $scope.valueSetOptions = lst;
                                        }
-                                        console.log(lst)
+
 
 
 
@@ -1146,20 +1054,18 @@ angular.module("sampleApp")
 
                    profileDiffSvc.getSD(url).then(
                        function(SD){
-                           //console.log(SD);
+
 
 
                            $scope.constrainedType = SD.constrainedType;     //todo different for R3...
 
                            //always check if there are any extension definitions or valuesets references by this profile (in case they have been externally changed)
                            if (profileDiffSvc.updateExtensionsAndVSInProfile($scope.currentIG,SD)) {
-                               console.log('updating IG',$scope.currentIG);
-
 
 
                                SaveDataToServer.saveResource($scope.currentIG).then(
                                    function (data) {
-                                       console.log(data)
+
                                        $scope.selectIG($scope.currentIG);       //re-draw the lists
                                        //need to reset these as they are cleared in the select routine...
 
@@ -1215,7 +1121,7 @@ angular.module("sampleApp")
 
 
 
-                            console.log(data)
+
                         },function(err){
                             console.log(err)
                         }
@@ -1248,7 +1154,7 @@ angular.module("sampleApp")
                 GetDataFromServer.adHocFHIRQuery(url).then (
                     function(data) {
                         $scope.exampleResourceXml = data.data
-                       // console.log($scope.exampleResourceXml)
+
                     },
                     function (err) {
                         alert("Can't find an example at the url: "+ url)
@@ -1310,7 +1216,7 @@ angular.module("sampleApp")
                             }
                         ).on('select_node.jstree', function (e, data) {
                             if (data.node && data.node.data) {
-                               // console.log(data.node && data.node.data);
+
 
                                 $scope.selectedElementInLM = data.node.data.ed;
 
@@ -1336,9 +1242,9 @@ angular.module("sampleApp")
                 ).on('changed.jstree', function (e, data) {
                     //seems to be the node selection event...
                     delete $scope.selectedED;
-                    //console.log(data)
+
                     if (data.node) {
-                        //console.log(data.node && data.node.data);
+
                         $scope.selectedED = data.node.data.ed;
                         $scope.$digest();       //as the event occurred outside of angular...
 
@@ -1351,7 +1257,7 @@ angular.module("sampleApp")
 
                 profileDiffSvc.makeCanonicalObj(angular.copy(SD)).then(
                     function (vo) {
-                        //console.log(vo)
+
                         $scope.canonical = vo.canonical;
                         $scope.allExtensions = vo.extensions;
                     },function (err) {
@@ -1415,8 +1321,7 @@ angular.module("sampleApp")
 
                 profileDiffSvc.createGraphOfIG(IG,graphOptions).then(
                     function(graphData) {
-                        //$scope.graphData = graphData;
-                        console.log(graphData)
+
                         var hashRelationships = graphData.hashRelationships;  //details of relationships (like path) = hash is <from>-<to>
 
                         $scope.igGraphHash = graphData.hash;    //the hash generated during the IG analysis. Contains useful stuff like extension usedBy
@@ -1447,12 +1352,12 @@ angular.module("sampleApp")
                         $scope.profileNetwork.on("click", function (obj) {
                             if (obj.edges.length > 0) {
                                 delete $scope.selectedNodeFromGraph
-                                console.log(obj.edges)
+
                                 var edge = graphData.edges.get(obj.edges[0]);
                                 //var relationship = hashRelationships[edge.from+'-'+edge.to];
                                 $scope.graphReferences = hashRelationships[edge.from+'-'+edge.to];
 
-                                console.log(hashRelationships[edge.from+'-'+edge.to])
+
                             }
 
                             if (obj.nodes.length > 0) {
@@ -1469,7 +1374,7 @@ angular.module("sampleApp")
                                 //retrieve the valueset properties if a valueset
                                 if ($scope.selectedNodeFromGraph.data.purpose == 'terminology') {
                                     delete $scope.valueSetOptions;
-                                    console.log($scope.selectedNodeFromGraph.data)
+
 
                                     var vo = {selectedValueSet : {vs: {url: $scope.selectedNodeFromGraph.data.url}}}
 
@@ -1523,7 +1428,7 @@ angular.module("sampleApp")
 
                             obj.event.cancelBubble = true;
                             obj.event.stopPropagation();
-                            console.log(obj.event)
+
                             $scope.$digest();
                         });
                     }
@@ -1557,7 +1462,7 @@ angular.module("sampleApp")
 
                     $timeout(function(){
                         $scope.profileNetwork.fit();
-                        console.log('fit')
+                        
                     },1000)
                 }
 

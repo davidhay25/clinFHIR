@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 //CareConnect version 3 profiles...
 
 var fs = require('fs');
@@ -6,97 +8,197 @@ var syncRequest = require('sync-request');
 var upload = false;
 
 //var remoteFhirServer = "http://fhirtest.uhn.ca/baseDstu2/";
-var remoteFhirServer = "http://snapp.clinfhir.com:8080/baseDstu2/";
-//var remoteFhirServer = "http://localhost:8079/baseDstu2/";
+//var remoteFhirServer = "http://snapp.clinfhir.com:8080/baseDstu2/";
+var remoteFhirServer = "http://localhost:8080/baseDstu3/";
 
-/*
-var List = {resourceType:'List',status:'current',mode:'snapshot',entry:[]};
-List.title = "CareConnect profiles";
-List.code = {coding:[{system:"http:clinfhir.com/fhir/CodingSystem/cfList",code:'confList'}],text:'clinFHIR conformance list'}
-List.id = 'cf-artifacts-cc'
+//var remoteFhirServer = "http://snapp.clinfhir.com:8081/baseDstu3/";   //the real one when ready...
 
-*/
 
 //Create an implementation guide to hold the artifacts
 var IG = {resourceType:'ImplementationGuide',status:'draft',package:[{name:'complete',resource:[]}]};
-IG.id = 'cf-artifacts-cc';
-IG.description = "Care Connect";
+IG.id = 'cf-artifacts-cc3';
+IG.description = "Care Connect Profiles";
 IG.extension = [{url: "http://clinfhir.com/fhir/StructureDefinition/cfAuthor",valueBoolean:true}]
 
 //var localFileRoot = __dirname;
 var localFileRoot = "/Users/davidha/Dropbox/orion/careConnect3/CareConnect-profiles-feature-stu3/";
 
-
+/* temp...
 console.log('------ Uploading ValueSets -------')
-var filePath = localFileRoot + "valuesets";
-
-
-
-
-console.log(filePath);
+var filePath = localFileRoot + "valuesets/";
 var fileNames = getFilesInFolder(filePath);
 uploadValueSets(remoteFhirServer,filePath,fileNames)
 
+*/
 
+console.log('------ Uploading CodeSystems -------')
+var filePath = localFileRoot + "codesystems/";
+var fileNames = getFilesInFolder(filePath);
+uploadCodeSystem(remoteFhirServer,filePath,fileNames)
 
-return;
 
 
 console.log('-------- Uploading StructureDefinitions --------')
-var filePath = localFileRoot + "/CareConnectAPI/StructureDefinitions";
+var filePath = localFileRoot + "constraints/";
 console.log(filePath);
 var fileNames = getFilesInFolder(filePath);
-uploadFiles(remoteFhirServer,filePath,fileNames,'StructureDefinition')
+var errors = uploadSD(remoteFhirServer,filePath,fileNames);
+if (errors > 0) {
+    console.log('-------------------------------------------------------')
+    console.log(errors + ' errors')
+    console.log('-------------------------------------------------------')
+}
 
-//console.log(List)
-
-//temp addPages(fileRoot)
 
 
 
 console.log('-------- Uploading ImplementationGuide --------');
-//now save the List resource...
-//var url = remoteFhirServer  + "List/" + List.id;
 var url = remoteFhirServer  + "ImplementationGuide/" + IG.id;
-var options = {};
-//options.body = JSON.stringify(List);
-options.body = JSON.stringify(IG);
-//options.body =  body.replace(/(\r\n|\n|\r)/gm,"");
-options.headers = {"content-type": "application/json+fhir"};
-options.timeout = 20000;        //20 seconds
-var response = syncRequest('PUT', url, options);
-//console.log(response)
+var success = uploadOneFile(url,IG)
 
-console.log(response.statusCode)
-if (response.statusCode !== 200 && response.statusCode !== 201) {
-    console.log("Error saving ImplementationGuide:" + response.body.toString())
+if (! success) {
+    console.log("Error saving ImplementationGuide.")
 } else {
-
     console.log("Uploaded ImplementationGuide.")
 }
 
 
-//--------- functions
-
-function addPages(fileRoot) {
-    var arFileNames = getFilesInFolder(filePath);
-    // assume that this is a 'top level' list of folders - ie that
-
-
-}
-
-
-function uploadValueSets(serverRoot,filePath,arFiles) {
+function uploadSD(serverRoot,filePath,arFiles) {
+    var errors = 0;
     arFiles.forEach(function (fileName) {
-        console.log(fileName);
 
-        var ar = fileName.split('-');
-        varIGEntry = {purpose:'Terminology',description:ar[2],sourceReference:{reference:json.url}}
-        IG.package[0].resource.push(varIGEntry);
+
+        var ar=fileName.split('-')
+        var pathToFile = filePath + fileName;
+        var contents = fs.readFileSync(pathToFile,{encoding:'utf8'})
+        try {
+            var json = JSON.parse(contents);
+            var id = json.id;
+
+            varIGEntry = {description:json.name,sourceReference:{reference:json.url}};
+            IG.package[0].resource.push(varIGEntry);
+            if (ar[0]== 'CareConnect') {
+                //a profile
+                varIGEntry.acronym = 'profile'
+                if (! id) {
+                    id = 'cc-' + ar[1];
+                }
+            } else {
+                //an extension
+                varIGEntry.acronym = 'extension'
+                if (! id) {
+                    id = ar[2] || ar[1];
+                    id = id.replace('.json','')
+                }
+            }
+
+            json.id = id;
+
+            //now save to FHIR server
+            var url = remoteFhirServer + "StructureDefinition/"+id;
+
+            var success = uploadOneFile(url,json)
+            if (! success) {
+                errors++
+            }
+
+        } catch (ex) {
+            console.log('error processing '+ fileName + " "+ ex)
+        }
+
+        return errors;
 
     })
 }
 
+function uploadCodeSystem(serverRoot,filePath,arFiles) {
+    arFiles.forEach(function (fileName) {
+
+
+        var ar=fileName.split('-')
+        var pathToFile = filePath + fileName;
+        var contents = fs.readFileSync(pathToFile,{encoding:'utf8'})
+        try {
+            var json = JSON.parse(contents);
+            var id = json.id;
+            if (! id) {
+                id = 'cc-'+ ar[2];
+            }
+
+            varIGEntry = {acronym:'Terminology',description:json.name,sourceReference:{reference:json.url}};
+            IG.package[0].resource.push(varIGEntry);
+
+            //now save to FHIR server
+            // console.log('---> ' + id)
+            var url = remoteFhirServer + "CodeSystem/"+id;
+
+            var success = uploadOneFile(url,json)
+
+        } catch (ex) {
+            console.log('error processing '+ fileName + " "+ ex)
+        }
+
+
+
+    })
+}
+
+function uploadValueSets(serverRoot,filePath,arFiles) {
+    arFiles.forEach(function (fileName) {
+        //console.log(fileName);
+
+        var ar=fileName.split('-')
+        var pathToFile = filePath + fileName;
+        var contents = fs.readFileSync(pathToFile,{encoding:'utf8'})
+        try {
+            var json = JSON.parse(contents);
+            var id = json.id;
+            if (! id) {
+                id = ar[2];
+            }
+
+            varIGEntry = {acronym:'Terminology',description:json.name,sourceReference:{reference:json.url}};
+            IG.package[0].resource.push(varIGEntry);
+
+            //now save to FHIR server
+           // console.log('---> ' + id)
+            var url = remoteFhirServer + "ValueSet/"+id;
+
+            var success = uploadOneFile(url,json)
+
+        } catch (ex) {
+            console.log('error processing '+ fileName + " "+ ex)
+        }
+
+
+
+    })
+}
+
+
+function uploadOneFile(url,json) {
+    //now save to FHIR server
+    //console.log('---> ' + id)
+    //var url = remoteFhirServer + "ValueSet/"+id;
+
+    var options = {}
+    options.body = JSON.stringify(json);
+    options.headers = {"content-type": "application/json+fhir"}
+    options.timeout = 20000;        //20 seconds
+
+    var response = syncRequest('PUT', url, options);
+
+    console.log(response.statusCode)
+    if (response.statusCode !== 200 && response.statusCode !== 201) {
+
+        console.log(response.body.toString())
+        return false
+    } else {
+        console.log('uploaded '+ url)
+        return true;
+    }
+
+}
 
 //send all the xml files in the filepath to the indicated server (serverRoot)
 //for now, only use json files to avoid duplication

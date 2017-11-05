@@ -19,10 +19,9 @@ angular.module('sampleApp')
                 $scope.$watch(
                     function() {return $scope.resource},
                     function() {
-                        //console.log($scope.resource)
+
                         delete $scope.FHIRPathResult;
                         delete $scope.input.JSONPath;
-
                     }
                 );
 

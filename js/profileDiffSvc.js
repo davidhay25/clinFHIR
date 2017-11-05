@@ -1,6 +1,6 @@
 angular.module("sampleApp").service('profileDiffSvc',
     function($q,$http,GetDataFromServer,Utilities,appConfigSvc,$filter,resourceSvc,profileCreatorSvc,
-             $localStorage,Utilities) {
+             $localStorage) {
 
         $localStorage.extensionDefinitionCache = $localStorage.extensionDefinitionCache || {}
 
@@ -36,6 +36,28 @@ angular.module("sampleApp").service('profileDiffSvc',
         objColours.HealthcareService = '#FFFFCC';
 
         objColours.Medication = '#FF9900';
+
+        //remove the contents of an SD that we're not using to reduce the cache requirements
+        function minimizeSD(SD) {
+            var startSize = Utilities.getObjectSize(SD);
+            delete SD.text;
+            delete SD.differential;
+            if (SD.snapshot && SD.snapshot.element) {
+                SD.snapshot.element.forEach(function (ed) {
+                    delete ed.constraint;
+                    delete ed.mapping;
+
+                })
+            }
+            var endSize = Utilities.getObjectSize(SD);
+            var url = SD.url || 'Unknown url'
+
+
+            $localStorage.totalSavings = $localStorage.totalSavings || 0;
+            $localStorage.totalSavings += (startSize-endSize);
+
+            return SD;
+        }
 
     return {
 
@@ -86,7 +108,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                         resItem.comboSearch = ar;
                     }
 
-                    console.log(ar)
+
                 }
 
 
@@ -179,7 +201,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
             })
 
-            console.log(arV2);
+
             return arV2;
 
         },
@@ -290,7 +312,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                                 res.acronym = 'terminology'
                             }
 
-                           // console.log(res)
+
 
                             pkg.resource.push(res);
                             updated = true;
@@ -456,9 +478,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
             }
 
-            function addLogDEP(msg,err) {
-                //console.log(msg)
-            }
+
 
             //get the text display for the element
             function getDisplay(node) {
@@ -558,7 +578,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                     if (node.data && node.data.ed) {
                         if (node.data.ed.type) {
                             node.data.ed.type.forEach(function(typ){
-                                //console.log(typ)
+
                                 if (typ.code) {
                                     if (typ.code.substr(0,1) == typ.code.substr(0,1).toUpperCase()){
                                         node.icon='/icons/icon_datatype.gif';
@@ -660,7 +680,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
             function addResource(that,url,bundle) {
                 var deferred1 = $q.defer();
-                //console.log(url)
+
 
 
 
@@ -720,7 +740,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                     if (include && item.sourceReference) {
                         var url = item.sourceReference.reference;   //the url of the node
                         if (url) {
-                             //console.log(url,purpose)
+
 
                             //var label = path = $filter('referenceType')(url);  this can't be right???
                             var label = $filter('referenceType')(url);
@@ -743,14 +763,12 @@ angular.module("sampleApp").service('profileDiffSvc',
                 })
             });
 
-           // console.log(hash)    var label = path = $filter('referenceType')(url);
-
 
             //now load all the profiles, and figure out the references to extensions and other types. Do need to create all the nodes first...
             var arQuery = []
             angular.forEach(hash,function(item,key){
 
-                //console.log(key,item);
+
                 var parentId = item.nodeId;
 
                 if (item.purpose == 'profile' || item.purpose == 'extension' ||item.acronym == 'profile' || item.acronym == 'extension') {
@@ -911,7 +929,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                 if (url && ! hash[url]) {
                     //adds a new node (generally a core node)
                     var label = path = $filter('referenceType')(url);
-                    //console.log(url)
+
 
                     var id = new Date().getTime() + "-" + Math.random();
                     var node = {id: id, label: label, shape: 'box',color:objColours[purpose+'_loaded']};
@@ -976,7 +994,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                                             ref.usedBy.push(url)
                                         } else {
                                             //this is a reference to a resource not in the IG
-                                           // console.log(url)
+
                                             if (options.includeCore && options.includeTerminology) {
                                                 var newNodeId = addNode(url,'terminology')
                                                 arEdges.push({from: parentId, to: newNodeId, data:{path:ed.path,ed:ed}})
@@ -1004,7 +1022,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
                                             } else {
                                                 //this is a reference to a resource not in the IG
-                                                //console.log(url)
+
                                                 if (options.includeCore) {
                                                     var newNodeId = addNode(targetProfile,'profile')
                                                     arEdges.push({from: parentId, to: newNodeId, data:{path:ed.path,ed:ed}})
@@ -1037,6 +1055,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
         clearCache : function(){
             delete $localStorage.extensionDefinitionCache;
+            delete $localStorage.totalSavings;
             $localStorage.extensionDefinitionCache = {};
             alert('Done! (Be warned that the app will be a bit sluggish until the caches are re-filled)')
         },
@@ -1052,7 +1071,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                 searchString += "kind=resource&type="+baseType.name;
             }
 
-            //console.log(searchString)
+
             $scope.waiting = true;
 
             $http.get(searchString).then(       //first get the base type...
@@ -1063,7 +1082,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                     $http.get(url1).then(       //and then the profiles on that server
                         function (data) {
                             if (data.data) {
-                               // console.log(data.data)
+
                                 $scope.profilesOnBaseType.entry = $scope.profilesOnBaseType.entry || []
                                 $scope.profilesOnBaseType.entry.push({resource:data.data});
 
@@ -1074,7 +1093,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                             //just ignore if we don't fine the base..
                         }
                     ).finally(function () {
-                       // console.log($scope.profilesOnBaseType)
+
                     })
 
                 },
@@ -1121,7 +1140,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                 }
 
                 if (arPath[arPath.length-1] == 'extension') {
-                   // console.log(el)
+
                     include = false;
                     if (el.type) {
                         el.type.forEach(function (typ) {
@@ -1151,10 +1170,6 @@ angular.module("sampleApp").service('profileDiffSvc',
 
             $q.all(queries).then(
                 function () {
-                   // console.log('DONE')
-                    //now that we have all the analysis objects,
-
-
 
                     deferred.resolve(SD);
                 },
@@ -1180,16 +1195,16 @@ angular.module("sampleApp").service('profileDiffSvc',
                         if (bundle && bundle.entry) {
                             var extensionDef = bundle.entry[0].resource;     //should really only be one...
                             var analysis = Utilities.analyseExtensionDefinition3(extensionDef);
-                            //console.log(analysis)
+
                             if (analysis.name) {
                                 var ar = el.path.split('.');
                                 ar[ar.length-1] = analysis.name;
                                 el.path = ar.join('.')
-                                //console.log(item)
+
                             }
                             el.analysis = analysis;
                         }
-                        //console.log(data.data)
+
                         deferred.resolve();
                     },
                     function (err) {
@@ -1211,8 +1226,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                 var discriminatorUrl = appConfigSvc.config().standardExtensionUrl.discriminatorUrl;
                 var conceptMapUrl = appConfigSvc.config().standardExtensionUrl.conceptMapUrl;
 
-                //todo - should use Utile.addExtension...
-          //      var sd = {resourceType: 'StructureDefinition'};
                 if (vo.currentUser) {
                     this.addSimpleExtension(sd, appConfigSvc.config().standardExtensionUrl.userEmail, vo.currentUser.email)
                 }
@@ -1225,53 +1238,14 @@ angular.module("sampleApp").service('profileDiffSvc',
 
                 sd.id = vo.rootName;
                 sd.url = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/" + sd.id;
-               /* sd.name = vo.name;
 
-                //these are some of the fhir version changes...
-                if (appConfigSvc.getCurrentConformanceServer().version ==2) {
-                    sd.display = header.title;
-                    sd.requirements = header.purpose;
-                } else {
-                    sd.title = header.title;
-                    sd.purpose = header.purpose;
-                }
-*/
-
-               // sd.publisher = header.publisher;
-               // sd.status = 'draft';
                 sd.date = moment().format();
 
-             //   sd.purpose = header.purpose;
-               // sd.description = header.description;
 
-                //sd.publisher = scope.input.publisher;
                 //at the time of writing (Oct 12), the implementaton of stu3 varies wrt 'code' & 'keyword'. Remove this eventually...
                 sd.identifier = [{system: "http://clinfhir.com", value: "author"}]
                 sd.keyword = [{system: 'http://fhir.hl7.org.nz/NamingSystem/application', code: 'clinfhir'}]
-/*
-                if (header.mapping) {
-                    //mapping comments for the target resource as a whole...
-                    sd.mapping = [{identity: 'fhir', name: 'Model Mapping', comments: header.mapping}]
-                }
-                */
-/*
-                if (header.type) {
-                    var uc = {
-                        code: {
-                            code: 'logicalType',
-                            system: 'http:www.hl7.org.nz/NamingSystem/logicalModelContext'
-                        }
-                    };
-                    uc.valueCodeableConcept = {
-                        coding: [{
-                            code: header.type,
-                            'system': 'http:www.hl7.org.nz/NamingSystem/logicalModelContextType'
-                        }]
-                    };
-                    sd.useContext = [uc]
 
-                }
-*/
                 sd.kind = 'logical';
                 sd.abstract = false;
                 sd.baseDefinition = "http://hl7.org/fhir/StructureDefinition/Element";
@@ -1411,7 +1385,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                 })
 
             }
-            //console.log(result)
+
             return result;
 
 
@@ -1489,11 +1463,11 @@ angular.module("sampleApp").service('profileDiffSvc',
                         if (k.substr(0,5) == 'fixed') {
                             item.fixed = item.fixed || []
                             item.fixed.push({v:v,k:k})
-                            //console.log(v,k)
+
                         }
                     })
 
-                    //console.log(item.fixed)
+
 
 
                     //if multiplicity is 0, then add to the exclude roots
@@ -1627,13 +1601,12 @@ angular.module("sampleApp").service('profileDiffSvc',
             return deferred.promise
 
             function resolveExtensionDefinition(item,svr) {
-                //console.log(item);
+
                 var deferred = $q.defer();
                 var url = item.extension.url;
 
                 if ($localStorage.extensionDefinitionCache[url]) {
                     //note that this is an async call - some duplicate calls are inevitible
-                    //console.log('cache')
                     item.extension.analysis = angular.copy(Utilities.analyseExtensionDefinition3($localStorage.extensionDefinitionCache[url]));
                     deferred.resolve()
                 } else {
@@ -1646,12 +1619,14 @@ angular.module("sampleApp").service('profileDiffSvc',
                     GetDataFromServer.findConformanceResourceByUri(url,serverUrl).then(
                         function (sdef) {
 
-                            delete sdef.text;       //large text
-                            $localStorage.extensionDefinitionCache[url] = sdef
+                            //delete sdef.text;       //large text
+
+                            $localStorage.extensionDefinitionCache[url] = minimizeSD(sdef)
+
 
 
                             item.extension.analysis = angular.copy(Utilities.analyseExtensionDefinition3(sdef));
-                            //console.log(item.extension.analysis)
+
                             deferred.resolve()
                         },function (err) {
                             console.log(err)
@@ -1667,7 +1642,7 @@ angular.module("sampleApp").service('profileDiffSvc',
             var deferred = $q.defer();
             if ($localStorage.extensionDefinitionCache[url]) {
                 //note that this is an async call - some duplicate calls are inevitible
-                console.log('cache')
+
                 deferred.resolve($localStorage.extensionDefinitionCache[url]);
             } else {
                 // This assumes that the terminology resources are all on the terminology service...
@@ -1675,11 +1650,11 @@ angular.module("sampleApp").service('profileDiffSvc',
                 GetDataFromServer.findConformanceResourceByUri(url,serverUrl,resourceType).then(
                     function (sdef) {
                         //remove elements we don't use to save space...
-                        delete sdef.text;
-                        delete sdef.mapping;
-                        delete sdef.differential;
+                        //delete sdef.text;
+                        //delete sdef.mapping;
+                        //delete sdef.differential;
 
-                        $localStorage.extensionDefinitionCache[url] = sdef
+                        $localStorage.extensionDefinitionCache[url] = minimizeSD(sdef)
                         deferred.resolve($localStorage.extensionDefinitionCache[url]);
                     },function (err) {
                         console.log(err)
@@ -1693,7 +1668,7 @@ angular.module("sampleApp").service('profileDiffSvc',
             delete $localStorage.extensionDefinitionCache[url];
         },
         getSD : function(url) {
-//console.log(url)
+
 
 
             var deferred = $q.defer();
@@ -1705,16 +1680,16 @@ angular.module("sampleApp").service('profileDiffSvc',
 
 
                 //is this a 'core' extension?
-                if (1==1 && url.indexOf('http://hl7.org/fhir/StructureDefinition') > -1) {
+                if (url.indexOf('http://hl7.org/fhir/StructureDefinition') > -1) {
                     //yep. can get it directly. THis seems to be the naming algorithm...
                     var url1 = url.replace('StructureDefinition/','extension-');
-                    console.log(url1);
+
                     $http.get(url1  +'.json').then(
                         function(data) {
                             var sdef = data.data;
                             delete sdef.text;   //text can be v large in some profiles
 
-                            $localStorage.extensionDefinitionCache[url] = sdef;
+                            $localStorage.extensionDefinitionCache[url] = minimizeSD(sdef);
 
                             deferred.resolve($localStorage.extensionDefinitionCache[url]);
                         },
@@ -1727,10 +1702,10 @@ angular.module("sampleApp").service('profileDiffSvc',
                 } else {
                     GetDataFromServer.findConformanceResourceByUri(url).then(
                         function (sdef) {
-                            //console.log(sdef);
+
                             delete sdef.text;   //text can be v large in some profiles
 
-                            $localStorage.extensionDefinitionCache[url] = sdef
+                            $localStorage.extensionDefinitionCache[url] = minimizeSD(sdef)
 
                             deferred.resolve($localStorage.extensionDefinitionCache[url]);
                         },function (err) {
@@ -1765,12 +1740,12 @@ angular.module("sampleApp").service('profileDiffSvc',
 
             secondary.item.forEach(function (item) {
 
-               // console.log(item)
+
 
                 //may want to check the primary...
                 if (item.fixed) {
-                    //console.log(item.fixed)
-                   // secondary.report.fixed = secondary.report.fixed || []
+
+
                     secondary.report.fixed.push({item:item,fixed:item.fixed})
 
                     item.difference.fixed = item.fixed;
@@ -1835,8 +1810,8 @@ angular.module("sampleApp").service('profileDiffSvc',
 
                 })
 
-            //console.log(analysis)
-            console.log(secondary.report)
+
+
 
         }
     }
