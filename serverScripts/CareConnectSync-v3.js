@@ -6,6 +6,8 @@ var fs = require('fs');
 var syncRequest = require('sync-request');
 
 var upload = false;
+var errors = 0;
+
 
 //var remoteFhirServer = "http://fhirtest.uhn.ca/baseDstu2/";
 //var remoteFhirServer = "http://snapp.clinfhir.com:8080/baseDstu2/";
@@ -23,18 +25,18 @@ IG.extension = [{url: "http://clinfhir.com/fhir/StructureDefinition/cfAuthor",va
 //var localFileRoot = __dirname;
 var localFileRoot = "/Users/davidha/Dropbox/orion/careConnect3/CareConnect-profiles-feature-stu3/";
 
-/* temp...
+
 console.log('------ Uploading ValueSets -------')
 var filePath = localFileRoot + "valuesets/";
 var fileNames = getFilesInFolder(filePath);
-uploadValueSets(remoteFhirServer,filePath,fileNames)
+errors += uploadValueSets(remoteFhirServer,filePath,fileNames)
 
-*/
+
 
 console.log('------ Uploading CodeSystems -------')
 var filePath = localFileRoot + "codesystems/";
 var fileNames = getFilesInFolder(filePath);
-uploadCodeSystem(remoteFhirServer,filePath,fileNames)
+errors += uploadCodeSystem(remoteFhirServer,filePath,fileNames)
 
 
 
@@ -42,12 +44,8 @@ console.log('-------- Uploading StructureDefinitions --------')
 var filePath = localFileRoot + "constraints/";
 console.log(filePath);
 var fileNames = getFilesInFolder(filePath);
-var errors = uploadSD(remoteFhirServer,filePath,fileNames);
-if (errors > 0) {
-    console.log('-------------------------------------------------------')
-    console.log(errors + ' errors')
-    console.log('-------------------------------------------------------')
-}
+errors += uploadSD(remoteFhirServer,filePath,fileNames);
+
 
 
 
@@ -62,6 +60,18 @@ if (! success) {
     console.log("Uploaded ImplementationGuide.")
 }
 
+if (errors > 0) {
+    console.log('-------------------------------------------------------')
+    console.log(errors + ' errors')
+    console.log('-------------------------------------------------------')
+} else {
+    console.log('-------------------------------------------------------')
+    console.log('No errors')
+    console.log('-------------------------------------------------------')
+}
+
+return;
+
 
 function uploadSD(serverRoot,filePath,arFiles) {
     var errors = 0;
@@ -75,17 +85,19 @@ function uploadSD(serverRoot,filePath,arFiles) {
             var json = JSON.parse(contents);
             var id = json.id;
 
-            varIGEntry = {description:json.name,sourceReference:{reference:json.url}};
-            IG.package[0].resource.push(varIGEntry);
+            var IGEntry = {description:json.name,sourceReference:{reference:json.url}};
+            IG.package[0].resource.push(IGEntry);
             if (ar[0]== 'CareConnect') {
                 //a profile
-                varIGEntry.acronym = 'profile'
+                IGEntry.acronym = 'profile'
+                addExtension(IGEntry,'profile')
                 if (! id) {
                     id = 'cc-' + ar[1];
                 }
             } else {
                 //an extension
-                varIGEntry.acronym = 'extension'
+                IGEntry.acronym = 'extension'
+                addExtension(IGEntry,'extension')
                 if (! id) {
                     id = ar[2] || ar[1];
                     id = id.replace('.json','')
@@ -106,12 +118,14 @@ function uploadSD(serverRoot,filePath,arFiles) {
             console.log('error processing '+ fileName + " "+ ex)
         }
 
-        return errors;
+
 
     })
+    return errors;
 }
 
 function uploadCodeSystem(serverRoot,filePath,arFiles) {
+    var errors = 0;
     arFiles.forEach(function (fileName) {
 
 
@@ -125,25 +139,31 @@ function uploadCodeSystem(serverRoot,filePath,arFiles) {
                 id = 'cc-'+ ar[2];
             }
 
-            varIGEntry = {acronym:'Terminology',description:json.name,sourceReference:{reference:json.url}};
-            IG.package[0].resource.push(varIGEntry);
+            var IGEntry = {acronym:'terminology',description:json.name,sourceReference:{reference:json.url}};
+            addExtension(IGEntry,'codesystem')
+            IG.package[0].resource.push(IGEntry);
+
+            json.id = id;
 
             //now save to FHIR server
-            // console.log('---> ' + id)
             var url = remoteFhirServer + "CodeSystem/"+id;
 
             var success = uploadOneFile(url,json)
+            if (! success) {
+                errors ++
+            }
 
         } catch (ex) {
             console.log('error processing '+ fileName + " "+ ex)
         }
 
+    });
 
-
-    })
+    return errors;
 }
 
 function uploadValueSets(serverRoot,filePath,arFiles) {
+    var errors = 0;
     arFiles.forEach(function (fileName) {
         //console.log(fileName);
 
@@ -157,29 +177,37 @@ function uploadValueSets(serverRoot,filePath,arFiles) {
                 id = ar[2];
             }
 
-            varIGEntry = {acronym:'Terminology',description:json.name,sourceReference:{reference:json.url}};
-            IG.package[0].resource.push(varIGEntry);
+            var IGEntry = {acronym:'terminology',description:json.name,sourceReference:{reference:json.url}};
+            addExtension(IGEntry,'terminology')
+            IG.package[0].resource.push(IGEntry);
+
+            json.id = id;
 
             //now save to FHIR server
-           // console.log('---> ' + id)
             var url = remoteFhirServer + "ValueSet/"+id;
 
             var success = uploadOneFile(url,json)
+            if (! success) {
+                errors ++
+            }
 
         } catch (ex) {
             console.log('error processing '+ fileName + " "+ ex)
         }
 
-
-
     })
+    return errors;
 }
 
+function addExtension(entry,term) {
+    entry.extension = [];
+    var extension = {url:'http://clinfhir.com/StructureDefinition/igEntryType'}
+    extension.valueCode = term;
+}
 
 function uploadOneFile(url,json) {
     //now save to FHIR server
-    //console.log('---> ' + id)
-    //var url = remoteFhirServer + "ValueSet/"+id;
+
 
     var options = {}
     options.body = JSON.stringify(json);
@@ -190,7 +218,7 @@ function uploadOneFile(url,json) {
 
     console.log(response.statusCode)
     if (response.statusCode !== 200 && response.statusCode !== 201) {
-
+        console.log('--------------->   error uploading '+ url)
         console.log(response.body.toString())
         return false
     } else {
@@ -202,7 +230,7 @@ function uploadOneFile(url,json) {
 
 //send all the xml files in the filepath to the indicated server (serverRoot)
 //for now, only use json files to avoid duplication
-function uploadFiles(serverRoot,filePath,arFiles,resourceType) {
+function uploadFilesDEP(serverRoot,filePath,arFiles,resourceType) {
 
     var errors = 0, count = 0;
 
@@ -332,7 +360,7 @@ function uploadFiles(serverRoot,filePath,arFiles,resourceType) {
 }
 
 
-function validateResource(fileName, json) {
+function validateResourceDEP(fileName, json) {
     err = ""
     if (! json.url) {
         err += fileName + 'has no url'
@@ -345,7 +373,6 @@ function getFilesInFolder(path) {
     var ar = []
     fs.readdirSync(path).forEach(function(file) {
         ar.push(file)
-        //console.log(file);
     })
     return ar;
 }

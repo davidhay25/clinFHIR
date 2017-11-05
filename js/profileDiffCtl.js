@@ -453,15 +453,10 @@ angular.module("sampleApp")
                 var fileName = $scope.currentIG.name;
                 profileDiffSvc.createDownloadBundle($scope.currentIG).then(
                     function(bundle) {
-
-
                         displayDownLoadDlg(bundle,['Only Profiles and Extension Definitions included'],fileName)
 
                     },function(bundle) {
-
                         displayDownLoadDlg(bundle,['Only Profiles and Extension Definitions included'],fileName)
-
-
                     }
                 );
             };
@@ -472,8 +467,6 @@ angular.module("sampleApp")
             }
 
             $scope.importItem = function(itemType){
-
-
 
                 var url = $window.prompt('Enter the Url of the '+itemType.display);
                 if (url) {
@@ -490,7 +483,7 @@ angular.module("sampleApp")
                                 profileDiffSvc.clearSDProfile(SD.url);
                                 modalService.showModal({}, {
                                     bodyText: "There is already an entry for this profile in the Guide. I've cleared it from the cache but you need to re-load the app for the new profile to be displayed."})
-                               // return
+
                             } else {
                                 //add the profile to the IG - then find any extensions and add them as well. todo - should we check whether they exist first?
 
@@ -504,21 +497,12 @@ angular.module("sampleApp")
                                 pkg.resource.push(res);
                             }
 
-
-
                             //now look for any extensions or ValueSets if the object being imported is a profile....
                             if (itemType.type == "profile" && SD.snapshot && SD.snapshot.element) {
-
                                 profileDiffSvc.updateExtensionsAndVSInProfile($scope.currentIG,SD,pkg);
-
-
                             }
 
-
                             $scope.dirty = true;
-
-
-                            //var IGUrl = appConfigSvc.getCurrentConformanceServer().url + "/ImplementationGuide/"+$scope.currentIG.id;
 
                             SaveDataToServer.saveResource($scope.currentIG).then(
                                 function (data) {
@@ -535,8 +519,6 @@ angular.module("sampleApp")
                         }
                     )
 
-
-                    //alert(url)
                 }
 
             };
@@ -586,7 +568,7 @@ angular.module("sampleApp")
                         $scope.extensionAnalysis = Utilities.analyseExtensionDefinition3(ext)
 
                         $scope.mShowVS = function(url) {
-                            console.log(url)
+                           // console.log(url)
                             fnShowVS(url)
 
                         }

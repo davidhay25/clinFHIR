@@ -51,7 +51,7 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.resourceTypeUrl = 'http://clinfhir.com/StructureDefinition/resourceTypeUrl';
         defaultConfig.standardExtensionUrl.qPath = 'http://clinfhir.com/StructureDefinition/qPathUrl';
         defaultConfig.standardExtensionUrl.qMult = 'http://clinfhir.com/StructureDefinition/qMultUrl';
-
+        defaultConfig.standardExtensionUrl.igEntryType = 'http://clinfhir.com/StructureDefinition/igEntryType';
 
 
 
