@@ -1340,11 +1340,35 @@ angular.module("sampleApp")
                             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
                             
                             $scope.checkModelExists = function(name) {
+
+
+                                if (! /^[A-Za-z0-9\-\.]{1,64}$/.test(name)) {
+                                    var msg = "The name can only contain upper and lowercase letters, numbers, '-' and '.'"
+                                    modalService.showModal({},{bodyText:msg})
+                                    return
+
+
+                                }
+                                /*
+                                console.log(/^[A-Za-z0-9\-\.]{1,64}$/.test(name))
+
+
+                               // console.log(name.match(/[A-Za-z0-9\-\.]/))
+
+                                var re = new RegExp("^[A-Za-z0-9\\-\\.]{1,64}$");
+                                if (re.test(name)) {
+                                    console.log(name + " Valid");
+                                } else {
+                                    console.log(name + " Invalid");
+                                }
+
+
+
                                 if (name && name.indexOf(' ')>-1) {
                                     modalService.showModal({},{bodyText:"The name cannot contain spaces"})
                                     return;
                                 }
-
+*/
                                 var url = $scope.conformanceServer.url + "StructureDefinition/"+name;
                                 $scope.showWaiting = true;
                                 $scope.canSave = false;

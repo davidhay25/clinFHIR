@@ -8,12 +8,10 @@ angular.module("sampleApp")
 
             $scope.input = {};
 
-
             $scope.equivalence = ['equal','equivalent','relatedto','wider','subsumes','narrower','specializes','inexact','unmatched','disjoint'];
             $scope.equivalenceDescription = {};
             $scope.equivalenceDescription.equal = "The definitions of the concepts are exactly the same (i.e. only grammatical differences) and structural implications of meaning are identical or irrelevant (i.e. intentionally identical)."
             $scope.equivalenceDescription.equivalent = "The definitions of the concepts mean the same thing (including when structural implications of meaning are considered) (i.e. extensionally identical).";
-
 
             $scope.equivalenceDescription.relatedto = "The concepts are related to each other, and have at least some overlap in meaning, but the exact relationship is not known";
             $scope.equivalenceDescription.wider= "The target mapping is wider in meaning than the source concept.";
@@ -163,11 +161,9 @@ angular.module("sampleApp")
                 )
             };
 
-
             $scope.editHeader = function() {
                 $scope.addConceptMap($scope.currentCM);     //will actually edit..
             };
-
 
             $scope.addConceptMap = function (map) {
                 $uibModal.open({
@@ -267,8 +263,6 @@ angular.module("sampleApp")
                     }
                 )
             };
-
-
 
             $scope.addItem = function (item) {
                 $uibModal.open({

@@ -8,5 +8,10 @@
     "callback":"http://localhost:8081/smartCallback",
     "baseUrl":"https://orionhealth-sandbox-bellatrix.apigee.net",
     "token":"https://orionhealth-sandbox-bellatrix.apigee.net/oauth2/token"
+  },
+  "Grahame" :{
+    "name" : "clinfhir-dev",
+    "callback":"http://localhost:8081/smartCallback",
+
   }
 }
