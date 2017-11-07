@@ -56,7 +56,28 @@
             $locationProvider.html5Mode(true);
             $locationProvider.hashPrefix('!');
         });
+    //    angular.module("sampleApp",['ui.checkbox','ui.bootstrap','ngStorage','ngSanitize'])
         angular.module("sampleApp").constant("moment", moment);
+
+        //http://www.devblogrbmz.com/angular-default-request-headers-and-interceptors/
+        //http://www.webdeveasy.com/interceptors-in-angularjs-and-useful-examples/
+        angular.module("sampleApp").factory('authIntercept',['sessionSvc',function(sessionSvc){
+            return {
+                'request': function(config){
+                    //console.log('intercept '+ sessionSvc.getAuthToken());
+                    if (sessionSvc.getAuthToken()) {
+                        config.headers['Authorization'] = sessionSvc.getAuthToken();
+                        config.headers['myAuth'] = sessionSvc.getAuthToken();
+
+                    }
+                    return config
+                }
+
+            }
+        }]).config(function($httpProvider){
+            $httpProvider.interceptors.push('authIntercept')
+        })
+
 
     </script>
 
@@ -84,6 +105,7 @@
     <script src="directive/fhirpath/fhirpath.js"></script>
     <script src="directive/graphql/graphql.js"></script>
     <script src="js/builderSvc.js"></script>
+    <script src="js/sessionSvc.js"></script>
 
     <title>Patient Viewer</title>
 
@@ -109,7 +131,7 @@
 
                 </a>
             </div>
-            <div class="col-md-7 col-sm-7">
+            <div class="col-md-6 col-sm-6">
 
                 <div class="navbar-text" ng-show="currentPatient">
                     {{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}} ({{currentPatient.id}})
@@ -120,8 +142,13 @@
                     <img src="css/ajax_loader_blue_32.gif"/>
                 </div>
             </div>
-            <div class="col-md-2 col-sm-2">
-                <form class="navbar-form navbar-right">
+            <div class="col-md-3 col-sm-3">
+
+                <form ng-show = "appConfigSvc.getCurrentDataServer().smart && ! oauthAccessToken" class="navbar-form navbar-right">
+                    <button class="btn btn-danger" ng-click="smartLogin()">Logon</button>
+                </form>
+
+                <form ng-hideDEP = "appConfigSvc.getCurrentDataServer().smart && ! oauthAccessToken" class="navbar-form navbar-right">
                     <button class="btn btn-primary" ng-click="findPatient()">Select Patient</button>
                 </form>
             </div>

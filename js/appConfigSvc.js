@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-10-29';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-11-07a';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -32,14 +32,6 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.simpleExtensionUrl = 'http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl';
         defaultConfig.standardExtensionUrl.clinFHIRCreated = 'http://clinfhir.com/fhir/StructureDefinition/cfAuthor';
         defaultConfig.standardExtensionUrl.userEmail = 'http://clinfhir.com/StructureDefinition/userEmail';
-        //defaultConfig.standardExtensionUrl.userEmail = 'http:www.clinfhir.com/StructureDefinition/userEmail';
-       // defaultConfig.standardExtensionUrl.scenarioProvenance = 'http:www.clinfhir.com/StructureDefinition/scenarioProvenance';
-      //  defaultConfig.standardExtensionUrl.scenarioNote = 'http:www.clinfhir.com/StructureDefinition/scenarioNote';
-      //  defaultConfig.standardExtensionUrl.provenanceTargetUrl = 'http:www.clinfhir.com/StructureDefinition/provenanceTargetUrl';
-      //  defaultConfig.standardExtensionUrl.discriminatorUrl = 'http:www.clinfhir.com/StructureDefinition/discriminatorUrl';
-      //  defaultConfig.standardExtensionUrl.conceptMapUrl = 'http:www.clinfhir.com/StructureDefinition/conceptMapUrl';
-
-        //defaultConfig.standardExtensionUrl.resourceTypeUrl = 'http:www.clinfhir.com/StructureDefinition/resourceTypeUrl';
 
 
         defaultConfig.standardExtensionUrl.scenarioProvenance = 'http://clinfhir.com/StructureDefinition/scenarioProvenance';
@@ -81,29 +73,15 @@ angular.module("sampleApp")
         defaultConfig.baseSpecUrl = "http://hl7.org/fhir/";     //the base for spec documentation
         defaultConfig.logLevel = 0;     //0 = no logging, 1 = log to console
         defaultConfig.enableCache = false;  //whether caching is supported
-        //defaultConfig.servers.terminology = "http://fhir3.healthintersections.com.au/open/";//
         defaultConfig.servers.terminology = "http://fhirtest.uhn.ca/baseDstu3/";//
-        // defaultConfig.servers.terminology = "grahamv3/";
-        //defaultConfig.servers.terminology = "http://fhir.hl7.org.nz/dstu2/";
         defaultConfig.servers.data = "http://fhirtest.uhn.ca/baseDstu3/";
-        //defaultConfig.servers.conformance = "http://fhir2.healthintersections.com.au/open/";
-        //defaultConfig.servers.conformance = "http://fhir3.healthintersections.com.au/open/";
         defaultConfig.servers.conformance = "http://fhirtest.uhn.ca/baseDstu3/";
 
-
-
-
-        //defaultConfig.servers.conformance = "grahamv3/";
-
-        //default to Grahames DSTU2 server when data and conformance servers are inconsistent...
-        //defaultConfig.defaultTerminologyServerUrl = "http://fhir3.healthintersections.com.au/open/";
         defaultConfig.defaultTerminologyServerUrl = "http://fhirtest.uhn.ca/baseDstu3/";
 
 
 
 
-
-        //defaultConfig.defaultTerminologyServerUrl = "grahamv3/";
 
         //terminology servers. Order is significant as the first one will be selected by default...
         defaultConfig.terminologyServers = [];
@@ -112,15 +90,8 @@ angular.module("sampleApp")
         defaultConfig.terminologyServers.push({name:'Grahames STU2 Server',version:2,url:"http://test.fhir.org/r2/"});
         defaultConfig.terminologyServers.push({name:'Grahames STU3 Server',version:3,url:"http://test.fhir.org/r3/"});
 
-        //realUrl needed for conformance resources...
-        //defaultConfig.terminologyServers.push({name:'Grahames STU2 Server',version:2,url:"grahamv2/",realUrl:'http://fhir2.healthintersections.com.au/open/'});
-        //defaultConfig.terminologyServers.push({name:'Grahames STU3 Server',version:3,url:"grahamv3/",realUrl:'http://fhir3.healthintersections.com.au/open/'});
-
-
         defaultConfig.terminologyServers.push({name:'Public HAPI STU3 server',version:3,url:"http://fhirtest.uhn.ca/baseDstu3/"});
 
-
-        //defaultConfig.terminologyServers.push({name:'Ontoserver',version:3,url:"http://ontoserver.csiro.au/stu3/"});
         defaultConfig.terminologyServers.push({name:'Ontoserver',version:3,url:"http://52.63.0.196:8080/fhir/"});
         defaultConfig.terminologyServers.push({name:"Local HAPI STU3",url:"http://localhost:8080/baseDstu3/",version:3});
         defaultConfig.terminologyServers.push({name:"fhir.org",url:"http://tx.fhir.org/r3/",version:3});
@@ -132,15 +103,11 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://test.fhir.org/r2/",version:2,everythingOperation:true,isTerminology:true});
         defaultConfig.allKnownServers.push({name:"Grahames STU3 server",url:"http://test.fhir.org/r3/",version:3,everythingOperation:true,isTerminology:true});
         
-        //defaultConfig.allKnownServers.push({name:"Grahame STU3 server (Proxy)",url:"grahamv3/",version:3,everythingOperation:true,realUrl:'http://fhir3.healthintersections.com.au/open/'});
-        //defaultConfig.allKnownServers.push({name:"Grahame STU2 server (Proxy)",url:"grahamv2/",version:2,everythingOperation:true,realUrl:'http://fhir2.healthintersections.com.au/open/'});
-        
+
         defaultConfig.allKnownServers.push({name:"Public HAPI STU2 server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2,everythingOperation:true});
 
 
         defaultConfig.allKnownServers.push({name:"Public HAPI STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true,isTerminology:true});
-
-        //defaultConfig.allKnownServers.push({name:'SNapp STU3',version:3,url:"http://snapp.clinfhir.com:8080/baseDstu3/",everythingOperation:true});
 
         defaultConfig.allKnownServers.push({name:"HealthConnex STU2 server",url:"http://sqlonfhir-dstu2.azurewebsites.net/fhir/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"HealthConnex STU3 server",url:"http://sqlonfhir-stu3.azurewebsites.net/fhir/",version:3,everythingOperation:true});
@@ -157,8 +124,7 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'MiHIN STU2',version:2,url:"http://52.72.172.54:8080/fhir/baseDstu2/"});
         defaultConfig.allKnownServers.push({name:'Simplifier R3',version:3,url:"https://stu3.simplifier.net/open/"});
         defaultConfig.allKnownServers.push({name:'Aegis WildFHIR STU3',version:3,url:" http://wildfhir.aegis.net/fhir3-0-1/"});
-       // defaultConfig.allKnownServers.push({name:'SNApp STU2' ,version:2,url:"http://snapp.clinfhir.com:8080/baseDstu2/"});
-       // defaultConfig.allKnownServers.push({name:'SNApp R3',version:3,url:"http://snapp.clinfhir.com:8081/baseDstu3/"});
+
 
         defaultConfig.allKnownServers.push({name:'clinFHIR R2' ,version:2,url:"http://snapp.clinfhir.com:8080/baseDstu2/"});
         defaultConfig.allKnownServers.push({name:'clinFHIR R3',version:3,url:"http://snapp.clinfhir.com:8081/baseDstu3/"});
@@ -169,13 +135,6 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'HSPC-14',version:3,url:"https://api3.hspconsortium.org/fhirconnect14/open/",everythingOperation:true});
         defaultConfig.allKnownServers.push({name:'HSPC Careplan',version:3,url:"https://api-stu3.hspconsortium.org/careplantest/open/",everythingOperation:true});
 
-        defaultConfig.allKnownServers.push({name:'cfProxy',version:3,url:"proxy/",everythingOperation:true});
-
-        //https://api-stu3.hspconsortium.org/careplantest/open
-
-
-        //defaultConfig.allKnownServers.push({name:'hsp2',version:3,url:"https://api2.hspconsortium.org/careplan2/open/",everythingOperation:true});
-        //defaultConfig.allKnownServers.push({name:'hsp3',version:3,url:"https://api2.hspconsortium.org/careplan3/open/",everythingOperation:true});
 
         defaultConfig.allKnownServers.push({name:'Patients First R3',version:3,url:"http://its.patientsfirst.org.nz/RestService.svc/Terminz/"});
 
@@ -185,9 +144,8 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'HL7-UK STU-2',version:2,url:"https://fhir-test.hl7.org.uk/"});
 
 
-
         defaultConfig.allKnownServers.push({name:'FHIR Registry',version:3,url:"https://registry-api.fhir.org/open/",everythingOperation:true});
-
+        defaultConfig.allKnownServers.push({name:'Orion R2-Test',version:2,url:"orionProxy/",smart:true});
 
         //place all the servers in a hash indexed by url. THis is used for the userConfig
         var allServersHash = {};

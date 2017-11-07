@@ -1641,7 +1641,7 @@ angular.module("sampleApp").service('profileDiffSvc',
             //todo - there's an overlap with 'getSD' - maybe. To be investigated - especially getting 'standard' resources..
             var deferred = $q.defer();
             if ($localStorage.extensionDefinitionCache[url]) {
-                //note that this is an async call - some duplicate calls are inevitible
+                //note that this is an async call - some duplicate calls are inevitable
 
                 deferred.resolve($localStorage.extensionDefinitionCache[url]);
             } else {
@@ -1649,10 +1649,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                 var serverUrl = appConfigSvc.getCurrentTerminologyServer().url;
                 GetDataFromServer.findConformanceResourceByUri(url,serverUrl,resourceType).then(
                     function (sdef) {
-                        //remove elements we don't use to save space...
-                        //delete sdef.text;
-                        //delete sdef.mapping;
-                        //delete sdef.differential;
 
                         $localStorage.extensionDefinitionCache[url] = minimizeSD(sdef)
                         deferred.resolve($localStorage.extensionDefinitionCache[url]);

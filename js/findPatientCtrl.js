@@ -43,16 +43,11 @@ angular.module("sampleApp")
 
                 $scope.ResourceUtilsSvc = ResourceUtilsSvc;
 
-
-                //supportSvc.checkReferenceResources
-
                 $scope.selectNewPatient = function(patient) {
                     appConfigSvc.setCurrentPatient(patient);
 
                     $scope.$close(patient);
                 };
-
-
 
                 //directly load a patient based on their id
                 $scope.loadPatient = function(id) {
@@ -76,6 +71,32 @@ angular.module("sampleApp")
                 };
 
 
+                $scope.searchForIdentifier = function(identifier) {
+                    $scope.nomatch=false;   //if there were no matching patients
+                    delete $scope.matchingPatientsList;
+                    if (! identifier) {
+                        alert('Please enter an identifier');
+                        return true;
+                    }
+                    $scope.waiting = true;
+
+                    resourceCreatorSvc.findPatientsByIdentifier(identifier).then(
+                        function(data){
+
+                            $scope.matchingPatientsList = data;
+                            if (! data || data.length == 0) {
+                                $scope.nomatch=true;
+                            }
+                        },
+                        function(err) {
+                            modalService.showModal({}, {bodyText: 'Error finding patient - have you selected the correct Data Server?'})
+
+                        }
+                    ).finally(function(){
+                        $scope.waiting = false;
+                    })
+                };
+
 
 
 
@@ -89,7 +110,7 @@ angular.module("sampleApp")
                     $scope.waiting = true;
                     resourceCreatorSvc.findPatientsByName(name).then(
                         function(data){
-                            // ResourceUtilsSvc.getOneLineSummaryOfResource(patient);
+
                             $scope.matchingPatientsList = data;
                             if (! data || data.length == 0) {
                                 $scope.nomatch=true;
@@ -106,8 +127,8 @@ angular.module("sampleApp")
                 };
 
                 //add - and select - a new patient..
-                //note that Grahames server can't handle multiple concurrent requests - whucg is why theres
-                //a rather ineligant 'pyramid of doom' sync calls....
+                //note that Grahames server can't handle multiple concurrent requests - which is why theres
+                //a rather inelegant 'pyramid of doom' sync calls....
                 $scope.addNewPatient = function() {
                     $scope.showLog = true;
                     $scope.allowClose = false;

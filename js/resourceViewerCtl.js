@@ -1,15 +1,43 @@
 
 angular.module("sampleApp")
     .controller('resourceViewerCtrl',
-        function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,
-                  $uibModal, $timeout,GetDataFromServer,modalService,ResourceUtilsSvc,builderSvc) {
+        function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,sessionSvc,
+                  $uibModal, $timeout,GetDataFromServer,modalService,ResourceUtilsSvc,builderSvc,$window,$http) {
 
-        //outcome.resourceTypes
+
             $scope.outcome = {};
             $scope.graph = {};
 
             $scope.ResourceUtilsSvc = ResourceUtilsSvc; //needed for 1 line summary
             $scope.appConfigSvc = appConfigSvc;     //for displaying the patient json
+
+            $scope.isSMART = appConfigSvc.getCurrentDataServer().smart;     //if true, this server requires SMART
+            $scope.oauthAccessToken;    //if SMART, this will be the access token...
+
+            //---------- SMART stuff ------ move to a common service
+            $scope.smartLogin = function() {
+                $http.get('smartAuth/'+appConfigSvc.getCurrentDataServer().name).then(
+                    function(data) {
+                        $window.location.href = data.data.authUrl;
+                    },
+                    function(data) {
+                        alert(data.msg)
+                    }
+                );
+            };
+
+            //always see if therer is an active token for this session.
+            //https://stackoverflow.com/questions/23124032/set-httpprovider-default-headers-after-user-authentification
+            $http.get("/smartAuth/getToken").then(
+                function(data) {
+                    sessionSvc.setAuthToken("Bearer " + data.data.token)
+                  //  $http.defaults.headers.common['Authorization'] = "Bearer " + data.data.token;
+                    alert("Bearer " + data.data.token)
+                }
+            );
+
+
+            //----------------------
 
             $scope.showGQL = appConfigSvc.getCurrentDataServer().name == 'Grahames STU3 server';
 
@@ -92,9 +120,6 @@ angular.module("sampleApp")
                     }
                 }
 
-
-
-
             };
 
             $scope.selectResourceInDocTree = function(resource) {
@@ -152,93 +177,7 @@ angular.module("sampleApp")
                 });
 
 
-               /*
 
-
-                return;
-
-                //=========================================
-
-                console.log(composition);
-
-                //work on copies
-                $scope.currentComposition = angular.copy(composition);
-                var localAllResourcesList = angular.copy($scope.allResourcesAsList)
-
-                //not currently used - was going to support a separate node for sections linked from the document
-                var sectionNodeMaster = {resourceType:"Section",id:'sectionNodeMaster'};
-                sectionNodeMaster.entry = [];
-                //temp disable $scope.currentComposition.sectionNodeMasterNode = {'reference':'Section/sectionNodeMaster'}
-                //temp disable localAllResourcesList.push(sectionNodeMaster)
-
-
-
-
-                //move through sections and create a node to represent that, moving the references from the composition to the node...
-                $scope.currentComposition.section.forEach(function(section,inx){
-                    var newNode = angular.copy(section);
-                    newNode.resourceType = "Section";
-                    newNode.id = 'sectionNode'+inx;
-
-                    delete section.entry
-                    delete section.text
-
-                    //the reference from the Composition to the section
-                    section.section = {'reference':'Section/sectionNode'+inx}
-                    sectionNodeMaster.entry.push({'reference':'Section/sectionNode'+inx})
-
-                    localAllResourcesList.push(newNode)
-                })
-
-                //move through the list of all resources, remove the current composition & insert the updated one
-                for (var i=0; i < localAllResourcesList.length; i++) {
-                    var resource = localAllResourcesList[i]
-
-                    if (resource.resourceType == 'Composition' && resource.id == $scope.currentComposition.id) {
-                        localAllResourcesList.splice(i,1,$scope.currentComposition);
-                        break;
-                    }
-                }
-
-
-
-                //create and draw the graph representation...
-                var graphData = resourceCreatorSvc.createGraphOfInstances(localAllResourcesList);
-                var container = document.getElementById('documentGraph');
-                var docGraph = new vis.Network(container, graphData, {});
-                // $scope.graph['mynetwork'] = network;
-                docGraph.on("click", function (obj) {
-                    // console.log(obj)
-                    var nodeId = obj.nodes[0];  //get the first node
-                    var node = graphData.nodes.get(nodeId);
-
-                    var selectedGraphNode = graphData.nodes.get(nodeId);
-
-                    console.log(selectedGraphNode)
-                    delete $scope.currentDocumentSectionText;
-                    delete $scope.currentDocumentSection
-                    if (selectedGraphNode.resource && selectedGraphNode.resource) {
-                        $scope.currentDocumentSection = selectedGraphNode.resource;
-                        // delete $scope.currentDocumentSection.text;
-                    }
-
-
-                    if (selectedGraphNode && selectedGraphNode.resource && selectedGraphNode.resource.text) {
-                        $scope.currentDocumentSectionText = selectedGraphNode.resource.text.div;
-
-
-                    }
-
-
-                    //drawResourceTree($scope.selectedGraphNode.resource)
-
-                    $scope.$digest();
-                });
-
-
-                //createGraphOneResource(composition,"documentGraph")
-
-*/
             }
 
 
@@ -399,6 +338,9 @@ angular.module("sampleApp")
                 })
             }
 
+
+
+
             //used by patientViewer to select a patient to display
             $scope.findPatient = function(){
 
@@ -409,6 +351,12 @@ angular.module("sampleApp")
                 delete $scope.docGraph;
                 delete $scope.fpResource;
                 delete $scope.docSection;
+
+                delete $scope.documentReferenceList;
+                delete $scope.allResources;
+                delete $scope.vitalsTable;
+                delete $scope.outcome.resourceTypes;
+                delete $scope.outcome.allResourcesOfOneType;
 
                 delete $scope.resourcesFromServer;
                 $uibModal.open({
@@ -423,29 +371,39 @@ angular.module("sampleApp")
                         if (resource) {
                             $scope.currentPatient = resource;
                             //load the existing resources for this patient...
-                            appConfigSvc.setCurrentPatient(resource)
+                            appConfigSvc.setCurrentPatient(resource);
+
+                            $scope.waiting = true;
+
+                           //GetDataFromServer.adHocFHIRQueryFollowingPaging(appConfigSvc.getCurrentPatient().id).then(
 
                              supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
                                 //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
+
                                 function(data){
 
                                     if (data.DocumentReference) {
                                         $scope.documentReferenceList = data.DocumentReference.entry;
                                     }
 
-
                                     renderPatientDetails(data)
                                     $scope.$broadcast('patientObservations',data['Observation']);//used to draw the observation charts...
-                                 },
-                                 function(err){
-                                    console.log(err)
-                                 })
+                                     },
+                                     function(err){
+                                        console.log(err)
+                                 }).finally(
+                                     function(){
+                                         $scope.waiting = false;
+                                     }
+                             )
 
                         }
 
                     }
                 )
             };
+
+
 
 
             function renderPatientDetails(allResources) {
@@ -464,7 +422,7 @@ angular.module("sampleApp")
                 $scope.outcome.resourceTypes = [];
                 angular.forEach(allResources, function (bundle, type) {
 
-                    if (bundle && bundle.total > 0) {
+                    if (bundle && bundle.entry &&  bundle.entry.length > 0) {
                         $scope.outcome.resourceTypes.push({type: type, bundle: bundle});
                         if (type == 'Observation') {
                             //if there are Obervations, then may be able to build a Vitals table...
@@ -796,9 +754,5 @@ angular.module("sampleApp")
                     }
                 )
             };
-
-
-
-
 
         });

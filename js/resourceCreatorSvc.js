@@ -98,9 +98,16 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         },
         findPatientsByIdentifier: function (identifier) {
             var deferred = $q.defer();
-
             var identifierSystem =  appConfigSvc.config().standardSystem.identifierSystem;
-            var qry = appConfigSvc.getCurrentDataServer().url + "\Patient?identifier=" + identifierSystem + "|" + identifier;
+
+            //add the clinfhir standard system if no system defined...
+            var ar = identifier.split('|');
+            if (ar.length == 1) {
+                identifier = identifierSystem + "|" + identifier;
+            }
+
+
+            var qry = appConfigSvc.getCurrentDataServer().url + "\Patient?identifier=" +  identifier;
 
             supportSvc.getAllResourcesFollowingPaging(qry).then(
                 function (data) {

@@ -15,6 +15,7 @@ var app = express();
 
 
 var orionModule = require("./serverModuleOrion.js")
+var smartModule = require("./serverModuleSMART.js")
 
 //var connect = require('connect');
 var http = require('http');
@@ -49,6 +50,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
     } else {
         db = ldb;
         orionModule.setup(app,db);
+        smartModule.setup(app,db);
 
     }
 });
@@ -245,7 +247,7 @@ app.get('/stats/summary',function(req,res){
 
 
 
-    console.log(query)
+
 
     db.collection("accessAudit").find({$query: query}).toArray(function(err,doc){
         if (err) {
@@ -255,7 +257,7 @@ app.get('/stats/summary',function(req,res){
             var rtn = {cnt:doc.length,item:[],country:{},lastAccess : {date:0},module:{}};
             var daySum = {};
 
-            console.log(doc.length)
+            //console.log(doc.length)
 
             doc.forEach(function(d,inx){
 
@@ -264,10 +266,26 @@ app.get('/stats/summary',function(req,res){
                 if (d.data) {
                     if (d.data.module) {
                         var m = d.data.module;
+                        var dataServer,confServer,termServer;
+                        if (d.data.servers) {
+                            dataServer = d.data.servers.data;
+                            termServer = d.data.servers.terminology;
+                            confServer = d.data.servers.conformance;
+                        }
+
                         if (rtn.module[m]) {
-                            rtn.module[m].cnt++
+                            rtn.module[m].cnt++;
+
+                            updateServerCount(dataServer,'data',rtn.module[m])
+                            updateServerCount(termServer,'term',rtn.module[m])
+                            updateServerCount(confServer,'conf',rtn.module[m])
+
                         } else {
-                            rtn.module[m] = {cnt:1}
+                            rtn.module[m] = {cnt:1};
+                            updateServerCount(dataServer,'data',rtn.module[m])
+                            updateServerCount(termServer,'term',rtn.module[m])
+                            updateServerCount(confServer,'conf',rtn.module[m])
+
                         }
 
                     }
@@ -299,7 +317,6 @@ app.get('/stats/summary',function(req,res){
 
             rtn.daySum = [];
 
-
             for (var day in daySum) {
                 rtn.daySum.push([parseInt(day),daySum[day]]);
             }
@@ -311,8 +328,6 @@ app.get('/stats/summary',function(req,res){
                     return -1;
                 }
             });
-
-
 
             //now create an array of countries - easier for sorting
             rtn.countryList = [];
@@ -332,7 +347,10 @@ app.get('/stats/summary',function(req,res){
 
             rtn.moduleList = []
             for (var m in rtn.module) {
-                rtn.moduleList.push({name:m,cnt : rtn.module[m].cnt})
+
+
+
+                rtn.moduleList.push({name:m,cnt : rtn.module[m].cnt,detail:rtn.module[m]})
             }
             rtn.moduleList.sort(function(a,b){
                 if (a.cnt < b.cnt) {
@@ -343,15 +361,32 @@ app.get('/stats/summary',function(req,res){
             });
 
 
+            res.json(rtn);
 
-            //add the number of profiles being accesses...
-          //  getProfileUsage(rtn,function(){
-                res.json(rtn);
-           // })
 
         }
     })
+
+
+
 });
+
+function updateServerCount(serverName,type,obj) {
+
+    if (serverName) {
+        var key = type+'Server'
+        obj[key] = obj[key] || {};
+        var o = obj[key];
+        o[serverName] = o[serverName] || {cnt:0}
+        o[serverName].cnt++
+
+
+
+        //return obj;
+
+
+    }
+}
 
 
 //old clients trying to access server...

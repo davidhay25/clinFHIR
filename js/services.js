@@ -1,4 +1,4 @@
-angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc,GetDataFromServer) {
+angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities) {
 
     //options for building the samples that will come from a UI
     var buildConfig = {};
@@ -214,7 +214,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             var bundle = {resourceType:'Bundle',type:'transaction',entry:[]};
 
             var cnt = 0;
-            for (var i=0; i < 5; i++) {                 //5 sets per type of observation
+            for (var i=0; i < 6; i++) {                 //5 sets per type of observation
                 var date = moment().subtract(i,'weeks');
 
 
@@ -807,8 +807,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 return deferred.promise;
             }
 
-
-
         },
 
         getVitals : function(vo) {
@@ -816,7 +814,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             //only 100 observations at the moment
             var deferred = $q.defer();
             var patientId = vo.patientId;
-
 
             var that = this;
             var response = {vitalsCodes:[]};      //the response object as we want to return more than one thing...
@@ -843,8 +840,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
                     response.grid = that.getGridOfObservations(data.data);      //an object hashed by date.
 
-
-
                     deferred.resolve(response)
 
                 },
@@ -854,10 +849,8 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 }
             );
             return deferred.promise;
-
         },
 
-        
         getAllResourcesFollowingPaging : function(url,limit){
             //Get all the resurces specified by a query, following any paging...
             //http://stackoverflow.com/questions/28549164/how-can-i-do-pagination-with-bluebird-promises
@@ -869,11 +862,9 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 url += "?_count=50"
             }
 
-
             var deferred = $q.defer();
 
             limit = limit || 500;           //absolute max of 500
-
 
             var allResources = [];
 
@@ -899,7 +890,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                                 var lnk = bundle.link[i];
 
                                 //if there is a 'next' link and we're not at the limit then get the next page
-                                if (lnk.relation == 'next' && allResources.length < limit) {
+                                if (lnk && lnk.relation == 'next' && allResources.length < limit) {
                                     moreToGet = true;
                                     var url = lnk.url;
                                     getPage(url);
@@ -941,10 +932,12 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 var url = dataServer.url + "Patient/"+patientId + '/$everything';
 
 
+                //GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
+
                 this.getAllResourcesFollowingPaging(url).then(
                     function(arrayOfResource){
 
-                        //console.log(arrayOfResource)
+                        console.log(arrayOfResource)
 
                         if (arrayOfResource) {
                             arrayOfResource.forEach(function(resource){        //this is a bundle
@@ -1007,7 +1000,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 //type that is being searched.
                 var uri;
                 if (item.patientReference == 'subject') {
-                    uri = appConfigSvc.getCurrentDataServerBase() + item.type + "?" + item.patientReference + "=Patient/" + patientId + "&_count=100";
+                    uri = appConfigSvc.getCurrentDataServerBase() + item.type + "?" + item.patientReference + "=" + patientId + "&_count=100";
                 } else {
                     uri = appConfigSvc.getCurrentDataServerBase() + item.type + "?" + item.patientReference + "=" + patientId + "&_count=100";
                 }
@@ -1015,9 +1008,21 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
                 arQuery.push(
 
+                    //GetDataFromServer.adHocFHIRQueryFollowingPaging(uri).then(
+
                     getAllResources(uri).then(
                         function(bundle){
-                            allResources[item.type] = bundle;    //this will be a bundle
+
+
+
+                            if (bundle.resourceType == 'Bundle' && bundle.entry && bundle.entry.length > 0) {
+                                if (! bundle.total) {
+                                    bundle.total = bundle.entry.length;
+                                }
+                                allResources[item.type] = bundle;    //this will be a bundle
+                            }
+
+                            console.log(bundle)
                         }
                     )
                 )
@@ -1025,6 +1030,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
             $q.all(arQuery).then(
                 function(data){
+                    console.log(allResources)
                     deferred.resolve(allResources);
                 },
                 function(err){
@@ -1038,11 +1044,33 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             function getAllResources(uri) {
                 var deferred = $q.defer();
                 var bundle = {entry:[]}
+                /*
+
+                                Utilities.perfromQueryFollowingPaging(uri).then(
+                                    function(data) {
+                                        deferred.resolve(data);
+                                    }
+                                );
+                                return deferred.promise;
 
 
+
+
+                                GetDataFromServer.adHocFHIRQueryFollowingPaging(uri).then(
+                                    function(data) {
+                                        deferred.resolve(data);
+                                    }
+                                )
+
+
+                                return deferred.promise;
+                */
 
                 //thereIsMore = true;
                 //while (thereIsMore) {
+
+
+
                 loadPage(uri).then(
                     function(data){
                         var pageBundle = data.data;     //the bundle representing this page...
