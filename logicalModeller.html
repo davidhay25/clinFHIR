@@ -230,11 +230,7 @@
 
                     <form ng-show="SD && !loadedFromBookmark && !treeData.shortCut.shortCut" class="navbar-form">
                         <button class="btn btn-success pull-right iconSpacing" ng-click="generateShortCut()">Share</button>
-
-
                     </form>
-
-
                 </div>
 
                 <div class="col-md-1 col-sm-1">
@@ -464,7 +460,7 @@
                     <uib-tabset>
                         <uib-tab heading="Mapping">
                             <table class="table table-bordered table-condensed">
-                                <tr><th></th><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th><th>Mapping notes</th></tr>
+                                <tr><th></th><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th><th>Comments</th><th>Mapping notes</th></tr>
                                 <tr ng-repeat="ed in SD.snapshot.element">
                                     <td>{{$index}}</td>
                                     <td>
@@ -476,6 +472,7 @@
                                     </td>
                                     <td>{{ed.min}}..{{ed.max}}</td>
                                     <td>{{ed.definition}}</td>
+                                    <td>{{ed.comment}}</td>
                                     <td>
                                         <div ng-repeat="map in ed.mapping">{{map.identity}}:{{map.map | showMapOnly}}</div>
 

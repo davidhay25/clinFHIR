@@ -645,13 +645,15 @@ angular.module("sampleApp")
             }
 
             //todo - this could be tidied...
+            $scope.LMDetailVisible = true;
+            $scope.rightPaneClass = "col-md-5 col-sm-5";
             $scope.showLMSelector = function(){
                 $scope.leftPaneClass = "col-sm-2 col-md-2"
                 if ($scope.LMDetailVisible) {
-                    $scope.midPaneClass = "col-md-10 col-sm-10"
+                    $scope.midPaneClass = "col-md-5 col-sm-5"
 
                 } else {
-                    $scope.midPaneClass = "col-md-5 col-sm-5"
+                    $scope.midPaneClass = "col-md-10 col-sm-10"
                 }
                // $scope.leftPaneClass = "col-sm-2 col-md-2"
                // $scope.midPaneClass = "col-md-5 col-sm-5"
@@ -664,9 +666,9 @@ angular.module("sampleApp")
                 $scope.leftPaneClass = "hidden"
                 if ($scope.LMDetailVisible) {
 
-                    $scope.midPaneClass = "col-md-5 col-sm-5"
+                    $scope.midPaneClass = "col-md-7 col-sm-7"
                 } else {
-                    $scope.midPaneClass = "col-md-10 col-sm-10"
+                    $scope.midPaneClass = "col-md-12 col-sm-12"
                 }
                 $scope.LMSelectorVisible = false;
             };
@@ -694,8 +696,8 @@ angular.module("sampleApp")
                 }
                 $scope.LMDetailVisible = true
             };
-            $scope.LMDetailVisible = true;
-            
+
+
 
             //check for commands in the url - specifically a valueset url to edit or view...
             var params = $location.search();
