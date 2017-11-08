@@ -219,8 +219,10 @@
                     <div ng-hide = "loadedFromBookmark">
                         <div class="navbar-text clickable" ng-show="LMSelectorVisible" ng-click="hideLMSelector()">Hide Selector</div>
                         <div class="navbar-text clickable" ng-hide="LMSelectorVisible" ng-click="showLMSelector()">Show Selector</div>
-
                     </div>
+
+                    <div class="navbar-text clickable" ng-show="LMDetailVisible" ng-click="hideDetailSelector()">Hide Detail</div>
+                    <div class="navbar-text clickable" ng-hide="LMDetailVisible" ng-click="showDetailSelector()">Show Detail</div>
 
                     <form ng-show="isDirty" class="navbar-form">
                         <button ng-show="isDirty && canSaveModel" class="btn btn-success pull-right" ng-click="saveModel()">Save model</button>
@@ -428,7 +430,7 @@
 
 
                     <table class="table table-bordered table-condensed">
-                        <tr><th>Element</th><th>DataType</th><th>isRef</th><th>Mult.</th><th>Description</th></tr>
+                        <tr><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th><th>Comment</th></tr>
                         <tr ng-repeat="row in treeData">
 
                             <td>
@@ -442,10 +444,10 @@
 
 
                             </td>
-                            <td><div ng-show="row.data.isReference">Y</div></td>
+
                             <td>{{row.data.min}}..{{row.data.max}}</td>
                             <td>{{row.data.description}}</td>
-
+                            <td>{{row.data.ed.comment}}</td>
                         </tr>
 
                     </table>

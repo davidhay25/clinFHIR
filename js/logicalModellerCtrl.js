@@ -644,27 +644,58 @@ angular.module("sampleApp")
                 }
             }
 
-            
+            //todo - this could be tidied...
             $scope.showLMSelector = function(){
                 $scope.leftPaneClass = "col-sm-2 col-md-2"
-                $scope.midPaneClass = "col-md-5 col-sm-5"
-                $scope.rightPaneClass = "col-md-5 col-sm-5";
+                if ($scope.LMDetailVisible) {
+                    $scope.midPaneClass = "col-md-10 col-sm-10"
+
+                } else {
+                    $scope.midPaneClass = "col-md-5 col-sm-5"
+                }
+               // $scope.leftPaneClass = "col-sm-2 col-md-2"
+               // $scope.midPaneClass = "col-md-5 col-sm-5"
+               // $scope.rightPaneClass = "col-md-5 col-sm-5";
                 $scope.LMSelectorVisible = true;
-            }
+            };
 
             
             $scope.hideLMSelector = function(){
                 $scope.leftPaneClass = "hidden"
-                $scope.midPaneClass = "col-md-7 col-sm-7"
-                $scope.rightPaneClass = "col-md-5 col-sm-5";
+                if ($scope.LMDetailVisible) {
+
+                    $scope.midPaneClass = "col-md-5 col-sm-5"
+                } else {
+                    $scope.midPaneClass = "col-md-10 col-sm-10"
+                }
                 $scope.LMSelectorVisible = false;
-            }
-
-
-            //$scope.hideDetail - function
+            };
 
             $scope.showLMSelector()
 
+            $scope.hideDetailSelector = function() {
+                $scope.rightPaneClass = "hidden";
+                if ($scope.LMSelectorVisible) {
+                    $scope.midPaneClass = "col-md-10 col-sm-10"
+
+                } else {
+                    $scope.midPaneClass = "col-md-12 col-sm-12"
+                }
+                $scope.LMDetailVisible = false
+            };
+
+            $scope.showDetailSelector = function() {
+                $scope.rightPaneClass = "col-md-5 col-sm-5";
+                if ($scope.LMSelectorVisible) {
+                    $scope.midPaneClass = "col-md-5 col-sm-5"
+
+                } else {
+                    $scope.midPaneClass = "col-md-7 col-sm-7"
+                }
+                $scope.LMDetailVisible = true
+            };
+            $scope.LMDetailVisible = true;
+            
 
             //check for commands in the url - specifically a valueset url to edit or view...
             var params = $location.search();
