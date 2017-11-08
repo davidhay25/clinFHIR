@@ -84,8 +84,11 @@ angular.module("sampleApp")
 
             $scope.baseType = baseType;
 
+
+
             if (baseType) {
-                logicalModelSvc.getAllPathsForType(baseType).then(
+                //get all the paths - including expanding logical models...
+                logicalModelSvc.getAllPathsForType(baseType,true).then(
                     function(listOfPaths) {
 
                         $scope.allPaths = listOfPaths.list;

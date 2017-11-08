@@ -2550,6 +2550,9 @@ angular.module("sampleApp")
             };
 
 
+
+
+
             function drawTree() {
 
                 //not sure about this...  logicalModelSvc.resetTreeState($scope.treeData);    //reset the opened/closed status to the most recent saved...

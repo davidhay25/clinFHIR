@@ -22,6 +22,16 @@ angular.module("sampleApp")
             }
         )
 
+        //logical models (like Dosage). Might extend to complex datatypes for expanding logical models later on...
+        var fhirLM = {}
+        $http.get("artifacts/fhirLM.json").then(
+            function(data) {
+                fhirLM = data.data;
+
+            }
+        )
+
+
         //set the first segment of a path to the supplied value. Used when determining differneces from the base type
         String.prototype.setFirstSegment = function(firstSegment) {
             var ar = this.split('.');
@@ -1512,8 +1522,11 @@ angular.module("sampleApp")
             getCurrentUser: function () {
                 return currentUser;
             },
-            getAllPathsForType: function (typeName) {
+            getAllPathsForType: function (typeName,explode) {
                 //return all the possible paths for a base type...
+                //if explode true then add 'child nodes' for some complex elements
+
+
                 var deferred = $q.defer();
                 var url = "http://hl7.org/fhir/StructureDefinition/" + typeName;
 
@@ -1523,6 +1536,7 @@ angular.module("sampleApp")
                             var lst = [], hash={};
                             SD.snapshot.element.forEach(function (ed) {
                                 var path = ed.path;
+
                                 //expand the [x] element. Todo - this might muck up the profile generation... ?could just look for multiple types
                                 if (path.indexOf('[x]')> -1 && ed.type) {
                                     var pathRoot = path.substr(0,path.length-3);
@@ -1533,13 +1547,26 @@ angular.module("sampleApp")
                                             lst.push(newPath)
                                             hash[newPath] = ed;
                                         }
-
                                     })
-
 
                                 } else {
                                     lst.push(path)
                                     hash[path] = ed;
+                                    if (ed.type && explode) {
+                                        //see if this is a FHIR logical model (like dosage). If so, add the child nodes
+                                        //may want to do this for codeableconcept and others as well...
+                                        var typ = ed.type[0].code;
+                                        if (fhirLM[typ]) {
+                                            fhirLM[typ].forEach(function(child){
+                                                lst.push(path + "." + child.name)
+                                                hash[path] = ed;
+                                            })
+                                        }
+                                    }
+
+
+
+
                                 }
 
 
