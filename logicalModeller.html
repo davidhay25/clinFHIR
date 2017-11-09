@@ -476,6 +476,9 @@
                                     <td>
                                         <div ng-repeat="map in ed.mapping">{{map.identity}}:{{map.map | showMapOnly}}</div>
 
+                                        <div ng-show="ed.fixedString">
+                                            Fixed: {{ed.fixedString}}
+                                        </div>
 
 <!--
                                         <div ng-repeat="map in ed.mapping">{{map.identity}}:{{map.map}}</div>

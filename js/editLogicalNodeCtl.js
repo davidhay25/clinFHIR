@@ -257,14 +257,29 @@ angular.module("sampleApp")
                         $scope.qry = qry;
 
 
+
+                        $scope.filter = function(txt) {
+                           // console.log(txt)
+                            if (txt) {
+                                $scope.bundle = filter(txt.toLowerCase())
+                            }
+
+                        };
+
                         $scope.conformanceServerUrl = conformanceSvr.url;
                         $scope.showWaiting = true;
                         GetDataFromServer.adHocFHIRQueryFollowingPaging(qry).then(
 
                             function(data) {
                                 //filter out the ones not for this resource type. Not sure if this can be done server side...
+                                $scope.allExtensionsBundle = data.data;     //all the extensions
+
+                                $scope.bundle = filter()
+
+                                /*
                                 $scope.bundle = {entry:[]}
                                 if (data.data && data.data.entry) {
+
                                     data.data.entry.forEach(function(entry){
                                         var include = false;
                                         if (entry.resource) {
@@ -286,7 +301,9 @@ angular.module("sampleApp")
 
                                     })
                                 }
+                                */
 
+                                /*
                                 $scope.bundle.entry.sort(function(a,b){
                                     try {
                                         if (a.resource && b.resource) {
@@ -305,13 +322,72 @@ angular.module("sampleApp")
 
 
                                 });
-
+*/
                                 //$scope.bundle = data.data;
 
                             }
                         ).finally(function(){
                             $scope.showWaiting = false;
                         });
+
+
+                        function filter(txt) {
+                            var bundle = {entry:[]}
+
+                            if (! $scope.allExtensionsBundle) {
+                                return;
+                            }
+
+                            $scope.allExtensionsBundle.entry.forEach(function(entry){
+                                var include = false;
+                                if (entry.resource) {
+                                    if (! entry.resource.context) {
+                                        include = true;
+                                    } else  {
+                                        entry.resource.context.forEach(function(ctx){
+                                            if (ctx == '*' || ctx == 'Element' ||  ctx.indexOf($scope.resourceType) > -1) {
+                                                include = true;
+
+                                                if (txt && entry.resource.name && entry.resource.name.toLowerCase().indexOf(txt)== -1 ) {
+                                                    include = false;
+                                                }
+
+
+                                            }
+                                        })
+                                    }
+                                }
+
+
+                                if (include) {
+                                    bundle.entry.push(entry);
+                                }
+
+
+                            });
+
+                            bundle.entry.sort(function(a,b){
+                                try {
+                                    if (a.resource && b.resource) {
+                                        if (a.resource.name.toUpperCase() > b.resource.name.toUpperCase()) {
+                                            return 1
+                                        } else {
+                                            return -1;
+                                        }
+                                    } else {
+                                        return 0
+                                    }
+                                } catch (ex) {
+                                    return 0;
+                                }
+
+
+
+                            });
+
+                            return bundle;
+
+                        }
 
                         $scope.selectExtension = function(ent) {
                             $scope.selectedExtension = ent.resource

@@ -11,7 +11,7 @@
   },
   "Grahame" :{
     "name" : "clinfhir-dev",
-    "callback":"http://localhost:8081/smartCallback",
+    "callback":"http://localhost:8081/smartCallback"
 
   }
 }

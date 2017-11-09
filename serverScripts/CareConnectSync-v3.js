@@ -11,10 +11,10 @@ var errors = 0;
 
 //var remoteFhirServer = "http://fhirtest.uhn.ca/baseDstu2/";
 //var remoteFhirServer = "http://snapp.clinfhir.com:8080/baseDstu2/";
-var remoteFhirServer = "http://localhost:8080/baseDstu3/";
+//var remoteFhirServer = "http://localhost:8080/baseDstu3/";
 
 //var remoteFhirServer = "http://snapp.clinfhir.com:8081/baseDstu3/";   //the real one when ready...
-
+var remoteFhirServer = "http://fhirtest.uhn.ca/baseDstu3/";   //the real one when ready...
 
 //Create an implementation guide to hold the artifacts
 var IG = {resourceType:'ImplementationGuide',status:'draft',package:[{name:'complete',resource:[]}]};

@@ -655,9 +655,6 @@ angular.module("sampleApp")
                 } else {
                     $scope.midPaneClass = "col-md-10 col-sm-10"
                 }
-               // $scope.leftPaneClass = "col-sm-2 col-md-2"
-               // $scope.midPaneClass = "col-md-5 col-sm-5"
-               // $scope.rightPaneClass = "col-md-5 col-sm-5";
                 $scope.LMSelectorVisible = true;
             };
 
@@ -890,14 +887,12 @@ angular.module("sampleApp")
             }
 
 
-
             //if a shortcut has been used there will be a hash so load that
             var hash = $location.hash();
             if (hash) {
                 var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
                 sc.$loaded().then(
                     function(){
-
 
                         $scope.loadedFromBookmark = true;
 
@@ -948,8 +943,6 @@ angular.module("sampleApp")
                     }
                 )
             };
-
-
 
             $scope.generateShortCut = function() {
                 var hash = Utilities.generateHash();
@@ -2053,6 +2046,40 @@ angular.module("sampleApp")
 
                             //if not, then is the parent a reference to a resource?
                             if (!baseType) {
+
+
+                                var checkPath = parentPath;
+                                var checkMore = true, cnt = 0;
+                                while (checkPath != '#' && checkMore && cnt < 10) {
+                                    cnt++;      //a safety device to avoid an endless loop...
+                                    var node = findNodeWithPath(checkPath)
+
+                                    if (node && node.data && node.data.type) {
+                                        //if (node && node.data && node.data.ed && node.data.ed.type) {
+                                        node.data.type.forEach(function (typ) {
+                                            if (typ.code == 'Reference') {
+                                                //r2/r3 difference
+                                                var profile = typ.targetProfile
+                                                if (!profile && typ.profile) {
+                                                    profile = typ.profile[0]
+                                                }
+                                                if (profile) {
+                                                    baseType  = $filter('referenceType')(profile);
+                                                    checkMore = false;  //found the parent!
+                                                }
+
+                                            }
+                                        })
+                                        //if checkMore is still true, then we didn't find a reference with a profile.
+                                        checkPath = node.parent;    //move up the hierarchy. Will eventually stop at the root (parent = '#')
+
+                                        console.log(checkPath)
+
+                                    }  else {
+                                        checkMore = false;      //stop if there is a node without a type
+                                    }
+                                }
+                                /*
                                 var node = findNodeWithPath(parentPath)
 
                                 if (node && node.data && node.data.type) {
@@ -2071,6 +2098,7 @@ angular.module("sampleApp")
                                         }
                                     })
                                 }
+                                */
 
                             }
 
@@ -2605,26 +2633,20 @@ angular.module("sampleApp")
 
                 }).on('redraw.jstree', function (e, data) {
 
+                    //ensure the selected node remains so after a redraw...
                     if ($scope.treeIdToSelect) {
                         $("#lmTreeView").jstree("select_node", "#"+$scope.treeIdToSelect);
                         delete $scope.treeIdToSelect
                     }
-/*
-
-                    if ($scope.treeData.length > 0) {
-                        $scope.$broadcast('treebuilt');
-                        $scope.$digest();       //as the event occurred outside of angular...
-                    }
-                    */
 
                 }).on('open_node.jstree',function(e,data){
 
-                    //set the opened status of the scope propert to the same as the tree node so we can remember the state...
+                    //set the opened status of the scope property to the same as the tree node so we can remember the state...
                     $scope.treeData.forEach(function(node){
                         if (node.id == data.node.id){
                             node.state.opened = data.node.state.opened;
                         }
-                    })
+                    });
                     $scope.$digest();
                 }).on('close_node.jstree',function(e,data){
 
