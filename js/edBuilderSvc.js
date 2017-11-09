@@ -273,7 +273,8 @@ angular.module("sampleApp")
 
                     //the value name is 'value' + the code with the first letter capitalized, or value[x] if more than one...
                     var valueName = '[x]';
-                    if (vo.dataTypes.length == 1) {
+
+                    if (vo.dataTypes && vo.dataTypes.length == 1) {
                         valueName = vo.dataTypes[0].code;
                         valueName = valueName[0].toUpperCase()+valueName.substr(1);
                     }
@@ -282,16 +283,19 @@ angular.module("sampleApp")
                         definition:vo.description,min:vo.min,max:vo.max,type:[]};
 
 
-                    vo.dataTypes.forEach(function(type){
-                        ed3.base = {path: ed3.path,min:ed3.min, max:ed3.max};
-                        ed3.type.push({code:type.code})
+                    if (vo.dataTypes) {
+                        vo.dataTypes.forEach(function(type){
+                            ed3.base = {path: ed3.path,min:ed3.min, max:ed3.max};
+                            ed3.type.push({code:type.code})
 
-                        if (type.vs) {
-                            //this is a bound valueset
-                            ed3.binding = {strength : type.vs.strength,valueSetUri:type.vs.vs.url,description:vo.description}
-                        }
+                            if (type.vs) {
+                                //this is a bound valueset
+                                ed3.binding = {strength : type.vs.strength,valueSetUri:type.vs.vs.url,description:vo.description}
+                            }
 
-                    });
+                        });
+                    }
+
 
                     //required by STU-3
                     ed1.id = ed1.path + index;

@@ -6,6 +6,21 @@
 angular.module("sampleApp")
 
 
+    .filter('getSingleExtensionValueString',['Utilities',function(Utilities){
+        //return the value of an extension
+        return function(json,url) {
+            if (json) {
+                var ext = Utilities.getSingleExtensionValue(json,url)
+                if (ext) {
+                    return ext.valueString;
+                }
+                //return Utilities.getSingleExtensionValue(json,url)
+            }
+
+
+
+        }
+    }])
 
 
     .filter('typeFromUrl', function() {

@@ -4,6 +4,7 @@ angular.module("sampleApp")
         function ($scope,allDataTypes,editNode,parentPath,RenderProfileSvc,appConfigSvc, allResourceTypes,treeData,Utilities,
                   findNodeWithPath,rootForDataType,igSvc,references,baseType,$uibModal, logicalModelSvc, modalService) {
 
+            $scope.appConfigSvc = appConfigSvc;
             $scope.allResourceTypes = allResourceTypes;
             $scope.references = references;
             $scope.rootForDataType = rootForDataType;
@@ -169,7 +170,7 @@ angular.module("sampleApp")
                     $scope.isCoded = true;
                 }
 
-                $scope.allDataTypes.forEach(function(dt1){
+                    $scope.allDataTypes.forEach(function(dt1){
                         if (dt1.code == dtCode) {
                             $scope.input.dataType = dt1;
                         }

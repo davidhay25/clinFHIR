@@ -20,9 +20,7 @@ angular.module("sampleApp").controller('extensionDefCtrl',
                 $scope.input.description = parsedED.description; // currentExt.description;
                 $scope.input.short = parsedED.short; //currentExt.short;
                 $scope.input.publisher = parsedED.publisher; //) currentExt.publisher;
-
                 $scope.selectedResourcePaths = parsedED.selectedResourcePaths;      //the types (actually paths) where this extension can be applied
-
                 $scope.childElements = parsedED.childElements;
 
             }

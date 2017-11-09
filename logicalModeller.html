@@ -119,6 +119,9 @@
     <script src="js/editLogicalNodeCtl.js"></script>
     <script src="js/editLMDocCtl.js"></script>
     <script src="js/components/extensionDirective.js"></script>
+    <script src="js/newExtensionDefinitionCtrl.js"></script>
+    <script src="js/edBuilderSvc.js"></script>
+
 
     <script src="directive/questionnaire/questionnaireCtl.js"></script>
     <script src="js/questionnaireSvc.js"></script>
@@ -480,6 +483,20 @@
                                             Fixed: {{ed.fixedString}}
                                         </div>
 
+                                        <div>
+
+                                            <a href="#" ng-click="showExtensionFromMap(ed)">
+
+                                                {{ed | getSingleExtensionValueString : appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl}}
+                                            </a>
+
+
+<!--
+                                            {{ed | getSingleExtensionValueString : "http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl"}}
+                                            -->
+                                        </div>
+
+
 <!--
                                         <div ng-repeat="map in ed.mapping">{{map.identity}}:{{map.map}}</div>
                                         <div ng-repeat="ext in ed.mapping[0].extension">
@@ -763,7 +780,7 @@
 
                                 <tr ng-show="selectedNode.data.fhirMappingExtensionUrl"><td>Extension Url</td>
                                     <td>
-                                        <a href="#" ng-click="editExtension()">{{selectedNode.data.fhirMappingExtensionUrl}}</a>
+                                        <a href="#" ng-click="editExtension(selectedNode.data.fhirMappingExtensionUrl)">{{selectedNode.data.fhirMappingExtensionUrl}}</a>
                                     </td>
                                 </tr>
 

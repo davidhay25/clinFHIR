@@ -1955,9 +1955,16 @@ angular.module("sampleApp")
             };
 
 
-            $scope.editExtension = function () {
-                var extensionUrl = $scope.selectedNode.data.fhirMappingExtensionUrl;
+            $scope.showExtensionFromMap = function(ed) {
+                var url = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl;
+                var ext = Utilities.getSingleExtensionValue(ed,url)
+                if (ext) {
+                    $scope.editExtension(ext.valueString);
+                }
+            }
 
+            $scope.editExtension = function (extensionUrl) {
+                //var extensionUrl = $scope.selectedNode.data.fhirMappingExtensionUrl;
                 GetDataFromServer.findConformanceResourceByUri(extensionUrl).then(
                     function(resource) {
                         $uibModal.open({
@@ -1978,10 +1985,6 @@ angular.module("sampleApp")
                         alert(angular.toJson(err))
                     }
                 )
-
-
-
-
             };
 
 
