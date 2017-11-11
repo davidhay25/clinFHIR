@@ -865,7 +865,8 @@ angular.module("sampleApp")
                     }
 
                     //add the current model to it
-                    var entry = {item : {reference: 'StructureDefinition/'+$scope.currentType.id,display:$scope.currentType.id}}
+                    var entry = {item : {reference: 'StructureDefinition/'+$scope.currentType.id,display:$scope.currentType.id}};
+                    $scope.lmPalette.entry = $scope.lmPalette.entry || []
                     $scope.lmPalette.entry.push(entry);
 
                     //... and save...
@@ -1941,7 +1942,9 @@ angular.module("sampleApp")
                         $scope.modelHistory =data.data;
                     },
                     function(err) {
-                        alert(angular.toJson(err))
+                        msg = "There was an error loading the history of changes for this model.";
+                        msg += angular.toJson(err)
+                        alert(msg);
                     }
                 )
             }
@@ -1982,6 +1985,7 @@ angular.module("sampleApp")
                             })
                     },
                     function(err) {
+
                         alert(angular.toJson(err))
                     }
                 )

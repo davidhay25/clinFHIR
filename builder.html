@@ -301,15 +301,19 @@
                 </div>
 
 
-                <div class="col-md-2 col-sm-2">
-
+                <div class="col-md-1 col-sm-1">
                     <div class="navbar-text" ng-show="thingToDisplay=='scenario'">
-                        <div class="clickable" ng-click="refreshScenarioFromServer()">Refresh Scenario</div>
+                        <div class="clickable" ng-click="refreshScenarioFromServer()"
+                             uib-popover="Refresh scenario from server"
+                             popover-placement="left"
+                             popover-trigger="'mouseenter'"
 
+                        >Refresh</div>
                     </div>
                 </div>
 
-                <div class="col-md-1 col-sm-1">
+
+                <div class="col-md-2 col-sm-2">
 
                     <div class="pull-right navbar-form" ng-show="waiting">
                         <img src="css/ajax_loader_blue_32.gif"/>
@@ -346,9 +350,7 @@
                             </a>
 
 
-
                             <ul class="dropdown-menu" role="menu">
-
 
                                 <li ng-show="thingToDisplay=='scenario' && selectedContainer.isDirty">
                                     <a href="#" ng-click="saveToLibrary()">Save to Library</a>
@@ -373,11 +375,6 @@
                                 <li ng-show="thingToDisplay=='recording'">
                                     <a href="#" ng-click="thingToDisplay='scenario'">View Scenario</a>
                                 </li>
-
-
-
-
-
 
 
                             </ul>
