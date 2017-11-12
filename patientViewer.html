@@ -119,8 +119,19 @@
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 
         <div class="container-fluid">
-            <div class="col-md-2 col-sm-2">
-                <a class="navbar-brand" href="#">
+            <div class="col-md-3 col-sm-3">
+
+                <div class="col-md-1 col-sm-1">
+                    <a class="navbar-brand" href="#"
+                       uib-popover-html="displayServers"
+                       popover-trigger="'mouseenter'"
+                       popover-placement="right">
+                        Patient Viewer
+                    </a>
+                </div>
+
+
+               <!-- <a class="navbar-brand" href="#">
                     <a class="navbar-brand" href="#"
                        uib-popover-html="displayServers"
                        popover-trigger="'mouseenter'"
@@ -129,9 +140,9 @@
                     </a>
 
 
-                </a>
+                </a>-->
             </div>
-            <div class="col-md-6 col-sm-6">
+            <div class="col-md-5 col-sm-5">
 
                 <div class="navbar-text" ng-show="currentPatient">
                     {{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}} ({{currentPatient.id}})
