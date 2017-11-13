@@ -2,7 +2,7 @@
 angular.module("sampleApp")
     .controller('editLogicalNodeCtrl',
         function ($scope,allDataTypes,editNode,parentPath,RenderProfileSvc,appConfigSvc, allResourceTypes,treeData,Utilities,
-                  findNodeWithPath,rootForDataType,igSvc,references,baseType,$uibModal, logicalModelSvc, modalService) {
+                  findNodeWithPath,rootForDataType,igSvc,references,baseType,$uibModal, logicalModelSvc, modalService,$timeout) {
 
             $scope.appConfigSvc = appConfigSvc;
             $scope.allResourceTypes = allResourceTypes;
@@ -15,6 +15,26 @@ angular.module("sampleApp")
             $scope.vsInGuide = igSvc.getResourcesInGuide('valueSet');       //so we can show the list of ValueSets in the IG
             $scope.input = {};
             var that = this;
+
+            //NOT WORKING RIGHT NOW...
+            function setOptionsForDtAndPath() {
+                var path = $scope.input.mappingPath;    //the path in the fhor mapping
+                if ($scope.input.dataType && path) {
+                    var config = $scope.dtDef[$scope.input.dataType.code]
+
+                    if (config) {
+                        //if there's a config object for this datatype, does the path have an options set?
+                        var ar = path.split('.');
+                        var segment = ar[ar.length-1];
+                        if (config[segment].options) {
+                            console.log(config[segment].options)
+                        }
+                    }
+                }
+
+
+            }
+
 
             $scope.fhirMapping = function(map) {
                 $scope.isExtension = false;
@@ -67,6 +87,7 @@ angular.module("sampleApp")
                 }
             };
 
+            $scope.baseType = baseType;
 
 
             if (editNode) {
@@ -79,21 +100,17 @@ angular.module("sampleApp")
                     }
                 }
 
-
                 $scope.input.multiplicity = 'opt';
             }
-
-            $scope.baseType = baseType;
-
 
 
             if (baseType) {
                 //get all the paths - including expanding logical models...
                 logicalModelSvc.getAllPathsForType(baseType,true).then(
                     function(listOfPaths) {
-
                         $scope.allPaths = listOfPaths.list;
                         $scope.allPathsHash = listOfPaths.hash;
+                        $scope.dtDef = listOfPaths.dtDef;       //the definitions for a path (use to get the options)...
                     },function(err) {
                         alert("A Base type of "+ baseType +" was selected, but I couldn't locate the profile to get the element paths")
                     }
@@ -125,8 +142,6 @@ angular.module("sampleApp")
 
                     $scope.input.mappingFromED = angular.copy(data.mappingFromED);    //all the current mappings. Only want to update on save...
 
-
-
                     $scope.input.mappingPath = getMapValueForIdentity('fhir');
 
                     if ($scope.input.mappingPath && $scope.input.mappingPath.indexOf('xtension')>-1) {
@@ -138,8 +153,6 @@ angular.module("sampleApp")
                     $scope.input.mappingPathSnomed = getMapValueForIdentity('snomed');
 
                     $scope.input.fhirMappingExtensionUrl = data.fhirMappingExtensionUrl;
-
-
 
 
                     if (data.min == 0) {
@@ -159,12 +172,10 @@ angular.module("sampleApp")
 
 
                     $scope.dt = data.type[0];   //the selected datatype...
-
-
-
-
-
                     var dtCode = data.type[0].code;     //only the first datatype (we only support 1 right now)
+
+
+                    $timeout(setOptionsForDtAndPath,1000);      //check options for this dt & path (need to wait for the config to be loaded
 
                 if (dtCode == 'code' || dtCode == 'Codeing' || dtCode == 'CodeableConcept') {
                     $scope.isCoded = true;
@@ -187,9 +198,7 @@ angular.module("sampleApp")
                         })
                     }
 
-
                     $scope.selectedValueSet = data.selectedValueSet;
-
 
                     //if this is a reference, set the initial reference
                     if (dtCode == 'Reference') {
@@ -764,6 +773,7 @@ angular.module("sampleApp")
                 if (dt.isCoded) {
                     $scope.isCoded = true;
                 }
+                setOptionsForDtAndPath();       //see if this datatype & path has an options element set
             }
 
             $scope.selectVsFromServer = function(){

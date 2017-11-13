@@ -1,5 +1,5 @@
 angular.module("sampleApp").service('resourceCreatorSvc',
-    function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,profileCreatorSvc,
+    function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,profileCreatorSvc,$filter,
              GetDataFromServer,$localStorage,Utilities,$sce,resourceSvc,supportSvc,modalService) {
 
 
@@ -2041,6 +2041,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             //lst.push({code: 'Coding'});
             lst.push({code: 'Timing'});
             lst.push({code: 'instant'});
+            //lst.push({code: 'instant'});
             //lst.push({code: 'Range'});
 
             /*          return lst;
@@ -2740,7 +2741,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 }
             }
 
-
             var arNodes = [], arEdges = [];
             var objNodes = {};
             profile.snapshot.element.forEach(function (ed, inx) {
@@ -2830,6 +2830,19 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         label = arLabel.join('.');
 
                         label = ar[ar.length - 1];
+/*
+                        //see if this is a resoruce reference. If so, show the type
+                        if (ed.type) {
+                            ed.type.forEach(function (it) {
+                                if (it.code == 'Extension' && it.profile) {
+                                    label += '\n' +  $filter('getLogicalID')(it.profile)
+                                }
+                            })
+                        }
+*/
+
+
+
 
                     }
                     //console.log(label)
@@ -2848,8 +2861,18 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                             switch (typ.code) {
                                 case 'Reference' :
-                                    node.shape = 'ellipse';
-                                    node.color = {background: 'yellow', border: 'black'};
+                                   // node.shape = 'ellipse';
+                                    node.color = {background: '#ffcccc', border: 'black'};
+                                    //node.font = {multi:true}
+
+                                    var profile = typ.targetProfile;
+                                    if (! profile && typ.profile) {
+                                        profile = typ.profile[0];
+                                    }
+
+                                    node.label += '\n' +  $filter('getLogicalID')(profile)
+
+
                                     break;
                                 case 'BackboneElement' :
                                     node.color = 'lightgreen';

@@ -235,6 +235,7 @@ angular.module("sampleApp").controller('valuesetCtrl',
 
         //check for commands in the url - specifically a valueset url to edit or view...
         //todo - do I still ant to do this?
+        /*
         var params = $location.search();
         if (params) {
             $scope.startupParams = params;
@@ -249,6 +250,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 $scope.implementationGuide = params.ig;
             }
         }
+
+        */
 
         //see if an initial ValueSet was specified when the app was invoked..
         function checkForInitialVs() {
@@ -361,7 +364,8 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 delete $scope.serverRoot;       //will disable edit controls....
             })
         }
-        $scope.setRootConcept($scope.rootConcepts[0]);  //set to the first root concept in the array - chacking that it exists
+
+        $scope.setRootConcept($scope.rootConcepts[0]);  //set to the first root concept in the array - checking that it exists
 
 
 

@@ -120,5 +120,21 @@
       "name": "assigner",
       "type": "Reference"
     }
+  ],
+  "ContactPoint" : [
+    {"name":"system",
+    "type":"code",
+      "options":["phone","fax","email","pager","url","sms"]
+    },
+    {"name":"value",
+      "type":"string"},
+    {"name":"use",
+      "type":"code",
+      "options":["home","work","temp","old","mobile"]
+    },
+    {"name":"rank",
+      "type":"positiveInt"},
+    {"name":"period",
+      "type":"Period"}
   ]
 }

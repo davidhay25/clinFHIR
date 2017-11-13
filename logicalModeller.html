@@ -820,14 +820,28 @@
 
                                         <!-- Show any profile. If a reference, then hyperlink to the 'display' functionality... -->
                                         <span ng-show="typ.code == 'Reference'" class="pull-right">
+
+
+
+
+                                            <!--
                                             <span class="clickable" ng-click="viewReferencedModel(selectedNode.data.referenceUri)">View</span>
 
 
 
                                             <span ng-hide="isDirty" class="clickable" ng-click="loadReferencedModel(selectedNode.data.referenceUri)">Load</span>
+                                        -->
+
                                         </span>
 
-                                        <div>{{typ.profile}}{{typ.targetProfile}}</div>
+                                        <div>
+                                            <a ng-href="http://hl7.org/fhir/{{typ.targetProfile | getLogicalID}}.html" target="_blank">
+                                                {{typ.profile}}{{typ.targetProfile}}
+                                            </a>
+
+
+
+                                        </div>
 
                                     </div>
                                     <!-- If there's a ValueSet defined, allow it to be selected... -->

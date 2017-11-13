@@ -16,7 +16,7 @@
 
 <br/>
 <div class="row">
-    <div class="col-md-3">
+    <div class="col-md-3 col-sm-3">
 
         <h5>Resource Types</h5>
         <div class="list-group myScroll" >
@@ -39,7 +39,7 @@
 
 
 
-    <div ng-show="selectedType" class="col-md-9">
+    <div ng-show="selectedType" class="col-md-9 col-sm-9">
 
         <!--{{selectedType}}-->
         <div class="row" ng-show="selectedType.documentation">
@@ -230,22 +230,6 @@ onprofileselected = "showReferencedProfile(uri)"
                     <tr><td><strong>Conditional Update </strong></td><td>{{selectedType.conditionalUpdate}}</td></tr>
                     <tr><td><strong>Conditional Delete </strong></td><td>{{selectedType.conditionalDelete}}</td></tr>
                 </table>
-                <!--
-
-                <p>This will list - and describe - the profiles (or StructureDefinition resources) that are
-                supported by the server. Depending on how much detail we want to provide, these would be similar
-                to the woki documentation - including mappings back to HL7 version 2 messages</p>
-
-                <table class="table table-bordered">
-                    <tr><th>Path</th><th>Mult</th><th>DataType</th><th>Short</th></tr>
-                    <tr ng-repeat="el in confCtrl.profile.snapshot.element">
-                        <td>{{el.path}}</td>
-                        <td>{{el.min}}..{{el.max}}</td>
-                        <td><div ng-repeat="t in el.type">{{t.code}}</div> </td>
-                        <td>{{el.short}}</td>
-                    </tr>
-                </table>
--->
 
             </uib-tab>
             <uib-tab heading="Json">

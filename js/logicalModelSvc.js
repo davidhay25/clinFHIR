@@ -1533,7 +1533,7 @@ angular.module("sampleApp")
                 GetDataFromServer.findConformanceResourceByUri(url).then(
                     function (SD) {
                         if (SD && SD.snapshot && SD.snapshot.element) {
-                            var lst = [], hash={};
+                            var lst = [], hash={}, dtDef = {};
                             SD.snapshot.element.forEach(function (ed) {
                                 var path = ed.path;
 
@@ -1546,6 +1546,7 @@ angular.module("sampleApp")
                                             var newPath = pathRoot + cd;
                                             lst.push(newPath)
                                             hash[newPath] = ed;
+                                            //dtDef[newPath] =
                                         }
                                     })
 
@@ -1563,17 +1564,10 @@ angular.module("sampleApp")
                                             })
                                         }
                                     }
-
-
-
-
                                 }
 
-
-
-
                             });
-                            deferred.resolve({list:lst,hash:hash})
+                            deferred.resolve({list:lst,hash:hash,dtDef:fhirLM});
                         }
 
 
