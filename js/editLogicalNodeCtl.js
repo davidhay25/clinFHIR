@@ -17,7 +17,7 @@ angular.module("sampleApp")
             var that = this;
 
             //NOT WORKING RIGHT NOW...
-            function setOptionsForDtAndPath() {
+            function setOptionsForDtAndPathDep() {
                 var path = $scope.input.mappingPath;    //the path in the fhor mapping
                 if ($scope.input.dataType && path) {
                     var config = $scope.dtDef[$scope.input.dataType.code]
@@ -175,7 +175,7 @@ angular.module("sampleApp")
                     var dtCode = data.type[0].code;     //only the first datatype (we only support 1 right now)
 
 
-                    $timeout(setOptionsForDtAndPath,1000);      //check options for this dt & path (need to wait for the config to be loaded
+                    //$timeout(setOptionsForDtAndPath,1000);      //check options for this dt & path (need to wait for the config to be loaded
 
                 if (dtCode == 'code' || dtCode == 'Codeing' || dtCode == 'CodeableConcept') {
                     $scope.isCoded = true;
@@ -773,7 +773,7 @@ angular.module("sampleApp")
                 if (dt.isCoded) {
                     $scope.isCoded = true;
                 }
-                setOptionsForDtAndPath();       //see if this datatype & path has an options element set
+              //  setOptionsForDtAndPath();       //see if this datatype & path has an options element set
             }
 
             $scope.selectVsFromServer = function(){

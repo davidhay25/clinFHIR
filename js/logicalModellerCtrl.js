@@ -2047,17 +2047,17 @@ angular.module("sampleApp")
                         baseType : function() {
                             var baseType = null
                             //is there a base type set for this whole model?
-                            //changed so a parent reference will set the baseType 
+                            //changed so a parent reference will set the baseType
 
 
-                            if ($scope.treeData && $scope.treeData[0] && $scope.treeData[0].data &&  $scope.treeData[0].data.header)  {
-                                baseType = $scope.treeData[0].data.header.baseType;
-                            }
+                            //if ($scope.treeData && $scope.treeData[0] && $scope.treeData[0].data &&  $scope.treeData[0].data.header)  {
+                             //   baseType = $scope.treeData[0].data.header.baseType;
+                          //  }
 
                             //if not, then is the parent a reference to a resource?
-                            if (!baseType) {
+                           // if (!baseType) {
 
-
+                                //look
                                 var checkPath = parentPath;
                                 var checkMore = true, cnt = 0;
                                 while (checkPath != '#' && checkMore && cnt < 10) {
@@ -2110,6 +2110,11 @@ angular.module("sampleApp")
                                 }
                                 */
 
+                           // }
+                            if (!baseType) {
+                                if ($scope.treeData && $scope.treeData[0] && $scope.treeData[0].data && $scope.treeData[0].data.header) {
+                                    baseType = $scope.treeData[0].data.header.baseType;
+                                }
                             }
 
 
