@@ -209,8 +209,8 @@ angular.module("sampleApp")
                 console.log($scope.selectedContainer.showVersion)
             };
 
+            //set the current bundle as a version...
             $scope.setNewScenarioVersion = function(){
-                //set the current bundle as a version...
 
                 var modalOptions = {
                     closeButtonText: "No, I changed my mind",
@@ -229,6 +229,7 @@ angular.module("sampleApp")
                 )
             };
 
+            //select a particular version to display...
             $scope.selectScenarioVersion = function(inx) {
 
                 console.log(inx);
@@ -236,6 +237,7 @@ angular.module("sampleApp")
                 //the .bundle property is always the bundle version being displayed.
                 //.index is where it is in the history. if it is the same as history.length-1 then it is editable...
                 //when selecting a container we'll set the index to the last version (the editable one)
+
                 if ($scope.selectedContainer.history) {
                     $scope.selectedContainer.index = inx;
                     $scope.selectedContainer.bundle = angular.copy($scope.selectedContainer.history[inx].bundle)
@@ -279,7 +281,6 @@ angular.module("sampleApp")
             $scope.displayServers = "Conformance: " + appConfigSvc.getCurrentConformanceServer().name
                 + "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>"
                 + "<div>Term: " + appConfigSvc.getCurrentTerminologyServer().name + "</div>";
-
             $scope.showSelector = true;
 
 
@@ -471,7 +472,6 @@ angular.module("sampleApp")
                 })
 
             }
-
 
             $scope.importResource = function() {
                 $uibModal.open({
@@ -967,28 +967,19 @@ angular.module("sampleApp")
 
             $scope.currentBundleIndex = 0;     //the index of the bundle currently being used
 
+
             //select the initial container
             if (! $localStorage.builderBundles) {
-
-                //modalService.showModal({}, {bodyText:'To get started, either create a new set or download one from the Library.'});
                 $localStorage.builderBundles = [];
-
                 $scope.currentBundleIndex = -1;
 
             } else {
                 if ($localStorage.builderBundles.length > 0) {
                     $scope.selectedContainer = $localStorage.builderBundles[$scope.currentBundleIndex];
 
-
                     //set the .bundle property to the most recent version
                     builderSvc.setMostRecentVersionActive($scope.selectedContainer);
-/*
 
-                    if ($scope.selectedContainer.history) {
-                        $scope.selectedContainer.index = $scope.selectedContainer.history.length -1;
-                        $scope.selectedContainer.bundle = $scope.selectedContainer.history[$scope.selectedContainer.index]
-                    }
-*/
                     //create a hash (based on url) of all the resources in the
                     builderSvc.setAllResourcesThisSet($localStorage.builderBundles[$scope.currentBundleIndex].bundle);
                     $scope.currentPatient = builderSvc.getPatientResource();

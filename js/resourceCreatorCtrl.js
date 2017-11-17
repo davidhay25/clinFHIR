@@ -1709,7 +1709,12 @@ angular.module("sampleApp")
             resourceCreatorSvc.getLookupForCode(item.system,item.code).then(
                 function(data) {
                    //console.log(data);
-                    $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
+                    resourceCreatorSvc.parseCodeLookupResponse(data.data).then(
+                        function(d) {
+                            $scope.terminologyLookup = d;
+                        }
+                    )
+
                     //console.log($scope.terminologyLookup);
                 },
                 function(err) {
@@ -1729,7 +1734,12 @@ angular.module("sampleApp")
         resourceCreatorSvc.getLookupForCode(system,code).then(
             function(data) {
                 //console.log(data);
-                $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
+                resourceCreatorSvc.parseCodeLookupResponse(data.data).then(
+                    function(d) {
+                        $scope.terminologyLookup = d;
+                    }
+                )
+
                 //console.log($scope.terminologyLookup);
 
 
@@ -1779,9 +1789,13 @@ angular.module("sampleApp")
         resourceCreatorSvc.getLookupForCode(system,code).then(
             function(data) {
                // console.log(data);
+                resourceCreatorSvc.parseCodeLookupResponse(data.data).then(
+                    function(d) {
+                        $scope.terminologyLookup = d
+                            $scope.results.ccDirectDisplay = $scope.terminologyLookup.display;
 
-                $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
-                $scope.results.ccDirectDisplay = $scope.terminologyLookup.display;
+                    }
+                )
 
                 //console.log($scope.terminologyLookup);
 

@@ -2335,11 +2335,11 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             }
 
             var url = appConfigSvc.getCurrentTerminologyServer().url + 'CodeSystem/$lookup?code=' + code + "&system=" + system;
-            //var url = config.servers.terminology + 'CodeSystem/$lookup?code=' + code + "&system=" + system;
-            //console.log(url)
             return $http.get(url);
         },
         parseCodeLookupResponse: function (resp) {
+            var deferred = $q.defer();
+
             //parse the response from the codeSystem/$lookup operation. For now, assume SNOMED todo - check
             var obj = {parent: [], children: []}
             resp.parameter.forEach(function (param) {
@@ -2410,7 +2410,77 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 }
 
             })
-            return obj;
+
+
+            console.log(obj)
+
+            //do a separate lookup for all children codes...
+            var inc = {system:"http://snomed.info/sct",concept:[]}
+            obj.children.forEach(function(child){
+                if (!child.description) {
+                    inc.concept.push({code:child.value})
+                }
+            });
+
+            obj.parent.forEach(function(child){
+                if (!child.description) {
+                    inc.concept.push({code:child.value})
+                }
+            });
+
+
+
+            if (inc.concept.length > 0) {
+                var vs = {resourceType:'ValueSet',status:'draft',compose:{include:[]}}
+                vs.compose.include.push(inc);
+                console.log(vs);
+
+                var param = {resourceType:'Parameters',parameter:[]}
+                param.parameter.push({name:'valueSet',resource:vs})
+
+                var url = appConfigSvc.getCurrentTerminologyServer().url + 'ValueSet/$expand';
+                $http.post(url,param).then(
+                    function(data) {
+                        console.log(data.data)
+                        var evs = data.data;        //expanded ValueSet
+                        var hash = {};
+                        evs.expansion.contains.forEach(function(exp){
+                            hash[exp.code] = exp;
+                        });
+
+
+                        obj.children.forEach(function(child){
+                            if (!child.description) {
+                                child.description = hash[child.value].display;
+                            }
+                        });
+
+                        obj.parent.forEach(function(child){
+                            if (!child.description) {
+                                child.description = hash[child.value].display;
+                            }
+                        });
+
+
+                        deferred.resolve(obj)
+
+
+                    },function(err) {
+                        console.log(err)
+                    }
+                );
+
+            } else {
+                deferred.resolve(obj)
+            }
+
+
+
+
+            return deferred.promise
+
+
+            //return obj;
         },
         checkExtensionDefinitionsAreOnServer: function (serverUrl, arExtensions) {
             //retrieve all the StructureDefinitions that describe the extensions in this resource

@@ -120,6 +120,14 @@ angular.module("sampleApp")
                     })
             }
 
+            $scope.expandAll = function() {
+                $scope.treeData.forEach(function (item) {
+
+                    item.state.opened = true;
+                })
+                drawTree();
+            }
+
             $scope.resetLayout = function(){
                 logicalModelSvc.resetTreeState($scope.treeData);
                 $scope.treeData.forEach(function (item) {
@@ -1652,7 +1660,7 @@ angular.module("sampleApp")
 
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource);
-                $scope.Q = questionnaireSvc.makeQ($scope.treeData);
+                //temp $scope.Q = questionnaireSvc.makeQ($scope.treeData);
                 $scope.relativeMappings = logicalModelSvc.getRelativeMappings($scope.treeData); //items with both v2 & fhir mappings
 
 
@@ -2111,6 +2119,7 @@ angular.module("sampleApp")
                                 */
 
                            // }
+                            // if no reference in the hierarchy, see if the model was created with a base resource
                             if (!baseType) {
                                 if ($scope.treeData && $scope.treeData[0] && $scope.treeData[0].data && $scope.treeData[0].data.header) {
                                     baseType = $scope.treeData[0].data.header.baseType;
@@ -2241,7 +2250,7 @@ angular.module("sampleApp")
                         setAllMappings();   //update any mappings
 
                         //$scope.Q = logicalModelSvc.makeQ($scope.treeData);  //update the Questionnaire
-                        console.log( $scope.Q)
+                        //console.log( $scope.Q)
 
                         //set the path of the element based on the name - and the parent names up the hierarchy..
                         //>>>>>>>> This is an important function! Note the use of pathSegment...
@@ -2677,5 +2686,5 @@ angular.module("sampleApp")
 
             }
 
-            //drawTree()
+
     });

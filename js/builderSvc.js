@@ -500,7 +500,7 @@ angular.module("sampleApp")
 
             },
             setMostRecentVersionActive : function(container) {
-                //set the most recent bundle in the container to be the actibe one (.bundle)
+                //set the most recent bundle in the container to be the active one (.bundle)
                 if (container && container.history) {
                     if (container.history.length > 0) {
                         container.index = container.history.length -1;

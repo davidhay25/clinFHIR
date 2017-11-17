@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-11-07a';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-11-15c';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -92,11 +92,11 @@ angular.module("sampleApp")
 
         defaultConfig.terminologyServers.push({name:'Public HAPI STU3 server',version:3,url:"http://fhirtest.uhn.ca/baseDstu3/"});
 
-        defaultConfig.terminologyServers.push({name:'Ontoserver',version:3,url:"http://52.63.0.196:8080/fhir/"});
+       // defaultConfig.terminologyServers.push({name:'Ontoserver',version:3,url:"http://52.63.0.196:8080/fhir/"});
         defaultConfig.terminologyServers.push({name:"Local HAPI STU3",url:"http://localhost:8080/baseDstu3/",version:3});
         defaultConfig.terminologyServers.push({name:"fhir.org",url:"http://tx.fhir.org/r3/",version:3});
 
-
+        defaultConfig.terminologyServers.push({name:"ontoserver",url:"https://ontoserver.csiro.au/stu3-latest/",version:3});
 
 
 
@@ -120,7 +120,7 @@ angular.module("sampleApp")
 
 
         defaultConfig.allKnownServers.push({name:'fhir.org',version:3,url:"http://tx.fhir.org/r3/",isTerminology:true});
-        defaultConfig.allKnownServers.push({name:'Ontoserver STU3',version:3,url:"http://52.63.0.196:8080/fhir/",isTerminology:true});
+        //defaultConfig.allKnownServers.push({name:'Ontoserver STU3',version:3,url:"http://52.63.0.196:8080/fhir/",isTerminology:true});
         defaultConfig.allKnownServers.push({name:'MiHIN STU2',version:2,url:"http://52.72.172.54:8080/fhir/baseDstu2/"});
         defaultConfig.allKnownServers.push({name:'Simplifier R3',version:3,url:"https://stu3.simplifier.net/open/"});
         defaultConfig.allKnownServers.push({name:'Aegis WildFHIR STU3',version:3,url:" http://wildfhir.aegis.net/fhir3-0-1/"});
@@ -145,6 +145,8 @@ angular.module("sampleApp")
 
 
         defaultConfig.allKnownServers.push({name:'FHIR Registry',version:3,url:"https://registry-api.fhir.org/open/",everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:"ontoserver (terminology)",url:"https://ontoserver.csiro.au/stu3-latest/",version:3,everythingOperation:true,isTerminology:true});
+
         defaultConfig.allKnownServers.push({name:'Orion R2-Test',version:2,url:"orionProxy/",smart:true});
 
         //place all the servers in a hash indexed by url. THis is used for the userConfig

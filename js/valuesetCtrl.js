@@ -20,6 +20,30 @@ angular.module("sampleApp").controller('valuesetCtrl',
         };
 
 
+
+        //tmp-------
+        resourceCreatorSvc.getLookupForCode(snomedSystem,'195967001').then(
+            function(data) {
+                console.log(data);
+                resourceCreatorSvc.parseCodeLookupResponse(data.data).then(
+                    function(obj){
+                        console.log(obj)
+                    }
+
+                )
+
+               // $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data);
+                //console.log($scope.terminologyLookup);
+            },
+            function(err) {
+                //this will generally occur when using stu-2 - so ignore...
+                //alert(angular.toJson(err));
+            }
+        );
+        //-------
+
+
+
         $scope.newSelect = function(vs) {
             delete $scope.queryUrl;
             delete $scope.expansion;
@@ -39,10 +63,15 @@ angular.module("sampleApp").controller('valuesetCtrl',
                 function(data){
                     //console.log(data)
                     var raw = data.data;
-                    var parsed = resourceCreatorSvc.parseCodeLookupResponse(data.data);
+                    resourceCreatorSvc.parseCodeLookupResponse(data.data).then(
+                        function(data){
+                            var parsed = data;
+
+
+                    //var parsed = resourceCreatorSvc.parseCodeLookupResponse(data.data);
                     //console.log(parsed)
 
-                    $uibModal.open({
+                        $uibModal.open({
                         backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
                         keyboard: false,       //same as above.
                         templateUrl: 'modalTemplates/codeLookup.html',
@@ -61,10 +90,16 @@ angular.module("sampleApp").controller('valuesetCtrl',
                                     function(data) {
                                         console.log(data)
                                         $scope.raw = data.data
-                                        $scope.parsed = resourceCreatorSvc.parseCodeLookupResponse(data.data);
-                                        console.log($scope.parsed)
-                                        $scope.concept.code = item.value;
-                                        $scope.concept.display = item.description;
+
+                                        resourceCreatorSvc.parseCodeLookupResponse(data.data).then(
+                                            function(data) {
+                                                $scope.parsed = data;
+                                                console.log($scope.parsed)
+                                                $scope.concept.code = item.value;
+                                                $scope.concept.display = item.description;
+                                            }
+                                        )
+
                                     }
                                 ).finally(function(){
                                     $scope.showWaiting = false;
@@ -86,7 +121,9 @@ angular.module("sampleApp").controller('valuesetCtrl',
                         }
                     })
 
+                        }
 
+                    )
 
 
                 },
@@ -996,8 +1033,13 @@ angular.module("sampleApp").controller('valuesetCtrl',
             resourceCreatorSvc.getLookupForCode(item.system,item.code).then(
                 function(data) {
                     console.log(data);
-                    $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data);
-                    console.log($scope.terminologyLookup);
+                    resourceCreatorSvc.parseCodeLookupResponse(data.data).then(
+                        function(d) {
+                            $scope.terminologyLookup = d;
+                            console.log($scope.terminologyLookup);
+                        }
+                    )
+
                 },
                 function(err) {
                     //this will generally occur when using stu-2 - so ignore...
@@ -1049,7 +1091,12 @@ angular.module("sampleApp").controller('valuesetCtrl',
             resourceCreatorSvc.getLookupForCode(system,code).then(
                 function(data) {
                     console.log(data);
-                    $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
+                    resourceCreatorSvc.parseCodeLookupResponse(data.data).then(
+                        function(d) {
+                            $scope.terminologyLookup = d;
+                        }
+                    )
+
                    // console.log($scope.terminologyLookup);
                 },
                 function(err) {
@@ -1091,8 +1138,14 @@ angular.module("sampleApp").controller('valuesetCtrl',
                     function(data) {
                         console.log(data);
                         $scope.lookupResult = data.data;
-                        $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data)
-                        $scope.results.ccDirectDisplay = $scope.terminologyLookup.display;
+
+                        resourceCreatorSvc.parseCodeLookupResponse(data.data).then(
+                            function(d) {
+                                $scope.terminologyLookup = d
+                                $scope.results.ccDirectDisplay = $scope.terminologyLookup.display;
+                            }
+                        )
+
 
 
                         //set results.cc as that will enable the buttons - and will also be the code that is saved
