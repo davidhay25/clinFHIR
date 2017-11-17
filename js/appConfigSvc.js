@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-11-15c';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-11-17';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -77,8 +77,9 @@ angular.module("sampleApp")
         defaultConfig.servers.data = "http://fhirtest.uhn.ca/baseDstu3/";
         defaultConfig.servers.conformance = "http://fhirtest.uhn.ca/baseDstu3/";
 
-        defaultConfig.defaultTerminologyServerUrl = "http://fhirtest.uhn.ca/baseDstu3/";
+        //defaultConfig.defaultTerminologyServerUrl = "http://fhirtest.uhn.ca/baseDstu3/";
 
+        defaultConfig.defaultTerminologyServerUrl = "https://ontoserver.csiro.au/stu3-latest/";
 
 
 
