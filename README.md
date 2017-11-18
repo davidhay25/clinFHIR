@@ -9,7 +9,7 @@ This project is an Angular  'Single Page Application' that has 2 purposes (and 2
 
  1. Clone (or download) the repository
  2. Set up a simple HTTP server that will serve the files to a browser. On Mac OS X/Linux, the file 'startServer.sh' will start up the python HTTP server that serves up pages on port 8000 by default. On Windows, the file 'startServerWindows.bat' will start up the python HTTP server on port 8000 (make sure python is installed).
- 3. In a browser, navigate to *http://localhost:8000/sampleCreator.html*
+ 3. In a browser, navigate to *http://localhost:8000/launcher.html*
 
 # Usage
 As described above, this app is really targetted to 2 distinct sets of users.
