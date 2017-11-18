@@ -26,7 +26,7 @@
 
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage','ui.checkbox',"firebase"]).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','ui.checkbox',"firebase","ngSanitize"]).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -1108,6 +1108,26 @@
                                     </ul>
                                     <br/>
                                 </div>
+
+
+
+                                <div class="alert alert-error" ng-show="valueSetExpandError">
+                                    <h4>Errors expanding ValueSet</h4>
+                                    <table class="table">
+                                        <tr><th>Code</th><th>Severity</th><th>details</th><th>Diagnostics</th></tr>
+                                        <tr ng-repeat="iss in valueSetExpandError.issue">
+                                            <td>{{iss.code}}</td>
+                                            <td>{{iss.severity}}</td>
+                                            <td><pre ng-show="iss.details">{{iss.details}}</pre></td>
+                                            <td>{{iss.diagnostics}}</td>
+                                        </tr>
+                                    </table>
+
+
+
+                                </div>
+
+
 
                                 <a href="#" ng-show="selectedTerminology.resourceType=='ValueSet'" class="clickableDotted"
                                    ng-click="showValueSet(selectedTerminology.url)">Explore ValueSet</a>

@@ -951,6 +951,7 @@ angular.module("sampleApp")
 
                 if (type == 'terminology') {
                     delete $scope.valueSetOptions;
+                    delete $scope.valueSetExpandError;
                    //really only works for ValueSet and CodeSystemat this point...
                     var tType = 'ValueSet';
                     if (item.url.indexOf('/CodeSystem/') > -1) {
@@ -998,7 +999,7 @@ angular.module("sampleApp")
                                    },
                                    function(err){
                                        //$scope.valueSetOptions = [{code:'notExpanded',display:'Unable to get list, may be too long'}]
-                                       $scope.valueSetOptions = [{code:'notExpanded',display:err}]
+                                       $scope.valueSetExpandError = err.data
                                    }
                                )
                            }

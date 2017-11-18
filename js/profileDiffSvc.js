@@ -386,10 +386,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                             }
                         });
 
-                        //is this a discriminator entry
-                        if (item.slicing) {
-                           // node.a_attr = {style:'color:blue'}
-                        }
+
 
 
                         node.text = getDisplay(node);
@@ -422,6 +419,14 @@ angular.module("sampleApp").service('profileDiffSvc',
                                 })
                             }
                         }
+
+                        //hide discriminator entry
+                        if (item.slicing) {
+                            node.state.hidden=true;
+                        }
+
+
+
                     }
                 });
 
