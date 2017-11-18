@@ -12,38 +12,6 @@ angular.module("sampleApp").controller('valuesetCtrl',
         $scope.input = {};
         $scope.state = 'find';      // edit / new / find
 
-        $scope.cheatDEP = function() {
-            snomedSystem = "http://fhir.hl7.org.nz/NamingSystem/cheat";
-            createNewValueSet('cheat')
-            $scope.state='new';
-            $scope.canEdit = true;
-        };
-
-
-
-        //tmp-------
-        resourceCreatorSvc.getLookupForCode(snomedSystem,'195967001').then(
-            function(data) {
-                console.log(data);
-                resourceCreatorSvc.parseCodeLookupResponse(data.data).then(
-                    function(obj){
-                        console.log(obj)
-                    }
-
-                )
-
-               // $scope.terminologyLookup = resourceCreatorSvc.parseCodeLookupResponse(data.data);
-                //console.log($scope.terminologyLookup);
-            },
-            function(err) {
-                //this will generally occur when using stu-2 - so ignore...
-                //alert(angular.toJson(err));
-            }
-        );
-        //-------
-
-
-
         $scope.newSelect = function(vs) {
             delete $scope.queryUrl;
             delete $scope.expansion;

@@ -1046,8 +1046,6 @@ angular.module("sampleApp")
                    profileDiffSvc.getSD(url).then(
                        function(SD){
 
-
-
                            $scope.constrainedType = SD.constrainedType;     //todo different for R3...
 
                            //always check if there are any extension definitions or valuesets references by this profile (in case they have been externally changed)
@@ -1067,9 +1065,17 @@ angular.module("sampleApp")
                                        setupProfile(SD)
 
 
-
                                    }, function (err) {
                                        alert('Error updating IG '+angular.toJson(err))
+
+                                       //even if there was an error updating the the IG, we still want to select this profile...
+                                       $scope.selectIG($scope.currentIG);       //re-draw the lists
+                                       //need to reset these as they are cleared in the select routine...
+                                       $scope.selectedItemType = type;
+                                       $scope.selectedItem = item;
+                                       //$scope.selectItem(item,type);    //todo. hmmm this is calling itself!
+                                       setupProfile(SD)
+
                                    }
                                );
 
@@ -1191,8 +1197,6 @@ angular.module("sampleApp")
                         //display any errors...
                         if (vo.errors.length) {
                             $scope.errorsInLM = vo.errors;
-
-
                         }
 
 
@@ -1218,9 +1222,6 @@ angular.module("sampleApp")
                         })
                     }
                 );
-
-
-
 
                 //------- raw model
                 var treeData = logicalModelSvc.createTreeArrayFromSD(angular.copy(SD))

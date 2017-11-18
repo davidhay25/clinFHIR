@@ -645,7 +645,15 @@
                                                     </td></tr>
 
                                                     <tr><td width="15%">Path</td><td>{{selectedElementInLM.path}}</td></tr>
-                                                    <tr><td>Multiplicity</td><td>{{selectedElementInLM.min}}..{{selectedElementInLM.max}}</td></tr>
+                                                    <tr><td>Multiplicity</td>
+                                                        <td>
+                                                            {{selectedElementInLM.min}}..{{selectedElementInLM.max}}
+                                                            <span ng-show="selectedElementInLM.min == 1
+                                                                && selectedElementInLM.base.min ==0
+                                                                && selectedElementInLM.path.indexOf('extension') == -1">
+                                                                <strong> (This element was optional in the FHIR spec)</strong>
+                                                            </span>
+                                                        </td></tr>
                                                     <tr><td>Name</td><td>{{selectedElementInLM.name}}</td></tr>
                                                     <tr><td>Short</td><td>{{selectedElementInLM.short}}</td></tr>
                                                     <tr><td>Definition</td><td>{{selectedElementInLM.definition}}</td></tr>

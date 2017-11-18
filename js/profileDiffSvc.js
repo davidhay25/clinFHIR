@@ -256,7 +256,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
 
         updateExtensionsAndVSInProfile : function(IG,SD,pkg) {
-            //add any referenced extensions and valuesets to the profile...
+            //add any referenced extensions and valuesets to the IMPLEMENTATIONGUIDE!!!...
             var updated = false;
             var that = this;
             if (! pkg) {
@@ -276,7 +276,9 @@ angular.module("sampleApp").service('profileDiffSvc',
                             var res = that.findResourceInIGPackage(IG,profileUrl);
 
                             if (!res) {
+
                                 var res = {sourceReference:{reference:profileUrl}};
+
                                 //todo - should likely move to an extension for R3
                                 if (appConfigSvc.getCurrentConformanceServer().version ==2) {
                                     res.purpose = 'extension'
@@ -292,15 +294,29 @@ angular.module("sampleApp").service('profileDiffSvc',
                 }
                 if (ed.binding) {
 
+                    //in amsterdam. Only look for bindings that are a reference (not a Uri) - as a uri won't resolve...
+
+                    var vsUrl;
+                    if (ed.binding.valueSetReference && ed.binding.valueSetReference.reference) {
+                        vsUrl = ed.binding.valueSetReference.reference;
+
+
+
+                  //  }
+
+
+
+                    /*
                     //prefer the valueSetReference...
                     var vsUrl = ed.binding.valueSetUri;
                     if (ed.binding.valueSetReference) {
                         vsUrl = ed.binding.valueSetReference.reference;
                     }
 
+                    */
 
 
-                    if (vsUrl) {
+                  //  if (vsUrl) {
                         var res = that.findResourceInIGPackage(IG,vsUrl);
 
                         if (!res) {
@@ -311,7 +327,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                             } else {
                                 res.acronym = 'terminology'
                             }
-
 
 
                             pkg.resource.push(res);
@@ -347,7 +362,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                         var parent = ar.join('.');
                         var node = {id:inx, text:path, state: {}, data: {ed : item, myMeta:{}}};
 
-                        //standard element names like 'text' or 'language'. Note that hidden elements are actually removed form the tree b4 returning...
+                        //standard element names like 'text' or 'language'. Note that hidden elements are actually removed from the tree b4 returning...
                         if (ar.length == 1 && elementsToDisable.indexOf(segment) > -1) {
                             node.state.hidden=true;
                         }
@@ -377,22 +392,21 @@ angular.module("sampleApp").service('profileDiffSvc',
                         }
 
 
-
                         node.text = getDisplay(node);
-
 
                         if (segment == 'extension') {
 
                             //set the text to a better display (not the path)
                             node.text = item.name || item.short || node.text;
 
-
                             node.a_attr = {style:'color:blueviolet'}
                             //if the extension has a profile type then include it, otherwise not...
+                            node.state.hidden=true;     //default is to hide...
                             if (item.type) {
                                 item.type.forEach(function (it) {
                                     if (it.code == 'Extension' && it.profile) {
                                         //load the extension definition
+                                        node.state.hidden=false;    //if there is a profile, then show it...
                                         queries.push(GetDataFromServer.findConformanceResourceByUri(it.profile).then(
                                             function(sdef) {
                                                 var analysis = Utilities.analyseExtensionDefinition3(sdef);
@@ -461,6 +475,7 @@ angular.module("sampleApp").service('profileDiffSvc',
             return deferred.promise;
 
 
+            //also set the max length of the text in the tree...
             function removeHidden(lst) {
                 var treeData =[];
                 var hash = {}
@@ -469,10 +484,22 @@ angular.module("sampleApp").service('profileDiffSvc',
                     if (item.state && item.state.hidden){
                         include = false
                     }
+                    //include if first (root) node, is not hidden =, and has a parent
                     if (inx == 0 || (include && hash[item.parent])) {
-                        treeData.push(item)
-                        hash[item.id] = 'x'
+                        treeData.push(item);
+                        hash[item.id] = 'x';    //for the parent check
+
+                        if (item.text && item.text.length > 40) {
+                            item.text = item.text.substr(0,37) + '...';
+                        }
+
+
+
+
                     }
+
+
+
                 })
                 return treeData;
 
