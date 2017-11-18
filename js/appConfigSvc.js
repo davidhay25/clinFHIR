@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-11-17';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-11-18';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -45,8 +45,6 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.qMult = 'http://clinfhir.com/StructureDefinition/qMultUrl';
         defaultConfig.standardExtensionUrl.igEntryType = 'http://clinfhir.com/StructureDefinition/igEntryType';
 
-
-
         defaultConfig.standardSystem.identifierSystem = 'http://clinfhir.com/fhir/NamingSystem/identifier';
         defaultConfig.standardSystem.practitionerIdentifierSystem = 'http://clinfhir.com/fhir/NamingSystem/practitioner';
         defaultConfig.standardSystem.listTypes = 'http://clinfhir.com/fhir/CodeSystem/listTypes';
@@ -73,7 +71,9 @@ angular.module("sampleApp")
         defaultConfig.baseSpecUrl = "http://hl7.org/fhir/";     //the base for spec documentation
         defaultConfig.logLevel = 0;     //0 = no logging, 1 = log to console
         defaultConfig.enableCache = false;  //whether caching is supported
-        defaultConfig.servers.terminology = "http://fhirtest.uhn.ca/baseDstu3/";//
+
+        //these are the default servers....
+        defaultConfig.servers.terminology = "https://ontoserver.csiro.au/stu3-latest/";//
         defaultConfig.servers.data = "http://fhirtest.uhn.ca/baseDstu3/";
         defaultConfig.servers.conformance = "http://fhirtest.uhn.ca/baseDstu3/";
 
@@ -97,7 +97,7 @@ angular.module("sampleApp")
         defaultConfig.terminologyServers.push({name:"Local HAPI STU3",url:"http://localhost:8080/baseDstu3/",version:3});
         defaultConfig.terminologyServers.push({name:"fhir.org",url:"http://tx.fhir.org/r3/",version:3});
 
-        defaultConfig.terminologyServers.push({name:"ontoserver",url:"https://ontoserver.csiro.au/stu3-latest/",version:3});
+        defaultConfig.terminologyServers.push({name:"Ontoserver",url:"https://ontoserver.csiro.au/stu3-latest/",version:3});
 
 
 
@@ -146,7 +146,7 @@ angular.module("sampleApp")
 
 
         defaultConfig.allKnownServers.push({name:'FHIR Registry',version:3,url:"https://registry-api.fhir.org/open/",everythingOperation:true});
-        defaultConfig.allKnownServers.push({name:"ontoserver (terminology)",url:"https://ontoserver.csiro.au/stu3-latest/",version:3,everythingOperation:true,isTerminology:true});
+        defaultConfig.allKnownServers.push({name:"Ontoserver (terminology)",url:"https://ontoserver.csiro.au/stu3-latest/",version:3,everythingOperation:true,isTerminology:true});
 
         defaultConfig.allKnownServers.push({name:'Orion R2-Test',version:2,url:"orionProxy/",smart:true});
 
@@ -168,7 +168,7 @@ angular.module("sampleApp")
         return {
             setToDefault : function(){
                 //this.setServerType('terminology',"http://fhir3.healthintersections.com.au/open/");
-                this.setServerType('terminology',"http://fhirtest.uhn.ca/baseDstu3/");
+                this.setServerType('terminology',"https://ontoserver.csiro.au/stu3-latest/");
                 this.setServerType('data',"http://fhirtest.uhn.ca/baseDstu3/");
                 this.setServerType('conformance',"http://fhirtest.uhn.ca/baseDstu3/");
             },

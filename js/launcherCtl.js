@@ -88,8 +88,6 @@ angular.module("sampleApp")
 
                     }
                 );
-
-
             };
 
             GetDataFromServer.getAccessAudit(evt).then(

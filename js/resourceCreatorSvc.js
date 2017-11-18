@@ -2403,18 +2403,17 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                                 break;
                         }
 
-
                         break;
                     default :
                         console.log('unrecognised param', param)
                 }
 
-            })
+            });
 
 
-            console.log(obj)
+            //console.log(obj)
 
-            //do a separate lookup for all children codes...
+            //do a separate lookup for all children codes that have no description...
             var inc = {system:"http://snomed.info/sct",concept:[]}
             obj.children.forEach(function(child){
                 if (!child.description) {
@@ -2429,25 +2428,24 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             });
 
 
-
+            //if there are child or parent codes that have no description, create a dynamic ValueSet to retrieve them in a single call...
             if (inc.concept.length > 0) {
                 var vs = {resourceType:'ValueSet',status:'draft',compose:{include:[]}}
                 vs.compose.include.push(inc);
-                console.log(vs);
+                //console.log(vs);
 
-                var param = {resourceType:'Parameters',parameter:[]}
-                param.parameter.push({name:'valueSet',resource:vs})
+                var param = {resourceType:'Parameters',parameter:[]};
+                param.parameter.push({name:'valueSet',resource:vs});
 
                 var url = appConfigSvc.getCurrentTerminologyServer().url + 'ValueSet/$expand';
                 $http.post(url,param).then(
                     function(data) {
-                        console.log(data.data)
+                        //console.log(data.data)
                         var evs = data.data;        //expanded ValueSet
                         var hash = {};
                         evs.expansion.contains.forEach(function(exp){
                             hash[exp.code] = exp;
                         });
-
 
                         obj.children.forEach(function(child){
                             if (!child.description) {
@@ -2461,10 +2459,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             }
                         });
 
-
                         deferred.resolve(obj)
-
-
+                        
                     },function(err) {
                         console.log(err)
                     }
@@ -2473,9 +2469,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             } else {
                 deferred.resolve(obj)
             }
-
-
-
 
             return deferred.promise
 
