@@ -2460,7 +2460,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         });
 
                         deferred.resolve(obj)
-                        
+
                     },function(err) {
                         console.log(err)
                     }
