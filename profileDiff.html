@@ -26,7 +26,14 @@
 
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage','ui.checkbox',"firebase","ngSanitize"]).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','ui.checkbox',"firebase","ngSanitize"]).
+        config(function($locationProvider) {
+
+
+
+           // $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file):/);
+            //$compileProvider.urlSanitizationWhitelist(/^\s*(https?|ftp|mailto|file):/);
+
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);

@@ -8,7 +8,12 @@ angular.module("sampleApp").service('profileDiffSvc',
 
         objColours.profile = '#ff8080';
         objColours.extension = '#ffb3ff';
+        objColours.extensionEdge = '#9900cc';
         objColours.terminology = '#FFFFCC';
+        objColours.terminologyEdge = '#cccc00';
+
+
+
 
 
         //_loaded are profiles not in the IG...
@@ -1001,7 +1006,15 @@ angular.module("sampleApp").service('profileDiffSvc',
                                             var ref = hash[profile];
                                             if (ref) {
                                                 //hurrah! we have a target resource
-                                                arEdges.push({from: parentId, to: ref.nodeId, data:{path:ed.path,ed:ed}})
+                                                var extConfig = {from: parentId, to: ref.nodeId, data:{path:ed.path,ed:ed}}
+
+                                                extConfig.arrows = {to:{enabled:false}};
+                                                extConfig.dashes = true;
+
+                                                extConfig.color = objColours['extensionEdge']
+
+
+                                                arEdges.push(extConfig)
                                                 ref.usedBy.push(SD.url)
                                             }
                                         }
@@ -1022,14 +1035,26 @@ angular.module("sampleApp").service('profileDiffSvc',
                                         var ref = hash[url];
                                         if (ref) {
                                             //hurrah! we have a target ValueSet
-                                            arEdges.push({from: parentId, to: ref.nodeId, data:{path:ed.path,ed:ed}})
+
+                                            var vsConfig={from: parentId, to: ref.nodeId, data:{path:ed.path,ed:ed}}
+                                            vsConfig.arrows = {to:{enabled:false}};
+                                            vsConfig.dashes = true;
+                                            vsConfig.color = objColours['terminologyEdge']
+
+                                            arEdges.push(vsConfig)
                                             ref.usedBy.push(url)
                                         } else {
                                             //this is a reference to a resource not in the IG
 
                                             if (options.includeCore && options.includeTerminology) {
                                                 var newNodeId = addNode(url,'terminology')
-                                                arEdges.push({from: parentId, to: newNodeId, data:{path:ed.path,ed:ed}})
+
+                                                var vsConfig={from: parentId, to: newNodeId, data:{path:ed.path,ed:ed}}
+                                                vsConfig.arrows = {to:{enabled:false}};
+                                                vsConfig.dashes = true;
+                                                vsConfig.color = objColours['terminologyEdge']
+
+                                                arEdges.push(vsConfig)
                                             }
 
                                         }

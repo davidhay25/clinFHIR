@@ -38,16 +38,39 @@
                                     <td>{{child.ed.min}}...{{child.ed.max}}</td>
                                     <td>
                                         <div ng-repeat="dt in child.ed.type track by $index">
+
+
+                                            <span ng-hide="dt.code=='Reference'">{{dt.code}}</span>
+                                            <span ng-show="dt.code=='Reference'">--></span>
+
+
+                                            <span ng-show="dt.profile">
+                                                        <span title="{{dt.profile}}">{{dt.profile | referenceType}}</span>
+
+                                                    </span>
+                                            <span ng-show="dt.targetProfile">
+
+                                                     <span title="{{dt.targetProfile}}">{{dt.targetProfile | referenceType}}</span>
+                                                    </span>
+
+<!--
                                             <a ng-href="http://hl7.org/fhir/datatypes.html#{{dt.code}}" target="_blank">
 
                                                 <span ng-hide="dt.code=='Reference'">{{dt.code}}</span>
-                                                <span ng-show="dt.code=='Reference'">--></span>
+                                                <span ng-show="dt.code=='Reference'">--</span>
 
 
                                                 <span ng-show="dt.profile">
                                                         <span title="{{dt.profile}}">{{dt.profile | referenceType}}</span>
+
                                                     </span>
+                                                <span ng-show="dt.targetProfile">
+
+                                                     <span title="{{dt.targetProfile}}">{{dt.targetProfile | referenceType}}</span>
+                                                    </span>
+
                                             </a>
+                                            -->
                                         </div>
 
 
@@ -125,7 +148,7 @@
                                 <div class="clickable" ng-click="$ctrl.showvs({url:$ctrl.analyse.binding.valueSetReference.reference})">
                                     {{$ctrl.analyse.binding.valueSetReference.reference}}
                                 </div>
-                                    {{$ctrl.analyse.binding.valueSetUri}}
+                                {{$ctrl.analyse.binding.valueSetUri}}
                                 ({{$ctrl.analyse.binding.strength}})
                             </div>
                             <div>{{$ctrl.analyse.binding.description}}</div>
