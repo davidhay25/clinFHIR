@@ -1308,6 +1308,7 @@ angular.module("sampleApp")
                         controller: function($scope,appConfigSvc,Utilities,GetDataFromServer,
                                              modalService,RenderProfileSvc,SD,allModels) {
                             $scope.input = {};
+                            $scope.input.createElementsFromBase = false;    //by default, don't copy the existing elements across.
                             $scope.isNew = true;
                             $scope.allModels = allModels;
 
@@ -1351,12 +1352,13 @@ angular.module("sampleApp")
                                     //
                                 }
                             } else {
-                                $scope.input.modelType = 'multiple'
+                                //$scope.input.modelType = 'multiple'
+                                $scope.input.modelType = 'single'
                                 
                             }
 
                             $scope.selectBaseType = function() {
-                                $scope.input.createElementsFromBase = true;     //default to copy elements across
+                                //$scope.input.createElementsFromBase = true;     //default to copy elements across
                             }
 
                             $scope.checkName = function() {
@@ -1507,7 +1509,6 @@ angular.module("sampleApp")
 
                                     $scope.currentType = logicalModelSvc.clone(result.clone,result.name);
 
-
                                     $scope.isDirty = true;  //as the model has noy been saved...
                                     $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.currentType)
 
@@ -1517,9 +1518,6 @@ angular.module("sampleApp")
 
                                 } else if (result.baseType && result.createElementsFromBase) {
                                     //if the user specified a base type, then pre-populate a model from that base
-
-
-
 
                                     logicalModelSvc.createFromBaseType($scope.treeData,result.baseType,
                                         $scope.rootName).then(
