@@ -86,6 +86,45 @@ angular.module("sampleApp")
 
 
         return {
+            makeScenario : function(tree) {
+                //generate a scenario from the model (as a tree)
+                var bundle = {resourceType:'Bundle',entry:[]}
+                var patient = null;   //if there's a patient resource in the model...
+                var hash = {};
+                tree.forEach(function (node,inx) {
+                    if (inx == 0) {
+                        var ext = Utilities.getSingleExtensionValue(node.data.header,
+                            appConfigSvc.config().standardExtensionUrl.baseTypeForModel)
+                        if (ext && ext.valueString) {
+                            var resource = {resourceType:ext.valueString,id:node.id}
+                            hash[node.id] = resource;
+                            bundle.entry.push({resource:resource})
+                        }
+                    } else {
+                        if (node.data && node.data.referenceUrl) {
+                            var resourceType = $filter('referenceType')(node.data.referenceUrl)
+                            var resource = {resourceType:resourceType,id:node.id}
+                            hash[node.id] = resource
+                            bundle.entry.push({resource:resource})
+                            if (resourceType == 'Patient') {
+                                patient = resource;
+                            }
+                        }
+                    }
+                });
+
+                //if there's a patient, then set all the patient references for all resources.
+                if (patient) {
+                    bundle.entry.forEach(function (entry) {
+
+
+                    })
+                }
+
+
+                console.log(bundle)
+
+           },
 
             getMappingFile : function(url) {
                 url = url || "http://fhir.hl7.org.nz/baseDstu2/StructureDefinition/OhEncounter";    //testing
@@ -1569,7 +1608,6 @@ angular.module("sampleApp")
                             });
                             deferred.resolve({list:lst,hash:hash,dtDef:fhirLM});
                         }
-
 
                     }, function (err) {
                         alert("error qith query: " + url + "\n" + angular.toJson(err));

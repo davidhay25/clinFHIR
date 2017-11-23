@@ -28,7 +28,7 @@ angular.module("sampleApp")
                     $scope.allResourceTypes = data;
                 });
 
-            $scope.findProfileDEP = function() {
+            $scope.makeScenario = function() {
                 //$scope.showFindProfileDialog.open();
             };
 
@@ -1204,53 +1204,6 @@ angular.module("sampleApp")
             };
 
 
-            //generate the graph. allows tge graph to be manipulated (eg nodes hidden) after creation...
-            var drawGraphFromGraphDataDEP = function(graphData,options) {
-
-                var container = document.getElementById('mmLogicalModel');
-                var options = {
-
-                    edges: {
-
-                        smooth: {
-                            type: 'cubicBezier',
-                            forceDirection: 'horizontal',
-                            roundness: 0.4
-                        }
-                    },
-                    layout: {
-                        hierarchical: {
-                            direction: 'LR',
-                            nodeSpacing : 35,
-                            sortMethod:'directed'
-                        }
-                    },
-                    physics:false
-                };
-
-                $scope.profileNetwork = new vis.Network(container, graphData, options);
-
-                $scope.profileNetwork.on("click", function (obj) {
-
-
-                    var nodeId = obj.nodes[0];  //get the first node
-
-
-                    var node = graphData.nodes.get(nodeId);
-
-
-                    var pathOfSelectedNode = node.ed.path; //node.ed.base.path not working with merged...
-
-                    //var pathOfSelectedNode = node.ed.base.path;
-                    $scope.selectedNode = findNodeWithPath(pathOfSelectedNode); //note this is the node for the tree view, not the graph
-
-                    $scope.$digest();
-
-
-                });
-
-
-            }
 
             //this is the event when the profileGraph tab is chosen. Should really move this to a separate controller...
             $scope.redrawProfileGraph = function() {
@@ -2016,6 +1969,7 @@ angular.module("sampleApp")
 
                 editNode($scope.selectedNode,parentPath);         //will edit the node
 
+
             };
 
             //edit or add a new element to the model
@@ -2244,6 +2198,7 @@ angular.module("sampleApp")
                         drawTree();
                         $scope.isDirty = true;
                         makeSD();       //create the StructureDefinition resource...
+                        logicalModelSvc.makeScenario($scope.treeData);      //make a scenario...
 
                         setAllMappings();   //update any mappings
 

@@ -2890,21 +2890,8 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     if (ar.length > 1) {
                         var arLabel = angular.copy(ar);
                         arLabel.shift();
-                        label = arLabel.join('.');
-
+                        //label = arLabel.join('.');
                         label = ar[ar.length - 1];
-/*
-                        //see if this is a resoruce reference. If so, show the type
-                        if (ed.type) {
-                            ed.type.forEach(function (it) {
-                                if (it.code == 'Extension' && it.profile) {
-                                    label += '\n' +  $filter('getLogicalID')(it.profile)
-                                }
-                            })
-                        }
-*/
-
-
 
 
                     }
@@ -2967,6 +2954,15 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                         node.font = {color: 'red'};
                     }
 
+
+                    if (inx == 0) {
+                        //if it's the root node, and there is a base type then add that to the label
+                        var baseTypeForModel = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
+                        var ext1 = Utilities.getSingleExtensionValue(profile, baseTypeForModel)
+                        if (ext1 && ext1.valueString) {
+                            node.label += '\n' +  ext1.valueString
+                        }
+                    }
 
                     arNodes.push(node);
                     arEdges.push({from: objNodes[arParent.join('.')], to: inx})
