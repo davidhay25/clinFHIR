@@ -1762,6 +1762,18 @@ angular.module("sampleApp")
                 checkInPalette();
 
 
+                logicalModelSvc.makeScenario($scope.treeData).then(
+                    function(bundle){
+                        //do something...
+
+
+
+                       logicalModelSvc.saveScenario(bundle,'fromLM')
+
+
+
+                    }
+                );      //make a scenario.
 
             }
 
@@ -2198,7 +2210,11 @@ angular.module("sampleApp")
                         drawTree();
                         $scope.isDirty = true;
                         makeSD();       //create the StructureDefinition resource...
-                        logicalModelSvc.makeScenario($scope.treeData);      //make a scenario...
+                        logicalModelSvc.makeScenario($scope.treeData).then(
+                            function(bundle){
+                                //do something...
+                            }
+                        );      //make a scenario...
 
                         setAllMappings();   //update any mappings
 

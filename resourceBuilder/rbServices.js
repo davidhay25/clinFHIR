@@ -93,7 +93,7 @@ angular.module("sampleApp").
                         deferred.resolve(data);
                     },
                     function(err) {
-                        //alert("errr calling validate operation:\n"+angular.toJson(err))
+
                         deferred.reject(err.data);
                     }
                 );
@@ -121,7 +121,7 @@ angular.module("sampleApp").
                     deferred.resolve(data);
                 },
                 function(err) {
-                    //alert("errr calling validate operation:\n"+angular.toJson(err))
+
                     deferred.reject(err.data);
                 }
             );
@@ -136,7 +136,6 @@ angular.module("sampleApp").
                     deferred.resolve(data);
                 },
                 function(err) {
-                    //alert("errr calling validate operation:\n"+angular.toJson(err))
                     deferred.reject(err.data);
                 }
             );
@@ -584,9 +583,6 @@ angular.module("sampleApp").
             }
 
             return deferred.promise;
-
-
-
 
         },
         findConformanceResourceByUri : function(url,serverUrl,typeOfConformanceResource) {

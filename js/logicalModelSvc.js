@@ -3,7 +3,8 @@ angular.module("sampleApp")
     //also holds the current patient and all their resources...
     //note that the current profile is maintained by resourceCreatorSvc
 
-    .service('logicalModelSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities,$filter,SaveDataToServer) {
+    .service('logicalModelSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities,$filter,
+                                         $localStorage,profileDiffSvc, SaveDataToServer) {
 
         var currentUser;
         var elementsToIgnore =['id','meta','implicitRules','language','text','contained','extension','modifierExtension'];
@@ -20,7 +21,7 @@ angular.module("sampleApp")
                 dataTypes = data.data;
 
             }
-        )
+        );
 
         //logical models (like Dosage). Might extend to complex datatypes for expanding logical models later on...
         var fhirLM = {}
@@ -29,7 +30,7 @@ angular.module("sampleApp")
                 fhirLM = data.data;
 
             }
-        )
+        );
 
 
         //set the first segment of a path to the supplied value. Used when determining differneces from the base type
@@ -85,14 +86,73 @@ angular.module("sampleApp")
         }
 
 
+        //a cache of patient references by type. todo may need to enhance this when supporting profiles...
+        var patientReferenceCache = {};
+
         return {
+            saveScenario : function(bundle,modelName) {
+                //save a bundle as a scenario. Make the name of the scenario the same as the model name,
+
+                //create the container...
+                var container = {name:modelName,bundle:bundle};
+                container.tracker = [];
+                container.history = [];
+                container.server = {data:appConfigSvc.getCurrentDataServer()};
+
+                $localStorage.builderBundles = $localStorage.builderBundles || []
+                var pos = -1;
+                $localStorage.builderBundles.forEach(function(container,inx){
+                    if (container.name == modelName) {
+                        pos = inx
+                    }
+                });
+
+                if (pos > -1) {
+                    //replace
+                    $localStorage.builderBundles[pos] = container;
+                } else {
+                    //new
+                    $localStorage.builderBundles.push(container);
+                }
+
+
+
+                /*
+                        delete $scope.isaDocument
+                       var newBundle = {resourceType:'Bundle',type:'collection', entry:[]};
+                       newBundle.id = idPrefix+new Date().getTime();
+
+                       var newBundleContainer = {name:vo.name,bundle:newBundle};
+                       newBundleContainer.description = vo.description;
+                       //newBundleContainer.bundle.id = idPrefix+new Date().getTime();
+                       newBundleContainer.isDirty = true;
+                       newBundleContainer.isPrivate = true;
+                       newBundleContainer.category = vo.category;
+                       newBundleContainer.tracker = [];
+                       newBundleContainer.history = [{bundle:newBundle}];
+                       newBundleContainer.index = 0;
+                       newBundleContainer.server = {data:appConfigSvc.getCurrentDataServer()};     //save the data server in use
+
+                       * */
+
+
+
+
+                if ($localStorage.builderBundles.length == 0) {
+
+                }
+
+            },
             makeScenario : function(tree) {
+                var deferred = $q.defer();
                 //generate a scenario from the model (as a tree)
                 var bundle = {resourceType:'Bundle',entry:[]}
                 var patient = null;   //if there's a patient resource in the model...
                 var hash = {};
+                var arQuery = []
+                console.log('makeScenario')
                 tree.forEach(function (node,inx) {
-                    if (inx == 0) {
+                    if (inx === 0) {
                         var ext = Utilities.getSingleExtensionValue(node.data.header,
                             appConfigSvc.config().standardExtensionUrl.baseTypeForModel)
                         if (ext && ext.valueString) {
@@ -109,22 +169,119 @@ angular.module("sampleApp")
                             if (resourceType == 'Patient') {
                                 patient = resource;
                             }
+                            arQuery.push(getPatientReference(resourceType));
                         }
                     }
                 });
 
                 //if there's a patient, then set all the patient references for all resources.
+                //***** note **** this will only work for references off the resource root - like Condition.patient
                 if (patient) {
-                    bundle.entry.forEach(function (entry) {
+                    if (arQuery.length > 0) {
 
 
-                    })
+                        $q.all(arQuery).then(
+                            function(data){
+                                //all the SDs have been collected and analysed. patientReferenceCache has the pateint refernecs by type......
+                                //console.log(patientReferenceCache)
+
+                                //now go through the bundle, setting the patient reference for all
+                                bundle.entry.forEach(function (entry) {
+                                    var resource = entry.resource;
+                                    var pp = patientReferenceCache[resource.resourceType];
+                                    if (pp) {
+                                        var ar = pp.split('.');
+                                        if (ar.length == 2) {
+                                            //assume an entry like Conditon.patient
+                                            var elementName = ar[1];
+                                            resource[elementName] = {reference:'Patient/'+patient.id};
+                                        }
+                                    }
+
+                                });
+
+
+                                //console.log(bundle)
+                                deferred.resolve(bundle)
+
+                            })
+
+
+                        } else {
+                        //no other types in the model yet
+                            //console.log(bundle)
+                            deferred.resolve(bundle)
+
+                        }
+
+
+
+                } else {
+                    //no patient so can't create any references...
+                   // console.log(bundle)
+                    deferred.resolve(bundle)
                 }
 
 
-                console.log(bundle)
 
-           },
+                return deferred.promise;
+
+
+                function getPatientReference(type) {
+                    //find the patient reference path for this type (if it exists)
+                    var deferred = $q.defer();
+
+
+                    if (patientReferenceCache[type]) {
+                        //console.log('cache hit '+type)
+                        deferred.resolve(patientReferenceCache[type])
+                    } else {
+                        var url = 'http://hl7.org/fhir/StructureDefinition/'+type;  //right now, assume core types only
+                        GetDataFromServer.findConformanceResourceByUri(url).then(
+                            function(SD){
+                                //console.log(SD)
+                                var patRef = gpr(SD);
+                                if (patRef) {
+                                    patientReferenceCache[type] = gpr(SD)
+                                    deferred.resolve(patientReferenceCache[type])
+                                } else {
+                                    deferred.resolve();
+                                }
+
+                            },
+                            function(err){
+                                deferred.reject(err)
+                            })
+                    }
+
+
+                    return deferred.promise
+
+
+                }
+                function gpr(SD) {
+                    //find any patient reference in the SD..
+                    var patRef;
+                    if (SD.snapshot && SD.snapshot.element) {
+                        for (var i=0; i< SD.snapshot.element.length; i++) {
+                            var path = SD.snapshot.element[i].path;
+                            var ar = path.split('.');
+                            var seg = ar[ar.length-1]
+                            if (seg == 'patient' || seg == 'subject') {
+                                return path;
+                                break;
+                            }
+                        }
+
+                    }
+
+
+                    //console.log('fpr')
+                    return
+                }
+
+
+            },
 
             getMappingFile : function(url) {
                 url = url || "http://fhir.hl7.org.nz/baseDstu2/StructureDefinition/OhEncounter";    //testing

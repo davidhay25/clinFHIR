@@ -2940,7 +2940,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             }
 
                         })
-
                     }
 
                     //an extension...
