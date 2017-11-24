@@ -4,7 +4,7 @@ angular.module("sampleApp")
     .controller('logicalModellerCtrl',
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
                   GetDataFromServer,$firebaseObject,$firebaseArray,$location,igSvc,SaveDataToServer,$window,RenderProfileSvc,
-                  $q,Utilities, securitySvc,$filter,questionnaireSvc) {
+                  $q,Utilities, securitySvc,$filter,builderSvc,questionnaireSvc) {
             $scope.input = {};
 
             $scope.code = {};
@@ -79,6 +79,17 @@ angular.module("sampleApp")
 
             }
 
+            $scope.redrawChart = function(){
+                //$scope.chart.fit();
+                $timeout(function(){
+                    if ($scope.instanceGraph) {
+                        $scope.instanceGraph.fit();
+
+                    }
+
+                },1000)
+
+            }
 
             $scope.showQuest = function(){
                 $scope.showForm()
@@ -1762,13 +1773,36 @@ angular.module("sampleApp")
                 checkInPalette();
 
 
+                //todo - just during dev...
                 logicalModelSvc.makeScenario($scope.treeData).then(
                     function(bundle){
                         //do something...
 
 
 
+
                        logicalModelSvc.saveScenario(bundle,'fromLM')
+
+                        var vo = builderSvc.makeGraph(bundle);//,centralResource,hideMe,showText) ;  //todo - may not be the right place...
+
+                        //$scope.allReferences = vo.allReferences;                //all references in the entire set.
+
+                        var container = document.getElementById('resourceGraph');
+                        var options = {
+                            physics: {
+                                enabled: true,
+                                barnesHut: {
+                                    gravitationalConstant: -10000,
+                                }
+                            }
+                        };
+
+
+
+                        $scope.instanceGraph = new vis.Network(container, vo.graphData, options);
+
+                        //--------------
+
 
 
 

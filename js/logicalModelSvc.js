@@ -95,8 +95,9 @@ angular.module("sampleApp")
 
                 //create the container...
                 var container = {name:modelName,bundle:bundle};
-                container.tracker = [];
-                container.history = [];
+                //container.tracker = [];
+                //container.history = [];
+                //container.index = 0;
                 container.server = {data:appConfigSvc.getCurrentDataServer()};
 
                 $localStorage.builderBundles = $localStorage.builderBundles || []
@@ -151,6 +152,10 @@ angular.module("sampleApp")
                 var hash = {};
                 var arQuery = []
                 console.log('makeScenario')
+
+
+
+
                 tree.forEach(function (node,inx) {
                     if (inx === 0) {
                         var ext = Utilities.getSingleExtensionValue(node.data.header,
@@ -173,6 +178,66 @@ angular.module("sampleApp")
                         }
                     }
                 });
+
+                //set up any references that can be done by referring to parent...
+                for (var i=1; i< tree.length;i++) {
+
+                    var node = tree[i];
+                    //the hash contains  nodes which have an associated resource(reference) in it...
+                    if (hash[node.id]) {
+                        //yes, this node has an associated resource (only nodes with a resource are in the hash)...
+                        var thisResource = hash[node.id];       //this resource - the one that the psrent will reference
+                        var parentNodeResource = hash[node.parent];
+                        console.log(parentNodeResource)
+
+                        if (parentNodeResource) {
+                            //is there
+console.log(node.data.ed)
+                            var mappingPath = getMapValueForIdentity(node.data.ed,'fhir')
+                            console.log(mappingPath)
+                            //and the parent is also a resource - create a reference...
+                            if (mappingPath) {
+                                var ar = mappingPath.split('.');
+                                switch (ar.length) {
+                                    case 2 :
+                                        //eg Composition.subject
+                                        //assume the parent is always single...
+                                        var elementName = ar[1];
+                                        parentNodeResource[elementName] = {reference: thisResource.resourceType + "/"+ thisResource.id}
+                                        console.log(parentNodeResource)
+                                        break;
+                                    case 3 :
+                                        //eg Composition.section.entry
+                                        //assume for now that the parent is always multiple (todo - not true for careplan, likely need to look this up)
+                                        var parentElementName = ar[1];
+                                        var elementName = ar[2];
+                                        //var reference = thisResource.resourceType + "/"+ thisResource.id;
+
+                                        parentNodeResource[parentElementName] = parentNodeResource[parentElementName] || [];
+                                        var arParentElement = parentNodeResource[parentElementName];    //eg Composition.section
+                                        var elementToAdd = {}
+                                        elementToAdd[elementName] = {reference: thisResource.resourceType + "/"+ thisResource.id};
+                                        arParentElement.push(elementToAdd)
+
+
+                                        console.log(parentNodeResource)
+                                        break;
+                                }
+
+
+
+                            }
+
+
+
+
+                        }
+
+                    }
+
+                }
+
+
 
                 //if there's a patient, then set all the patient references for all resources.
                 //***** note **** this will only work for references off the resource root - like Condition.patient
@@ -200,6 +265,8 @@ angular.module("sampleApp")
 
                                 });
 
+                                //now set up references based on the parent...
+
 
                                 //console.log(bundle)
                                 deferred.resolve(bundle)
@@ -225,6 +292,25 @@ angular.module("sampleApp")
 
 
                 return deferred.promise;
+
+                function getMapValueForIdentity(ed,identity){
+                    //get the path for a given identity - fhir in this case
+                    if (ed && ed.mapping) {
+                        for (var i =0; i < ed.mapping.length; i++) {
+                            var map =  ed.mapping[i];
+                            if (map.identity == identity) {
+                                var fhirPath = map.map;
+                                if (fhirPath) {
+                                    var ar = fhirPath.split('|');   //because the comment is in the same element (should have used an extension)
+                                    return ar[0];
+                                    break;
+                                }
+
+                            }
+                        }
+                    }
+
+                }
 
 
                 function getPatientReference(type) {
