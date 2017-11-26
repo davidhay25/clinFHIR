@@ -4,7 +4,7 @@ angular.module("sampleApp")
     //note that the current profile is maintained by resourceCreatorSvc
 
     .service('logicalModelSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities,$filter,
-                                         $localStorage,profileDiffSvc, SaveDataToServer) {
+                                         $localStorage) {
 
         var currentUser;
         var elementsToIgnore =['id','meta','implicitRules','language','text','contained','extension','modifierExtension'];
@@ -90,6 +90,28 @@ angular.module("sampleApp")
         var patientReferenceCache = {};
 
         return {
+            makeMappingDownload : function(SD) {
+                var download = "";
+
+                if (SD && SD.snapshot && SD.snapshot.element) {
+                    SD.snapshot.element.forEach(function (el) {
+                        var lne = el.path + ',';
+                        if (el.type) {
+                            lne += el.type[0].code + ',';
+                        } else {
+                            lne += ','
+                        }
+
+
+
+                        download += lne + "\n";
+                    })
+
+                }
+                return download;
+
+
+            },
             saveScenario : function(bundle,modelName) {
                 //save a bundle as a scenario. Make the name of the scenario the same as the model name,
 
@@ -169,6 +191,10 @@ angular.module("sampleApp")
                         if (node.data && node.data.referenceUrl) {
                             var resourceType = $filter('referenceType')(node.data.referenceUrl)
                             var resource = {resourceType:resourceType,id:node.id}
+                            if (node.data.short) {
+                                resource.text = {div:node.data.short}
+                            }
+
                             hash[node.id] = resource
                             bundle.entry.push({resource:resource})
                             if (resourceType == 'Patient') {

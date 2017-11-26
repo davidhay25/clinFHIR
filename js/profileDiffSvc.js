@@ -12,17 +12,10 @@ angular.module("sampleApp").service('profileDiffSvc',
         objColours.terminology = '#FFFFCC';
         objColours.terminologyEdge = '#cccc00';
 
-
-
-
-
         //_loaded are profiles not in the IG...
         objColours.profile_loaded = '#00c6ff'
         objColours.extension_loaded = '#ffb3ff';
         objColours.terminology_loaded = '#FFFFCC';
-
-
-
         objColours.Patient = '#93FF1A';
 
         objColours.List = '#ff8080';
@@ -41,6 +34,9 @@ angular.module("sampleApp").service('profileDiffSvc',
         objColours.HealthcareService = '#FFFFCC';
 
         objColours.Medication = '#FF9900';
+
+        var igEntryType = appConfigSvc.config().standardExtensionUrl.igEntryType;
+
 
         //remove the contents of an SD that we're not using to reduce the cache requirements
         function minimizeSD(SD) {
@@ -65,6 +61,21 @@ angular.module("sampleApp").service('profileDiffSvc',
         }
 
     return {
+        setPurpose : function(igResource,purpose) {
+            Utilities.addExtensionOnceWithReplace(igResource,igEntryType,purpose)
+        },
+        getPurpose: function(igResource) {
+            //get the purpose from the IG.package.resource node.
+            var ext = Utilities.getSingleExtensionValue(igResource,igEntryType)
+            if (ext && ext.valueCode) {
+                return ext.valueCode;
+            } else if (igResource.purpose) {
+                return igResource.purpose
+            } else if (igResource.acronym) {
+                return igResource.acronym
+            }
+
+        },
 
         makeCapStmt : function(cs) {
 
@@ -285,6 +296,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                                 var res = {sourceReference:{reference:profileUrl}};
 
                                 //todo - should likely move to an extension for R3
+
                                 if (appConfigSvc.getCurrentConformanceServer().version ==2) {
                                     res.purpose = 'extension'
                                 } else {

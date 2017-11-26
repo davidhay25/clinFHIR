@@ -1,6 +1,11 @@
-//upload conformance files in a folder structire to a FHOR server
+//upload conformance files in a folder structire to a FHIR server
 //currently set for careconnect profiles
 //works synchronously - easier to programme, and easier on the target server...
+
+
+//github download url
+//https://raw.githubusercontent.com/davidhay25/clinFHIR/master/serverScripts/CareConnectSync.js
+
 
 var fs = require('fs');
 var syncRequest = require('sync-request');

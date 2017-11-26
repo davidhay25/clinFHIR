@@ -17,6 +17,30 @@ angular.module("sampleApp")
 
             GetDataFromServer.registerAccess('igView');
 
+            var url = appConfigSvc.getCurrentConformanceServer().url + "ImplementationGuide";
+            GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
+                function(data) {
+                    $scope.listOfIG = []
+                    if (data.data && data.data.entry) {
+                        data.data.entry.forEach(function (entry) {
+                            var ig = entry.resource;
+
+
+                            if (Utilities.isAuthoredByClinFhir(ig)) {
+                                ig.name = ig.name || ig.description;
+                                $scope.listOfIG.push(ig)
+                            }
+                        })
+                    }
+                    $scope.input.selIG = $scope.listOfIG[0]
+                },
+                function(err){
+                    console.log(err)
+                }
+            );
+
+
+
             $scope.saveIG = function(){
 
                 SaveDataToServer.saveResource($scope.currentIG).then(
@@ -770,28 +794,6 @@ angular.module("sampleApp")
             
             //load the IG's that describe 'collections' of conformance artifacts - like CareConnect & Argonaut
 
-            var url = appConfigSvc.getCurrentConformanceServer().url + "ImplementationGuide";
-            GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
-                function(data) {
-                    $scope.listOfIG = []
-                    if (data.data && data.data.entry) {
-                        data.data.entry.forEach(function (entry) {
-                            var ig = entry.resource;
-
-
-                            if (Utilities.isAuthoredByClinFhir(ig)) {
-                                ig.name = ig.name || ig.description;
-                                $scope.listOfIG.push(ig)
-                            }
-                        })
-                    }
-                    $scope.input.selIG = $scope.listOfIG[0]
-                },
-                function(err){
-                    console.log(err)
-                }
-            );
-
 
             //note that we're using an IG to hold all the resources in this collection
             $scope.selectIG = function(IG){
@@ -803,8 +805,14 @@ angular.module("sampleApp")
                 $scope.artifacts = {}
                 $scope.currentIG.package.forEach(function (package) {
                     package.resource.forEach(function (resource) {
-                        var purpose = resource.purpose || resource.acronym;     //<<< todo - 'purpose' was removed in R3...
+
+
+
+                        var purpose = profileDiffSvc.getPurpose(resource)
+
+                       // var purpose = resource.purpose || resource.acronym;     //<<< todo - 'purpose' was removed in R3...
                         var type;
+
                         if (resource.example || resource.purpose == 'example') {         //another R2/3 difference...
                             purpose = 'example'
                             var t = Utilities.getSingleExtensionValue(resource,extDef);

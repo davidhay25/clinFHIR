@@ -20,6 +20,21 @@ angular.module("sampleApp")
 
             GetDataFromServer.registerAccess('logical');
 
+
+            //generate the mapping download file
+            function makeMappingDownload() {
+
+                var download = logicalModelSvc.makeMappingDownload($scope.SD);
+                console.log(download)
+
+                $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([download],
+                    {type: "text/text"}));
+
+                $scope.downloadLinkJsonName = "downloaded"
+            }
+            makeMappingDownload()
+
+
             //for selecting a profile to import
            // $scope.showFindProfileDialog = {};
             //all the base types for the selection...
@@ -612,30 +627,6 @@ angular.module("sampleApp")
                 });
 
 
-            //copy the files referenced by the current model to another server
-            $scope.copyFilesDEP = function() {
-                $uibModal.open({
-                    backdrop: 'static',      //means can't close by clicking on the backdrop.
-                    keyboard: false,       //same as above.
-                    templateUrl: 'modalTemplates/fileCopy.html',
-                    controller: 'fileCopyCtrl',
-                    resolve : {
-                        
-                        fileList : function(){
-                            //var lst = [];
-                            var vo = {files : []}
-                            vo.server = appConfigSvc.getCurrentConformanceServer().url;
-
-                            $scope.uniqueModelsList.forEach(function(item) {
-                                vo.files.push({url:item.url})
-                            })
-                        
-                            return vo
-                        }}
-                })
-            }
-
-
             //load the indicated model...
             $scope.loadReferencedModel = function(url){
                 //find the indicated model (based on the url
@@ -655,7 +646,7 @@ angular.module("sampleApp")
                 }
             };
 
-            //re-load the previous mmodel
+            //re-load the previous model
             $scope.goBack = function() {
                 var entry = $scope.history.pop();
                 if (entry) {
@@ -983,8 +974,6 @@ angular.module("sampleApp")
             };
 
 
-
-
             //find a shortcut for a model. Note there may be more that one (as could have the same id on different servers
             function findShortCutForModel(id) {
                 var deferred = $q.defer();
@@ -1014,8 +1003,6 @@ angular.module("sampleApp")
                 return deferred.promise;
 
             }
-
-            findShortCutForModel('OhEncounter');
 
 
             $scope.login=function(){
@@ -1516,7 +1503,6 @@ angular.module("sampleApp")
 
 
 
-            //$scope.dataTypes.push({code: 'Extension',description: 'Extension'});
 
 /* hide for the moment...
             //add the v2 datatypes here. todo - perhaps there's a 'model source' property that selects from different data types?
@@ -1642,39 +1628,9 @@ angular.module("sampleApp")
 
                 var baseType = $scope.treeData[0].data.header.baseType
 
-                //find all the mapping identities that have been used..
-                setAllMappings();
 
-                /*
-                $scope.allMappingIdentities = [];
-                $scope.allMappings = [];        //all of the mappings
-                $scope.treeData.forEach(function (item) {
-                    if (item.data.mappingFromED && item.data.mappingFromED.length > 0) {
-                        item.data.mappingFromED.forEach(function (map) {
-
-                            //$scope.allMappings.push({identity:map.identity,map:map.map, name:item.data.name})
-                            var ar = item.data.path.split('.');
-                            ar.splice(0,1)  //strip off the f
-                            $scope.allMappings.push({identity:map.identity,map:map.map, path:item.data.path, name:ar.join('.')})
-
-                            if ($scope.allMappingIdentities.indexOf(map.identity)==-1){
-                                $scope.allMappingIdentities.push(map.identity)
-                            }
-                        })
-                    }
-                });
-
-                $scope.allMappings.sort(function(a,b){
-
-                    if (a.map > b.map) {
-                        return 1
-                    } else {
-                        return -1
-                    }
-                })
-
-                */
-
+                setAllMappings();       //find all the mapping identities that have been used..
+                makeMappingDownload();  //create a download for the mappings defined in the model
 
 
                 findShortCutForModel(entry.resource.id).then(
@@ -1683,14 +1639,6 @@ angular.module("sampleApp")
                     }
                 )
 
-               // checkDifferences(entry.resource)
-
-
-
-
-                // WARNING todo - this calls teh 'makeTree' function in the service and mucks things up.. (particularly the momments)
-
-                //2017-09-17 - resurrected this call (down to the indicsted line)
 
                 var vo = logicalModelSvc.makeReferencedMapsModel(entry.resource,$scope.bundleModels);   //todo - may not be the right place...
 
@@ -1748,7 +1696,7 @@ angular.module("sampleApp")
                     }
 
 
-                    //selectedNetworkElement
+
 
                 });
 
@@ -1759,58 +1707,86 @@ angular.module("sampleApp")
                 $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                 drawTree();
 
-
                 makeSD();
                 $scope.currentType = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
                 loadHistory($scope.rootName);
                 /*
-                DON'T DELETE. - for now, don't try to find models...
+                DON'T DELETE. - for now, don't try to find comments...
                 checkForComments(entry.resource);
                 getAllComments();
                 */
 
 
                 checkInPalette();
+                updateInstanceGraph();
+                $scope.hidePatientFlag = false;
 
+            }
 
-                //todo - just during dev...
+            function updateInstanceGraph() {
+                $scope.hidePatientFlag = false;
+
                 logicalModelSvc.makeScenario($scope.treeData).then(
                     function(bundle){
-                        //do something...
+                        $scope.scenarioBundle = bundle;
+                        logicalModelSvc.saveScenario(bundle,'fromLM');      //write out the scenario for the Scenario Builder
 
-
-
-
-                       logicalModelSvc.saveScenario(bundle,'fromLM')
-
-                        var vo = builderSvc.makeGraph(bundle);//,centralResource,hideMe,showText) ;  //todo - may not be the right place...
-
-                        //$scope.allReferences = vo.allReferences;                //all references in the entire set.
-
-                        var container = document.getElementById('resourceGraph');
-                        var options = {
-                            physics: {
-                                enabled: true,
-                                barnesHut: {
-                                    gravitationalConstant: -10000,
-                                }
-                            }
-                        };
-
-
-
-                        $scope.instanceGraph = new vis.Network(container, vo.graphData, options);
-
-                        //--------------
-
-
-
-
+                        generateInstanceGraph(bundle)
                     }
                 );      //make a scenario.
 
             }
 
+            function generateInstanceGraph(bundle,resource,hideMe){
+                var vo = builderSvc.makeGraph(bundle,resource,hideMe,true);//,centralResource,hideMe,showText) ;  //todo - may not be the right place...
+
+                var container = document.getElementById('resourceGraph');
+                var options = {
+                    physics: {
+                        enabled: true,
+                        barnesHut: {
+                            gravitationalConstant: -10000,
+                        }
+                    }
+                };
+
+                $scope.instanceGraph = new vis.Network(container, vo.graphData, options);
+                $scope.instanceGraph.on("click", function (obj) {
+                    var nodeId = obj.nodes[0];  //get the first node
+                    var node = vo.graphData.nodes.get(nodeId);
+                    if (node.cf && node.cf.resource) {
+                        var pathOfSelectedNode = node.cf.resource.id; //node.ed.base.path not working with merged...
+                        $scope.selectedNode = findNodeWithPath(pathOfSelectedNode); //note this is the node for the tree view, not the graph
+
+                        $scope.$digest();
+                    }
+
+
+                });
+
+                $scope.instanceGraph.fit();
+
+            }
+
+            $scope.hidePatient = function(){
+                $scope.hidePatientFlag = true;
+                if ($scope.scenarioBundle) {
+                    for (var i = 0; i < $scope.scenarioBundle.entry.length; i++){
+                        var resource = $scope.scenarioBundle.entry[i].resource;
+                        if (resource.resourceType == 'Patient') {
+                            generateInstanceGraph($scope.scenarioBundle,resource,true)
+                            break;
+
+                        }
+                    }
+                }
+            }
+            $scope.showAllInGraph = function(){
+                $scope.hidePatientFlag = false;
+                if ($scope.scenarioBundle) {
+                    generateInstanceGraph($scope.scenarioBundle)
+                }
+            }
 
             function setAllMappings() {
                 //find all the mapping identities that have been used..
@@ -2152,6 +2128,7 @@ angular.module("sampleApp")
                                     $scope.selectedNode = item;
                                 }
                             })
+                            //updateInstanceGraph();
 
                         } else {
                             //this is a new node
@@ -2221,14 +2198,7 @@ angular.module("sampleApp")
                             }
 
 
-/*
-                            //the currently selected parent node type should now be set to 'BackBone element'
-                            var node = findNodeWithPath(parentPath);
-                            if (node){
-                           //     node.data.type = [{code:'BackboneElement'}]
-                            }
 
-                            */
 
                         }
 
@@ -2244,14 +2214,15 @@ angular.module("sampleApp")
                         drawTree();
                         $scope.isDirty = true;
                         makeSD();       //create the StructureDefinition resource...
+                        /*
                         logicalModelSvc.makeScenario($scope.treeData).then(
                             function(bundle){
                                 //do something...
                             }
                         );      //make a scenario...
-
+*/
                         setAllMappings();   //update any mappings
-
+                        updateInstanceGraph()
                         //$scope.Q = logicalModelSvc.makeQ($scope.treeData);  //update the Questionnaire
                         //console.log( $scope.Q)
 
@@ -2446,7 +2417,7 @@ angular.module("sampleApp")
                     delete $scope.selectedNode;
                     drawTree();
                     makeSD();
-
+                    updateInstanceGraph();
                     $scope.isDirty = true;
                     $scope.currentType = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
 

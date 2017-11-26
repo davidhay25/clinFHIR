@@ -6,7 +6,7 @@ angular.module("sampleApp")
 
             $scope.appConfigSvc = appConfigSvc;
             $scope.allResourceTypes = allResourceTypes;
-            $scope.references = references;
+            $scope.references = references;    // a bundle containing all the LogicalModels...
             $scope.rootForDataType = rootForDataType;
             $scope.canSave = true;
             $scope.allDataTypes = allDataTypes;
@@ -14,7 +14,26 @@ angular.module("sampleApp")
             $scope.pathDescription = 'Parent path';
             $scope.vsInGuide = igSvc.getResourcesInGuide('valueSet');       //so we can show the list of ValueSets in the IG
             $scope.input = {};
+
+            var baseTypeUrl = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
+
             var that = this;
+
+
+            //the display of logical models.
+            $scope.lmDisplay = function(resource) {
+                var baseType = Utilities.getSingleExtensionValue(resource,baseTypeUrl);
+                if (baseType && baseType.valueString) {
+                    return resource.name + "   ("+ baseType.valueString + ")";
+                } else {
+                    return resource.name;
+                }
+
+
+
+
+
+            }
 
             //NOT WORKING RIGHT NOW...
             function setOptionsForDtAndPathDep() {

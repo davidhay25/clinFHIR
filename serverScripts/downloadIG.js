@@ -1,23 +1,41 @@
+#!/usr/bin/env node
+
+
 /**
  * Created by davidha on 1/8/17.
+ *
+ * make sure the function getTypeFromUrl() has all the types in the IG
+ * assumes that the url of a resource is FHIR standard - ie has the resource type in it...
  */
 
 
 var fs = require('fs');
-var syncRequest = require('sync-request');
+var syncRequest = require('sync-request');  //found at https://www.npmjs.com/package/sync-request
 var log = [];       //log to display at the end
+
 //where the IG is located (and all the resources it references)
 var remoteFhirServer = "http://fhir.hl7.org.nz/baseDstu2/";
 
+//where to save the downloaded resources. This path will be the root of the download folder
+//make sure the root exists, and that the nodejs user has write permission to that folder (it will create subfolders as well)
+//defaults to a folder off the server path...
+
+var localRoot = __dirname + "/Downloads/ig"
+
+console.log(localRoot);
+//return;
+
 var IGUrl = remoteFhirServer + "ImplementationGuide/orion";
 var IG = loadIG(IGUrl);
+
+
 var ctr = 0;
 IG.package.forEach(function (package) {
     package.resource.forEach(function (entry) {
         var url = entry.sourceReference.reference;
-        var purpose = entry.purpose || entry.acronym
+        var purpose =  getPurpose(entry);// entry.purpose || entry.acronym
         console.log(ctr++ + '  ' + url);
-        var type = getTypeFromUrl(url);
+        var type = getTypeFromUrl(url);     //assume that the url contains the FHIR resource type in it...
         //console.log(type)
         if (type) {
             var qry = remoteFhirServer + type + '?url='+url;
@@ -30,8 +48,11 @@ IG.package.forEach(function (package) {
                     var fileName =url.replace(/\//g,'+')
                     fileName =fileName.replace(/\:/g,'%')
 
-                    var fullFileName = __dirname + "/downloads/"+ purpose + '/' +fileName + ".json";
+                    var fullFileName = localRoot + purpose + '/' +fileName + ".json";
                     //console.log(fullFileName);
+
+
+                    //write out the file
                     fs.writeFileSync(fullFileName,JSON.stringify(resource));
 
                 } else {
@@ -73,8 +94,37 @@ function getTypeFromUrl(url) {
         return 'StructureDefinition'
     } else if (url.indexOf('alueSet') > -1) {
         return 'ValueSet'
+    }  else if (url.indexOf('odeSystem') > -1) {
+        return 'CodeSystem'
+    } else if (url.indexOf('amingSystem') > -1) {
+        return 'NamingSystem'
+    } else if (url.indexOf('apabilityStatement') > -1) {
+        return 'CapabilityStatement'
+    }
+}
+
+//get the purpose of the artifact from the clinFHIR extension or the content
+function getPurpose(igResource) {
+    var url = 'http://clinfhir.com/StructureDefinition/igEntryType';    //defined in appConfigSvc
+    var purpose;
+    if (igResource && igResource.extension) {
+
+        igResource.extension.forEach(function(ext){
+            if (ext.url == url) {
+                purpose = ext.valueCode
+            }
+        });
     }
 
+    if (purpose) {
+        return purpose;
+    }
+
+    if (igResource.purpose) {
+        return igResource.purpose;
+    }
+
+    return 'unknown'
 
 
 }

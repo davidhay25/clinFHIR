@@ -104,7 +104,7 @@
                                 </uib-tab>
                                 <uib-tab heading="Logical Models">
                                     <select  class="form-control" ng-model="input.referenceFromIg"
-                                             ng-options="entry.resource.name for entry in references.entry">
+                                             ng-options="lmDisplay(entry.resource) for entry in references.entry">
 
                                     </select>
                                 </uib-tab>

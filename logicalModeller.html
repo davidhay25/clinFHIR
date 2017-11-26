@@ -88,6 +88,11 @@
         });
         angular.module("sampleApp").constant("moment", moment);
 
+        angular.module("sampleApp").config(['$compileProvider', function ($compileProvider) {
+            $compileProvider.aHrefSanitizationWhitelist(/^\s*(|blob|):/);
+        }]);
+
+
         window.onerror = function(message, url, linenumber) {
             alert("An unexpected error occurred: " + message + " on line " + linenumber + " for " + url);
         }
@@ -426,17 +431,6 @@
 
                 </uib-tab>
 
-                <uib-tab heading="Graph" select="redrawChart()">
-                    <div id="resourceGraph"></div>
-                </uib-tab>
-
-
-
-
-
-                <uib-tab heading="Mind Map"  select="redrawProfileGraph()"  deselect="input.graphTabIsSelected = false">
-                    <div id="mmLogicalModel"></div>
-                </uib-tab>
 
 
                 <uib-tab heading="Table">
@@ -472,11 +466,31 @@
 
                 </uib-tab>
 
+                <uib-tab heading="Mind Map"  select="redrawProfileGraph()"  deselect="input.graphTabIsSelected = false">
+                    <div id="mmLogicalModel"></div>
+                </uib-tab>
+
+                <uib-tab heading="Graph" select="redrawChart()">
+                     <span class="clickable iconSpacing pull-right" ng-show="hidePatientFlag"
+                           ng-click="showAllInGraph()">Show All</span>
+
+                    <span class="clickable iconSpacing pull-right"
+                          ng-hide="hidePatientFlag" ng-click="hidePatient()">Hide Patient</span>
+
+                    <div id="resourceGraph"></div>
+                </uib-tab>
+
+
                 <uib-tab heading="Mapping">
                     <br/>
 
                     <uib-tabset>
                         <uib-tab heading="Mapping">
+
+
+
+
+
                             <table class="table table-bordered table-condensed">
                                 <tr><th></th><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th><th>Comments</th><th>Mapping notes</th></tr>
                                 <tr ng-repeat="ed in SD.snapshot.element">
@@ -525,6 +539,13 @@
                                 </tr>
 
                             </table>
+
+                            <div>
+                                <a class="btn btn-link" download="{{downloadLinkJsonName}}.csv"
+                                   href="{{downloadLinkJsonContent}}" title="{{downloadLinkJsonName}}" >
+                                    Download
+                                </a>
+                            </div>
 
                         </uib-tab>
 
