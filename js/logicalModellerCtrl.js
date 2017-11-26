@@ -22,9 +22,9 @@ angular.module("sampleApp")
 
 
             //generate the mapping download file
-            function makeMappingDownload() {
+            function makeMappingDownload(SD) {
 
-                var download = logicalModelSvc.makeMappingDownload($scope.SD);
+                var download = logicalModelSvc.makeMappingDownload(SD);
                 console.log(download)
 
                 $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([download],
@@ -32,7 +32,7 @@ angular.module("sampleApp")
 
                 $scope.downloadLinkJsonName = "downloaded"
             }
-            makeMappingDownload()
+            //makeMappingDownload()
 
 
             //for selecting a profile to import
@@ -1630,7 +1630,7 @@ angular.module("sampleApp")
 
 
                 setAllMappings();       //find all the mapping identities that have been used..
-                makeMappingDownload();  //create a download for the mappings defined in the model
+                makeMappingDownload(entry.resource);  //create a download for the mappings defined in the model
 
 
                 findShortCutForModel(entry.resource.id).then(

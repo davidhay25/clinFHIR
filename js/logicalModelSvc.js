@@ -12,7 +12,10 @@ angular.module("sampleApp")
 
         //VS that are too large to expand in full...
         var expansionBlacklist = [];
-        expansionBlacklist.push('http://hl7.org/fhir/ValueSet/observation-codes')
+        expansionBlacklist.push('http://hl7.org/fhir/ValueSet/observation-codes');
+
+        //the url to the extension in an element...
+        var simpleExtensionUrl = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl
 
 
         var dataTypes = [];
@@ -91,24 +94,59 @@ angular.module("sampleApp")
 
         return {
             makeMappingDownload : function(SD) {
-                var download = "";
+                var download = "Path,Type,Multiplicity,Definition,Comment,Mapping,Fixed Value,Extension Url\n";
 
                 if (SD && SD.snapshot && SD.snapshot.element) {
-                    SD.snapshot.element.forEach(function (el) {
-                        var lne = el.path + ',';
-                        if (el.type) {
-                            lne += el.type[0].code + ',';
-                        } else {
-                            lne += ','
+                    SD.snapshot.element.forEach(function (ed) {
+                        //don't add the first element
+                        var ar = ed.path.split('.')
+                        if (ar.length > 1) {
+                            ar.splice(0,1)
+                            var lne = ar.join('.') + ',';
+                            if (ed.type) {
+                                lne += ed.type[0].code + ',';
+                            } else {
+                                lne += ','
+                            }
+
+                            lne += ed.min + '..'+ed.max + ',';
+                            lne += makeSafe(ed.definition) + ",";
+                            lne += makeSafe(ed.comment) + ",";
+
+                            if (ed.mapping) {
+                                ed.mapping.forEach(function(map){
+                                    lne += map.identity + ':' +  $filter('showMapOnly')(map.map)
+                                })
+                            };
+                            lne += ',';
+                            if (ed.fixedString) {
+                                lne += ed.fixedString
+                            }
+                            lne += ',';
+
+                            var ext = Utilities.getSingleExtensionValue(ed,simpleExtensionUrl);
+                            if (ext && ext.valueString) {
+                                lne += ed.valueString
+                            }
+
+
+                            download += lne + "\n";
                         }
 
-
-
-                        download += lne + "\n";
                     })
 
                 }
                 return download;
+
+                //remove comma's and convert " -> '
+                function makeSafe(s) {
+                    if (s) {
+                        s = s.replace(/"/g, "'");
+                        s = s.replace(/,/g, "-");
+                        return '"' + s + '"';
+                    }
+
+                }
 
 
             },
@@ -173,7 +211,7 @@ angular.module("sampleApp")
                 var patient = null;   //if there's a patient resource in the model...
                 var hash = {};
                 var arQuery = []
-                console.log('makeScenario')
+               // console.log('makeScenario')
 
 
 
@@ -214,13 +252,13 @@ angular.module("sampleApp")
                         //yes, this node has an associated resource (only nodes with a resource are in the hash)...
                         var thisResource = hash[node.id];       //this resource - the one that the psrent will reference
                         var parentNodeResource = hash[node.parent];
-                        console.log(parentNodeResource)
+                        //console.log(parentNodeResource)
 
                         if (parentNodeResource) {
                             //is there
-console.log(node.data.ed)
+//console.log(node.data.ed)
                             var mappingPath = getMapValueForIdentity(node.data.ed,'fhir')
-                            console.log(mappingPath)
+                            //console.log(mappingPath)
                             //and the parent is also a resource - create a reference...
                             if (mappingPath) {
                                 var ar = mappingPath.split('.');
@@ -230,7 +268,7 @@ console.log(node.data.ed)
                                         //assume the parent is always single...
                                         var elementName = ar[1];
                                         parentNodeResource[elementName] = {reference: thisResource.resourceType + "/"+ thisResource.id}
-                                        console.log(parentNodeResource)
+                                        //console.log(parentNodeResource)
                                         break;
                                     case 3 :
                                         //eg Composition.section.entry
@@ -246,7 +284,7 @@ console.log(node.data.ed)
                                         arParentElement.push(elementToAdd)
 
 
-                                        console.log(parentNodeResource)
+                                        //console.log(parentNodeResource)
                                         break;
                                 }
 
@@ -294,7 +332,6 @@ console.log(node.data.ed)
                                 //now set up references based on the parent...
 
 
-                                //console.log(bundle)
                                 deferred.resolve(bundle)
 
                             })
@@ -302,7 +339,7 @@ console.log(node.data.ed)
 
                         } else {
                         //no other types in the model yet
-                            //console.log(bundle)
+
                             deferred.resolve(bundle)
 
                         }
@@ -311,7 +348,7 @@ console.log(node.data.ed)
 
                 } else {
                     //no patient so can't create any references...
-                   // console.log(bundle)
+
                     deferred.resolve(bundle)
                 }
 
@@ -345,13 +382,13 @@ console.log(node.data.ed)
 
 
                     if (patientReferenceCache[type]) {
-                        //console.log('cache hit '+type)
+
                         deferred.resolve(patientReferenceCache[type])
                     } else {
                         var url = 'http://hl7.org/fhir/StructureDefinition/'+type;  //right now, assume core types only
                         GetDataFromServer.findConformanceResourceByUri(url).then(
                             function(SD){
-                                //console.log(SD)
+
                                 var patRef = gpr(SD);
                                 if (patRef) {
                                     patientReferenceCache[type] = gpr(SD)
@@ -388,7 +425,7 @@ console.log(node.data.ed)
                     }
 
 
-                    //console.log('fpr')
+
                     return
                 }
 
@@ -1540,7 +1577,7 @@ console.log(node.data.ed)
 
                 });
 
-                console.log(composition)
+                //console.log(composition)
                 return bundle;
             },
 
