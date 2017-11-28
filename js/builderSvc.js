@@ -2066,7 +2066,11 @@ angular.module("sampleApp")
                     case "Coding" :
                         //value is an object that can have properties code, system, display, text
                         var cc = {},text="";
-                        if (value && value.coding) {
+
+                        if (value && value.cc && value.cc.coding) {
+                            simpleInsert(insertPoint,info,path,value.cc.coding,dt);
+                        } else if (value && value.coding) {
+                            //todo - this doesn;t seen to work...
                             simpleInsert(insertPoint,info,path,value.coding,dt);
                         }
 
@@ -2528,8 +2532,6 @@ angular.module("sampleApp")
                     //should always be a resource.id  todo? should I check
                     var resource = entry.resource;
                     var addToGraph = true;
-
-
 
                     var url = that.getLinkingUrlFromId(resource);
 

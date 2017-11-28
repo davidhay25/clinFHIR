@@ -7,7 +7,7 @@
 angular.module("sampleApp")
     .controller('addPropertyInBuilderCtrl',
         function ($scope,dataType,hashPath,builderSvc,insertPoint,vsDetails,expandedValueSet,GetDataFromServer,
-                  currentStringValue,container,resource,sbHistorySvc,RenderProfileSvc) {
+                  currentStringValue,container,resource,sbHistorySvc) {
 
 
 

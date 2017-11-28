@@ -25,7 +25,7 @@ angular.module("sampleApp")
             function makeMappingDownload(SD) {
 
                 var download = logicalModelSvc.makeMappingDownload(SD);
-                console.log(download)
+                //console.log(download)
 
                 $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([download],
                     {type: "text/text"}));
@@ -1724,6 +1724,7 @@ angular.module("sampleApp")
             }
 
             function updateInstanceGraph() {
+                console.log('update instance graph')
                 $scope.hidePatientFlag = false;
 
                 logicalModelSvc.makeScenario($scope.treeData).then(
@@ -1738,6 +1739,9 @@ angular.module("sampleApp")
             }
 
             function generateInstanceGraph(bundle,resource,hideMe){
+
+                console.log('generate graph')
+
                 var vo = builderSvc.makeGraph(bundle,resource,hideMe,true);//,centralResource,hideMe,showText) ;  //todo - may not be the right place...
 
                 var container = document.getElementById('resourceGraph');
@@ -2144,8 +2148,8 @@ angular.module("sampleApp")
 
                             $scope.treeData.push(newNode);
 
-
-                            if (result.extensionAnalyse && result.extensionAnalyse.isComplexExtension && result.extensionAnalyse.children) {
+                            if (result.extensionAnalyse && result.extensionAnalyse.isComplexExtension
+                                && result.extensionAnalyse.children) {
                                 //this is a complex extension, so need to add the children...
 
                                 var parentId = newNode.id;
@@ -2196,7 +2200,6 @@ angular.module("sampleApp")
                                 })
                                 
                             }
-
 
 
 

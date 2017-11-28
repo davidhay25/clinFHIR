@@ -691,6 +691,20 @@
                     <pre>{{vsDetails | json}}</pre>-->
     </div>
 
+
+
+    <div ng-show="ooError">
+        <div class="alert alert-danger" style="margin: 20px">
+            <div ng-repeat="iss in ooError.issue">
+                Error from terminology server: {{iss.details.text}} {{iss.diagnostics}}
+            </div>
+        </div>
+
+
+    </div>
+
+
+
     <vs-browser trigger="showVSBrowserDialog" hidesearch="true" concept-selected="conceptSelected"
                 vs-selected="vsSelected"></vs-browser>
 

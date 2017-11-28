@@ -97,6 +97,7 @@ angular.module("sampleApp").controller('dataTypeCtrl',
 
         $scope.vsLookup = function (text, vs) {
                 $scope.waiting = true;
+                delete $scope.ooError;
 
 
                 if (vs) {
@@ -114,14 +115,19 @@ angular.module("sampleApp").controller('dataTypeCtrl',
                             }
                         }, function (vo) {
                             var statusCode = vo.statusCode;
-                            var msg = vo.error;
+                            $scope.ooError = vo.data;       //will display in builderDataEntry
+
+                            //var msg = vo.data;      //should be an OO
 
 
-                            alert(msg);
 
+                            //alert(msg);
+
+                            /*
                             return [
                                 {'display': ""}
                             ];
+                            */
                         }
                     ).finally(function () {
                         $scope.waiting = false;

@@ -674,6 +674,7 @@ angular.module("sampleApp")
 
 
 
+
                     vo.conceptMap = $scope.input.conceptMap;
 
                     vo.mappingPath = $scope.input.mappingPath;      //this is the FHIR path
