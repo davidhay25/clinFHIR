@@ -2069,10 +2069,10 @@ angular.module("sampleApp")
 
                         if (value && value.cc && value.cc.coding) {
                             simpleInsert(insertPoint,info,path,value.cc.coding,dt);
-                        } else if (value && value.coding) {
+                        } /*else if (value && value.coding) {
                             //todo - this doesn;t seen to work...
                             simpleInsert(insertPoint,info,path,value.coding,dt);
-                        }
+                        }*/
 
                         break;
                 }
