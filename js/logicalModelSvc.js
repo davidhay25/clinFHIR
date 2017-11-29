@@ -214,8 +214,6 @@ angular.module("sampleApp")
                // console.log('makeScenario')
 
 
-
-
                 tree.forEach(function (node,inx) {
                     if (inx === 0) {
                         var ext = Utilities.getSingleExtensionValue(node.data.header,
@@ -233,17 +231,32 @@ angular.module("sampleApp")
                                 resource.text = {div:node.data.short}
                             }
 
-                            hash[node.id] = resource
-                            bundle.entry.push({resource:resource})
+
                             if (resourceType == 'Patient') {
-                                patient = resource;
+                                if (patient) {
+                                    //if there's already a patient, then don't add another..
+                                    hash[node.id] = patient
+                                } else {
+                                    //otherwise add it...
+                                    patient = resource;
+                                    hash[node.id] = resource
+                                    bundle.entry.push({resource:resource})
+                                }
+
+
+
+                            } else {
+                                hash[node.id] = resource
+                                bundle.entry.push({resource:resource})
+                                arQuery.push(getPatientReference(resourceType));
                             }
-                            arQuery.push(getPatientReference(resourceType));
+
+
                         }
                     }
                 });
 
-                //set up any references that can be done by referring to parent...
+                //set up any references that can be done by referring to a parent...
                 for (var i=1; i< tree.length;i++) {
 
                     var node = tree[i];

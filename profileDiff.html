@@ -668,9 +668,9 @@
                                                     <tr><td>Datatype/s</td>
                                                         <td>
                                                             <div class = 'row' ng-repeat="typ in selectedElementInLM.type">
-                                                                <div class="col-md-4 col-sm-4">{{typ.code}}</div>
-                                                                <div ng-show="typ.profile" class="col-md-8 col-sm-8">{{typ.profile}}</div>
-                                                                <div ng-show="typ.targetProfile" class="col-md-8 col-sm-8">{{typ.targetProfile}}</div>
+                                                                <div class="col-md-2 col-sm-2">{{typ.code}}</div>
+                                                                <div ng-show="typ.profile" class="col-md-10 col-sm-10">{{typ.profile}}</div>
+                                                                <div ng-show="typ.targetProfile" class="col-md-10 col-sm-10">{{typ.targetProfile}}</div>
 
                                                             </div>
 
@@ -716,10 +716,15 @@
 
                                                 </table>
 
-                                                <div ng-show="selectedElementInLM.myMeta.analysis">
+                                                <div ng-show="selectedElementInLM.myMeta.analysis.url">
                                                     <span class = 'clickable' ng-click="showExtensionFromUrl(selectedElementInLM.myMeta.analysis.url)">
                                                         Show extension</span>
+                                                </div>
 
+                                                <div ng-show="selectedElementInLM && selectedElementInLM.myMeta.analysis && ! selectedElementInLM.myMeta.analysis.url">
+                                                    <div class="alert alert-warning">
+                                                        This Extension Definition could not be located on the Conformance server
+                                                    </div>
                                                 </div>
 
                                             </uib-tab>
@@ -778,7 +783,7 @@
                                             <tr><th>ValueSet</th>
                                                 <th uib-popover="If true, ValueSet was included in the IG"
                                                     popover-placement="left"
-                                                    popover-trigger="'mouseenter'">Included</th>
+                                                    popover-trigger="'mouseenter'">Included in IG</th>
                                                 <th>Paths & Binding Strength</th></tr>
                                             <tr ng-repeat="item in profileReport.valueSetArray">
                                                 <td width="40%"><span class="clickable"  ng-click="showValueSet(item.url)">{{item.url}}</span> </td>
@@ -792,9 +797,7 @@
                                                     </table>
 
                                                 </td>
-                                                <!--
-                                                <td><pre>{{item | json}}</pre></td>
-                                                -->
+
                                             </tr>
                                         </table>
                                     </div>

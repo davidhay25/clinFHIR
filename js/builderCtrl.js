@@ -2293,7 +2293,6 @@ console.log($scope.currentSD)
                         $scope.currentType = data;
                         $scope.references = builderSvc.getReferences($scope.currentType)
 
-
                     },
                     function(err) {
                         modalService.showModal({}, {bodyText:"Sorry, I couldn't find the profile for the '"+type+"' resource on the Conformance Server ("+appConfigSvc.getCurrentConformanceServer().name+")"});

@@ -64,6 +64,7 @@ angular.module("sampleApp")
 
                                 },
                                 function(err){
+                                    console.log(err)
                                     modalService.showModal({}, {bodyText: 'There is no valid FHIR server at this URL:'+qry})
 
                                 }

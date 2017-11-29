@@ -1761,7 +1761,8 @@ angular.module("sampleApp")
                     if (node.cf && node.cf.resource) {
                         var pathOfSelectedNode = node.cf.resource.id; //node.ed.base.path not working with merged...
                         $scope.selectedNode = findNodeWithPath(pathOfSelectedNode); //note this is the node for the tree view, not the graph
-
+                        $scope.selectedED = logicalModelSvc.getEDForPath($scope.SD,$scope.selectedNode)
+                        //
                         $scope.$digest();
                     }
 
@@ -2137,7 +2138,13 @@ angular.module("sampleApp")
                         } else {
                             //this is a new node
                             var parentId = $scope.selectedNode.id;
-                            var newId = 't' + new Date().getTime();
+
+
+                            //var newId = 't' + new Date().getTime();
+                            //nov29 2017 - set the id to the path so the graph will work...
+                            var newId = $scope.selectedNode.data.path + '.'+ result.name;
+
+
                             var newNode = {
                                 "id": newId,
                                 "parent": parentId,
@@ -2145,6 +2152,7 @@ angular.module("sampleApp")
                                 state: {opened: true}
                             };
                             newNode.data = angular.copy(result);
+                            newNode.data.ed = {mapping:result.mappingFromED};   //nov29 - also for the graph...
 
                             $scope.treeData.push(newNode);
 
