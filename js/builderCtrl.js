@@ -1809,6 +1809,11 @@ angular.module("sampleApp")
                 delete $scope.currentElementValue;
                 delete $scope.currentReference;
 
+                delete $scope.currentSD;
+                delete $scope.currentResource;
+                $('#SDtreeView').jstree('destroy');     //remove the current profile tree
+
+
 
                 $scope.currentResource = resource;      //in theory we could use currentEntry...
                 $scope.currentEntry = entry;            //needed for validation
@@ -1833,6 +1838,7 @@ console.log($scope.currentSD)
                     },
                     function (err) {
                         modalService.showModal({}, {bodyText:angular.toJson(err)});
+
 
                     }
                 ).finally(function(){
