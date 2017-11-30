@@ -47,6 +47,16 @@ angular.module("sampleApp")
                 //$scope.showFindProfileDialog.open();
             };
 
+            $scope.generateIG = function() {
+                logicalModelSvc.makeIG($scope.treeData).then(
+                    function(IG) {
+                        console.log(IG)
+                    },
+                    function(err) {
+                        console.log(err)
+                    }
+                )
+            }
 
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
 

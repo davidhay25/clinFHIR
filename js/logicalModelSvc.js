@@ -93,6 +93,64 @@ angular.module("sampleApp")
         var patientReferenceCache = {};
 
         return {
+            makeIG : function(tree){
+                var deferred = $q.defer();
+                //construct an Implementation Guide based on the model...
+                var hash = {};      //track urls to avoid duplication...
+                var IG = {resourceType:'ImplementationGuide',status:'draft',package:[{name:'complete',resource:[]}]};
+                IG.id = 'cf-artifacts-cc3';
+                IG.description = "Logical Model Profiles";
+                IG.extension = [{url: "http://clinfhir.com/fhir/StructureDefinition/cfAuthor",valueBoolean:true}]
+
+                tree.forEach(function (node,inx) {
+                    if (inx === 0) {
+                      /*  var ext = Utilities.getSingleExtensionValue(node.data.header,
+                            appConfigSvc.config().standardExtensionUrl.baseTypeForModel)
+                        if (ext && ext.valueString) {
+                            var resource = {resourceType: ext.valueString, id: node.id}
+                            hash[node.id] = resource;
+                            bundle.entry.push({resource: resource})
+                        }
+                        */
+                    } else {
+                        if (node.data && node.data.referenceUrl) {
+                            //this is a reference to a resource. Eventually this will be a profile - for now add the base type as well...
+                            var resourceType = $filter('referenceType')(node.data.referenceUrl)
+                            var resource = {resourceType: resourceType, id: node.id}
+                            var description = node.data.short;
+                            if (node.data.short) {
+                                resource.text = {div: node.data.short}
+                            }
+                            if (! hash[node.data.referenceUrl]) {
+                                //create an entry for this
+
+                                var IGEntry = {description:description,sourceReference:{reference:node.data.referenceUrl}};
+                                addExtension(IGEntry,'profile')
+
+                                IG.package[0].resource.push(IGEntry);
+
+                                hash[node.data.referenceUrl] = 'x'
+                            }
+
+
+                        }
+                    }
+                });
+
+                deferred.resolve(IG);
+
+
+                return deferred.promise;
+
+
+                function addExtension(entry,term) {
+                    entry.extension = [];
+                    var extension = {url:'http://clinfhir.com/StructureDefinition/igEntryType'}
+                    extension.valueCode = term;
+                }
+
+
+            },
             makeMappingDownload : function(SD) {
                 var download = "Path,Type,Multiplicity,Definition,Comment,Mapping,Fixed Value,Extension Url\n";
 

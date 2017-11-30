@@ -80,11 +80,18 @@ angular.module("sampleApp").controller('extensionDefCtrl',
 
             //?? should do this when about to save as well
             $scope.checkEDExists = function(name) {
+                /*
                 if (name.indexOf(' ') > -1) {
                     modalService.showModal({}, {bodyText:"Sorry, no spaces in the name."})
                     return;
                 }
+*/
 
+                if (! /^[A-Za-z0-9\-\.]{1,64}$/.test(name)) {
+                    var msg = "The name can only contain upper and lowercase letters, numbers, '-' and '.'"
+                    modalService.showModal({},{bodyText:msg})
+                    return
+                }
 
                 var url = $scope.conformanceSvr.url + "StructureDefinition/"+name;
                 $scope.showWaiting = true;

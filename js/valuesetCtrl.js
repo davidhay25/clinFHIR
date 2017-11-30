@@ -524,6 +524,14 @@ angular.module("sampleApp").controller('valuesetCtrl',
                     $scope.terminologyServer = config.servers.terminology;      //to display...
                     $scope.input = {};
                     $scope.checkName = function(name){
+
+
+                        if (! /^[A-Za-z0-9\-\.]{1,64}$/.test(name)) {
+                            var msg = "The name can only contain upper and lowercase letters, numbers, '-' and '.'"
+                            modalService.showModal({},{bodyText:msg})
+                            return
+                        }
+
                         var url = config.servers.terminology + "ValueSet/"+name;
                         GetDataFromServer.adHocFHIRQuery(url).then(
                             function(){
@@ -532,18 +540,18 @@ angular.module("sampleApp").controller('valuesetCtrl',
                             },
                             function(err){
                                 console.log(err);
-
+/*
                                 if (! profileCreatorSvc.isSimpleString(name)){
                                     modalService.showModal({}, {bodyText: 'This name has characters that may cause problems. I suggest you try a simpler one.'})
                                 }
 
-
+*/
                                 $scope.nameValid = true;
                             }
                         );
 
 
-                    }
+                    };
 
                     $scope.select = function() {
                         $scope.$close({name:$scope.input.name,description:$scope.input.description})
