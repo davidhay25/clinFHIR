@@ -1163,11 +1163,7 @@
                                     </div>
 
                                 </div> <!-- ng-repeat -->
-        <!--
-                                <pre>{{input.modelChatData | json}}</pre>
-                                <pre>{{input.modelChat | json}}</pre>
 
-                                -->
                             </uib-tab>
 
 
@@ -1176,22 +1172,56 @@
 
 
 
+
+
+                    </uib-tab>
+
+                    <uib-tab heading="Export">
+                        <table class="table">
+                            <tr>
+                                <td><button class=" btn btn-primary" ng-click="generateFHIRProfile()">Generate Profile</button></td>
+                                <td>
+                                    <p>This will create a Profile resource from the Logical Model. This makes sense when you've
+                                    created the model with a base type, and have added extensions or otherwise changed the
+                                        contents of the base type.</p>
+                                    <p>Child nodes of elements that are references to other resources will be ignored.</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><button class=" btn btn-primary" ng-click="generateIG()">Generate Implementation Guide</button></td>
+                                <td>
+                                    <p>Create an Implementation Guide from the model. This is useful if the model is describing a multi-resource
+                                    model (like a Document) and will extract all the referenced profiles, ValueSets and Extension
+                                        Definitions from the model and create an Implementation Guide that references all those artifacts.</p>
+                                    <p><em>Under development</em></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><button class=" btn btn-primary" ng-click="generateQ()">Generate Questionnaire</button></td></td>
+                                <td>
+                                    <p>Create a Questionnaire resource that has entries for all elements in the model. Any references
+                                        to resources or profiles will be ignored - only the elements with other datatypes will be included.</p>
+                                    <p><em>Under development</em></p>
+                                </td>
+                            </tr>
+                        </table>
+
+
                         <div class="row">
                             <div class="col-sm-12 col-md-12">
-                                <button class=" btn btn-primary pull-right" ng-click="generateFHIRProfile()">Generate Profile</button>
 
-                                <button class=" btn btn-primary" ng-click="generateIG()">Generate Implementation Guide</button>
+
+
 
                             </div>
                         </div>
-
                     </uib-tab>
 
-                    <uib-tab heading="TreeJson">
+                    <uib-tab ng-show = "selectedNode" heading="TreeJson">
                         <pre>{{selectedNode | json}}</pre>
                     </uib-tab>
 
-                    <uib-tab heading="EDJson">
+                    <uib-tab ng-show = "selectedNode" heading="EDJson">
                         <pre>{{selectedED | json}}</pre>
                     </uib-tab>
 

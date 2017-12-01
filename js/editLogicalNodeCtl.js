@@ -495,7 +495,7 @@ angular.module("sampleApp")
                 $scope.canSave = true;
 
 
-                localMetadata
+                
 
                 if (! $scope.input.name) {
                     //if (! $scope.input.name || $scope.input.name.indexOf('0') > -1) { ????? why look for 0 ???
