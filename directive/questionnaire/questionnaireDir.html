@@ -29,56 +29,47 @@
                 </div>
                 <br/>
 
-                <form>
-                    <div class="form-group" ng-repeat="item in selectedSection.item">
+                <!--<form>   class="form-group" -->
+                    <div  ng-repeat="item in selectedSection.item">
                         <div class="row underline">
                             <div class="col-sm-2 col-md-2">
-                                <label class="capitalize popoverHint"
-                                       uib-popover="{{item.myMeta.ed.definition}}"
-                                       popover-placement="top"
-                                       popover-trigger="'mouseenter'">
-                                    {{item.text}} <span ng-show="item.repeats"> *</span>
-                                </label>
+                                <button class="btn btn-default form-control">
+                                    <span class= 'clickable' ng-click = "selectQItem(item)">{{item.text}}</span>
+
+
+                                    <span ng-show="item.repeats"> *</span>
+                                </button>
+
+
                             </div>
 
                             <div class="col-sm-7 col-md-7">
 
                                 <div ng-repeat="answer in item.myMeta.answer">
                                     <div class="answer">
-                                        <i class="pull-right glyphicon glyphicon-minus-sign clickable" ng-click="deleteAnswer(item,$index)"></i>
+                                        <i class="pull-right glyphicon glyphicon-minus-sign clickable"
+                                           ng-click="deleteAnswer(item,$index)"></i>
                                         {{answer.display}}
                                     </div>
 
                                 </div>
 
-                                <!-- Possible datatypes -->
-                                <div class="pull-right">
-                                    <span class="iconSpacing clickable" ng-click = "selectDt(item,type.code)" ng-repeat="type in item.myMeta.ed.type">
-
-                                        <span ng-hide="type.code == 'Reference'">
-                                            {{type.code}}
 
 
-                                        </span>
-                                        <span ng-show="type.code == 'Reference'">
-                                            ->{{type.targetProfile | referenceType}}
-                                        </span>
-                                    </span>
-                                </div>
+
                             </div>
 
                             <div class="col-sm-3 col-md-3">
-                                {{}}
-
-
-                                {{item.myMeta.ed.short}}
+                                {{getDescription(item)}}
                             </div>
 
                         </div>
                     </div>
-                </form>
+               <!-- </form>-->
             </div>
         </div>
+
+
 
 
     </uib-tab>
@@ -123,4 +114,5 @@
 
 
 
-
+<vs-browser trigger="showVSBrowserDialog" hidesearch="true"
+            vs-selectedDEP="vsSelected" concept-selected="conceptSelected" ></vs-browser>

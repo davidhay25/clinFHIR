@@ -8,8 +8,9 @@
 
 .answer {
     border: 1px solid gainsboro;
-    padding : 1px;
+    padding : 8px;
     margin: 1px;
+    background-color:#F6F6F6;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;

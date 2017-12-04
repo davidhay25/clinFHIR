@@ -43,11 +43,16 @@ angular.module("sampleApp")
                     $scope.allResourceTypes = data;
                 });
 
-            $scope.makeScenario = function() {
+            $scope.makeScenarioDEP = function() {
+
+
+
                 //$scope.showFindProfileDialog.open();
             };
 
             $scope.generateIG = function() {
+                alert('Not yet enabled, sorry...')
+
                 logicalModelSvc.makeIG($scope.treeData).then(
                     function(IG) {
                         console.log(IG)
@@ -58,10 +63,35 @@ angular.module("sampleApp")
                 )
             }
 
+
+
+            //generate and save a questionnaire
+            $scope.generateQ = function(){
+
+                var Qname = $scope.SD.id;   //the questionairre name (and id, url) is based on the LM model id
+                var Q = questionnaireSvc.makeQ($scope.treeData);  //update the Questionnaire
+                questionnaireSvc.saveQ(Q,Qname).then(
+                    function(ok) {
+                        modalService.showModal({}, {bodyText: ok});
+
+
+                        questionnaireSvc.findQ();       //just as a test...
+                    },
+                    function(err) {
+                        modalService.showModal({}, {bodyText: err});
+                    }
+
+                )
+
+
+
+            };
+
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
 
             $scope.input.newCommentboxInxDEP = -1;
 
+            //this is the new builder model
             $scope.showForm = function(){
 
                 $uibModal.open({
@@ -102,7 +132,7 @@ angular.module("sampleApp")
                 })
 
 
-            }
+            };
 
             $scope.redrawChart = function(){
                 //$scope.chart.fit();
@@ -114,10 +144,11 @@ angular.module("sampleApp")
 
                 },1000)
 
-            }
+            };
 
             $scope.showQuest = function(){
-                $scope.showForm()
+                $scope.showForm();      //actually the new data entry form...
+
 
                 return
 
@@ -419,7 +450,7 @@ angular.module("sampleApp")
 
             }
 
-            $scope.saveComment = function() {
+            $scope.saveCommentDEP = function() {
                 //save the comment. For now, a single comment only...
                 var QuestionnaireResponse;
                 if ($scope.taskOutputs.length == 0) {
@@ -1613,12 +1644,12 @@ angular.module("sampleApp")
                 delete $scope.commentTask;      //the task to comment on this model...
                 delete $scope.input.mdComment;  //the comment
                 delete $scope.taskOutputs;      //the outputs of the task (Communication resource currently)
-                delete $scope.Q;                //the Questionnaire
+                //delete $scope.Q;                //the Questionnaire
                 $scope.canSaveModel = true;     //allow edits to the model to be saved
 
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource);
-                //temp $scope.Q = questionnaireSvc.makeQ($scope.treeData);
+               // $scope.Q = questionnaireSvc.makeQ($scope.treeData);
                 $scope.relativeMappings = logicalModelSvc.getRelativeMappings($scope.treeData); //items with both v2 & fhir mappings
 
 
@@ -1683,7 +1714,7 @@ angular.module("sampleApp")
                 $scope.refNetwork = new vis.Network(container, vo.graphData, options);
 
                 $scope.refNetwork.on("click", function (obj) {
-                    
+
                     //this is selecting a model
                     return;     //disable for now...
 

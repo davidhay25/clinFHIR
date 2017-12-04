@@ -1,0 +1,93 @@
+
+<div>
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-6 col-sm-6 col-xs-6">
+
+                <h3 class="modal-title">Questionnaire Answer</h3>
+
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-6">
+
+                <button class="btn btn-success pull-right" ng-click="add()">
+                    Add
+                </button>
+                <button class="btn btn-link pull-right" ng-click="$dismiss()">Cancel</button>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+
+
+        <div ng-show="item.type == 'string'">
+            <input placeholder="{{item.text}}" class="form-control" ng-model="input.string"/>
+        </div>
+
+
+        <div ng-show="item.type == 'choice'">
+            <input placeholder="{{item.text}}" class="form-control" ng-model="input.string"/>
+        </div>
+
+        <div ng-show="item.type == 'date'">
+            <div class="row">
+                <div class="col-md-7  col-sm-7 col-centered">
+                    <div uib-datepicker ng-model="input.date" class="well well-sm"></div>
+                </div>
+            </div>
+        </div>
+
+
+<!--
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                {{item.text}}
+            </div>
+            <div class="col-md-8 col-sm-8">
+
+            </div>
+        </div>
+-->
+
+
+
+
+
+
+        <br/>
+        <pre>{{item | json}}</pre>
+
+<!--
+        <div class="row" style="margin-bottom: 10px">
+            <div class="col-md-4 col-sm-4">
+                Select the resource type
+            </div>
+            <div class="col-md-8 col-sm-8">
+                <select ng-change="selectContextType(input.type)" ng-model="input.type" class="form-control"
+
+                        ng-options="type.name for type in allResourceTypes">
+                </select>
+            </div>
+
+        </div>
+
+-->
+
+
+
+
+
+</div>
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+            </div>
+        </div>
+    </div>
+</div>

@@ -488,7 +488,6 @@
 
     </uib-tab>
 
-
     <uib-tab ng-show="showGQL" heading="GraphQL">
         <br/>
         <div class="row">
@@ -497,8 +496,6 @@
             </div>
         </div>
     </uib-tab>
-
-
 
     <uib-tab heading="Documents">
 
@@ -608,7 +605,27 @@
 
     </uib-tab>
 
+    <uib-tab heading="Questionnaires">
 
+        <div class="row">
+
+            <div class="col-md-2 col-sm-2">
+                <h4>Questionnaires</h4>
+                <div class="list-group">
+                    <a href="#"  ng-click="selectQ(entry.resource)"
+                       ng-class="{'list-group-item':true,'active':currentQ.id == entry.resource.id}"
+                       ng-repeat="entry in QBundle.entry">
+                        {{entry.resource.id}}
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-10 col-sm-10">
+                <br/>
+                <questionnaire model="currentQ" resourcehash="allResources"></questionnaire>
+            </div>
+        </div>
+    </uib-tab>
 
 
 

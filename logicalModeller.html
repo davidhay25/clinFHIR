@@ -133,9 +133,11 @@
     <script src="js/newExtensionDefinitionCtrl.js"></script>
     <script src="js/edBuilderSvc.js"></script>
 
-
-    <script src="directive/questionnaire/questionnaireCtl.js"></script>
     <script src="js/questionnaireSvc.js"></script>
+    <!--
+    <script src="directive/questionnaire/questionnaireCtl.js"></script>
+
+    -->
     <script src="js/newBuilderCtl.js"></script>
     <script src="js/newBuilderSvc.js"></script>
 
@@ -285,9 +287,7 @@
     </div>
 
 
-    <!-- temp location -->
 
-    <questionnaireDEP model="Q"></questionnaireDEP>
 
 
     <div class="row">
@@ -403,7 +403,8 @@
                                  <button class="btn btn-link" ng-click="">Collapse all</button>-->
                                    <button class="btn btn-link" ng-click="expandAll()">Expand All</button>
                                   <button class="btn btn-link" ng-click="resetLayout()">Collapse Layout</button>
-                                 <!--
+
+<!--
                                  <button class="btn btn-link" ng-click="showQuest()">Form</button>
 
 -->
@@ -756,14 +757,17 @@
                         <uib-tab heading="TreeData">
                             <pre>{{treeData | json}}</pre>
                         </uib-tab>
-
+<!--
                         <uib-tab heading="Questionnaire">
                             <pre>{{Q | json}}</pre>
                         </uib-tab>
 
                         <uib-tab heading="Questionnaire Form">
-                            <questionnaireDEP model="Q"></questionnaireDEP>
+
+                            <questionnaire model="Q"></questionnaire>
                         </uib-tab>
+
+                        -->
 
                     </uib-tabset>
                 </uib-tab>
@@ -1193,7 +1197,7 @@
                                     <p>Create an Implementation Guide from the model. This is useful if the model is describing a multi-resource
                                     model (like a Document) and will extract all the referenced profiles, ValueSets and Extension
                                         Definitions from the model and create an Implementation Guide that references all those artifacts.</p>
-                                    <p><em>Under development</em></p>
+                                    <p><em><strong>Under development</strong></em></p>
                                 </td>
                             </tr>
                             <tr>
@@ -1201,7 +1205,7 @@
                                 <td>
                                     <p>Create a Questionnaire resource that has entries for all elements in the model. Any references
                                         to resources or profiles will be ignored - only the elements with other datatypes will be included.</p>
-                                    <p><em>Under development</em></p>
+                                    <p><em><strong>Under development</strong></em></p>
                                 </td>
                             </tr>
                         </table>

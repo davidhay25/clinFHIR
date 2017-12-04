@@ -54,8 +54,6 @@ angular.module("sampleApp").controller('dataTypeCtrl',
         $scope.results = {timing:{}};
         $scope.routeCodes = {id:'route-codes'};
 
-
-
         //the ValueSet lookup & select for CodeableConcept
         $scope.showVSBrowserDialog = {};
         $scope.showVs = function(vs){ //pass in the actual valueset...

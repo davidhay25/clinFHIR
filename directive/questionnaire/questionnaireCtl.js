@@ -4,18 +4,35 @@ angular.module('sampleApp')
             restrict: 'EA', //E = element, A = attribute, C = class, M = comment
             scope: {
                 //@ reads the attribute value, = provides two-way binding, & works with functions
-                model: '=',
-                sd : '=',
-                bundle : '='
+                model: '=',             //the actual questionnaire...
+                sd : '=',               //not curently used
+                bundle : '=',           //not currently used
+                resourcehash : '='      //a hash (by type) or all resources for this patient...
             },
 
             templateUrl: 'directive/questionnaire/questionnaireDir.html',
             controller: function($scope,$uibModal,builderSvc,ResourceUtilsSvc,Utilities,GetDataFromServer,
-                                 questionnaireSvc){
+                                 questionnaireSvc,appConfigSvc){
+
+
+                //will be triggered when the value of 'model' changes - ie when a questionnaire  is selected......
+                $scope.$watch(function(scope) {
+                        return scope.model
+                    },
+                    function(newValue,oldValue) {
+                        //console.log('watch:',oldValue,newValue)
+                        if (newValue) {
+                            //console.log($scope.resourcehash)
+                            //establish the hash of data that can be pre-populated from the patients data into the model answers...
+                            questionnaireSvc.setUpPrePop($scope.resourcehash);
+                        }
+                    }
+                );
 
                 //console.log($scope.sd)
 
                 //if an SD is passed in, then create a model from the SD. Intended especially for profiles...
+                /*
                 if ($scope.sd) {
                     questionnaireSvc.makeLMFromProfile($scope.sd).then(
                         function (data) {
@@ -38,21 +55,147 @@ angular.module('sampleApp')
                         var type = resource.resourceType;
                         resourceHash[type] = resourceHash[type] || []
                         resourceHash[type].push(resource)
-                    })
+
+                        console.log('bundle passed:',resourceHash)
+
+
+                    });
                     console.log(resourceHash)
                 }
+
+
+               */
+
+
+                var qItemDescription = appConfigSvc.config().standardExtensionUrl.qItemDescription; //description of the question
+                $scope.getDescription = function(item){
+                    var ext = Utilities.getSingleExtensionValue(item,qItemDescription);
+                    if (ext) {
+                        return ext.valueString;
+                    }
+                }
+
+                //-------- functions and properties to enable the valueset viewer
+                $scope.showVSBrowserDialog = {};
+                $scope.showVSBrowser = function(vs) {
+                    $scope.showVSBrowserDialog.open(vs);        //the open method defined in the directive...
+                };
+
+                //called when a concept is selected from the ValueSet dialog...
+                $scope.conceptSelected = function(concept) {
+                    console.log(concept)
+                    $scope.currentItem.myMeta = $scope.currentItem.myMeta || {}
+                    $scope.currentItem.myMeta.answer = $scope.currentItem.myMeta.answer || [];
+
+                    var vo = {answer:concept,display:concept.display + " ("+ concept.system + "|" + concept.code}
+                    if ($scope.currentItem.repeats) {
+                        $scope.currentItem.myMeta.answer.push(vo);
+                    } else {
+                        $scope.currentItem.myMeta.answer[0] = vo
+                    }
+
+                };
+
+
+                var showValueSet = function(item) {
+
+                    var uri = item.options.reference;
+
+                    //treat the reference as lookup in the repo...
+                    GetDataFromServer.getValueSet(uri).then(
+                        function(vs) {
+                            $scope.showVSBrowserDialog.open(vs);
+
+                        }, function(err) {
+                            alert(err)
+                        }
+                    ).finally (function(){
+                        $scope.showWaiting = false;
+                    });
+                };
+
+
+                $scope.selectQItem = function(item){
+                    $scope.currentItem = item;
+
+                    //var QType = item.type;      //the Questionnaire type. This is not the same as a resource dataType...
+
+                    //choice items are selected from a ValueSet. todo Really need to allow text to be entered for open choice...
+                    if (item.type == 'choice' || item.type == 'open-choice') {
+
+                       // var url = item.options.reference;
+                        if (item.options &&  item.options.reference) {
+                            showValueSet(item);
+                        } else {
+                            alert("A 'choice' type should have an associated options property...")
+                        }
+
+                        return;
+                    }
+
+
+
+
+
+                    $uibModal.open({
+                        templateUrl: 'modalTemplates/qDataInput.html',
+                        size: 'lg',
+                        controller: function($scope,item){
+                            $scope.input = {}
+                            $scope.item = item;
+
+                            $scope.add = function () {
+                                item.myMeta = item.myMeta || {}
+                                item.myMeta.answer = item.myMeta.answer || []
+                                switch (item.type) {
+                                    case 'string' :
+                                        var vo = {answer:$scope.input.string,display:$scope.input.string}
+                                        addNewAnswer(item,vo)
+                                       // item.myMeta.answer.push(vo)
+                                        break;
+                                    case 'date' :
+                                        var v = moment($scope.input.date).format('YYYY-MM-DD');
+                                        var vo = {answer:v,display:v}
+                                        addNewAnswer(item,vo)
+                                        break;
+                                }
+
+                                $scope.$close();
+                            }
+
+                            function addNewAnswer(item,vo){
+                                if (item.repeats) {
+                                    item.myMeta.answer.push(vo)
+                                } else {
+                                    item.myMeta.answer[0] = vo
+                                }
+
+                            }
+
+                        },
+                        resolve: {
+                            item: function () {
+                                return item;
+                            }
+                        }
+                    }).result.then(
+                        function(data) {
+
+                        }
+                    )
+
+                };
 
                 $scope.deleteAnswer = function(item,inx) {
                     item.myMeta.answer.splice(inx,1)
                 };
 
-                //$scope.answers = [];    //an array of sections with answers. (We'll think about the QR later...)
 
                 $scope.currentSection;  //the currently selected section
 
                 $scope.input = {};
 
-                $scope.selectDt = function(item,dt) {
+                $scope.selectDtDEP = function(item,dt) {
                     console.log(item,dt)
                     var vsDetails;
                     var expandedValueSet;
@@ -97,7 +240,8 @@ angular.module('sampleApp')
                         getDtValue(item,dt)
                     }
 
-                    function getDtValue(item,dt,vsDetails,expandedValueSet) {
+
+                    function getDtValueDEP(item,dt,vsDetails,expandedValueSet) {
                         $uibModal.open({
                             templateUrl: 'modalTemplates/addPropertyInBuilder.html',
                             size: 'lg',
@@ -169,6 +313,9 @@ angular.module('sampleApp')
                 $scope.selectSection = function(item) {
                     console.log(item)
                     $scope.selectedSection = item;
+                    questionnaireSvc.prePopNode(item,$scope.resourceHash)
+
+
                 };
 
                 function makeDisplayJson() {

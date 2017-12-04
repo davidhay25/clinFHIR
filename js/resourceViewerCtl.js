@@ -1,7 +1,7 @@
 
 angular.module("sampleApp")
     .controller('resourceViewerCtrl',
-        function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,sessionSvc,
+        function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,sessionSvc,questionnaireSvc,
                   $uibModal, $timeout,GetDataFromServer,modalService,ResourceUtilsSvc,builderSvc,$window,$http) {
 
 
@@ -14,7 +14,7 @@ angular.module("sampleApp")
             $scope.isSMART = appConfigSvc.getCurrentDataServer().smart;     //if true, this server requires SMART
             $scope.oauthAccessToken;    //if SMART, this will be the access token...
 
-            //---------- SMART stuff ------ move to a common service
+            //---------- SMART stuff ------ move to a common service eventually..
             $scope.smartLogin = function() {
                 $http.get('smartAuth/'+appConfigSvc.getCurrentDataServer().name).then(
                     function(data) {
@@ -38,6 +38,19 @@ angular.module("sampleApp")
 
 
             //----------------------
+
+
+            //find all the questionnaires (authored by CF) on the conformance server...
+            questionnaireSvc.findQ().then(
+                function(bundle) {
+                    $scope.QBundle = bundle;
+                }
+            )
+
+            $scope.selectQ = function(Q) {
+                $scope.currentQ = Q;
+            }
+
 
             $scope.showGQL = appConfigSvc.getCurrentDataServer().name == 'Grahames STU3 server';
 
@@ -388,13 +401,13 @@ angular.module("sampleApp")
 
                                     renderPatientDetails(data)
                                     $scope.$broadcast('patientObservations',data['Observation']);//used to draw the observation charts...
-                                     },
-                                     function(err){
-                                        console.log(err)
-                                 }).finally(
-                                     function(){
-                                         $scope.waiting = false;
-                                     }
+                                 },
+                                 function(err){
+                                    console.log(err)
+                             }).finally(
+                                 function(){
+                                     $scope.waiting = false;
+                                 }
                              )
 
                         }

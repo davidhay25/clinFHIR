@@ -1,10 +1,13 @@
 angular.module("sampleApp")
-    .service('questionnaireSvc', function(Utilities,appConfigSvc,$q) {
+    .service('questionnaireSvc', function(Utilities,appConfigSvc,$q,$http,GetDataFromServer) {
 
         var elementsToIgnore = ['id', 'meta', 'implicitRules', 'language', 'contained','extension','modifierExtension'];
 
         var qPath = appConfigSvc.config().standardExtensionUrl.qPath;   //path in the resource
         var qMult = appConfigSvc.config().standardExtensionUrl.qMult;   //if the element is multiple in the resource
+        var extFhirPath = appConfigSvc.config().standardExtensionUrl.fhirPath;   //the fhirpath
+
+        var prePopHash = {};    //the paths that can be pre-populated...
 
         function getLastSegment(path) {
             var ar = path.split('.');
@@ -12,6 +15,68 @@ angular.module("sampleApp")
         }
 
         return {
+            setUpPrePop : function(resourceHash) {
+                //the paths that can be pre-populated. This is rather manual...
+                prePopHash = {};    //entries are always an array...
+
+                //todo: need to think about datatype...
+                if (resourceHash.Patient && resourceHash.Patient.entry && resourceHash.Patient.entry.length > 0) {
+                    var patient = resourceHash.Patient.entry[0].resource;   //only the first one...
+                    if (patient.name) {
+                        prePopHash['Patient.name.given'] = {value:patient.name[0].given};
+                        prePopHash['Patient.name.family'] = {value:[patient.name[0].family]};    //make an array
+                    }
+                    prePopHash['Patient.birthDate'] = {value:[patient.birthDate],dt:'date'};    //make an array
+                }
+
+
+
+
+
+
+            },
+            prePopNode : function(node,resourceHash){
+                //pre-populate the model answers based on the fhirPath. return a summary as well as the pre-pop
+                var log = [];
+
+                if (node.item) {
+                    node.item.forEach(function(child){
+                        var ext = Utilities.getSingleExtensionValue(child,extFhirPath);
+                        if (ext) {
+                            console.log(ext)
+                            var fhirPath = ext.valueString;
+                            if (prePopHash[fhirPath]) {
+                                //there is a value we can pre-populate...
+                                child.myMeta = child.myMeta || {}
+                                if (! child.myMeta.answer) {
+                                    //only pre-pop if there is no answer present...
+                                    child.myMeta.answer = []
+                                    var prePopElement = prePopHash[fhirPath];
+                                    var prePopValues = prePopElement.value;
+                                    if (prePopValues) {
+                                        prePopValues.forEach(function (v) {
+                                            var vo = {answer:v}
+                                            vo.display = v;
+                                            child.myMeta.answer.push(vo);
+                                            // switch ()
+                                        })
+                                    }
+                                }
+                            }
+
+                        }
+                    })
+                }
+
+
+
+
+
+
+
+
+
+            },
             makeResource : function(QR) {
                 //generate a resource based on the QR - assuming the simplefied section structure...
                 var resource = {resourceType:'Thing'}
@@ -142,34 +207,126 @@ angular.module("sampleApp")
                 var clone = angular.copy(treeData)
                 var childHash = {}
                 var linkId=0
+
+                var qItemDescription = appConfigSvc.config().standardExtensionUrl.qItemDescription; //description of the question
+
+
                 clone.forEach(function (node) {
                     childHash[node.parent] = childHash[node.parent] || []
                     childHash[node.parent].push(node)
                 });
                 console.log(childHash);
 
+                //set the type of th equestionnaire item - and the options if coded...
+                var setQType = function (item,ed) {
+                    if (ed && ed.type && ed.type[0]) {
+                        var dt = ed.type[0].code
+                        var typ = 'string';
+                        console.log(dt)
+                        switch (dt) {
+                            case 'date' :
+                                typ = 'date'
+                                break;
+                            case 'CodeableConcept' :
+                                //could either be 'choice' or 'open-choice' depending on binding...
+                                typ = 'choice';     //most common default...
+                                if (ed.binding) {
+                                    if (ed.binding.strength == 'required') {
+                                        typ = 'open-choice'
+                                    }
+                                    if (ed.binding.valueSetUri) {
+                                        //todo this should really be a reference - need to go through all of CF and correct :(
+                                        item.options = {reference:ed.binding.valueSetUri}
+                                    }
+                                    if (ed.binding.valueSetReference && ed.binding.valueSetReference.reference) {
+                                        item.options = {reference: ed.binding.valueSetReference.reference}
+                                    }
+                                }
+
+
+                                break;
+                         }
+                         item.type = typ;
+
+                    }
+
+
+                }
+/*
+                var getQTypeFromDataTypeDEP = function(dt) {
+                  //  var dt
+
+
+
+                    var rtn = 'string';
+                    console.log(dt)
+                    switch (dt) {
+                        case 'date' :
+                            rtn = 'date'
+                            break;
+                        case 'CodeableConcept' :
+
+                            break;
+                        default :
+
+
+                    }
+
+
+                    return rtn;
+                };
+*/
+                //add the description extensoion...
+                var addDescription = function(item,ed) {
+                    if (ed && ed.definition) {
+                        Utilities.addExtensionOnce(item,qItemDescription,{valueString:ed.definition})
+
+                    }
+                };
+
+                //add the FHIRPath extension...
+                var addFHIRPath = function(item,ed) {
+
+                    if (ed && ed.mapping) {
+
+                        ed.mapping.forEach(function(map){
+                            if (map.identity == 'fhir') {
+                                var ar = map.map.split('|');
+                                var fp = ar[0];
+                                Utilities.addExtensionOnce(item,extFhirPath,{valueString:fp})
+                            }
+                        })
+                    }
+                };
+
+
                 //this routine is used for bbe off the root
                 var addItemsFromNode = function(node,parentPath){
                     //add all nodes with the given parentparentPath
                     console.log(parentPath, childHash[parentPath]);
-                    //node.item = []
-
-
 
                     if (childHash[parentPath]) {
                         childHash[parentPath].forEach(function (child) {
 
                             var ed = child.data.ed;          //the ElementDefinition from the LM...
                             if (ed && ed.type && ed.type.length > 0) {
-                                var item = {linkId: 'id' + linkId++, text: child.text, myMeta: {answer: [], ed: ed}};
+                                var item = {linkId: 'id' + linkId++, text: child.text};
+                                //item.type = getQTypeFromDataType(ed.type[0].code)
+                                setQType(item,ed)
+                                addDescription(item,ed);
+                                addFHIRPath(item,ed)
                                 if (ed.max == '*') {
                                     item.repeats = true;
                                 }
-                                item.myMeta.path = ed.path;
+
+
+
+
+                                //item.myMeta.path = ed.path;
                                 node.item.push(item);
 
-                                if (ed.type[0].code == 'BackboneElement') {
-                                    //This is a bbe with child elements - but not a data input field...
+                                if (ed.type[0].code == 'BackboneElement' || ed.type[0].code == 'Reference') {
+                                    //This is a bbe with child elements, or a reference - but not a data input field...
                                     //console.log('bbe '+ ed.path)
 
                                     item.item = [];
@@ -195,20 +352,26 @@ angular.module("sampleApp")
 
                 //add a text element...
                 var textEd = {type:[{code:'string'}]}
-                var textItem = {linkId:'id'+linkId++,text:'Text', item:[],myMeta:{answer:[],ed:textEd}};
+                var textItem = {linkId:'id'+linkId++,text:'Text', type:'string',item:[]};
                 var modelRoot = treeData[0].data.pathSegment;
-                textItem.myMeta.path = modelRoot + ".text"
+               // textItem.myMeta.path = modelRoot + ".text"
+
                 rootItem.item.push(textItem);
 
-                var arRootChildren = childHash[clone[0].id];        //nodes that are chilren of the first element
+                var arRootChildren = childHash[clone[0].id];        //nodes that are children of the first element
+
                 arRootChildren.forEach(function (child) {
                     //add a question for each child...
 
                     var ed = child.data.ed;          //the ElementDefinition from the LM...
                     if (ed && ed.type && ed.type.length > 0) {
-                        if (ed.type[0].code == 'BackboneElement' ) {
-
+                        if (ed.type[0].code == 'BackboneElement' || ed.type[0].code == 'Reference' ) {
+                            //a set of elements...
                             var parentItem = {linkId:'id'+linkId++,text:child.text, item:[]};
+                            //parentItem.type = getQTypeFromDataType(ed.type[0].code);
+                            setQType(parentItem,ed)
+                            addDescription(parentItem,ed);
+                            addFHIRPath(parentItem,ed);
                             if (ed.max == '*') {
                                 parentItem.repeats = true;
                             }
@@ -216,14 +379,18 @@ angular.module("sampleApp")
 
                             addItemsFromNode(parentItem,child.id)
                         } else {
+                            //a single element
                             var lastSegment = getLastSegment(ed.path);
                             if (elementsToIgnore.indexOf(lastSegment) == -1) {
-                                var item = {linkId:'id'+linkId++,text:child.text, item:[],myMeta:{answer:[],ed:ed}};
-
+                                var item = {linkId:'id'+linkId++,text:child.text, item:[]};
+                                //item.type = getQTypeFromDataType(ed.type[0].code)
+                                setQType(item,ed)
+                                addDescription(item,ed);
+                                addFHIRPath(item,ed);
                                 if (ed.max == '*') {
                                     item.repeats = true;
                                 }
-                                item.myMeta.path = ed.path;
+                              //  item.myMeta.path = ed.path;
                                 rootItem.item.push(item)
                             }
                         }
@@ -238,6 +405,62 @@ angular.module("sampleApp")
 
 
 
+            },
+            findQ : function() {
+                //load all the CF authored Questionnaires
+                var deferred = $q.defer();
+                var url = appConfigSvc.getCurrentConformanceServer().url + "Questionnaire";
+
+
+
+                GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
+                    function(data) {
+                        if (data && data.data && data.data.entry) {
+                            var bundle = {resourceType:'Bundle',entry:[]}
+                            data.data.entry.forEach(function (entry) {
+                                var Q = entry.resource;
+                                //if this questionnaire is authored by CF than add it...
+                                if (Utilities.isAuthoredByClinFhir(Q)){
+                                    bundle.entry.push({resource:Q})
+                                }
+
+                            });
+
+                            console.log(bundle)
+                            deferred.resolve(bundle)
+                        } else {
+                            alert("No Questionnaires found")
+                            deferred.reject(err);
+                        }
+
+                    },
+                    function(err) {
+                        alert(angular.toJson(err))
+                        deferred.reject(err);
+                    }
+                )
+                return deferred.promise;
+
+            },
+            saveQ : function(Q,name) {
+                var deferred = $q.defer();
+                var url = appConfigSvc.getCurrentConformanceServer().url + 'Questionnaire/'+name;
+                Utilities.setAuthoredByClinFhir(Q);
+                Q.url = url;
+                Q.id = name;
+                $http.put(url,Q).then(
+                    function() {
+                        deferred.resolve('Questionnaire saved with the URL: '+url)
+                    },
+                    function(err) {
+                        deferred.reject(angular.toJson(err))
+                    }
+                );
+
+
+
+
+                return deferred.promise;
             },
             makeLMFromProfile : function(inProfile) {
                 //copied from profileDiff service - adapt to needs of Questionnaire...

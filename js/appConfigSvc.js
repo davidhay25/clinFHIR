@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2017-11-18';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2017-12-04a';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -44,10 +44,15 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.qPath = 'http://clinfhir.com/StructureDefinition/qPathUrl';
         defaultConfig.standardExtensionUrl.qMult = 'http://clinfhir.com/StructureDefinition/qMultUrl';
         defaultConfig.standardExtensionUrl.igEntryType = 'http://clinfhir.com/StructureDefinition/igEntryType';
+        defaultConfig.standardExtensionUrl.qItemDescription = 'http://clinfhir.com/fhir/StructureDefinition/qItemDescription';
+        defaultConfig.standardExtensionUrl.fhirPath = 'http://clinfhir.com/fhir/StructureDefinition/fhirPath';
+
+
 
         defaultConfig.standardSystem.identifierSystem = 'http://clinfhir.com/fhir/NamingSystem/identifier';
         defaultConfig.standardSystem.practitionerIdentifierSystem = 'http://clinfhir.com/fhir/NamingSystem/practitioner';
         defaultConfig.standardSystem.listTypes = 'http://clinfhir.com/fhir/CodeSystem/listTypes';
+
 
 
         defaultConfig.standardCode.lmPalette = defaultConfig.standardSystem.listTypes + '|lmPalette' 
