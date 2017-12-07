@@ -488,6 +488,200 @@
 
                         <uib-tabset>
 
+                            <uib-tab heading="Tree View">
+
+                                <p class="banner"><em>The Profile rendered as a Logical Model - extensions appear as ordinary elements.</em></p>
+                                <div class="row">
+                                    <div class="col-sm-4 col-md-4">
+                                        <div id="logicalTree"></div>
+
+                                    </div>
+                                    <div class="col-sm-8 col-md-8">
+                                        <uib-tabset>
+                                            <uib-tab heading="Summary">
+                                                <br/>
+                                                <table class="table">
+                                                    <tr ng-show="selectedElementInLM.slicing"><td><strong>Discriminator</strong></td><td>
+                                                        <div>Discriminator: <span ng-repeat = "d in selectedElementInLM.slicing.discriminator">
+                                                            {{selectedElementInLM.path}}.{{d}}  </span></div>
+                                                        <div>Ordered: {{selectedElementInLM.slicing.ordered}}</div>
+                                                        <div>Rules: {{selectedElementInLM.slicing.rules}}</div>
+                                                    </td></tr>
+
+                                                    <tr><td width="15%">Path</td><td>{{selectedElementInLM.path}}</td></tr>
+                                                    <tr><td>Multiplicity</td>
+                                                        <td>
+                                                            {{selectedElementInLM.min}}..{{selectedElementInLM.max}}
+                                                            <span ng-show="selectedElementInLM.min == 1
+                                                                && selectedElementInLM.base.min ==0
+                                                                && selectedElementInLM.path.indexOf('extension') == -1">
+                                                                <strong> (This element was optional in the FHIR spec)</strong>
+                                                            </span>
+                                                        </td></tr>
+                                                    <tr><td>Name</td><td>{{selectedElementInLM.name}}</td></tr>
+                                                    <tr><td>Short</td><td>{{selectedElementInLM.short}}</td></tr>
+                                                    <tr><td>Definition</td><td>{{selectedElementInLM.definition}}</td></tr>
+                                                    <tr><td>Requirements</td><td>{{selectedElementInLM.requirements}}</td></tr>
+                                                    <tr><td>Datatype/s</td>
+                                                        <td>
+                                                            <div class = 'row' ng-repeat="typ in selectedElementInLM.type">
+                                                                <div class="col-md-2 col-sm-2">{{typ.code}}</div>
+                                                                <div ng-show="typ.profile" class="col-md-10 col-sm-10">{{typ.profile}}</div>
+                                                                <div ng-show="typ.targetProfile" class="col-md-10 col-sm-10">{{typ.targetProfile}}</div>
+
+                                                            </div>
+
+
+                                                            <div ng-repeat="typ in selectedElementInLM.myMeta.analysis.dataTypes">
+                                                                From Extension Definition: {{typ.code}}
+                                                                <span ng-show="typ.profile"> --> {{typ.profile}}</span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr ng-show="selectedElementInLM.binding"><td>Binding</td><td>
+
+                                                        <span class="clickable"  ng-click="showValueSet(selectedElementInLM.binding.valueSetReference.reference)">
+                                                            {{selectedElementInLM.binding.valueSetReference.reference}}
+                                                        </span>
+
+
+                                                        {{selectedElementInLM.binding.valueSetUri}}
+                                                        ({{selectedElementInLM.binding.strength}})
+                                                        <div>{{selectedElementInLM.binding.description}}</div>
+                                                    </td></tr>
+
+
+                                                    <tr ng-show="selectedElementInLM.myMeta.analysis.binding"><td>Binding (from Extension)</td><td>
+
+                                                        <span class="clickable"
+                                                              ng-click="showValueSet(selectedElementInLM.myMeta.analysis.binding.valueSetReference.reference)">
+                                                            {{selectedElementInLM.myMeta.analysis.binding.valueSetReference.reference}}
+                                                        </span>
+
+
+                                                        {{selectedElementInLM.myMeta.analysis.binding.valueSetUri}}
+                                                        ({{selectedElementInLM.myMeta.analysis.binding.strength}})
+                                                        <div>{{selectedElementInLM.myMeta.analysis.binding.description}}</div>
+                                                    </td></tr>
+
+
+                                                    <tr ng-show="selectedElementInLM.myMeta.fixed"><td>{{selectedElementInLM.myMeta.fixed.key}}</td>
+                                                        <td>{{selectedElementInLM.myMeta.fixed.value}}</td>
+                                                    </tr>
+
+
+                                                </table>
+
+                                                <div ng-show="selectedElementInLM.myMeta.analysis.url">
+                                                    <span class = 'clickable' ng-click="showExtensionFromUrl(selectedElementInLM.myMeta.analysis.url)">
+                                                        Show extension</span>
+                                                </div>
+
+                                                <div ng-show="selectedElementInLM && selectedElementInLM.myMeta.analysis && ! selectedElementInLM.myMeta.analysis.url">
+                                                    <div class="alert alert-warning">
+                                                        This Extension Definition could not be located on the Conformance server
+                                                    </div>
+                                                </div>
+
+                                            </uib-tab>
+                                            <uib-tab heading="Json">
+                                                <pre>{{selectedElementInLM | json}}</pre>
+                                            </uib-tab>
+
+                                            <uib-tab>
+                                                <uib-tab-heading>
+                                                    Comments <span class="badge">{{commentsForElement.length}}</span>
+                                                </uib-tab-heading>
+                                                <br/>
+                                                <panel>
+                                                    <table class="table table-bordered">
+                                                        <tr><th>User Email</th><th>When</th><th>Comment</th></tr>
+                                                        <tr ng-repeat="comment in commentsForElement">
+                                                            <td>{{comment.email}}</td>
+                                                            <td>{{comment.issued | getAgeSeconds}}</td>
+                                                            <td>{{comment.comment}}</td>
+                                                        </tr>
+                                                    </table>
+                                                </panel>
+
+                                                <div class="row" ng-show = "selectedEDInLM && user.email">
+                                                    <div class="col-sm-9 col-md-9">
+
+                                                        <textarea class="form-control" ng-model="input.newComment" placeholder="Add new comment">
+
+                                                        </textarea>
+                                                        <!--<pre>{{commentsForElement | json}}</pre>-->
+                                                    </div>
+                                                    <div class="col-sm-3 col-md-3">
+                                                        <button class="btn btn-primary" ng-show="input.newComment"
+                                                                ng-click="saveNewComment(input.newComment)">Add Comment</button>
+                                                    </div>
+                                                </div>
+
+                                            </uib-tab>
+
+
+                                            <uib-tab heading="Help">
+                                                <br/>
+                                                <p>This logical model is derived from the Profile (the StructureDefinition resource) as a way
+                                                    of presenting a 'user friendly view of the Profile - as opposed to the Logical Models listed
+                                                    in the left side bar which were generated by a person (and can be used to create a 'real' profile.
+                                                </p><p>   If the profile allows for further extensions to
+                                                be added, then there is an entry labelled 'extension' to indicate this.</p><p> The items are colour
+                                                coded as follows:</p>
+                                                <ul class="list-unstyled" style="padding-left: 8px">
+                                                    <li><span style="color:blueviolet">Purple</span> is an element that is an extension - it has been added to the underlying 'core' resource</li>
+                                                    <li><span class="elementRequired">Red</span> is a required field</li>
+                                                    <li>The asterisk (*) indicates that multiple entries are allowed.</li>
+                                                    <li>The letter 'D' indicates this element is a Discriminator.</li>
+                                                    <li>The letter 'F' indicates this element has a fixed value.</li>
+                                                </ul>
+                                                <p>Selecting an element will show more details of that element, including the 'raw' json from
+                                                    which the logical model was derived.</p>
+                                            </uib-tab>
+                                        </uib-tabset>
+
+
+
+
+                                    </div>
+                                </div>
+                            </uib-tab>
+
+
+                            <uib-tab>
+                                <uib-tab-heading>
+                                    Comments <span class="badge">{{commentsThisProfileCount}}</span>
+                                </uib-tab-heading>
+
+
+
+                                <div class="row strong">
+                                    <div class="col-md-2 col-sm-2">Path</div>
+                                    <div class="col-md-2 col-sm-2">When</div>
+                                    <div class="col-md-3 col-sm-3">Who</div>
+                                    <div class="col-md-5 col-sm-5">Comment</div>
+                                </div>
+                                <div ng-repeat="(key,value) in commentsThisProfileHash">
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6"><em>{{key}}</em></div>
+
+                                    </div>
+                                    <div class="row" ng-repeat="comment in value">
+                                        <div class="col-md-2 col-sm-2"></div>
+                                        <div class="col-md-2 col-sm-2">{{comment.issued | getAgeSeconds }}</div>
+                                        <div class="col-md-3 col-sm-3">{{comment.email }}</div>
+                                        <div class="col-md-5 col-sm-5">{{comment.comment }}</div>
+                                    </div>
+
+                                </div>
+
+
+
+
+
+                            </uib-tab>
 
                             <uib-tab heading="Graph" select="fitGraph()">
                                 <p class="banner"><em>Relationships between the Profile and other resources, Extensions and ValueSets.</em></p>
@@ -629,133 +823,6 @@
 
 
 
-                            </uib-tab>
-
-                            <uib-tab heading="Tree View">
-
-                                <p class="banner"><em>The Profile rendered as a Logical Model - extensions appear as ordinary elements.</em></p>
-                                <div class="row">
-                                    <div class="col-sm-4 col-md-4">
-                                        <div id="logicalTree"></div>
-
-                                    </div>
-                                    <div class="col-sm-8 col-md-8">
-                                        <uib-tabset>
-                                            <uib-tab heading="Summary">
-                                                <br/>
-                                                <table class="table">
-                                                    <tr ng-show="selectedElementInLM.slicing"><td><strong>Discriminator</strong></td><td>
-                                                        <div>Discriminator: <span ng-repeat = "d in selectedElementInLM.slicing.discriminator">
-                                                            {{selectedElementInLM.path}}.{{d}}  </span></div>
-                                                        <div>Ordered: {{selectedElementInLM.slicing.ordered}}</div>
-                                                        <div>Rules: {{selectedElementInLM.slicing.rules}}</div>
-                                                    </td></tr>
-
-                                                    <tr><td width="15%">Path</td><td>{{selectedElementInLM.path}}</td></tr>
-                                                    <tr><td>Multiplicity</td>
-                                                        <td>
-                                                            {{selectedElementInLM.min}}..{{selectedElementInLM.max}}
-                                                            <span ng-show="selectedElementInLM.min == 1
-                                                                && selectedElementInLM.base.min ==0
-                                                                && selectedElementInLM.path.indexOf('extension') == -1">
-                                                                <strong> (This element was optional in the FHIR spec)</strong>
-                                                            </span>
-                                                        </td></tr>
-                                                    <tr><td>Name</td><td>{{selectedElementInLM.name}}</td></tr>
-                                                    <tr><td>Short</td><td>{{selectedElementInLM.short}}</td></tr>
-                                                    <tr><td>Definition</td><td>{{selectedElementInLM.definition}}</td></tr>
-                                                    <tr><td>Requirements</td><td>{{selectedElementInLM.requirements}}</td></tr>
-                                                    <tr><td>Datatype/s</td>
-                                                        <td>
-                                                            <div class = 'row' ng-repeat="typ in selectedElementInLM.type">
-                                                                <div class="col-md-2 col-sm-2">{{typ.code}}</div>
-                                                                <div ng-show="typ.profile" class="col-md-10 col-sm-10">{{typ.profile}}</div>
-                                                                <div ng-show="typ.targetProfile" class="col-md-10 col-sm-10">{{typ.targetProfile}}</div>
-
-                                                            </div>
-
-
-                                                            <div ng-repeat="typ in selectedElementInLM.myMeta.analysis.dataTypes">
-                                                                From Extension Definition: {{typ.code}}
-                                                                <span ng-show="typ.profile"> --> {{typ.profile}}</span>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-
-                                                    <tr ng-show="selectedElementInLM.binding"><td>Binding</td><td>
-
-                                                        <span class="clickable"  ng-click="showValueSet(selectedElementInLM.binding.valueSetReference.reference)">
-                                                            {{selectedElementInLM.binding.valueSetReference.reference}}
-                                                        </span>
-
-
-                                                        {{selectedElementInLM.binding.valueSetUri}}
-                                                        ({{selectedElementInLM.binding.strength}})
-                                                        <div>{{selectedElementInLM.binding.description}}</div>
-                                                    </td></tr>
-
-
-                                                    <tr ng-show="selectedElementInLM.myMeta.analysis.binding"><td>Binding (from Extension)</td><td>
-
-                                                        <span class="clickable"
-                                                              ng-click="showValueSet(selectedElementInLM.myMeta.analysis.binding.valueSetReference.reference)">
-                                                            {{selectedElementInLM.myMeta.analysis.binding.valueSetReference.reference}}
-                                                        </span>
-
-
-                                                        {{selectedElementInLM.myMeta.analysis.binding.valueSetUri}}
-                                                        ({{selectedElementInLM.myMeta.analysis.binding.strength}})
-                                                        <div>{{selectedElementInLM.myMeta.analysis.binding.description}}</div>
-                                                    </td></tr>
-
-
-                                                    <tr ng-show="selectedElementInLM.myMeta.fixed"><td>{{selectedElementInLM.myMeta.fixed.key}}</td>
-                                                        <td>{{selectedElementInLM.myMeta.fixed.value}}</td>
-                                                    </tr>
-
-
-                                                </table>
-
-                                                <div ng-show="selectedElementInLM.myMeta.analysis.url">
-                                                    <span class = 'clickable' ng-click="showExtensionFromUrl(selectedElementInLM.myMeta.analysis.url)">
-                                                        Show extension</span>
-                                                </div>
-
-                                                <div ng-show="selectedElementInLM && selectedElementInLM.myMeta.analysis && ! selectedElementInLM.myMeta.analysis.url">
-                                                    <div class="alert alert-warning">
-                                                        This Extension Definition could not be located on the Conformance server
-                                                    </div>
-                                                </div>
-
-                                            </uib-tab>
-                                            <uib-tab heading="Json">
-                                                <pre>{{selectedElementInLM | json}}</pre>
-                                            </uib-tab>
-                                            <uib-tab heading="Help">
-                                                <br/>
-                                                <p>This logical model is derived from the Profile (the StructureDefinition resource) as a way
-                                                of presenting a 'user friendly view of the Profile - as opposed to the Logical Models listed
-                                                    in the left side bar which were generated by a person (and can be used to create a 'real' profile.
-                                                </p><p>   If the profile allows for further extensions to
-                                                be added, then there is an entry labelled 'extension' to indicate this.</p><p> The items are colour
-                                                coded as follows:</p>
-                                                <ul class="list-unstyled" style="padding-left: 8px">
-                                                    <li><span style="color:blueviolet">Purple</span> is an element that is an extension - it has been added to the underlying 'core' resource</li>
-                                                    <li><span class="elementRequired">Red</span> is a required field</li>
-                                                    <li>The asterisk (*) indicates that multiple entries are allowed.</li>
-                                                    <li>The letter 'D' indicates this element is a Discriminator.</li>
-                                                    <li>The letter 'F' indicates this element has a fixed value.</li>
-                                                </ul>
-                                                <p>Selecting an element will show more details of that element, including the 'raw' json from
-                                                which the logical model was derived.</p>
-                                            </uib-tab>
-                                        </uib-tabset>
-
-
-
-
-                                    </div>
-                                </div>
                             </uib-tab>
 
                             <uib-tab heading="Table">

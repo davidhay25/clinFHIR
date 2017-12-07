@@ -2,7 +2,7 @@
 angular.module("sampleApp")
     .controller('profileDiffCtrl',
         function ($scope,$q,$http,profileDiffSvc,$uibModal,logicalModelSvc,appConfigSvc,RenderProfileSvc,builderSvc,
-                  Utilities,GetDataFromServer,profileCreatorSvc,$filter,$firebaseObject,$location,$window,modalService,
+                  Utilities,GetDataFromServer,profileCreatorSvc,$filter,$firebaseObject,$firebaseArray,$location,$window,modalService,
                     $timeout,SaveDataToServer,$sce) {
 
             $scope.input = {center:true,includeCore:true,immediateChildren:true,includeExtensions:true,includePatient:true};
@@ -17,6 +17,67 @@ angular.module("sampleApp")
 
             GetDataFromServer.registerAccess('igView');
 
+
+            //-----------  login stuff....
+
+            //called whenever the auth state changes - eg login/out, initial load, create user etc.
+            firebase.auth().onAuthStateChanged(function(user) {
+
+                if (user) {
+                    $scope.user = user;
+                    $scope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+
+                   // console.log(user)
+
+                }
+            });
+
+
+            //--------  comment functions
+            $scope.$on("LMElementSelected",function(ev,data){
+                //console.log(data);
+                $scope.selectedEDInLM = data;
+
+                $scope.commentsForElement = profileDiffSvc.getCommentsForElement($scope.selectedEDInLM);
+            });
+
+
+            $scope.saveNewComment = function (comment) {
+                profileDiffSvc.saveNewComment(comment,$scope.selectedSD.url,$scope.selectedEDInLM,$scope.user.email).then(
+                    function(displayObj) {
+                        $scope.commentsForElement.push(displayObj)
+                        alert('Comment has been saved')
+                        delete $scope.input.newComment;
+                        $scope.commentsThisProfileCount++;
+                    },
+                    function(err) {
+                        alert('not saved')
+                        console.log(err)
+                    }
+                )
+            };
+
+            var getCommentsForProfile = function(url) {
+                delete $scope.commentsThisProfileHash;
+                delete $scope.commentsThisProfileCount;
+                profileDiffSvc.getCommentsForProfile(url).then(
+                    function(data){
+                        console.log(data)
+                        $scope.commentsThisProfileHash = data.hash;
+                        $scope.commentsThisProfileCount = data.count;
+
+                    },
+                    function(err) {
+                        console.log(err)
+                    }
+                )
+            };
+
+
+            //-------------------
+
+
+            //load all the IG's on this server
             var url = appConfigSvc.getCurrentConformanceServer().url + "ImplementationGuide";
             GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
                 function(data) {
@@ -1055,6 +1116,8 @@ angular.module("sampleApp")
                    profileDiffSvc.getSD(url).then(
                        function(SD){
 
+                           getCommentsForProfile(url);
+
                            $scope.constrainedType = SD.constrainedType;     //todo different for R3...
 
                            //always check if there are any extension definitions or valuesets references by this profile (in case they have been externally changed)
@@ -1223,8 +1286,11 @@ angular.module("sampleApp")
 
 
                                 $scope.selectedElementInLM = data.node.data.ed;
-
                                 $scope.selectedED1 = data.node.data.ed;
+
+                                $scope.$broadcast("LMElementSelected",data.node.data.ed);
+
+
                                 $scope.$digest();       //as the event occurred outside of angular...
 
                             }

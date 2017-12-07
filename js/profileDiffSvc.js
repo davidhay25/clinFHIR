@@ -37,6 +37,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
         var igEntryType = appConfigSvc.config().standardExtensionUrl.igEntryType;
 
+        var commentsThisProfileHash = {};       //comments against thos profile, hashed by element
 
         //remove the contents of an SD that we're not using to reduce the cache requirements
         function minimizeSD(SD) {
@@ -60,8 +61,116 @@ angular.module("sampleApp").service('profileDiffSvc',
             return SD;
         }
 
+        function makeCommentEntry(obs) {
+            var comment = {comment: obs.valueString};
+
+           // if (obs.subject) {
+                var element = obs.subject.display;
+
+                comment.issued = obs.issued;
+
+
+                if (obs.performer) {
+                    comment.email = obs.performer[0].display;
+                }
+            //}
+            return comment;
+        }
+
     return {
+        saveNewComment : function(comment,profileUrl,ED,userEmail) {
+            var deferred = $q.defer();
+            var obs = {resourceType:'Observation',status:'final'}
+            obs.category = {coding:[{system:'clinfhir.com/observationCategory',code:'profile-comment'}]}
+            obs.code = {coding:[{system:'clinfhir.com/observationCommentProfile',code:profileUrl}]}
+            obs.valueString = comment;
+            obs.issued = new moment().format();
+            if (userEmail) {
+                obs.performer = [{display:userEmail}]
+            }
+
+            //the actual element being commented on (sliceName if an extension, path otherwise...
+            var element = ED.sliceName || ED.path;      //path is always present...
+            if (! element) {
+                deferred.reject({msg:"Can't find path"})
+                return;
+            }
+            obs.subject = {display:element}
+            /*
+            if (element) {
+                obs.subject = {display:element}
+            } else {
+                //var ar = ED.
+                obs.subject = {display:element}
+            }
+            */
+            var url = appConfigSvc.getCurrentConformanceServer().url+"Observation";
+
+            $http.post(url,obs).then(
+                function(){
+                    var displayObj = makeCommentEntry(obs)
+                    commentsThisProfileHash[element] = commentsThisProfileHash[element] || []
+                    commentsThisProfileHash[element].push(displayObj)
+                    deferred.resolve(displayObj)
+                },function(err) {
+                    deferred.reject(err)
+                }
+            );
+
+            return deferred.promise
+        },
+        getCommentsForProfile : function (profileUrl) {
+            commentsThisProfileHash = {};       //hash by element
+
+            var deferred = $q.defer();
+            var url =  appConfigSvc.getCurrentConformanceServer().url+"Observation";
+            url += "?category=clinfhir.com/observationCategory|profile-comment";
+            url += "&code=clinfhir.com/observationCommentProfile|"+profileUrl + "," + new Date().getTime(); //date is a hack to stop caching
+
+            GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
+
+
+           // $http.get(url).then(
+                function(data) {
+                    var bundle = data.data;
+                    cnt = 0;
+                    if (bundle.entry) {
+                        bundle.entry.forEach(function(entry){
+                            var obs = entry.resource;
+
+
+                            if (obs.subject) {
+                                var comment = makeCommentEntry(obs);
+                                var element = obs.subject.display;
+
+                                commentsThisProfileHash[element] = commentsThisProfileHash[element] || []
+                                commentsThisProfileHash[element].push(comment)
+                                cnt++;
+                            }
+
+                        })
+                    }
+                    deferred.resolve({hash:commentsThisProfileHash,count:cnt})
+                },function(err) {
+                    console.log(err)
+                    deferred.reject(err)
+                }
+            );
+
+
+            return deferred.promise;
+        },
+        getCommentsForElement : function(ED){
+            var element = ED.sliceName || ED.path;
+
+            var ar = commentsThisProfileHash[element] || []
+
+            return ar
+
+
+        },
         setPurpose : function(igResource,purpose) {
+            //use a consistent purpose extension for contents in an IG
             Utilities.addExtensionOnceWithReplace(igResource,igEntryType,purpose)
         },
         getPurpose: function(igResource) {
