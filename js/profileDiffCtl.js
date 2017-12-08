@@ -44,14 +44,18 @@ angular.module("sampleApp")
             });
 
 
-            $scope.saveNewComment = function (comment,relatedToId) {
+            $scope.saveNewComment = function (comment,relatedToId,inx) {
                 profileDiffSvc.saveNewComment(comment,$scope.selectedSD.url,$scope.selectedEDInLM,$scope.user.email,relatedToId).then(
                     function(displayObj) {
-                        $scope.commentsForElement.push(angular.copy(displayObj))
                         alert('Comment has been saved')
                         delete $scope.input.newComment;
-                        $scope.commentsForElement = profileDiffSvc.getCommentsForElement($scope.selectedEDInLM);
-                        $scope.commentsThisProfileCount++;
+                        getCommentsForProfile($scope.selectedSD.url,function(){
+                            $scope.commentsForElement = profileDiffSvc.getCommentsForElement($scope.selectedEDInLM);
+                            $scope.commentsThisProfileCount++;
+                            if (inx !== null) {
+                                delete $scope.input.commentReply[inx]
+                            }
+                        })
                     },
                     function(err) {
                         alert('not saved')
@@ -60,9 +64,7 @@ angular.module("sampleApp")
                 )
             };
 
-
-
-            var getCommentsForProfile = function(url) {
+            var getCommentsForProfile = function(url,cb) {
                 delete $scope.commentsThisProfileHash;
                 delete $scope.commentsThisProfileCount;
                 profileDiffSvc.getCommentsForProfile(url).then(
@@ -70,10 +72,16 @@ angular.module("sampleApp")
                         console.log(data)
                         $scope.commentsThisProfileHash = data.hash;
                         $scope.commentsThisProfileCount = data.count;
+                        if (cb) {
+                            cb()
+                        }
 
                     },
                     function(err) {
                         console.log(err)
+                        if (cb) {
+                            cb()
+                        }
                     }
                 )
             };

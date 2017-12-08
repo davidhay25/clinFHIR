@@ -501,6 +501,11 @@
                             <div ng-show="selectedItemType == 'profile'">
                         <h4>Profiled resource</h4>
 
+
+                        <div class="pull-right" ng-hide="input.displayMode">
+                            <em>Use the 'Full Display' checkbox in the Navbar at the top to view other tabs</em>
+                        </div>
+
                         <uib-tabset>
 
                             <uib-tab heading="Tree View">
@@ -633,7 +638,7 @@
                                                                 </div>
                                                                 <div class="col-sm-3 col-md-3">
                                                                     <button class="btn btn-link" ng-show="input.commentReply[$index]"
-                                                                            ng-click="saveNewComment(input.commentReply[$index],comment.id)">Send reply</button>
+                                                                            ng-click="saveNewComment(input.commentReply[$index],comment.id,$index)">Send reply</button>
                                                                 </div>
                                                             </div>
 
@@ -710,17 +715,54 @@
                                 </uib-tab-heading>
 
 
-
+<!--
                                 <div class="row">
                                     <div class="col-md-2 col-sm-2"><strong>Path</strong></div>
                                     <div class="col-md-2 col-sm-1"><strong>When</strong></div>
                                     <div class="col-md-3 col-sm-3"><strong>Who</strong></div>
                                     <div class="col-md-5 col-sm-6"><strong>Comment</strong></div>
                                 </div>
+                                -->
+
                                 <div ng-repeat="(key,value) in commentsThisProfileHash">
+
+                                    <div class="rounded-box-filled">Path: <em>{{key}}</em></div>
+                                    <!--
                                     <div class="row">
                                         <div class="col-md-6 col-sm-6"><em>{{key}}</em></div>
                                     </div>
+                                    -->
+
+                                    <div class="row" ng-repeat="comment in value">
+                                        <div class="col-sm-12 col-md-12">
+                                            <div class="row">
+
+                                                <div class="col-md-6 col-sm-6">
+                                                    <div><strong>{{comment.email}} {{comment.issued | getAgeSeconds}}</strong></div>
+                                                    <div>{{comment.comment}}</div>
+
+                                                </div>
+                                                <div class="col-md-6 col-sm-6">
+                                                    <div ng-repeat = "reply in comment.replies" class="rounded-box">
+                                                        <div><strong>{{reply.email}} {{reply.issued | getAgeSeconds}}</strong></div>
+                                                        <div>{{reply.comment}}</div>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                            <hr/>
+                                        </div>
+
+
+
+
+
+                                    </div>
+
+
+
+<!--
                                     <div class="row" ng-repeat="comment in value">
                                         <div class="col-md-2 col-sm-2"></div>
                                         <div class="col-md-2 col-sm-1">{{comment.issued | getAgeSeconds }}</div>
@@ -734,12 +776,13 @@
 
                                         </div>
                                     </div>
+                                    -->
 
                                 </div>
 
                             </uib-tab>
 
-                            <uib-tab heading="Graph" ng-show="input.displayMode" select="fitGraph()">
+                            <uib-tab heading="Graph"  select="fitGraph()">
                                 <p class="banner"><em>Relationships between the Profile and other resources, Extensions and ValueSets.</em></p>
                                 <div class="row" ng-show="currentIG">
                                     <div class="col-md-9">
@@ -897,7 +940,7 @@
                                                show-value-set-e="showValueSet"></profile-table>
                             </uib-tab>
 
-                            <uib-tab heading="ValueSets used"  ng-show="input.displayMode">
+                            <uib-tab heading="ValueSets"  ng-show="input.displayMode">
 
                                 <p class="banner"><em>ValueSets used by this Profile, including binding information</em></p>
                                 <div class="row">
@@ -978,7 +1021,7 @@
                             </uib-tab>
 
 
-                            <uib-tab heading="Required Elements" ng-show="input.displayMode">
+                            <uib-tab heading="Required" ng-show="input.displayMode">
 
                                 <p class="banner"><em>Elements marked as 'Required' (min = 1)</em></p>
                                 <div class="row">
