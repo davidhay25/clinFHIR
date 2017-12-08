@@ -62,23 +62,18 @@ angular.module("sampleApp").service('profileDiffSvc',
         }
 
         function makeCommentEntry(obs) {
-            var comment = {comment: obs.valueString};
-
-           // if (obs.subject) {
-                var element = obs.subject.display;
-
-                comment.issued = obs.issued;
-
-
-                if (obs.performer) {
-                    comment.email = obs.performer[0].display;
-                }
-            //}
+            var comment = {comment: obs.valueString,replies:[]};
+            comment.id = obs.id;
+            var element = obs.subject.display;
+            comment.issued = obs.issued;
+            if (obs.performer) {
+                comment.email = obs.performer[0].display;
+            }
             return comment;
         }
 
     return {
-        saveNewComment : function(comment,profileUrl,ED,userEmail) {
+        saveNewComment : function(comment,profileUrl,ED,userEmail,relatedToId) {
             var deferred = $q.defer();
             var obs = {resourceType:'Observation',status:'final'}
             obs.category = {coding:[{system:'clinfhir.com/observationCategory',code:'profile-comment'}]}
@@ -96,14 +91,11 @@ angular.module("sampleApp").service('profileDiffSvc',
                 return;
             }
             obs.subject = {display:element}
-            /*
-            if (element) {
-                obs.subject = {display:element}
-            } else {
-                //var ar = ED.
-                obs.subject = {display:element}
+
+            if (relatedToId) {
+                //not null if this is a reply to a previous comment
+                obs.related = [{type:'sequel-to',target:{reference:'Observation/'+relatedToId}}]
             }
-            */
             var url = appConfigSvc.getCurrentConformanceServer().url+"Observation";
 
             $http.post(url,obs).then(
@@ -133,7 +125,9 @@ angular.module("sampleApp").service('profileDiffSvc',
            // $http.get(url).then(
                 function(data) {
                     var bundle = data.data;
-                    cnt = 0;
+                    var replies = [];   //save all replies until all obs read...
+                    var commentHash = {}
+                    var cnt = 0;
                     if (bundle.entry) {
                         bundle.entry.forEach(function(entry){
                             var obs = entry.resource;
@@ -141,14 +135,47 @@ angular.module("sampleApp").service('profileDiffSvc',
 
                             if (obs.subject) {
                                 var comment = makeCommentEntry(obs);
-                                var element = obs.subject.display;
+                                if (obs.related) {
+                                    //this is a reply to. Save until we've processed them all...
+                                    if (obs.related[0].target && obs.related[0].target.reference) {
+                                        var ar = obs.related[0].target.reference.split('/')
+                                        var parentId = ar[1];       //the id of the obs that this one is related to
+                                        comment.parentId = parentId
+                                        replies.push(comment)
+                                    }
 
-                                commentsThisProfileHash[element] = commentsThisProfileHash[element] || []
-                                commentsThisProfileHash[element].push(comment)
-                                cnt++;
+
+
+                                } else {
+                                    var element = obs.subject.display;
+                                    commentsThisProfileHash[element] = commentsThisProfileHash[element] || []
+                                    commentsThisProfileHash[element].push(comment)
+                                    cnt++;
+                                    commentHash[comment.id]=comment;
+                                }
+
+
+
+
                             }
 
-                        })
+                        });
+
+                        if (replies.length > 0) {
+                            //if there are any replies, then add them to the original comment
+                            replies.forEach(function(reply){
+
+                                var parent = commentHash[reply.parentId]
+                                if (parent) {
+                                    parent.replies.push(reply)
+                                    console.log(parent)
+                                }
+
+
+                            })
+                        }
+
+
                     }
                     deferred.resolve({hash:commentsThisProfileHash,count:cnt})
                 },function(err) {

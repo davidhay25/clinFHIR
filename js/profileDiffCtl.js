@@ -6,6 +6,8 @@ angular.module("sampleApp")
                     $timeout,SaveDataToServer,$sce) {
 
             $scope.input = {center:true,includeCore:true,immediateChildren:true,includeExtensions:true,includePatient:true};
+            $scope.input.commentReply = {};
+
             $scope.appConfigSvc = appConfigSvc;
             $scope.itemColours = profileDiffSvc.objectColours();
 
@@ -42,12 +44,13 @@ angular.module("sampleApp")
             });
 
 
-            $scope.saveNewComment = function (comment) {
-                profileDiffSvc.saveNewComment(comment,$scope.selectedSD.url,$scope.selectedEDInLM,$scope.user.email).then(
+            $scope.saveNewComment = function (comment,relatedToId) {
+                profileDiffSvc.saveNewComment(comment,$scope.selectedSD.url,$scope.selectedEDInLM,$scope.user.email,relatedToId).then(
                     function(displayObj) {
-                        $scope.commentsForElement.push(displayObj)
+                        $scope.commentsForElement.push(angular.copy(displayObj))
                         alert('Comment has been saved')
                         delete $scope.input.newComment;
+                        $scope.commentsForElement = profileDiffSvc.getCommentsForElement($scope.selectedEDInLM);
                         $scope.commentsThisProfileCount++;
                     },
                     function(err) {
@@ -56,6 +59,8 @@ angular.module("sampleApp")
                     }
                 )
             };
+
+
 
             var getCommentsForProfile = function(url) {
                 delete $scope.commentsThisProfileHash;
@@ -76,6 +81,9 @@ angular.module("sampleApp")
 
             //-------------------
 
+            $scope.changeMode = function(mode) {
+                mode = !mode
+            }
 
             //load all the IG's on this server
             var url = appConfigSvc.getCurrentConformanceServer().url + "ImplementationGuide";

@@ -19,7 +19,6 @@
 
     <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
 
-
     <script src="js/libs/angular-sanitize.js"></script>
     <script src="js/libs/firebase.js"></script>
     <script src="js/libs/angularfire.min.js"></script>
@@ -28,12 +27,6 @@
     <script>
         angular.module("sampleApp",['ui.bootstrap','ngStorage','ui.checkbox',"firebase","ngSanitize"]).
         config(function($locationProvider) {
-
-
-
-           // $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file):/);
-            //$compileProvider.urlSanitizationWhitelist(/^\s*(https?|ftp|mailto|file):/);
-
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -115,6 +108,18 @@
             border-top: 2pt solid black
         }
 
+        .comment {
+            background-color: white;
+            margin: 8px;
+            border:8px
+        }
+
+        .vbottom{
+            position: relative;
+            top: 100%;
+            transform: translateY(-100%);
+        }
+
     </style>
         <title>IG Viewer</title>
 
@@ -134,7 +139,7 @@
                 </a>
             </div>
 
-            <div class="col-md-5 col-sm-5">
+            <div class="col-md-4 col-sm-4">
                 <div class="navbar-text">
                     <div>Data:{{appConfigSvc.getCurrentDataServer().name}}</div>
                     <div>Conformance:{{appConfigSvc.getCurrentConformanceServer().name}}</div>
@@ -153,12 +158,22 @@
 
             <div class="col-md-1 col-sm-1">
                 <form ng-show="currentIG && !loadedFromBookmark" class="navbar-form">
+                    <div class="navbar-text">
                     <button class="btn btn-success pull-right iconSpacing" ng-click="generateShortCut()">Share</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-md-2 col-sm-2">
+                <form  class="navbar-form">
+                    <div class="navbar-text" ng-show="selectedSD">
+                        Full display <checkbox ng-model="input.displayMode" ng-change="changeMode(input.displayMode)"></checkbox>
+                    </div>
                 </form>
             </div>
 
 
-            <div class="col-md-3 col-sm-3">
+            <div class="col-md-2 col-sm-2">
                 <div class="navbar-text">
                     <div><a href="#" ng-click="clearCache()">Clear Cache</a></div>
                     <div><a href="#" ng-show="currentIG" ng-click="createDownload()">Download</a>
@@ -591,10 +606,60 @@
 
                                             <uib-tab>
                                                 <uib-tab-heading>
-                                                    Comments <span class="badge">{{commentsForElement.length}}</span>
+                                                    Comments <span class="badge" ng-show="commentsForElement.length > 0" >{{commentsForElement.length}}</span>
                                                 </uib-tab-heading>
                                                 <br/>
-                                                <panel>
+
+                                                <div style="background-color: #dedede">
+                                                    <br/>
+                                                    <div ng-repeat="comment in commentsForElement  track by $index" style="margin: 8px">
+                                                        <div class="panel panel-default comment">
+                                                            <div class="comment">
+                                                                <div><strong>{{comment.email}} {{comment.issued | getAgeSeconds}}</strong></div>
+                                                                <div>{{comment.comment}}</div>
+                                                            </div>
+
+                                                            <div ng-repeat="reply in comment.replies track by $index">
+                                                                <div class="comment" style="margin-left: 20px">
+                                                                    <div><strong>{{reply.email}} {{reply.issued | getAgeSeconds}}</strong></div>
+                                                                    <div>{{reply.comment}}</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="row">
+                                                                <div class="col-sm-8 col-md-8" style="margin-left: 20px">
+                                                                    <textarea class="form-control" ng-model="input.commentReply[$index]"
+                                                                    placeholder="Enter reply here..."></textarea>
+                                                                </div>
+                                                                <div class="col-sm-3 col-md-3">
+                                                                    <button class="btn btn-link" ng-show="input.commentReply[$index]"
+                                                                            ng-click="saveNewComment(input.commentReply[$index],comment.id)">Send reply</button>
+                                                                </div>
+                                                            </div>
+
+                                                            <br/>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row" ng-show = "selectedEDInLM && user.email">
+                                                        <div class="col-sm-9 col-md-9">
+                                                            <div style="margin: 16px" class="commentX">
+                                                                <textarea class="form-control"
+                                                                          ng-model="input.newComment" placeholder="Add new comment">
+
+                                                                </textarea>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="col-sm-3 col-md-3">
+                                                            <button class="btn btn-link" ng-show="input.newComment"
+                                                                    ng-click="saveNewComment(input.newComment)">Save comment</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!--
+                                                <div class="panel panel-default">
                                                     <table class="table table-bordered">
                                                         <tr><th>User Email</th><th>When</th><th>Comment</th></tr>
                                                         <tr ng-repeat="comment in commentsForElement">
@@ -603,21 +668,10 @@
                                                             <td>{{comment.comment}}</td>
                                                         </tr>
                                                     </table>
-                                                </panel>
-
-                                                <div class="row" ng-show = "selectedEDInLM && user.email">
-                                                    <div class="col-sm-9 col-md-9">
-
-                                                        <textarea class="form-control" ng-model="input.newComment" placeholder="Add new comment">
-
-                                                        </textarea>
-                                                        <!--<pre>{{commentsForElement | json}}</pre>-->
-                                                    </div>
-                                                    <div class="col-sm-3 col-md-3">
-                                                        <button class="btn btn-primary" ng-show="input.newComment"
-                                                                ng-click="saveNewComment(input.newComment)">Add Comment</button>
-                                                    </div>
                                                 </div>
+                                                -->
+
+
 
                                             </uib-tab>
 
@@ -652,38 +706,40 @@
 
                             <uib-tab>
                                 <uib-tab-heading>
-                                    Comments <span class="badge">{{commentsThisProfileCount}}</span>
+                                    Comments <span ng-show="commentsThisProfileCount > 0" class="badge">{{commentsThisProfileCount}}</span>
                                 </uib-tab-heading>
 
 
 
-                                <div class="row strong">
-                                    <div class="col-md-2 col-sm-2">Path</div>
-                                    <div class="col-md-2 col-sm-2">When</div>
-                                    <div class="col-md-3 col-sm-3">Who</div>
-                                    <div class="col-md-5 col-sm-5">Comment</div>
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-2"><strong>Path</strong></div>
+                                    <div class="col-md-2 col-sm-1"><strong>When</strong></div>
+                                    <div class="col-md-3 col-sm-3"><strong>Who</strong></div>
+                                    <div class="col-md-5 col-sm-6"><strong>Comment</strong></div>
                                 </div>
                                 <div ng-repeat="(key,value) in commentsThisProfileHash">
                                     <div class="row">
                                         <div class="col-md-6 col-sm-6"><em>{{key}}</em></div>
-
                                     </div>
                                     <div class="row" ng-repeat="comment in value">
                                         <div class="col-md-2 col-sm-2"></div>
-                                        <div class="col-md-2 col-sm-2">{{comment.issued | getAgeSeconds }}</div>
+                                        <div class="col-md-2 col-sm-1">{{comment.issued | getAgeSeconds }}</div>
                                         <div class="col-md-3 col-sm-3">{{comment.email }}</div>
-                                        <div class="col-md-5 col-sm-5">{{comment.comment }}</div>
+                                        <div class="col-md-5 col-sm-6">{{comment.comment }}
+
+                                        <div ng-repeat = "reply in comment.replies" class="rounded-box">
+                                            <div><strong>{{reply.email}} {{reply.issued | getAgeSeconds}}</strong></div>
+                                            <div>{{reply.comment}}</div>
+                                        </div>
+
+                                        </div>
                                     </div>
 
                                 </div>
 
-
-
-
-
                             </uib-tab>
 
-                            <uib-tab heading="Graph" select="fitGraph()">
+                            <uib-tab heading="Graph" ng-show="input.displayMode" select="fitGraph()">
                                 <p class="banner"><em>Relationships between the Profile and other resources, Extensions and ValueSets.</em></p>
                                 <div class="row" ng-show="currentIG">
                                     <div class="col-md-9">
@@ -825,7 +881,7 @@
 
                             </uib-tab>
 
-                            <uib-tab heading="Table">
+                            <uib-tab heading="Table" ng-show="input.displayMode">
 
                                 <p class="banner"><em>A tabular view of the Profile. </em></p>
                                 <profile-table items="canonical.item" select-item="selectItem"
@@ -833,7 +889,7 @@
                                    show-value-set-e="showValueSet"></profile-table>
                             </uib-tab>
 
-                            <uib-tab heading="Extensions">
+                            <uib-tab heading="Extensions" ng-show="input.displayMode">
 
                                 <p class="banner"><em>Extensions that this Profile references. Shows Url and any ValueSet references by the Extension.</em></p>
                                 <profile-table items="allExtensions" select-item="selectItem"
@@ -841,7 +897,7 @@
                                                show-value-set-e="showValueSet"></profile-table>
                             </uib-tab>
 
-                            <uib-tab heading="ValueSets used">
+                            <uib-tab heading="ValueSets used"  ng-show="input.displayMode">
 
                                 <p class="banner"><em>ValueSets used by this Profile, including binding information</em></p>
                                 <div class="row">
@@ -872,7 +928,7 @@
                                 </div>
                             </uib-tab>
 
-                            <uib-tab heading="References">
+                            <uib-tab heading="References" ng-show="input.displayMode">
 
                                 <p class="banner"><em>The references from this Profile to some other resource</em></p>
                                 <div class="row">
@@ -899,7 +955,7 @@
                             </uib-tab>
 
 
-                            <uib-tab heading="Examples">
+                            <uib-tab heading="Examples" ng-show="input.displayMode">
                                 <div class="row">
                                     <div class="col-sm-3 col-md-3">
 
@@ -922,7 +978,7 @@
                             </uib-tab>
 
 
-                            <uib-tab heading="Required Elements">
+                            <uib-tab heading="Required Elements" ng-show="input.displayMode">
 
                                 <p class="banner"><em>Elements marked as 'Required' (min = 1)</em></p>
                                 <div class="row">
@@ -945,7 +1001,7 @@
                             </uib-tab>
 
 
-                            <uib-tab heading="Mappings">
+                            <uib-tab heading="Mappings" ng-show="input.displayMode">
                                 <br/>
 
                                 <uib-tabset>
@@ -1007,7 +1063,7 @@
                             </uib-tab>
 
 
-                            <uib-tab heading="Paths">
+                            <uib-tab heading="Paths" ng-show="input.displayMode">
 
                                 <p class="banner"><em>These are the actual Element Definitions - in order - from the Profile. (StructureDefinition.snapshot.element)</em></p>
                                 <div class="row">
@@ -1028,7 +1084,7 @@
                                 </div>
                             </uib-tab>
 
-                            <uib-tab heading="Json">
+                            <uib-tab heading="Json" ng-show="input.displayMode">
                                 <p class="banner"><em>The raw Json of the profile (StructureDefinition)</em></p>
                                 <div class="row">
                                     <div class="col-sm-12 col-md-12">
