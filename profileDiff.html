@@ -139,7 +139,7 @@
                 </a>
             </div>
 
-            <div class="col-md-4 col-sm-4">
+            <div class="col-md-3 col-sm-3">
                 <div class="navbar-text">
                     <div>Data:{{appConfigSvc.getCurrentDataServer().name}}</div>
                     <div>Conformance:{{appConfigSvc.getCurrentConformanceServer().name}}</div>
@@ -181,7 +181,32 @@
                     </div>
                 </div>
             </div>
+            <div class="col-md-1 col-sm-1">
+                <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
+                    <li uib-dropdown>
 
+                        <a href="#" uib-dropdown-toggle>
+                        <span style="font-size:2em; cursor: pointer">
+                            <i class="glyphicon glyphicon-cog"></i>
+                        </span>
+                        </a>
+
+
+
+                        <ul class="dropdown-menu" role="menu">
+
+
+                            <li>
+                                <a href="#" ng-click="addIG()"
+                                   uib-popover="Create a new IG"
+                                   popover-placement="left"
+                                   popover-trigger="'mouseenter'">New IG</a>
+                            </li>
+
+                        </ul>
+                    </li>
+                </ul>
+            </div>
 
         </div>
     </nav>
@@ -201,11 +226,13 @@
             <br/>
 
             <div class="row">
-                <div class="col-sm-3 col-md-3">
+                <div ng-class="singleLeftPaneClass" classDEP="col-sm-3 col-md-3">
                     <uib-tabset>
                         <uib-tab heading="Implementation Guide">
-                            <br/>
 
+
+
+                            <br/>
                     <div class="row">
                         <div class="col-sm-9 col-md-9">
                             <select class="form-control" ng-model="input.selIG"
@@ -361,7 +388,7 @@
                     </div>
 
                         </uib-tab>
-                        <uib-tab heading="Lookup">
+                        <uib-tab heading="Find Profile">
                             <br/>
                             <div class="row">
                                 <div class="col-sm-9 col-md-9">
@@ -393,14 +420,16 @@
                     </uib-tabset>
 
                 </div>
+                <div ng-class="singleRightPaneClass" classDEP="col-sm-9 col-md-9">
 
-
-
-                <div class="col-sm-9 col-md-9">
+                    <span class="pull-right clickable" ng-click="toggleSingleState()">
+                        <span ng-hide="singleStateZoom">Zoom</span>
+                        <span ng-show="singleStateZoom">Unzoom</span>
+                    </span>
 
                     <uib-tabset ng-show="currentIG">
 
-                        <uib-tab>
+                        <uib-tab ng-show="selectedItem.url">
 
                             <uib-tab-heading>Details of Resource: <strong>{{selectedItem.url | referenceType}}</strong>
                             </uib-tab-heading>
@@ -1348,7 +1377,7 @@
 
 
                         </uib-tab>
-                        <uib-tab heading="Implementation Guide Summary">
+                        <uib-tab heading="IG Summary">
                             <br/>
                             <ng-include src="'/includes/IGSummary.html'"></ng-include>
 
@@ -1411,7 +1440,7 @@
                         </uib-tab>
 
 
-                        <uib-tab heading="Implementation Guide Json">
+                        <uib-tab heading="IG Json">
                             <br/>
                             <pre>{{currentIG | json}}</pre>
                         </uib-tab>

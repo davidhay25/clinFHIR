@@ -1,4 +1,16 @@
 <div>
+
+    <div class="row">
+        <div class="col-md-2 col-sm-2">
+            Url
+        </div>
+        <div class="col-md-10 col-sm-10">
+            <input type='text'  ng-change="input.IGSummaryDirty=true" class="form-control" ng-model="currentIG.url"/>
+        </div>
+
+    </div>
+    <br/>
+
     <div class="row">
         <div class="col-md-2 col-sm-2">
             Name
@@ -11,7 +23,7 @@
         </div>
         <div class="col-md-4 col-sm-4">
 
-            <input type='text'  ng-change="input.IGSummaryDirty=true" class="form-control" ng-model="currentIG.status"/>
+            <input type='text' ng-change="input.IGSummaryDirty=true" class="form-control" ng-model="currentIG.status"/>
 
         </div>
     </div>
@@ -27,6 +39,7 @@
 
         </div>
         <div class="col-md-4 col-sm-4">
+
 
         </div>
     </div>

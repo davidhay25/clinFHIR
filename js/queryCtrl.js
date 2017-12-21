@@ -252,9 +252,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         $scope.waiting = true;
         resourceCreatorSvc.getConformanceResource($scope.server.url).then(
             function (data) {
-               // $scope.conformanceForQuery = data.data;
                 $scope.conformance = data.data;
-                //console.log($scope.conformance);
 
                 $scope.hashResource = {};
                 $scope.standardResourceTypes= []

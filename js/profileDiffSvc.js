@@ -547,7 +547,8 @@ angular.module("sampleApp").service('profileDiffSvc',
                         if (segment == 'extension') {
 
                             //set the text to a better display (not the path)
-                            node.text = item.name || item.short || node.text;
+                            //node.text = item.name || item.short || node.text;
+                            node.text = item.name|| item.sliceName || item.short || node.text;
 
                             node.a_attr = {style:'color:blueviolet'}
                             //if the extension has a profile type then include it, otherwise not...

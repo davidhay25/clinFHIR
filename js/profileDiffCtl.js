@@ -19,6 +19,20 @@ angular.module("sampleApp")
 
             GetDataFromServer.registerAccess('igView');
 
+            $scope.singleStateZoom = false;
+            $scope.singleLeftPaneClass = "col-sm-3 col-md-3";
+            $scope.singleRightPaneClass = "col-sm-9 col-md-9";
+
+            $scope.toggleSingleState = function(){
+                $scope.singleStateZoom = ! $scope.singleStateZoom
+                if ($scope.singleStateZoom) {
+                    $scope.singleLeftPaneClass = "hidden";
+                    $scope.singleRightPaneClass = "col-sm-12 col-md-12";
+                } else {
+                    $scope.singleLeftPaneClass = "col-sm-3 col-md-3";
+                    $scope.singleRightPaneClass = "col-sm-9 col-md-9";
+                }
+            };
 
             //-----------  login stuff....
 
@@ -29,7 +43,6 @@ angular.module("sampleApp")
                     $scope.user = user;
                     $scope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
 
-                   // console.log(user)
 
                 }
             });
@@ -42,6 +55,58 @@ angular.module("sampleApp")
 
                 $scope.commentsForElement = profileDiffSvc.getCommentsForElement($scope.selectedEDInLM);
             });
+
+            //create a new IG
+            $scope.addIG = function() {
+
+                var name = $window.prompt('The IG name (must be a single word - it will become the Id and Url)')
+                if (name) {
+
+                    if (! /^[A-Za-z0-9\-\.]{1,64}$/.test(name)) {
+                        var msg = "The name can only contain upper and lowercase letters, numbers, '-' and '.'"
+                        modalService.showModal({},{bodyText:msg})
+                        return;
+                    }
+
+                    var url = appConfigSvc.getCurrentConformanceServer().url + "ImplementationGuide/"+name;
+                    $http.get(url).then(
+                        function(data){
+                            modalService.showModal({},{bodyText:"There is already an IG with that id"})
+                        },function(err){
+
+                            var IG = {resourceType:'ImplementationGuide',status:'draft',package:[{name:'complete',resource:[]}]};
+                            IG.id = name;
+                            IG.url = url;
+                            //IG.description = "QI Core";
+                            IG.name = name;
+                            IG.extension = [{url: "http://clinfhir.com/fhir/StructureDefinition/cfAuthor",valueBoolean:true}];
+                            IG.page = {source:'',title:'Root of Pages',kind:'page',page:[]};
+                            console.log(IG)
+                            msg = "The IG has been created and saved. You should go to the IG summary page ";
+                            msg += "to set the description and other IG level information.";
+                            modalService.showModal({},{bodyText:msg})
+                            $scope.input.IGSummaryDirty=true;
+                            //$scope.currentIG = IG;
+
+                            //the list selector to the left
+                            $scope.listOfIG.push(IG);
+                            $scope.input.selIG = IG;
+
+                            $scope.selectIG(IG)
+                            $scope.saveIG();
+
+                        }
+                    );
+
+
+
+                    //IG.page = {source:'http://hl7.org/fhir/us/qicore/2018Jan/index.html',title:'Specification',kind:'page',page:[]};
+
+                }
+
+
+
+            };
 
 
             $scope.saveNewComment = function (comment,relatedToId,inx) {
@@ -89,9 +154,10 @@ angular.module("sampleApp")
 
             //-------------------
 
+            //switch between a 'simplified' and a complete view of the profile...
             $scope.changeMode = function(mode) {
                 mode = !mode
-            }
+            };
 
             //load all the IG's on this server
             var url = appConfigSvc.getCurrentConformanceServer().url + "ImplementationGuide";
@@ -118,11 +184,14 @@ angular.module("sampleApp")
 
 
 
-            $scope.saveIG = function(){
+            $scope.saveIG = function(hideAlert){
 
                 SaveDataToServer.saveResource($scope.currentIG).then(
                     function (data) {
-                        alert('IG updated');
+                        if (! hideAlert) {
+                            alert('IG updated');
+                        }
+
                         delete $scope.input.IGSummaryDirty;
                     },function(err){
                         alert('Error updating IG '+ angular.toJson(err,true))
@@ -569,7 +638,7 @@ angular.module("sampleApp")
 
             $scope.importItem = function(itemType){
 
-                var url = $window.prompt('Enter the Url of the '+itemType.display);
+                var url = $window.prompt('Enter the canonical url of the '+itemType.display + " \n(It must be on the Conformance server)");
                 if (url) {
                     profileDiffSvc.getSD(url).then(
                         function (SD) {
@@ -612,6 +681,8 @@ angular.module("sampleApp")
                                    alert('Error updating IG '+angular.toJson(err))
                                 }
                             );
+
+
 
                             $scope.selectIG($scope.currentIG);
 
@@ -812,7 +883,8 @@ angular.module("sampleApp")
                     $scope.allResourceTypes = lst
                 }
             );
-            
+
+            //find all the profiles on a given type
             $scope.findAdHocProfile = function (baseType) {
                 var svr =  appConfigSvc.getCurrentConformanceServer();
                 var searchString = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition?";
@@ -958,8 +1030,6 @@ angular.module("sampleApp")
                     $scope.showWaiting = false;
                 });
             };
-
-
 
             //when an item is selected in the accordian for display in the right pane...
             $scope.selectItem = function(item,type){
@@ -1131,6 +1201,8 @@ angular.module("sampleApp")
 
                    profileDiffSvc.getSD(url).then(
                        function(SD){
+
+                           //console.log(SD)
 
                            getCommentsForProfile(url);
 

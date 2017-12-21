@@ -757,6 +757,20 @@
                         <uib-tab heading="TreeData">
                             <pre>{{treeData | json}}</pre>
                         </uib-tab>
+
+                        <uib-tab heading="TreeData-links">
+                            <table>
+                                <tr><th>Id</th><th>Parent</th></tr>
+                                <tr ng-repeat="row in treeData">
+                                    <td>{{row.id}}</td>
+                                    <td>{{row.parent}}</td>
+
+                                </tr>
+                            </table>
+                        </uib-tab>
+
+
+
 <!--
                         <uib-tab heading="Questionnaire">
                             <pre>{{Q | json}}</pre>

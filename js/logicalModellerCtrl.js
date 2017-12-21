@@ -1783,7 +1783,7 @@ angular.module("sampleApp")
 
                 console.log('generate graph')
 
-                var vo = builderSvc.makeGraph(bundle,resource,hideMe,true);//,centralResource,hideMe,showText) ;  //todo - may not be the right place...
+                var vo = builderSvc.makeGraph(bundle,resource,hideMe,true);
 
                 var container = document.getElementById('resourceGraph');
                 var options = {

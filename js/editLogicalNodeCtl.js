@@ -500,14 +500,20 @@ angular.module("sampleApp")
                 if (! $scope.input.name) {
                     //if (! $scope.input.name || $scope.input.name.indexOf('0') > -1) { ????? why look for 0 ???
                     $scope.canSave = false;
-                   // modalService.showModal({},{bodyText:"The name cannot have spaces in it. Try again."})
+
                     modalService.showModal({},{bodyText:"The name cannot be blank. Try again."})
                 }
+
 
 
                 if ($scope.input.name && $scope.input.name.indexOf(" ") > -1) {
                     $scope.canSave = false;
                     modalService.showModal({},{bodyText:"The name cannot have spaces in it. Try again."})
+                }
+
+                if ($scope.input.name && $scope.input.name.indexOf(".") > -1) {
+                    $scope.canSave = false;
+                    modalService.showModal({},{bodyText:"The name cannot have a dot/period (.) in it. Try again."})
                 }
 
                 //for now, only do duplicate checking for adding new nodes - not renaming - todo
