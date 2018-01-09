@@ -117,7 +117,9 @@ angular.module("sampleApp").directive( 'selectProfile', function (Utilities,GetD
 
                                     var svr =  appConfigSvc.getCurrentConformanceServer();
                                     if (svr.version == 3) {
-                                        searchString += "kind=resource&base=http://hl7.org/fhir/StructureDefinition/"+$scope.results.profileType.name
+
+                                        searchString += "kind=resource&base-path="+$scope.results.profileType.name;
+                                        //searchString += "kind=resource&base=http://hl7.org/fhir/StructureDefinition/"+$scope.results.profileType.name
                                     } else {
                                         searchString += "kind=resource&type="+$scope.results.profileType.name
                                     }
