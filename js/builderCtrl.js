@@ -1376,13 +1376,13 @@ angular.module("sampleApp")
                     var info = builderSvc.getEDInfoForPath(testPath);   //this is the parent
 
                     var segmentName = ar[ar.length-1];
-
+/*
                     //this is a trial for nutritionrequest
                     if (ar.length == 3) {
                         var pSegName = ar[1];
                         insertPoint = insertPoint[pSegName]
                     }
-
+*/
 
                     if (info.isBBE) {
 
