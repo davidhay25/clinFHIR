@@ -14,6 +14,34 @@ angular.module("sampleApp")
 
             GetDataFromServer.registerAccess('scnBld');
 
+
+            //allow the resource to be directly edited
+            $scope.setupDirectEdit = function(){
+                $scope.input.directEdit = angular.toJson($scope.currentResource,true)
+            };
+
+            $scope.saveDirectEdit = function(contents){
+                try {
+                    var newResource = angular.fromJson(contents);
+                } catch (ex) {
+                    alert('This is not valid Json. Resource is not updated.')
+                    return;
+                }
+
+                //find the entry in the contriner.bundle that has this resource (based on the id) and replace it..
+                for (var i=0; i < $scope.selectedContainer.bundle.entry.length; i++) {
+                    var res = $scope.selectedContainer.bundle.entry[i].resource;
+                    if (res.id == newResource.id) {
+                        $scope.selectedContainer.bundle.entry[i].resource = newResource;
+                        $scope.selectResource($scope.selectedContainer.bundle.entry[i]);    //set all the required varr
+                        break;
+                    }
+                }
+
+                delete $scope.input.directEdit;
+            };
+
+
             $scope.refreshScenarioFromServer = function(){
                 $uibModal.open({
                     templateUrl: 'modalTemplates/refreshScenario.html',
@@ -1417,10 +1445,7 @@ angular.module("sampleApp")
                         } else {
 
                         }
-
-
                     }
-
                 }
 
                 if ($scope.supportedDt.indexOf(dt) > -1) {

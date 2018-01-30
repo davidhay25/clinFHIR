@@ -1369,9 +1369,9 @@
 
                             <uib-tab heading="Current resource views">
                                 <br/>
-
+<!-- TEMP - don't delete as this needs to be sompleted
                                 <span class="clickable pull-right iconSpacing" ng-click="showQuest()">Edit</span>
-
+-->
                                 <uib-tabset>
 
 
@@ -1401,6 +1401,38 @@
                                     <uib-tab heading="Json">
                                         <br/>
                                         <pre>{{currentResource | json}}</pre>
+                                    </uib-tab>
+
+
+                                    <uib-tab heading="Direct edit">
+                                        <br/>
+
+                                        <div ng-hide="input.directEdit">
+                                            <p>This option allows you to directly modify the resource json.
+                                            This completely bypasses all checking and the resource can become invalid
+                                                and unable to be updated via the Structure&Reference tab.<strong>You have been warned!</strong></p>
+                                            <p>Click the 'Setup' link below to generate the Json text to edit. You can either edit in place,
+                                            or copy the text from the edit box into an external editor - make the edits - and
+                                            paste back again. This is likely easier (and safer)</p>
+                                            <p>Click the 'Save' link to update the resource from the edit box.</p>
+
+
+
+                                        </div>
+
+                                        <button ng-hide="input.directEdit"
+                                                class="btn btn-link" ng-click="setupDirectEdit()">Setup</button>
+                                        <button ng-show="input.directEdit"
+                                                class="btn btn-link" ng-click="saveDirectEdit(input.directEdit)">Save</button>
+
+                                        <textarea ng-show="input.directEdit" class="form-control" rows="20" ng-model="input.directEdit">
+
+                                        </textarea>
+
+
+
+
+
                                     </uib-tab>
 
                                     <uib-tab heading="FHIRPath">
