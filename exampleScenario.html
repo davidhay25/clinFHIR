@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Example Scenario</title>
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+    <script src="js/libs/ngStorage.min.js"></script>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+       // angular.module("sampleApp").constant("moment", moment);
+
+    </script>
+    <script src="js/exampleScenarioCtrl.js"></script>
+
+    <script src="js/libs/jstree.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
+
+
+
+</head>
+<body style="padding: 8px;padding-top: 80px" >
+
+
+
+<div ng-app="sampleApp" ng-controller="exampleScenarioCtrl" class="container-fluid">
+
+    <nav class="navbar navbar-default navbar-fixed-top" ng-style="navBarStyle" role="navigation">
+
+        <div class="container-fluid row">
+            <div class="col-md-7 col-sm-7">
+                <a class="navbar-brand" href="#">
+                    Scenario example builder
+                </a>
+            </div>
+
+            <div class="col-md-3 col-sm-3">
+                <div class="navbar-text">
+
+
+                </div>
+            </div>
+
+        </div>
+    </nav>
+
+
+    <div class="row">
+        <div class="col-sm-3 col-md-3">
+            <div class="designerScroll" id="exTreeView"></div>
+        </div>
+        <div class="col-sm-9 co-md-9">
+
+            <div ng-show="selectedNode.data.myState=='actorParent'">
+                <div class="banner">Add new Actor</div>
+            </div>
+
+            <div ng-show="selectedNode.data.myState=='instanceParent'">
+                <div class="banner">Add new Instance</div>
+            </div>
+
+            <div ng-show="selectedNode.data.myState=='procParent'">
+                <div class="banner">Add new Process</div>
+
+                <div class="row">
+                    <div class="col-sm-3 col-md-3">
+                        Name
+                    </div>
+                    <div class="col-sm-9 col-md-9">
+                        <input class="form-control" ng-model="input.processName"/>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-3 col-md-3">
+                    </div>
+                    <div class="col-sm-9 col-md-9">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3 col-md-3">
+                    </div>
+                    <div class="col-sm-9 col-md-9">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3 col-md-3">
+                    </div>
+                    <div class="col-sm-9 col-md-9">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" ng-click="addProcess()">Add Process</button>
+
+            </div>
+
+            <div ng-show="selectedNode.data.myState=='proc'">
+                <div class="banner">Add new Step to the Process</div>
+            </div>
+
+        </div>
+    </div>
+
+
+
+</div>
+
+</body>
+</html>
