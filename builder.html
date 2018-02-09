@@ -1369,9 +1369,9 @@
 
                             <uib-tab heading="Current resource views">
                                 <br/>
-<!-- TEMP - don't delete as this needs to be sompleted
+
                                 <span class="clickable pull-right iconSpacing" ng-click="showQuest()">Edit</span>
--->
+
                                 <uib-tabset>
 
 
@@ -1422,8 +1422,12 @@
 
                                         <button ng-hide="input.directEdit"
                                                 class="btn btn-link" ng-click="setupDirectEdit()">Setup</button>
+
                                         <button ng-show="input.directEdit"
                                                 class="btn btn-link" ng-click="saveDirectEdit(input.directEdit)">Save</button>
+
+                                        <button ng-show="input.directEdit"
+                                                class="btn btn-link" ng-click="cancelDirectEdit(input.directEdit)">Cancel</button>
 
                                         <textarea ng-show="input.directEdit" class="form-control" rows="20" ng-model="input.directEdit">
 

@@ -953,38 +953,39 @@ angular.module("sampleApp")
                 //now pull out the various artifacts into an easy to use object
                 $scope.artifacts = {}
                 $scope.currentIG.package.forEach(function (package) {
-                    package.resource.forEach(function (resource) {
+                    if (package && package.resource) {
+                        package.resource.forEach(function (resource) {
 
 
+                            var purpose = profileDiffSvc.getPurpose(resource)
 
-                        var purpose = profileDiffSvc.getPurpose(resource)
+                            // var purpose = resource.purpose || resource.acronym;     //<<< todo - 'purpose' was removed in R3...
+                            var type;
 
-                       // var purpose = resource.purpose || resource.acronym;     //<<< todo - 'purpose' was removed in R3...
-                        var type;
-
-                        if (resource.example || resource.purpose == 'example') {         //another R2/3 difference...
-                            purpose = 'example'
-                            var t = Utilities.getSingleExtensionValue(resource,extDef);
-                            if (t) {
-                                type = t.valueString;
+                            if (resource.example || resource.purpose == 'example') {         //another R2/3 difference...
+                                purpose = 'example'
+                                var t = Utilities.getSingleExtensionValue(resource, extDef);
+                                if (t) {
+                                    type = t.valueString;
+                                }
                             }
-                        }
 
-                        $scope.artifacts[purpose] = $scope.artifacts[purpose] || []
+                            $scope.artifacts[purpose] = $scope.artifacts[purpose] || []
 
-                        var item2 = {description:resource.description,type:type}
+                            var item2 = {description: resource.description, type: type}
 
-                        if (resource.sourceReference) {
-                            item2.url = resource.sourceReference.reference;
-                        }
+                            if (resource.sourceReference) {
+                                item2.url = resource.sourceReference.reference;
+                            }
 
-                        if (resource.sourceUri) {
-                            item2.url = resource.sourceUri;
-                            item2.uri = resource.sourceUri;     //for OID type references...
-                        }
+                            if (resource.sourceUri) {
+                                item2.url = resource.sourceUri;
+                                item2.uri = resource.sourceUri;     //for OID type references...
+                            }
 
-                        $scope.artifacts[purpose].push(item2)
-                    })
+                            $scope.artifacts[purpose].push(item2)
+                        })
+                     }
                 });
 
                 //sort 'em all...

@@ -15,10 +15,28 @@ angular.module("sampleApp")
             GetDataFromServer.registerAccess('scnBld');
 
 
+            //a useful function to determine the browser storage being used -
+            var localStorageSpace = function(){
+                var allStrings = '';
+                for(var key in window.localStorage){
+                    if(window.localStorage.hasOwnProperty(key)){
+                        allStrings += window.localStorage[key];
+                    }
+                }
+                return allStrings ? 3 + ((allStrings.length*16)/(8*1024)) + ' KB' : 'Empty (0 KB)';
+            };
+
+            console.log(localStorageSpace());
+
+
             //allow the resource to be directly edited
             $scope.setupDirectEdit = function(){
                 $scope.input.directEdit = angular.toJson($scope.currentResource,true)
             };
+
+            $scope.cancelDirectEdit = function() {
+                delete $scope.input.directEdit;
+            }
 
             $scope.saveDirectEdit = function(contents){
                 try {
@@ -29,13 +47,19 @@ angular.module("sampleApp")
                 }
 
                 //find the entry in the contriner.bundle that has this resource (based on the id) and replace it..
+                var replaced = false;
                 for (var i=0; i < $scope.selectedContainer.bundle.entry.length; i++) {
                     var res = $scope.selectedContainer.bundle.entry[i].resource;
                     if (res.id == newResource.id) {
                         $scope.selectedContainer.bundle.entry[i].resource = newResource;
                         $scope.selectResource($scope.selectedContainer.bundle.entry[i]);    //set all the required varr
+                        replaced = true;
                         break;
                     }
+                }
+
+                if (! replaced) {
+                    alert("The Json was valid, but the id didn't match any of the resources in this scenario")
                 }
 
                 delete $scope.input.directEdit;

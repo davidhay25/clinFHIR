@@ -147,10 +147,10 @@ angular.module("sampleApp")
             };
 
             $scope.showQuest = function(){
-                $scope.showForm();      //actually the new data entry form...
+                //$scope.showForm();      //actually the new data entry form...
 
 
-                return
+                //return
 
 
                 $uibModal.open({
@@ -162,6 +162,7 @@ angular.module("sampleApp")
                     },
                     resolve : {
                         Q: function () {          //the default extension
+                            console.log($scope.Q)
                             return  $scope.Q;
                         }
                     }
@@ -169,7 +170,7 @@ angular.module("sampleApp")
                     function(result) {
 
                     })
-            }
+            };
 
             $scope.editLMDoc = function(){
                 $uibModal.open({
@@ -185,7 +186,7 @@ angular.module("sampleApp")
                     function(result) {
 
                     })
-            }
+            };
 
             $scope.expandAll = function() {
                 $scope.treeData.forEach(function (item) {
@@ -1644,12 +1645,12 @@ angular.module("sampleApp")
                 delete $scope.commentTask;      //the task to comment on this model...
                 delete $scope.input.mdComment;  //the comment
                 delete $scope.taskOutputs;      //the outputs of the task (Communication resource currently)
-                //delete $scope.Q;                //the Questionnaire
+                delete $scope.Q;                //the Questionnaire
                 $scope.canSaveModel = true;     //allow edits to the model to be saved
 
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource);
-               // $scope.Q = questionnaireSvc.makeQ($scope.treeData);
+                $scope.Q = questionnaireSvc.makeQ($scope.treeData);
                 $scope.relativeMappings = logicalModelSvc.getRelativeMappings($scope.treeData); //items with both v2 & fhir mappings
 
 

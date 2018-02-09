@@ -1363,8 +1363,6 @@ angular.module("sampleApp")
                     if (ext && ext.valueString) {
                         container.description = ext.valueString;  //yes, I know these names are confusing...
                     }
-
-
                     container.isDirty = false;
                     //get the security tags.
                     if (dr.meta && dr.meta.security) {
@@ -1374,15 +1372,8 @@ angular.module("sampleApp")
                             }
                         })
                     }
-
-
-
                     return container;
-
-
                 }
-
-
             },
             loadLibrary : function (builderBundles) {
                 //download ALL the DocumentReferences that are the library references...
@@ -1404,7 +1395,7 @@ angular.module("sampleApp")
 
                         var bundle = data.data;
                         if (bundle && bundle.entry) {
-                            var arContainer = []
+                            var arContainer = [];
                             bundle.entry.forEach(function(entry){
                                 var dr = entry.resource;
                                 var container = that.getBundleContainerFromDocRef(dr)
@@ -1993,14 +1984,23 @@ angular.module("sampleApp")
                     case 'dateTime' :
                         //value is a Date object...
                         //var v = moment(valuedate).format();
-                        var v = moment(value.date).format('YYYY-MM-DD');
 
+                        //var v = moment(value.date).format('YYYY-MM-DD');
+                        value.date = value.date || new Date();//moment(value.date).format('YYYY-MM-DD');
                         if (value.time) {
-                            value.date.setHours(v.time.getHours());
-                            value.date.setMinutes(v.time.getMinutes());
+                            value.date.setHours(value.time.getHours());
+                            value.date.setMinutes(value.time.getMinutes());
+
+
+                            //v = moment(value.date).format('YYYY-MM-DD hh:mm:ss');
+
+                            //value.date.setHours(v.time.getHours());
+                           // value.date.setMinutes(v.time.getMinutes());
                         }
 
-                        simpleInsert(insertPoint,info,path,v,dt);
+                        //simpleInsert(insertPoint,info,path,v,dt);
+                        simpleInsert(insertPoint,info,path,value.date,dt);
+
                         this.addStringToText(insertPoint,path+": "+ v)
                         break;
 
