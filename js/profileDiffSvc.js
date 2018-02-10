@@ -351,14 +351,12 @@ angular.module("sampleApp").service('profileDiffSvc',
                     return -1
                 }
 
-            })
-
-
+            });
             return arV2;
 
         },
 
-        generatePageTree : function(IG){
+        generatePageTree : function(IG,artifacts,typeDescription){
             var treeData = [];
 
             if (IG.page) {
@@ -366,9 +364,45 @@ angular.module("sampleApp").service('profileDiffSvc',
             } else {
                 //create a front page...
                 var frontPage = {source:"about:blank",kind:'page',page:[]};
-                setTitle(frontPage,"Front Page");
+                setTitle(frontPage,"Documentation");
                 addPage(treeData,frontPage,{id:'#'});
             }
+
+            //at this point, we've added the pages to the tree. Now add the artifacts...
+            console.log(artifacts);
+
+            var id = 't' + new Date().getTime() + Math.random()*1000
+            var artifactsRoot = {id:id,parent:'#',text:"FHIR artifacts",state: {opened: true}};
+            artifactsRoot.data = {nodeType:'root'};
+
+
+            treeData.push(artifactsRoot);
+
+            angular.forEach(artifacts,function(value,key) {
+                console.log(key,value)
+
+                var id = 't' + new Date().getTime() + Math.random()*1000
+                var artifactTypeRoot = {id:id,parent:artifactsRoot.id,text:typeDescription[key]+'s',state: {opened: false}};
+                artifactTypeRoot.data = {nodeType:'artifactType',artifactType:key};
+                treeData.push(artifactTypeRoot);
+
+                value.forEach(function (art) {
+                    art.purpose=key;
+                    console.log(art);
+                    var id = 't' + new Date().getTime() + Math.random()*1000;
+
+                    var text = art.name || "No name"
+                    if (! text) {
+                        text = $filter('getLogicalID')(art.url)
+                    }
+                    var artifactNode = {id:id,parent:artifactTypeRoot.id,text:text,state: {opened: true}};
+                    artifactNode.data = {nodeType : 'artifact',art:art};
+                    treeData.push(artifactNode);
+                })
+
+            });
+
+
 
 
             return treeData;
@@ -382,7 +416,11 @@ angular.module("sampleApp").service('profileDiffSvc',
                 var node = {id:id,parent:parentNode.id,text:title,state: {opened: true}}
                 var pageInTree = angular.copy(page);
                 delete pageInTree.page;
+
                 node.data = pageInTree;
+
+                node.data.nodeType = 'page';
+
                 treeData.push(node);
 
 
@@ -921,7 +959,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                             break;
 
                     }
-
 
                     if (include && item.sourceReference) {
                         var url = item.sourceReference.reference;   //the url of the node
@@ -1902,6 +1939,11 @@ angular.module("sampleApp").service('profileDiffSvc',
 
 
                 } else {
+                    //is this an absolute reference?
+                    if (url.indexOf('http') == -1) {
+                        //no - it's relative - we assume to the conformance server
+                        url = appConfigSvc.getCurrentConformanceServer().url+url;
+                    }
                     GetDataFromServer.findConformanceResourceByUri(url).then(
                         function (sdef) {
 

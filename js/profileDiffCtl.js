@@ -23,6 +23,17 @@ angular.module("sampleApp")
             $scope.singleLeftPaneClass = "col-sm-3 col-md-3";
             $scope.singleRightPaneClass = "col-sm-9 col-md-9";
 
+            $scope.typeDescription = {};
+
+            $scope.typeDescription.extension = 'Extension Definition';
+            $scope.typeDescription.profile = 'Profile';
+            $scope.typeDescription.terminology = 'Terminology resource';
+            $scope.typeDescription.logical = 'Logical model';
+            $scope.typeDescription.other = 'Other artifact';
+            $scope.typeDescription.example = 'Example';
+
+
+
             $scope.toggleSingleState = function(){
                 $scope.singleStateZoom = ! $scope.singleStateZoom
                 if ($scope.singleStateZoom) {
@@ -167,20 +178,27 @@ angular.module("sampleApp")
                     if (data.data && data.data.entry) {
                         data.data.entry.forEach(function (entry) {
                             var ig = entry.resource;
-
-
                             if (Utilities.isAuthoredByClinFhir(ig)) {
                                 ig.name = ig.name || ig.description;
                                 $scope.listOfIG.push(ig)
                             }
                         })
+                        $scope.listOfIG.sort(function(a,b){
+                            if (a.name > b.name) {
+                                return -1
+                            } else {
+                                return 1
+                            }
+                        })
                     }
+
                     $scope.input.selIG = $scope.listOfIG[0]
                 },
                 function(err){
                     console.log(err)
                 }
             );
+
 
 
 
@@ -201,9 +219,6 @@ angular.module("sampleApp")
 
             $scope.editResourceItem = function(item) {
 
-
-
-
                 var igResource = profileDiffSvc.findItem(item.url,$scope.currentIG)
 
 
@@ -214,8 +229,10 @@ angular.module("sampleApp")
                     backdrop: 'static',
                     controller: function($scope,igResource){
                         $scope.description = igResource.description;
+                        $scope.name = igResource.name;
+
                         $scope.save = function(){
-                            var vo = {description: $scope.description}
+                            var vo = {description: $scope.description,name:$scope.name}
                             $scope.$close(vo);
                         }
                     },
@@ -228,8 +245,14 @@ angular.module("sampleApp")
                 }).result.then(function(vo){
                     igResource.description = vo.description;    //the underlying item
                     item.description = vo.description;      //the display item
+
+                    igResource.name = vo.name;
+                    item.name = vo.name;
                     $scope.saveIG()
-                    $scope.selectItem(item,'example')
+
+                    makeArtifact();
+
+                    //$scope.selectItem(item,'example')
                 });
 
 
@@ -362,14 +385,44 @@ angular.module("sampleApp")
                         $scope.selectedPageNode = data.node;
 
 
-                        var url = $scope.selectedPageNode.data.source
-                        $scope.page.src = $sce.trustAsResourceUrl('about:blank');
-                        $scope.page.src = $sce.trustAsResourceUrl(url);
+                       // var url = $scope.selectedPageNode.data.source
+
+                        //console.log($scope.selectedPageNode.data.nodeType);
+
+
+                        if ($scope.selectedPageNode.data) {
+
+                            //console.log($scope.selectedPageNode.data.nodeType);
+                            //this node represents a page...
+                            if ($scope.selectedPageNode.data.nodeType == 'page') {
+                                var url = $scope.selectedPageNode.data.source
+                                $scope.page.src = $sce.trustAsResourceUrl('about:blank');
+                                $scope.page.src = $sce.trustAsResourceUrl(url);
+                                $scope.selectedItemType = 'page';
+                            }
+
+                            //this is an artifact type (like 'extension' or 'logical'
+                            if ($scope.selectedPageNode.data.nodeType == 'artifactType') {
+                                var aType = $scope.selectedPageNode.data.artifactType;
+                                //console.log(aType)
+                                $scope.selectedItemType = 'artifactType';
+                                $scope.selectedArtifactType = $scope.selectedPageNode.data.artifactType;
+                            }
+
+                            //this node represents an artifact
+                            if ($scope.selectedPageNode.data.nodeType == 'artifact') {
+                                var item = $scope.selectedPageNode.data.art;
+
+                                $scope.selectItem(item,item.purpose);       //sets selectedItemType
+                            }
+
+                            //console.log($scope.selectedItemType)
+                        }
+                        $scope.$digest();       //as the event occurred outside of angular...
 
                     }
 
 
-                    $scope.$digest();       //as the event occurred outside of angular...
 
                 }).on('redraw.jstree',function(e,data){
 
@@ -564,7 +617,7 @@ angular.module("sampleApp")
                             var id = 't' + new Date().getTime();// + Math.random()*1000
                             var title = page.title || page.name;    //R3/STU2
 
-                            var parentId = '#'
+                            var parentId = '#';
                             if ($scope.selectedPageNode) {
                                 parentId = $scope.selectedPageNode.id;
                             }
@@ -572,6 +625,9 @@ angular.module("sampleApp")
                             var node = {id:id,parent:parentId,text:title,state: {opened: true}}
                             node.data = page;
                             $scope.pageTreeData.push(node)
+
+                            console.log(node)
+
                         }
                         drawPageTree()
 
@@ -638,6 +694,7 @@ angular.module("sampleApp")
 
             $scope.importItem = function(itemType){
 
+
                 var url = $window.prompt('Enter the canonical url of the '+itemType.display + " \n(It must be on the Conformance server)");
                 if (url) {
                     profileDiffSvc.getSD(url).then(
@@ -681,8 +738,6 @@ angular.module("sampleApp")
                                    alert('Error updating IG '+angular.toJson(err))
                                 }
                             );
-
-
 
                             $scope.selectIG($scope.currentIG);
 
@@ -885,7 +940,7 @@ angular.module("sampleApp")
             );
 
             //find all the profiles on a given type
-            $scope.findAdHocProfile = function (baseType) {
+            $scope.findAdHocProfileDEP = function (baseType) {
                 var svr =  appConfigSvc.getCurrentConformanceServer();
                 var searchString = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition?";
 
@@ -933,15 +988,11 @@ angular.module("sampleApp")
 
             }
 
-            $scope.selectAdHocProfile = function(SD) {
-
-
+            $scope.selectAdHocProfileDEP = function(SD) {
                 setupProfile(SD)
                 $scope.selectedItemType = 'profile';
                 $scope.currentIG = {};      //to show the tabset
             };
-            
-            //load the IG's that describe 'collections' of conformance artifacts - like CareConnect & Argonaut
 
 
             //note that we're using an IG to hold all the resources in this collection
@@ -951,7 +1002,10 @@ angular.module("sampleApp")
                 $scope.currentIG=IG;     //the List the holds this collection
 
                 //now pull out the various artifacts into an easy to use object
+                makeArtifact();
+                /*
                 $scope.artifacts = {}
+
                 $scope.currentIG.package.forEach(function (package) {
                     if (package && package.resource) {
                         package.resource.forEach(function (resource) {
@@ -972,7 +1026,7 @@ angular.module("sampleApp")
 
                             $scope.artifacts[purpose] = $scope.artifacts[purpose] || []
 
-                            var item2 = {description: resource.description, type: type}
+                            var item2 = {description: resource.description, type: type, name:resource.name}
 
                             if (resource.sourceReference) {
                                 item2.url = resource.sourceReference.reference;
@@ -1003,11 +1057,69 @@ angular.module("sampleApp")
                     }
 
                 })
+*/
+                $scope.pageTreeData = profileDiffSvc.generatePageTree($scope.currentIG,$scope.artifacts,$scope.typeDescription);
 
-                $scope.pageTreeData = profileDiffSvc.generatePageTree($scope.currentIG);
                 drawPageTree();
+                console.log($scope.artifacts)
 
             };
+
+            function makeArtifact() {
+                $scope.artifacts = {}
+                $scope.currentIG.package.forEach(function (package) {
+                    if (package && package.resource) {
+                        package.resource.forEach(function (resource) {
+
+
+                            var purpose = profileDiffSvc.getPurpose(resource)
+
+                            // var purpose = resource.purpose || resource.acronym;     //<<< todo - 'purpose' was removed in R3...
+                            var type;
+
+                            if (resource.example || resource.purpose == 'example') {         //another R2/3 difference...
+                                purpose = 'example'
+                                var t = Utilities.getSingleExtensionValue(resource, extDef);
+                                if (t) {
+                                    type = t.valueString;
+                                }
+                            }
+
+                            $scope.artifacts[purpose] = $scope.artifacts[purpose] || []
+
+                            var item2 = {description: resource.description, type: type, name:resource.name}
+
+                            if (resource.sourceReference) {
+                                item2.url = resource.sourceReference.reference;
+                            }
+
+                            if (resource.sourceUri) {
+                                item2.url = resource.sourceUri;
+                                item2.uri = resource.sourceUri;     //for OID type references...
+                            }
+
+                            $scope.artifacts[purpose].push(item2)
+                        })
+                    }
+                });
+
+                //sort 'em all...
+                ['extension','profile','terminology','logical','other','example'].forEach(function (purpose) {
+                    if ($scope.artifacts[purpose]) {
+                        $scope.artifacts[purpose].sort(function(item1,item2) {
+                            var typ1 =  $filter('getLogicalID')(item1.url);
+                            var typ2 =  $filter('getLogicalID')(item2.url);
+                            if (typ1 > typ2) {
+                                return 1
+                            } else {
+                                return -1
+                            }
+                        })
+                    }
+
+                })
+
+            }
 
             //-------- functions and properties to enable the valueset viewer
             $scope.showVSBrowserDialog = {};
@@ -1032,7 +1144,7 @@ angular.module("sampleApp")
                 });
             };
 
-            //when an item is selected in the accordian for display in the right pane...
+            //when an item is selected in the tree for display in the right pane...
             $scope.selectItem = function(item,type){
 
                 clearRightPane()
@@ -1042,7 +1154,6 @@ angular.module("sampleApp")
 
                 delete $scope.exampleResource
                 delete $scope.exampleResourceXml
-
 
 
                 centerNodeInGraph(item.url)
@@ -1099,9 +1210,6 @@ angular.module("sampleApp")
 
                         }
                     )
-
-
-
 
                 }
 
