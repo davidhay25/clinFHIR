@@ -34,6 +34,8 @@ angular.module("sampleApp")
 
 
 
+
+
             $scope.toggleSingleState = function(){
                 $scope.singleStateZoom = ! $scope.singleStateZoom
                 if ($scope.singleStateZoom) {
@@ -392,20 +394,24 @@ angular.module("sampleApp")
 
                         if ($scope.selectedPageNode.data) {
 
+                            delete $scope.selectedItem;     //actually, specifically an artifact item...
+
+                            $scope.selectedItemType = $scope.selectedPageNode.data.nodeType;
+
                             //console.log($scope.selectedPageNode.data.nodeType);
                             //this node represents a page...
                             if ($scope.selectedPageNode.data.nodeType == 'page') {
                                 var url = $scope.selectedPageNode.data.source
                                 $scope.page.src = $sce.trustAsResourceUrl('about:blank');
                                 $scope.page.src = $sce.trustAsResourceUrl(url);
-                                $scope.selectedItemType = 'page';
+                               // $scope.selectedItemType = 'page';
                             }
 
                             //this is an artifact type (like 'extension' or 'logical'
                             if ($scope.selectedPageNode.data.nodeType == 'artifactType') {
                                 var aType = $scope.selectedPageNode.data.artifactType;
                                 //console.log(aType)
-                                $scope.selectedItemType = 'artifactType';
+                               // $scope.selectedItemType = 'artifactType';
                                 $scope.selectedArtifactType = $scope.selectedPageNode.data.artifactType;
                             }
 
@@ -1061,6 +1067,7 @@ angular.module("sampleApp")
                 $scope.pageTreeData = profileDiffSvc.generatePageTree($scope.currentIG,$scope.artifacts,$scope.typeDescription);
 
                 drawPageTree();
+                $scope.selectedItemType = 'pageRoot';   //shows the root page for the documentaion
                 console.log($scope.artifacts)
 
             };
@@ -1069,6 +1076,12 @@ angular.module("sampleApp")
                 $scope.artifacts = {}
                 $scope.currentIG.package.forEach(function (package) {
                     if (package && package.resource) {
+
+                        //create an entry for every 'purpose' so they can be added in the UI
+                        ['logical','profile','extension','terminology','other','example'].forEach(function (purpose) {
+                            $scope.artifacts[purpose] = []
+                        });
+
                         package.resource.forEach(function (resource) {
 
 

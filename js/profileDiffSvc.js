@@ -373,7 +373,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
             var id = 't' + new Date().getTime() + Math.random()*1000
             var artifactsRoot = {id:id,parent:'#',text:"FHIR artifacts",state: {opened: true}};
-            artifactsRoot.data = {nodeType:'root'};
+            artifactsRoot.data = {nodeType:'artifactRoot'};
 
 
             treeData.push(artifactsRoot);
@@ -391,7 +391,8 @@ angular.module("sampleApp").service('profileDiffSvc',
                     console.log(art);
                     var id = 't' + new Date().getTime() + Math.random()*1000;
 
-                    var text = art.name || "No name"
+                    var text = art.name;// || "No name"
+
                     if (! text) {
                         text = $filter('getLogicalID')(art.url)
                     }
@@ -401,9 +402,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                 })
 
             });
-
-
-
 
             return treeData;
 
@@ -418,8 +416,12 @@ angular.module("sampleApp").service('profileDiffSvc',
                 delete pageInTree.page;
 
                 node.data = pageInTree;
+                if (parentNode.id !== '#') {
+                    node.data.nodeType = 'page';
+                } else {
+                    node.data.nodeType = 'pageRoot';
+                }
 
-                node.data.nodeType = 'page';
 
                 treeData.push(node);
 

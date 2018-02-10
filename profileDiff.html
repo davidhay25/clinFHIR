@@ -114,7 +114,7 @@
             border:8px
         }
 
-        .vbottom{
+        .vbottomDEP{
             position: relative;
             top: 100%;
             transform: translateY(-100%);
@@ -227,6 +227,8 @@
             <br/>
             <!-- This is the IG selector...-->
             <div class="row">
+                <div class="col-sm-4 col-md-4">
+                </div>
                 <div class="col-sm-3 col-md-3">
                     <select class="form-control" ng-model="input.selIG"
                             ng-options="ig.name for ig in listOfIG">
@@ -241,11 +243,11 @@
 
             <uib-tabset ng-show="currentIG">
 
-                <uib-tab heading="Pages" >
+                <uib-tab heading="Contents" >
                     <div class="row">
 
                         <div class="col-md-4 col-sm-4">
-                            <div ng-show="selectedItemType=='page'" class="pull-right" style="margin-top: 8px">
+                            <div ng-show="selectedItemType=='page' || selectedItemType=='pageRoot'" class="pull-right" style="margin-top: 8px">
 
                                         <span ng-show="selectedPageNode">
                                             <i class="glyphicon glyphicon-edit clickable iconSpacing"
@@ -258,11 +260,11 @@
                                                ng-click="move(selectedPageNode,'dn')"></i>
                                             <i class="glyphicon glyphicon-arrow-up clickable iconSpacing"
                                                ng-click="move(selectedPageNode,'up')"></i>
-
+                                            <i class="glyphicon glyphicon-plus clickable iconSpacing"
+                                               ng-click="addPage()"></i>
                                         </span>
 
-                                <i class="glyphicon glyphicon-plus clickable iconSpacing"
-                                   ng-click="addPage()"></i>
+
 
                                 <hr style="margin-top: 30px"/>
 
@@ -277,17 +279,33 @@
                         </div>
 
                         <div class="col-md-8 col-sm-8">
+
+                            <div ng-show="selectedItemType == 'pageRoot'">
+
+                                <ng-include src="'/includes/pageRoot.html'"></ng-include>
+                            </div>
+
+                            <div ng-show="selectedItemType == 'artifactRoot'">
+                                <ng-include src="'/includes/artifactRoot.html'"></ng-include>
+                            </div>
+
                             <div ng-show="selectedItemType == 'artifactType'">
                                 <div class="row">
-                                    <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <h4>{{typeDescription[selectedArtifactType]}}s</h4>
+                                    </div>
+                                    <div class="col-md-6">
                                         <div class="pull-right">
-                                            <a href="#" ng-click="importItem({type:selectedArtifactType,
+                                            <div style="padding-top: 10px">
+                                                <a href="#" ng-click="importItem({type:selectedArtifactType,
                                             display:typeDescription[selectedArtifactType]})">Attach new {{typeDescription[selectedArtifactType]}}</a>
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>
 
-                                <h4>{{typeDescription[selectedArtifactType]}}</h4>
+
                                 <table class="table table-bordered table-condensed">
                                     <tr><th>Name</th><th>Description</th><th>Url</th><th></th></tr>
                                     <tr ng-repeat="item in artifacts[selectedArtifactType]">
@@ -310,24 +328,17 @@
                                 <iframe height = "600px" width="100%" ng-src="{{page.src}}"></iframe>
                             </div>
 
-                            <div class="row" ng-hide="selectedItemType == 'page' || selectedItemType == 'artifactType'">
-
+                            <!--<div class="row" ng-hide="selectedItemType == 'page' || selectedItemType == 'artifactType'">-->
+                            <div class="row" ng-show="selectedItem">
                                 <div class="col-md-10">
                                     <div><strong>{{selectedItem.name}}</strong></div>
                                     {{selectedItem.description}}
                                 </div>
-
-
                                 <div class="col-md-2">
                                     <div class="pull-right">
-
                                         <i class="glyphicon glyphicon-edit clickable iconSpacing"
                                            ng-click="editResourceItem(selectedItem)"></i>
-                                        <!--
-                                        <a href="#" ng-click="editResourceItem(selectedItem)">Edit</a>
-                                        -->
                                     </div>
-
                                 </div>
                             </div>
 
@@ -1278,7 +1289,7 @@
 
 
                 </uib-tab>
-                <uib-tab heading="IG Summary">
+                <uib-tab heading="Description">
                     <br/>
                     <ng-include src="'/includes/IGSummary.html'"></ng-include>
 
@@ -1286,6 +1297,7 @@
 
                 <uib-tab heading="IG Json">
                     <br/>
+                    <em>This page is the actual ImplementationGuide resource and intended only for debugging</em>
                     <pre>{{currentIG | json}}</pre>
                 </uib-tab>
 
