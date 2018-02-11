@@ -7,6 +7,7 @@ angular.module("sampleApp")
 
             $scope.input = {center:true,includeCore:true,immediateChildren:true,includeExtensions:true,includePatient:true};
             $scope.input.commentReply = {};
+            $scope.input.displayMode = true;        //show all the tabs for the profile view
 
             $scope.appConfigSvc = appConfigSvc;
             $scope.itemColours = profileDiffSvc.objectColours();
@@ -730,9 +731,11 @@ angular.module("sampleApp")
                                 pkg.resource.push(res);
                             }
 
-                            //now look for any extensions or ValueSets if the object being imported is a profile....
-                            if (itemType.type == "profile" && SD.snapshot && SD.snapshot.element) {
-                                profileDiffSvc.updateExtensionsAndVSInProfile($scope.currentIG,SD,pkg);
+                            //now look for any extensions or ValueSets if the object being imported is a profile or a logical model....
+                            if (itemType.type == "profile" || itemType.type == "logical") {
+                                if (SD.snapshot && SD.snapshot.element) {
+                                    profileDiffSvc.updateExtensionsAndVSInProfile($scope.currentIG,SD,pkg);
+                                }
                             }
 
                             $scope.dirty = true;
@@ -754,6 +757,10 @@ angular.module("sampleApp")
 
                 }
 
+            };
+
+            $scope.removeItem = function(item) {
+                console.log(item)
             };
 
             $scope.generateShortCut = function() {

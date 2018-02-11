@@ -2443,8 +2443,24 @@ angular.module("sampleApp")
                         //note that we don't retrieve the complete valueset...
                         if (ed.binding) {
                             item.data.selectedValueSet = {strength: ed.binding.strength};
-                            item.data.selectedValueSet.vs = {url: ed.binding.valueSetUri};
-                            item.data.selectedValueSet.vs.name = ed.binding.description;
+
+
+
+
+                            //  12/2/2018  change to using vsReference, but need to preserve the old stuff...
+                            if (ed.binding.valueSetUri) {
+                                item.data.selectedValueSet.vs = {url: ed.binding.valueSetUri};
+                            }
+
+                            if (ed.binding.valueSetReference && ed.binding.valueSetReference.reference) {
+                                item.data.selectedValueSet.vs = {url: ed.binding.valueSetReference.reference};
+                            }
+
+                            if (item.data.selectedValueSet.vs) {
+                                item.data.selectedValueSet.vs.name = ed.binding.description;
+                            }
+
+
                         }
 
                         if (include) {
@@ -2659,8 +2675,15 @@ angular.module("sampleApp")
 
                     if (data.selectedValueSet) {
                         ed.binding = {strength: data.selectedValueSet.strength};
-                        ed.binding.valueSetUri = data.selectedValueSet.vs.url;
+
+                        //  12/2/2018 - change to a reference...
+                        //ed.binding.valueSetUri = data.selectedValueSet.vs.url;
+
+                        ed.binding.valueSetReference = {reference: data.selectedValueSet.vs.url};
                         ed.binding.description = data.selectedValueSet.vs.name;
+
+
+
 
                     }
 

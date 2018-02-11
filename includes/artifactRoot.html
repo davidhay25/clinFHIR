@@ -2,14 +2,14 @@
     <h3>FHIR Artifacts</h3>
 </div>
 
-<p>This section of the Guide are the specific FHIR artifacts that have been defined to meet the business requirements. Like
+<p>This section of the Guide contains the specific FHIR artifacts that have been defined to meet the business requirements. Like
 the documentation, they are listed in the Table of contents (TOC) and will be displayed in this pane when selected.</p>
 
-
+<p>While it should be possibel for anyone to understand them, creating them does require FHIR knowledge.</p>
 
 <div class="row">
     <div class="col-md-3">
-        <p>There are 6 types of artifact </p>
+        <p>There are 6 types of artifact in this Guide:</p>
         <ul class="list-unstyled clickable">
             <li ng-click="artDetail='logical'">Logical models</li>
             <li ng-click="artDetail='profile'">Profiles</li>
@@ -53,7 +53,11 @@ the documentation, they are listed in the Table of contents (TOC) and will be di
                 <li>Fix the 'type' of some element. eg require that an identifier must be of a given system - such as the
                 New Zealand National Health Index
                     (<a href="http://www.health.govt.nz/our-work/health-identity/national-health-index" target="_blank">NHI</a>).</li>
+                <li>Change the set of possible values that a coded element can have - called 'binding' to a ValueSet. This can
+                be done for most (but not all) coded elements, depending on the
+                    <a target="_blank" href="http://hl7.org/fhir/terminologies.html#strength">strength</a> of the binding .</li>
             </ul>
+
 
         </div>
         <div ng-show="artDetail == 'extension'">
@@ -66,6 +70,51 @@ the documentation, they are listed in the Table of contents (TOC) and will be di
             <p>It is possible that an extension value can be of different datatypes (eg a string or a date), though
             a given instance will only have one of them.</p>
 
+        </div>
+
+        <div ng-show="artDetail == 'terminology'">
+            <div class="banner">Terminology resources</div>
+            <p>The terminology sub-system describes how the value coded elements can be bound to a specific set of values.
+            There are details of how FHIR uses terminology
+                <a target="_blank" href="http://hl7.org/fhir/terminology-module.html">here</a>.
+            </p>
+            <p>There are a number of different resources that are included in the Terminology module:</p>
+            <ul >
+                <li><a target="_blank" href="http://hl7.org/fhir/terminology-module.html">ValueSet</a>. This defines a set
+                of values (technically 'concepts') that a coded element may have</li>
+                <li><a target="_blank" href="http://hl7.org/fhir/terminology-module.html">CodeSystem</a>. The definition of
+                    the concept itself. May be a 'pointer' to an existing Terminology (like SNOMED) or define an ah-hoc set</li>
+                <li><a target="_blank" href="http://hl7.org/fhir/terminology-module.html">ConceptMap</a>. Used to
+                map a concept between multiple code systems - eg between HL7 v2 messages and FHIR</li>
+                <li><a target="_blank" href="http://hl7.org/fhir/terminology-module.html">NamingSystem</a>.
+                    Used especially for Identifiers, but also code systems. An example would be to define the system
+                    within which a Drovers License is unique - effectively the 'issuer' of the license.
+                </li>
+            </ul>
+            <p>A common use of Terminology in Implementation Guides is to define the ValueSet to be used for a
+                coded element. The overall steps in changing a terminology binding are:</p>
+            <ol>
+                <li>Create a ValueSet that has the set of possible values. Generally, these are from a single Code System
+                (like SNOMED or LOINC) but it is quite possible that a single ValueSet has values from more than one.</li>
+                <li>Decide on the
+                    <a target="_blank" href="http://hl7.org/fhir/terminologies.html#strength">Binding Strength</a>
+                     - ie can a a resource instance have a value that is not in the ValueSet
+                (usually you do want to allow others - see the spec for details</li>
+                <li>Create a profile on the resource type that binds the element to the ValueSet, or add the binding
+                to a Logical Model.</li>
+            </ol>
+
+        </div>
+        <div ng-show="artDetail == 'other'">
+            <div class="banner">Other resources</div>
+            <p>A catch all for other resources that an Implementation Guide may define - such as a
+                <a target="_blank" href="http://hl7.org/fhir/capabilitystatement.html">CapabilityStatement</a>, which indicates
+                what a server can do - or what it needs to be able to do to meet the requirements of the IG.
+            </p>
+        </div>
+        <div ng-show="artDetail == 'example'">
+            <div class="banner">Examples</div>
+            <p>Any examples of resource instances that have been defined</p>
         </div>
     </div>
 </div>

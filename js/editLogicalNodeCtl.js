@@ -196,7 +196,7 @@ angular.module("sampleApp")
 
                     //$timeout(setOptionsForDtAndPath,1000);      //check options for this dt & path (need to wait for the config to be loaded
 
-                if (dtCode == 'code' || dtCode == 'Codeing' || dtCode == 'CodeableConcept') {
+                if (dtCode == 'code' || dtCode == 'Coding' || dtCode == 'CodeableConcept') {
                     $scope.isCoded = true;
                 }
 
@@ -672,8 +672,6 @@ angular.module("sampleApp")
                 if (! $scope.canSave) {
                     return
                 }
-
-
                     var vo = {};
                     vo.name = $scope.input.name;
                     vo.short = $scope.input.short;
@@ -681,9 +679,6 @@ angular.module("sampleApp")
                     vo.comments = $scope.input.comments;
                     vo.mapping = $scope.input.mapping;
                     vo.pathSegment = $scope.input.pathSegment;
-
-
-
 
                     vo.conceptMap = $scope.input.conceptMap;
 
@@ -701,7 +696,6 @@ angular.module("sampleApp")
                     //make sure the v2 & fhir mappings align with the
                     alignMap('hl7V2',vo.mappingPathV2,vo.mappingFromED)
                     alignMap('fhir',vo.mappingPath,vo.mappingFromED)
-
                     alignMap('snomed',vo.mappingPathSnomed,vo.mappingFromED)
 
                     vo.type = [{code:$scope.input.dataType.code}];
