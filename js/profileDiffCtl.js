@@ -33,10 +33,6 @@ angular.module("sampleApp")
             $scope.typeDescription.other = 'Other artifact';
             $scope.typeDescription.example = 'Example';
 
-
-
-
-
             $scope.toggleSingleState = function(){
                 $scope.singleStateZoom = ! $scope.singleStateZoom
                 if ($scope.singleStateZoom) {
@@ -1077,6 +1073,9 @@ angular.module("sampleApp")
                 $scope.selectedItemType = 'pageRoot';   //shows the root page for the documentaion
                 console.log($scope.artifacts)
 
+
+
+
             };
 
             function makeArtifact() {
@@ -1184,12 +1183,11 @@ angular.module("sampleApp")
                 }
 
                 if (type == 'logical') {
-                    delete $scope.LMSD
+                    delete $scope.LMSD;
+                    delete $scope.lmShortCut;
                     profileDiffSvc.getSD(item.url).then(
                         function (SD) {
                             $scope.LMtreeData = logicalModelSvc.createTreeArrayFromSD(angular.copy(SD));
-
-
 
                             $scope.LMSD = SD;
                             logicalModelSvc.resetTreeState($scope.LMtreeData);
@@ -1226,6 +1224,12 @@ angular.module("sampleApp")
 
                             })
 
+                            profileDiffSvc.findShortCutForModel($scope.LMSD.id).then(
+                                function(data){
+                                    $scope.lmShortCut = data;
+                                    console.log(data)
+                                }
+                            )
 
 
                         }

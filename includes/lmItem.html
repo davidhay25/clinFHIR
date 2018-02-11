@@ -1,4 +1,10 @@
+
+
+
 <div ng-show="selectedNode">
+
+    <!-- AFAIK this is only used by the profileDiff app (actually, the IG viewer)-->
+
     <div class="row">
         <div class="col-md-10 col-sm-10">
             <h4>Element path <em>{{selectedNode.text}}</em> properties</h4>
@@ -48,32 +54,26 @@
                 <div ng-repeat = "typ in selectedNode.data.type">
 
 
-
+<!--
                     <a ng-href="{{rootForDataType}}{{typ.code}}" target="_blank">
                         <i class="glyphicon glyphicon-eye-open clickable"></i>
                     </a>
-
+-->
 
 
                     {{typ.code}}
-
+<!--
                     <span class="clickable" ng-click="explodeDT(typ.code)" ng-show = "typ.isComplexDT">Expand</span>
 
                     <span class="clickable" ng-click="explodeReference(selectedNode)"
                           ng-show = "selectedNode.text == 'reference'">Expand</span>
-
-
-
-
+                    -->
 
                     <!-- Show any profile. If a reference, then hyperlink to the 'display' functionality... -->
                     <span ng-show="typ.code == 'Reference'" class="pull-right">
-                                            <span class="clickable" ng-click="viewReferencedModel(selectedNode.data.referenceUri)">View</span>
-
-
-
-                                            <span ng-hide="isDirty" class="clickable" ng-click="loadReferencedModel(selectedNode.data.referenceUri)">Load</span>
-                                        </span>
+                        <span class="clickable" ng-click="viewReferencedModel(selectedNode.data.referenceUri)">View</span>
+                        <span ng-hide="isDirty" class="clickable" ng-click="loadReferencedModel(selectedNode.data.referenceUri)">Load</span>
+                    </span>
 
                     <div>{{typ.profile}}{{typ.targetProfile}}</div>
 
@@ -81,11 +81,12 @@
                 <!-- If there's a ValueSet defined, allow it to be selected... -->
                 <span ng-show="selectedNode.data.selectedValueSet">
                                       <!--  <span>{{selectedNode.data.selectedValueSet.vs.name}}</span>-->
-                                        <span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.vs.url)">
-                                            {{selectedNode.data.selectedValueSet.vs.url}}</span>
-                                            ({{selectedNode.data.selectedValueSet.strength}})
 
-                                    </span>
+                        <span class="clickable" ng-click="showValueSet(selectedNode.data.selectedValueSet.vs.url)">
+                                {{selectedNode.data.selectedValueSet.vs.url}}</span>
+                                ({{selectedNode.data.selectedValueSet.strength}})
+
+                        </span>
 
 
             </td>

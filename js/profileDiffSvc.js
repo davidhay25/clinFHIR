@@ -1,6 +1,6 @@
 angular.module("sampleApp").service('profileDiffSvc',
     function($q,$http,GetDataFromServer,Utilities,appConfigSvc,$filter,resourceSvc,profileCreatorSvc,
-             $localStorage) {
+             $localStorage,$firebaseObject,$firebaseArray) {
 
         $localStorage.extensionDefinitionCache = $localStorage.extensionDefinitionCache || {}
 
@@ -73,6 +73,32 @@ angular.module("sampleApp").service('profileDiffSvc',
         }
 
     return {
+
+       findShortCutForModel : function(id) {
+            var deferred = $q.defer();
+            var scCollection = $firebaseArray(firebase.database().ref().child("shortCut"));
+            scCollection.$ref().orderByChild("modelId").equalTo(id).once("value", function(dataSnapshot){
+                var series = dataSnapshot.val();
+                if(series){
+                    //so there's at least 1 shortcut for a model with this id, now check the server
+
+                    angular.forEach(series,function(v,k){
+
+                        if (v.config.conformanceServer.url == appConfigSvc.getCurrentConformanceServer().url) {
+                            deferred.resolve(v)
+                        }
+                    })
+                    deferred.reject()
+
+                } else {
+                    deferred.reject()
+                }
+
+            })
+            return deferred.promise;
+
+        },
+
         saveNewComment : function(comment,profileUrl,ED,userEmail,relatedToId) {
             var deferred = $q.defer();
             var obs = {resourceType:'Observation',status:'final'}

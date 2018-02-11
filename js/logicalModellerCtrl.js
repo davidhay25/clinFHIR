@@ -933,16 +933,16 @@ angular.module("sampleApp")
                     )
 
                 }
-
-
-
-
-            }
+            };
 
 
             //if a shortcut has been used there will be a hash so load that
             var hash = $location.hash();
             if (hash) {
+
+                //console.log(ha)
+
+
                 var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
                 sc.$loaded().then(
                     function(){
@@ -970,7 +970,6 @@ angular.module("sampleApp")
                         ).finally(function(){
                             $scope.showWaiting = false;
                         })
-                        
                     }
                 )
             } else {
