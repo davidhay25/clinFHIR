@@ -746,30 +746,47 @@ angular.module("sampleApp")
                         function(resource){
                             //console.log(resource)
                             if (resource) {
-                                $scope.currentPatient = resource;
+                                setSelectedPatientFromServer(resource);
+                                    /*
+                                    $scope.currentPatient = resource;
+                                    addExistingResource(resource)
+                                    $scope.displayMode = 'view';
+                                    //load any existing resources for this patient...
+                                    getExistingData(resource)
+                                    $scope.selectResource(resource,function(){
+                                        $scope.waiting = false;
+                                        makeGraph();
+                                        drawResourceTree(resource);
+                                        isaDocument();      //determine if this bundle is a document (has a Composition resource)
 
-                                addExistingResource(resource)
+                                        $rootScope.$emit('addResource',resource);
 
-
-                                $scope.displayMode = 'view';
-
-                                //load any existing resources for this patient...
-                                getExistingData(resource)
-
-
-                                $scope.selectResource(resource,function(){
-                                    $scope.waiting = false;
-                                    makeGraph();
-                                    drawResourceTree(resource);
-                                    isaDocument();      //determine if this bundle is a document (has a Composition resource)
-
-                                    $rootScope.$emit('addResource',resource);
-
-                                });       //select the resource, indicating that it is a new resource...
+                                    });       //select the resource, indicating that it is a new resource...
+                                */
                             }
 
                         }
                 )
+            }
+
+            function setSelectedPatientFromServer(resource) {
+                if (resource) {
+                    $scope.currentPatient = resource;
+                    addExistingResource(resource)
+                    $scope.displayMode = 'view';
+                    //load any existing resources for this patient...
+                    getExistingData(resource)
+                    $scope.selectResource(resource,function(){
+                        $scope.waiting = false;
+                        makeGraph();
+                        drawResourceTree(resource);
+                        isaDocument();      //determine if this bundle is a document (has a Composition resource)
+
+                        $rootScope.$emit('addResource',resource);
+
+                    });       //select the resource, indicating that it is a new resource...
+                }
+
             }
 
             $scope.downloadBundle = function(){
@@ -1069,17 +1086,31 @@ angular.module("sampleApp")
 
                 $uibModal.open({
                     templateUrl: 'modalTemplates/newSet.html',
-
-                    controller: function ($scope,GetDataFromServer,appConfigSvc,categories) {
+                    controller: 'addScenarioCtrl',
+                    controllerDEP: function ($scope,GetDataFromServer,appConfigSvc,categories) {
 
                         $scope.canSave = true;
-                        $scope.categories = categories;
+                        $scope.input = {};
+                        $scope.categories = categories;     //categories in a ValueSet...
                         if (categories && categories.concept) {
-                            $scope.category = categories.concept[0];
+                            $scope.input.category = categories.concept[0];
                         } else {
-                            $scope.category = {code:'default',display:'Default',definition:'Default'}
+                            $scope.input.category = {code:'default',display:'Default',definition:'Default'}
 
                         }
+
+                        $scope.findPatient = function(){
+                            $uibModal.open({
+                                backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
+                                keyboard: false,       //same as above.
+                                templateUrl: 'modalTemplates/searchForPatient.html',
+                                size:'lg',
+                                controller: 'findPatientCtrl'
+                            }).result.then(
+                            );
+                        }
+
+
 
                         $scope.server = appConfigSvc.getCurrentDataServer();
                         $scope.checkName = function(){
@@ -1092,11 +1123,10 @@ angular.module("sampleApp")
 
                         $scope.save = function(){
                             //represent the category as a Coding. $scope.category is a concept
-                            var cat = {code:$scope.category.code,display:$scope.category.display}
+
+                            var cat = {code:$scope.input.category.code,display:$scope.input.category.display}
                             cat.system = 'http://clinfhir.com/fhir/CodeSystem/LibraryCategories';   //todo get from appConfig
-
-
-                            $scope.$close({name:$scope.name,description:$scope.description,category:cat})
+                            $scope.$close({name:$scope.input.name,description:$scope.input.description,category:cat})
                         }
 
                     },
@@ -1132,6 +1162,10 @@ angular.module("sampleApp")
                         if ($scope.builderBundles.length == 0) {
                             $scope.builderBundles = $localStorage.builderBundles
                         }
+
+                        //this will add the patient to the bundle (if there is one)
+                        setSelectedPatientFromServer(vo.patient);
+
 
                         makeGraph();
                         delete $scope.currentResource;

@@ -35,6 +35,7 @@ angular.module("sampleApp")
     })
 
     .filter('manualText',['builderSvc',function(builderSvc){
+        //return the manually entered text
         return function(resource) {
 
             if (resource && resource.text) {
@@ -244,13 +245,22 @@ angular.module("sampleApp")
     })
     .filter('cleanTextDiv',function(){
         //remove the <div  xmlns='http://www.w3.org/1999/xhtml'>{texthere}</div> tgs...
+        //todo - there must be a more elegant way than this...
         return function(textDiv) {
-            //console.log(textDiv)
-            if (textDiv) {
-                var startDiv = "<div xmlns='http://www.w3.org/1999/xhtml'>";
-                if (textDiv.indexOf(startDiv) > -1) {
-                    textDiv = textDiv.replace(startDiv,"");
 
+            if (textDiv) {
+                //var startDiv = "<div xmlns='http://www.w3.org/1999/xhtml'>";
+
+                var tmp = textDiv.replace(/"/g,"'");
+               // tmp = tmp.replace(/ /g,"");
+
+                var startDiv = "<div xmlns='http://www.w3.org/1999/xhtml'>";
+                var g = tmp.indexOf(startDiv);
+
+                if (g > -1) {
+
+                    textDiv = textDiv.substr(g+startDiv.length)
+                    //textDiv = textDiv.replace(startDiv,"");
                     textDiv = textDiv.substr(0,textDiv.length - 6);
                 }
 

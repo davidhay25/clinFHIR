@@ -181,7 +181,7 @@ angular.module("sampleApp")
                                 ig.name = ig.name || ig.description;
                                 $scope.listOfIG.push(ig)
                             }
-                        })
+                        });
                         $scope.listOfIG.sort(function(a,b){
                             if (a.name > b.name) {
                                 return -1
@@ -197,8 +197,6 @@ angular.module("sampleApp")
                     console.log(err)
                 }
             );
-
-
 
 
             $scope.saveIG = function(hideAlert){

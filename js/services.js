@@ -1022,7 +1022,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                                 allResources[item.type] = bundle;    //this will be a bundle
                             }
 
-                            console.log(bundle)
+                            //console.log(bundle)
                         }
                     )
                 )

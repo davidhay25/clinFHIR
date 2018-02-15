@@ -1,0 +1,138 @@
+<div>
+    <div class="row">
+        <div class="col-md-10">
+            <h3>Model Sections</h3>
+        </div>
+        <div class="col-md-2">
+            <img style="padding-top: 12px" ng-show="waiting" src="css/ajax_loader_blue_32.gif"/>
+        </div>
+    </div>
+
+    <uib-tabset>
+        <uib-tab heading="Editor">
+
+            <div class="row">
+                <div class="col-md-4 col-sm-4">
+
+                    <div class="list-group">
+                        <div ng-class="{'list-group-item':1==1,'list-group-item-info':section.code == selectedSection.code}"
+                             ng-repeat="section in sections" ng-click="selectSection(section)">
+                            <span style="cursor: pointer" >{{section.title}}</span>
+                        </div>
+                    </div>
+
+<!--
+            <ul>
+                <li ng-repeat="section in sections" ng-click="selectSection(section)">
+                    <span style="cursor: pointer" >{{section.title}}</span>
+                </li>
+            </ul>
+
+             <div id="popTree"></div>
+            -->
+
+
+        </div>
+        <div class="col-md-8 col-sm-8">
+
+            <div ng-show="selectedInstance">
+                <strong>{{selectedInstance.section.title}}</strong>
+                <table class="table">
+                    <tr ng-repeat="child in selectedInstance.children">
+                        <td>{{child.text}} <span ng-show="child.multiple">*</span></td>
+                        <td>
+                            <div ng-show="child.multiple">
+                                <div ng-repeat = "value in child.values track by $index">
+                                    {{value.value}}
+                                </div>
+                                <input ng-model="input.newValue[child.id].new" class="form-control"
+                                       ng-blur="addValue(child,input.newValue[child.id].new,true)"/>
+                            </div>
+                            <div ng-hide="child.multiple">
+                                <input value="input.newValue[child.id][0].value" ng-model="input.newValue[child.id]"
+                                       class="form-control"  ng-blur="addValue(child,input.newValue[child.id],false)"/>
+                            </div>
+
+                        </td>
+
+                        <td>
+                            <div ng-show="child.vs.vs.url">
+                                <i class="glyphicon glyphicon-eye-open clickable"
+                                   popover-placement="right" popover-trigger="'mouseenter'"
+                                   uib-popover="{{child.vs.vs.url}} ({{child.vs.strength}})"
+                                   ng-click="viewVS(child.vs.vs.url)">
+
+                                </i>
+                            </div>
+<!--
+                            <span ng-click="viewVS(child.vs.vs.url)" >{{child.vs.vs.url}} </span>
+                             <span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.vs.url)">
+                                            {{selectedNode.data.selectedValueSet.vs.url}}</span>
+                            -->
+
+                        </td>
+                        <!--<td>{{child}}</td>-->
+
+                    </tr>
+                </table>
+            </div>
+
+
+<!--
+            <div><strong>Path: </strong>{{selectedNode.id | dropFirstInPath}}</div>
+            <input ng-model="input.value" ng-blur="addValue()" class="form-control"/>
+
+            <table class="table">
+                <tr ng-repeat="node in allNodes" ng-show="values[node.id]">
+                    <td>{{node.id | dropFirstInPath}}</td>
+                    <td>{{values[node.id].value}}</td>
+
+                </tr>
+            </table>
+
+            -->
+
+
+        </div>
+    </div>
+
+        </uib-tab>
+        <uib-tab heading = 'Full document'>
+            <div ng-repeat="section in document.sections">
+                <div class="row">
+                    <div class="col-md-12">
+                        <strong>{{section.code | dropFirstInPath}}</strong>
+                    </div>
+                </div>
+
+                <div ng-repeat="value in section.values" class="row">
+                    <div class="col-md-1">
+
+                    </div>
+                    <div class="col-md-2">
+                        {{value.field}}
+                    </div>
+                    <div class="col-md-6">
+                        {{value.value}}
+                    </div>
+                    <div class="col-md-1">
+
+
+
+
+                    </div>
+                </div>
+
+
+            </div>
+
+        </uib-tab>
+        <uib-tab heading = 'Json'>
+            <pre>{{document | json}}</pre>
+        </uib-tab>
+    </uib-tabset>
+
+    <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
+                vs-selected="vsSelected"></vs-browser>
+
+</div>

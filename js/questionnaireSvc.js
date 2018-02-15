@@ -215,14 +215,14 @@ angular.module("sampleApp")
                     childHash[node.parent] = childHash[node.parent] || []
                     childHash[node.parent].push(node)
                 });
-                console.log(childHash);
+                //console.log(childHash);
 
                 //set the type of th equestionnaire item - and the options if coded...
                 var setQType = function (item,ed) {
                     if (ed && ed.type && ed.type[0]) {
                         var dt = ed.type[0].code
                         var typ = 'string';
-                        console.log(dt)
+                        //console.log(dt)
                         switch (dt) {
                             case 'date' :
                                 typ = 'date'
