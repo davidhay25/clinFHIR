@@ -50,6 +50,14 @@ angular.module("sampleApp")
                 //$scope.showFindProfileDialog.open();
             };
 
+            //when an item is selected in the form (populator)
+            $scope.selectItemFromForm = function(child) {
+                console.log(child)
+                $scope.selectedNode = findNodeWithPath(child.id);
+                console.log($scope.selectedNode);
+
+            };
+
             $scope.generateIG = function() {
                 alert('Not yet enabled, sorry...')
 

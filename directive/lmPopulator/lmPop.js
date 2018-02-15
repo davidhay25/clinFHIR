@@ -4,7 +4,8 @@ angular.module('sampleApp')
             restrict: 'EA', //E = element, A = attribute, C = class, M = comment
             scope: {
                 //@ reads the attribute value, = provides two-way binding, & works with functions
-                model: '='
+                model: '=',
+                selectItem : '&'
             },
 
             templateUrl: 'directive/lmPopulator/lmPopulator.html',
@@ -54,6 +55,12 @@ angular.module('sampleApp')
 console.log($scope.selectedInstance)
 
                     //$scope.selectedSection = section.children;
+                };
+
+                $scope.selectChild = function(child) {
+                    console.log(child)
+                    $scope.selectItem()(child)
+
                 };
 
                 $scope.addValue = function(child,value,isMultiple){

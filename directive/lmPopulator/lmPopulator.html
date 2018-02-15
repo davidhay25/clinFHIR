@@ -46,10 +46,12 @@
                                     {{value.value}}
                                 </div>
                                 <input ng-model="input.newValue[child.id].new" class="form-control"
+                                       ng-focus="selectChild(child)"
                                        ng-blur="addValue(child,input.newValue[child.id].new,true)"/>
                             </div>
                             <div ng-hide="child.multiple">
                                 <input value="input.newValue[child.id][0].value" ng-model="input.newValue[child.id]"
+                                       ng-focus="selectChild(child)"
                                        class="form-control"  ng-blur="addValue(child,input.newValue[child.id],false)"/>
                             </div>
 
