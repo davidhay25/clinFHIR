@@ -18,6 +18,13 @@
                         <div ng-class="{'list-group-item':1==1,'list-group-item-info':section.code == selectedSection.code}"
                              ng-repeat="section in sections" ng-click="selectSection(section)">
                             <span style="cursor: pointer" >{{section.title}}</span>
+                            <span ng-show="section.code == section.masterCode && section.canRepeat">
+                                <i class="glyphicon glyphicon-plus-sign pull-right"
+                                   popover-placement="top" popover-trigger="'mouseenter'"
+                                   uib-popover="Add a new section"
+                                   ng-click="addSection(section)"></i>
+                            </span>
+
                         </div>
                     </div>
 
@@ -62,7 +69,7 @@
                                 <i class="glyphicon glyphicon-eye-open clickable"
                                    popover-placement="right" popover-trigger="'mouseenter'"
                                    uib-popover="{{child.vs.vs.url}} ({{child.vs.strength}})"
-                                   ng-click="viewVS(child.vs.vs.url)">
+                                   ng-click="viewVS(child.vs.vs.url,child,false)">
 
                                 </i>
                             </div>
@@ -120,8 +127,6 @@
                     <div class="col-md-1">
 
 
-
-
                     </div>
                 </div>
 
@@ -135,6 +140,6 @@
     </uib-tabset>
 
     <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
-                vs-selected="vsSelected"></vs-browser>
+                concept-selected="codeSelected"></vs-browser>
 
 </div>

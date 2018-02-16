@@ -12,15 +12,42 @@ angular.module('sampleApp')
             controller: function($scope,logicalModelSvc,GetDataFromServer){
 
                 $scope.input = {};
+                $scope.input.newValue = {};
+
                 //react to change of model
                 $scope.$watch(function(scope){
                     return scope.model
                 },function(){
+                    console.log('ping!')
                     drawTree();
                 });
 
-
                 $scope.sectionInstances = []
+
+                //add a new instance of this section
+                $scope.addSection = function(section) {
+                    console.log(section)
+                    var clone = angular.copy(section);
+                    var id = new Date().getTime();
+                    clone.code = 'cd'+ id;
+                    
+                    //set id's for the children so the values can be tracked...
+                    clone.children.forEach(function (child) {
+                        //child is a tree node...
+                        child.id = child.id + id;
+                    });
+                    
+                    //now find where to insert it - after this set of masterCodes
+                    var pos = -1;
+                    $scope.sections.forEach(function(sect,inx) {
+                        if (sect.masterCode == section.masterCode) {
+                            pos = inx;
+                        }
+                    });
+
+                    $scope.sections.splice(pos+1,0,clone);
+
+                };
 
                 $scope.selectSection = function(section) {
                     $scope.selectedSection = section;       //this is actually the definition
@@ -33,6 +60,7 @@ angular.module('sampleApp')
                             $scope.selectedSectionInstances.push(inst)
                         }
                     });
+
                     switch ($scope.selectedSectionInstances.length) {
                         case 0 :
                             //there are no instances yet. Create one and add to the array
@@ -89,8 +117,8 @@ console.log($scope.selectedInstance)
                 $scope.showVSBrowser = function(vs) {
                     $scope.showVSBrowserDialog.open(vs);        //the open method defined in the directive...
                 };
-                $scope.viewVS = function(uri) {
-
+                $scope.viewVS = function(uri,child,isMultiple) {
+                    $scope.currentChildForVS = {child:child,isMultiple:isMultiple};       //a bit crufty this, should really pass it to the VS browswe somehow...
                     $scope.waiting = true;
                     GetDataFromServer.getValueSet(uri).then(
                         function(vs) {
@@ -102,6 +130,20 @@ console.log($scope.selectedInstance)
                     ).finally (function(){
                         $scope.waiting = false;
                     });
+                };
+
+
+                //when a code is selected from a dialog
+                $scope.codeSelected = function(code) {
+                    console.log(code,$scope.currentChildForVS.child)
+                    var child = $scope.currentChildForVS.child;
+                    var value = code.display + " ("+ code.code + ")";
+
+                    $scope.input.newValue[child.id] = value;       //this is where the form values are stored...
+
+                    $scope.addValue(child,value,$scope.currentChildForVS.isMultiple)
+
+
                 };
 
                 var makeDocument = function(sections,instances) {
@@ -142,7 +184,7 @@ console.log($scope.selectedInstance)
                     var topNode = treeData[0];      //the parent node for the mpdel
                     var section;
 
-                    var singleTopNodeSection = {code:'top',title:'top',node:{},children:[]};
+                    var singleTopNodeSection = {masterCode:'top',code:'top',title:'top',node:{},children:[]};
                     $scope.sections.push(singleTopNodeSection);
 
                     treeData.forEach(function (node) {
@@ -155,20 +197,23 @@ console.log($scope.selectedInstance)
 
                             } catch (ex){}//shouldn't happen...
 
-
-
-
                             if (type == 'BackboneElement' || type == 'Reference') {
                                 //this has child nodes
                                 //this is a new section.
                                 section = {code:node.id,title:node.text,node:node,children:[]};
+                                section.masterCode = node.id;      //this is used to distinguish between instances of this section
+
+                                if (node.data.max == '*') {
+                                    //this is a repeating section
+                                    section.canRepeat = true;
+                                }
+
+
                                 $scope.sections.push(section);
                             } else {
                                 //this is a single element off the root..
                                 singleTopNodeSection.children.push(node);
                             }
-
-
 
                            // nestedChildIds = {};
                            // nestedChildIds[node.id] = 'x';  //any nodes that have this as a parent will be inclded. This will 'flatten' the tree
@@ -187,7 +232,7 @@ console.log($scope.selectedInstance)
                                 delete cloneNode.data;
 
                                 section.children.push(cloneNode);
-                                console.log(cloneNode)
+                                //console.log(cloneNode)
                             }
                         }
 
