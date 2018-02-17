@@ -28,22 +28,32 @@
                         </div>
                     </div>
 
-<!--
-            <ul>
-                <li ng-repeat="section in sections" ng-click="selectSection(section)">
-                    <span style="cursor: pointer" >{{section.title}}</span>
-                </li>
-            </ul>
 
-             <div id="popTree"></div>
-            -->
 
 
         </div>
         <div class="col-md-8 col-sm-8">
 
             <div ng-show="selectedInstance">
-                <strong>{{selectedInstance.section.title}}</strong>
+
+                <div class="row">
+                    <div class="col-md-10 col-sm-10">
+                        <strong>{{selectedInstance.section.title}}</strong>
+                    </div>
+                    <div class="col-md-2 col-sm-2">
+                        <div ng-show="selectedInstance.section.profile">
+                            <i class="glyphicon glyphicon-edit clickable pull-right"
+                               style="padding: 8px"
+                               popover-placement="right" popover-trigger="'mouseenter'"
+                               uib-popover="Can prepopulate from patient data"
+                               ng-click="prePop(selectedInstance.section)">
+
+                            </i>
+                        </div>
+                    </div>
+                </div>
+
+
                 <table class="table">
                     <tr ng-repeat="child in selectedInstance.children">
                         <td>{{child.text}} <span ng-show="child.multiple">*</span></td>
@@ -66,41 +76,21 @@
 
                         <td>
                             <div ng-show="child.vs.vs.url">
-                                <i class="glyphicon glyphicon-eye-open clickable"
+                                <i class="glyphicon glyphicon-edit clickable pull-right"
                                    popover-placement="right" popover-trigger="'mouseenter'"
                                    uib-popover="{{child.vs.vs.url}} ({{child.vs.strength}})"
                                    ng-click="viewVS(child.vs.vs.url,child,false)">
 
                                 </i>
                             </div>
-<!--
-                            <span ng-click="viewVS(child.vs.vs.url)" >{{child.vs.vs.url}} </span>
-                             <span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.vs.url)">
-                                            {{selectedNode.data.selectedValueSet.vs.url}}</span>
-                            -->
+
 
                         </td>
-                        <!--<td>{{child}}</td>-->
+
 
                     </tr>
                 </table>
             </div>
-
-
-<!--
-            <div><strong>Path: </strong>{{selectedNode.id | dropFirstInPath}}</div>
-            <input ng-model="input.value" ng-blur="addValue()" class="form-control"/>
-
-            <table class="table">
-                <tr ng-repeat="node in allNodes" ng-show="values[node.id]">
-                    <td>{{node.id | dropFirstInPath}}</td>
-                    <td>{{values[node.id].value}}</td>
-
-                </tr>
-            </table>
-
-            -->
-
 
         </div>
     </div>
@@ -137,6 +127,14 @@
         <uib-tab heading = 'Json'>
             <pre>{{document | json}}</pre>
         </uib-tab>
+        <uib-tab heading = 'Values'>
+            <pre>{{input.newValue | json}}</pre>
+        </uib-tab>
+
+        <uib-tab heading = 'Instances'>
+            <pre>{{sectionInstances | json}}</pre>
+        </uib-tab>
+
     </uib-tabset>
 
     <vs-browser trigger="showVSBrowserDialog" hidesearch="true"

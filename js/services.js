@@ -918,7 +918,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
         getAllData : function(patientId) {
             //get all the data for a patient. Follow paging to get them all...
 
-
             var deferred = $q.defer();
             var allResources = {};
             //the currently selected data server object (not just the url)
@@ -930,9 +929,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 //some implement paging and small default sizes (hapi) and some don't (grahame)
 
                 var url = dataServer.url + "Patient/"+patientId + '/$everything';
-
-
-                //GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
 
                 this.getAllResourcesFollowingPaging(url).then(
                     function(arrayOfResource){
@@ -956,7 +952,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                                         allResources[type].entry.push({resource:resource});
                                         allResources[type].total ++;
                                     }
-
 
                                 }
 
@@ -1030,7 +1025,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
             $q.all(arQuery).then(
                 function(data){
-                    console.log(allResources)
+                    //console.log(allResources)
                     deferred.resolve(allResources);
                 },
                 function(err){

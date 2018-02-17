@@ -9,7 +9,40 @@ angular.module('sampleApp')
             },
 
             templateUrl: 'directive/lmPopulator/lmPopulator.html',
-            controller: function($scope,logicalModelSvc,GetDataFromServer){
+            controller: function($scope,logicalModelSvc,GetDataFromServer,$filter,supportSvc,$uibModal){
+
+                //get sample data. I thnk this should be passed in to allow a patient to be selected...
+                supportSvc.getAllData('12844').then(
+                    //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
+                    function(data) {
+                        console.log(data)
+                        $scope.patientData = data;
+                    }
+                );
+
+
+                $scope.prePop = function(section){
+                    //console.log(section)
+                    $uibModal.open({
+                        templateUrl: 'directive/lmPopulator/lmPrePop.html',
+                        //size : 'lg',
+                        controller : function($scope,patientData,ResourceUtilsSvc){
+                            $scope.patientData = patientData;
+                            $scope.ResourceUtilsSvc = ResourceUtilsSvc;     //used to display resource type summary
+                            //console.log(patientData);
+
+                            $scope.closeModal = function() {
+                                $scope.$close()
+                            }
+
+                        }, resolve : {
+                            patientData : function(){
+                                return $scope.patientData[section.profile]
+                            }
+                        }
+                    })
+
+                };
 
                 $scope.input = {};
                 $scope.input.newValue = {};
@@ -28,7 +61,8 @@ angular.module('sampleApp')
                 $scope.addSection = function(section) {
                     console.log(section)
                     var clone = angular.copy(section);
-                    var id = new Date().getTime();
+                    //id crafted to display easily in the form...
+                    var id = new Date().getTime() + '.' +  $filter('dropFirstInPath')(section.code); ;
                     clone.code = 'cd'+ id;
                     
                     //set id's for the children so the values can be tracked...
@@ -51,7 +85,7 @@ angular.module('sampleApp')
 
                 $scope.selectSection = function(section) {
                     $scope.selectedSection = section;       //this is actually the definition
-                    console.log(section)
+                    //console.log(section)
 
                     //find all the instances of this section.
                     $scope.selectedSectionInstances = [];
@@ -80,7 +114,7 @@ angular.module('sampleApp')
                     }
 
 
-console.log($scope.selectedInstance)
+//console.log($scope.selectedInstance)
 
                     //$scope.selectedSection = section.children;
                 };
@@ -102,13 +136,6 @@ console.log($scope.selectedInstance)
 
                     makeDocument($scope.sections,$scope.sectionInstances)
 
-                    return;
-
-
-                    var value = $scope.input.value;
-                    delete $scope.input.value;
-                    var path = $scope.selectedNode.id;
-                    $scope.values[path] = {value:value};
                 };
 
 
@@ -142,31 +169,31 @@ console.log($scope.selectedInstance)
                     $scope.input.newValue[child.id] = value;       //this is where the form values are stored...
 
                     $scope.addValue(child,value,$scope.currentChildForVS.isMultiple)
-
-
                 };
 
                 var makeDocument = function(sections,instances) {
                     $scope.document = {sections:[]};
+
                     sections.forEach(function (section) {
                         //are there any instances of this section
                         instances.forEach(function (inst) {
                             if (inst.code == section.code) {
-                                //yes (at least one)
-                                var docSection = {code:inst.code,values:[]}
+                                //yes (at least one). each instance is a separate section in the document.
+
+                                var docSection = {code:inst.code,values:[],display:''}
                                 $scope.document.sections.push(docSection);
                                 //now pull out all the values from the instance, where there is data in them...
                                 inst.children.forEach(function (child) {
                                     if (child.values && child.values.length > 0) {
 
-                                        //docSection.values = []
+
                                         child.values.forEach(function (v) {
                                             if (v.value) {
                                                 docSection.values.push(v)
                                             }
                                         })
 
-                                        //docSection.values.push(child.values)
+
                                     }
                                 })
                             }
@@ -208,10 +235,28 @@ console.log($scope.selectedInstance)
                                     section.canRepeat = true;
                                 }
 
+                                //if this is a reference, is there any data that can be pre-populated
+                                if (type == 'Reference') {
+
+                                    try {
+                                        var profile =  node.data.ed.type[0].targetProfile;
+                                        section.profile = $filter('referenceType')(profile)
+
+
+                                        //console.log(profile)
+
+
+                                    } catch (ex){}//shouldn't happen...
+
+
+                                }
+
 
                                 $scope.sections.push(section);
                             } else {
                                 //this is a single element off the root..
+
+
                                 singleTopNodeSection.children.push(node);
                             }
 

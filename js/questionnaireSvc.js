@@ -303,7 +303,7 @@ angular.module("sampleApp")
                 //this routine is used for bbe off the root
                 var addItemsFromNode = function(node,parentPath){
                     //add all nodes with the given parentparentPath
-                    console.log(parentPath, childHash[parentPath]);
+                    //console.log(parentPath, childHash[parentPath]);
 
                     if (childHash[parentPath]) {
                         childHash[parentPath].forEach(function (child) {
