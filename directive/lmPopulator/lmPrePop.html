@@ -32,7 +32,7 @@
                 <div class="list-group">
                     <div
                        ng-class="{'list-group-item':true,'active':entry.resource.id == outcome.selectedResource.id}"
-                       ng-repeat="entry in patientData.entry">
+                       ng-repeat="entry in patientResource.entry">
                         <div style="cursor: pointer" ng-click="resourceSelected(entry)">
 
                             <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>

@@ -349,28 +349,6 @@
 
                 </uib-tab>
 
-                <!--
-                <uib-tab heading="Current">
-
-                    <ul class="list-group" style=" height:500px; overflow: auto;" >
-                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.id == entry.item.display}"
-                            ng-repeat="ref in uniqueModelsList"
-                            ng-click="loadReferencedModel(ref.url)">
-
-                            <div class="row">
-                                <div class="col-md-12 col-sm-12">
-                                    <h4>{{ref.url | getLogicalID}}</h4>
-                                </div>
-
-                            </div>
-
-
-                        </li>
-                    </ul>
-
-
-                </uib-tab>
-                -->
 
 
             </uib-tabset>
@@ -455,250 +433,257 @@
                     <lm-populator model="SD" select-item="selectItemFromForm"></lm-populator>
                 </uib-tab>
 
-                <uib-tab heading="Mind Map"  select="redrawProfileGraph()"  deselect="input.graphTabIsSelected = false">
-                    <div id="mmLogicalModel"></div>
-                </uib-tab>
 
-                <uib-tab heading="Graph" select="redrawChart()">
+                <uib-tab heading="Analysis">
+                    <uib-tabset>
+
+                        <uib-tab heading="Mapping">
+                            <br/>
+
+                            <uib-tabset>
+                                <uib-tab heading="Mapping">
+
+
+
+
+
+                                    <table class="table table-bordered table-condensed">
+                                        <tr><th></th><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th><th>Comments</th><th>Mapping notes</th></tr>
+                                        <tr ng-repeat="ed in SD.snapshot.element">
+                                            <td>{{$index}}</td>
+                                            <td>
+                                                <div  ng-click="selectNodeFromTable(ed.path)" class="clickable"
+                                                      ng-style="{ 'padding-left': (ed.path | pathindent) }">{{ed.path | lastInPath}}</div>
+                                            </td>
+                                            <td>{{ed.type[0].code}}
+                                                <div ng-show="ed.type[0].targetProfile">-> {{ed.type[0].targetProfile | getLogicalID}}</div>
+                                            </td>
+                                            <td>{{ed.min}}..{{ed.max}}</td>
+                                            <td>{{ed.definition}}</td>
+                                            <td>{{ed.comment}}</td>
+                                            <td>
+                                                <div ng-repeat="map in ed.mapping">{{map.identity}}:{{map.map | showMapOnly}}</div>
+
+                                                <div ng-show="ed.fixedString">
+                                                    Fixed: {{ed.fixedString}}
+                                                </div>
+
+                                                <div>
+
+                                                    <a href="#" ng-click="showExtensionFromMap(ed)">
+
+                                                        {{ed | getSingleExtensionValueString : appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl}}
+                                                    </a>
+
+
+                                                    <!--
+                                                                                                {{ed | getSingleExtensionValueString : "http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl"}}
+                                                                                                -->
+                                                </div>
+
+
+                                                <!--
+                                                                                        <div ng-repeat="map in ed.mapping">{{map.identity}}:{{map.map}}</div>
+                                                                                        <div ng-repeat="ext in ed.mapping[0].extension">
+                                                                                            <em>
+                                                                                            {{ext.valueString}}
+                                                                                            {{ext.valueUri | getLogicalID}}
+                                                                                            </em>
+                                                                                        </div>
+                                                -->
+                                            </td>
+                                        </tr>
+
+                                    </table>
+
+                                    <div>
+                                        <a class="btn btn-link" download="{{downloadLinkJsonName}}.csv"
+                                           href="{{downloadLinkJsonContent}}" title="{{downloadLinkJsonName}}" >
+                                            Download
+                                        </a>
+                                    </div>
+
+                                </uib-tab>
+
+                                <uib-tab heading="Differences from base" ng-show="differenceFromBase">
+                                    <h5>Elements added to the base</h5>
+                                    <table>
+                                        <tr ng-repeat = "diff in differenceFromBase.added">
+                                            <td>
+                                                {{diff.path}}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <h5>Elements removed from the base</h5>
+                                    <table>
+                                        <tr ng-repeat = "diff in differenceFromBase.removed">
+                                            <td>
+                                                {{diff.path}}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <h5>Elements changed compared to the base</h5>
+                                    <table>
+                                        <tr ng-repeat = "diff in differenceFromBase.changed">
+                                            <td>
+                                                {{diff.ed.path}}
+                                            </td>
+                                            <td>
+                                                <ul>
+                                                    <li ng-repeat="change in diff.list">
+                                                        {{change.display}}
+                                                    </li>
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+
+                                </uib-tab>
+
+
+                                <uib-tab heading="Mappings by Identity">
+                                    <br/>
+                                    <div class="btn-group">
+                                        <label ng-repeat="identity in allMappingIdentities"
+                                               class="btn btn-default" ng-model='input.mi' uib-btn-radio="identity">
+                                            {{identity}}
+                                        </label>
+                                    </div>
+                                    <br/> <br/>
+                                    <table class="table table-condensed table-bordered">
+                                        <tr><th>Identity</th><th>Map</th><th>Path</th></tr>
+                                        <tr ng-repeat="map in allMappings" ng-show="map.identity == input.mi">
+                                            <td>
+                                                {{map.identity}}
+                                            </td>
+                                            <td>{{map.map}}</td>
+                                            <td class="clickable" ng-click="selectNodeFromTable(map.path)">
+                                                {{map.name}}</td>
+                                        </tr>
+                                    </table>
+
+                                </uib-tab>
+
+                                <uib-tab heading="v2 -> FHIR">
+                                    <h4>Mappings that have both an HL7 v2 and a FHIR mapping</h4>
+
+                                    <table class="table table-bordered table-condensed">
+                                        <tr><th>HL7 V2</th><th>FHIR</th><th>Path</th></tr>
+                                        <tr ng-repeat="map in relativeMappings">
+                                            <td>{{map.sourceMap | addSpace}}</td>
+                                            <td>{{map.targetMap | addSpace}}</td>
+                                            <td>{{map.branch.data.path | addSpace}}</td>
+                                        </tr>
+                                    </table>
+
+
+
+
+                                </uib-tab>
+
+                            </uib-tabset>
+
+
+                        </uib-tab>
+
+                        <uib-tab heading="Coded">
+                            <br/>
+                            <div class="designerScroll">
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12">
+                                        <table class="table table-bordered table-condensed">
+                                            <tr><th>Element</th><th>ValueSet</th><th>Description</th></tr>
+                                            <tr ng-repeat="row in treeData" ng-show="row.data.isCoded">
+                                                <td>
+
+                                                    <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
+                                                </td>
+                                                <td>{{row.data.selectedValueSet.vs.url}}</td>
+                                                <td>{{row.data.description}}</td>
+
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </uib-tab>
+
+                        <uib-tab heading="References">
+                            <br/>
+
+
+                            <uib-tabset>
+
+                                <uib-tab heading="From this model">
+                                    <table class="table table-bordered table-condensed">
+                                        <tr><th>Path</th><th>Referenced Model</th><th>Description</th></tr>
+                                        <tr ng-repeat="row in treeData" ng-show="row.data.isReference">
+                                            <td>
+                                                <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path | dropFirstInPath}}</div>
+                                            </td>
+                                            <td>{{row.data.referenceUrl | getLogicalID}}</td>
+                                            <td>{{row.data.description}}</td>
+
+                                        </tr>
+                                    </table>
+                                </uib-tab>
+                                <uib-tab heading="Graph" select="redrawReferencesChart()">
+                                    <div id="refLogicalModel"></div>
+                                </uib-tab>
+
+                                <uib-tab heading="Sample Document">
+                                    <button class="btn btn-link pull-right" ng-click="editLMDoc()">Edit</button>
+                                    <div class="clearfix"></div>
+
+                                    <pre>{{docBundle | json}}</pre>
+                                </uib-tab>
+
+
+                                <uib-tab heading="All references">
+                                    <table class="table table-bordered table-condensed">
+                                        <tr><th>Source Model</th><th>Path</th><th>Target Model</th></tr>
+                                        <tr ng-repeat="row in modelReferences">
+
+                                            <td>{{row.src | getLogicalID}}</td>
+                                            <td>
+                                                <div  ng-click="selectNodeFromTable(row.path)" class="clickable" >{{row.path | dropFirstInPath}}</div>
+                                            </td>
+
+
+                                            <td>{{row.targ | getLogicalID}}</td>
+
+                                        </tr>
+                                    </table>
+                                </uib-tab>
+
+
+
+                            </uib-tabset>
+
+
+
+
+
+                        </uib-tab>
+
+                        <uib-tab heading="Mind Map"  select="redrawProfileGraph()"  deselect="input.graphTabIsSelected = false">
+                            <div id="mmLogicalModel"></div>
+                        </uib-tab>
+
+                        <uib-tab heading="Graph" select="redrawChart()">
                      <span class="clickable iconSpacing pull-right" ng-show="hidePatientFlag"
                            ng-click="showAllInGraph()">Show All</span>
 
-                    <span class="clickable iconSpacing pull-right"
-                          ng-hide="hidePatientFlag" ng-click="hidePatient()">Hide Patient</span>
+                            <span class="clickable iconSpacing pull-right"
+                                  ng-hide="hidePatientFlag" ng-click="hidePatient()">Hide Patient</span>
 
-                    <div id="resourceGraph"></div>
-                </uib-tab>
-
-
-                <uib-tab heading="Mapping">
-                    <br/>
-
-                    <uib-tabset>
-                        <uib-tab heading="Mapping">
-
-
-
-
-
-                            <table class="table table-bordered table-condensed">
-                                <tr><th></th><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th><th>Comments</th><th>Mapping notes</th></tr>
-                                <tr ng-repeat="ed in SD.snapshot.element">
-                                    <td>{{$index}}</td>
-                                    <td>
-                                        <div  ng-click="selectNodeFromTable(ed.path)" class="clickable"
-                                              ng-style="{ 'padding-left': (ed.path | pathindent) }">{{ed.path | lastInPath}}</div>
-                                    </td>
-                                    <td>{{ed.type[0].code}}
-                                        <div ng-show="ed.type[0].targetProfile">-> {{ed.type[0].targetProfile | getLogicalID}}</div>
-                                    </td>
-                                    <td>{{ed.min}}..{{ed.max}}</td>
-                                    <td>{{ed.definition}}</td>
-                                    <td>{{ed.comment}}</td>
-                                    <td>
-                                        <div ng-repeat="map in ed.mapping">{{map.identity}}:{{map.map | showMapOnly}}</div>
-
-                                        <div ng-show="ed.fixedString">
-                                            Fixed: {{ed.fixedString}}
-                                        </div>
-
-                                        <div>
-
-                                            <a href="#" ng-click="showExtensionFromMap(ed)">
-
-                                                {{ed | getSingleExtensionValueString : appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl}}
-                                            </a>
-
-
-<!--
-                                            {{ed | getSingleExtensionValueString : "http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl"}}
-                                            -->
-                                        </div>
-
-
-<!--
-                                        <div ng-repeat="map in ed.mapping">{{map.identity}}:{{map.map}}</div>
-                                        <div ng-repeat="ext in ed.mapping[0].extension">
-                                            <em>
-                                            {{ext.valueString}}
-                                            {{ext.valueUri | getLogicalID}}
-                                            </em>
-                                        </div>
--->
-                                    </td>
-                                </tr>
-
-                            </table>
-
-                            <div>
-                                <a class="btn btn-link" download="{{downloadLinkJsonName}}.csv"
-                                   href="{{downloadLinkJsonContent}}" title="{{downloadLinkJsonName}}" >
-                                    Download
-                                </a>
-                            </div>
-
+                            <div id="resourceGraph"></div>
                         </uib-tab>
-
-                        <uib-tab heading="Differences from base" ng-show="differenceFromBase">
-                            <h5>Elements added to the base</h5>
-                            <table>
-                                <tr ng-repeat = "diff in differenceFromBase.added">
-                                <td>
-                                    {{diff.path}}
-                                </td>
-                                </tr>
-                            </table>
-                            <h5>Elements removed from the base</h5>
-                            <table>
-                                <tr ng-repeat = "diff in differenceFromBase.removed">
-                                    <td>
-                                        {{diff.path}}
-                                    </td>
-                                </tr>
-                            </table>
-                            <h5>Elements changed compared to the base</h5>
-                            <table>
-                                <tr ng-repeat = "diff in differenceFromBase.changed">
-                                    <td>
-                                        {{diff.ed.path}}
-                                    </td>
-                                    <td>
-                                        <ul>
-                                            <li ng-repeat="change in diff.list">
-                                                {{change.display}}
-                                            </li>
-                                        </ul>
-                                    </td>
-                                </tr>
-                            </table>
-
-
-                        </uib-tab>
-
-
-                        <uib-tab heading="Mappings by Identity">
-                            <br/>
-                            <div class="btn-group">
-                                <label ng-repeat="identity in allMappingIdentities"
-                                       class="btn btn-default" ng-model='input.mi' uib-btn-radio="identity">
-                                    {{identity}}
-                                </label>
-                            </div>
-                            <br/> <br/>
-                            <table class="table table-condensed table-bordered">
-                                <tr><th>Identity</th><th>Map</th><th>Path</th></tr>
-                                <tr ng-repeat="map in allMappings" ng-show="map.identity == input.mi">
-                                    <td>
-                                        {{map.identity}}
-                                    </td>
-                                    <td>{{map.map}}</td>
-                                    <td class="clickable" ng-click="selectNodeFromTable(map.path)">
-                                       {{map.name}}</td>
-                                </tr>
-                            </table>
-
-                        </uib-tab>
-
-                        <uib-tab heading="v2 -> FHIR">
-                            <h4>Mappings that have both an HL7 v2 and a FHIR mapping</h4>
-
-                            <table class="table table-bordered table-condensed">
-                                <tr><th>HL7 V2</th><th>FHIR</th><th>Path</th></tr>
-                                <tr ng-repeat="map in relativeMappings">
-                                    <td>{{map.sourceMap | addSpace}}</td>
-                                    <td>{{map.targetMap | addSpace}}</td>
-                                    <td>{{map.branch.data.path | addSpace}}</td>
-                                </tr>
-                            </table>
-
-
-
-
-                        </uib-tab>
-
-                    </uib-tabset>
-
-
-                </uib-tab>
-
-                <uib-tab heading="Coded">
-                    <br/>
-                    <div class="designerScroll">
-                        <div class="row">
-                            <div class="col-md-12 col-sm-12">
-                                <table class="table table-bordered table-condensed">
-                                    <tr><th>Element</th><th>ValueSet</th><th>Description</th></tr>
-                                    <tr ng-repeat="row in treeData" ng-show="row.data.isCoded">
-                                        <td>
-
-                                            <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
-                                        </td>
-                                        <td>{{row.data.selectedValueSet.vs.url}}</td>
-                                        <td>{{row.data.description}}</td>
-
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                </uib-tab>
-
-                <uib-tab heading="References">
-                    <br/>
-
-
-                    <uib-tabset>
-
-                        <uib-tab heading="From this model">
-                            <table class="table table-bordered table-condensed">
-                                <tr><th>Path</th><th>Referenced Model</th><th>Description</th></tr>
-                                <tr ng-repeat="row in treeData" ng-show="row.data.isReference">
-                                    <td>
-                                        <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path | dropFirstInPath}}</div>
-                                    </td>
-                                    <td>{{row.data.referenceUrl | getLogicalID}}</td>
-                                    <td>{{row.data.description}}</td>
-
-                                </tr>
-                            </table>
-                        </uib-tab>
-                        <uib-tab heading="Graph" select="redrawReferencesChart()">
-                            <div id="refLogicalModel"></div>
-                        </uib-tab>
-
-                        <uib-tab heading="Sample Document">
-                            <button class="btn btn-link pull-right" ng-click="editLMDoc()">Edit</button>
-                            <div class="clearfix"></div>
-
-                            <pre>{{docBundle | json}}</pre>
-                        </uib-tab>
-
-
-                        <uib-tab heading="All references">
-                            <table class="table table-bordered table-condensed">
-                                <tr><th>Source Model</th><th>Path</th><th>Target Model</th></tr>
-                                <tr ng-repeat="row in modelReferences">
-
-                                    <td>{{row.src | getLogicalID}}</td>
-                                    <td>
-                                        <div  ng-click="selectNodeFromTable(row.path)" class="clickable" >{{row.path | dropFirstInPath}}</div>
-                                    </td>
-
-
-                                    <td>{{row.targ | getLogicalID}}</td>
-
-                                </tr>
-                            </table>
-                        </uib-tab>
-
 
 
                     </uib-tabset>
-
-
-
-
-
                 </uib-tab>
 
 

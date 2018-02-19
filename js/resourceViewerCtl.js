@@ -58,8 +58,8 @@ angular.module("sampleApp")
 
             //when a new scenario is selected with a patient from the server. passes in all data for that patient
             $scope.$on('patientSelected',function(event,patientData){
-                renderPatientDetails(patientData);
-                console.log(patientData)
+                renderPatientDetails(patientResource);
+                console.log(patientResource)
             });
 
 

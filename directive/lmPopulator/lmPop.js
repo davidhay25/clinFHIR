@@ -9,10 +9,30 @@ angular.module('sampleApp')
             },
 
             templateUrl: 'directive/lmPopulator/lmPopulator.html',
-            controller: function($scope,logicalModelSvc,GetDataFromServer,$filter,supportSvc,$uibModal){
+            controller: function($scope,logicalModelSvc,GetDataFromServer,$filter,supportSvc,$uibModal,
+                                 appConfigSvc,$http,modalService,ResourceUtilsSvc){
+
+                //react to change of model
+                $scope.$watch(function(scope){
+                    return scope.model
+                },function(){
+                    console.log('ping!')
+                    drawTree();
+                });
+
+
+                var patientId ='12844';
+                $scope.ResourceUtilsSvc = ResourceUtilsSvc;
+                $scope.showPatientSummary = function(){
+                    var html = ""
+                    angular.forEach($scope.patientData,function(v,k) {
+                        html +=  v.entry.length + ' ' +   k + "<br/>"
+                    });
+                    return html
+                };
 
                 //get sample data. I thnk this should be passed in to allow a patient to be selected...
-                supportSvc.getAllData('12844').then(
+                supportSvc.getAllData(patientId).then(
                     //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
                     function(data) {
                         console.log(data)
@@ -20,7 +40,34 @@ angular.module('sampleApp')
                     }
                 );
 
+                //and here's the patient...
+                var url = appConfigSvc.getCurrentDataServer().url + "Patient/"+patientId;
+                $http.get(url).then(
+                    function(data) {
+                        console.log(data)
+                        $scope.patient = data.data;
+                    }
+                );
 
+
+                $scope.refreshModel = function() {
+                    var modalOptions = {
+                        closeButtonText: "No, I've changed my mind",
+                        actionButtonText: 'Yes, create a new form',
+                        headerText: 'Refresh form',
+                        bodyText: 'Are you sure you wish to refresh the form. This will delete all entries (apart from the patient) '
+                    };
+
+
+                    // var txt = 'There are '+ $scope.patientData[type].entry.length + ' Resources of this type. ';
+                    // txt += 'Please confirm that you wish to import them all?'
+                    modalService.showModal({}, modalOptions).then(function(){
+
+                        drawTree();
+                    })
+                };
+
+                //when the use wants to pre-pop from the patient data (like Condition)
                 $scope.prePop = function(section){
                     //console.log(section)
                     $uibModal.open({
@@ -47,15 +94,7 @@ angular.module('sampleApp')
                 $scope.input = {};
                 $scope.input.newValue = {};
 
-                //react to change of model
-                $scope.$watch(function(scope){
-                    return scope.model
-                },function(){
-                    console.log('ping!')
-                    drawTree();
-                });
-
-                $scope.sectionInstances = []
+                $scope.sectionInstances = [];
 
                 //add a new instance of this section
                 $scope.addSection = function(section) {
@@ -66,9 +105,9 @@ angular.module('sampleApp')
                     clone.code = 'cd'+ id;
                     
                     //set id's for the children so the values can be tracked...
-                    clone.children.forEach(function (child) {
+                    clone.children.forEach(function (child,index) {
                         //child is a tree node...
-                        child.id = child.id + id;
+                        child.id = id + '-'+ index;// child.id + id;
                     });
                     
                     //now find where to insert it - after this set of masterCodes
@@ -80,6 +119,7 @@ angular.module('sampleApp')
                     });
 
                     $scope.sections.splice(pos+1,0,clone);
+                    return clone;
 
                 };
 
@@ -138,7 +178,6 @@ angular.module('sampleApp')
 
                 };
 
-
                 //functions and prperties to enable the valueset viewer
                 $scope.showVSBrowserDialog = {};
                 $scope.showVSBrowser = function(vs) {
@@ -159,7 +198,6 @@ angular.module('sampleApp')
                     });
                 };
 
-
                 //when a code is selected from a dialog
                 $scope.codeSelected = function(code) {
                     console.log(code,$scope.currentChildForVS.child)
@@ -167,10 +205,29 @@ angular.module('sampleApp')
                     var value = code.display + " ("+ code.code + ")";
 
                     $scope.input.newValue[child.id] = value;       //this is where the form values are stored...
-
                     $scope.addValue(child,value,$scope.currentChildForVS.isMultiple)
                 };
 
+
+                $scope.doPrePopDEP = function() {
+                    //now look for prepop of repeating resources (like Condition)
+                    var ppResources = ['Condition','MedicationStatement']
+
+                    //need to fix the sections to iterate over, as the pre-pop function adds new ones...
+                    var fixedSections = angular.copy($scope.sections);
+                    // $scope.sections.forEach(function (sect) {
+                    fixedSections.forEach(function (sect) {
+                        if (sect.profile) {
+                            //so this section is mapped to a referenced resource, is it one that we can pre-populate from?
+                            if (ppResources.indexOf(sect.profile) > -1) {
+                                //yes, it is...
+                                prePopRepeats(sect);    //perform the actual pre-pop
+                            }
+                        }
+                    });
+                }
+
+                //construct the document model...
                 var makeDocument = function(sections,instances) {
                     $scope.document = {sections:[]};
 
@@ -201,8 +258,112 @@ angular.module('sampleApp')
                         
                     })
                 };
-                
+
+                //get the fhir mapping (if any) from the tree node
+                function getMapping(data) {
+                    var fhirPath;
+                    if (data) {
+                        data.forEach(function (map) {
+                            if (map.identity == 'fhir') {
+                                fhirPath = map.map
+                            }
+                        })
+                    }
+                    return fhirPath;
+                }
+
+                //mapped resources - like Condition & AllergyIntolerance
+                $scope.prePopRepeats = function(section) {
+                    var type = section.profile;         //this is actually a resoruce type...
+                    console.log(type)
+                    if ($scope.patientData[type]) {
+
+                        var modalOptions = {
+                            closeButtonText: "No, I've changed my mind",
+                            actionButtonText: 'Yes, please add these resources to the form',
+                            headerText: 'Add resources to form',
+                            bodyText: 'There are '+ $scope.patientData[type].entry.length + ' Resources of this type. '
+                        };
+
+
+                       // var txt = 'There are '+ $scope.patientData[type].entry.length + ' Resources of this type. ';
+                       // txt += 'Please confirm that you wish to import them all?'
+                        modalService.showModal({}, modalOptions).then(function(){
+                            //so the patient has data of this type
+                            $scope.patientData[type].entry.forEach(function(entry,inx){
+
+                                var resource = entry.resource;      //the resource from the patient data
+                                console.log(inx,entry.resource)
+                                //first, construct a new section for this resource
+
+                                var newSection = $scope.addSection(section)
+                                console.log(newSection);
+
+                                //add a new instance per 'pre-popped' element to hold the values
+                                var instance = {code:newSection.code,children:newSection.children,section: newSection, values: []}
+                                $scope.sectionInstances.push(instance);
+
+                                //now, work through the child elements of the 'parent' section to pull out the mapped values
+                                newSection.children.forEach(function (child) {
+
+                                    if (child.mappingPath) {
+                                        console.log(child.mappingPath)
+
+                                        var v = getPrepopValue(resource,child.mappingPath)
+                                        //console.log(v)
+                                        if (v) {
+                                            var v1 = v[0];
+
+                                            if (angular.isObject(v1)){
+                                                v1 = v1.text;
+                                            }
+
+                                            $scope.input.newValue[child.id] = v1;       //this is where the form values are stored...
+                                            $scope.addValue(child,v1,false)
+
+                                        }
+
+                                        //finally, add the instance
+                                        //  var instance = {code:child.code,children:child.children,section: child,values: []}
+                                        // $scope.sectionInstances.push(instance);
+
+
+                                    }
+
+                                })
+
+
+                            })
+                        })
+
+
+
+                    }
+
+                    console.log($scope.sectionInstances)
+                }
+
+                //return the value (if any) for this resource in this path. For now, just off the root...
+                function getPrepopValue(resource,fhirPath) {
+
+                    //always return an array...
+                    if (fhirPath && resource) {
+                        var ar = fhirPath.split('.');
+                        if (ar.length == 2) {
+                            var elementName = ar[1];
+                            var v = resource[elementName];
+                            if (v) {
+                                if (! angular.isArray(v)) {
+                                    v = [v]
+                                }
+                            }
+                            return v;
+                        }
+                    }
+                }
+
                 function drawTree() {
+                    console.log('----------------------------------')
                     $scope.values = {};        //a hash that contains values entered by the user
                     var treeData = logicalModelSvc.createTreeArrayFromSD($scope.model);
 
@@ -211,9 +372,10 @@ angular.module('sampleApp')
                     var topNode = treeData[0];      //the parent node for the mpdel
                     var section;
 
-                    var singleTopNodeSection = {masterCode:'top',code:'top',title:'top',node:{},children:[]};
+                    var singleTopNodeSection = {masterCode:'top',code:'top',title:'top level elements',node:{},children:[]};
                     $scope.sections.push(singleTopNodeSection);
 
+                    var ppPatient;
                     treeData.forEach(function (node) {
                         if (node.parent == topNode.id) {
                             //this is directly off the parent...
@@ -221,7 +383,6 @@ angular.module('sampleApp')
                             var type ='unknown';
                             try {
                                 type = node.data.ed.type[0].code
-
                             } catch (ex){}//shouldn't happen...
 
                             if (type == 'BackboneElement' || type == 'Reference') {
@@ -235,17 +396,12 @@ angular.module('sampleApp')
                                     section.canRepeat = true;
                                 }
 
-                                //if this is a reference, is there any data that can be pre-populated
+                                //if this is a reference, then add the type so it can be pre-populated
                                 if (type == 'Reference') {
 
                                     try {
                                         var profile =  node.data.ed.type[0].targetProfile;
                                         section.profile = $filter('referenceType')(profile)
-
-
-                                        //console.log(profile)
-
-
                                     } catch (ex){}//shouldn't happen...
 
 
@@ -255,8 +411,6 @@ angular.module('sampleApp')
                                 $scope.sections.push(section);
                             } else {
                                 //this is a single element off the root..
-
-
                                 singleTopNodeSection.children.push(node);
                             }
 
@@ -266,52 +420,58 @@ angular.module('sampleApp')
                             if (section) {
                                 //does this node (itself a child) allow multiple values
 
-
-
                                 if (node.data.max == '*') {
                                     node.multiple = true;
                                 }
                                 var cloneNode = angular.copy(node);
                                 cloneNode.vs = node.data.selectedValueSet
-
-                                delete cloneNode.data;
+                                delete cloneNode.data;      //too much data!
 
                                 section.children.push(cloneNode);
-                                //console.log(cloneNode)
+
+                                var fhirPath = getMapping(node.data.mappingFromED);
+                                if (fhirPath) {
+                                    //currently only works for Patient...
+                                    cloneNode.mappingPath = fhirPath;
+
+                                    //console.log(fhirPath)
+                                    var v = getPrepopValue($scope.patient,fhirPath)
+                                    //console.log(v)
+                                    if (v) {
+                                        var v1 = v[0];
+
+                                        if (angular.isObject(v1)){
+                                            v1 = v1.text;
+                                        }
+
+
+                                        $scope.input.newValue[cloneNode.id] = v1;       //this is where the form values are stored...
+                                        $scope.addValue(cloneNode,v1,false)
+                                        if (! ppPatient) {
+                                            //need to add a Patient instance...
+                                            ppPatient = true;
+                                            var instance = {code:section.code,children:section.children,section: section,values: []}
+                                            $scope.sectionInstances.push(instance);
+                                        }
+                                    }
+                                }
                             }
                         }
 
                         $scope.allNodes.push(node)
                     });
 
-                    $('#popTree').jstree('destroy');
-                    $('#popTree').jstree(
-                        {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
-                    ).on('changed.jstree', function (e, data) {
-                        //seems to be the node selection event...
+                    if (1==2) {
 
-                        if (data.node) {
-                            $scope.selectedNode = data.node;
-                            console.log($scope.selectedNode)
-                            //$scope.input.value = $scope.values[path];
+                    }
 
-                        }
 
-                        $scope.$digest();       //as the event occurred outside of angular...
 
-                    }).on('redraw.jstree', function (e, data) {
 
-                        //ensure the selected node remains so after a redraw...
-                        if ($scope.treeIdToSelect) {
-                            //  $("#lmTreeView").jstree("select_node", "#"+$scope.treeIdToSelect);
-                            delete $scope.treeIdToSelect
-                        }
+                    makeDocument($scope.sections,$scope.sectionInstances)
 
-                    });
+
                 }
-
-
-
 
             }
         }
