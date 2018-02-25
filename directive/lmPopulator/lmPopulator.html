@@ -24,7 +24,7 @@
                      popover-trigger="'mouseenter'"
 
                      popover-placement="bottom">
-                    <span class="dottedUnderline">
+                    <span class="dottedUnderline pull-right">
                         {{ResourceUtilsSvc.getOneLineSummaryOfResource(patient)}}
                     </span>
 
@@ -65,72 +65,97 @@
                         </div>
                     </div>
                 </div>
-        <div class="col-md-8 col-sm-8">
+                <div class="col-md-4 col-sm-4">
 
-            <div ng-show="selectedInstance">
-<!--
-                <div class="banner">{{selectedInstance.section.title}}</div>
--->
-               <div class="row">
-                   <div class="col-md-10 col-sm-10">
-                       <div class="banner">{{selectedInstance.section.title}}</div>
-                   </div>
-                   <div class="col-md-2 col-sm-2">
-
-                       <div ng-show="selectedInstance.section.profile">
-                           <i class="glyphicon glyphicon-flash clickable pull-right"
-                                style="padding-right: 8px"
-                              popover-placement="right" popover-trigger="'mouseenter'"
-                              uib-popover="Can add {{selectedInstance.section.profile}} resources from patient data"
-                              ng-click="prePopRepeats(selectedInstance.section)">
-
-                           </i>
+                    <div ng-show="selectedInstance">
+                   <div class="row">
+                       <div class="col-md-10 col-sm-10">
+                           <div class="banner">{{selectedInstance.section.title}}</div>
                        </div>
+                       <div class="col-md-2 col-sm-2">
+
+                           <div ng-show="selectedInstance.section.profile">
+                               <i class="glyphicon glyphicon-flash clickable pull-right"
+                                    style="padding-right: 8px"
+                                  popover-placement="right" popover-trigger="'mouseenter'"
+                                  uib-popover="Can add {{selectedInstance.section.profile}} resources from patient data"
+                                  ng-click="prePopRepeats(selectedInstance.section)">
+
+                               </i>
+                           </div>
+
+                        </div>
+                    </div>
+
+
+                    <table class="table">
+                        <tr ng-repeat="child in selectedInstance.children">
+                            <td>{{child.text}} <span ng-show="child.multiple">*</span></td>
+                            <td>
+                                <div ng-show="child.multiple">
+                                    <div ng-repeat = "value in child.values track by $index">
+                                        {{value.value}}
+                                    </div>
+                                    <input ng-model="input.newValue[child.id].new" class="form-control"
+                                           ng-focus="selectChild(child)"
+                                           ng-blur="addValue(child,input.newValue[child.id].new,true)"/>
+                                </div>
+                                <div ng-hide="child.multiple">
+                                    <input value="input.newValue[child.id][0].value" ng-model="input.newValue[child.id]"
+                                           ng-focus="selectChild(child)"
+                                           class="form-control"  ng-blur="addValue(child,input.newValue[child.id],false)"/>
+                                </div>
+
+                            </td>
+
+                            <td>
+                                <div ng-show="child.vs.vs.url">
+                                    <i class="glyphicon glyphicon-edit clickable pull-right"
+                                       popover-placement="right" popover-trigger="'mouseenter'"
+                                       uib-popover="{{child.vs.vs.url}} ({{child.vs.strength}})"
+                                       ng-click="viewVS(child.vs.vs.url,child,false)">
+
+                                    </i>
+                                </div>
+
+
+                            </td>
+
+
+                        </tr>
+                    </table>
+                </div>
+
+                </div>
+                <div class="col-md-4 col-sm-4">
+                    <div ng-repeat="section in document.sections">
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12">
+                                <strong>{{section.code | dropFirstInPath}}</strong>
+                            </div>
+                        </div>
+
+                        <div ng-repeat="value in section.values" class="row">
+                            <div class="col-md-3 col-sm-3">
+
+                            </div>
+                            <div class="col-md-2">
+                                {{value.field}}
+                            </div>
+                            <div class="col-md-6">
+                                {{value.value}}
+                            </div>
+                            <div class="col-md-1">
+
+
+                            </div>
+
+                        </div>
+                        <hr/>
 
                     </div>
                 </div>
-
-
-                <table class="table">
-                    <tr ng-repeat="child in selectedInstance.children">
-                        <td>{{child.text}} <span ng-show="child.multiple">*</span></td>
-                        <td>
-                            <div ng-show="child.multiple">
-                                <div ng-repeat = "value in child.values track by $index">
-                                    {{value.value}}
-                                </div>
-                                <input ng-model="input.newValue[child.id].new" class="form-control"
-                                       ng-focus="selectChild(child)"
-                                       ng-blur="addValue(child,input.newValue[child.id].new,true)"/>
-                            </div>
-                            <div ng-hide="child.multiple">
-                                <input value="input.newValue[child.id][0].value" ng-model="input.newValue[child.id]"
-                                       ng-focus="selectChild(child)"
-                                       class="form-control"  ng-blur="addValue(child,input.newValue[child.id],false)"/>
-                            </div>
-
-                        </td>
-
-                        <td>
-                            <div ng-show="child.vs.vs.url">
-                                <i class="glyphicon glyphicon-edit clickable pull-right"
-                                   popover-placement="right" popover-trigger="'mouseenter'"
-                                   uib-popover="{{child.vs.vs.url}} ({{child.vs.strength}})"
-                                   ng-click="viewVS(child.vs.vs.url,child,false)">
-
-                                </i>
-                            </div>
-
-
-                        </td>
-
-
-                    </tr>
-                </table>
             </div>
-
-        </div>
-    </div>
 
         </uib-tab>
         <uib-tab heading = 'Full document'>
