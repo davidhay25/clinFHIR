@@ -3171,7 +3171,7 @@ angular.module("sampleApp")
 
                     $scope.cancel = function () {
                         $scope.$close();
-                    }
+                    };
 
                     $scope.checkIdentifier = function (identifier) {
                         delete $scope.input.identifierError;

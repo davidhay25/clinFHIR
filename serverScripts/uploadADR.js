@@ -152,9 +152,6 @@ arReaction.forEach(function(lne){
     }
 });
 
-
-
-
 var arMedication = [];
 var arMeds = fs.readFileSync(fileRoot+'Medicine.txt').toString().split("\n");
 var inx=0

@@ -90,8 +90,9 @@
                     <!-- Will set input.identifierError in the checkIdentifier() function...-->
                     <label class="col-md-3 col-sm-3 control-label">Identifier</label>
                     <div class="col-md-3 col-sm-3 ">
+                        <!-- todo ng-blur not firing...-->
                         <input class="form-control" type="text" ng-model="input.identifier"
-                               ng-change="input.identifierError='Tab out of field to check identifier is unique'"
+                               placeholder="Identifier should be unique"
                                ng-blur="checkIdentifier(input.identifier)"/>
 
                     </div>
@@ -178,8 +179,10 @@
         <div class="row">
             <div class="col-md-4 col-sm-4">
                 <div ng-hide="showLog">
-                    <div ng-show="input.mode=='find'" class="btn btn-link pull-left" ng-click="seletNewPatientOption()">Add new patient</div>
-                    <div ng-show="input.mode=='new'" class="btn btn-link pull-left" ng-click="input.mode='find'">Find existing patient</div>
+                    <div ng-show="input.mode=='find'" class="btn btn-link pull-left"
+                         ng-click="seletNewPatientOption()">Add new patient</div>
+                    <div ng-show="input.mode=='new'" class="btn btn-link pull-left"
+                         ng-click="input.mode='find'">Find existing patient</div>
                 </div>
 
             </div>

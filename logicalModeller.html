@@ -151,6 +151,7 @@
     <script src="js/sbHistorySvc.js"></script>
     <script src="js/dataTypeCtrl.js"></script>
     <script src="js/profileDiffSvc.js"></script>
+    <script src="js/newFormCtrl.js"></script>
     <!--
 
 
@@ -357,6 +358,51 @@
 
         </div>
         <div ng-class="midPaneClass">
+
+
+            <div ng-controller="newFormCtrl" ng-show="false && treeData.length > 0">
+                <!-- experimental -->
+                <h3>Form</h3>
+                <table class="table table-bordered table-condensed">
+                    <tr><th>Element</th><th></th><th>DataType</th><th>Data</th><th>Input</th></tr>
+                    <tr ng-repeat="row in formModel">
+
+                        <td>
+
+                            <div  ng-style="{ 'padding-left': (row.data.path | pathindent) }"
+                                  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path| lastInPath}}</div>
+                        </td>
+                        <td>
+                            <div ng-show="row.data.max=='*'">
+                                <i class="glyphicon glyphicon-plus-sign clickable" ng-click="addRow(row.id)"></i>
+                            </div>
+                        </td>
+
+                        <td>{{row.data.type[0].code}}
+
+                            <div ng-show="row.data.type[0].targetProfile">-> {{row.data.type[0].targetProfile | getLogicalID}}</div>
+
+
+                        </td>
+
+                        <td>
+                            <div ng-show="showEdit(row.data.type[0].code)">
+                                <input class="form-control" ng-model="form[row.id]">
+                            </div>
+                        </td>
+                        <td>
+
+                                <i class="glyphicon glyphicon-edit clickable" ng-click="editRow(row.id)"></i>
+
+                        </td>
+
+                    </tr>
+
+                </table>
+            </div>
+
+
+
 
             <div ng-show="isHistory" class="alert alert-warning">
                 <div class="row">
