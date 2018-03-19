@@ -235,60 +235,131 @@ angular.module("sampleApp")
                 }
 
 
-
-                /*
-                        delete $scope.isaDocument
-                       var newBundle = {resourceType:'Bundle',type:'collection', entry:[]};
-                       newBundle.id = idPrefix+new Date().getTime();
-
-                       var newBundleContainer = {name:vo.name,bundle:newBundle};
-                       newBundleContainer.description = vo.description;
-                       //newBundleContainer.bundle.id = idPrefix+new Date().getTime();
-                       newBundleContainer.isDirty = true;
-                       newBundleContainer.isPrivate = true;
-                       newBundleContainer.category = vo.category;
-                       newBundleContainer.tracker = [];
-                       newBundleContainer.history = [{bundle:newBundle}];
-                       newBundleContainer.index = 0;
-                       newBundleContainer.server = {data:appConfigSvc.getCurrentDataServer()};     //save the data server in use
-
-                       * */
-
-
-
-
                 if ($localStorage.builderBundles.length == 0) {
 
                 }
 
             },
+            getSample : function(ed) {
+                //return a sample based on an ed.
+                var dt;
+                if (ed && ed.type) {
+                    dt = ed.type[0].code;
+                }
+
+                var sample;
+                //look for fixed values
+/*
+                for (var key in ed) {
+                    if (ed.substr(0,5)== 'fixed') {
+                        sample = ed[key]
+                    }
+                }
+             */
+
+
+                sample = "sample";      //default to a string
+                switch (dt) {
+                    case 'Identifier' :
+                        sample = {'system':'http://moh.govt.nz/nhi','value':'WER4568'};
+                        break;
+                    case 'CodeableConcept' :
+                        sample = {text:'Sample Data',coding:[{'system':'http://snomed.info/sct','code':'12234556'}]};
+                        break;
+                    case 'dateTime' :
+                        sample= '1955-12-16T12:30';
+                        break;
+                    case 'HumanName' :
+                        sample = {use:'official',family:'Doe',given:['John'],text:'John Doe'};
+                        break;
+                    case 'code' :
+                        sample = 'm';
+                        break;
+                    case 'Address' :
+                        sample = {"use": "home","type": "both","text": "534 Erewhon St PeasantVille, Rainbow, Vic  3999","line": ["534 Erewhon St"],"city": "PleasantVille"}
+                        break;
+                    case 'ContactPoint' :
+                        sample = {"system": "email",value:"here@there.com",use:"home"};
+                        break;
+                    case 'Period' :
+                        sample = {start:"1974-11-25T14:35",end:"1974-12-25T14:35"};
+                        break;
+                    case 'boolean' :
+                        sample = true;
+                        break;
+                    case 'Dosage' :
+                        sample = {text:"1 tab twice a day",route:{text:'oral'}}
+                        break;
+                    case 'Reference' :
+                        sample = null;
+                        break;
+                }
+
+                return sample;
+            },
             makeScenario : function(tree) {
                 var deferred = $q.defer();
+                var that = this;
                 //generate a scenario from the model (as a tree)
-                var bundle = {resourceType:'Bundle',entry:[]}
+                var bundle = {resourceType:'Bundle',entry:[],type:'collection'};
                 var patient = null;   //if there's a patient resource in the model...
                 var hash = {};
-                var arQuery = []
-               // console.log('makeScenario')
+                var arQuery = [];
 
+                //function to put in a sample value for all direct children of a resource...
+                function populateElements(resource) {
+                    var id = resource.id;   //the node (&resource) id
+                    //find all the nodes on the tree that are direct children of this node
+                    tree.forEach(function (node) {
+                        if (node.parent == id) {
+                            console.log(node.id)
+
+                            var mappingPath = getMapValueForIdentity(node.data.ed,'fhir')
+                            //console.log(mappingPath)
+                            if (mappingPath) {
+                                var ar = mappingPath.split('.')
+                                var eleName = ar[1];
+                                var sampleData = that.getSample(node.data.ed) ;
+                                if (sampleData) {
+                                    if (node.data.ed.max == 1) {
+                                        resource[eleName] = sampleData;
+                                    } else {
+                                        resource[eleName] = [sampleData];
+                                    }
+                                }
+
+                            }
+                        }
+                    })
+                }
 
                 tree.forEach(function (node,inx) {
                     if (inx === 0) {
+                        //this is the root
                         var ext = Utilities.getSingleExtensionValue(node.data.header,
                             appConfigSvc.config().standardExtensionUrl.baseTypeForModel)
                         if (ext && ext.valueString) {
-                            var resource = {resourceType:ext.valueString,id:node.id}
+                            //the model has a base resource (like a Document)
+                            var resource = {resourceType:ext.valueString,id:node.id};
+                            populateElements(resource)
                             hash[node.id] = resource;
+
                             bundle.entry.push({resource:resource})
+
+                            if (ext.valueString == 'Composition') {
+                                //this is a Document...
+                                bundle.type='document';
+                            }
                         }
                     } else {
                         if (node.data && node.data.referenceUrl) {
-                            var resourceType = $filter('referenceType')(node.data.referenceUrl)
-                            var resource = {resourceType:resourceType,id:node.id}
+                            var resourceType = $filter('referenceType')(node.data.referenceUrl);
+                            var resource = {resourceType:resourceType,id:node.id};
+                            var fullUrl = appConfigSvc.getCurrentDataServer().url+resourceType + "/" + node.id;
+
                             if (node.data.short) {
                                 resource.text = {div:node.data.short}
                             }
-
 
                             if (resourceType == 'Patient') {
                                 if (patient) {
@@ -298,18 +369,16 @@ angular.module("sampleApp")
                                     //otherwise add it...
                                     patient = resource;
                                     hash[node.id] = resource
-                                    bundle.entry.push({resource:resource})
+                                    bundle.entry.push({fullUrl:fullUrl,resource:resource})
+
+
                                 }
-
-
-
                             } else {
-                                hash[node.id] = resource
-                                bundle.entry.push({resource:resource})
+                                //any resource other than a patient...
+                                hash[node.id] = resource;
+                                bundle.entry.push({fullUrl:fullUrl,resource:resource})
                                 arQuery.push(getPatientReference(resourceType));
                             }
-
-
                         }
                     }
                 });
@@ -326,19 +395,30 @@ angular.module("sampleApp")
                         //console.log(parentNodeResource)
 
                         if (parentNodeResource) {
-                            //is there
-//console.log(node.data.ed)
                             var mappingPath = getMapValueForIdentity(node.data.ed,'fhir')
-                            //console.log(mappingPath)
                             //and the parent is also a resource - create a reference...
                             if (mappingPath) {
+                                //console.log(mappingPath);
                                 var ar = mappingPath.split('.');
                                 switch (ar.length) {
                                     case 2 :
                                         //eg Composition.subject
-                                        //assume the parent is always single...
+                                        //assume the source is always multiple as the logical model may have more than one reference...
                                         var elementName = ar[1];
-                                        parentNodeResource[elementName] = {reference: thisResource.resourceType + "/"+ thisResource.id}
+                                        console.log(mappingPath,parentNodeResource[elementName])
+                                        parentNodeResource[elementName] = parentNodeResource[elementName] || [] ;//<<<<<<<<<<<<<
+                                        parentNodeResource[elementName].push({reference: thisResource.resourceType + "/"+ thisResource.id})
+                                        /*
+                                        if (parentNodeResource[elementName]) {
+                                            var x = parentNodeResource[elementName];
+                                            parentNodeResource[elementName] = []
+                                            parentNodeResource[elementName].push(x)
+                                        }
+*/
+
+
+
+                                       // parentNodeResource[elementName] = {reference: thisResource.resourceType + "/"+ thisResource.id}
                                         //console.log(parentNodeResource)
                                         break;
                                     case 3 :
@@ -2290,7 +2370,6 @@ angular.module("sampleApp")
                                 item.data.header.baseType = ext1.valueString;
 
                             }
-
 
                             //note that mapping node is different in the SD and the ED - but in the same place in the treeData
                             if (sd.mapping && sd.mapping.length > 0) {

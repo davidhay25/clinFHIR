@@ -3,7 +3,7 @@ angular.module("sampleApp")
     .controller('profileDiffCtrl',
         function ($scope,$q,$http,profileDiffSvc,$uibModal,logicalModelSvc,appConfigSvc,RenderProfileSvc,builderSvc,
                   Utilities,GetDataFromServer,profileCreatorSvc,$filter,$firebaseObject,$firebaseArray,$location,$window,modalService,
-                    $timeout,SaveDataToServer,$sce) {
+                    $timeout,SaveDataToServer,$sce,resourceCreatorSvc) {
 
             $scope.input = {center:true,includeCore:true,immediateChildren:true,includeExtensions:true,includePatient:true};
             $scope.input.commentReply = {};
@@ -1185,7 +1185,15 @@ angular.module("sampleApp")
                     delete $scope.lmShortCut;
                     profileDiffSvc.getSD(item.url).then(
                         function (SD) {
+
+
+
                             $scope.LMtreeData = logicalModelSvc.createTreeArrayFromSD(angular.copy(SD));
+console.log(SD)
+
+
+                            buildMM(SD);        //construct the mind map
+                            //console.log($scope.LMtreeData);
 
                             $scope.LMSD = SD;
                             logicalModelSvc.resetTreeState($scope.LMtreeData);
@@ -1720,6 +1728,55 @@ angular.module("sampleApp")
                     }
                 );
             };
+
+
+
+            function buildMM(SD) {
+                var options = {};
+                resourceCreatorSvc.createGraphOfProfile(SD,options).then(
+                    function(graphData) {
+                        $scope.graphData = graphData;
+
+                        var container = document.getElementById('mmLogicalModel');
+                        var optionsMM = {
+
+                            edges: {
+
+                                smooth: {
+                                    type: 'cubicBezier',
+                                    forceDirection: 'horizontal',
+                                    roundness: 0.4
+                                }
+                            },
+                            layout: {
+                                hierarchical: {
+                                    direction: 'LR',
+                                    nodeSpacing: 60,
+                                    sortMethod: 'directed',
+                                    parentCentralization: false
+                                }
+                            },
+                            physics: false
+                        };
+
+
+                        var options = {
+                            physics: {
+                                enabled: true,
+                                barnesHut: {
+                                    gravitationalConstant: -1100,
+                                }
+                            }
+                        };
+
+                        $scope.profileNetwork = new vis.Network(container, graphData, options);
+                    }
+                )
+
+                //--------------------
+            }
+
+
 
             $scope.selectNodeFromGraph = function(){
 

@@ -89,7 +89,8 @@
         angular.module("sampleApp").constant("moment", moment);
 
         angular.module("sampleApp").config(['$compileProvider', function ($compileProvider) {
-            $compileProvider.aHrefSanitizationWhitelist(/^\s*(|blob|):/);
+            $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
+            //$compileProvider.aHrefSanitizationWhitelist(/^\s*(|blob|):/);
         }]);
 
 
@@ -482,15 +483,12 @@
 
                 <uib-tab heading="Analysis">
                     <uib-tabset>
-
+                        <br/>
                         <uib-tab heading="Mapping">
                             <br/>
 
                             <uib-tabset>
                                 <uib-tab heading="Mapping">
-
-
-
 
 
                                     <table class="table table-bordered table-condensed">
@@ -522,21 +520,10 @@
                                                     </a>
 
 
-                                                    <!--
-                                                                                                {{ed | getSingleExtensionValueString : "http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl"}}
-                                                                                                -->
                                                 </div>
 
 
-                                                <!--
-                                                                                        <div ng-repeat="map in ed.mapping">{{map.identity}}:{{map.map}}</div>
-                                                                                        <div ng-repeat="ext in ed.mapping[0].extension">
-                                                                                            <em>
-                                                                                            {{ext.valueString}}
-                                                                                            {{ext.valueUri | getLogicalID}}
-                                                                                            </em>
-                                                                                        </div>
-                                                -->
+
                                             </td>
                                         </tr>
 
@@ -603,7 +590,9 @@
                                             <td>
                                                 {{map.identity}}
                                             </td>
+
                                             <td>{{map.map}}</td>
+
                                             <td class="clickable" ng-click="selectNodeFromTable(map.path)">
                                                 {{map.name}}</td>
                                         </tr>
@@ -704,13 +693,7 @@
                                     </table>
                                 </uib-tab>
 
-
-
                             </uib-tabset>
-
-
-
-
 
                         </uib-tab>
 
@@ -718,9 +701,9 @@
                             <div id="mmLogicalModel"></div>
                         </uib-tab>
 
-                        <uib-tab heading="Graph" select="redrawChart()">
-                     <span class="clickable iconSpacing pull-right" ng-show="hidePatientFlag"
-                           ng-click="showAllInGraph()">Show All</span>
+                        <uib-tab heading="Resources Graph" select="redrawChart()">
+                            <span class="clickable iconSpacing pull-right" ng-show="hidePatientFlag"
+                            ng-click="showAllInGraph()">Show All</span>
 
                             <span class="clickable iconSpacing pull-right"
                                   ng-hide="hidePatientFlag" ng-click="hidePatient()">Hide Patient</span>
@@ -728,6 +711,9 @@
                             <div id="resourceGraph"></div>
                         </uib-tab>
 
+                        <uib-tab heading="Sample resouces bundle">
+                            <pre>{{scenarioBundle | json}}</pre>
+                        </uib-tab>
 
                     </uib-tabset>
                 </uib-tab>

@@ -47,7 +47,7 @@ angular.module("sampleApp").service('profileDiffSvc',
             if (SD.snapshot && SD.snapshot.element) {
                 SD.snapshot.element.forEach(function (ed) {
                     delete ed.constraint;
-                    delete ed.mapping;
+                 //NO!!!!!!    delete ed.mapping;
 
                 })
             }
@@ -1940,11 +1940,9 @@ angular.module("sampleApp").service('profileDiffSvc',
 
             var deferred = $q.defer();
             if ($localStorage.extensionDefinitionCache[url]) {
-
                 //note that this is an async call - some duplicate calls are inevitible
                 deferred.resolve($localStorage.extensionDefinitionCache[url]);
             } else {
-
 
                 //is this a 'core' extension?
                 if (url.indexOf('http://hl7.org/fhir/StructureDefinition') > -1) {
@@ -1974,7 +1972,8 @@ angular.module("sampleApp").service('profileDiffSvc',
                     }
                     GetDataFromServer.findConformanceResourceByUri(url).then(
                         function (sdef) {
-
+                            console.log(url)
+console.log(sdef)
                             delete sdef.text;   //text can be v large in some profiles
 
                             $localStorage.extensionDefinitionCache[url] = minimizeSD(sdef)

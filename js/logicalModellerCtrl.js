@@ -1211,7 +1211,7 @@ angular.module("sampleApp")
                         $scope.graphData = graphData;
 
                         var container = document.getElementById('mmLogicalModel');
-                        var options = {
+                        var optionsMM = {
 
                             edges: {
                                
@@ -1230,6 +1230,16 @@ angular.module("sampleApp")
                                 }
                             },
                             physics:false
+                        };
+
+
+                        var options = {
+                            physics: {
+                                enabled: true,
+                                barnesHut: {
+                                    gravitationalConstant: -1100,
+                                }
+                            }
                         };
 
                         $scope.profileNetwork = new vis.Network(container, graphData, options);
@@ -1772,12 +1782,15 @@ angular.module("sampleApp")
 
             }
 
+            //make a bundle that has a resource instance for all the referenced resource types in the model
             function updateInstanceGraph() {
                 console.log('update instance graph')
                 $scope.hidePatientFlag = false;
 
                 logicalModelSvc.makeScenario($scope.treeData).then(
                     function(bundle){
+
+
                         $scope.scenarioBundle = bundle;
                         logicalModelSvc.saveScenario(bundle,'fromLM');      //write out the scenario for the Scenario Builder
 
@@ -1787,9 +1800,13 @@ angular.module("sampleApp")
 
             }
 
+            //
             function generateInstanceGraph(bundle,resource,hideMe){
 
-                console.log('generate graph')
+
+
+
+                console.log('generate graph',bundle)
 
                 var vo = builderSvc.makeGraph(bundle,resource,hideMe,true);
 

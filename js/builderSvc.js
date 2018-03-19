@@ -2515,6 +2515,7 @@ angular.module("sampleApp")
             makeGraph : function(bundle,centralResource,hideMe,showText) {
                 //builds the model that has all the models referenced by the indicated SD, recursively...
                 //if hideMe is true, then hide the central node and all references to it
+                //treat Composition.section as if it were a reference...
 
                 var that = this;
                 var allReferences = [];

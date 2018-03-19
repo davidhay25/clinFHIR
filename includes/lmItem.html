@@ -15,8 +15,17 @@
     </div>
 
 
+    <div ng-show="selectedNode.parent == '#'">
+        <table class="table table-bordered">
 
-    <table class="table table-bordered">
+            <tr><td width="20%">Base Type</td><td>{{selectedNode.data.header.baseType}}</td></tr>
+            <tr><td width="20%">Location</td><td>{{selectedNode.data.header.SDUrl}}</td></tr>
+        </table>
+    </div>
+
+
+    <div ng-hide="selectedNode.parent == '#'">
+        <table class="table table-bordered">
         <!--<tr><td width="20%">Name</td><td>{{selectedNode.data.name}}</td></tr> -->
         <tr><td width="20%">Model path</td><td>{{selectedNode.data.path}}</td></tr>
         <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
@@ -34,8 +43,6 @@
             <!--{{selectedNode.data.mappingFromED}}
             <div ng-show="selectedNode.data.mapping"><em>{{selectedNode.data.mapping}}</em></div>-->
         </td></tr>
-
-
 
         <tr ng-show="selectedNode.data.fhirMappingExtensionUrl"><td>Extension Url</td>
             <td>
@@ -113,7 +120,7 @@
         <tr ng-show="selectedNode.data.discriminator">
             <td>Discriminator</td><td>{{selectedNode.data.discriminator}}</td>
         </tr>
-
+<!--
         <tr><td>Actions</td><td>
             <div ng-show="!firebase.auth().currentUser">
                 Read only mode
@@ -170,6 +177,9 @@
 
 
         </td></tr>
+
+        -->
+
         <tr ng-show="valueSetOptions">
             <td>Options</td>
             <td>
@@ -181,7 +191,10 @@
             </td>
         </tr>
     </table>
-    <!--
+    </div>
+
+
+<!--
                                 <pre>{{selectedNode | json}}</pre>
-    -->
+-->
 </div>

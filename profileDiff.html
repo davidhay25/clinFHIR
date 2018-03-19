@@ -93,6 +93,12 @@
     </script>
 
     <style>
+        #mmLogicalModel {
+            width: 100%;
+            height: 800px;
+            border: 1px solid lightgray;
+        }
+
         .myScroll {
             height: 800px;
             overflow-y: scroll;
@@ -248,20 +254,20 @@
                     <div class="col-md-3 col-sm-3">
                         <div ng-show="selectedItemType=='page' || selectedItemType=='pageRoot'" class="pull-right" style="margin-top: 8px">
 
-                                    <span ng-show="selectedPageNode">
-                                        <i class="glyphicon glyphicon-edit clickable iconSpacing"
-                                           ng-click="addPage(selectedPageNode)"></i>
+                            <span ng-show="selectedPageNode">
+                                <i class="glyphicon glyphicon-edit clickable iconSpacing"
+                                   ng-click="addPage(selectedPageNode)"></i>
 
-                                        <i class="glyphicon glyphicon-remove clickable iconSpacing"
-                                           ng-click="deletePage(selectedPageNode)"></i>
+                                <i class="glyphicon glyphicon-remove clickable iconSpacing"
+                                   ng-click="deletePage(selectedPageNode)"></i>
 
-                                        <i class="glyphicon glyphicon-arrow-down clickable iconSpacing"
-                                           ng-click="move(selectedPageNode,'dn')"></i>
-                                        <i class="glyphicon glyphicon-arrow-up clickable iconSpacing"
-                                           ng-click="move(selectedPageNode,'up')"></i>
-                                        <i class="glyphicon glyphicon-plus clickable iconSpacing"
-                                           ng-click="addPage()"></i>
-                                    </span>
+                                <i class="glyphicon glyphicon-arrow-down clickable iconSpacing"
+                                   ng-click="move(selectedPageNode,'dn')"></i>
+                                <i class="glyphicon glyphicon-arrow-up clickable iconSpacing"
+                                   ng-click="move(selectedPageNode,'up')"></i>
+                                <i class="glyphicon glyphicon-plus clickable iconSpacing"
+                                   ng-click="addPage()"></i>
+                            </span>
 
 
 
@@ -408,7 +414,7 @@
                                         <div class="col-sm-4 col-md-4">
                                             <div id="lmTreeView"></div>
                                         </div>
-                                        <div class="col-sm-4 col-md-4">
+                                        <div class="col-sm-8 col-md-8">
                                             <ng-include src="'/includes/lmItem.html'"></ng-include>
                                         </div>
                                     </div>
@@ -443,6 +449,12 @@
 
                                     </table>
                                 </uib-tab>
+
+                                <uib-tab heading="Mind Map"  select="redrawProfileGraph()"  deselect="input.graphTabIsSelected = false">
+                                    <div id="mmLogicalModel"></div>
+                                </uib-tab>
+
+
                                 <uib-tab heading="Json">
                                     <pre>{{LMSD | json}}</pre>
                                 </uib-tab>
@@ -814,7 +826,6 @@
 
 
                                             </div>
-
 
 
                                         </div>

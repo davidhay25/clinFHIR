@@ -602,27 +602,22 @@ angular.module("sampleApp").
 
             config.log(qry,'findConformanceResourceByUri');
 
-
             $http.get(qry).then(
                 function(data){
                     var bundle = data.data;
                     if (bundle && bundle.entry && bundle.entry.length > 0) {
                         //return the first on if more than one... - updated: check the resource type! - added because of a bug, but it's not safe to assume that the response doesn't have other resources - like an OO
 
+
+                        if (bundle.entry.length > 1) {
+                            alert('There are '+ bundle.entry.length + ' StructureDefinitions with the url ' + url + "!")
+                        }
+
+
                         var entry = _.find(bundle.entry,function(o){
                             return o.resource.resourceType==typeOfConformanceResource;
                         });
 
-                        /*
-
-                       for (var i=0; i< bundle.entry.length;i++) {
-                           var entry = bundle.entry[i];
-                           if (entry.resource && entry.resource.resourceType == typeOfConformanceResource) {
-                               res = entry.resource;
-                                break;
-                           }
-                       }
-*/
                        if (entry && entry.resource) {
                            config.log('resolvedId: '+entry.resource,'findConformanceResourceByUri');
                            deferred.resolve(entry.resource);
