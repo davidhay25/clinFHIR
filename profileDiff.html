@@ -426,14 +426,22 @@
 
 
                                     <table class="table table-bordered table-condensed">
-                                        <tr><th>Element</th><th>DataType</th><th>isRef</th><th>Mult.</th><th>Mappings</th><th>Description</th></tr>
+                                        <tr><th>Element</th><th>DataType</th><th>isRef</th><th>Mult.</th><th>Mappings</th><th>Description & Comment</th></tr>
                                         <tr ng-repeat="row in LMtreeData">
 
                                             <td>
                                                 <div  ng-style="{ 'padding-left': (row.data.path | pathindent) }"
-                                                      ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path| lastInPath}}</div>
+                                                       >{{row.data.path| lastInPath}}</div>
                                             </td>
-                                            <td>{{row.data.type[0].code}}
+                                            <td>
+                                                <div uib-popover-html="showDT(row.data.type[0].code)"
+                                                     popover-placement="right"
+                                                     popover-trigger="'mouseenter'">
+                                                    <a target="_blank" ng-href="http://hl7.org/fhir/datatypes.html#{{row.data.type[0].code}}">
+                                                        {{row.data.type[0].code}}
+                                                    </a>
+
+                                                </div>
 
                                             </td>
                                             <td><div ng-show="row.data.isReference">Y</div></td>
@@ -443,12 +451,21 @@
                                                     {{map.identity}}: {{map.map}}
                                                 </div>
                                             </td>
-                                            <td>{{row.data.description}}
+                                            <td>
+                                                {{row.data.description}}
+                                                <div ng-show="row.data.comments">
+                                                    <br/>{{row.data.comments}}
+                                                </div>
+
+
                                                 <div ng-show="row.data.isCoded">
-                                                    VS: {{row.data.selectedValueSet.vs.url}} ({{row.data.selectedValueSet.strength}})
+                                                    <strong>VS:</strong> {{row.data.selectedValueSet.vs.url}} ({{row.data.selectedValueSet.strength}})
                                                 </div>
                                                 <div ng-show="row.data.isReference">
-                                                    Ref: {{row.data.ed.type[0].targetProfile}}
+                                                    <strong>Ref:</strong> {{row.data.ed.type[0].targetProfile}}
+                                                </div>
+                                                <div ng-show="row.data.fhirMappingExtensionUrl">
+                                                    <strong>Ext:</strong> {{row.data.fhirMappingExtensionUrl}}
                                                 </div>
 
 

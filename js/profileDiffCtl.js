@@ -33,6 +33,18 @@ angular.module("sampleApp")
             $scope.typeDescription.other = 'Other artifact';
             $scope.typeDescription.example = 'Example';
 
+
+            $scope.showDT = function(dt) {
+
+                var disp = {text:'string',coding:[{system:'uri',code:'string'}]}
+                var s = angular.toJson(disp,true)
+
+                return '<pre>'+s+ '</pre>'
+            }
+
+
+
+
             $scope.toggleSingleState = function(){
                 $scope.singleStateZoom = ! $scope.singleStateZoom
                 if ($scope.singleStateZoom) {
