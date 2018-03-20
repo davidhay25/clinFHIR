@@ -457,6 +457,45 @@
                                                     <br/>{{row.data.comments}}
                                                 </div>
 
+                                                <div ng-show="row.data.isCoded">
+                                                    <strong>VS:</strong> {{row.data.selectedValueSet.vs.url}} ({{row.data.selectedValueSet.strength}})
+                                                </div>
+                                                <div ng-show="row.data.isReference">
+                                                    <strong>Ref:</strong> {{row.data.ed.type[0].targetProfile}}
+                                                </div>
+                                                <div ng-show="row.data.fhirMappingExtensionUrl">
+                                                    <strong>Ext:</strong> {{row.data.fhirMappingExtensionUrl}}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </uib-tab>
+
+                                <uib-tab heading="Extensions">
+                                    <br/>
+                                    <table class="table table-bordered table-condensed">
+                                        <tr><th>Element</th><th>Base Resource Type</th><th>Notes</th></tr>
+                                        <tr ng-repeat="row in LMtreeData" ng-show="row.data.isExtension">
+                                            <td>
+                                                <div>{{row.data.path | dropFirstInPath}}</div>
+                                            </td>
+                                            <td>
+                                                <div ng-repeat = "map in row.data.ed.mapping">
+                                                    {{map.map | mapPath | dropLastInPath}}
+                                                </div>
+
+
+                                            </td>
+                                            <td>
+                                                {{row.data.description}}
+                                                <div ng-show="row.data.comments">
+                                                    <br/>{{row.data.comments}}
+                                                </div>
+
+
+                                                <div ng-repeat = "map in row.data.ed.mapping">
+                                                    {{map.map | mapComment}}
+                                                </div>
 
                                                 <div ng-show="row.data.isCoded">
                                                     <strong>VS:</strong> {{row.data.selectedValueSet.vs.url}} ({{row.data.selectedValueSet.strength}})
@@ -467,31 +506,26 @@
                                                 <div ng-show="row.data.fhirMappingExtensionUrl">
                                                     <strong>Ext:</strong> {{row.data.fhirMappingExtensionUrl}}
                                                 </div>
-
-
                                             </td>
 
                                         </tr>
-
                                     </table>
+
                                 </uib-tab>
 
                                 <uib-tab heading="Mind Map"  select="redrawProfileGraph()"  deselect="input.graphTabIsSelected = false">
                                     <div id="mmLogicalModel"></div>
                                 </uib-tab>
 
-
                                 <uib-tab heading="Json">
                                     <pre>{{LMSD | json}}</pre>
                                 </uib-tab>
                             </uib-tabset>
 
-
                         </div>
 
                         <div ng-show="selectedItemType == 'profile'">
                             <h4>Profiled resource</h4>
-
 
                             <div class="pull-right" ng-hide="input.displayMode">
                                 <em>Use the 'Full Display' checkbox in the Navbar at the top to view other tabs</em>

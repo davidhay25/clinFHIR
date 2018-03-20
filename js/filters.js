@@ -5,6 +5,24 @@
 
 angular.module("sampleApp")
 
+    .filter('mapPath',function(){
+        return function(s) {
+
+            if (s) {
+                var ar = s.split('|');
+                return ar[0];
+            }
+        }
+    })
+
+    .filter('mapComment',function(){
+        return function(s) {
+            if (s) {
+                var ar = s.split('|');
+                return ar[1];
+            }
+        }
+    })
 
     .filter('getSingleExtensionValueString',['Utilities',function(Utilities){
         //return the value of an extension
@@ -285,8 +303,19 @@ angular.module("sampleApp")
                     ar.splice(0,1);
                     return ar.join('.') //removed training space...
                 }
+            }
+        }
 
+    )
+    .filter('dropLastInPath',function(){
+            return function(path) {
+                //return the last part of a path
+                if (path) {
+                    var ar = path.split('.');
 
+                    ar.pop();
+                    return ar.join('.') //removed training space...
+                }
             }
         }
 
