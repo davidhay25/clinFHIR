@@ -424,20 +424,11 @@
                     <div class="row">
                         <div class="col-md-12 col-sm-12">
                              <span class="pull-right">
-
-                                 <!--<button class="btn btn-link" ng-click="">Expand all</button>
-                                 <button class="btn btn-link" ng-click="">Collapse all</button>-->
-                                   <button class="btn btn-link" ng-click="expandAll()">Expand All</button>
-                                  <button class="btn btn-link" ng-click="resetLayout()">Collapse Layout</button>
-
-
+                                 <button class="btn btn-link" ng-click="expandAll()">Expand All</button>
+                                 <button class="btn btn-link" ng-click="resetLayout()">Collapse Layout</button>
                                  <button class="btn btn-link" ng-click="showQuest()">Form</button>
-
-
-
-
-                                <button ng-hide="isInPalette" class="btn btn-link" ng-click="addToPalette()">Add to Palette</button>
-                                <button ng-show="isInPalette" class="btn btn-link" ng-click="removeFromPalette()">Remove from Palette</button>
+                                 <button ng-hide="isInPalette" class="btn btn-link" ng-click="addToPalette()">Add to Palette</button>
+                                 <button ng-show="isInPalette" class="btn btn-link" ng-click="removeFromPalette()">Remove from Palette</button>
 
                             </span>
 
@@ -585,16 +576,18 @@
                                     </div>
                                     <br/> <br/>
                                     <table class="table table-condensed table-bordered">
-                                        <tr><th>Identity</th><th>Map</th><th>Path</th></tr>
+                                        <tr><th>Identity</th><th>Path</th><th>Map</th></tr>
                                         <tr ng-repeat="map in allMappings" ng-show="map.identity == input.mi">
+
                                             <td>
                                                 {{map.identity}}
                                             </td>
 
-                                            <td>{{map.map}}</td>
+
 
                                             <td class="clickable" ng-click="selectNodeFromTable(map.path)">
                                                 {{map.name}}</td>
+                                            <td>{{map.map}}</td>
                                         </tr>
                                     </table>
 
@@ -642,10 +635,24 @@
                                     </div>
                                 </div>
                             </div>
+                        </uib-tab>
+
+                        <uib-tab heading="Extensions">
+                            <br/>
+                            <table class="table table-bordered table-condensed">
+                                <tr><th>Element</th></tr>
+                                <tr ng-repeat="row in treeData" ng-show="row.data.isExtension">
+                                    <td>
+                                        <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
+                                    </td>
+
+
+                                </tr>
+                            </table>
 
                         </uib-tab>
 
-                        <uib-tab heading="References">
+                        <uib-tab heading="References" ng-show="1==2">
                             <br/>
 
 
@@ -675,7 +682,6 @@
                                     <pre>{{docBundle | json}}</pre>
                                 </uib-tab>
 
-
                                 <uib-tab heading="All references">
                                     <table class="table table-bordered table-condensed">
                                         <tr><th>Source Model</th><th>Path</th><th>Target Model</th></tr>
@@ -697,6 +703,8 @@
 
                         </uib-tab>
 
+
+
                         <uib-tab heading="Mind Map"  select="redrawProfileGraph()"  deselect="input.graphTabIsSelected = false">
                             <div id="mmLogicalModel"></div>
                         </uib-tab>
@@ -711,9 +719,7 @@
                             <div id="resourceGraph"></div>
                         </uib-tab>
 
-                        <uib-tab heading="Sample resouces bundle">
-                            <pre>{{scenarioBundle | json}}</pre>
-                        </uib-tab>
+
 
                     </uib-tabset>
                 </uib-tab>
@@ -749,6 +755,19 @@
 
 
 
+
+                </uib-tab>
+
+                <uib-tab heading="Sample">
+                    <br/>
+                    <uib-tabset>
+                        <uib-tab heading="Json">
+                            <pre>{{scenarioBundle | json}}</pre>
+                        </uib-tab>
+                        <uib-tab heading="Tree">
+                            <div id="docTreeView"></div>
+                        </uib-tab>
+                    </uib-tabset>
 
                 </uib-tab>
 
@@ -1065,11 +1084,12 @@
 
                                     <tr ng-show="treeData[0].data.header.baseType">
                                         <td>Base Resource Type</td><td>{{treeData[0].data.header.baseType}}</td></tr>
-
+<!--
                                     <tr ng-show="treeData[0].data.header.baseType == 'Composition'">
                                         <td >Sample Document</td>
                                         <td><a href="#"  ng-click="editLMDoc()">Show Document</a></td>
                                     </tr>
+                                    -->
 
                                     <tr ng-show="treeData[0].data.header.mapping">
                                         <td>Mapping</td><td>{{treeData[0].data.header.mapping}}</td></tr>

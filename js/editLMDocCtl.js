@@ -15,6 +15,7 @@ angular.module("sampleApp")
             };
 
 
+
             $scope.generateDocTree = function(document){
                 console.log(document)
                 var treeData = builderSvc.makeDocumentTree(document)

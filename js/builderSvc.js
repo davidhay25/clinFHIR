@@ -200,7 +200,7 @@ angular.module("sampleApp")
                 }
 
             },
-            makeDocumentTree : function(bundle) {
+            makeDocumentTree : function(bundle,hideError) {
                 var tree = []
                 var hashByType = {};
                 var hashByRef = {};
@@ -222,7 +222,10 @@ angular.module("sampleApp")
 
                 var comp = getResource(hashByType,'Composition',false);
                 if (! comp) {
-                    alert('No Composition');    //shouldn't ever get this
+                    if (! hideError) {
+                        alert('No Composition');    //shouldn't ever get this
+                    }
+
                     return;
                 }
 

@@ -180,7 +180,7 @@ angular.module("sampleApp")
                     })
             };
 
-            $scope.editLMDoc = function(){
+            $scope.editLMDocDEP = function(){
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editLMDoc.html',
                     size: 'lg',
@@ -439,12 +439,8 @@ angular.module("sampleApp")
             }
 
             //generate a sample document from this SD
-            $scope.generateSample = function(){
-
-
+            $scope.generateSampleDEP = function(){
                 var treeObject = $('#lmTreeView').jstree().get_json();    //creates a hierarchical view of the resource
-
-                
                 $scope.sample = logicalModelSvc.generateSample(treeObject);
             };
 
@@ -1707,13 +1703,8 @@ angular.module("sampleApp")
                 $scope.uniqueModelsList = vo.lstNodes;
 
 
-                //>>>> $scope.docBundle = logicalModelSvc.makeDocBundle(vo.references);    //construct a sample document bundle
-
-
-
                 var b = logicalModelSvc.makeDocBundleWithComposition(entry.resource)
                 console.log(b)
-
                 $scope.docBundle = b;
 
                 var allNodesObj = vo.nodes;
@@ -1790,9 +1781,70 @@ angular.module("sampleApp")
                 logicalModelSvc.makeScenario($scope.treeData).then(
                     function(bundle){
 
-
+//console.log(bundle)
                         $scope.scenarioBundle = bundle;
                         logicalModelSvc.saveScenario(bundle,'fromLM');      //write out the scenario for the Scenario Builder
+
+
+
+
+                       //build the sampleDocumentTree - but only if there is a Composition resource in the bundle...
+                        //console.log(bundle)
+
+                        var treeData = builderSvc.makeDocumentTree(bundle,true);    //don't display any error message
+                        $('#docTreeView').jstree('destroy');
+
+                        if (treeData) {
+
+
+                            $('#docTreeView').jstree(
+                                {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+                            ).on('select_node.jstree', function (e, data) {
+                                console.log(data && data.node.data)
+                                //delete $scope.currentResource;      //todo - there's a setResource() in the service too...
+                                //delete $scope.currentPath;
+                                delete $scope.selectedNode;
+                                if (data.node) {
+                                    var resource = data.node.data.resource;
+
+                                    console.log(resource);
+                                    var path = resource.path;
+                                    //find the node in the
+
+
+
+                                    //$scope.selectedNode = data.node;
+
+
+
+                                    $scope.selectedED = logicalModelSvc.getEDForPath($scope.SD,{data: {path:path}})
+                                    $scope.$digest()
+                                }
+
+                            })
+
+
+                        }
+
+
+
+
+                            /*.on('select_node.jstree', function (e, data) {
+                            console.log(data)
+                            delete $scope.currentResource;      //todo - there's a setResource() in the service too...
+                            delete $scope.currentPath;
+                            if (data.node.data){
+                                $scope.selectResource({resource:data.node.data.resource});
+                                $scope.currentPath = data.node.data.path;
+
+                            }
+                            $scope.$digest()
+                        })
+
+*/
+
+
+
 
                         generateInstanceGraph(bundle)
                     }

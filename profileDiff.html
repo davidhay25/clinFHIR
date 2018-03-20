@@ -443,7 +443,16 @@
                                                     {{map.identity}}: {{map.map}}
                                                 </div>
                                             </td>
-                                            <td>{{row.data.description}}</td>
+                                            <td>{{row.data.description}}
+                                                <div ng-show="row.data.isCoded">
+                                                    VS: {{row.data.selectedValueSet.vs.url}} ({{row.data.selectedValueSet.strength}})
+                                                </div>
+                                                <div ng-show="row.data.isReference">
+                                                    Ref: {{row.data.ed.type[0].targetProfile}}
+                                                </div>
+
+
+                                            </td>
 
                                         </tr>
 

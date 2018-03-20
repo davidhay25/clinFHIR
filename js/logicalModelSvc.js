@@ -91,6 +91,8 @@ angular.module("sampleApp")
 
         //a cache of patient references by type. todo may need to enhance this when supporting profiles...
         var patientReferenceCache = {};
+        var multiple = {}       //todo hack!!!  multiple paths...
+        multiple['Composition.section.entry'] = "*"
 
         return {
             makeIG : function(tree){
@@ -248,7 +250,28 @@ angular.module("sampleApp")
                 }
 
                 var sample;
-                //look for fixed values
+                //look for fixed values - always stored as a string
+                var fixed = ed.fixedString;
+                if (fixed) {
+                    console.log(fixed)
+
+                    if (fixed.indexOf('{') > -1) {
+                        try {
+
+
+                            return angular.fromJson(fixed);
+                        } catch (ex){
+                            console.log('error parsing '+fixed);
+                        }
+                    } else {
+                        return fixed;
+                    }
+
+
+
+                }
+
+
 /*
                 for (var key in ed) {
                     if (ed.substr(0,5)== 'fixed') {
@@ -297,6 +320,14 @@ angular.module("sampleApp")
 
                 return sample;
             },
+            isMultiple : function(path) {
+                //true if a given path is multiple. todo - need to read from the SD...
+                if (multiple[path]) {
+                    return true
+                } else {
+                    return false;
+                }
+            },
             makeScenario : function(tree) {
                 var deferred = $q.defer();
                 var that = this;
@@ -312,7 +343,7 @@ angular.module("sampleApp")
                     //find all the nodes on the tree that are direct children of this node
                     tree.forEach(function (node) {
                         if (node.parent == id) {
-                            console.log(node.id)
+                            //console.log(node.id)
 
                             var mappingPath = getMapValueForIdentity(node.data.ed,'fhir')
                             //console.log(mappingPath)
@@ -341,6 +372,7 @@ angular.module("sampleApp")
                         if (ext && ext.valueString) {
                             //the model has a base resource (like a Document)
                             var resource = {resourceType:ext.valueString,id:node.id};
+                            resource.text = {div:"test"}
                             populateElements(resource)
                             hash[node.id] = resource;
 
@@ -355,6 +387,7 @@ angular.module("sampleApp")
                         if (node.data && node.data.referenceUrl) {
                             var resourceType = $filter('referenceType')(node.data.referenceUrl);
                             var resource = {resourceType:resourceType,id:node.id};
+                            populateElements(resource);
                             var fullUrl = appConfigSvc.getCurrentDataServer().url+resourceType + "/" + node.id;
 
                             if (node.data.short) {
@@ -387,6 +420,13 @@ angular.module("sampleApp")
                 for (var i=1; i< tree.length;i++) {
 
                     var node = tree[i];
+
+                    var ed;
+                    if (node.data) {
+                        ed = node.data.ed;
+                    }
+
+
                     //the hash contains  nodes which have an associated resource(reference) in it...
                     if (hash[node.id]) {
                         //yes, this node has an associated resource (only nodes with a resource are in the hash)...
@@ -405,16 +445,21 @@ angular.module("sampleApp")
                                         //eg Composition.subject
                                         //assume the source is always multiple as the logical model may have more than one reference...
                                         var elementName = ar[1];
+
+
                                         console.log(mappingPath,parentNodeResource[elementName])
-                                        parentNodeResource[elementName] = parentNodeResource[elementName] || [] ;//<<<<<<<<<<<<<
-                                        parentNodeResource[elementName].push({reference: thisResource.resourceType + "/"+ thisResource.id})
-                                        /*
-                                        if (parentNodeResource[elementName]) {
-                                            var x = parentNodeResource[elementName];
-                                            parentNodeResource[elementName] = []
-                                            parentNodeResource[elementName].push(x)
+
+                                        //see if the mapping path is multiple...
+                                        //note that a consequence of this is that if a singular mappingpath (like Composition.author) is present more than once, only the last one will be in the sample...
+                                        if (that.isMultiple(mappingPath)) {
+                                            parentNodeResource[elementName] = parentNodeResource[elementName] || [] ;//<<<<<<<<<<<<<
+                                            parentNodeResource[elementName].push({reference: thisResource.resourceType + "/"+ thisResource.id})
+                                        } else {
+                                           // parentNodeResource[elementName] = parentNodeResource[elementName] || [] ;//<<<<<<<<<<<<<
+                                            parentNodeResource[elementName] = {reference: thisResource.resourceType + "/"+ thisResource.id}
+
                                         }
-*/
+
 
 
 
@@ -431,7 +476,17 @@ angular.module("sampleApp")
                                         parentNodeResource[parentElementName] = parentNodeResource[parentElementName] || [];
                                         var arParentElement = parentNodeResource[parentElementName];    //eg Composition.section
                                         var elementToAdd = {}
-                                        elementToAdd[elementName] = {reference: thisResource.resourceType + "/"+ thisResource.id};
+                                        //elementToAdd[elementName] = {reference: thisResource.resourceType + "/"+ thisResource.id};
+
+
+                                        //console.log(mappingPath,ed.max)
+                                        if (that.isMultiple(mappingPath)) {     //true if there can be multiple elements at this path...
+                                            elementToAdd[elementName] = [{reference: thisResource.resourceType + "/"+ thisResource.id}];
+                                        } else {
+                                            elementToAdd[elementName] = {reference: thisResource.resourceType + "/"+ thisResource.id};
+                                        }
+
+
                                         arParentElement.push(elementToAdd)
 
 
@@ -2441,6 +2496,11 @@ angular.module("sampleApp")
                                         item.data.isCoded = true;
                                     }
 
+
+
+
+
+
                                     //is this a reference
                                     if (typ.code == 'Reference') {
                                         item.data.isReference = true;   //used to populate the 'is reference' table...
@@ -2494,6 +2554,13 @@ angular.module("sampleApp")
                                 var internalMap = {identity:map.identity}
                                 var ar = map.map.split('|');        //the 'map' will always include the comment separated by '|'
                                 internalMap.map = ar[0];            //the first entry is the actual map
+
+                                //is this an extensiom
+                                if (internalMap.map.indexOf('extension') > -1) {
+                                    item.data.isExtension = true;
+                                }
+
+
                                 if (map.comment) {
                                     internalMap.comment = map.comment
                                 } else {
