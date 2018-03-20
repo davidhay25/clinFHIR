@@ -458,7 +458,11 @@
                                                 </div>
 
                                                 <div ng-show="row.data.isCoded">
-                                                    <strong>VS:</strong> {{row.data.selectedValueSet.vs.url}} ({{row.data.selectedValueSet.strength}})
+                                                    <strong>VS:</strong> {{row.data.selectedValueSet.vs.url}}
+                                                    <span ng-show="row.data.selectedValueSet.strength">
+                                                        ({{row.data.selectedValueSet.strength}})
+                                                    </span>
+
                                                 </div>
                                                 <div ng-show="row.data.isReference">
                                                     <strong>Ref:</strong> {{row.data.ed.type[0].targetProfile}}
@@ -470,6 +474,44 @@
                                         </tr>
                                     </table>
                                 </uib-tab>
+
+                                <uib-tab heading="Coded Items">
+                                    <br/>
+                                    <table class="table table-bordered table-condensed">
+                                        <tr><th>Element</th><th>DataType</th><th>Url</th><th>Notes</th></tr>
+                                        <tr ng-repeat="row in LMtreeData" ng-show="row.data.isCoded">
+                                            <td>
+                                                <div>{{row.data.path | dropFirstInPath}}</div>
+                                            </td>
+                                            <td>
+                                                {{row.data.type[0].code}}
+                                            </td>
+                                            <td>
+                                                {{row.data.selectedValueSet.vs.url}}
+
+                                                <span ng-show="row.data.selectedValueSet.strength">
+                                                    ({{row.data.selectedValueSet.strength}})
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {{row.data.description}}
+
+                                                <div ng-show="row.data.comments">
+                                                    <br/>{{row.data.comments}}
+                                                </div>
+
+                                                <div ng-repeat = "map in row.data.ed.mapping">
+                                                    {{map.map | mapComment}}
+                                                </div>
+
+
+                                            </td>
+
+                                        </tr>
+                                    </table>
+
+                                </uib-tab>
+
 
                                 <uib-tab heading="Extensions">
                                     <br/>
@@ -512,6 +554,7 @@
                                     </table>
 
                                 </uib-tab>
+
 
                                 <uib-tab heading="Mind Map"  select="redrawProfileGraph()"  deselect="input.graphTabIsSelected = false">
                                     <div id="mmLogicalModel"></div>

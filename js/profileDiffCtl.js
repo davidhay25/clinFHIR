@@ -35,11 +35,33 @@ angular.module("sampleApp")
 
 
             $scope.showDT = function(dt) {
+                var msg = "";dt;
+                switch (dt) {
+                    case 'Identifier' :
+                        msg = "System,Value";
+                        break;
 
-                var disp = {text:'string',coding:[{system:'uri',code:'string'}]}
-                var s = angular.toJson(disp,true)
+                    case 'HumanName' :
+                        msg = "First name, Last Name, Prefix, Suffix";
+                        break;
+                    case 'Address' :
+                        msg = 'Text, address lines, suburb, state, country';
+                        break;
+                    case 'CodeableConcept' :
+                        msg = 'Text, multiple coded values (system, code)';
+                        break;
+                    case 'ContactPoint' :
+                        msg = 'Type, value';
+                        break;
 
-                return '<pre>'+s+ '</pre>'
+
+                }
+
+                return msg
+               // var disp = {text:'string',coding:[{system:'uri',code:'string'}]}
+               // var s = angular.toJson(disp,true)
+
+               // return '<pre>'+s+ '</pre>'
             }
 
 
