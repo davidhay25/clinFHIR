@@ -1793,7 +1793,6 @@ console.log(SD)
                             physics: false
                         };
 
-
                         var options = {
                             physics: {
                                 enabled: true,
@@ -1803,7 +1802,16 @@ console.log(SD)
                             }
                         };
 
-                        $scope.profileNetwork = new vis.Network(container, graphData, options);
+                        $scope.graphLM = new vis.Network(container, graphData, options);
+
+                        $scope.graphLM.on("click", function (obj) {
+                            var nodeId = obj.nodes[0];  //get the first node
+                            var node = graphData.nodes.get(nodeId);
+                            $scope.selectedNodeInLMGraph = angular.copy(node);
+                            console.log(node);
+                        })
+
+
                     }
                 )
 

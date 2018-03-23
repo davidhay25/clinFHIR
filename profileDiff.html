@@ -557,7 +557,22 @@
 
 
                                 <uib-tab heading="Mind Map"  select="redrawProfileGraph()"  deselect="input.graphTabIsSelected = false">
-                                    <div id="mmLogicalModel"></div>
+
+                                    <div class="row">
+                                        <div class="col-sm-9 col-md-9">
+                                            <div id="mmLogicalModel"></div>
+                                        </div>
+                                        <div class="col-sm-3 col-md-3">
+                                            <div>{{selectedNodeInLMGraph.ed.definition}}</div>
+                                            <div ng-repeat="map in selectedNodeInLMGraph.ed.mapping">
+                                                {{map.identity}}:{{map.map}}
+                                            </div>
+                                            <div>{{map.binding.valueSetReference.reference}}</div>
+
+                                            <pre>{{selectedNodeInLMGraph | json}}</pre>
+                                        </div>
+                                    </div>
+
                                 </uib-tab>
 
                                 <uib-tab heading="Json">

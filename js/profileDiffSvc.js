@@ -405,7 +405,7 @@ angular.module("sampleApp").service('profileDiffSvc',
             treeData.push(artifactsRoot);
 
             angular.forEach(artifacts,function(value,key) {
-                console.log(key,value)
+
 
                 var id = 't' + new Date().getTime() + Math.random()*1000
                 var artifactTypeRoot = {id:id,parent:artifactsRoot.id,text:typeDescription[key]+'s',state: {opened: false}};
@@ -414,7 +414,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
                 value.forEach(function (art) {
                     art.purpose=key;
-                    console.log(art);
+
                     var id = 't' + new Date().getTime() + Math.random()*1000;
 
                     var text = art.name;// || "No name"
