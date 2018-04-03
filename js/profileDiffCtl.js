@@ -1167,9 +1167,7 @@ angular.module("sampleApp")
                             }
                         })
                     }
-
                 })
-
             }
 
             //-------- functions and properties to enable the valueset viewer
