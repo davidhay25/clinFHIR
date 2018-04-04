@@ -2573,11 +2573,8 @@ angular.module("sampleApp")
                                 node.hidden = true;
                                 node.physics=false;
                             }
-
                         }
                     }
-
-
 
 
                     if (objColours[resource.resourceType]) {
@@ -2586,6 +2583,7 @@ angular.module("sampleApp")
 
                     //if there are implicit rules, then assume a logical model //todo - might want a url for this...
                     if (resource.implicitRules) {
+                        console.log(resource)
                         node.shape='ellipse';
                         node.color = objColours['LogicalModel'];
                         node.font = {color:'white'}
