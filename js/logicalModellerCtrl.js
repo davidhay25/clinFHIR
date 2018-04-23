@@ -2272,7 +2272,14 @@ angular.module("sampleApp")
                             newNode.data = angular.copy(result);
                             newNode.data.ed = {mapping:result.mappingFromED};   //nov29 - also for the graph...
 
+
                             $scope.treeData.push(newNode);
+
+
+                            //so the table is sorted correctly (otherwise the new node is at the bottom)...
+                            $scope.treeData = logicalModelSvc.reOrderTree($scope.treeData);
+
+
 
                             if (result.extensionAnalyse && result.extensionAnalyse.isComplexExtension
                                 && result.extensionAnalyse.children) {
