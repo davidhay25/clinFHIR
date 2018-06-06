@@ -796,7 +796,7 @@ angular.module("sampleApp")
 
                             $scope.Practitioner = practitioner;
 
-                            checkForComments($scope.currentType);     //get comments for this user against this model...
+                           // checkForComments($scope.currentType);     //get comments for this user against this model...
                             getPalette(practitioner);       //get the palette of logical models
 
 
@@ -977,12 +977,14 @@ angular.module("sampleApp")
                     }
                 )
             } else {
+                /*
                 if ($scope.conformanceServer.url !== appConfigSvc.getCurrentDataServer().url) {
                     var msg = 'The Conformance and Data servers must be the same for the Comments to work correctly.\n';
                     msg += 'Please reset them and re-load the page if you want comments.'
                     modalService.showModal({}, {bodyText: msg})
 
                 }
+                */
             }
 
 
@@ -1600,7 +1602,6 @@ angular.module("sampleApp")
 
                 });
 
-
                 
                 $http.put(url,SDToSave).then(
                     function(data) {
@@ -1997,7 +1998,7 @@ angular.module("sampleApp")
                 )
             }
 
-            function checkForComments(resource) {
+            function checkForCommentsDEP(resource) {
                 //if there's a practitioner (ie a logged in user) then see if there is an active task to comment on this model
                 if (resource && $scope.Practitioner) {
                     var options = {active:true,focus:resource}

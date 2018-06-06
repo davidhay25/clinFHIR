@@ -1292,13 +1292,6 @@ angular.module("sampleApp")
                     }
 
 
-                    /*
-                    //scenario tags are saved as tags against the
-                    if (dr.meta && dr.meta.tags) {
-                        container.tags = dr.meta.tags
-                    }
-*/
-
                     //the bundle of resources that makes up the scenario. stores as a b64 encoded attachment in the DR
 
 
@@ -1307,6 +1300,7 @@ angular.module("sampleApp")
                         container.bundle = angular.fromJson(atob(dr.content[0].attachment.data));
                     } catch (ex) {
                         console.log('error loading library item: ',ex)
+                        return null;
                     }
 
                     //get the history (if any)
@@ -1315,11 +1309,6 @@ angular.module("sampleApp")
                         container.history = hx.history;
                         container.showVersion = true;       //displays the version bar..
                     }
-
-                   // if (bundleContainer.history && bundleContainer.history.length > 1) {
-                     //   var dr = {history:bundleContainer.history}
-                       // docref.content.push({attachment:{data:btoa(angular.toJson(dr))}})
-                   // }
 
 
 
@@ -1382,7 +1371,7 @@ angular.module("sampleApp")
                 //download ALL the DocumentReferences that are the library references...
                 var that = this;
                 //create a hash for the current sets in the local cache based on id...
-                //determine which are already stored loca
+                //determine which are already stored locally
                 var cache = {};
                 if (builderBundles) {
                     builderBundles.forEach(function(bundle){
@@ -1401,12 +1390,15 @@ angular.module("sampleApp")
                             var arContainer = [];
                             bundle.entry.forEach(function(entry){
                                 var dr = entry.resource;
-                                var container = that.getBundleContainerFromDocRef(dr)
-                                //console.log(container);
-                                if (cache[dr.id]) {
-                                    container.cachedLocally = true;
+                                var container = that.getBundleContainerFromDocRef(dr);
+                                if (container) {
+                                    //console.log(container);
+                                    if (cache[dr.id]) {
+                                        container.cachedLocally = true;
+                                    }
+                                    arContainer.push(container);  //saves the doc as a container...
                                 }
-                                arContainer.push(container);  //saves the doc as a container...
+
                             })
                         }
 

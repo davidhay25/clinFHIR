@@ -1849,7 +1849,6 @@ angular.module("sampleApp")
 
                         });
 
-
                         $q.all(queries).then(
                             function () {
 
@@ -1959,7 +1958,6 @@ angular.module("sampleApp")
 
 
             },
-
             generateSample: function (treeObject) {
 
 
@@ -1992,7 +1990,6 @@ angular.module("sampleApp")
 
                 return sample;
             },
-
             getOptionsFromValueSet: function (element) {
                 //return the expanded set of options from the ValueSet
                 var deferred = $q.defer();
@@ -2618,12 +2615,6 @@ angular.module("sampleApp")
 
                 }
 
-
-
-
-
-
-
                 return arTree;
             },
             makeSD: function (scope, treeData) {
@@ -2828,13 +2819,9 @@ angular.module("sampleApp")
                         ed.binding.valueSetReference = {reference: data.selectedValueSet.vs.url};
                         ed.binding.description = data.selectedValueSet.vs.name;
 
-
-
-
                     }
 
                     ed.fixedString = data.fixedString;  //todo needs to be a compatible type
-
 
                     //used for slicing...
                     if (data.discriminator) {
@@ -2845,8 +2832,6 @@ angular.module("sampleApp")
                 });
 
                 return sd;
-
-
 
             },
             reOrderTree: function (treeData) {
