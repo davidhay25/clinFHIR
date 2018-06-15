@@ -57,7 +57,8 @@ angular.module("sampleApp")
             $scope.displayServers = "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>"
 
             //when a new scenario is selected with a patient from the server. passes in all data for that patient
-            $scope.$on('patientSelected',function(event,patientData){
+            $scope.$on('patientSelected',function(event,patientResource){
+
                 renderPatientDetails(patientResource);
                 console.log(patientResource)
             });

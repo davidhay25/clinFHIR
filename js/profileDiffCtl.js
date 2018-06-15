@@ -1127,7 +1127,7 @@ angular.module("sampleApp")
 
                             // var purpose = resource.purpose || resource.acronym;     //<<< todo - 'purpose' was removed in R3...
                             var type;
-
+                            var extDef = appConfigSvc.config().standardExtensionUrl.resourceTypeUrl;
                             if (resource.example || resource.purpose == 'example') {         //another R2/3 difference...
                                 purpose = 'example'
                                 var t = Utilities.getSingleExtensionValue(resource, extDef);

@@ -123,6 +123,9 @@
   {"name": "Task","reference":false,"version":"2.1"},
   {"name": "TestReport","reference":false,"version":"2.1"},
 
-  {"name": "ActivityDefinition","reference":false,"version":"2.1"}
+  {"name": "ActivityDefinition","reference":false,"version":"2.1"},
+
+  {"name": "ServiceRequest","reference":false,"version":"2.1"}
+
 ]
 
