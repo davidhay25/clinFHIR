@@ -750,7 +750,7 @@ angular.module("sampleApp")
                 $scope.LMDetailVisible = true
             };
 
-
+/*
 
             //check for commands in the url - specifically a valueset url to edit or view...
             var params = $location.search();
@@ -777,7 +777,7 @@ angular.module("sampleApp")
                 }
             }
 
-
+*/
             //-----------  login stuff....
             
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
@@ -827,7 +827,12 @@ angular.module("sampleApp")
 
                         if (list) {
 
+                            sortPalette(list)
+
+
                             $scope.lmPalette = list;
+
+
 
                             checkInPalette();   //if the user logs in while a model is selected...
 
@@ -836,6 +841,22 @@ angular.module("sampleApp")
 
                     }
                 )
+            }
+
+            function sortPalette(list) {
+                list.entry.sort(function (a,b) {
+                    if (a.item && b.item) {
+                        if (a.item.display > b.item.display) {
+                            return 1
+                        } else {
+                            return -1
+                        }
+                    } else {
+                        return 0;
+                    }
+
+
+                })
             }
             
             //remove the current model from the palette
@@ -908,7 +929,7 @@ angular.module("sampleApp")
 
             //add the current model to the current users palette of models
             $scope.addToPalette = function() {
-                if ($scope.Practitioner) {
+                if ($scope.Practitioner && $scope.currentType) {
                     //create the palette if it doesn't exist
                     if (!$scope.lmPalette) {
                         $scope.lmPalette = {resourceType:'List',status:'current',mode:'working',entry:[]}
@@ -929,6 +950,7 @@ angular.module("sampleApp")
                     SaveDataToServer.saveResource($scope.lmPalette).then(
                         function(){
                             $scope.isInPalette = true;
+                            sortPalette($scope.lmPalette)
                         },
                         function(err){
                             alert("error saving List " + angular.toJson(err))
@@ -988,7 +1010,7 @@ angular.module("sampleApp")
             }
 
 
-            $scope.createTask = function(){
+            $scope.createTaskDEP = function(){
                 //create a new task for this practitioner against this model.
                 SaveDataToServer.addTaskForPractitioner($scope.Practitioner,{focus:$scope.currentType}).then(
                     function(task){

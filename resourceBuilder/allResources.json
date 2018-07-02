@@ -125,7 +125,8 @@
 
   {"name": "ActivityDefinition","reference":false,"version":"2.1"},
 
-  {"name": "ServiceRequest","reference":false,"version":"2.1"}
+  {"name": "ServiceRequest","reference":false,"version":"2.1"},
+  {"name": "CodeSystem","reference":false,"version":"2.1"}
 
 ]
 
