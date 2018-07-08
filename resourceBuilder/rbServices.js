@@ -585,9 +585,10 @@ angular.module("sampleApp").
             return deferred.promise;
 
         },
-        findConformanceResourceByUri : function(url,serverUrl,typeOfConformanceResource) {
+        findConformanceResourceByUri : function(url,serverUrl,typeOfConformanceResource,hideError) {
             //find a StructureDefinition based on its Uri. ie we query the registry to find the required SD
             //added serverUrl May21 so can specify the server to query in the call
+            //July 2018 - parameter to inhibit error when > 1 match. Pick the one with the latest updated date if > 1.
             var deferred = $q.defer();
             var config = appConfigSvc.config();
 
@@ -606,18 +607,57 @@ angular.module("sampleApp").
                 function(data){
                     var bundle = data.data;
                     if (bundle && bundle.entry && bundle.entry.length > 0) {
-                        //return the first on if more than one... - updated: check the resource type! - added because of a bug, but it's not safe to assume that the response doesn't have other resources - like an OO
+                        //return the most recent one if more than one... -
+/*
 
-
-                        if (bundle.entry.length > 1) {
+                        if (bundle.entry.length > 1 && ! hideError) {
                             alert('There are '+ bundle.entry.length + ' StructureDefinitions with the url ' + url + "!")
                         }
+*/
 
-
-                        var entry = _.find(bundle.entry,function(o){
+                        //updated: check the resource type! - added because of a bug, but it's not safe to assume that the response doesn't have other resources - like an OO
+                        var arEntry = _.filter(bundle.entry,function(o){
                             return o.resource.resourceType==typeOfConformanceResource;
                         });
 
+
+                        if (arEntry) {
+                            if (arEntry.length ==1) {
+                                deferred.resolve(arEntry[0].resource);
+                            } else {
+                                if (! hideError) {
+                                    alert('There are '+ bundle.entry.length + ' StructureDefinitions with the url ' + url + "!")
+                                }
+                                var entry;
+                                var last = moment().subtract(10,'years')
+                                arEntry.forEach(function (ent) {
+                                    ent.resource.meta = ent.resource.meta || {}
+                                    ent.resource.meta.lastUpdated = ent.resource.meta.lastUpdated || moment().format(); //if no lastUpdated, set to now...
+
+                                    var date = moment(ent.resource.meta.lastUpdated) || moment();
+                                    if (date.unix() > last.unix()) {
+                                        last = date;
+                                        entry = ent;
+                                    }
+                                    if (ent) {
+                                        deferred.resolve(ent.resource);
+                                    } else {
+                                        deferred.reject({msg:"No matching profile ("+url+") found on "+serverUrl  + typeOfConformanceResource +" (but not a server error - just not present, although others were)"})
+                                    }
+
+                                })
+
+
+                            }
+
+
+                        } else {
+                            deferred.reject({msg:"No matching profile ("+url+") found on "+serverUrl  + typeOfConformanceResource +" (but not a server error - just not present, although others were)"})
+                        }
+
+
+
+/*
                        if (entry && entry.resource) {
                            config.log('resolvedId: '+entry.resource,'findConformanceResourceByUri');
                            deferred.resolve(entry.resource);
@@ -626,7 +666,7 @@ angular.module("sampleApp").
                            deferred.reject({msg:"No matching profile ("+url+") found on "+serverUrl  + typeOfConformanceResource +" (but not a server error - just not present, although others were)"})
                        }
 
-
+*/
 
                     } else {
                         

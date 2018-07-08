@@ -10,7 +10,9 @@ var upload = false;
 var errors = 0;
 
 
-var remoteFhirServer = "http://localhost:8080/baseDstu3/";
+//var remoteFhirServer = "http://localhost:8080/baseDstu3/";
+var remoteFhirServer = "https://ontoserver.csiro.au/stu3-latest/";
+
 
 //var remoteFhirServer = "http://snapp.clinfhir.com:8081/baseDstu3/";   //the real one when ready...
 //var remoteFhirServer = "http://fhirtest.uhn.ca/baseDstu3/";   //the real one when ready...

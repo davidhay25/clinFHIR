@@ -153,7 +153,7 @@ angular.module("sampleApp")
             };
 
 
-            $scope.saveNewComment = function (comment,relatedToId,inx) {
+            $scope.saveNewCommentDEPDontDelete = function (comment,relatedToId,inx) {
                 profileDiffSvc.saveNewComment(comment,$scope.selectedSD.url,$scope.selectedEDInLM,$scope.user.email,relatedToId).then(
                     function(displayObj) {
                         alert('Comment has been saved')
@@ -173,7 +173,7 @@ angular.module("sampleApp")
                 )
             };
 
-            var getCommentsForProfile = function(url,cb) {
+            var getCommentsForProfileDEPDontDelete = function(url,cb) {
                 delete $scope.commentsThisProfileHash;
                 delete $scope.commentsThisProfileCount;
                 profileDiffSvc.getCommentsForProfile(url).then(
@@ -1106,8 +1106,6 @@ angular.module("sampleApp")
                 console.log($scope.artifacts)
 
 
-
-
             };
 
             function makeArtifact() {
@@ -1375,7 +1373,7 @@ console.log(SD)
 
                            //console.log(SD)
 
-                           getCommentsForProfile(url);
+                          //Don't delete just yet... getCommentsForProfile(url);
 
                            $scope.constrainedType = SD.constrainedType;     //todo different for R3...
 
@@ -1438,7 +1436,7 @@ console.log(SD)
                     var ar = url.split('/');
                     var type = ar[ar.length-2];
 
-                    GetDataFromServer.findConformanceResourceByUri(url,appConfigSvc.getCurrentConformanceServer().url,type).then(
+                    GetDataFromServer.findConformanceResourceByUri(url,appConfigSvc.getCurrentConformanceServer().url,type,true).then(
                         function(data) {
                             $scope.input.selectedRest = {}
                             $scope.otherResource = data;

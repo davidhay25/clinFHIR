@@ -56,17 +56,17 @@
             </div>
         </div>
         <br/>
-       <div class="row">
+        <div class="row">
            <div class="col-md-3 col-sm-3">
                Source ValueSet
            </div>
            <div class="col-md-6 col-sm-6">
-               <input type="text" class="form-control"  ng-model="input.sourceUri" ng-blur="checkCanAdd()"/>
+               <input type="text" class="form-control"  ng-model="input.sourceRef" ng-blur="checkCanAdd()"/>
            </div>
            <div class="col-md-2 col-sm-2">
                <button class="btn btn-primary pull-right" ng-click="findVS('source')">Find</button>
            </div>
-       </div>
+        </div>
         <br/>
 
         <div class="row">
@@ -74,7 +74,7 @@
                 Target ValueSet
             </div>
             <div class="col-md-6 col-sm-6">
-                <input type="text" class="form-control" ng-model="input.targetUri" ng-blur="checkCanAdd()"/>
+                <input type="text" class="form-control" ng-model="input.targetRef" ng-blur="checkCanAdd()"/>
             </div>
             <div class="col-md-2 col-sm-2">
                 <button class="btn btn-primary pull-right" ng-click="findVS('source')">Find</button>
@@ -127,8 +127,12 @@
         <div class="row">
             <div class="col-md-12 col-sm-12">
 
+
+
                 <em ng-hide="currentMap">Add the details for a new ConceptMap</em>
                 <em ng-show="currentMap">Edit the details of an existing ConceptMap</em>
+
+
 
             </div>
 

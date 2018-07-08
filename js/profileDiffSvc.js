@@ -194,7 +194,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                                 var parent = commentHash[reply.parentId]
                                 if (parent) {
                                     parent.replies.push(reply)
-                                    console.log(parent)
+
                                 }
 
 
@@ -624,7 +624,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                                     if (it.code == 'Extension' && it.profile) {
                                         //load the extension definition
                                         node.state.hidden=false;    //if there is a profile, then show it...
-                                        queries.push(GetDataFromServer.findConformanceResourceByUri(it.profile).then(
+                                        queries.push(GetDataFromServer.findConformanceResourceByUri(it.profile,null,null,true).then(
                                             function(sdef) {
                                                 var analysis = Utilities.analyseExtensionDefinition3(sdef);
                                                 item.myMeta.analysis = analysis;
@@ -1887,7 +1887,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                     if (svr) {
                         serverUrl = svr.url;
                     }
-                    GetDataFromServer.findConformanceResourceByUri(url,serverUrl).then(
+                    GetDataFromServer.findConformanceResourceByUri(url,serverUrl,null,true).then(
                         function (sdef) {
 
                             //delete sdef.text;       //large text
@@ -1918,7 +1918,7 @@ angular.module("sampleApp").service('profileDiffSvc',
             } else {
                 // This assumes that the terminology resources are all on the terminology service...
                 var serverUrl = appConfigSvc.getCurrentTerminologyServer().url;
-                GetDataFromServer.findConformanceResourceByUri(url,serverUrl,resourceType).then(
+                GetDataFromServer.findConformanceResourceByUri(url,serverUrl,resourceType,true).then(
                     function (sdef) {
 
                         $localStorage.extensionDefinitionCache[url] = minimizeSD(sdef)
@@ -1970,7 +1970,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                         //no - it's relative - we assume to the conformance server
                         url = appConfigSvc.getCurrentConformanceServer().url+url;
                     }
-                    GetDataFromServer.findConformanceResourceByUri(url).then(
+                    GetDataFromServer.findConformanceResourceByUri(url,null,null,true).then(
                         function (sdef) {
                             console.log(url)
 console.log(sdef)

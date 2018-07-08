@@ -22,13 +22,11 @@ angular.module("sampleApp")
             $scope.equivalenceDescription.unmatched ="There is no match for this concept in the destination concept system.";
             $scope.equivalenceDescription.disjoint="This is an explicit assertion that there is no mapping between the source and target concept.";
 
-
             $scope.input.eq = $scope.equivalence[0];
-
 
             $scope.showEquivalenceDescription = function(eq) {
                 return $scope.equivalenceDescription[eq]
-            }
+            };
 
             $scope.appConfigSvc = appConfigSvc;
 
@@ -36,6 +34,8 @@ angular.module("sampleApp")
                 modalService.showModal({}, {bodyText: 'This app needs a Conformance Server of release 3 of greater.'})
             }
 
+            var conformanceServer = appConfigSvc.getCurrentConformanceServer();
+            var terminologyServer = appConfigSvc.getCurrentTerminologyServer();
             $scope.setCurrentCM = function(cm){
                 if ($scope.isDirty) {
                     var modalOptions = {
@@ -73,6 +73,88 @@ angular.module("sampleApp")
 
             };
 
+
+            //add an entry for all the source codes not currently present
+            $scope.allSource = function(group){
+                //console.log(group);
+                var hashEntries = {};
+                //make a hash of existing entries by code
+                group.element.forEach(function (element) {
+                    hashEntries[group.source + '|' + element.code] = element
+                });
+
+                if ($scope.currentCM.sourceReference && $scope.currentCM.sourceReference.reference) {
+                    var url = terminologyServer.url + 'ValueSet/$expand?url=' + $scope.currentCM.sourceReference.reference;
+
+                    //now add all the ones not already added
+                    $http.get(url).then(
+                        function(data) {
+                            var expandedVS = data.data;
+                            console.log(expandedVS.expansion.contains)
+                            if (expandedVS.expansion && expandedVS.expansion.contains) {
+                                var lst = expandedVS.expansion.contains;
+                                lst.forEach(function (concept) {
+                                    if (! hashEntries[concept.system + "|" + concept.code]) {
+                                        var map = {code:concept.code,target:[]};
+                                        group.element.push(map)
+                                    }
+                                })
+                            }
+                            console.log(group)
+                        },
+                        function(err) {
+                            alert(angular.toJson(err))
+                        }
+                    )
+                }
+
+
+
+            };
+
+            //lookup the set of possible codes
+            $scope.vsLookup = function(value,set) {
+
+
+                var url;
+                if (set=='source') {
+                    if ($scope.currentCM && $scope.currentCM.sourceReference && $scope.currentCM.sourceReference.reference)
+                    url = terminologyServer.url + 'ValueSet/$expand?url=' + $scope.currentCM.sourceReference.reference;
+                } else {
+                    if ($scope.currentCM && $scope.currentCM.targetReference && $scope.currentCM.targetReference.reference)
+                        url = terminologyServer.url + 'ValueSet/$expand?url=' + $scope.currentCM.targetReference.reference;
+
+                    //url = terminologyServer.url + 'ValueSet/$expand?url=' + $scope.currentCM.targetUri;
+                }
+
+                if (url) {
+                    if (value !== ' ') {
+                        url += '&filter='+value;
+                    }
+
+                    console.log(url)
+
+
+                    return $http.get(url).then(
+                        function(data) {
+                            var expandedVS = data.data;
+                            console.log(expandedVS.expansion.contains)
+                            if (expandedVS.expansion && expandedVS.expansion.contains) {
+                                var lst = expandedVS.expansion.contains;
+                                console.log(lst)
+                                return lst;
+                            } else {
+                                return [
+                                    {'code': 'No expansion'}
+                                ];
+                            }
+                        }
+                    )
+                }
+
+
+
+            }
 
 
             $scope.setDirty = function(){
@@ -121,7 +203,7 @@ angular.module("sampleApp")
 
                 }
 
-            }
+            };
 
             $scope.removeItem = function(vo){
                 //assume a single group, and that each 'source' code is only represented once in the mapping, with only a single target
@@ -155,8 +237,6 @@ angular.module("sampleApp")
                             delete $scope.isDirty;
                             loadAllCM();
                         }
-
-
                     }
                 )
             };
@@ -182,8 +262,15 @@ angular.module("sampleApp")
                             $scope.input.description = currentMap.description;
                             $scope.input.purpose = currentMap.purpose;
 
-                            $scope.input.sourceUri = currentMap.sourceUri;
-                            $scope.input.targetUri = currentMap.targetUri;
+                            if (currentMap.sourceReference) {
+                                $scope.input.sourceRef = currentMap.sourceReference.reference;
+                            }
+
+                            if (currentMap.sourceReference) {
+                                $scope.input.targetRef = currentMap.targetReference.reference;
+                            }
+
+
 
                             $scope.input.sourceCS = currentMap.group[0].source;
                             $scope.input.targetCS = currentMap.group[0].target;
@@ -221,6 +308,7 @@ angular.module("sampleApp")
                             )
                         }
 
+                        //add the new ConceptMap
                         $scope.add = function () {
 
                             var vo =  {resourceType:'ConceptMap',status:'draft'}
@@ -233,8 +321,8 @@ angular.module("sampleApp")
                             vo.description = $scope.input.description;
                             vo.purpose = $scope.input.purpose;
 
-                            vo.sourceUri = $scope.input.sourceUri;
-                            vo.targetUri = $scope.input.targetUri;
+                            vo.sourceReference = {reference:$scope.input.sourceRef};
+                            vo.targetReference = {reference:$scope.input.targetRef};
 
                             if (currentMap) {
                                 vo.group[0].source = $scope.input.sourceCS;
@@ -269,11 +357,12 @@ angular.module("sampleApp")
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
                     keyboard: false,       //same as above.
                     templateUrl: 'modalTemplates/addConceptMapItem.html',
-                    controller: function($scope,currentItem,sourceSystem,targetSystem,GetDataFromServer,Utilities,equivalence){
+                    controller: function($scope,currentItem,sourceSystem,targetSystem,GetDataFromServer,Utilities,equivalence,vsLookup){
                         $scope.equivalence = equivalence;
 
+                        $scope.vsLookup = vsLookup;     //the typeahead function from the 'parent'
 
-                        function getVS(url,type) {
+                        function getVSDEP(url,type) {
                             if (url) {
                                 var key = type+"VS"
                                 Utilities.getValueSetIdFromRegistry(url,function(vs){
@@ -292,23 +381,24 @@ angular.module("sampleApp")
                             $scope.currentItem = currentItem;
                             $scope.input.source = currentItem.code;
 
-                            $scope.input.target = currentItem.target[0].code;
-                            $scope.input.comment = currentItem.target[0].comment;
-                            if (currentItem.target[0].equivalence) {
-                                $scope.equivalence.forEach(function(eq){
-                                    if (eq == currentItem.target[0].equivalence) {
-                                        $scope.input.eq= eq
-                                    }
-                                })
+                            if (currentItem.target[0]) {
+                                $scope.input.target = currentItem.target[0].code;
+                                $scope.input.comment = currentItem.target[0].comment;
+                                if (currentItem.target[0].equivalence) {
+                                    $scope.equivalence.forEach(function(eq){
+                                        if (eq == currentItem.target[0].equivalence) {
+                                            $scope.input.eq= eq
+                                        }
+                                    })
+                                }
                             }
-
-
                         }
 
 
 
+
                         //autocomplete from a valueset
-                        $scope.vsLookup = function(key,text) {
+                        $scope.vsLookupDEP = function(key,text) {
 
                             console.log(text)
                             var vs = $scope[key+'VS'];
@@ -361,6 +451,9 @@ angular.module("sampleApp")
 
                             if (currentItem) {
                                 currentItem.code = $scope.input.source;
+                                if (currentItem.target.length == 0) {
+                                    currentItem.target.push({})
+                                }
                                 currentItem.target[0].code = $scope.input.target;
                                 currentItem.target[0].comment = $scope.input.comment;
                                 currentItem.target[0].equivalence = $scope.input.eq;
@@ -392,6 +485,11 @@ angular.module("sampleApp")
                         equivalence : function(){
 
                             return $scope.equivalence
+                        },
+                        vsLookup : function(){
+                            //the expand typeahead function...
+                            return $scope.vsLookup
+
                         }
                     }
                 }).result.then(

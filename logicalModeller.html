@@ -421,6 +421,9 @@
             <uib-tabset ng-show="treeData.length > 0">
                 <uib-tab heading="Designer">
 
+
+
+
                     <div class="row">
                         <div class="col-md-12 col-sm-12">
                              <span class="pull-right">
@@ -439,6 +442,23 @@
 
                 <uib-tab heading="Table">
                     <br/>
+
+                    <div class="row">
+                        <div class="col-sm-6 col-md-6">
+
+                        </div>
+                        <div class="col-sm-6 col-md-6">
+                            <div>
+                                <a class="btn btn-link pull-right" download="{{downloadLinkJsonName}}.csv"
+                                   href="{{downloadLinkJsonContent}}" title="{{downloadLinkJsonName}}" >
+                                    Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+
+
 
                     <div class="designerScroll">
 
@@ -529,12 +549,7 @@
 
                                     </table>
 
-                                    <div>
-                                        <a class="btn btn-link" download="{{downloadLinkJsonName}}.csv"
-                                           href="{{downloadLinkJsonContent}}" title="{{downloadLinkJsonName}}" >
-                                            Download
-                                        </a>
-                                    </div>
+
 
                                 </uib-tab>
 
@@ -1222,13 +1237,7 @@
 
                             </uib-tab>
 
-
-
                         </uib-tabset>
-
-
-
-
 
                     </uib-tab>
 
@@ -1281,7 +1290,7 @@
                         <pre>{{selectedED | json}}</pre>
                     </uib-tab>
 
-<!--
+
                     <uib-tab ng-show="1==2" heading="Comments" >
                         <br/>
                         <uib-tabset>
@@ -1347,16 +1356,7 @@
 
                     </uib-tab>
 
-                    -->
-<!--
-                    <uib-tab heading="Commands">
-                        <br/>
-                        <h4>Experimental commands</h4>
-                        <button class="btn btn-default" ng-click="generateSample()">Generate Sample</button>
 
-                        <pre>{{sample | json}}</pre>
-                    </uib-tab>
-                    -->
 
 
                 </uib-tabset>
