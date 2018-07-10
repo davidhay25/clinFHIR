@@ -153,7 +153,7 @@ angular.module("sampleApp")
                 },1000)
 
             };
-
+/*
             $scope.showQuest = function(){
                 //$scope.showForm();      //actually the new data entry form...
 
@@ -179,7 +179,7 @@ angular.module("sampleApp")
 
                     })
             };
-
+*/
             $scope.editLMDocDEP = function(){
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editLMDoc.html',
@@ -1681,12 +1681,12 @@ angular.module("sampleApp")
                 delete $scope.commentTask;      //the task to comment on this model...
                 delete $scope.input.mdComment;  //the comment
                 delete $scope.taskOutputs;      //the outputs of the task (Communication resource currently)
-                delete $scope.Q;                //the Questionnaire
+                //delete $scope.Q;                //the Questionnaire
                 $scope.canSaveModel = true;     //allow edits to the model to be saved
 
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource);
-                $scope.Q = questionnaireSvc.makeQ($scope.treeData);
+                //$scope.Q = questionnaireSvc.makeQ($scope.treeData);
                 $scope.relativeMappings = logicalModelSvc.getRelativeMappings($scope.treeData); //items with both v2 & fhir mappings
 
 

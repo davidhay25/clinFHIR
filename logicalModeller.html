@@ -429,7 +429,7 @@
                              <span class="pull-right">
                                  <button class="btn btn-link" ng-click="expandAll()">Expand All</button>
                                  <button class="btn btn-link" ng-click="resetLayout()">Collapse Layout</button>
-                                 <button class="btn btn-link" ng-click="showQuest()">Form</button>
+                               <!--  <button class="btn btn-link" ng-click="showQuest()">Form</button>-->
                                  <button ng-hide="isInPalette" class="btn btn-link" ng-click="addToPalette()">Add to Palette</button>
                                  <button ng-show="isInPalette" class="btn btn-link" ng-click="removeFromPalette()">Remove from Palette</button>
 
@@ -1071,13 +1071,7 @@
                         </div>
 
 
-
-
-
                     </uib-tab>
-
-
-
 
                     <uib-tab heading="Model">
 
@@ -1123,11 +1117,6 @@
                                     </tr>
 
 
-
-
-
-
-
                                 </table>
                             </uib-tab>
                             <uib-tab heading="History">
@@ -1160,10 +1149,8 @@
 
                                 </ul>
 
-
-
                             </uib-tab>
-
+<!--
                             <uib-tab ng-show="input.modelChat && 1==2">
                                 <uib-tab-heading>Comments <span class="badge">{{input.modelChat.length-1}}</span> </uib-tab-heading>
 
@@ -1184,7 +1171,7 @@
 
                                         <div class="row">
                                             <div class="col-md-12 col-sm-12">
-                                                <!-- .path is present in the 'top' chat of a conversation, .display otherwise-->
+                                                // .path is present in the 'top' chat of a conversation, .display otherwise
                                                 {{comment.comment.display}} {{comment.comment.path}}
                                             </div>
 
@@ -1198,7 +1185,7 @@
                                             </div>
                                             <div class="col-md-4 col-sm-4">
 
-                                                <!-- Show the new comment box-->
+                                                //Show the new comment box
                                                 <div style="margin: 6px" ng-hide="newCommentboxInx == $index"
                                                      class="pull-right clickable" ng-click="input.newCommentboxInx = $index">
 
@@ -1233,9 +1220,10 @@
                                         <hr style="margin:3px" />
                                     </div>
 
-                                </div> <!-- ng-repeat -->
+                                </div>
 
                             </uib-tab>
+                            -->
 
                         </uib-tabset>
 

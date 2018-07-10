@@ -232,7 +232,7 @@ angular.module("sampleApp")
                 if ($scope.input.searchStatus !== 'all') {
                     query += "&status="+$scope.input.searchStatus;
                 }
-                
+
                 getProfiles(query,downLoadName)
             };
 

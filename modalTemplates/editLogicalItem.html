@@ -45,7 +45,6 @@
                     <div class="row">
                         <div class="col-md-10 col-sm-10">
                             <select ng-change="setDataType(input.dataType)" ng-model="input.dataType" class="form-control"
-
                                     ng-options="type.description for type in allDataTypes">
                             </select>
                         </div>
@@ -55,9 +54,6 @@
                             </a>
                         </div>
                     </div>
-
-
-
 
                     <div class="pull-right" ng-show="isCoded">
                         <em>{{selectedValueSet.vs.url}}</em>
@@ -277,14 +273,17 @@
                                        ng-change="updateCurrentMapValue(input.mappingPathV2)"/>
                             </uib-tab>
 
+                            <uib-tab heading="LM" select="setCurrentMap('lm')">
+                                <br/>
+                                <input type="text" class="form-control" ng-model="input.mappingPathLM"
+                                       ng-change="updateCurrentMapValue(input.mappingPathLM)"/>
+                            </uib-tab>
+
                             <uib-tab heading="SNOMED" select="setCurrentMap('snomed')">
                                 <br/>
                                 <input type="text" class="form-control" ng-model="input.mappingPathSnomed"
                                        ng-change="updateCurrentMapValue(input.mappingPathSnomed)"/>
                             </uib-tab>
-
-
-
 
 
                             <uib-tab heading="Others" select = "deleteCurrentMap() ">

@@ -7,7 +7,7 @@ angular.module("sampleApp")
             $scope.appConfigSvc = appConfigSvc;
             $scope.allResourceTypes = allResourceTypes;
             $scope.references = references;    // a bundle containing all the LogicalModels...
-            $scope.rootForDataType = rootForDataType;
+            $scope.rootForDataType = rootForDataType;   //HTTP root for viewing datatype details
             $scope.canSave = true;
             $scope.allDataTypes = allDataTypes;
             $scope.parentPath = parentPath;
@@ -63,7 +63,7 @@ angular.module("sampleApp")
             };
 
 
-            //when a fhir path is selected from the type-ahead...
+            //when a fhir path is selected from the type-ahead in the mapping...
             $scope.fhirPathSelect = function(item) {
                 console.log(item)
                 //if the name is empty, set it to the last value in the path and set the datatype...
@@ -170,6 +170,7 @@ angular.module("sampleApp")
                     isDiscriminatorRequired();      //true if there is another fhir mapping the same
                     $scope.input.mappingPathV2 = getMapValueForIdentity('hl7V2');
                     $scope.input.mappingPathSnomed = getMapValueForIdentity('snomed');
+                    $scope.input.mappingPathLM = getMapValueForIdentity('lm');
 
                     $scope.input.fhirMappingExtensionUrl = data.fhirMappingExtensionUrl;
 
@@ -686,17 +687,18 @@ angular.module("sampleApp")
                     vo.mappingFromED = $scope.input.mappingFromED;      //all mappings
                     vo.mappingPathV2 = $scope.input.mappingPathV2;
                     vo.mappingPathSnomed = $scope.input.mappingPathSnomed;
+                    vo.mappingPathLM = $scope.input.mappingPathLM;
 
                     //if mapping to an extension, the include the oath to the extension
                     if (vo.mappingPath && vo.mappingPath.indexOf('xtension') > -1) {
                         vo.fhirMappingExtensionUrl = $scope.input.fhirMappingExtensionUrl
-
                     }
 
                     //make sure the v2 & fhir mappings align with the
                     alignMap('hl7V2',vo.mappingPathV2,vo.mappingFromED)
                     alignMap('fhir',vo.mappingPath,vo.mappingFromED)
                     alignMap('snomed',vo.mappingPathSnomed,vo.mappingFromED)
+                    alignMap('lm',vo.mappingPathLM,vo.mappingFromED)
 
                     vo.type = [{code:$scope.input.dataType.code}];
                     vo.editNode = editNode;
