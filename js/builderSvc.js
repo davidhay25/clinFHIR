@@ -1158,7 +1158,7 @@ angular.module("sampleApp")
                 //construct the text representation of a document
                 // order is patient.text, composition.text, sections.text
                 var html = "";
-                if (composition) {
+                if (composition && composition.text) {
                     var that = this;
 
 
@@ -1200,21 +1200,24 @@ angular.module("sampleApp")
                     html += "<h3>Composition</h3>" + "<div class='inset'>"+ composition.text.div + "</div>";
                     html += "<h3>Sections</h3>";
 
-                    composition.section.forEach(function(section){
+                    if (composition.section) {
+                        composition.section.forEach(function(section){
 
-                        html += "<h4>"+section.title+"</h4>";
-                        html += "<div class='inset'>";
+                            html += "<h4>"+section.title+"</h4>";
+                            html += "<div class='inset'>";
 
-                        // - don't do that here any more... html += that.generateSectionText(section)
-                        if (section.text) {
-                            html += section.text.div;
-                        }
+                            // - don't do that here any more... html += that.generateSectionText(section)
+                            if (section.text) {
+                                html += section.text.div;
+                            }
 
-                        html += "</div>";
+                            html += "</div>";
 
 
 
-                    })
+                        })
+
+                    }
 
 
                 }

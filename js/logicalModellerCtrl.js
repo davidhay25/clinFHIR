@@ -76,6 +76,9 @@ angular.module("sampleApp")
             //generate and save a questionnaire
             $scope.generateQ = function(){
 
+                alert('not yet enabled');
+                return;
+
                 var Qname = $scope.SD.id;   //the questionairre name (and id, url) is based on the LM model id
                 var Q = questionnaireSvc.makeQ($scope.treeData);  //update the Questionnaire
                 questionnaireSvc.saveQ(Q,Qname).then(
