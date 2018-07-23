@@ -5,6 +5,7 @@
 
 angular.module("sampleApp")
 
+
     .filter('mapPath',function(){
         return function(s) {
 

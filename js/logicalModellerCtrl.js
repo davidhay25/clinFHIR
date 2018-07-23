@@ -7,6 +7,7 @@ angular.module("sampleApp")
                   $q,Utilities, securitySvc,$filter,builderSvc,questionnaireSvc) {
             $scope.input = {};
 
+            $scope.firebase = firebase;
             $scope.code = {};
             $scope.code.lmPalette = 'lmPalette';        //the list code for the paletteof models...
             $scope.treeData = [];           //populates the resource tree
@@ -25,14 +26,65 @@ angular.module("sampleApp")
             function makeMappingDownload(SD) {
 
                 var download = logicalModelSvc.makeMappingDownload(SD);
-                //console.log(download)
-
                 $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([download],
                     {type: "text/text"}));
 
                 $scope.downloadLinkJsonName = "downloaded"
             }
-            //makeMappingDownload()
+
+
+            //return true if the url is to a core resource type
+            $scope.isCoreType = function(url) {
+
+                if (url && url.indexOf('http://hl7.org/fhir') > -1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            };
+
+
+            //number of segments in a path...
+            $scope.segmentCount = function(path){
+                if (path) {
+                    var ar = path.split('.');
+                    return ar.length;
+                } else {
+                    return 0;
+                }
+            };
+
+            //todo - need to move children as well...
+            $scope.moveLeft = function() {
+
+                var path = $scope.selectedNode.data.path;
+                var pos = findPositionInTree(path);     //the location of the element we wish to move in the array
+
+                var ar = path.split('.');
+                if (ar.length > 2) {
+                    ar.splice(ar.length-2,1);
+                    var newPath = ar.join('.');
+                    ar.pop();
+                    var newParent = ar.join('.');
+
+                    $scope.selectedNode.data.path = newPath;
+                    $scope.selectedNode.id = newPath;
+                    $scope.selectedNode.parent = newParent;
+
+                    $scope.treeData.splice(pos,1,angular.copy($scope.selectedNode));
+
+
+                    //do children here...
+
+
+
+                    $scope.treeData = logicalModelSvc.reOrderTree($scope.treeData);
+                    drawTree();
+                    makeSD();
+                    $scope.isDirty = true
+
+                }
+            };
 
 
             //for selecting a profile to import
@@ -72,11 +124,10 @@ angular.module("sampleApp")
             }
 
 
-
             //generate and save a questionnaire
             $scope.generateQ = function(){
 
-                alert('not yet enabled');
+                alert('not yet enabled, sorry...');
                 return;
 
                 var Qname = $scope.SD.id;   //the questionairre name (and id, url) is based on the LM model id
@@ -84,18 +135,12 @@ angular.module("sampleApp")
                 questionnaireSvc.saveQ(Q,Qname).then(
                     function(ok) {
                         modalService.showModal({}, {bodyText: ok});
-
-
                         questionnaireSvc.findQ();       //just as a test...
                     },
                     function(err) {
                         modalService.showModal({}, {bodyText: err});
                     }
-
                 )
-
-
-
             };
 
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
@@ -146,7 +191,6 @@ angular.module("sampleApp")
             };
 
             $scope.redrawChart = function(){
-                //$scope.chart.fit();
                 $timeout(function(){
                     if ($scope.instanceGraph) {
                         $scope.instanceGraph.fit();
@@ -156,33 +200,7 @@ angular.module("sampleApp")
                 },1000)
 
             };
-/*
-            $scope.showQuest = function(){
-                //$scope.showForm();      //actually the new data entry form...
 
-
-                //return
-
-
-                $uibModal.open({
-                    templateUrl: 'modalTemplates/questionnaire.html',
-                    size: 'xl',
-                    controller: function($scope,Q){
-                        console.log(Q)
-                        $scope.Q = Q;
-                    },
-                    resolve : {
-                        Q: function () {          //the default extension
-                            console.log($scope.Q)
-                            return  $scope.Q;
-                        }
-                    }
-                }).result.then(
-                    function(result) {
-
-                    })
-            };
-*/
             $scope.editLMDocDEP = function(){
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editLMDoc.html',
@@ -753,34 +771,7 @@ angular.module("sampleApp")
                 $scope.LMDetailVisible = true
             };
 
-/*
 
-            //check for commands in the url - specifically a valueset url to edit or view...
-            var params = $location.search();
-            if (params) {
-                $scope.startupParams = params;
-                if (params.vs) {
-                    $scope.initialLM = params.vs;   //the param is names vs - as the same routine in the IG calls valuesets (&others)
-                    //delete $scope.state;        //the defualt value is 'find' whicg displays the find dialog...
-
-                    //don't show the list of models if one was passed in...
-                    $scope.hideLMSelector();
-
-                  
-
-                }
-                if (params.ts) {
-                    $scope.initialTerminologyServer = params.ts;
-                }
-                if (params.ig) {
-                    //if an implementation guide is passed to the app (which it will if called from the IG app)
-                    //then save the url and load the IG into the service...
-                    $scope.implementationGuide = params.ig;
-                    igSvc.loadIg($scope.implementationGuide);
-                }
-            }
-
-*/
             //-----------  login stuff....
             
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
@@ -848,8 +839,8 @@ angular.module("sampleApp")
 
             function sortPalette(list) {
                 list.entry.sort(function (a,b) {
-                    if (a.item && b.item) {
-                        if (a.item.display > b.item.display) {
+                    if (a.item  && a.item.display && b.item  && b.item.display) {
+                        if (a.item.display.toLowerCase() > b.item.display.toLowerCase()) {
                             return 1
                         } else {
                             return -1
@@ -948,6 +939,7 @@ angular.module("sampleApp")
                     var entry = {item : {reference: 'StructureDefinition/'+$scope.currentType.id,display:$scope.currentType.id}};
                     $scope.lmPalette.entry = $scope.lmPalette.entry || []
                     $scope.lmPalette.entry.push(entry);
+
 
                     //... and save...
                     SaveDataToServer.saveResource($scope.lmPalette).then(
@@ -1063,15 +1055,16 @@ angular.module("sampleApp")
                             if (v.config.conformanceServer.url == appConfigSvc.getCurrentConformanceServer().url) {
                                 deferred.resolve(v)
                             }
-                        })
-                        deferred.reject()
+                        });
+
+                        deferred.reject();
 
                         $scope.series = series;
                     } else {
                         deferred.reject()
                     }
 
-                })
+                });
                 return deferred.promise;
 
             }
@@ -1092,33 +1085,82 @@ angular.module("sampleApp")
                     modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
 
                 }, function(error) {
-                    modalService.showModal({}, {bodyText: 'Sorry, there was an error lgging out - please try again'})
+                    modalService.showModal({}, {bodyText: 'Sorry, there was an error logging out - please try again'})
                 });
 
             };
 
-            $scope.firebase = firebase;
+            //display a complex datatype
+            $scope.viewDataType = function(dt) {
+                var url = 'http://hl7.org/fhir/StructureDefinition/'+dt;
+                $scope.viewReferencedModel(url)
+            };
 
-            //------------------------------------------
-
+            //when an element is a reference to another model...
             $scope.viewReferencedModel = function(modelUrl) {
                 $uibModal.open({
                     templateUrl: 'modalTemplates/viewLogicalModel.html',
                     size: 'lg',
-                    controller: function ($scope,allModels,modelUrl) {
+                    controller: function ($scope,allModels,modelUrl,$timeout) {
 
-                        
+                        $scope.url = modelUrl;
+                        function vmDrawTree(model){
+
+                            $timeout(function(){
+                                var vmTreeData = logicalModelSvc.createTreeArrayFromSD(model);
+                                $('#vmTreeView').jstree(
+                                    {'core': {'multiple': false, 'data': vmTreeData, 'themes': {name: 'proton', responsive: true}}}
+                                ).on('select_node.jstree', function (e, data) {
+                                    console.log(data);
+
+                                    if (data.node && data.node.data) {
+                                        $scope.selectedED = data.node.data.ed;
+
+                                        $scope.$digest()
+                                    }
+
+                                })
+                            },2000)
+
+                        }
+
                         //locate the specific model from the list of models. This won't scale of course...
                         for (var i=0; i < allModels.entry.length ; i++) {
                             if (allModels.entry[i].resource.url == modelUrl) {
                                 $scope.model = allModels.entry[i].resource;
                             }
                         }
-                        
-                        
+
+                        //draw a tree if a model was found
+                        if ($scope.model) {
+                            vmDrawTree($scope.model);
+                        } else {
+                            //if no model, see if it can be located on the conformance server (it may be a core model)
+                            $scope.showWaiting = true
+                            GetDataFromServer.findConformanceResourceByUri(modelUrl).then(
+                                function(resource){
+                                    $scope.model = resource
+                                    vmDrawTree(resource);
+                                },
+                                function(err) {
+                                    $scope.error = "can't find StructureDefinition with the url: "+modelUrl;
+
+                                }
+                            ).finally(function () {
+                                $scope.showWaiting = false;
+                            })
+
+
+                        }
+
+
+
+
+
+
                     },
                     resolve : {
-                        allModels: function () {          //the default config
+                        allModels: function () {
                             return $scope.bundleModels;
                         },
                         modelUrl : function(){
@@ -1133,7 +1175,6 @@ angular.module("sampleApp")
 
                 var url=$scope.conformanceServer.url + "StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
 
-                //var url="http://fhir3.healthintersections.com.au/open/StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
                 GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
                     function(data) {
                         $scope.bundleModels = data.data
@@ -1145,7 +1186,7 @@ angular.module("sampleApp")
                             } else {
                                 return -1
                             }
-                        })
+                        });
 
                         //save all the models for the search facility
                         $scope.originalAllModels = angular.copy($scope.bundleModels);
@@ -1807,9 +1848,8 @@ angular.module("sampleApp")
                 logicalModelSvc.makeScenario($scope.treeData).then(
                     function(bundle){
 
-//console.log(bundle)
                         $scope.scenarioBundle = bundle;
-                        logicalModelSvc.saveScenario(bundle,'fromLM');      //write out the scenario for the Scenario Builder
+                        //logicalModelSvc.saveScenario(bundle,'fromLM');      //write out the scenario for the Scenario Builder
 
 
 

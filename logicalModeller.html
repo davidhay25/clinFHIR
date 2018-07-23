@@ -43,6 +43,16 @@
             border: 1px solid lightgray;
         }
 
+        markdown-editor {
+            border: 1px solid #ccc;
+            border-radius: 2px;
+        }
+
+        .designerScroll {
+            height: 900px;
+            overflow-y: scroll;
+        }
+
         /* These seem only to apply to the markdown generated html (which is the intention*/
 
         /*
@@ -77,8 +87,6 @@
     <script>
 
         //https://github.com/rallu/angular-lightweight-markdown-editor
-
-
         angular.module("sampleApp",['ui.bootstrap','ngStorage',"firebase","ngSanitize",
             "angular-lightweight-markdown-editor"]).config(function($locationProvider) {
 
@@ -90,7 +98,6 @@
 
         angular.module("sampleApp").config(['$compileProvider', function ($compileProvider) {
             $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
-            //$compileProvider.aHrefSanitizationWhitelist(/^\s*(|blob|):/);
         }]);
 
 
@@ -109,7 +116,6 @@
     <script src="js/filters.js"></script>
 
     <script src="resourceBuilder/rbServices.js"></script>
-
 
     <script src="js/libs/ngStorage.min.js"></script>
     <script src="js/appConfigSvc.js"></script>
@@ -137,8 +143,7 @@
     <script src="js/questionnaireSvc.js"></script>
 
     <script src="directive/questionnaire/questionnaireCtl.js"></script>
-    <!--
-       -->
+
     <script src="js/newBuilderCtl.js"></script>
     <script src="js/newBuilderSvc.js"></script>
 
@@ -153,6 +158,9 @@
     <script src="js/dataTypeCtrl.js"></script>
     <script src="js/profileDiffSvc.js"></script>
     <script src="js/newFormCtrl.js"></script>
+
+    <!--
+    <script src="js/displayLMCtl.js"></script>
     <!--
 
 
@@ -177,19 +185,6 @@
 
     <title>Logical Modeller</title>
 
-
-    <style>
-        markdown-editor {
-            border: 1px solid #ccc;
-            border-radius: 2px;
-        }
-
-        .designerScroll {
-            height: 900px;
-            overflow-y: scroll;
-        }
-
-    </style>
 
 </head>
 
@@ -430,7 +425,7 @@
                                  <button class="btn btn-link" ng-click="expandAll()">Expand All</button>
                                  <button class="btn btn-link" ng-click="resetLayout()">Collapse Layout</button>
                                <!--  <button class="btn btn-link" ng-click="showQuest()">Form</button>-->
-                                 <button ng-hide="isInPalette" class="btn btn-link" ng-click="addToPalette()">Add to Palette</button>
+                                 <button ng-hide="isInPalette || isDirty" class="btn btn-link" ng-click="addToPalette()">Add to Palette</button>
                                  <button ng-show="isInPalette" class="btn btn-link" ng-click="removeFromPalette()">Remove from Palette</button>
 
                             </span>
@@ -775,11 +770,6 @@
                     </uib-tabset>
 
 
-
-
-
-
-
                 </uib-tab>
 
                 <uib-tab heading="Sample">
@@ -914,6 +904,9 @@
 
                                         {{typ.code}}
 
+                                        <span  ng-hide="typ.code == 'Reference'" class="clickable pull-right"
+                                              ng-click="viewDataType(typ.code)">View</span>
+
                                         <!-- - hiding this for the moment as it might be confusing (was added for rod & mapping)
                                         <span class="clickable" ng-click="explodeDT(typ.code)" ng-show = "typ.isComplexDT">Expand</span>
 
@@ -926,33 +919,29 @@
 
                                         <!-- Show any profile. If a reference, then hyperlink to the 'display' functionality... -->
                                         <span ng-show="typ.code == 'Reference'" class="pull-right">
-
-
-
+                                            <span class="clickable" ng-click="viewReferencedModel(typ.targetProfile)">View</span>
 
                                             <!--
-                                            <span class="clickable" ng-click="viewReferencedModel(selectedNode.data.referenceUri)">View</span>
-
-
-
-                                            <span ng-hide="isDirty" class="clickable" ng-click="loadReferencedModel(selectedNode.data.referenceUri)">Load</span>
-                                        -->
+                                              <span ng-hide="isDirty" class="clickable" ng-click="loadReferencedModel(selectedNode.data.referenceUri)">Load</span>
+                                          -->
 
                                         </span>
 
-                                        <div>
+                                        <!-- Reference to another model -->
+                                        <div ng-show="isCoreType(typ.targetProfile)">
                                             <a ng-href="http://hl7.org/fhir/{{typ.targetProfile | getLogicalID}}.html" target="_blank">
                                                 {{typ.profile}}{{typ.targetProfile}}
                                             </a>
 
-
-
                                         </div>
+                                        <div ng-hide="isCoreType(typ.targetProfile)">
+                                            {{typ.profile}}{{typ.targetProfile}}
+                                        </div>
+
 
                                     </div>
                                     <!-- If there's a ValueSet defined, allow it to be selected... -->
                                     <span ng-show="selectedNode.data.selectedValueSet">
-                                      <!--  <span>{{selectedNode.data.selectedValueSet.vs.name}}</span>-->
                                         <span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.vs.url)">
                                             {{selectedNode.data.selectedValueSet.vs.url}}</span>
                                             ({{selectedNode.data.selectedValueSet.strength}})
@@ -971,9 +960,6 @@
 
                                 <tr ng-show="selectedNode.data.mapping"><td>Mapping notes</td><td>
                                     {{selectedNode.data.mapping}}
-
-
-
 
 
                                 </td></tr>
@@ -1004,6 +990,10 @@
                                         <i class="glyphicon glyphicon-arrow-down clickable"
                                            ng-hide = "$index == (config.sections.length -1) || isHistory"
                                            ng-click="moveDn($event,$index)"></i>
+
+                                        <i class="glyphicon glyphicon-arrow-left clickable"
+                                           ng-show="segmentCount(selectedNode.data.path) > 2 "
+                                           ng-click="moveLeft($event,$index)"></i>
 
                                     </span>
 

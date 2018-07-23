@@ -210,7 +210,7 @@ angular.module("sampleApp")
 
 
             },
-            saveScenario : function(bundle,modelName) {
+            saveScenarioDEP : function(bundle,modelName) {
                 //save a bundle as a scenario. Make the name of the scenario the same as the model name,
 
                 //create the container...
