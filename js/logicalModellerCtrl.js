@@ -54,10 +54,46 @@ angular.module("sampleApp")
                 }
             };
 
+
+            $scope.moveRight = function() {
+                var path = $scope.selectedNode.data.path;
+                var lst = getChildren(path)
+                if (lst.length > 0) {
+                    alert("Sorry, nodes with children can't be moved right yet. Move then individually")
+                    return;
+                }
+
+                var pos = findPositionInTree(path);     //the location of the element we wish to move in the array
+                var ar = path.split('.');
+                var leafName = ar[ar.length-1];
+                var newParentPath = $scope.treeData[pos-1].data.path;
+                var newPath = newParentPath + '.'+leafName;
+
+                $scope.selectedNode.data.path = newPath;
+                $scope.selectedNode.id = newPath;
+                $scope.selectedNode.parent = newParentPath;
+
+                $scope.treeData.splice(pos,1,angular.copy($scope.selectedNode));
+                drawTree();
+                makeSD();
+                $scope.isDirty = true
+
+
+
+
+            };
+
             //todo - need to move children as well...
             $scope.moveLeft = function() {
 
                 var path = $scope.selectedNode.data.path;
+
+                var lst = getChildren(path)
+                if (lst.length > 0) {
+                    alert("Sorry, nodes with children can't be moved left yet. Move then individually")
+                    return;
+                }
+
                 var pos = findPositionInTree(path);     //the location of the element we wish to move in the array
 
                 var ar = path.split('.');
@@ -74,8 +110,30 @@ angular.module("sampleApp")
                     $scope.treeData.splice(pos,1,angular.copy($scope.selectedNode));
 
 
-                    //do children here...
+                    //do children here...  NOT YET WORKING!!!
+                    var lst = getChildren(path)
+                    if (lst.length > 0) {
+                        lst.forEach(function (item) {
+                            var childPath = item.id;
+                            //var posChild = findPositionInTree(childPath);
+                            var arCP = childPath.split('.')
+                            arCP.splice(arCP.length-3,1);       //todo - ?is this a function of the path length
+                            var newChildPath = arCP.join('.');
+                            arCP.pop();
+                            var newChildParent = arCP.join('.');
+                            item.data.path = newChildPath;
+                            item.id = newChildPath;
+                            item.parent = newChildParent;
+                            if (item.ed) {
+                                item.ed.path = newChildPath;
+                                item.ed.id = newChildPath;
+                            }
 
+
+                            //$scope.treeData.splice(posChild,1,angular.copy(item));
+
+                        })
+                    }
 
 
                     $scope.treeData = logicalModelSvc.reOrderTree($scope.treeData);
@@ -1835,13 +1893,13 @@ angular.module("sampleApp")
 
 
                 checkInPalette();
-                updateInstanceGraph();
+               // updateInstanceGraph();
                 $scope.hidePatientFlag = false;
 
             }
 
             //make a bundle that has a resource instance for all the referenced resource types in the model
-            function updateInstanceGraph() {
+            function updateInstanceGraphDEP() {
                 console.log('update instance graph')
                 $scope.hidePatientFlag = false;
 
@@ -1849,13 +1907,7 @@ angular.module("sampleApp")
                     function(bundle){
 
                         $scope.scenarioBundle = bundle;
-                        //logicalModelSvc.saveScenario(bundle,'fromLM');      //write out the scenario for the Scenario Builder
 
-
-
-
-                       //build the sampleDocumentTree - but only if there is a Composition resource in the bundle...
-                        //console.log(bundle)
 
                         var treeData = builderSvc.makeDocumentTree(bundle,true);    //don't display any error message
                         $('#docTreeView').jstree('destroy');
@@ -1875,13 +1927,6 @@ angular.module("sampleApp")
 
                                     console.log(resource);
                                     var path = resource.path;
-                                    //find the node in the
-
-
-
-                                    //$scope.selectedNode = data.node;
-
-
 
                                     $scope.selectedED = logicalModelSvc.getEDForPath($scope.SD,{data: {path:path}})
                                     $scope.$digest()
@@ -2424,7 +2469,7 @@ angular.module("sampleApp")
                         );      //make a scenario...
 */
                         setAllMappings();   //update any mappings
-                        updateInstanceGraph()
+                        //updateInstanceGraph()
                         //$scope.Q = logicalModelSvc.makeQ($scope.treeData);  //update the Questionnaire
                         //console.log( $scope.Q)
 
@@ -2619,7 +2664,7 @@ angular.module("sampleApp")
                     delete $scope.selectedNode;
                     drawTree();
                     makeSD();
-                    updateInstanceGraph();
+                  //  updateInstanceGraph();
                     $scope.isDirty = true;
                     $scope.currentType = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
 
