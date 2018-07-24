@@ -10,8 +10,6 @@ var Cookies = require( "cookies" )
 
 var express = require('express');
 var app = express();
-//remove for proxy app.use(myParser.json({extended : true}));
-
 
 
 var orionModule = require("./serverModuleOrion.js")
@@ -55,7 +53,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
     }
 });
 
-
+/*
 // proxy - for servers not implementing CORS
 var proxy = httpProxy.createProxyServer({});
 proxy.on('error', function (err, req, res) {
@@ -73,7 +71,7 @@ proxy.on('proxyReq', function (proxyRes, req, res) {
     console.log('sending');
 });
 
-
+*/
 
 function recordAccess(req,data) {
     console.log(data)
@@ -108,7 +106,7 @@ function recordAccess(req,data) {
 //app.use('/', express.static(__dirname,{index:'/resourceCreator.html'}));
 app.use('/', express.static(__dirname,{index:'/launcher.html'}));
 
-
+/*
 app.all('/proxy/*',function(req,res){
     console.log(req.url)
     req.url = req.url.replace('proxy/','')
@@ -116,7 +114,7 @@ app.all('/proxy/*',function(req,res){
     proxy.web(req, res, { target: 'http://snapp.clinfhir.com:8081/baseDstu3/' });
 });
 
-
+*/
 
 /*
 //--- proxies for Grahames server. Could generalize this using - eg - headers,but will need to update allservices making $http calls...
@@ -479,20 +477,7 @@ app.get('/errorReport/:type?',function(req,res){
 
 });
 
-/*
-app.get('/',function(req,res){
-    //console.log('d')
-    res.sendFile(__dirname+'/resourceCreator.html');
-});
-*/
 
-
-//app.use('/', express.static(__dirname,{index:'/resourceCreator.html'}));
-
-
-var sendEmail = function(recipient,message) {
-
-}
 
 
 app.listen(port);

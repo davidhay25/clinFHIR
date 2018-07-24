@@ -22,6 +22,133 @@ angular.module("sampleApp")
             GetDataFromServer.registerAccess('logical');
 
 
+            //-----------  login stuff....
+
+            $scope.login=function(){
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop.
+                    keyboard: false,       //same as above.
+                    templateUrl: 'modalTemplates/login.html',
+                    controller: 'loginCtrl'
+                })
+            };
+
+            $scope.logout=function(){
+                firebase.auth().signOut().then(function() {
+                    delete $rootScope.userProfile;
+                    modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
+
+                }, function(error) {
+                    modalService.showModal({}, {bodyText: 'Sorry, there was an error logging out - please try again'})
+                });
+
+            };
+
+            //if a shortcut has been used there will be a hash so load that
+            var hash = $location.hash();
+            if (hash) {
+
+
+                //if there's a hash starting with $$$ then this has been started from the project, with an authenticted user...
+                if (hash && hash.substr(0,3)== '$$$') {
+                    //loaded from project. Need to get user details, servers...
+
+
+                    return
+                } else {
+                    var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
+                    sc.$loaded().then(
+                        function(){
+
+                            $scope.loadedFromBookmark = true;
+
+                            //set the conformance server to the one in the bookmark
+                            var conformanceServer =  sc.config.conformanceServer;
+                            appConfigSvc.setServerType('conformance',conformanceServer.url);
+                            appConfigSvc.setServerType('data',conformanceServer.url);       //set the data server to the same as the conformance for the comments
+
+                            var id = sc.config.model.id;    //the id of the model on this server
+                            //get the model from the server...
+                            var url = conformanceServer.url + 'StructureDefinition/'+id;
+                            $scope.showWaiting = true;
+                            GetDataFromServer.adHocFHIRQuery(url).then(
+                                function(data){
+                                    var model = data.data;
+                                    $scope.hideLMSelector();            //only want to see this model...
+                                    selectEntry({resource:model});       //select the model
+                                },
+                                function(){
+                                    modalService.showModal({}, {bodyText: "The model with the id '"+id + "' is not on the "+conformanceServer.name + " server"})
+                                }
+                            ).finally(function(){
+                                $scope.showWaiting = false;
+                            })
+                        }
+                    )
+                }
+
+
+
+
+
+            } else {
+                /*
+                if ($scope.conformanceServer.url !== appConfigSvc.getCurrentDataServer().url) {
+                    var msg = 'The Conformance and Data servers must be the same for the Comments to work correctly.\n';
+                    msg += 'Please reset them and re-load the page if you want comments.'
+                    modalService.showModal({}, {bodyText: msg})
+
+                }
+                */
+            }
+
+
+            //called whenever the auth state changes - eg login/out, initial load, create user etc.
+            firebase.auth().onAuthStateChanged(function(user) {
+                //if there's a hash starting with $$$ then this has been started from the project, with an authenticted user...
+                if (hash && hash.substr(0,3)== '$$$') {
+                    //nothing to see here, move right along...
+                    return
+                }
+
+                delete $scope.input.mdComment;
+
+                if (user) {
+                    $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+                    logicalModelSvc.setCurrentUser(user);
+                    securitySvc.setCurrentUser(user);
+
+
+                    //return the practitioner resource that corresponds to the current user (the service will create if absent)
+                    GetDataFromServer.getPractitionerByLogin(user).then(
+                        function(practitioner){
+
+                            $scope.Practitioner = practitioner;
+
+                            // checkForComments($scope.currentType);     //get comments for this user against this model...
+                            getPalette(practitioner);       //get the palette of logical models
+
+
+                        },function (err) {
+                            //swallow errorsalert(err)
+                        }
+                    );
+
+                    delete $scope.showNotLoggedIn;
+
+
+                } else {
+
+                    logicalModelSvc.setCurrentUser(null);
+                    $scope.showNotLoggedIn = true;
+                    delete $scope.Practitioner;
+                    delete $scope.taskOutputs;
+                    delete $scope.commentTask;
+                    // No user is signed in.
+                }
+            });
+
+
             //generate the mapping download file
             function makeMappingDownload(SD) {
 
@@ -59,7 +186,7 @@ angular.module("sampleApp")
                 var path = $scope.selectedNode.data.path;
                 var lst = getChildren(path)
                 if (lst.length > 0) {
-                    alert("Sorry, nodes with children can't be moved right yet. Move then individually")
+                    alert("Sorry, nodes with children can't be moved right yet. Move them individually")
                     return;
                 }
 
@@ -90,7 +217,7 @@ angular.module("sampleApp")
 
                 var lst = getChildren(path)
                 if (lst.length > 0) {
-                    alert("Sorry, nodes with children can't be moved left yet. Move then individually")
+                    alert("Sorry, nodes with children can't be moved left yet. Move them individually")
                     return;
                 }
 
@@ -830,46 +957,6 @@ angular.module("sampleApp")
             };
 
 
-            //-----------  login stuff....
-            
-            //called whenever the auth state changes - eg login/out, initial load, create user etc.
-            firebase.auth().onAuthStateChanged(function(user) {
-                delete $scope.input.mdComment;
-
-                if (user) {
-                    $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
-                    logicalModelSvc.setCurrentUser(user);
-                    securitySvc.setCurrentUser(user);
-
-
-                    //return the practitioner resource that corresponds to the current user (the service will create if absent)
-                    GetDataFromServer.getPractitionerByLogin(user).then(
-                        function(practitioner){
-
-                            $scope.Practitioner = practitioner;
-
-                           // checkForComments($scope.currentType);     //get comments for this user against this model...
-                            getPalette(practitioner);       //get the palette of logical models
-
-
-                        },function (err) {
-                            //swallow errorsalert(err)
-                        }
-                    );
-
-                    delete $scope.showNotLoggedIn;
-
-
-                } else {
-
-                    logicalModelSvc.setCurrentUser(null);
-                    $scope.showNotLoggedIn = true;
-                    delete $scope.Practitioner;
-                    delete $scope.taskOutputs;
-                    delete $scope.commentTask;
-                    // No user is signed in.
-                }
-            });
 
             //retrieve the list of models on the users current palette...
             function getPalette(practitioner)  {
@@ -1015,52 +1102,7 @@ angular.module("sampleApp")
             };
 
 
-            //if a shortcut has been used there will be a hash so load that
-            var hash = $location.hash();
-            if (hash) {
 
-                //console.log(ha)
-
-
-                var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
-                sc.$loaded().then(
-                    function(){
-
-                        $scope.loadedFromBookmark = true;
-
-                        //set the conformance server to the one in the bookmark
-                        var conformanceServer =  sc.config.conformanceServer;
-                        appConfigSvc.setServerType('conformance',conformanceServer.url);
-                        appConfigSvc.setServerType('data',conformanceServer.url);       //set the data server to the same as the conformance for the comments
-
-                        var id = sc.config.model.id;    //the id of the model on this server
-                        //get the model from the server...
-                        var url = conformanceServer.url + 'StructureDefinition/'+id;
-                        $scope.showWaiting = true;
-                        GetDataFromServer.adHocFHIRQuery(url).then(
-                            function(data){
-                                var model = data.data;
-                                $scope.hideLMSelector();            //only want to see this model...
-                                selectEntry({resource:model});       //select the model
-                            },
-                            function(){
-                                modalService.showModal({}, {bodyText: "The model with the id '"+id + "' is not on the "+conformanceServer.name + " server"})
-                            }
-                        ).finally(function(){
-                            $scope.showWaiting = false;
-                        })
-                    }
-                )
-            } else {
-                /*
-                if ($scope.conformanceServer.url !== appConfigSvc.getCurrentDataServer().url) {
-                    var msg = 'The Conformance and Data servers must be the same for the Comments to work correctly.\n';
-                    msg += 'Please reset them and re-load the page if you want comments.'
-                    modalService.showModal({}, {bodyText: msg})
-
-                }
-                */
-            }
 
 
             $scope.createTaskDEP = function(){
@@ -1128,25 +1170,7 @@ angular.module("sampleApp")
             }
 
 
-            $scope.login=function(){
-                $uibModal.open({
-                    backdrop: 'static',      //means can't close by clicking on the backdrop.
-                    keyboard: false,       //same as above.
-                    templateUrl: 'modalTemplates/login.html',
-                    controller: 'loginCtrl'
-                })
-            };
 
-            $scope.logout=function(){
-                firebase.auth().signOut().then(function() {
-                    delete $rootScope.userProfile;
-                    modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
-
-                }, function(error) {
-                    modalService.showModal({}, {bodyText: 'Sorry, there was an error logging out - please try again'})
-                });
-
-            };
 
             //display a complex datatype
             $scope.viewDataType = function(dt) {
@@ -1893,13 +1917,14 @@ angular.module("sampleApp")
 
 
                 checkInPalette();
-               // updateInstanceGraph();
+                updateInstanceGraph();
                 $scope.hidePatientFlag = false;
 
             }
 
             //make a bundle that has a resource instance for all the referenced resource types in the model
-            function updateInstanceGraphDEP() {
+            function updateInstanceGraph() {
+                return;     //disable this...
                 console.log('update instance graph')
                 $scope.hidePatientFlag = false;
 
@@ -2362,7 +2387,7 @@ angular.module("sampleApp")
                                     $scope.selectedNode = item;
                                 }
                             })
-                            //updateInstanceGraph();
+                            updateInstanceGraph();
 
                         } else {
                             //this is a new node
@@ -2469,7 +2494,7 @@ angular.module("sampleApp")
                         );      //make a scenario...
 */
                         setAllMappings();   //update any mappings
-                        //updateInstanceGraph()
+                        updateInstanceGraph()
                         //$scope.Q = logicalModelSvc.makeQ($scope.treeData);  //update the Questionnaire
                         //console.log( $scope.Q)
 
@@ -2664,7 +2689,7 @@ angular.module("sampleApp")
                     delete $scope.selectedNode;
                     drawTree();
                     makeSD();
-                  //  updateInstanceGraph();
+                    updateInstanceGraph();
                     $scope.isDirty = true;
                     $scope.currentType = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
 

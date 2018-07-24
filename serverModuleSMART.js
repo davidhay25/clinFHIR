@@ -4,11 +4,6 @@ var request  = require('request');
 var session = require('express-session');
 var showLog = true;
 
-// ORION|AAAA-0124-8 - charles dodson
-// ORION|AAAA-0104-3 - cicilia silver
-// ORION|AAAA-0200-7 - ann taylor
-// ORION|AAAA-0111-6 - barbara gordon
-
 var serverConfig = require("./artifacts/smart.json");   //all the config for the authentication
 
 function setup(app,db) {
