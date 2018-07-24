@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/firebase.js"></script>
+    <script src="js/libs/angularfire.min.js"></script>
+
+    <script src="js/libs/highstock.js"></script>
+    <script src="js/libs/highcharts-ng.min.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <title>clinFHIR Launcher</title>
+
+    <style>/*https://css-tricks.com/snippets/css/css-box-shadow/*/
+        .myBox {
+            margin-top: 10px;
+            box-shadow: 0 0 8px black;
+            padding:12px;
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
+
+        }
+        .clickableDEP {
+            color: rgb(79, 155, 214);
+            cursor: pointer;
+        }
+        .pass {
+            color:green;
+        }
+        .fail {
+            color:red;
+        }
+
+    </style>
+
+    <script>
+
+
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase','highcharts-ng']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+
+        angular.module("sampleApp").constant("moment", moment);
+
+
+    </script>
+
+    <script>
+        var config = {
+            apiKey: "AIzaSyBNMohLbPiSKwpGwfARopdeW_6LLXujcUo",
+            authDomain: "clinfhir.firebaseapp.com",
+            databaseURL: "https://clinfhir.firebaseio.com",
+            storageBucket: ""
+        };
+
+        if (firebase) {
+            firebase.initializeApp(config);
+
+        }
+    </script>
+
+    <script src="js/appConfigSvc.js"></script>
+    <script src="js/launcherCtl.js"></script>
+    <script src="js/setServers.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/modalDialogSvc.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
+    <script src="js/logicalModelSvc.js"></script>
+    <script src="js/loginCtrl.js"></script>
+
+    <script src="js/filters.js"></script>
+
+
+
+</head>
+<body style="padding: 8px;padding-top: 80px">
+
+
+<div ng-app="sampleApp" ng-controller="launcherCtrl" class="container-fluid" ng-cloak>
+
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="col-md-8 col-sm-8">
+            <a class="navbar-brand" href="#">clinFHIR Launcher</a>
+        </div>
+
+        <div class="col-md-2 col-sm-2">
+            <div class="navbar-text pull-right">
+                {{firebase.auth().currentUser.email}}
+            </div>
+
+        </div>
+
+
+        <div class="col-md-1 col-sm-1">
+
+            <div ng-hide="waiting">
+                <div class="nav navbar-form navbar-right" ng-hide="firebase.auth().currentUser">
+                    <span style="font-size:1.8em; cursor: pointer">
+                        <div ng-click="login()">
+                            <i class="glyphicon glyphicon-log-in"></i>
+                        </div>
+                    </span>
+                </div>
+
+                <div class="nav navbar-form navbar-right" ng-show="firebase.auth().currentUser">
+                        <span style="font-size:1.8em; cursor: pointer"
+                              uib-popover="{{firebase.auth().currentUser.email}}"
+                              popover-placement="left"
+                              popover-trigger="'mouseenter'">
+
+                            <div href="#" ng-click="logout()"> <i class="glyphicon glyphicon-log-out"></i></div>
+                        </span>
+                </div>
+            </div>
+
+
+
+
+        </div>
+
+
+        <div class="col-md-1 col-sm-1">
+            <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
+                <li uib-dropdown>
+
+                    <a href="#" uib-dropdown-toggle>
+                        <span style="font-size:2em; cursor: pointer">
+                            <i class="glyphicon glyphicon-cog"></i>
+                        </span>
+                    </a>
+
+
+
+                    <ul class="dropdown-menu" role="menu">
+
+
+                        <li>
+                            <a href="#" ng-click="showChart()" ng-hide="displayMode=='access'"
+                               uib-popover="Show how many people are using clinFHIR"
+                               popover-placement="left"
+                               popover-trigger="'mouseenter'">Access statistics</a>
+                        </li>
+
+                        <li>
+                            <a href="#" ng-click="displayMode = 'front'" ng-hide="displayMode=='front'"
+                               uib-popover="Show the main Launcher screen"
+                               popover-placement="left"
+                               popover-trigger="'mouseenter'">Launcher</a>
+                        </li>
+
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+
+    </nav>
+
+
+    <div class="row"  ng-show="displayMode == 'front'">
+        <div class="col-md-8 col-sm-8">
+
+
+            <div class="myBox">
+
+
+                <uib-tabset>
+                    <uib-tab>
+                        <uib-tab-heading><strong>Main modules (open in new tab)</strong></uib-tab-heading>
+
+                        <br/>
+
+
+
+                        <table class="table width='100%'">
+
+                            <tr>
+                                <td>
+                                    <a target="_blank" href="patientViewer.html">Patient Viewer</a>
+                                </td>
+                                <td>
+                                    <p>Display resources for a specific patient, using a number of different views
+                                        such as a list by resource type, json & tree views, encounters by condition,
+                                        numeric Observation charting and graphical relationship views.</p>
+                                    <p>There is also the option to add a new patient, and to create sample data for that patient.</p>
+                                </td>
+                                <td>Patient resources are stored on the Data Server.
+                                    The server should support the Patient/$everything operation.</td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <a target="_blank" href="query.html">Server Query</a>
+                                </td>
+                                <td>
+                                    Supports ad hoc queries against any FHIR server. Includes a simple query builder.
+                                    The response can be displayed as Json or a Tree view, and FHIRPath is supported.
+                                </td>
+                                <td>
+                                    Can access any compliant FHIR server (must expose a Capability Statement)
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td><a target="_blank" href="builder.html">Scenario Builder</a></td>
+                                <td>
+                                    <p>The Scenario Builder is used to join together the resources needed to represent a specific clinical scenario.
+                                        It can use Core Resource types, Profiles and Logical models as it does this. The intention is to help people understand
+                                        how resources can tell a clinical story, and to validate that the resource types available (including profiles) are
+                                        sufficient.</p>
+                                    <p>Note that the builder still has issues with more complex resource types - this is a work in progress</p>
+                                </td>
+                                <td>
+                                    Patient information is on the Data Server. Profiles on the Conformance server.
+                                    ValueSets on the Terminology server.
+
+                                    <br/>
+
+                                    <div><a class="pull-right" target="_blank" href="https://fhirblog.com/creating-a-simple-scenario/">Create a simple scenario</a></div>
+                                    <div><a class="pull-right" target="_blank" href="https://fhirblog.com/adding-structured-data-to-a-scenario/">Adding structured data to a scenario</a></div>
+                                    <div><a class="pull-right" target="_blank" href="https://fhirblog.com/creating-a-fhir-document/">Create a Document</a></div>
+
+
+
+                                </td>
+                            </tr>
+
+
+
+                            <tr>
+                                <td width="15%">
+                                    <a target="_blank" href="logicalModeller.html">Logical Modeller</a>
+                                </td>
+                                <td>
+                                    The Logical modeller allows the creation of a model that represents a particular interoperability requirement
+                                    in a format that is easy to use. It uses FHIR datatypes, and can be based on an existing resource type or completely
+                                    'ad hoc'. It is intended to act as a 'bridge' between Modeller and User, and can act as the basis for the generation
+                                    of the profiling components required by FHIR
+                                </td>
+                                <td>
+                                    Models are saved on the Conformance Server. Can reference ValueSets from the Terminology server.
+                                    <br/>  <br/>
+
+                                    <div><a class="pull-right" target="_blank" href="https://fhirblog.com/creating-an-information-model/">Create an Information Model</a></div>
+                                    <div><a class="pull-right" target="_blank" href="https://fhirblog.com/creating-a-resources-model/">Create a Resources Model</a></div>
+
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a target="_blank" href="profileDiff.html">Implementation Guide Browser</a>
+                                </td>
+                                <td>
+                                    Display the contents of an Implementation Guide, and the relationships between the
+                                    contents of the Guide.
+                                </td>
+                                <td>
+                                    The Implementation guide, profiles and Extension Definitions are on the Conformance Server,
+                                    the terminology resources (eg ValueSet) are on the Terminology Server
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a target="_blank" href="EDBuilder.html">Extension Definition builder</a>
+                                </td>
+                                <td>
+                                    Views and builds extension definitions. These can be defined and applied to the Logical Model, which will
+                                    allow them to be included in the generated Profile
+                                </td>
+                                <td>
+                                    Extension definitions are saved on the Conformance Server
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="15%">
+                                    <a target="_blank" href="codeSystem.html">CodeSystem builder</a>
+                                </td>
+                                <td>
+                                    The CodeSystem defines a set of Concepts from which a ValueSet provides possible values for a resource element. The actual 'binding' between
+                                    CodeSystem and element is done by the ValueSet. This component allows you to build (and edit) a
+                                    CodeSystem, and optionally builds the ValueSet as well.
+                                </td>
+                                <td>
+                                    CodeSystems are saved on the Terminology Server.
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td>
+                                    <a target="_blank" href="valuesetCreator.html">ValueSet explorer</a>
+                                </td>
+                                <td>
+                                    Lets you view existing ValueSets. The builder works best with SNOMED (at the moment).
+                                </td>
+                                <td>ValueSets are stored on the Terminology Server</td>
+                            </tr>
+
+
+
+
+
+
+                        </table>
+
+
+                    </uib-tab>
+
+                    <uib-tab>
+                        <uib-tab-heading><strong>Experimental modules (open in new tab)</strong></uib-tab-heading>
+                        <br/>
+
+
+
+
+                        <table class="table width='100%'">
+
+                            <tr>
+                                <td>
+                                    <a target="_blank" href="newBuilder.html">New Builder</a>
+                                </td>
+                                <td>
+                                    A new app for building a resource instance from a profile. Intended to support
+                                    extensions and profiling characteristics like slicing & fixed values. Incomplete
+                                    at the moment - in particular will only work with 2 level resource types - CarePlan
+                                    resources will not be complete.
+                                </td>
+                                <td>
+
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <a target="_blank" href="conceptMap.html">Concept Mapper</a>
+                                </td>
+                                <td>
+                                    Edit concept maps.
+                                </td>
+                                <td>
+                                    R3 conformance server only
+                                </td>
+                            </tr>
+
+
+                        </table>
+
+
+                    </uib-tab>
+
+                </uib-tabset>
+
+            </div>
+
+
+        </div>
+        <div class="col-md-4 col-sm-4">
+
+            <div class="myBox">
+
+
+                <div class="pull-right" ng-click="showServers = !showServers">
+                    <span class="clickable" ng-show="showServers">Cancel</span>
+                    <span class="clickable" ng-hide="showServers">Edit</span>
+                </div>
+                <h5>Current servers </h5>
+
+
+
+                <div ng-controller="setServersCtrl">
+
+
+                        <table class="table width='100%'">
+                            <tr><td><strong>Data Server</strong></td><td>
+
+                                <div ng-hide = "showServers">{{input.dataServer.name}}</div>
+                                <div ng-show="showServers">
+                                    <select ng-model="input.dataServer" class="form-control"
+                                            ng-options="item.name for item in allServers"
+                                            ng-change="serverDirty = true">
+
+                                    </select>
+                                </div>
+
+                            </td>
+                            <td>
+                                <span ng-hide="showServers">
+                                    <i class="glyphicon glyphicon-question-sign clickable"
+                                       ng-click="testServer('Data')"
+                                       uib-popover="The data server holds most resources apart from the Conformance ones. Click to test."
+                                       popover-placement="left"
+                                       popover-trigger="'mouseenter'"> </i>
+
+
+                                <i ng-show="testing.testData.ok" class="glyphicon glyphicon-ok pass"></i>
+                                <i ng-show="testing.testData.fail" class="glyphicon glyphicon-remove fail"></i>
+                                </span>
+
+
+                            </td>
+
+                            </tr>
+                            <tr><td><strong>Conformance Server</strong></td>
+                                <td>
+                                    <div ng-hide = "showServers">{{input.confServer.name}}</div>
+                                    <div ng-show="showServers">
+                                        <select ng-model="input.confServer" class="form-control"
+                                                ng-options="item.name for item in allServers"
+                                                ng-change="serverDirty = true">
+
+                                        </select>
+                                    </div>
+
+                                </td>
+                                <td>
+                                     <span ng-hide="showServers">
+                                        <i class="glyphicon glyphicon-question-sign clickable"
+                                           ng-click="testServer('Conformance')"
+                                           uib-popover="The data conformance server holds Profiles, Extension Definitions and other conformance resources. Click to test."
+                                           popover-placement="left"
+                                           popover-trigger="'mouseenter'"></i>
+
+                                            <i ng-show="testing.testConformance.ok" class="glyphicon glyphicon-ok pass"></i>
+                                            <i ng-show="testing.testConformance.fail" class="glyphicon glyphicon-remove fail"></i>
+                                     </span>
+
+
+
+                                </td>
+
+                            </tr>
+                            <tr><td><strong>Terminology Server</strong></td>
+                                <td>
+                                    <div ng-hide = "showServers">{{input.termServer.name}}</div>
+                                    <div ng-show="showServers">
+                                        <select ng-model="input.termServer" class="form-control"
+                                                ng-options="item.name for item in allServers"
+                                                ng-change="serverDirty = true">
+
+                                        </select>
+                                    </div>
+                                </td>
+                            <td>
+                                 <span ng-hide="showServers">
+                                <i class="glyphicon glyphicon-question-sign clickable"
+                                   ng-click="testServer('Terminology')"
+                                   uib-popover="The terminology server holds ValueSets, and exposes terminology operations. Click to test."
+                                   popover-placement="left"
+                                   popover-trigger="'mouseenter'"></i>
+
+                                     <i ng-show="testing.testTerminology.ok" class="glyphicon glyphicon-ok pass"></i>
+                                    <i ng-show="testing.testTerminology.fail" class="glyphicon glyphicon-remove fail"></i>
+                                 </span>
+                            </td>
+                            </tr>
+                        </table>
+
+                    {{message}} {{elapsed}}
+
+                        <div ng-show="showServers">
+
+                            <button ng-show="serverDirty" class="btn btn-primary pull-right" ng-click="save()">Save</button>
+                            <button class="btn btn-link pull-right" ng-click="setToDefault()">Set to default</button>
+                            <em>Should all be the same FHIR version</em>
+
+                            <br/> <br/>
+                        </div>
+
+
+                    <div>
+                        <a href="#" ng-click="addServer()">Add Server</a>
+
+                        <a href="#" class="pull-right" ng-click="allTheSame()"
+                           ng-hide="showServers"
+                           uib-popover="Set all the servers the same as the Data Server"
+                           popover-placement="left"
+                           popover-trigger="'mouseenter'">Set all the same as the Data Server</a>
+                    </div>
+
+
+
+
+
+
+                </div>
+            </div>
+            <div class="myBox">
+                <h5>FHIR Links (open in new tab)</h5>
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <ul class="list-unstyled">
+                            <li><a target="_blank" href="http://hl7.org/fhir/index.html">STU-3 (R3) Specification</a></li>
+                            <li><a target="_blank" href="http://hl7.org/fhir/DSTU2/index.html">STU-2 Specification</a></li>
+                            <li><a target="_blank" href="http://wiki.hl7.org/index.php?title=FHIR">FHIR wiki</a></li>
+
+
+
+
+                        </ul>
+                    </div>
+                    <div class="col-md-6 col-sm-6">
+                        <ul class="list-unstyled">
+                            <li><a target="_blank" href="https://fhirblog.com/">Hay on FHIR</a></li>
+                            <li><a target="_blank" href="https://chat.fhir.org/">FHIR Chat</a></li>
+                            <li><a target="_blank" href="http://www.fhir.org/">FHIR.org</a></li>
+                            <li><a target="_blank" href="http://fhirblog.com/clinicians-on-fhir-workshop/">Clinicians Workshop</a></li>
+
+
+                        </ul>
+                    </div>
+                </div>
+
+
+
+
+
+
+
+            </div>
+
+            <div class="myBox">
+                <h5>clinFHIR Videos (open in new tab)</h5>
+                <div class="row">
+                    <div class="col-md-8 col-sm-8">
+                        <ul class="list-unstyled">
+                            <li><a target="_blank" href="https://vimeo.com/199927777">Scenario Builder</a></li>
+                            <li><a target="_blank" href="https://vimeo.com/203252984">Adding structured data</a></li>
+                            <li><a target="_blank" href="https://vimeo.com/203277373">Logical Modeller</a></li>
+                            <li><a target="_blank" href="https://vimeo.com/200105501">Logical Modeller and Scenario Builder</a></li>
+                            <li><a target="_blank" href="https://vimeo.com/203259751">RESTful query tool</a></li>
+
+                        </ul>
+                    </div>
+                </div>
+                <em>Note that some of these videos may describe earlier versions, so may not completely match the current functionality.</em>
+            </div>
+
+            <div class="myBox">
+                <h5>Other links</h5>
+                <div class="row">
+                    <div class="col-md-8 col-sm-8">
+                        <ul class="list-unstyled">
+                            <li><a target="_blank" href="http://browser.ihtsdotools.org/">SNOMED browser</a></li>
+                            <li><a target="_blank" href="http://ontoserver.csiro.au/shrimp/">SHRIMP (Terminology browser)</a></li>
+
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+
+
+
+
+        </div>
+    </div>
+
+
+
+
+    <div ng-show="displayMode == 'access'">
+        <div>
+            Last access from {{accessAudit.lastAccess.location['country_name']}} on
+            {{accessAudit.lastAccess.date | date:'yyyy-MM-dd HH:mm'}} ({{accessAudit.lastAccess.date | getAgeSeconds}} ago.)
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <div style="height: 200px; width: 100%">
+                    <highchart id='hcAccessAudit' config="accessAudit.accessDays"></highchart>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-4">
+
+
+                <table class="table table-bordered">
+                    <tr><th>Module</th><th>Count</th></tr>
+                    <tr ng-repeat = "m in accessAudit.moduleList">
+                        <td width="30%">{{m.name}}</td>
+                        <td>{{m.cnt}}</td>
+
+
+                    </tr>
+                </table>
+
+
+                <div style="height:400px; overflow-y: auto;" >
+                    <table class="table table-bordered">
+                        <tr><th>Country</th><th>Count</th></tr>
+                        <tr ng-repeat="c in accessAudit.countryList">
+                            <td width="30%">{{c.name}}</td>
+                            <td>{{c.cnt}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+</div>
+</body>
+</html>
