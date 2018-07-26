@@ -57,6 +57,7 @@
 
 
     <script src="js/projectCtl.js"></script>
+    <script src="js/projectSvc.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/libs/ngStorage.min.js"></script>
     <!--
@@ -137,19 +138,32 @@
     </nav>
 
     <div class="row">
-        <div class="col-sm-6 col-md-6">
+        <div class="col-sm-3 col-md-3">
 
-            <div>
+            <div ng-show="status.status=='notloggedin'">
                 <button class="btn btn-primary" ng-click="login()">Login</button>
-
-
             </div>
 
+            <div ng-show="status.status=='loggedin'">
 
-            <a href="logicalModeller.html#$$$">Launch modeler</a>
+                <button class="btn btn-primary" ng-click="test()">Test</button>
+                <button class="btn btn-primary" ng-click="refresh()">Refresh</button>
 
+                <a href="logicalModeller.html#$$$">Launch modeler</a>
+            </div>
+
+            <div class="alert alert-info" ng-show="status == 'loggingIn'">
+                Getting information from server...
+            </div>
         </div>
-        <div class="col-sm-6 col-md-6">
+        <div class="col-sm-9 col-md-9">
+
+        <table class="table table-bordered">
+            <tr ng-repeat="entry in modelsBundle.entry">
+                <td>{{entry.resource.name}}</td>
+                <td><button class="btn btn-link" ng-click="loadModel(entry)">View</button> </td>
+            </tr>
+        </table>
 
         </div>
     </div>

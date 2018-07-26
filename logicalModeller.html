@@ -99,6 +99,41 @@
         angular.module("sampleApp").config(['$compileProvider', function ($compileProvider) {
             $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
         }]);
+/*
+
+//http://www.webdeveasy.com/interceptors-in-angularjs-and-useful-examples/
+        angular.module('sampleApp').factory('sessionRecoverer', ['$q', '$injector', function($q, $injector) {
+            var sessionRecoverer = {
+                responseError: function(response) {
+                    // Session has expired
+
+                    console.log('intercept HTTP error! '+ response.status)
+
+                    if (response.status == 401){
+                        var projectService = $injector.get('projectSvc');
+                        var $http = $injector.get('$http');
+                        var deferred = $q.defer();
+
+                        // generate a new token
+
+                        projectService.refresh().then(deferred.resolve, deferred.reject);
+
+                        // When the session recovered, make the same backend call again and chain the request
+                        return deferred.promise.then(function() {
+                            return $http(response.config);
+                        });
+                    }
+
+                    return $q.reject(response);
+                }
+            };
+            return sessionRecoverer;
+        }]);
+
+        angular.module('sampleApp').config(['$httpProvider', function($httpProvider) {
+            $httpProvider.interceptors.push('sessionRecoverer');
+        }]);
+*/
 
 
         window.onerror = function(message, url, linenumber) {
@@ -157,9 +192,10 @@
     <script src="js/sbHistorySvc.js"></script>
     <script src="js/dataTypeCtrl.js"></script>
     <script src="js/profileDiffSvc.js"></script>
-    <script src="js/newFormCtrl.js"></script>
+    <script src="js/projectSvc.js"></script>
 
     <!--
+    <script src="js/newFormCtrl.js"></script>
     <script src="js/displayLMCtl.js"></script>
     <!--
 
@@ -250,7 +286,7 @@
 
                 <div class="col-md-1 col-sm-1">
 
-                    <div class="nav navbar-form navbar-right" ng-hide="firebase.auth().currentUser">
+                    <div class="nav navbar-form navbar-right" ng-hide="Provider">
                         <span style="font-size:1.8em; cursor: pointer">
                             <div ng-click="login()">
                                 <i class="glyphicon glyphicon-log-in"></i>
@@ -258,9 +294,9 @@
                         </span>
                     </div>
 
-                    <div class="nav navbar-form navbar-right" ng-show="firebase.auth().currentUser">
+                    <div class="nav navbar-form navbar-right" ng-show="Provider">
                         <span style="font-size:1.8em; cursor: pointer"
-                              uib-popover="{{firebase.auth().currentUser.email}}"
+                              uib-popover="{{Provider.name}}"
                               popover-placement="left"
                               popover-trigger="'mouseenter'">
 
@@ -276,7 +312,7 @@
 
     <div class="row" ng-show="showNotLoggedIn">
         <div class="col-md-12 col-sm-12">
-            <div ng-hide="firebase.auth().currentUser" class="alert alert-warning">
+            <div ng-hide="Practitioner" class="alert alert-warning">
                 <p>As you have not logged in, you are able to view Models, but not edit them.
                 To log in, click the  <i class="glyphicon glyphicon-log-in"></i>  icon to the upper right. You can create an account there if you don't already
                     have one - all you need is an email address.</p>
@@ -295,7 +331,12 @@
                     <h4>Model Selector</h4>
                 </div>
                 <div class="col-md-4 col-sm-4">
-                    <button ng-show="firebase.auth().currentUser" class="btn btn-link pull-right" ng-click="newModel()">New Model</button>
+
+                    <button ng-show="Practitioner" class="btn btn-link pull-right" ng-click="newModel()">New Model</button>
+                   <!-- <button ng-show="firebase.auth().currentUser" class="btn btn-link pull-right" ng-click="newModel()">New Model</button>
+-->
+
+
                 </div>
             </div>
 
@@ -355,9 +396,10 @@
         </div>
         <div ng-class="midPaneClass">
 
+            <!--
 
             <div ng-controller="newFormCtrl" ng-show="false && treeData.length > 0">
-                <!-- experimental -->
+                <!-- experimental
                 <h3>Form</h3>
                 <table class="table table-bordered table-condensed">
                     <tr><th>Element</th><th></th><th>DataType</th><th>Data</th><th>Input</th></tr>
@@ -397,7 +439,7 @@
                 </table>
             </div>
 
-
+-->
 
 
             <div ng-show="isHistory" class="alert alert-warning">
@@ -971,7 +1013,9 @@
                                 </tr>
 
                                 <tr><td>Actions</td><td>
-                                    <div ng-show="!firebase.auth().currentUser">
+
+
+                                    <div ng-show="!Practitioner">
                                         Not logged in - read only mode
                                     </div>
 
@@ -980,7 +1024,7 @@
 
                                     </div>
 
-                                    <div ng-show = "canSaveModel && firebase.auth().currentUser.email && !isHistory">
+                                    <div ng-show = "canSaveModel && Practitioner && !isHistory">
                                         <span>
                                         <i class="glyphicon glyphicon-arrow-up clickable"
                                            ng-hide = "$index == 0 || isHistory"

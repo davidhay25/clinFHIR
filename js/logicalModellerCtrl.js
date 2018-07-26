@@ -4,7 +4,7 @@ angular.module("sampleApp")
     .controller('logicalModellerCtrl',
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
                   GetDataFromServer,$firebaseObject,$firebaseArray,$location,igSvc,SaveDataToServer,$window,RenderProfileSvc,
-                  $q,Utilities, securitySvc,$filter,builderSvc,questionnaireSvc) {
+                  $q,Utilities, securitySvc,$filter,builderSvc,questionnaireSvc,$localStorage,projectSvc) {
             $scope.input = {};
 
             $scope.firebase = firebase;
@@ -21,6 +21,9 @@ angular.module("sampleApp")
 
             GetDataFromServer.registerAccess('logical');
 
+
+
+            console.log($http.defaults.headers.common);
 
             //-----------  login stuff....
 
@@ -48,15 +51,43 @@ angular.module("sampleApp")
             var hash = $location.hash();
             if (hash) {
 
+                console.log(hash)
 
                 //if there's a hash starting with $$$ then this has been started from the project, with an authenticted user...
-                if (hash && hash.substr(0,3)== '$$$') {
+                if (hash && hash.substr(0,3) == '$$$') {
                     //loaded from project. Need to get user details, servers...
 
+                    //the access token is set in the local storage. Think this is OK, though may need a synchronous call to get from the server...
+                    var at = $localStorage.cfAt;
+                    if (at) {
+                        console.log(at)
+                        $http.defaults.headers.common.Authorization = 'Bearer '+ at;
+                    }
 
-                    return
+                    //the user is also set by the project controller...
+                    var user = $localStorage.user;
+                    logicalModelSvc.setCurrentUser(user);
+                    securitySvc.setCurrentUser(user);
+
+                    console.log(user);
+
+                    //is there a selected model? if so, load it
+                    var model = $localStorage.cfModel;
+                    console.log(model)
+                    //return the practitioner resource that corresponds to the current user (the service will create if absent)
+                    GetDataFromServer.getPractitionerByLogin(user).then(
+                        function (practitioner) {
+                            $scope.Practitioner = practitioner;
+                            getPalette(practitioner);       //get the palette of logical models
+                        }, function (err) {
+                            console.log(err)
+                        }
+                    );
+
                 } else {
+                    //this
                     var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
+                    console.log(sc)
                     sc.$loaded().then(
                         function(){
 
@@ -106,45 +137,46 @@ angular.module("sampleApp")
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
             firebase.auth().onAuthStateChanged(function(user) {
                 //if there's a hash starting with $$$ then this has been started from the project, with an authenticted user...
-                if (hash && hash.substr(0,3)== '$$$') {
+                if (hash && hash.substr(0, 3) == '$$$') {
                     //nothing to see here, move right along...
-                    return
-                }
-
-                delete $scope.input.mdComment;
-
-                if (user) {
-                    $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
-                    logicalModelSvc.setCurrentUser(user);
-                    securitySvc.setCurrentUser(user);
-
-
-                    //return the practitioner resource that corresponds to the current user (the service will create if absent)
-                    GetDataFromServer.getPractitionerByLogin(user).then(
-                        function(practitioner){
-
-                            $scope.Practitioner = practitioner;
-
-                            // checkForComments($scope.currentType);     //get comments for this user against this model...
-                            getPalette(practitioner);       //get the palette of logical models
-
-
-                        },function (err) {
-                            //swallow errorsalert(err)
-                        }
-                    );
-
-                    delete $scope.showNotLoggedIn;
-
-
+                   // return
                 } else {
 
-                    logicalModelSvc.setCurrentUser(null);
-                    $scope.showNotLoggedIn = true;
-                    delete $scope.Practitioner;
-                    delete $scope.taskOutputs;
-                    delete $scope.commentTask;
-                    // No user is signed in.
+                    delete $scope.input.mdComment;
+
+                    if (user) {
+                        $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+                        logicalModelSvc.setCurrentUser(user);
+                        securitySvc.setCurrentUser(user);
+
+
+                        //return the practitioner resource that corresponds to the current user (the service will create if absent)
+                        GetDataFromServer.getPractitionerByLogin(user).then(
+                            function (practitioner) {
+
+                                $scope.Practitioner = practitioner;
+
+                                // checkForComments($scope.currentType);     //get comments for this user against this model...
+                                getPalette(practitioner);       //get the palette of logical models
+
+
+                            }, function (err) {
+                                //swallow errorsalert(err)
+                            }
+                        );
+
+                        delete $scope.showNotLoggedIn;
+
+
+                    } else {
+
+                        logicalModelSvc.setCurrentUser(null);
+                        $scope.showNotLoggedIn = true;
+                        delete $scope.Practitioner;
+                        delete $scope.taskOutputs;
+                        delete $scope.commentTask;
+                        // No user is signed in.
+                    }
                 }
             });
 
@@ -618,7 +650,7 @@ angular.module("sampleApp")
                     loadAllModels();
 
                 })
-            }
+            };
 
             //merge the referenced model into this one at this point
             $scope.mergeModel = function(url){
@@ -957,7 +989,6 @@ angular.module("sampleApp")
             };
 
 
-
             //retrieve the list of models on the users current palette...
             function getPalette(practitioner)  {
                 delete $scope.palette;
@@ -1255,7 +1286,10 @@ angular.module("sampleApp")
             //load all the logical models created by clinFHIR
             loadAllModels = function() {
 
-                var url=$scope.conformanceServer.url + "StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
+                var url= $scope.conformanceServer.url + "StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
+
+                console.log(url)
+
 
                 GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
                     function(data) {
@@ -1292,10 +1326,12 @@ angular.module("sampleApp")
             };
 
 
+            console.log($scope.initialLM)
             if (!$scope.initialLM) {
                // $scope.hideLMSelector();
                 loadAllModels();
             } else {
+                console.log($scope.initialLM)
                 GetDataFromServer.findConformanceResourceByUri($scope.initialLM).then(
                     function(resource){
                         $scope.selectModel({resource:resource})
@@ -1462,7 +1498,7 @@ angular.module("sampleApp")
                     templateUrl: 'modalTemplates/newLogicalModel.html',
                         size: 'lg',
                         controller: function($scope,appConfigSvc,Utilities,GetDataFromServer,
-                                             modalService,RenderProfileSvc,SD,allModels) {
+                                             modalService,RenderProfileSvc,SD,allModels,projectSvc) {
                             $scope.input = {};
                             $scope.input.createElementsFromBase = false;    //by default, don't copy the existing elements across.
                             $scope.isNew = true;
@@ -1565,7 +1601,8 @@ angular.module("sampleApp")
                                 var url = $scope.conformanceServer.url + "StructureDefinition/"+name;
                                 $scope.showWaiting = true;
                                 $scope.canSave = false;
-                                GetDataFromServer.adHocFHIRQuery(url).then(
+                                projectSvc.smartGet(url).then(
+                                //GetDataFromServer.adHocFHIRQuery(url).then(
                                     function(data){
 
                                         if (Utilities.isAuthoredByClinFhir(data.data)) {
@@ -1732,6 +1769,7 @@ angular.module("sampleApp")
 */
 
 
+
             $scope.saveModel = function() {
                 
                 var url = $scope.conformanceServer.url + "StructureDefinition/" + $scope.SD.id;
@@ -1750,8 +1788,11 @@ angular.module("sampleApp")
 
                 });
 
-                
-                $http.put(url,SDToSave).then(
+
+                //smartPut will attempt to refresh the access token if the endpoint is protected by SMART
+                projectSvc.smartPut(url,SDToSave).then(
+
+                //$http.put(url,SDToSave).then(
                     function(data) {
 
                         if (!$scope.initialLM) {
@@ -1778,6 +1819,8 @@ angular.module("sampleApp")
                 ).finally(function(){
                     $scope.showWaiting = false;
                 })
+
+
             };
 
             //select a model from the list of models
