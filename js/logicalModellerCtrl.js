@@ -19,6 +19,7 @@ angular.module("sampleApp")
             $scope.appConfigSvc = appConfigSvc
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
+
             GetDataFromServer.registerAccess('logical');
 
 
@@ -102,7 +103,8 @@ angular.module("sampleApp")
                             //get the model from the server...
                             var url = conformanceServer.url + 'StructureDefinition/'+id;
                             $scope.showWaiting = true;
-                            GetDataFromServer.adHocFHIRQuery(url).then(
+                            projectSvc.smartGet(url).then(
+                            //GetDataFromServer.adHocFHIRQuery(url).then(
                                 function(data){
                                     var model = data.data;
                                     $scope.hideLMSelector();            //only want to see this model...
@@ -632,7 +634,7 @@ angular.module("sampleApp")
             };
 
             //view and change servers
-            $scope.setServers = function(){
+            $scope.setServersDEP = function(){
                 $uibModal.open({
                     templateUrl: 'modalTemplates/setServers.html',
                     //size: 'lg',
@@ -1080,7 +1082,8 @@ angular.module("sampleApp")
                 function selectFromPalette(item) {
                     var url = appConfigSvc.getCurrentConformanceServer().url+item.reference;
                     $scope.showWaiting = true;
-                    GetDataFromServer.adHocFHIRQuery(url).then(
+                    projectSvc.smartGet(url).then(
+                    //GetDataFromServer.adHocFHIRQuery(url).then(
                         function(data){
 
                             selectEntry({resource:data.data})
@@ -1289,7 +1292,6 @@ angular.module("sampleApp")
                 var url= $scope.conformanceServer.url + "StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
 
                 console.log(url)
-
 
                 GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
                     function(data) {
