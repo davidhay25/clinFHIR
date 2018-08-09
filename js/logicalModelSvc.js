@@ -1273,10 +1273,7 @@ angular.module("sampleApp")
 
 
 
-                //retrieve the base profile. We'll use that to ensure that the mappings are valid...
-               // var url = appConfigSvc.getCurrentConformanceServer().url + baseType;
-             //   var url = "http://hl7.org/fhir/StructureDefinition/"+ baseType;
-               // realProfile.baseDefinition = url;
+
 
                 GetDataFromServer.findConformanceResourceByUri(url).then(
                     function (SD) {
@@ -1310,7 +1307,6 @@ angular.module("sampleApp")
 
                     //create a hash of all the paths in the base resource type (That is being profiled)...
                     var basePathHash = {};
-                   // var listOfDataTypes = {};   //a hash of all the datatypes used by the model
                     SD.snapshot.element.forEach(function(ed){
                         basePathHash[ed.path] = ed;
                         if (ed.type) {
@@ -1323,17 +1319,18 @@ angular.module("sampleApp")
 
                                     })
                                 }
-
                             })
                         }
-
                     });
-
 
 
                     //now work through the model. if there's no mapping, then an error. If an extension then insert the url...
                     internalLM.snapshot.element.forEach(function(ed,inx){
                         var newED = angular.copy(ed);
+
+
+
+
 
                         //remove invalid property that was added in the logival model to support internal processing
                         if (newED.type){
@@ -1359,19 +1356,6 @@ angular.module("sampleApp")
                                         if (map.map) {
                                             var ar1 = map.map.split('|');
                                             var fhirPath = ar1[0];      //this is the 'real' path in the SD
-
-
-
-                                            //if the mapping path has '[ ', then this is a sliced element.
-                                            /* I don't think this is true any more...
-                                            var ar2 = fhirPath.split('[')
-                                            if (ar2.length > 1) {
-                                                newED.path = map.map;//map.map
-                                                slices.push(newED)
-                                            } else {
-                                                newED.path = fhirPath;//map.map
-                                            }
-                                            */
                                             newED.path = fhirPath;//map.map
                                         }
                                     }
@@ -1401,38 +1385,6 @@ angular.module("sampleApp")
                             if (path && path.indexOf('[x]') > -1) {
                                 ignorePath.push(oldPath)    //don't include any of the children in the profile. May need to revisit this...
 
-                                //this is a choice type - change the name to the first type
-
-/*
-
-
-                                if (newED.type){
-                                    var cd = newED.type[0].code; // the datatype
-                                    cd = cd.substr(0,1).toUpperCase() + cd.substr(1)
-
-                                    //now change the path segment with the [x]
-                                    var ar = path.split('.');
-                                    newAr = []
-                                    ar.forEach(function (s) {
-                                        var g = s.indexOf('[x]');
-                                        if (g > -1) {
-                                            s = s.substr(0,g) +cd;
-                                        }
-                                        newAr.push(s)
-
-                                    })
-
-
-                                    //var g = path.indexOf('[x]');
-                                    newED.path = path + " " + newAr.join('.'); //path.substr(0,g) +cd;//  path.splice(g,3,cd);
-
-                                    //newED.path = newED.path.substr(0,newED.path.length-4) + cd.substr(0,1).toUpperCase() + cd.substr(1)
-
-
-                                    basePathHash[newED.path] = newED;   //add to the list of acceptable paths. (Assumes that the path before the [x] is legit...
-                                }
-                                */
-
                             }
                         }
 
@@ -1450,19 +1402,9 @@ angular.module("sampleApp")
                                 addToProfile = false;
                             }
                         }
-/*
-                        //if the oldPath value is in the list of ignorePaths then ignore
-                        if (addToProfile) {
-                            ignorePath.forEach(function (ignore) {
-                                if (oldPath.substr(0,ignore.length) === ignore) {
-                                    addToProfile = false;
-                                }
 
-                            })
-                        }
-*/
 
-                        //if this is datatype of reference, then add it to the list of 'ignorePaths' so the children will not be included
+                        //if this is datatype of reference, then add it to the list of 'ignorePaths' so the children added in the model will not be included
                         if (addToProfile) {
                             if (ed.type) {
                                 ed.type.forEach(function (typ) {
@@ -1531,6 +1473,14 @@ angular.module("sampleApp")
                         //an element not yet added to the real profile
                         if (addToProfile) {
 
+                            //the base type path should be the to the profiled base - added 2018-08-09 todo - review thos
+                            //todo - should this be changed when the LM is generated???
+                            if (newED.base && newED.base.path) {
+                                var ar9 = newED.base.path.split('.');
+                                ar9[0] = baseType;
+                                newED.base.path = ar9.join('.')
+                            }
+
                             //if there's a discriminator, then add an entry - but once only
                             var extDiscriminator = Utilities.getSingleExtensionValue(ed, discriminatorUrl);
                             if (extDiscriminator) {
@@ -1566,25 +1516,14 @@ angular.module("sampleApp")
 
 
                     if (err.length > 0) {
-                       // var msg = err.join(' ');
+
                         deferred.reject({err:err,ok:ok});
                     } else {
 
-                        //write out
-                        //
-                       // deferred.resolve(realProfile)
 
                         deferred.resolve(realProfile)
 
-/*
-                        SaveDataToServer.saveResource(realProfile,appConfigSvc.getCurrentConformanceServer().url).then(
-                            function(data) {
-                                deferred.resolve(realProfile)
-                            },function (err) {
-                                deferred.reject(angular.toJson(err));
-                            }
-                        )
-                        */
+
 
 
                     }

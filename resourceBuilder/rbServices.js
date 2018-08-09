@@ -608,12 +608,6 @@ angular.module("sampleApp").
                     var bundle = data.data;
                     if (bundle && bundle.entry && bundle.entry.length > 0) {
                         //return the most recent one if more than one... -
-/*
-
-                        if (bundle.entry.length > 1 && ! hideError) {
-                            alert('There are '+ bundle.entry.length + ' StructureDefinitions with the url ' + url + "!")
-                        }
-*/
 
                         //updated: check the resource type! - added because of a bug, but it's not safe to assume that the response doesn't have other resources - like an OO
                         var arEntry = _.filter(bundle.entry,function(o){
@@ -626,7 +620,9 @@ angular.module("sampleApp").
                                 deferred.resolve(arEntry[0].resource);
                             } else {
                                 if (! hideError) {
-                                    alert('There are '+ bundle.entry.length + ' StructureDefinitions with the url ' + url + "!")
+                                    //Aug 2018 - changed from modal dialog as users won't know what this means.
+                                    //todo need better logging - perhaps create as OO resource and I can review???
+                                    console.log('There are '+ bundle.entry.length + ' StructureDefinitions with the url ' + url + "!")
                                 }
                                 var entry;
                                 var last = moment().subtract(10,'years')

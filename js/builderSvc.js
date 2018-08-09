@@ -1318,7 +1318,7 @@ angular.module("sampleApp")
                     try {
                         container.bundle = angular.fromJson(atob(dr.content[0].attachment.data));
                     } catch (ex) {
-                        console.log('error loading library item: ',ex)
+                        console.log('error loading library item (will be ignored, no problem): ',ex)
                         return null;
                     }
 
@@ -2762,7 +2762,7 @@ angular.module("sampleApp")
             getResourcesOfType : function(type,bundle,fullProfile){
                 //get all the resources in the bundle of the given type. fullProfile is the complete profile - not just the type (at the end of the url)
 
-                console.log(type)
+               // console.log(type)
                if (fullProfile) {
                    //new search - will replace the other eventually...
                    // note that LMs can refer to 'core' types, but not other LM's (at present)

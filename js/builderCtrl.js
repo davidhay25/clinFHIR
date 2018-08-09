@@ -449,15 +449,13 @@ angular.module("sampleApp")
 
             };
 
-            //retrieve the categories for a sceanrio (will be the value of the DocumentReference.class
+            //retrieve the categories for a scenario (will be the value of the DocumentReference.class
             builderSvc.getLibraryCategories().then(
                function(cs){
                    $scope.libraryCategories = cs
-                   //problem with setting a default is that there are 2 dependany async operations...
-                   //$scope.input.selectedLibraryCategory = cs.concept[0];    //to set the default in the library
-                   //$scope.makeLibraryDisplayList($scope.input.selectedLibraryCategory);
-                      // console.log(cs);
+
                },function(){
+                   //if there are no categories, then just set the default...
                     $scope.libraryCategories = {concept:[]}
                     $scope.libraryCategories.concept.push({code:'default',display:'Default'});
                 }
@@ -465,7 +463,7 @@ angular.module("sampleApp")
 
             $scope.changeSelectedScenarioConcept = function(category){
                 $scope.selectedContainer.category = category;
-            }
+            };
 
             $scope.makeLibraryDisplayList = function(category){
                 delete $scope.selectedLibraryContainer;
@@ -1029,7 +1027,7 @@ angular.module("sampleApp")
                             $scope.$broadcast('patientSelected',data);   //so the patient display controller (resourceViewerCtl) knows
                         },
                         function(err){
-                            console.log(err)
+                            console.log('Patient: ' + patient.id + ' not found',err)
                         })
                 }
             }

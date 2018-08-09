@@ -26,6 +26,8 @@ angular.module("sampleApp")
                 );
             };
 
+            /* this was for SMART enabling - need to do this smarter :)
+
             //always see if therer is an active token for this session.
             //https://stackoverflow.com/questions/23124032/set-httpprovider-default-headers-after-user-authentification
             $http.get("/smartAuth/getToken").then(
@@ -36,7 +38,7 @@ angular.module("sampleApp")
                 }
             );
 
-
+*/
             //----------------------
 
 
