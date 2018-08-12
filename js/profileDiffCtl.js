@@ -28,14 +28,15 @@ angular.module("sampleApp")
 
             $scope.typeDescription.extension = 'Extension Definition';
             $scope.typeDescription.profile = 'Profile';
-            $scope.typeDescription.terminology = 'Terminology resource';
+            $scope.typeDescription.codesystem = 'CodeSystem';
+            $scope.typeDescription.terminology = 'ValueSet';
             $scope.typeDescription.logical = 'Logical model';
-            $scope.typeDescription.other = 'Other artifact';
             $scope.typeDescription.example = 'Example';
+            $scope.typeDescription.other = 'Other artifact';
 
 
             $scope.showDT = function(dt) {
-                var msg = "";dt;
+                var msg = "";
                 switch (dt) {
                     case 'Identifier' :
                         msg = "System,Value";
@@ -58,11 +59,7 @@ angular.module("sampleApp")
                 }
 
                 return msg
-               // var disp = {text:'string',coding:[{system:'uri',code:'string'}]}
-               // var s = angular.toJson(disp,true)
-
-               // return '<pre>'+s+ '</pre>'
-            }
+            };
 
 
 
@@ -1114,17 +1111,16 @@ angular.module("sampleApp")
                     if (package && package.resource) {
 
                         //create an entry for every 'purpose' so they can be added in the UI
-                        ['logical','profile','extension','terminology','other','example'].forEach(function (purpose) {
+                        ['logical','profile','extension','codesystem','terminology','other','example'].forEach(function (purpose) {
                             $scope.artifacts[purpose] = []
                         });
 
                         package.resource.forEach(function (resource) {
-
-
                             var purpose = profileDiffSvc.getPurpose(resource)
 
                             // var purpose = resource.purpose || resource.acronym;     //<<< todo - 'purpose' was removed in R3...
                             var type;
+
                             var extDef = appConfigSvc.config().standardExtensionUrl.resourceTypeUrl;
                             if (resource.example || resource.purpose == 'example') {         //another R2/3 difference...
                                 purpose = 'example'
@@ -1153,7 +1149,7 @@ angular.module("sampleApp")
                 });
 
                 //sort 'em all...
-                ['extension','profile','terminology','logical','other','example'].forEach(function (purpose) {
+                ['extension','profile','terminology','logical','other','example','codesystem'].forEach(function (purpose) {
                     if ($scope.artifacts[purpose]) {
                         $scope.artifacts[purpose].sort(function(item1,item2) {
                             var typ1 =  $filter('getLogicalID')(item1.url);
@@ -1273,10 +1269,26 @@ console.log(SD)
 
                 }
 
+                if (type == 'codesystem') {
+
+                    delete $scope.selectedCodeSystem;
+
+                   profileDiffSvc.getTerminologyResource(item.url,'CodeSystem').then(
+                       function (cs) {
+                           $scope.selectedCodeSystem = cs;
+
+                       }, function (err) {
+                           console.log(err)
+                       }
+                   )
+               }
+
+
                 if (type == 'terminology') {
                     delete $scope.valueSetOptions;
                     delete $scope.valueSetExpandError;
-                   //really only works for ValueSet and CodeSystemat this point...
+                    /*
+                    //really only works for ValueSet and CodeSystemat this point...
                     var tType = 'ValueSet';
                     if (item.url.indexOf('/CodeSystem/') > -1) {
                         tType = 'CodeSystem';
@@ -1287,55 +1299,51 @@ console.log(SD)
                         urlToGet = item.uri;
                         tType = 'CodeSystem';   //todo hack for UScore
                     }
+*/
+                    profileDiffSvc.getTerminologyResource(item.url,'ValueSet').then(
+                        function (vs) {
+                            $scope.selectedTerminology = vs;
+
+
+
+                            //if (tType == 'ValueSet') {
+                            var vo = {selectedValueSet : {vs: {url: vs.url}}}
+
+                            logicalModelSvc.getOptionsFromValueSet(vo).then(
+                                function(lst) {
+
+
+
+                                    if (lst) {
+                                        lst.sort(function(a,b){
+                                            if (a.display > b.display) {
+                                                return 1
+                                            } else {
+                                                return -1;
+                                            }
+                                        })
+                                        $scope.valueSetOptions = lst;
+                                    }
 
 
 
 
-
-                   profileDiffSvc.getTerminologyResource(urlToGet,tType).then(
-                       function (vs) {
-                           $scope.selectedTerminology = vs;
-
-
-
-                           if (tType == 'ValueSet') {
-                               var vo = {selectedValueSet : {vs: {url: vs.url}}}
-
-                               logicalModelSvc.getOptionsFromValueSet(vo).then(
-                                   function(lst) {
-
-
-
-                                       if (lst) {
-                                           lst.sort(function(a,b){
-                                               if (a.display > b.display) {
-                                                   return 1
-                                               } else {
-                                                   return -1;
-                                               }
-                                           })
-                                           $scope.valueSetOptions = lst;
-                                       }
+                                },
+                                function(err){
+                                    //$scope.valueSetOptions = [{code:'notExpanded',display:'Unable to get list, may be too long'}]
+                                    $scope.valueSetExpandError = err.data
+                                }
+                            )
+                            //}
 
 
 
 
-                                   },
-                                   function(err){
-                                       //$scope.valueSetOptions = [{code:'notExpanded',display:'Unable to get list, may be too long'}]
-                                       $scope.valueSetExpandError = err.data
-                                   }
-                               )
-                           }
-
-
-
-
-                       }, function (err) {
-                           console.log(err)
-                       }
-                   )
-               }
+                        }, function (err) {
+                            console.log(err)
+                        }
+                    )
+                }
 
                 if (type=='extension') {
                     profileDiffSvc.getSD(item.url).then(

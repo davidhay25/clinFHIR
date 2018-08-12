@@ -1252,7 +1252,9 @@
                         </div>
 
                         <div ng-show="selectedItemType == 'terminology'">
+                            <!--
                             <h4>Terminology: {{selectedTerminology.resourceType}}</h4>
+                            -->
 
                             <uib-tabset>
 
@@ -1290,6 +1292,9 @@
                                         </div>
                                     </div>
 
+                                    <br/>
+                                    <a href="#" ng-show="selectedTerminology.resourceType=='ValueSet'" class="clickableDotted"
+                                       ng-click="showValueSet(selectedTerminology.url)">Explore ValueSet</a>
 
 
 
@@ -1333,30 +1338,6 @@
 
 
 
-                                    <a href="#" ng-show="selectedTerminology.resourceType=='ValueSet'" class="clickableDotted"
-                                       ng-click="showValueSet(selectedTerminology.url)">Explore ValueSet</a>
-
-
-
-
-
-
-                                    <div ng-show="selectedTerminology.resourceType=='CodeSystem'">
-                                        <table class="table table-bordered">
-                                            <tr><th>Code</th><th>Display</th><th>Definition</th></tr>
-                                            <tr ng-repeat="code in selectedTerminology.concept">
-                                                <td>{{code.code}}</td>
-                                                <td>{{code.display}}</td>
-                                                <td>{{code.definition}}</td>
-
-
-
-                                            </tr>
-
-                                        </table>
-
-                                    </div>
-
 
 
                                 </uib-tab>
@@ -1373,7 +1354,61 @@
 
                         </div>
 
+                        <div ng-show="selectedItemType == 'codesystem'">
+                            <h4>CodeSystem: {{selectedTerminology.resourceType}}</h4>
+                            <uib-tabset>
+                                <uib-tab heading="Contents">
+                                    <br/>
+                                    <div class="row">
+                                        <div class="col-sm-6 col-md-6">
+                                            <div class="row">
+                                                <div class="col-sm-2 col-md-2">Name</div>
+                                                <div class="col-sm-10 col-md-10">{{selectedCodeSystem.name}}</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-2 col-md-2">Description</div>
+                                                <div class="col-sm-10 col-md-10">{{selectedCodeSystem.description}}</div>
+                                            </div>
 
+                                        </div>
+
+                                        <div class="col-sm-6 col-md-6">
+                                            <div class="row">
+                                                <div class="col-sm-2 col-md-2">Url</div>
+                                                <div class="col-sm-10 col-md-10">{{selectedCodeSystem.url}}</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-2 col-md-2">Publisher</div>
+                                                <div class="col-sm-10 col-md-10">{{selectedCodeSystem.publisher}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div ng-show="selectedCodeSystem.concept">
+                                        <br/>
+                                        <table class="table table-bordered">
+                                            <tr><th>Code</th><th>Display</th><th>Definition</th></tr>
+                                            <tr ng-repeat="code in selectedCodeSystem.concept">
+                                                <td>{{code.code}}</td>
+                                                <td>{{code.display}}</td>
+                                                <td>{{code.definition}}</td>
+
+
+
+                                            </tr>
+
+                                        </table>
+                                    </div>
+
+
+
+                                </uib-tab>
+                                <uib-tab heading="Json">
+                                    <pre>{{selectedCodeSystem | json}}</pre>
+                                </uib-tab>
+                            </uib-tabset>
+
+                        </div>
 
 
                     </div>

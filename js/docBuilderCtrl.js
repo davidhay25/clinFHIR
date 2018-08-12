@@ -64,16 +64,15 @@ angular.module("sampleApp")
                             msg += "The impact is that when creating a document, you'll need to enter section type text manually. Sorry about that.";
 
 
-                            //Temp - better to display this in the dociment seciotn... modalService.showModal({}, {bodyText:msg});
-
-                            //alert(err + ' expanding ValueSet:')
                         }
                     )
 
 
+                } else{
+                    alert("The ValueSet with the url 'http://hl7.org/fhir/ValueSet/doc-section-codes' was not found on the Terminology Server. You won't be able to add sections to a document.")
                 }
 
-            })
+            },true)
 
 
 
