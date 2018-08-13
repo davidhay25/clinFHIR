@@ -77,30 +77,33 @@ angular.module("sampleApp").
 
         },
         
-        saveResource : function(resource,urlBase) {
+        saveResource : function(resource,urlBase,user) {
             //save a resource to the data server
-            urlBase = urlBase || appConfigSvc.getCurrentDataServerBase();       //default to data server
+            urlBase = urlBase || appConfigSvc.getCurrentConformanceServer().url;       //default to data server
             var deferred = $q.defer();
-            //alert('saving:\n'+angular.toJson(resource));
-            //var config = appConfigSvc.config();
             var qry = urlBase + resource.resourceType;
+            var config = {};
+            //if there's a user object with an 'authHeader' property, then add tha to the config... (added for IG & smile)
+            if (user && user.authHeader) {
+                config.headers = {authorization:user.authHeader};
+
+            }
             if (resource.id) {
                 //this is an update
                 qry += "/"+resource.id;
-                //console.log(qry)
-                $http.put(qry, resource).then(
+
+                $http.put(qry, resource,config).then(
                     function(data) {
                         deferred.resolve(data);
                     },
                     function(err) {
-
                         deferred.reject(err.data);
                     }
                 );
             } else {
                 //this is new
-                console.log(qry)
-                $http.post(qry, resource).then(
+                //console.log(qry)
+                $http.post(qry, resource,config).then(
                     function(data) {
                         deferred.resolve(data);
                     },

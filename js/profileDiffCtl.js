@@ -2,17 +2,24 @@
 angular.module("sampleApp")
     .controller('profileDiffCtrl',
         function ($scope,$q,$http,profileDiffSvc,$uibModal,logicalModelSvc,appConfigSvc,RenderProfileSvc,builderSvc,
-                  Utilities,GetDataFromServer,profileCreatorSvc,$filter,$firebaseObject,$firebaseArray,$location,$window,modalService,
-                    $timeout,SaveDataToServer,$sce,resourceCreatorSvc) {
+                  Utilities,GetDataFromServer,profileCreatorSvc,$filter,$firebaseObject,$firebaseArray,$location,
+                  $window,modalService,$localStorage,$timeout,SaveDataToServer,$sce,resourceCreatorSvc) {
 
             $scope.input = {center:true,includeCore:true,immediateChildren:true,includeExtensions:true,includePatient:true};
             $scope.input.commentReply = {};
             $scope.input.displayMode = true;        //show all the tabs for the profile view
 
+            $scope.canEdit = false;
+
             $scope.appConfigSvc = appConfigSvc;
             $scope.itemColours = profileDiffSvc.objectColours();
 
             var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
+
+            //retrieve the current user from the browser cache if present. Note that this includes the authHeader...
+            if ($localStorage.currentUser) {
+                $scope.currentUser = $localStorage.currentUser;
+            }
 
             $scope.history = [];        //
             $scope.input.tabShowing='single';
@@ -76,18 +83,41 @@ angular.module("sampleApp")
             };
 
             //-----------  login stuff....
-
+/*
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
+            //todo - not using this ATM
             firebase.auth().onAuthStateChanged(function(user) {
 
                 if (user) {
                     $scope.user = user;
                     $scope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
 
-
                 }
             });
 
+*/
+            //using the smile login store.
+            $scope.loginSmile = function(){
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/loginSmile.html',
+
+                    backdrop: 'static',
+                    controller: 'loginSmileCtrl'
+
+                }).result.then(
+                    function (user) {
+                        $scope.currentUser = user;
+                        $localStorage.currentUser = user;
+                        $scope.canEdit = true;
+                    }
+                )
+            };
+
+            $scope.logoutSmile = function(){
+                delete $scope.currentUser;
+                delete $localStorage.currentUser;
+                $scope.canEdit = false;
+            };
 
             //--------  comment functions
             $scope.$on("LMElementSelected",function(ev,data){
@@ -228,7 +258,6 @@ angular.module("sampleApp")
                     console.log(err)
                 }
             );
-
 
             $scope.saveIG = function(hideAlert){
 
@@ -459,6 +488,7 @@ angular.module("sampleApp")
             //update the IG on the server..
             $scope.savePages = function(){
 
+                //generate a representation of the document tree to save in the IG.page element (ie the user documentation)
                 var pageRoot = {page:[]}
                 var tree = $('#pagesTreeView').jstree().get_json('#');
                 var topNode = tree[0];
@@ -471,9 +501,11 @@ angular.module("sampleApp")
 
                 //return;
 
-                SaveDataToServer.saveResource($scope.currentIG).then(
-                    function (data) {
+                console.log($scope.currentIG);
 
+                //pass in the current user, as the credentials may be required...
+                SaveDataToServer.saveResource($scope.currentIG,null,$scope.currentUser).then(
+                    function (data) {
                         $scope.pageDirty = false;
                         alert("Implementation Guide has been updated.")
                     }, function (err) {
@@ -481,8 +513,15 @@ angular.module("sampleApp")
                     }
                 );
 
+
                 function getChildren(parentPage,node) {
-                    var page = node.data;     //this is a child page off the parent
+                    var page = angular.copy(node.data);     //this is a child page off the parent
+                    delete page.nodeType;       //Added to support the tree display
+
+                    //STU changes. Could be re-factored when the IG version changes...
+
+                    page.title = page.title || page.name;
+                    delete page.name;
 
                     if (page) {
                         parentPage.page = parentPage.page || []
@@ -637,10 +676,10 @@ angular.module("sampleApp")
 
                         } else {
                             //add...
-                            var page = {source:vo.link,kind:'page'};
+                            var page = {source:vo.link,kind:'page',nodeType:'page'};
                             setTitle(page,vo.title);
-                            page.page = [];
-                            var id = 't' + new Date().getTime();// + Math.random()*1000
+                            page.page = [];         //as pages can be nested...
+                            var id = 't' + new Date().getTime();
                             var title = page.title || page.name;    //R3/STU2
 
                             var parentId = '#';
@@ -648,15 +687,14 @@ angular.module("sampleApp")
                                 parentId = $scope.selectedPageNode.id;
                             }
 
-                            var node = {id:id,parent:parentId,text:title,state: {opened: true}}
+                            var node = {id:id,parent:parentId,text:title,state: {opened: true}};
                             node.data = page;
-                            $scope.pageTreeData.push(node)
+                            $scope.pageTreeData.push(node);
 
                             console.log(node)
 
                         }
                         drawPageTree()
-
                 })
 
             };
@@ -956,6 +994,7 @@ angular.module("sampleApp")
             function clearRightPane(){
                 //delete $scope.currentIG;
                 delete $scope.selectedElementInLM;
+                delete $scope.selectedElementInLMDisplay
                 delete $scope.selectedItemType ;
                 delete $scope.selectedItem;
                 delete $scope.profileReport;
@@ -1495,24 +1534,6 @@ console.log(SD)
 
 
 
-
-/*
-                //------- other profiles on this base type...
-                var baseType;
-
-                if (fhirVersion == 2) {
-                    //baseType = SD.base;
-                    if (SD.base) {
-                        baseType = $filter('getLogicalID')(SD.base);
-                    }
-                }
-*/
-
-
-
-
-
-
                 delete $scope.errorsInLM;
                 //-------- logical model
                 profileDiffSvc.makeLMFromProfile(angular.copy(SD)).then(
@@ -1538,6 +1559,10 @@ console.log(SD)
 
 
                                 $scope.selectedElementInLM = data.node.data.ed;
+
+                                //create a display version of the element, removing the stuff I added...
+                                $scope.selectedElementInLMDisplay = angular.copy(data.node.data.ed);
+                                delete $scope.selectedElementInLMDisplay.myMeta;
                                 $scope.selectedED1 = data.node.data.ed;
 
                                 $scope.$broadcast("LMElementSelected",data.node.data.ed);
@@ -1755,7 +1780,6 @@ console.log(SD)
             };
 
 
-
             function buildMM(SD) {
                 var options = {};
                 resourceCreatorSvc.createGraphOfProfile(SD,options).then(
@@ -1808,8 +1832,6 @@ console.log(SD)
 
                 //--------------------
             }
-
-
 
             $scope.selectNodeFromGraph = function(){
 

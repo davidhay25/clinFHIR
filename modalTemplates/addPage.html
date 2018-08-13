@@ -10,16 +10,10 @@
             </div>
             <div class="col-md-6 col-sm-6 col-xs-6">
 
-                <button ng-show="input.link && input.title" class="btn btn-success pull-right" ng-click="add()">
-                    <span ng-hide="edit"> Add Page</span>
-                    <span ng-show="edit"> Update Page</span>
-                </button>
+
                 <button class="btn btn-link pull-right" ng-click="$dismiss()">Cancel</button>
 
             </div>
-
-
-
 
         </div>
 
@@ -53,6 +47,10 @@
 
         <div class="row">
             <div class="col-md-12 col-sm-12">
+                <button ng-show="input.link && input.title" class="btn btn-success pull-right" ng-click="add()">
+                    <span ng-hide="edit"> Add Page</span>
+                    <span ng-show="edit"> Update Page</span>
+                </button>
             </div>
         </div>
     </div>

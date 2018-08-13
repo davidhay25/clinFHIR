@@ -2433,10 +2433,6 @@ angular.module("sampleApp")
                                     }
 
 
-
-
-
-
                                     //is this a reference
                                     if (typ.code == 'Reference') {
                                         item.data.isReference = true;   //used to populate the 'is reference' table...

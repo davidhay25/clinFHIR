@@ -395,12 +395,11 @@ angular.module("sampleApp").service('profileDiffSvc',
             }
 
             //at this point, we've added the pages to the tree. Now add the artifacts...
-            console.log(artifacts);
+            //console.log(artifacts);
 
             var id = 't' + new Date().getTime() + Math.random()*1000
             var artifactsRoot = {id:id,parent:'#',text:"FHIR artifacts",state: {opened: true}};
             artifactsRoot.data = {nodeType:'artifactRoot'};
-
 
             treeData.push(artifactsRoot);
 
@@ -431,8 +430,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
             return treeData;
 
-
-
+            //only used for adding the documentation page hierarchy (not the artifacts)
             function addPage(treeData,page,parentNode) {
 
                 var id = 't' + new Date().getTime() + Math.random()*1000
@@ -558,7 +556,7 @@ angular.module("sampleApp").service('profileDiffSvc',
         },
         makeLMFromProfile : function(inProfile) {
 
-            var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained','DomainResource'];
+            var elementsToDisable = ['id', 'meta', 'implicitRules', 'language', 'text', 'contained','DomainResource','modifierExtension'];
             var deferred = $q.defer();
             var profile = angular.copy(inProfile);
             var lstTree = [];
@@ -1983,8 +1981,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                     }
                     GetDataFromServer.findConformanceResourceByUri(url,null,null,true).then(
                         function (sdef) {
-                            console.log(url)
-console.log(sdef)
                             delete sdef.text;   //text can be v large in some profiles
 
                             $localStorage.extensionDefinitionCache[url] = minimizeSD(sdef)

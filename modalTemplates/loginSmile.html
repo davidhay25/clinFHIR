@@ -1,0 +1,59 @@
+
+<div>
+    <!--<div ng-controller="newResourceCtrl">-->
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-6 col-sm-6">
+                <h3 class="modal-title">Login</h3>
+
+            </div>
+            <div class="col-md-2 col-sm-2">
+                <div class="navbar-form" ng-show="waiting">
+                    <img src="css/ajax_loader_blue_32.gif"/>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-4">
+                <button class="btn btn-link pull-right" ng-click="$dismiss()">Cancel</button>
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+
+        <div class="row" style="margin-bottom: 8px">
+            <div class="col-md-2 col-sm-2 col-xs-2">
+                <div>User Name</div>
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-6">
+                <input autoFocus class='form-control' type="text" ng-model="input.username"/>
+            </div>
+
+        </div>
+
+        <div class="row" style="margin-bottom: 8px">
+            <div class="col-md-2 col-sm-2 ">
+                <div>Password</div>
+            </div>
+            <div class="col-md-6 col-sm-6">
+                <input class='form-control' type="password" ng-model="input.password"/>
+            </div>
+
+            <div class="col-md-4 col-sm-4 ">
+                <button ng-show="input.password && input.username && !waiting" class="btn btn-primary pull-right"
+                        ng-click="userLogin()">Login</button>
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-header">
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <em>Enter your username and password. This needs to be assigned by an
+                    Administrator. The user needs to be valid, and be able to modify an Implementation Guide.
+                </em>
+            </div>
+        </div>
+    </div>
+</div>
