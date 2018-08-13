@@ -581,6 +581,13 @@ angular.module("sampleApp").service('profileDiffSvc',
                         var parent = ar.join('.');
                         var node = {id:inx, text:path, state: {}, data: {ed : item, myMeta:{}}};
 
+
+                        //if displaying a profile with slices, the slicename is more meaningful. Added 2018-08-13 for IG Viewer
+                     /*   if (item.sliceName) {
+                            node.text = item.sliceName;
+                        }
+*/
+
                         //standard element names like 'text' or 'language'. Note that hidden elements are actually removed from the tree b4 returning...
                         if (ar.length == 1 && elementsToDisable.indexOf(segment) > -1) {
                             node.state.hidden=true;
@@ -753,6 +760,10 @@ angular.module("sampleApp").service('profileDiffSvc',
                         display=ed.name;
                     } else if (ed.short) {
                         display=ed.short;
+                    }
+                } else {
+                    if (ed.sliceName) {
+                        display=ed.sliceName
                     }
                 }
 

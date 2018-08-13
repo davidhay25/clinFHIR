@@ -412,12 +412,6 @@ angular.module("sampleApp")
                     if (data.node) {
                         $scope.selectedPageNode = data.node;
 
-
-                       // var url = $scope.selectedPageNode.data.source
-
-                        //console.log($scope.selectedPageNode.data.nodeType);
-
-
                         if ($scope.selectedPageNode.data) {
 
                             delete $scope.selectedItem;     //actually, specifically an artifact item...
@@ -1379,12 +1373,15 @@ console.log(SD)
                    profileDiffSvc.getSD(url).then(
                        function(SD){
 
-                           //console.log(SD)
+
 
                           //Don't delete just yet... getCommentsForProfile(url);
 
                            $scope.constrainedType = SD.constrainedType;     //todo different for R3...
 
+                           /*   DON'T DELETE !!!
+
+                           Disable the content check for the moment. May want to make it optional,
                            //always check if there are any extension definitions or valuesets references by this profile (in case they have been externally changed)
                            if (profileDiffSvc.updateExtensionsAndVSInProfile($scope.currentIG,SD)) {
 
@@ -1394,14 +1391,9 @@ console.log(SD)
 
                                        $scope.selectIG($scope.currentIG);       //re-draw the lists
                                        //need to reset these as they are cleared in the select routine...
-
-
                                        $scope.selectedItemType = type;
                                        $scope.selectedItem = item;
-                                       //$scope.selectItem(item,type);    //todo. hmmm this is calling itself!
                                        setupProfile(SD)
-
-
                                    }, function (err) {
                                        alert('Error updating IG '+angular.toJson(err))
 
@@ -1410,22 +1402,17 @@ console.log(SD)
                                        //need to reset these as they are cleared in the select routine...
                                        $scope.selectedItemType = type;
                                        $scope.selectedItem = item;
-                                       //$scope.selectItem(item,type);    //todo. hmmm this is calling itself!
                                        setupProfile(SD)
 
                                    }
                                );
 
-
-
-
                            } else {
                                setupProfile(SD)
                            }
 
-
-
-
+                           */
+                           setupProfile(SD)
                            addToHistory('profile',SD)
 
                        }, function (err) {

@@ -30,6 +30,37 @@
 
         <uib-tabset>
 
+            <uib-tab heading="Expand" disabled="tab.noexpand" select="setHelpTopic('expand')">
+                <br />
+                <div class="row">
+                    <div class="col-md-2">Filter</div>
+                    <div class="col-md-8"><input type="text" placeholder="Enter filter text (or leave empty for all)"
+                                                 ng-model="results.filter" class="form-control"/> </div>
+                    <div class="col-md-2"><button class="btn btn-primary" ng-click="expand()">Expand</button> </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-offset-2 col-md-8">{{query}}</div>
+
+                </div>
+
+                <br />
+
+
+                <table ng-show="data.length > 0" class="table table-bordered table-condensed">
+                    <tr><th>Code</th><th>System</th><th>Display</th></tr>
+                    <tr ng-repeat="concept in data | orderBy : 'display'">
+
+                        <td><div class="clickable" ng-click="selectConcept(concept)">{{concept.code}}</div></td>
+                        <td>{{concept.system}}</td>
+                        <td>{{concept.display}}</td>
+                    </tr>
+                </table>
+
+
+            </uib-tab>
+
+
             <uib-tab heading="Description" active="tab.tabDescription" select="setHelpTopic('description')">
                 <br />
                 <div class="row">
@@ -66,7 +97,7 @@
                 </div>
 
             </uib-tab>
-
+<!--
             <uib-tab  select="setHelpTopic('define')">
                 <uib-tab-heading>CodeSystem <span ng-show="selectedvs.define">({{selectedvs.define.concept.length}})</span></uib-tab-heading>
                 <br />
@@ -83,6 +114,7 @@
 
 
             </uib-tab>
+            -->
 
             <uib-tab heading="Compose"  select="setHelpTopic('compose')">
                 <br />
@@ -179,35 +211,6 @@
                 <pre>{{selectedvsJSON}}</pre>
             </uib-tab>
 
-            <uib-tab heading="Expand" disabled="tab.noexpand" select="setHelpTopic('expand')">
-                <br />
-                <div class="row">
-                    <div class="col-md-2">Filter</div>
-                    <div class="col-md-8"><input type="text" placeholder="Enter filter text (or leave empty for all)"
-                                                 ng-model="results.filter" class="form-control"/> </div>
-                    <div class="col-md-2"><button class="btn btn-primary" ng-click="expand()">Expand</button> </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-offset-2 col-md-8">{{query}}</div>
-
-                </div>
-
-                <br />
-
-
-                <table ng-show="data.length > 0" class="table table-bordered table-condensed">
-                    <tr><th>Code</th><th>System</th><th>Display</th></tr>
-                    <tr ng-repeat="concept in data | orderBy : 'display'">
-
-                        <td><div class="clickable" ng-click="selectConcept(concept)">{{concept.code}}</div></td>
-                        <td>{{concept.system}}</td>
-                        <td>{{concept.display}}</td>
-                    </tr>
-                </table>
-
-
-            </uib-tab>
 
         </uib-tabset>
     </div>
