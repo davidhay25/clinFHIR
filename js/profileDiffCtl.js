@@ -19,6 +19,7 @@ angular.module("sampleApp")
             //retrieve the current user from the browser cache if present. Note that this includes the authHeader...
             if ($localStorage.currentUser) {
                 $scope.currentUser = $localStorage.currentUser;
+                $scope.canEdit = true;
             }
 
             $scope.history = [];        //
@@ -67,9 +68,6 @@ angular.module("sampleApp")
 
                 return msg
             };
-
-
-
 
             $scope.toggleSingleState = function(){
                 $scope.singleStateZoom = ! $scope.singleStateZoom
@@ -179,7 +177,6 @@ angular.module("sampleApp")
 
             };
 
-
             $scope.saveNewCommentDEPDontDelete = function (comment,relatedToId,inx) {
                 profileDiffSvc.saveNewComment(comment,$scope.selectedSD.url,$scope.selectedEDInLM,$scope.user.email,relatedToId).then(
                     function(displayObj) {
@@ -261,7 +258,7 @@ angular.module("sampleApp")
 
             $scope.saveIG = function(hideAlert){
 
-                SaveDataToServer.saveResource($scope.currentIG).then(
+                SaveDataToServer.saveResource($scope.currentIG,null,$scope.currentUser).then(
                     function (data) {
                         if (! hideAlert) {
                             alert('IG updated');
@@ -778,7 +775,14 @@ angular.module("sampleApp")
                             } else {
                                 //add the profile to the IG - then find any extensions and add them as well. todo - should we check whether they exist first?
 
-                                var res = {sourceReference:{reference:url}};
+                                var res = {sourceReference:{reference:url},acronym:itemType.type};
+
+                                res.extension = [];
+                                var extension = {url:'http://clinfhir.com/StructureDefinition/igEntryType'}
+                                extension.valueCode = itemType.type;
+                                res.extension.push(extension);
+
+
                                 //todo - should likely move to an extension for R3
                                 if (appConfigSvc.getCurrentConformanceServer().version ==2) {
                                     res.purpose = itemType.type
@@ -797,7 +801,7 @@ angular.module("sampleApp")
 
                             $scope.dirty = true;
 
-                            SaveDataToServer.saveResource($scope.currentIG).then(
+                            SaveDataToServer.saveResource($scope.currentIG,null,$scope.currentUser).then(
                                 function (data) {
 
                                 }, function (err) {
@@ -1425,7 +1429,7 @@ console.log(SD)
                            if (profileDiffSvc.updateExtensionsAndVSInProfile($scope.currentIG,SD)) {
 
 
-                               SaveDataToServer.saveResource($scope.currentIG).then(
+                               SaveDataToServer.saveResource($scope.currentIG,null,$scope.currentUser).then(
                                    function (data) {
 
                                        $scope.selectIG($scope.currentIG);       //re-draw the lists
