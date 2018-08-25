@@ -116,22 +116,7 @@ app.all('/proxy/*',function(req,res){
 
 */
 
-/*
-//--- proxies for Grahames server. Could generalize this using - eg - headers,but will need to update allservices making $http calls...
-app.all('/grahamv3/*',function(req,res){
-    //console.log(req.url)
-    req.url = req.url.replace('grahamv3/','')
-    proxy.web(req, res, { target: 'http://fhir3.healthintersections.com.au/open/' });
-});
 
-app.all('/grahamv2/*',function(req,res){
-    //console.log(req.url)
-    req.url = req.url.replace('grahamv2/','')
-    proxy.web(req, res, { target: 'http://fhir2.healthintersections.com.au/open/' });
-});
-
-
-*/
 
 
 //this is used for the re-direct from simplifier
@@ -203,7 +188,7 @@ app.post('/stats/login',function(req,res){
     var body = '';
     req.on('data', function (data) {
         body += data;
-        console.log("Partial body: " + body);
+
     });
 
     req.on('end', function () {
@@ -243,10 +228,6 @@ app.get('/stats/summary',function(req,res){
         query.date = {$gte : parseInt(min),$lte:parseInt(max)}
     }
 
-
-
-
-
     db.collection("accessAudit").find({$query: query}).toArray(function(err,doc){
         if (err) {
             res.status(500);
@@ -258,8 +239,6 @@ app.get('/stats/summary',function(req,res){
             //console.log(doc.length)
 
             doc.forEach(function(d,inx){
-
-                //console.log(d.date,rtn.lastAccess.date)
 
                 if (d.data) {
                     if (d.data.module) {
