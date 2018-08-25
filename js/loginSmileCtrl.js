@@ -14,7 +14,7 @@ angular.module("sampleApp")
 
                 var b64 = btoa(username + ":" + password);
                 var config = {headers:{}}
-                config.headers.authorization = 'Basic '+ b64
+                config.headers.authorization = 'Basic '+ b64;
 
                 var url = appConfigSvc.getCurrentConformanceServer().url + "ImplementationGuide/testIG";  //just a random query...
                 var IG = {resourceType:'ImplementationGuide',id:'testIG',url:'http://clinfhir.com/ImplementationGuide/testIG',status:'draft'};
@@ -31,7 +31,7 @@ angular.module("sampleApp")
 
                     },
                     function (err) {
-                        var msg = "Sorry, this is not a valid user - or one that cannot write Implementation Guides to the database. Try again.";
+                        var msg = "Sorry, this is not a valid user - or one that cannot write Implementation Guides to the database.";
                         modalService.showModal({},{bodyText:msg})
                     }
                 ).finally(
