@@ -116,7 +116,6 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                                 searchString = searchString.substr(0,searchString.length-1)
                             }
 
-
                             //console.log(searchString);
                             $scope.query=searchString;
 
@@ -138,9 +137,6 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                                     console.log('Error: '+err);
                                     alert("Unable to retrieve Profile, sorry..." + angular.toJson(err,true))
                                 });
-
-
-
 
 
 

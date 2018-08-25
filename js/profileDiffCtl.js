@@ -782,7 +782,6 @@ angular.module("sampleApp")
                                 extension.valueCode = itemType.type;
                                 res.extension.push(extension);
 
-
                                 //todo - should likely move to an extension for R3
                                 if (appConfigSvc.getCurrentConformanceServer().version ==2) {
                                     res.purpose = itemType.type
