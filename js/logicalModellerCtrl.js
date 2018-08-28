@@ -1351,9 +1351,17 @@ angular.module("sampleApp")
             $scope.showVSBrowser = function(vs) {
                 $scope.showVSBrowserDialog.open(vs);        //the open method defined in the directive...
             };
+
+
+            //load the valueset browser. Pass in the url of the vs - the expectation is that the terminology server
+            //can use the $expand?url=  syntax
             $scope.viewVS = function(uri) {
                 //var url = appConfigSvc
+                $scope.showVSBrowserDialog.open(null,uri);
 
+
+
+/*
                 GetDataFromServer.getValueSet(uri).then(
                     function(vs) {
 
@@ -1365,6 +1373,8 @@ angular.module("sampleApp")
                 ).finally (function(){
                     $scope.showWaiting = false;
                 });
+
+                */
             };
 
             
@@ -1378,13 +1388,13 @@ angular.module("sampleApp")
             //reset the graph to have the parent as the root
             $scope.resetGraph = function(){
                 createGraphOfProfile();
-            }
+            };
             
             //called when the graph tab is selected or de-selected
             $scope.graphTabSelected = function(selected) {
 
                 $scope.input.graphTabIsSelected = selected;
-            }
+            };
 
             var createGraphOfProfile = function(options) {
                 delete $scope.graphData;
@@ -1446,8 +1456,11 @@ angular.module("sampleApp")
 
 
 
-            //this is the event when the profileGraph tab is chosen. Should really move this to a separate controller...
+            //this is the event when the profileGraph tab is chosen.
             $scope.redrawProfileGraph = function() {
+
+
+                //createGraphOfProfile();
 
 
                 $scope.input.graphTabIsSelected = true;
@@ -1455,7 +1468,7 @@ angular.module("sampleApp")
                 $timeout(function(){
                     $scope.profileNetwork.fit();
 
-                },1000            )
+                },1000)
 
 
             };
@@ -2790,7 +2803,8 @@ angular.module("sampleApp")
 
                 $scope.SD = logicalModelSvc.makeSD($scope,ar);
 
-                createGraphOfProfile();     //update the graph display...
+
+               //temp disable createGraphOfProfile();     //update the graph display...
                 checkDifferences($scope.SD)
 
             };

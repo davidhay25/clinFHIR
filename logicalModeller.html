@@ -769,7 +769,16 @@
 
 
                         <uib-tab heading="Mind Map"  select="redrawProfileGraph()"  deselect="input.graphTabIsSelected = false">
+                            <div>
+                                <div class="pull-right clickable"  ng-click="resetGraph()">Refresh Graph (this can take a few seconds)</div>
+                            </div>
+
+                            <br/>
+
+
+
                             <div id="mmLogicalModel"></div>
+
                         </uib-tab>
 <!--
                         <uib-tab heading="Resources Graph" select="redrawChart()">

@@ -1,5 +1,5 @@
 //directile to render a UI for a profile.
-angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataFromServer,$uibModal  ) {
+angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataFromServer,$uibModal,$http,appConfigSvc  ) {
     return {
         restrict: 'E',
         scope: {
@@ -13,31 +13,22 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
         template: '<div></div>',
 
         link : function ($scope, element, attrs) {
-/*
-            $scope.tabCtrl = {};
 
-            //default is to show the search tab unless overwritten...
-
-            if ($scope.hidesearch) {
-                $scope.tabCtrl.showsearch = false;
-                //console.log('hide')
-            } else {
-                $scope.tabCtrl.showsearch = true;
-            }
-            if ($scope.showcreate) {
-                $scope.tabCtrl.showcreate = true;
-            }
-*/
-
-            //console.log($scope.vs)
             $scope.internalControl = $scope.trigger || {};
 
-            $scope.internalControl.open = function(x) {
+
+            //invoke the vs browser. first parameter is a complete valueset, the second a url.
+            //clinFHIR is changing to expect that a terminology server will support the /$expand?url=...  syntax at the moment
+            $scope.internalControl.open = function(x,url) {
                 if (x) {
                     $scope.selectedvs = angular.copy(x);
                     if ($scope.selectedvs.text) {
                         $scope.selectedvs.text.div = "Narrative removed";
                     }
+                }
+
+                if (url) {
+                    $scope.vsUrl = url;
                 }
 
                 showModal();
@@ -50,11 +41,12 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
 
                     templateUrl: 'resourceBuilder/vsBrowser.html',
                     size:'lg',
-                    controller: function($scope,selectedvs,GetDataFromServer,$filter,$localStorage) {
+                    controller: function($scope,selectedvs,GetDataFromServer,$filter,$localStorage,vsUrl) {
 
 
                         $scope.config = $localStorage.config;
                         $scope.newVS = {canSave : false};
+                        $scope.vsUrl = vsUrl
 
                         $scope.selectConcept = function(concept) {
                             $scope.$close(concept)
@@ -63,31 +55,11 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                         //when the close button is clicked
                         $scope.close = function(){
                             $scope.$dismiss();
-
                         };
-
-                       // $scope.selectVSFn = selectVSFn;
 
                         $scope.tab = {};
                         $scope.tab.tabDescription = true;
 
-                        /*
-                        //when the directive is being used to select a valueset...
-                       // $scope.showVSSelectButton = false;
-                        $scope.selectNewVS = function() {
-                            $scope.selectVSFn()($scope.selectedvs);
-                            $scope.$close();
-                        };
-
-                        //if there is no vs passed in, then disable the expand tab...
-                        if (!selectedvs) {
-                            $scope.tab.noexpand = true;
-                            $scope.tab.tabSearch = true;
-                            $scope.tab.tabDescription = false;
-                        }
-
-                        $scope.searchParams = {};
-                        */
 
                         $scope.results = {};
                         //$scope.results.filter = "diab"; //<< temp
@@ -100,7 +72,7 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                             $scope.helpTopic = topic;
                         };
 
-
+/*
                         $scope.searchForVSDEP = function() {
 
                             var searchString = "ValueSet?";
@@ -142,8 +114,8 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
 
                         };
 
-
-
+*/
+/*
                         $scope.showVSDEP = function(ev,entry) {
 
                             //this is the callback when a user selects the valueset
@@ -170,11 +142,71 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                             ev.preventDefault();
                         };
 
-
+*/
                         //when the user is performing an expansion...
                         $scope.data = [];
 
                         $scope.expand = function() {
+
+                            //if a url was passed in, then use the $expand?url= syntax
+
+                            if ($scope.vsUrl) {
+                                var url = "";
+                                var filter = $scope.results.filter;
+                                //todo - this is a hack to support snomed refset expansion on the NZ server
+                                if ($scope.vsUrl.indexOf('http://snomed.info')> -1) {
+                                    //this is expanding off a snomed refset. see https://www.hl7.org/fhir/snomedct.html
+                                    //assume the syntax is http://snomed.info/ValueSet/{refsetid}
+                                    var ar = $scope.vsUrl.split('/');
+                                    url = "http://its.patientsfirst.org.nz/RestService.svc/Terminz/ValueSet/$expand?url="
+                                    url += "http://snomed.info/sct?fhir_vs=refset/" + ar[ar.length -1]
+
+
+                                } else {
+                                    url = appConfigSvc.getCurrentTerminologyServer().url;
+                                    url += "ValueSet/$expand?url="+$scope.vsUrl;
+
+
+                                }
+
+                                if (filter) {
+                                    url += "&filter="+filter;
+                                }
+
+
+
+
+
+                                $scope.query = url;
+                                $http.get(url).then(
+                                    function(data){
+                                        var expandedVs = data.data;
+                                        if (expandedVs.expansion) {
+                                            $scope.data = expandedVs.expansion.contains;
+                                            if (! expandedVs.expansion.contains) {
+                                                alert('The expansion worked fine, but no expanded data was returned')
+                                            }
+                                        } else {
+                                            alert('Sorry, no expansion occurred');
+                                        }
+                                    },
+                                    function(err) {
+                                        $scope.showWaiting = false;
+                                        console.log(err);
+                                        if (err.statusCode == 422) {
+                                            alert('There were too many concepts to expand - use a filter.');
+                                        } else {
+                                            alert('Sorry, there was an error performing the expansion: '+angular.toJson(err));
+                                        }
+                                    }
+                                )
+
+                                return;
+                            }
+
+
+
+
 
                             if (!$scope.selectedvs) {
                                 alert('You must select a ValueSet before the expansion will work!');
@@ -255,6 +287,9 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                     resolve : {
                         selectedvs : function() {
                             return $scope.selectedvs;
+                        },
+                        vsUrl : function() {
+                            return $scope.vsUrl;
                         }
                     }
                 }).result.then(function(selectedConcept){
