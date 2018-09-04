@@ -19,9 +19,9 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
 
             //invoke the vs browser. first parameter is a complete valueset, the second a url.
             //clinFHIR is changing to expect that a terminology server will support the /$expand?url=...  syntax at the moment
-            $scope.internalControl.open = function(x,url) {
-                if (x) {
-                    $scope.selectedvs = angular.copy(x);
+            $scope.internalControl.open = function(vs,url) {
+                if (vs) {
+                    $scope.selectedvs = angular.copy(vs);
                     if ($scope.selectedvs.text) {
                         $scope.selectedvs.text.div = "Narrative removed";
                     }
@@ -295,7 +295,7 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                 }).result.then(function(selectedConcept){
                         //User clicked save
 
-                    //if there's no handler for selectinf a concept, then catch but ignore the exception...
+                    //if there's no handler for selecting a concept, then catch but ignore the exception...
                     try {
                         $scope.conceptSelected()(selectedConcept)
                     } catch (ex){
