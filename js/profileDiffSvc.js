@@ -439,7 +439,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                             //otherwise we create a new one...
                             var exampleTypeNodeId = 'et' + new Date().getTime() + Math.random()*1000;
                             var exampleTypeNode = {id:exampleTypeNodeId,parent:parentId,text:resourceType,state: {opened: false}};
-                            exampleTypeNode.data = {nodeType : 'artifact',art:art};        //todo ??? is this correct
+                            exampleTypeNode.data = {nodeType : 'artifactType',art:art};        //todo ??? is this correct
                             treeData.push(exampleTypeNode);
                             parentId = exampleTypeNodeId;
                             exampleTypes[resourceType] = exampleTypeNodeId;

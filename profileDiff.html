@@ -425,7 +425,18 @@
                                     <pre>{{exampleResource | json}}</pre>
                                 </div>
                                 <div class="col-sm-6 col-md-6">
-                                    <pre>{{exampleResourceXml}}</pre>
+                                    <uib-tabset>
+                                        <uib-tab heading="Text">
+                                            <p ng-bind-html="exampleResource.text.div"></p>
+                                        </uib-tab>
+                                        <uib-tab heading="Xml">
+                                            <pre>{{exampleResourceXml}}</pre>
+                                        </uib-tab>
+                                    </uib-tabset>
+
+
+
+
                                 </div>
                             </div>
                         </div>

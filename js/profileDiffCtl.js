@@ -1218,6 +1218,9 @@ angular.module("sampleApp")
 
                             $scope.artifacts[purpose].push(item2)
                         })
+
+
+
                     }
                 });
 
@@ -1233,6 +1236,22 @@ angular.module("sampleApp")
                                 return -1
                             }
                         })
+                    }
+                })
+
+                //now sort the examples by the base resource type. Assume a relative reference. todo - may need to change this...
+                $scope.artifacts.example.sort(function (a,b) {
+                    if (a.url && b.url) {
+                        var arA = a.url.split('/');
+                        var arB = b.url.split('/');
+
+                        if (arA[0] > arB[0]) {
+                            return 1
+                        } else {
+                            return -1
+                        }
+                    } else {
+                        return 0
                     }
                 })
             }
