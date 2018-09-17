@@ -1734,7 +1734,6 @@ console.log(summary);
 
             var isAuthoredByClinFhir = false;
 
-
             var ext = this.getSingleExtensionValue(profile, appConfigSvc.config().standardExtensionUrl.clinFHIRCreated)
             if (ext && ext.valueBoolean) {
                 isAuthoredByClinFhir = ext.valueBoolean

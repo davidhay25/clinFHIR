@@ -384,6 +384,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
         generatePageTree : function(IG,artifacts,typeDescription){
             var treeData = [];
+            var exampleTypes = {};      //the types for examples..
 
             if (IG.page) {
                 addPage(treeData,IG.page,{id:'#'});
@@ -406,22 +407,52 @@ angular.module("sampleApp").service('profileDiffSvc',
             angular.forEach(artifacts,function(value,key) {
 
 
+                //this is each categpry of artifact - LM, ED, example etc...
                 var id = 't' + new Date().getTime() + Math.random()*1000
                 var artifactTypeRoot = {id:id,parent:artifactsRoot.id,text:typeDescription[key]+'s',state: {opened: false}};
                 artifactTypeRoot.data = {nodeType:'artifactType',artifactType:key};
                 treeData.push(artifactTypeRoot);
 
+                //now the vakues within each artifcat category...
                 value.forEach(function (art) {
                     art.purpose=key;
 
                     var id = 't' + new Date().getTime() + Math.random()*1000;
-
                     var text = art.name;// || "No name"
 
                     if (! text) {
                         text = $filter('getLogicalID')(art.url)
                     }
-                    var artifactNode = {id:id,parent:artifactTypeRoot.id,text:text,state: {opened: true}};
+
+                    //for everything except examples, the artifact hangs off the category node. examples hang off a resourcetype node
+                    var parentId = artifactTypeRoot.id;
+
+
+                    //if this is an example, then will be adding the artifact off a node that is the resource type
+                    if (typeDescription[key] == 'Example' && art.url) {
+                        var ar =art.url.split('/');     //assume that reference url is relative... todo may need to check this...
+                        var resourceType = ar[0];
+                        if (exampleTypes[resourceType]) {
+                            //if we've already had one of these resource types as an example, then a new type parent has been added
+                            parentId = exampleTypes[resourceType]
+                        } else {
+                            //otherwise we create a new one...
+                            var exampleTypeNodeId = 'et' + new Date().getTime() + Math.random()*1000;
+                            var exampleTypeNode = {id:exampleTypeNodeId,parent:parentId,text:resourceType,state: {opened: false}};
+                            exampleTypeNode.data = {nodeType : 'artifact',art:art};        //todo ??? is this correct
+                            treeData.push(exampleTypeNode);
+                            parentId = exampleTypeNodeId;
+                            exampleTypes[resourceType] = exampleTypeNodeId;
+
+
+                        }
+                        console.log(resourceType)
+
+
+                       // console.log('ex '+ text, art)
+                    }
+
+                    var artifactNode = {id:id,parent:parentId,text:text,state: {opened: true}};
                     artifactNode.data = {nodeType : 'artifact',art:art};
                     treeData.push(artifactNode);
                 })

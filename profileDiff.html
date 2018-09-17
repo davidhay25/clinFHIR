@@ -78,6 +78,7 @@
     <script src="js/uploadCtrl.js"></script>
 
     <script src="js/loginSmileCtrl.js"></script>
+    <script src="js/loginCtrl.js"></script>
 
 
     <script>
@@ -186,7 +187,7 @@
                     <span style="font-size:1.8em; cursor: pointer"uib-popover="Click to log in"
                           popover-placement="left"
                           popover-trigger="'mouseenter'">
-                        <div ng-click="loginSmile()">
+                        <div ng-click="login()">
                             <i class="glyphicon glyphicon-log-in"></i>
                         </div>
                     </span>
@@ -194,7 +195,7 @@
 
                 <div class="nav navbar-form navbar-right" ng-show="currentUser">
                     <span style="font-size:1.8em; cursor: pointer"
-                          uib-popover="Current user: {{currentUser.name}}. Click to log out"
+                          uib-popover="Current user: {{currentUser.displayName}}. Click to log out"
                           popover-placement="left"
                           popover-trigger="'mouseenter'">
 
@@ -615,7 +616,9 @@
                         </div>
 
                         <div ng-show="selectedItemType == 'profile'">
-                            <h4>Profiled resource</h4>
+
+                            <h4 ng-show="selectedSD.kind=='resource'">Profiled Resource</h4>
+                            <h4 ng-show="selectedSD.kind=='complex-type'">Profiled Datatype</h4>
 
                             <div class="pull-right" ng-hide="input.displayMode">
                                 <em>Use the 'Full Display' checkbox in the Navbar at the top to view other tabs</em>
@@ -654,6 +657,7 @@
                                                         </span>
                                                             </td></tr>
                                                         <tr><td>Name</td><td>{{selectedElementInLM.name}}</td></tr>
+                                                        <tr><td>Title</td><td>{{selectedElementInLM.title}}</td></tr>
                                                         <tr><td>Short</td><td>{{selectedElementInLM.short}}</td></tr>
                                                         <tr><td>Definition</td><td>{{selectedElementInLM.definition}}</td></tr>
                                                         <tr><td>Requirements</td><td>{{selectedElementInLM.requirements}}</td></tr>
@@ -1059,7 +1063,6 @@
 
                                 </uib-tab>
 
-
                                 <uib-tab heading="Examples" ng-show="input.displayMode">
                                     <div class="row">
                                         <div class="col-sm-3 col-md-3">
@@ -1082,7 +1085,6 @@
                                     </div>
                                 </uib-tab>
 
-
                                 <uib-tab heading="Required" ng-show="input.displayMode">
 
                                     <p class="banner"><em>Elements marked as 'Required' (min = 1)</em></p>
@@ -1104,7 +1106,6 @@
                                         </div>
                                     </div>
                                 </uib-tab>
-
 
                                 <uib-tab heading="Mappings" ng-show="input.displayMode">
                                     <br/>

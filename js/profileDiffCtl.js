@@ -80,21 +80,50 @@ angular.module("sampleApp")
                 }
             };
 
+
+
             //-----------  login stuff....
-/*
+
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
             //todo - not using this ATM
             firebase.auth().onAuthStateChanged(function(user) {
 
                 if (user) {
                     $scope.user = user;
-                    $scope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
 
+                    $scope.currentUser = user;
+
+                    $scope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+                    $scope.canEdit = true;
+                    console.log(user)
                 }
             });
 
-*/
+
+            $scope.login=function(){
+                //note that after login, the authstatechanged event fires...
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop.
+                    keyboard: false,       //same as above.
+                    templateUrl: 'modalTemplates/login.html',
+                    controller: 'loginCtrl'
+                })
+            };
+
+            $scope.logout=function(){
+                firebase.auth().signOut().then(function() {
+                    delete $rootScope.userProfile;
+                    modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
+                    $scope.canEdit = false;
+
+                }, function(error) {
+                    modalService.showModal({}, {bodyText: 'Sorry, there was an error logging out - please try again'})
+                });
+
+            };
+
             //using the smile login store.
+            //Not using this at the moment - need to think this through a bit more...
             $scope.loginSmile = function(){
                 $uibModal.open({
                     templateUrl: 'modalTemplates/loginSmile.html',
@@ -238,13 +267,15 @@ angular.module("sampleApp")
                             if (Utilities.isAuthoredByClinFhir(ig)) {
                                 ig.name = ig.name || ig.description;
                                 $scope.listOfIG.push(ig)
+                            } else {
+                                console.log("IG '"+ig.id + "' is not authored by clinFHIR")
                             }
                         });
                         $scope.listOfIG.sort(function(a,b){
                             if (a.name > b.name) {
-                                return -1
-                            } else {
                                 return 1
+                            } else {
+                                return -1
                             }
                         })
                     }
@@ -429,6 +460,10 @@ angular.module("sampleApp")
             // ===================  page links ===============
             $scope.page = {}
             $scope.pageDirty = false;       //true if changes have been made...
+
+            function clearPageTree (){
+                $('#pagesTreeView').jstree('destroy');
+            }
             function drawPageTree() {
                 $('#pagesTreeView').jstree('destroy');
                 $('#pagesTreeView').jstree(
@@ -1073,6 +1108,8 @@ angular.module("sampleApp")
             $scope.selectIG = function(IG){
                 var extDef = appConfigSvc.config().standardExtensionUrl.resourceTypeUrl;
                 clearRightPane();
+                clearPageTree();
+
                 $scope.currentIG=IG;     //the List the holds this collection
 
                 //now pull out the various artifacts into an easy to use object

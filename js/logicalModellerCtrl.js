@@ -1212,6 +1212,7 @@ angular.module("sampleApp")
                 $scope.viewReferencedModel(url)
             };
 
+
             //when an element is a reference to another model...
             $scope.viewReferencedModel = function(modelUrl) {
                 $uibModal.open({
