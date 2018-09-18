@@ -813,51 +813,6 @@ angular.module("sampleApp")
                         currentBinding: function () {          //the default config
                             return {};
                         }
-                    },
-                    controllerDEP: function ($scope, appConfigSvc, GetDataFromServer) {
-                        //this code is all from vsFinderCtrl controller - for some reason I can't reference it from here...
-                        //and newExtensionDefinition
-                        $scope.input = {};
-
-                        var config = appConfigSvc.config();
-                        $scope.termServer = config.servers.terminology;
-
-                        $scope.input.arStrength = ['required', 'extensible', 'preferred', 'example'];
-                        $scope.input.strength = 'preferred'; //currentBinding.strength;
-
-
-                        $scope.select = function () {
-
-                            $scope.$close({
-                                vs: $scope.input.vspreview,
-                                strength: $scope.input.strength
-                            });
-                        };
-
-                        //find matching ValueSets based on name
-                        $scope.search = function (filter) {
-                            $scope.showWaiting = true;
-                            delete $scope.message;
-                            delete $scope.searchResultBundle;
-
-                            var url = $scope.termServer + "ValueSet?name=" + filter;
-                            $scope.showWaiting = true;
-
-                            GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
-                                //GetDataFromServer.adHocFHIRQuery(url).then(
-                                function (data) {
-                                    $scope.searchResultBundle = data.data;
-                                    if (!data.data || !data.data.entry || data.data.entry.length == 0) {
-                                        $scope.message = 'No matching ValueSets found'
-                                    }
-                                },
-                                function (err) {
-                                    alert(angular.toJson(err))
-                                }
-                            ).finally(function () {
-                                $scope.showWaiting = false;
-                            })
-                        };
                     }
                 }).result.then(
                     function (vo) {

@@ -112,6 +112,13 @@
                     <hr/>
                 </div>
 
+
+                <div uib-alert class="alert-warning" ng-show="error">
+                    {{error}}
+                    <br/>
+                    <p>The binding will still occur, but the app won't be able to display the values from the ValueSet</p>
+                </div>
+
                 <!-- Only show this if the valueSet was retrieved from the Terminology server-->
                 <uib-tabset ng-show="input.vspreview && input.vspreview.id">
                     <uib-tab heading="Json">

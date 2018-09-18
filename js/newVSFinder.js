@@ -26,6 +26,7 @@ angular.module("sampleApp").controller('vsFinderCtrl',
 
 
         $scope.addUrlDirectly = function(url) {
+            delete $scope.error;
             delete $scope.expansion;
             delete $scope.input.filter;
             delete $scope.queryError;
@@ -42,19 +43,21 @@ angular.module("sampleApp").controller('vsFinderCtrl',
                     }
                 },function(err) {
                     $scope.input.vspreview = {resourceType: 'ValueSet', url: url};
+                    $scope.error = err;
                     console.log(err)
             })
 
 
 
 
-        }
+        };
 
         //find matching ValueSets based on name
         $scope.search = function(filter){
             $scope.showWaiting = true;
             delete $scope.message;
             delete $scope.searchResultBundle;
+            delete $scope.error;
             
             var url = $scope.termServer+"ValueSet?name:contains="+filter;
             $scope.showWaiting = true;
