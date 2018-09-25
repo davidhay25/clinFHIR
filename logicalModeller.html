@@ -193,6 +193,7 @@
     <script src="js/dataTypeCtrl.js"></script>
     <script src="js/profileDiffSvc.js"></script>
     <script src="js/projectSvc.js"></script>
+    <script src="js/lmFilterCtrl.js"></script>
 
     <!--
     <script src="js/newFormCtrl.js"></script>
@@ -883,6 +884,13 @@
                     </uib-tabset>
                 </uib-tab>
 
+
+                <uib-tab heading="Filter">
+                    <div ng-controller="lmFilterCtrl">
+                        <ng-include src="'/includes/lmFilter.html'"></ng-include>
+                    </div>
+
+                </uib-tab>
 
 
             </uib-tabset>

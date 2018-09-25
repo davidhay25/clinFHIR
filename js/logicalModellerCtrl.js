@@ -1478,6 +1478,7 @@ angular.module("sampleApp")
 
                 //to allow the details of a selected node in the table to be displayed...
                 $scope.selectedNode = findNodeWithPath(path);
+               // console.log($scope.selectedNode)
 
             };
 
