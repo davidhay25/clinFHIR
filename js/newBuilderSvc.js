@@ -14,7 +14,7 @@ angular.module("sampleApp")
             if (this.substr(0,s.length === s )) {
                 return true;
             }
-        }
+        };
 
         return {
 

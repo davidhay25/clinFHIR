@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2018-07-25a';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2018-07-25c';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -157,8 +157,9 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'FHIR Registry',version:3,url:"https://registry-api.fhir.org/open/",everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Ontoserver (terminology)",url:"https://ontoserver.csiro.au/stu3-latest/",version:3,everythingOperation:true,isTerminology:true});
 
-        defaultConfig.allKnownServers.push({name:'hofSmile',version:2,url:"https://hof.smilecdr.com:8000/",smart:true});
+        defaultConfig.allKnownServers.push({name:'hofSmile',version:3,url:"https://hof.smilecdr.com:8000/",smart:true});
 
+        defaultConfig.allKnownServers.push({name:'eip',version:3,url:"http://eip-fhir.experimental.aimsplatform.com/hapi-fhir/baseDstu3/"});
 
 
 
