@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2018-07-25c';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2018-09-31';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -108,7 +108,8 @@ angular.module("sampleApp")
 
         defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://test.fhir.org/r2/",version:2,everythingOperation:true,isTerminology:true});
         defaultConfig.allKnownServers.push({name:"Grahames STU3 server",url:"http://test.fhir.org/r3/",version:3,everythingOperation:true,isTerminology:true});
-        
+        defaultConfig.allKnownServers.push({name:"Grahames R4 server",url:"http://test.fhir.org/r4/",version:4,everythingOperation:true,isTerminology:true});
+
 
         defaultConfig.allKnownServers.push({name:"Public HAPI STU2 server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2,everythingOperation:true});
 
