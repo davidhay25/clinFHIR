@@ -473,6 +473,13 @@
                                  <button ng-hide="isInPalette || isDirty" class="btn btn-link" ng-click="addToPalette()">Add to Palette</button>
                                  <button ng-show="isInPalette" class="btn btn-link" ng-click="removeFromPalette()">Remove from Palette</button>
 
+
+                                 <a class="btn btn-link pull-right" download="{{downloadSDJsonName}}"
+                                    href="{{downloadSDJsonContent}}" title="{{downloadSDJsonName}}" >
+                                    Download
+                                </a>
+
+
                             </span>
 
                         </div>

@@ -2563,7 +2563,11 @@ console.log($scope.currentSD)
             }
 
             //load all the logical models. This won't scale...
+
+
+
             logicalModelSvc.loadAllModels(appConfigSvc.getCurrentConformanceServer().url).then(
+
                 function (bundle) {
                     $scope.allLogicalModelsBundle = bundle
                     $scope.bundleLogicalModels = angular.copy($scope.allLogicalModelsBundle)

@@ -2861,7 +2861,7 @@ angular.module("sampleApp")
                             } else {
                                 return -1
                             }
-                        })
+                        });
                         deferred.resolve(bundleModels);
 
 

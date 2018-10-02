@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2018-09-31';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2018-09-31a';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -146,14 +146,12 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'HSPC-14',version:3,url:"https://api3.hspconsortium.org/fhirconnect14/open/",everythingOperation:true});
         defaultConfig.allKnownServers.push({name:'HSPC Careplan',version:3,url:"https://api-stu3.hspconsortium.org/careplantest/open/",everythingOperation:true});
 
-
         defaultConfig.allKnownServers.push({name:'Patients First R3',version:3,url:"http://its.patientsfirst.org.nz/RestService.svc/Terminz/"});
 
         defaultConfig.allKnownServers.push({name:'HSPC Synthea',version:3,url:"https://api3.hspconsortium.org/HSPCplusSynthea/open/"});
 
         defaultConfig.allKnownServers.push({name:'NHS-UK STU-2',version:2,url:"https://fhir.nhs.uk/"});
         defaultConfig.allKnownServers.push({name:'HL7-UK STU-2',version:2,url:"https://fhir-test.hl7.org.uk/"});
-
 
         defaultConfig.allKnownServers.push({name:'FHIR Registry',version:3,url:"https://registry-api.fhir.org/open/",everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Ontoserver (terminology)",url:"https://ontoserver.csiro.au/stu3-latest/",version:3,everythingOperation:true,isTerminology:true});
@@ -187,6 +185,17 @@ angular.module("sampleApp")
                 this.setServerType('conformance',"http://fhirtest.uhn.ca/baseDstu3/");
             },
             addServer : function(svr,isTerminology) {
+
+                //see if this url is already in use
+
+                for (var i=0; i < defaultConfig.allKnownServers.length; i++){
+                    if (defaultConfig.allKnownServers[i].url == svr.url) {
+                        alert('There is already a server with this url: '+angular.toJson(defaultConfig.allKnownServers[i]))
+                        return;
+                    }
+                }
+
+
                 $localStorage.config.allKnownServers.push(svr)
                 if (isTerminology) {
                     $localStorage.config.terminologyServers.push(svr);

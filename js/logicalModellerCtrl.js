@@ -2798,12 +2798,20 @@ angular.module("sampleApp")
             //have this as a single function so we can extract scope properties rather than passing the whole scope across...
             makeSD = function() {
 
-                //return;
+
 
                 //sorts the tree array in parent/child order
                 var ar = logicalModelSvc.reOrderTree($scope.treeData);
 
                 $scope.SD = logicalModelSvc.makeSD($scope,ar);
+
+
+
+                //var download = logicalModelSvc.makeMappingDownload(SD);
+                $scope.downloadSDJsonContent = window.URL.createObjectURL(new Blob([angular.toJson($scope.SD)],
+                    {type: "text/text"}));
+                $scope.downloadSDJsonName = $scope.treeData[0].data.header.name + '.json';
+
 
 
                //temp disable createGraphOfProfile();     //update the graph display...
