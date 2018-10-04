@@ -237,10 +237,12 @@
 -->
     <uib-tab heading="Resource references graph"  select="fitGraphInContainer('mynetwork')">
         <br/>
+
         <div class="row">
             <div class="col-md-8 col-sm-8">
                 <div id="mynetwork"></div>
                 <div><em>Note that the Patient is not displayed in this graph.</em></div>
+                <div class="pull-right clickable" ng-click="showPatientInGraph()">Show Patient</div>
             </div>
             <div class="col-md-4 col-sm-4">
                 <uib-tabset>
@@ -638,6 +640,7 @@
 
 </uib-tabset>
 
+<!--
 <div class="row">
     <div class="col-sm-11 col-md-11">
         <div id="3d-graph"></div>
@@ -646,3 +649,4 @@
 
     </div>
 </div>
+-->

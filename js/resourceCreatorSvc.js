@@ -2986,11 +2986,13 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             //return data;
 
         },
-        createGraphOfInstances: function (allResources) {
+        createGraphOfInstances: function (allResources,includePatient) {
             var that = this;
             var deferred = $q.defer();
             //console.log(allResources)
 
+
+            //includePatient = true;  //<<<<<<<<<< temp
 
             //create the array for the graph
             var arNodes = [];
@@ -3013,9 +3015,15 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 }
 
                 //don't include the patient - it completely skews the graph...
-                if (resource.resourceType !== 'Patient') {
+                if (includePatient) {
                     arNodes.push(node)
+                } else {
+                    if (resource.resourceType !== 'Patient') {
+                        arNodes.push(node)
+                    }
                 }
+
+
 
             });
 

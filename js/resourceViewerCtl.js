@@ -91,6 +91,11 @@ angular.module("sampleApp")
             //----------------------
 
 
+            $scope.showPatientInGraph = function(){
+                renderPatientDetails($scope.allResources,true)
+            }
+
+
             //find all the questionnaires (authored by CF) on the conformance server...
             questionnaireSvc.findQ().then(
                 function(bundle) {
@@ -471,7 +476,7 @@ angular.module("sampleApp")
 
 
 
-            function renderPatientDetails(allResources) {
+            function renderPatientDetails(allResources,showPatient) {
                 $scope.hasVitals = false;
                 delete $scope.vitalsTable;
                 delete $scope.outcome.selectedResource;
@@ -546,7 +551,7 @@ angular.module("sampleApp")
 
 
                 //create and draw the graph representation...
-                var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList);
+                var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList,showPatient);
                 $scope.graphData = graphData;
                 var container = document.getElementById('mynetwork');
                 if (container) {
@@ -598,7 +603,7 @@ angular.module("sampleApp")
 
                 $scope.resourceSelected();  //when called with no parameters will clear the display
 
-               $scope.generate3dgraph(graphData);
+              // $scope.generate3dgraph(graphData);
 
 
             }
