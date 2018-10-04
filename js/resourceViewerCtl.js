@@ -445,8 +445,6 @@ angular.module("sampleApp")
 
                             $scope.waiting = true;
 
-                           //GetDataFromServer.adHocFHIRQueryFollowingPaging(appConfigSvc.getCurrentPatient().id).then(
-
                              supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
                                 //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
 
@@ -454,6 +452,12 @@ angular.module("sampleApp")
 
                                     if (data.DocumentReference) {
                                         $scope.documentReferenceList = data.DocumentReference.entry;
+                                    }
+
+                                    //need to make sure the patient resource is in the allPatients object (set in renderPatientDetails)
+                                    if (! data.Patient) {
+                                        var patientBundle = {resourceType:'Bundle',total:1,entry:[{resource:resource}]}
+                                        data.Patient = patientBundle
                                     }
 
                                     renderPatientDetails(data)

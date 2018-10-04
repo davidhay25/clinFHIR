@@ -2967,8 +2967,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     arNodes.push(node);
                     arEdges.push({from: objNodes[arParent.join('.')], to: inx})
                 }
-
-
             });
 
             var nodes = new vis.DataSet(arNodes);
