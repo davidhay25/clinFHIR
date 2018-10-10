@@ -6,7 +6,7 @@ angular.module("sampleApp")
 
             $scope.saveFilteredModel = function() {
                 alert('This will save the filtered model as another logical model');
-            }
+            };
 
             $scope.localTableSelect = function(path) {
 
