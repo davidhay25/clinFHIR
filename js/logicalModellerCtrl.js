@@ -24,7 +24,7 @@ angular.module("sampleApp")
 
 
 
-            console.log($http.defaults.headers.common);
+           // console.log($http.defaults.headers.common);
 
             //-----------  login stuff....
 
@@ -52,7 +52,7 @@ angular.module("sampleApp")
             var hash = $location.hash();
             if (hash) {
 
-                console.log(hash)
+
 
                 //if there's a hash starting with $$$ then this has been started from the project, with an authenticted user...
                 if (hash && hash.substr(0,3) == '$$$') {
@@ -61,7 +61,7 @@ angular.module("sampleApp")
                     //the access token is set in the local storage. Think this is OK, though may need a synchronous call to get from the server...
                     var at = $localStorage.cfAt;
                     if (at) {
-                        console.log(at)
+
                         $http.defaults.headers.common.Authorization = 'Bearer '+ at;
                     }
 
@@ -70,11 +70,11 @@ angular.module("sampleApp")
                     logicalModelSvc.setCurrentUser(user);
                     securitySvc.setCurrentUser(user);
 
-                    console.log(user);
+                   // console.log(user);
 
                     //is there a selected model? if so, load it
                     var model = $localStorage.cfModel;
-                    console.log(model)
+                    //console.log(model)
                     //return the practitioner resource that corresponds to the current user (the service will create if absent)
                     GetDataFromServer.getPractitionerByLogin(user).then(
                         function (practitioner) {
@@ -88,7 +88,7 @@ angular.module("sampleApp")
                 } else {
                     //this
                     var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
-                    console.log(sc)
+                   // console.log(sc)
                     sc.$loaded().then(
                         function(){
 
@@ -317,14 +317,16 @@ angular.module("sampleApp")
 
             //when an item is selected in the form (populator)
             $scope.selectItemFromForm = function(child) {
-                console.log(child)
+
                 $scope.selectedNode = findNodeWithPath(child.id);
-                console.log($scope.selectedNode);
+
 
             };
 
             $scope.generateIG = function() {
                 alert('Not yet enabled, sorry...')
+                return;
+
 
                 logicalModelSvc.makeIG($scope.treeData).then(
                     function(IG) {
@@ -1209,7 +1211,7 @@ angular.module("sampleApp")
                                 $('#vmTreeView').jstree(
                                     {'core': {'multiple': false, 'data': vmTreeData, 'themes': {name: 'proton', responsive: true}}}
                                 ).on('select_node.jstree', function (e, data) {
-                                    console.log(data);
+                                   // console.log(data);
 
                                     if (data.node && data.node.data) {
                                         $scope.selectedED = data.node.data.ed;
@@ -1273,7 +1275,7 @@ angular.module("sampleApp")
 
                 var url= $scope.conformanceServer.url + "StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
 
-                console.log(url)
+
 
                 GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
                     function(data) {
@@ -1310,12 +1312,12 @@ angular.module("sampleApp")
             };
 
 
-            console.log($scope.initialLM)
+
             if (!$scope.initialLM) {
                // $scope.hideLMSelector();
                 loadAllModels();
             } else {
-                console.log($scope.initialLM)
+
                 GetDataFromServer.findConformanceResourceByUri($scope.initialLM).then(
                     function(resource){
                         $scope.selectModel({resource:resource})
@@ -1459,7 +1461,7 @@ angular.module("sampleApp")
 
                 //to allow the details of a selected node in the table to be displayed...
                 $scope.selectedNode = findNodeWithPath(path);
-               // console.log($scope.selectedNode)
+
 
             };
 
@@ -1576,31 +1578,12 @@ angular.module("sampleApp")
 
 
                                 }
-                                /*
-                                console.log(/^[A-Za-z0-9\-\.]{1,64}$/.test(name))
 
-
-                               // console.log(name.match(/[A-Za-z0-9\-\.]/))
-
-                                var re = new RegExp("^[A-Za-z0-9\\-\\.]{1,64}$");
-                                if (re.test(name)) {
-                                    console.log(name + " Valid");
-                                } else {
-                                    console.log(name + " Invalid");
-                                }
-
-
-
-                                if (name && name.indexOf(' ')>-1) {
-                                    modalService.showModal({},{bodyText:"The name cannot contain spaces"})
-                                    return;
-                                }
-*/
                                 var url = $scope.conformanceServer.url + "StructureDefinition/"+name;
                                 $scope.showWaiting = true;
                                 $scope.canSave = false;
                                 projectSvc.smartGet(url).then(
-                                //GetDataFromServer.adHocFHIRQuery(url).then(
+
                                     function(data){
 
                                         if (Utilities.isAuthoredByClinFhir(data.data)) {
@@ -1848,16 +1831,20 @@ angular.module("sampleApp")
                 delete $scope.commentTask;      //the task to comment on this model...
                 delete $scope.input.mdComment;  //the comment
                 delete $scope.taskOutputs;      //the outputs of the task (Communication resource currently)
-                //delete $scope.Q;                //the Questionnaire
+                delete $scope.isFilteredModel;  //true if this model is filtered...
+
                 $scope.canSaveModel = true;     //allow edits to the model to be saved
 
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource);
 
+                //is this a filtered model? (if so, we will hide the filter tab)
+                if (entry.resource.url.indexOf('--')> -1) {
+                    $scope.isFilteredModel = true;
+                }
+
+
                 lmFilterSvc.findChildModels(entry,$scope.bundleModels); //sets the list of any child (filtered) models...
-
-
-                console.log(lmFilterSvc.childModelEntries)
 
                 $scope.relativeMappings = logicalModelSvc.getRelativeMappings($scope.treeData); //items with both v2 & fhir mappings
 
@@ -1890,7 +1877,7 @@ angular.module("sampleApp")
                     function(vo) {
                         $scope.treeData.shortCut = vo;  //safe to put here as it will be ignored...
                     }
-                )
+                );
 
 
 
@@ -1901,9 +1888,8 @@ angular.module("sampleApp")
                 $scope.modelReferences = vo.references;
                 $scope.uniqueModelsList = vo.lstNodes;
 
-
                 var b = logicalModelSvc.makeDocBundleWithComposition(entry.resource)
-                console.log(b)
+
                 $scope.docBundle = b;
 
                 var allNodesObj = vo.nodes;
@@ -1950,7 +1936,6 @@ angular.module("sampleApp")
                 });
 
 
-                //-----  2017-09-17  whole section above was commented out
 
 
                 $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
@@ -1969,14 +1954,15 @@ angular.module("sampleApp")
                 checkInPalette();
                 updateInstanceGraph();
                 $scope.hidePatientFlag = false;
-                $scope.$broadcast('modelSelected',entry.resource.id)
+
+                $scope.$broadcast('modelSelected',entry)
 
             }
 
             //make a bundle that has a resource instance for all the referenced resource types in the model
             function updateInstanceGraph() {
                 return;     //disable this...
-                console.log('update instance graph')
+
                 $scope.hidePatientFlag = false;
 
                 logicalModelSvc.makeScenario($scope.treeData).then(
@@ -1994,14 +1980,14 @@ angular.module("sampleApp")
                             $('#docTreeView').jstree(
                                 {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
                             ).on('select_node.jstree', function (e, data) {
-                                console.log(data && data.node.data)
+
                                 //delete $scope.currentResource;      //todo - there's a setResource() in the service too...
                                 //delete $scope.currentPath;
                                 delete $scope.selectedNode;
                                 if (data.node) {
                                     var resource = data.node.data.resource;
 
-                                    console.log(resource);
+
                                     var path = resource.path;
 
                                     $scope.selectedED = logicalModelSvc.getEDForPath($scope.SD,{data: {path:path}})
@@ -2016,19 +2002,6 @@ angular.module("sampleApp")
 
 
 
-                            /*.on('select_node.jstree', function (e, data) {
-                            console.log(data)
-                            delete $scope.currentResource;      //todo - there's a setResource() in the service too...
-                            delete $scope.currentPath;
-                            if (data.node.data){
-                                $scope.selectResource({resource:data.node.data.resource});
-                                $scope.currentPath = data.node.data.path;
-
-                            }
-                            $scope.$digest()
-                        })
-
-*/
 
 
 
@@ -2045,7 +2018,6 @@ angular.module("sampleApp")
 
 
 
-                console.log('generate graph',bundle)
 
                 var vo = builderSvc.makeGraph(bundle,resource,hideMe,true);
 
@@ -2375,7 +2347,7 @@ angular.module("sampleApp")
                                         //if checkMore is still true, then we didn't find a reference with a profile.
                                         checkPath = node.parent;    //move up the hierarchy. Will eventually stop at the root (parent = '#')
 
-                                        console.log(checkPath)
+
 
                                     }  else {
                                         checkMore = false;      //stop if there is a node without a type
@@ -2438,7 +2410,7 @@ angular.module("sampleApp")
                                     $scope.selectedNode = item;
                                 }
                             })
-                            updateInstanceGraph();
+                            //updateInstanceGraph();
 
                         } else {
                             //this is a new node
@@ -2457,6 +2429,7 @@ angular.module("sampleApp")
                                 state: {opened: true}
                             };
                             newNode.data = angular.copy(result);
+
                             newNode.data.ed = {mapping:result.mappingFromED};   //nov29 - also for the graph...
 
 
@@ -2546,8 +2519,7 @@ angular.module("sampleApp")
 */
                         setAllMappings();   //update any mappings
                         updateInstanceGraph()
-                        //$scope.Q = logicalModelSvc.makeQ($scope.treeData);  //update the Questionnaire
-                        //console.log( $scope.Q)
+
 
                         //set the path of the element based on the name - and the parent names up the hierarchy..
                         //>>>>>>>> This is an important function! Note the use of pathSegment...

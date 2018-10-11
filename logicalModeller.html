@@ -891,7 +891,7 @@
                 </uib-tab>
 
 
-                <uib-tab heading="Filter">
+                <uib-tab heading="Filter" ng-hide="isFilteredModel">
                     <div ng-controller="lmFilterCtrl">
                         <ng-include src="'/includes/lmFilter.html'"></ng-include>
                     </div>

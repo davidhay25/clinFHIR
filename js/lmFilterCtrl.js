@@ -8,24 +8,43 @@ angular.module("sampleApp")
 
             $scope.isDirty = false;
 
-            //event fired when a model is selected in the list
-            $scope.$on('modelSelected',function(){
-
+            //event fired when a model is selected in the main list
+            $scope.$on('modelSelected',function(event,entry){
+/*
+                console.log(entry)
+                if (entry.resource) {
+                    var url = entry.resource.url;
+                    if (url.indexOf('--')> -1) {
+                        //this is a filtered model that has been direc
+                    }
+                }
+*/
                 updateListOfChildren();
                 console.log($scope.children)
                 $scope.input.childEntry = "";
 
                 delete $scope.currentChildEntry;
-                $scope.selected = {}
+                $scope.selected = {};
                 delete $scope.selectedNode;
 
+            });
 
-            })
+            $scope.log = [];
+            $scope.errors = false;
+            function myLogger(err,msg,obj){
+                if (err) {
+                    $scope.errors = true;
+                }
+                $scope.log.push({err:err, msg:msg, obj:obj});
+                console.log(msg,obj)
+            }
 
+            //updates the list of children for display
             function updateListOfChildren() {
+                $scope.children = []
                 var children = lmFilterSvc.childModelEntries;
                 if (children.length > 0) {
-                    $scope.children = []
+
                     children.forEach(function(entry){
                         var id = entry.resource.id;
                         $scope.children.push({display:id,entry:entry})
@@ -34,7 +53,7 @@ angular.module("sampleApp")
             }
 
             $scope.childSelected = function(vo) {
-                //console.log(vo)
+
                 if (! vo) {
                     return;
                 }
@@ -44,7 +63,7 @@ angular.module("sampleApp")
                         closeButtonText: "No, I've changed my mind",
                         actionButtonText: 'Yes, they can be discarded',
                         headerText: 'Confirm loading of new model',
-                        bodyText: 'Recent changes to the current model will be lost. Are you sure you want to load another'
+                        bodyText: 'Recent changes to the current filtered model will be lost. Are you sure you want to load another'
                     };
 
                     modalService.showModal({}, modalOptions).then(
@@ -58,8 +77,11 @@ angular.module("sampleApp")
 
 
                 function loadChild() {
+                    delete $scope.errors;
+                    //delete $scope.isFilteredModel = false
                     lmFilterSvc.setCurrentChildEntry(vo.entry)
                     $scope.currentChildEntry = vo.entry;        //so can hide/show apporpriately
+
 
                     //now set the paths that are currently selected
                     $scope.selected = {};
@@ -82,10 +104,8 @@ angular.module("sampleApp")
                     createFilteredTreeData()
                     drawFilterTree(filteredTreeData);
                     $scope.isDirty = false;
+                    delete $scope.selectedNode;
                 }
-
-
-
 
             };
 
@@ -132,7 +152,7 @@ angular.module("sampleApp")
                         updateListOfChildren();
                         $scope.selected = {}
 
-                        createFilteredTreeData()
+                        createFilteredTreeData()    //filteredTreeData is a global variable...  todo fix
                         drawFilterTree(filteredTreeData);
                         $scope.isDirty = false;
 
@@ -158,6 +178,7 @@ angular.module("sampleApp")
 
 
 
+            //select a node from the filter table
             $scope.localTableSelect = function(path) {
 
                 $scope.selectNodeFromTable(path);
@@ -190,34 +211,34 @@ angular.module("sampleApp")
                                 }
                             }
 
-                            createFilteredTreeData()
-                            drawFilterTree(filteredTreeData);
+                          //  createFilteredTreeData()
+                           // drawFilterTree(filteredTreeData);
 
                             $scope.isDirty = true;
 
                         } catch (ex) {
                             //shouldn't really happen...
-                            console.log('element with no path')
+                            console.log('element with no path', item)
                         }
 
                     });
 
+                    createFilteredTreeData()
+                    drawFilterTree(filteredTreeData);
                     return
                 }
 
                 //todo ensure that all parents of selected elements are included
 
 
-
-
-
-                //todo go through every selected element, and ensure that the elements are selected. Brute force - ? needs optimization
-                angular.forEach($scope.selected,function(v,k){
+                //todo go through every selected element, and ensure that the parent elements are selected. Brute force - ? needs optimization
+                try {
+                    angular.forEach($scope.selected,function(v,k){
                     if (v) {
                         var item = $scope.treeData[k]
-                        console.log(item)
+                        //console.log(item)
                         var path = item.data.ed.path;
-                        console.log(path)
+                        //console.log(path)
 
                         var ar = path.split('.');
 
@@ -237,19 +258,13 @@ angular.module("sampleApp")
                                 }
                             }
                         }
-
-                        //this selects all the children. It's simpler than the parents...
-
-
-
-
-
                     }
                 });
 
+                } catch (ex) {
+                    myLogger(true,'error setting parent elements')
+                }
                 //now check children. We only do this for the element just selected
-
-
                 $scope.treeData.forEach(function (item) {
                     try {
                         var p = item.data.ed.path;
@@ -261,10 +276,11 @@ angular.module("sampleApp")
                         }
                     } catch (ex) {
                         //shouldn't really happen...
-                        console.log('element with no path')
+                        myLogger(true,'element with no path',item)
+                      //  console.log('element with no path')
                     }
 
-                })
+                });
 
 
 
@@ -304,7 +320,8 @@ angular.module("sampleApp")
                     }
                 } catch (ex) {
                     //shouldn't ever happen...
-                    console.log(ex)
+                    //console.log(ex)
+                    myLogger(true,ex.message,item)
                     return 0
                 }
 
@@ -313,6 +330,8 @@ angular.module("sampleApp")
 
 
             function drawFilterTree(treeData) {
+
+                console.log(treeData)
 
                 //not sure about this...  logicalModelSvc.resetTreeState($scope.treeData);    //reset the opened/closed status to the most recent saved...
 
