@@ -4,7 +4,7 @@ angular.module("sampleApp")
     .controller('logicalModellerCtrl',
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
                   GetDataFromServer,$firebaseObject,$firebaseArray,$location,igSvc,SaveDataToServer,$window,RenderProfileSvc,
-                  $q,Utilities, securitySvc,$filter,builderSvc,questionnaireSvc,$localStorage,projectSvc) {
+                  $q,Utilities, securitySvc,$filter,builderSvc,questionnaireSvc,$localStorage,projectSvc,lmFilterSvc) {
             $scope.input = {};
 
             $scope.firebase = firebase;
@@ -314,12 +314,6 @@ angular.module("sampleApp")
                     $scope.allResourceTypes = data;
                 });
 
-            $scope.makeScenarioDEP = function() {
-
-
-
-                //$scope.showFindProfileDialog.open();
-            };
 
             //when an item is selected in the form (populator)
             $scope.selectItemFromForm = function(child) {
@@ -678,11 +672,6 @@ angular.module("sampleApp")
 
             }
 
-            //generate a sample document from this SD
-            $scope.generateSampleDEP = function(){
-                var treeObject = $('#lmTreeView').jstree().get_json();    //creates a hierarchical view of the resource
-                $scope.sample = logicalModelSvc.generateSample(treeObject);
-            };
 
             $scope.showCommentEntryDEP = function(comment,index) {
 
@@ -1135,10 +1124,6 @@ angular.module("sampleApp")
                 }
             };
 
-
-
-
-
             $scope.createTaskDEP = function(){
                 //create a new task for this practitioner against this model.
                 SaveDataToServer.addTaskForPractitioner($scope.Practitioner,{focus:$scope.currentType}).then(
@@ -1171,7 +1156,6 @@ angular.module("sampleApp")
                 )
             };
 
-
             //find a shortcut for a model. Note there may be more that one (as could have the same id on different servers
             function findShortCutForModel(id) {
                 var deferred = $q.defer();
@@ -1202,9 +1186,6 @@ angular.module("sampleApp")
                 return deferred.promise;
 
             }
-
-
-
 
             //display a complex datatype
             $scope.viewDataType = function(dt) {
@@ -1872,7 +1853,12 @@ angular.module("sampleApp")
 
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource);
-                //$scope.Q = questionnaireSvc.makeQ($scope.treeData);
+
+                lmFilterSvc.findChildModels(entry,$scope.bundleModels); //sets the list of any child (filtered) models...
+
+
+                console.log(lmFilterSvc.childModelEntries)
+
                 $scope.relativeMappings = logicalModelSvc.getRelativeMappings($scope.treeData); //items with both v2 & fhir mappings
 
 
@@ -1881,6 +1867,8 @@ angular.module("sampleApp")
 
                 logicalModelSvc.openTopLevelOnly($scope.treeData);
 
+
+                /* - is this used???
                 //temp little routine to generate a mapping file -
                 var map = []
                 $scope.relativeMappings.forEach(function(m) {
@@ -1888,6 +1876,7 @@ angular.module("sampleApp")
                     map.push({description: m.branch.data.path,v2:m.sourceMap,fhir:m.targetMap})
                 })
 
+                */
 
 
                 var baseType = $scope.treeData[0].data.header.baseType
@@ -1902,6 +1891,7 @@ angular.module("sampleApp")
                         $scope.treeData.shortCut = vo;  //safe to put here as it will be ignored...
                     }
                 )
+
 
 
                 var vo = logicalModelSvc.makeReferencedMapsModel(entry.resource,$scope.bundleModels);   //todo - may not be the right place...
@@ -1979,6 +1969,7 @@ angular.module("sampleApp")
                 checkInPalette();
                 updateInstanceGraph();
                 $scope.hidePatientFlag = false;
+                $scope.$broadcast('modelSelected',entry.resource.id)
 
             }
 

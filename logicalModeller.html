@@ -186,14 +186,13 @@
     <script src="directive/lmPopulator/lmPop.js"></script>
 
 
-    <!-- for Q-->
-
     <script src="js/addPropertyInBuilderCtrl.js"></script>
     <script src="js/sbHistorySvc.js"></script>
     <script src="js/dataTypeCtrl.js"></script>
     <script src="js/profileDiffSvc.js"></script>
     <script src="js/projectSvc.js"></script>
     <script src="js/lmFilterCtrl.js"></script>
+    <script src="js/lmFilterSvc.js"></script>
 
     <!--
     <script src="js/newFormCtrl.js"></script>
@@ -927,7 +926,12 @@
                                 <!--<tr><td width="20%">Name</td><td>{{selectedNode.data.name}}</td></tr> -->
                                 <tr><td width="20%">Model path</td><td>{{selectedNode.data.path}}</td></tr>
                                 <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
-                                <tr><td>Description</td><td>{{selectedNode.data.description}}</td></tr>
+                                <tr><td>Description</td>
+                                    <td>
+                                        {{selectedNode.data.description}}
+
+                                    </td>
+                                </tr>
 
                                 <tr ng-show="selectedNode.data.mappingFromED.length > 0"><td>Mappings</td><td>
                                     <table class="table table-condensed table-bordered"  style="margin-bottom: 2px">

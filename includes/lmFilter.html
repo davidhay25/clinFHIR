@@ -1,18 +1,23 @@
 <div>
     <br/>
     <div class="row">
-        <div class="col-sm-4 col-md-4">
-            <select class="form-control">
-                <option>Referral</option>
-                <option>Summary</option>
-                <option>Some other Scenario</option>
-            </select>
-        </div>
+
         <div class="col-sm-4 col-md-4">
 
+            <select class="form-control" ng-model = input.childEntry
+                    ng-change = "childSelected(input.childEntry)"
+                ng-options="child.display for child in children">
+                <option value=""></option>
+            </select>
+
+
+        </div>
+
+        <div class="col-sm-4 col-md-4">
+            <i class="glyphicon glyphicon-plus-sign" ng-click="addNewChild()"></i>
         </div>
         <div class="col-sm-4 col-md-4">
-            <button class="btn btn-primary" ng-click="saveFilteredModel()">Update filtered model</button>
+            <button class="btn btn-primary" ng-show="currentChildEntry" ng-click="saveFilteredModel()">Update filtered model</button>
         </div>
     </div>
     <hr/>
@@ -20,7 +25,7 @@
     <div class="row">
         <div class="col-sm-4 col-md-4">
             <div class="designerScroll">
-                <table class="table table-bordered table-condensed">
+                <table class="table table-bordered table-condensed" ng-show="currentChildEntry">
 
                     <tr ng-repeat="row in treeData">
                         <td>

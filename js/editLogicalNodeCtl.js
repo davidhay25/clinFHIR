@@ -496,16 +496,12 @@ angular.module("sampleApp")
                 $scope.canSave = true;
 
 
-
-
                 if (! $scope.input.name) {
                     //if (! $scope.input.name || $scope.input.name.indexOf('0') > -1) { ????? why look for 0 ???
                     $scope.canSave = false;
 
                     modalService.showModal({},{bodyText:"The name cannot be blank. Try again."})
                 }
-
-
 
                 if ($scope.input.name && $scope.input.name.indexOf(" ") > -1) {
                     $scope.canSave = false;
@@ -676,7 +672,7 @@ angular.module("sampleApp")
                     var vo = {};
                     vo.name = $scope.input.name;
                     vo.short = $scope.input.short;
-                    vo.description = $scope.input.description || 'definition';
+                    vo.description = $scope.input.description || 'No description';
                     vo.comments = $scope.input.comments;
                     vo.mapping = $scope.input.mapping;
                     vo.pathSegment = $scope.input.pathSegment;
