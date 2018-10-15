@@ -31,6 +31,7 @@ angular.module("sampleApp")
 
             $scope.log = [];
             $scope.errors = false;
+            $scope.issues = [];             //model level issues - added or removed elements...
             function myLogger(err,msg,obj){
                 if (err) {
                     $scope.errors = true;
@@ -78,6 +79,7 @@ angular.module("sampleApp")
 
                 function loadChild() {
                     delete $scope.errors;
+                    $scope.issues = [];
                     //delete $scope.isFilteredModel = false
                     lmFilterSvc.setCurrentChildEntry(vo.entry)
                     $scope.currentChildEntry = vo.entry;        //so can hide/show apporpriately
@@ -86,6 +88,7 @@ angular.module("sampleApp")
                     //now set the paths that are currently selected
                     $scope.selected = {};
                     var resource = vo.entry.resource;
+                    $scope.input.description = resource.description;
                     resource.snapshot.element.forEach(function (ed){
 
                         //need to change the paths to those of the parent...
@@ -98,6 +101,9 @@ angular.module("sampleApp")
                         var pos = findIndexOfPath(path1)
                         if (pos > -1) {
                             $scope.selected[pos] = true;
+                        } else {
+                            //this path is not in the uber model - ie it was likely added after
+                            $scope.issues.push({display:'The path ' + path1 + 'is not in the parent model'})
                         }
                     });
 
@@ -110,7 +116,8 @@ angular.module("sampleApp")
             };
 
             $scope.saveFilteredModel = function() {
-                lmFilterSvc.updateChild(filteredTreeData).then(
+
+                lmFilterSvc.updateChild(filteredTreeData,$scope.input.description).then(
                     function(data) {
                         alert('Filtered model saved')
                         $scope.isDirty = false;
@@ -182,6 +189,9 @@ angular.module("sampleApp")
             $scope.localTableSelect = function(path) {
 
                 $scope.selectNodeFromTable(path);
+
+
+
 
                 //this is to avoid an error when $digest is called when selecting the node
                 $timeout(function(){

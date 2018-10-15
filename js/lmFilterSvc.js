@@ -14,13 +14,13 @@ angular.module("sampleApp")
             setCurrentChildEntry : function(entry){
                 currentChildEntry = entry;
             },
-            updateChild(filteredTreeData) {
+            updateChild(filteredTreeData,description) {
                 //update the child entry from the currently selected paths...
-                //todo ? need to validate model first???
 
                 // console.log(filteredTreeData);
 
                 var resource = currentChildEntry.resource;
+                resource.description = description;
                 resource.snapshot.element.length = 0;
                 filteredTreeData.forEach(function(item){
                     var ed = item.data.ed;      //the ElementDefinition
@@ -55,7 +55,7 @@ angular.module("sampleApp")
                 newEntry.resource.id = base + name;
                 newEntry.resource.url = base + name;
                 newEntry.resource.name = base + name;
-                newEntry.resource.status = 'active'
+                newEntry.resource.status = 'active';
                 newEntry.resource.kind = 'logical';
                 //newEntry.resource.keyword = [{ "system": "http://fhir.hl7.org.nz/NamingSystem/application",
                  //   "code": "clinfhir"}]

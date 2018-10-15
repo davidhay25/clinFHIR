@@ -276,7 +276,8 @@
                     <div class="navbar-text clickable" ng-hide="LMDetailVisible" ng-click="showDetailSelector()">Show Detail</div>
 
                     <form ng-show="isDirty" class="navbar-form">
-                        <button ng-show="isDirty && canSaveModel" class="btn btn-success pull-right" ng-click="saveModel()">Save model</button>
+                        <button ng-show="isDirty && canSaveModel"
+                                class="btn btn-success pull-right" ng-click="saveModel()">Save model</button>
                     </form>
 
                     <form ng-show="SD && !loadedFromBookmark && !treeData.shortCut.shortCut" class="navbar-form">
@@ -904,10 +905,7 @@
         <div ng-class="rightPaneClass">
 
             <div ng-show="treeData.length > 0">
-
-
                 <uib-tabset>
-
                     <uib-tab heading="Element">
 
                         <div ng-show="selectedNode">
@@ -919,9 +917,7 @@
 
                                 </div>
                             </div>
-
-
-
+                            
                             <table class="table table-bordered">
                                 <!--<tr><td width="20%">Name</td><td>{{selectedNode.data.name}}</td></tr> -->
                                 <tr><td width="20%">Model path</td><td>{{selectedNode.data.path}}</td></tr>

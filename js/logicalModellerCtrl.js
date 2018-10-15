@@ -602,11 +602,11 @@ angular.module("sampleApp")
                         $scope.saveProfile = function() {
                             SaveDataToServer.saveResource($scope.realProfile,appConfigSvc.getCurrentConformanceServer().url).then(
                                 function(data) {
-                                    $scope.message = "Save successful."
+                                    $scope.message = "Save successful.";
                                     $scope.oo = data.data;
                                     delete $scope.oo.text;
                                 },function (err) {
-                                    $scope.message = "Save failed."
+                                    $scope.message = "Save failed.";
                                     $scope.oo = data.data;
                                     delete $scope.oo.text;
                                 }
@@ -1462,6 +1462,13 @@ angular.module("sampleApp")
                 //to allow the details of a selected node in the table to be displayed...
                 $scope.selectedNode = findNodeWithPath(path);
 
+                //added 2018-10-12
+                if ($scope.selectedNode && $scope.selectedNode.data) {
+                    $scope.selectedED = $scope.selectedNode.data.ed;
+                }
+
+
+
 
             };
 
@@ -1745,11 +1752,7 @@ angular.module("sampleApp")
             $scope.dataTypes.push({code: 'XCN',description: 'v2 XCN Extended name + ID for Persons'});
             $scope.dataTypes.push({code: 'XPN',description: 'v2 XPN Extended Person Name'});
             $scope.dataTypes.push({code: 'XTN',description: 'v2 XTN Extended Telecommunications Number'});
-
-
 */
-
-
 
             $scope.saveModel = function() {
                 
@@ -1768,6 +1771,8 @@ angular.module("sampleApp")
                     }
 
                 });
+
+
 
 
                 //smartPut will attempt to refresh the access token if the endpoint is protected by SMART
@@ -2312,16 +2317,6 @@ angular.module("sampleApp")
                             var baseType = null
                             //is there a base type set for this whole model?
                             //changed so a parent reference will set the baseType
-
-
-                            //if ($scope.treeData && $scope.treeData[0] && $scope.treeData[0].data &&  $scope.treeData[0].data.header)  {
-                             //   baseType = $scope.treeData[0].data.header.baseType;
-                          //  }
-
-                            //if not, then is the parent a reference to a resource?
-                           // if (!baseType) {
-
-                                //look
                                 var checkPath = parentPath;
                                 var checkMore = true, cnt = 0;
                                 while (checkPath != '#' && checkMore && cnt < 10) {
@@ -2353,26 +2348,7 @@ angular.module("sampleApp")
                                         checkMore = false;      //stop if there is a node without a type
                                     }
                                 }
-                                /*
-                                var node = findNodeWithPath(parentPath)
 
-                                if (node && node.data && node.data.type) {
-                                //if (node && node.data && node.data.ed && node.data.ed.type) {
-                                    node.data.type.forEach(function (typ) {
-                                        if (typ.code == 'Reference') {
-                                            //r2/r3 difference
-                                            var profile = typ.targetProfile
-                                            if (!profile && typ.profile) {
-                                                profile = typ.profile[0]
-                                            }
-                                            if (profile) {
-                                                baseType  = $filter('referenceType')(profile);
-                                            }
-
-                                        }
-                                    })
-                                }
-                                */
 
                            // }
                             // if no reference in the hierarchy, see if the model was created with a base resource
@@ -2403,6 +2379,10 @@ angular.module("sampleApp")
                                     var clone = angular.copy(result)
                                     delete clone.editNode;
                                     item.data = clone;
+
+                                    //2018-10-12 - needed when editing a node from a filtered view
+                                    item.data.ed = {path:item.id}
+
                                     item.text = clone.name;
 
                                     item.data.pathSegment = clone.name;     //this will re-write the path in setPath() below....
@@ -2416,8 +2396,6 @@ angular.module("sampleApp")
                             //this is a new node
                             var parentId = $scope.selectedNode.id;
 
-
-                            //var newId = 't' + new Date().getTime();
                             //nov29 2017 - set the id to the path so the graph will work...
                             var newId = $scope.selectedNode.data.path + '.'+ result.name;
 
@@ -2430,8 +2408,10 @@ angular.module("sampleApp")
                             };
                             newNode.data = angular.copy(result);
 
-                            newNode.data.ed = {mapping:result.mappingFromED};   //nov29 - also for the graph...
 
+                            newNode.data.ed = {mapping:result.mappingFromED};   //nov29 - also for the graph...
+                            //added 2018-10-12 for filtered view...
+                            newNode.data.ed.path = newId;
 
                             $scope.treeData.push(newNode);
 
@@ -2914,6 +2894,9 @@ angular.module("sampleApp")
             function drawTree() {
 
                 //not sure about this...  logicalModelSvc.resetTreeState($scope.treeData);    //reset the opened/closed status to the most recent saved...
+
+                //console.log($scope.treeData)
+
 
                 $('#lmTreeView').jstree('destroy');
                 $('#lmTreeView').jstree(
