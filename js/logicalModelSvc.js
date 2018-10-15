@@ -2297,6 +2297,7 @@ angular.module("sampleApp")
                 var simpleExtensionUrl = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl;
                 var discriminatorUrl = appConfigSvc.config().standardExtensionUrl.discriminatorUrl;
                 var conceptMapUrl = appConfigSvc.config().standardExtensionUrl.conceptMapUrl;
+                var editorUrl = appConfigSvc.config().standardExtensionUrl.editor;
                 var cntExtension = 0;
                 var arTree = [];
                 if (sd && sd.snapshot && sd.snapshot.element) {
@@ -2356,10 +2357,15 @@ angular.module("sampleApp")
                             item.data.header.extension = sd.extension;     //save any resource level extensions...
 
                             //see if this model has a base type
-                            var ext1 = Utilities.getSingleExtensionValue(sd, baseTypeForModel)
+                            var ext1 = Utilities.getSingleExtensionValue(sd, baseTypeForModel);
                             if (ext1 && ext1.valueString) {
                                 item.data.header.baseType = ext1.valueString;
+                            }
 
+                            //see if this model has an editor
+                            var ext1 = Utilities.getSingleExtensionValue(sd, editorUrl);
+                            if (ext1 && ext1.valueString) {
+                                item.data.header.editor = ext1.valueString;
                             }
 
                             //note that mapping node is different in the SD and the ED - but in the same place in the treeData
@@ -2557,7 +2563,7 @@ angular.module("sampleApp")
 
 
                 //create a StructureDefinition from the treeData //todo - don't pass in scope...
-                var header = treeData[0].data.header || {};     //the first node has the header informatiion
+                var header = treeData[0].data.header || {};     //the first node has the header information
 
                 var mappingCommentUrl = appConfigSvc.config().standardExtensionUrl.edMappingComment;
                 var mapToModelExtensionUrl = appConfigSvc.config().standardExtensionUrl.mapToModel;
@@ -2565,6 +2571,7 @@ angular.module("sampleApp")
                 var simpleExtensionUrl = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl;
                 var discriminatorUrl = appConfigSvc.config().standardExtensionUrl.discriminatorUrl;
                 var conceptMapUrl = appConfigSvc.config().standardExtensionUrl.conceptMapUrl;
+                var editorUrl = appConfigSvc.config().standardExtensionUrl.editor;
 
                 //todo - should use Utile.addExtension...
                 var sd = {resourceType: 'StructureDefinition'};
@@ -2575,8 +2582,12 @@ angular.module("sampleApp")
 
                 if (header.baseType) {
                     Utilities.addExtensionOnce(sd, baseTypeForModelUrl, {valueString: header.baseType})
-                    // this.addSimpleExtension(sd,baseTypeForModel,header.baseType)
                 }
+
+                if (header.editor) {
+                    Utilities.addExtensionOnce(sd, editorUrl, {valueString: header.editor})
+                }
+
 
 
                 sd.id = scope.rootName;

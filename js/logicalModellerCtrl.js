@@ -23,6 +23,40 @@ angular.module("sampleApp")
             GetDataFromServer.registerAccess('logical');
 
 
+            //change the model editor. Would be nice to be able to check that the email is valid...
+            $scope.changeEditor = function(){
+
+                var email = $window.prompt('Enter new editor email');
+                if (email) {
+                    $scope.treeData[0].data.header.editor = email;
+                    makeSD();
+                    $scope.isDirty = true
+                }
+
+
+            };
+
+            //can the current user edit the model. todo - this has become cruftly...
+            $scope.canEdit = function() {
+                if ($scope.isHistory || !$scope.Practitioner || ! $scope.canSaveModel) {
+                    return false
+                }
+                //is there an editor defined for the model?
+                try {
+                    if ($scope.treeData[0].data.header.editor) {
+                        //there is an editor
+                        if ($scope.treeData[0].data.header.editor == $scope.Practitioner.telecom[0].value) {
+                            return true
+                        } else {return false;}
+                    } else {
+                        //no editor (and the other conditions are true) so can edit
+                        return true;
+                    }
+
+                } catch (ex) {
+                    return false;
+                }
+            }
 
            // console.log($http.defaults.headers.common);
 

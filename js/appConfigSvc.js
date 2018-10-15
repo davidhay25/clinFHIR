@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2018-09-31a';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2018-10-15';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -46,6 +46,7 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.igEntryType = 'http://clinfhir.com/StructureDefinition/igEntryType';
         defaultConfig.standardExtensionUrl.qItemDescription = 'http://clinfhir.com/fhir/StructureDefinition/qItemDescription';
         defaultConfig.standardExtensionUrl.fhirPath = 'http://clinfhir.com/fhir/StructureDefinition/fhirPath';
+        defaultConfig.standardExtensionUrl.editor = 'http://clinfhir.com/fhir/StructureDefinition/editor';
 
 
 
@@ -103,6 +104,9 @@ angular.module("sampleApp")
         defaultConfig.terminologyServers.push({name:"fhir.org",url:"http://tx.fhir.org/r3/",version:3});
 
         defaultConfig.terminologyServers.push({name:"Ontoserver",url:"https://ontoserver.csiro.au/stu3-latest/",version:3});
+        defaultConfig.terminologyServers.push({name:"Ontoserver-PC",url:"https://primarycare.ontoserver.csiro.au/fhir/",version:3});
+
+
 
 
 
@@ -159,6 +163,7 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'hofSmile',version:3,url:"https://hof.smilecdr.com:8000/",smart:true});
 
         defaultConfig.allKnownServers.push({name:'eip',version:3,url:"http://eip-fhir.experimental.aimsplatform.com/hapi-fhir/baseDstu3/"});
+        defaultConfig.allKnownServers.push({name:'Ontoserver-PC',version:3,url:"https://primarycare.ontoserver.csiro.au/fhir/"});
 
 
 
