@@ -36,6 +36,12 @@ angular.module("sampleApp")
         );
 
 
+        if (!String.prototype.startsWith) {
+            String.prototype.startsWith = function(search, pos) {
+                return this.substr(!pos || pos < 0 ? 0 : +pos, search.length) === search;
+            };
+        }
+
         //set the first segment of a path to the supplied value. Used when determining differneces from the base type
         String.prototype.setFirstSegment = function(firstSegment) {
             var ar = this.split('.');

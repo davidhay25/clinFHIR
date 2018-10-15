@@ -1053,23 +1053,34 @@
                                         The model editor is {{treeData[0].data.header.editor}}. Only they can make changes
                                     </div>
 
-<!--<div ng-show = "canSaveModel && Practitioner && !isHistory"> -->
                                     <div ng-show = "canEdit()">
                                         <span>
                                         <i class="glyphicon glyphicon-arrow-up clickable"
                                            ng-hide = "$index == 0 || isHistory"
+                                           uib-popover="Move upwards. Cannot move beyond the parent"
+                                           popover-placement="top"
+                                           popover-trigger="'mouseenter'"
                                            ng-click="moveUp($event,$index)" style="margin-right: 10px"></i>
 
                                         <i class="glyphicon glyphicon-arrow-down clickable"
                                            ng-hide = "$index == (config.sections.length -1) || isHistory"
+                                           uib-popover="Move downwards. Cannot move beyond the parent"
+                                           popover-placement="top"
+                                           popover-trigger="'mouseenter'"
                                            ng-click="moveDn($event,$index)"></i>
 
                                         <i class="glyphicon glyphicon-arrow-left clickable"
                                            ng-show="segmentCount(selectedNode.data.path) > 2 "
+                                           uib-popover="Move up the hierarchy."
+                                           popover-placement="top"
+                                           popover-trigger="'mouseenter'"
                                            ng-click="moveLeft()"></i>
 
                                          <i class="glyphicon glyphicon-arrow-right clickable"
                                             ng-show="segmentCount(selectedNode.data.path) > 1 "
+                                            uib-popover="Move down the hierarchy."
+                                            popover-placement="top"
+                                            popover-trigger="'mouseenter'"
                                             ng-click="moveRight()"></i>
 
                                     </span>

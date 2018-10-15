@@ -23,7 +23,7 @@ angular.module("sampleApp")
             GetDataFromServer.registerAccess('logical');
 
 
-            //change the model editor. Would be nice to be able to check that the email is valid...
+            //change the email of the model editor. Would be nice to be able to check that the email is valid...
             $scope.changeEditor = function(){
 
                 var email = $window.prompt('Enter new editor email');
@@ -252,28 +252,83 @@ angular.module("sampleApp")
 
             $scope.moveRight = function() {
                 var path = $scope.selectedNode.data.path;
-                var lst = getChildren(path)
-                if (lst.length > 0) {
-                    alert("Sorry, nodes with children can't be moved right yet. Move them individually")
-                    return;
+                var lstChildren = getChildren(path,true)
+                if (lstChildren.length > 0) {
+                  //  alert("Sorry, nodes with children can't be moved right yet. Move them individually")
+                   // return;
                 }
-
+                //logicalModelSvc.saveTreeState($scope.treeData);
                 var pos = findPositionInTree(path);     //the location of the element we wish to move in the array
                 var ar = path.split('.');
                 var leafName = ar[ar.length-1];
-                var newParentPath = $scope.treeData[pos-1].data.path;
+
+                //find the sibling above this one. it will have the same number of segments
+                var segmentCnt = ar.length;
+                var siblingPos = -1;        //this will be the sibling immediately above
+                for (var i = pos-1; i > 0; i--) {
+                    var sPath = $scope.treeData[i].data.path;
+                    var sAr = sPath.split('.')
+                    if (sAr.length == segmentCnt) {
+                        siblingPos = i;
+                        break
+                    }
+                }
+                if (siblingPos == -1) {
+                    alert("Can't find a suitable sibling");
+                    return;
+                }
+
+
+                var newParentPath = $scope.treeData[siblingPos].data.path;
+
+                //var newParentPath = $scope.treeData[pos-1].data.path;
                 var newPath = newParentPath + '.'+leafName;
+
+                var nodeToShift = findNodeWithPath(path);
+                nodeToShift.data.path = newPath;
+                nodeToShift.id = newPath;
+                nodeToShift.parent = newParentPath;
+
+                /*
 
                 $scope.selectedNode.data.path = newPath;
                 $scope.selectedNode.id = newPath;
                 $scope.selectedNode.parent = newParentPath;
 
                 $scope.treeData.splice(pos,1,angular.copy($scope.selectedNode));
+
+                */
+
+                //now move all the children...
+                if (lstChildren.length > 0) {
+                    lstChildren.forEach(function (child) {
+
+                        var childNodeToShift = findNodeWithPath(child.data.path);
+
+
+                        var l = path.length;          //the length of original 'root' path. This has to change
+                        var rightMost = child.data.path.substr(l);       //this is the remainder of the path
+
+                        var newChildPath = newPath + rightMost;
+                        childNodeToShift.data.path = newChildPath;
+                        childNodeToShift.id = newChildPath;
+
+                        //need to adjust the parent also...
+                        var arNP = newChildPath.split('.')
+                        arNP.splice(-1)
+                        childNodeToShift.parent = arNP.join('.');      //the new path of the parent.
+                    })
+                }
+
+
+
+
+                $scope.treeData = logicalModelSvc.reOrderTree($scope.treeData);
+                $scope.treeIdToSelect = findNodeWithPath(newPath).id;
+
                 drawTree();
                 makeSD();
                 $scope.isDirty = true
-
-
 
 
             };
@@ -283,29 +338,62 @@ angular.module("sampleApp")
 
                 var path = $scope.selectedNode.data.path;
 
-                var lst = getChildren(path)
-                if (lst.length > 0) {
-                    alert("Sorry, nodes with children can't be moved left yet. Move them individually")
-                    return;
-                }
+                var lstChildren = getChildren(path,true)
+
 
                 var pos = findPositionInTree(path);     //the location of the element we wish to move in the array
 
                 var ar = path.split('.');
-                if (ar.length > 2) {
+                if (ar.length > 2) {        //ie cannot be off the root
                     ar.splice(ar.length-2,1);
                     var newPath = ar.join('.');
                     ar.pop();
-                    var newParent = ar.join('.');
+                    var newParentPath = ar.join('.');
 
+                    var nodeToShift = findNodeWithPath(path);
+                    nodeToShift.data.path = newPath;
+                    nodeToShift.id = newPath;
+                    nodeToShift.parent = newParentPath;
+
+
+                    if (lstChildren.length > 0) {
+                        lstChildren.forEach(function (child) {
+
+                            var childNodeToShift = findNodeWithPath(child.data.path);
+
+
+                            var l = path.length;          //the length of original 'root' path. This has to change
+                            var rightMost = child.data.path.substr(l);       //this is the remainder of the path
+
+                            var newChildPath = newPath + rightMost;
+                            childNodeToShift.data.path = newChildPath;
+                            childNodeToShift.id = newChildPath;
+
+                            //need to adjust the parent also...
+                            var arNP = newChildPath.split('.')
+                            arNP.splice(-1)
+                            childNodeToShift.parent = arNP.join('.');      //the new path of the parent.
+                        })
+                    }
+
+
+
+                    $scope.treeData = logicalModelSvc.reOrderTree($scope.treeData);
+                    drawTree();
+                    makeSD();
+                    $scope.isDirty = true
+
+
+                    /*
                     $scope.selectedNode.data.path = newPath;
                     $scope.selectedNode.id = newPath;
                     $scope.selectedNode.parent = newParent;
 
                     $scope.treeData.splice(pos,1,angular.copy($scope.selectedNode));
 
-
+*/
                     //do children here...  NOT YET WORKING!!!
+                    /*
                     var lst = getChildren(path)
                     if (lst.length > 0) {
                         lst.forEach(function (item) {
@@ -331,10 +419,7 @@ angular.module("sampleApp")
                     }
 
 
-                    $scope.treeData = logicalModelSvc.reOrderTree($scope.treeData);
-                    drawTree();
-                    makeSD();
-                    $scope.isDirty = true
+*/
 
                 }
             };
@@ -2782,7 +2867,9 @@ angular.module("sampleApp")
                 //var download = logicalModelSvc.makeMappingDownload(SD);
                 $scope.downloadSDJsonContent = window.URL.createObjectURL(new Blob([angular.toJson($scope.SD)],
                     {type: "text/text"}));
-                $scope.downloadSDJsonName = $scope.treeData[0].data.header.name + '.json';
+
+                var now = moment().format();
+                $scope.downloadSDJsonName = $scope.treeData[0].data.header.name + '-' + now + '.json';
 
 
 
@@ -2909,15 +2996,69 @@ angular.module("sampleApp")
 
             };
 
-            //get all the children of this path
-            getChildren = function(path) {
-                var ar = [];
+            //get all the children of this path.
+            //2018-10-16 - made more robust...   If recursive is true, then select children of childrem
+            getChildren = function(path,recursive) {
+                var arChildren = [];
+                var arPath = path.split('.');
+                var segmentCnt = arPath.length;      //the number of segments in the parent path
+
+
                 $scope.treeData.forEach(function(node){
-                    if (node.data.path.lastIndexOf(path,0)=== 0 && node.data.path !==path) {
-                        ar.push(node);
+                    var ar1 = node.data.path.split('.')
+
+                   // ar1.splice(-1);
+                   // var t = ar1.join('.')   //this is the path without the terminal leaf...
+                    if (recursive) {
+
+                        //is this below the parent in the hierarchy
+                        if (ar1.length > segmentCnt) {
+                            //yes, check all the leftmose arrat
+                            var flag = true;
+                            for (var i=0; i<segmentCnt; i++) {
+                                if (arPath[i] !== ar1[i]) {
+                                    flag = false;
+                                    break
+                                }
+                            }
+                        }
+
+                        if (flag) {
+                            arChildren.push(node);
+                        }
+                       // if (t.startsWith(path) && ar1.length >= segmentCnt){
+                       //     arChildren.push(node);
+                       // }
+
+                    } else {
+                        //immediate children only
+
+                        if (ar1.length == segmentCnt) {
+                            //yes, check all the leftmose arrat
+                            var flag = true;
+                            for (var i=0; i<segmentCnt; i++) {
+                                if (arPath[i] !== ar1[i]) {
+                                    flag = false;
+                                    break
+                                }
+                            }
+                        }
+
+                        if (flag) {
+                            arChildren.push(node);
+                        }
+
+                        /*
+                        if (t === path){
+                            //if (node.data.path.lastIndexOf(path,0) === 0 && node.data.path !==path) {
+                            arChildren.push(node);
+                        }
+                        */
                     }
+
+
                 });
-                return ar;
+                return arChildren;
 
             };
 
