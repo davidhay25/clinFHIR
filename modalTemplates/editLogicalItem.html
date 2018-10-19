@@ -162,28 +162,7 @@
             </div>
 
 
-            <div class="form-group">
-                <div class="row">
-                    <div class="col-md-4 col-sm-4">
 
-                    </div>
-
-                    <div class="col-md-4 col-sm-4">
-
-
-                    </div>
-
-                    <div class="col-md-4 col-sm-4">
-
-
-
-                    </div>
-
-
-
-                </div>
-
-            </div>
 
 
 
@@ -196,11 +175,20 @@
                         <uib-tabset>
                             <uib-tab heading="FHIR" select="setCurrentMap('fhir')">
                                 <br/>
-                                <input type="text" ng-blur="fhirMapping(input.mappingPath)" ng-model="input.mappingPath"
-                                       ng-change="updateCurrentMapValue(input.mappingPath)"
-                                       uib-typeahead="path for path in allPaths | filter:$viewValue | limitTo:100" class="form-control"
-                                        typeahead-on-select="fhirPathSelect($item)"
-                                />
+                                <div class="row">
+                                    <div class="col-sm-10 col-md-10">
+                                        <input type="text" ng-blur="fhirMapping(input.mappingPath)" ng-model="input.mappingPath"
+                                               ng-change="updateCurrentMapValue(input.mappingPath)"
+                                               uib-typeahead="path for path in allPaths | filter:$viewValue | limitTo:100" class="form-control"
+                                               typeahead-on-select="fhirPathSelect($item)"
+                                        />
+                                    </div>
+                                    <div class="col-sm-2 col-md-2" ng-show="selectedED">
+                                        <button class="btn btn-link" ng-click="showED(selectedED)">Detail</button>
+                                    </div>
+                                </div>
+
+
 <!--
 *** was ng-change() above
                                 <input type="text" typeahead-on-select="fhirMapping(input.mappingPath)" ng-model="input.mappingPath"

@@ -2041,7 +2041,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             //lst.push({code: 'Coding'});
             lst.push({code: 'Timing'});
             lst.push({code: 'instant'});
-            lst.push({code: 'MarkDown'});
+           // lst.push({code: 'MarkDown'});
             //lst.push({code: 'instant'});
             //lst.push({code: 'Range'});
 

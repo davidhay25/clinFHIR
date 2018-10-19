@@ -2026,9 +2026,10 @@ angular.module("sampleApp")
                 GetDataFromServer.findConformanceResourceByUri(url).then(
                     function (SD) {
                         if (SD && SD.snapshot && SD.snapshot.element) {
-                            var lst = [], hash={}, dtDef = {};
+                            var lst = [], hash={}, dtDef = {}, edHash={};
                             SD.snapshot.element.forEach(function (ed) {
                                 var path = ed.path;
+                                edHash[path]=ed
 
                                 //expand the [x] element. Todo - this might muck up the profile generation... ?could just look for multiple types
                                 if (path.indexOf('[x]')> -1 && ed.type) {
@@ -2060,7 +2061,7 @@ angular.module("sampleApp")
                                 }
 
                             });
-                            deferred.resolve({list:lst,hash:hash,dtDef:fhirLM});
+                            deferred.resolve({list:lst,hash:hash,dtDef:fhirLM,edHash:edHash});
                         }
 
                     }, function (err) {

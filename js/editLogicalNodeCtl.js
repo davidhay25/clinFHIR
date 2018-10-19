@@ -34,7 +34,7 @@ angular.module("sampleApp")
 
 
             }
-
+/*
             //NOT WORKING RIGHT NOW...
             function setOptionsForDtAndPathDep() {
                 var path = $scope.input.mappingPath;    //the path in the fhor mapping
@@ -54,7 +54,7 @@ angular.module("sampleApp")
 
             }
 
-
+*/
             $scope.fhirMapping = function(map) {
                 $scope.isExtension = false;
                 if (map && map.indexOf('xtension') > -1) {
@@ -62,10 +62,45 @@ angular.module("sampleApp")
                 }
             };
 
+            //display the ED for the FHIR mapping path
+            $scope.showED = function(ED){
+                console.log(ED)
+
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/showED.html',
+                    size:'lg',
+                    controller: function($scope,ed){
+                        $scope.ed = ed
+                    },
+                    resolve : {
+                        ed: function () {          //the default config
+                            var t = angular.copy(ED);
+                            delete t.mapping;       //just to save space
+                            return t;
+                        }
+                    }
+                })
+            };
+
 
             //when a fhir path is selected from the type-ahead in the mapping...
             $scope.fhirPathSelect = function(item) {
                 console.log(item)
+                var ed = $scope.allPathsHash[item];
+
+                console.log(ed)
+
+
+                $scope.selectedED = ed;     //used to view the ED for the mapped path
+                /*
+                delete $scope.selectedED;
+                if ($scope.edHash[path]) {
+                    $scope.selectedED = $scope.edHash[path];
+                }
+*/
+
+
+
                 //if the name is empty, set it to the last value in the path and set the datatype...
                 if (! $scope.input.name && item) {
 
@@ -109,6 +144,15 @@ angular.module("sampleApp")
             $scope.baseType = baseType;
 
 
+            //default datatype is string
+            for (var i=0; i< $scope.allDataTypes.length; i++) {
+                if ($scope.allDataTypes[i].code == 'string') {
+                    $scope.input.dataType = $scope.allDataTypes[i];
+                    break;
+                }
+            }
+            $scope.input.multiplicity = 'opt';      //default multiplicity
+            /*
             if (editNode) {
                 setup(editNode);
             } else {
@@ -121,7 +165,7 @@ angular.module("sampleApp")
 
                 $scope.input.multiplicity = 'opt';
             }
-
+*/
 
             if (baseType) {
                 //get all the paths - including expanding logical models...
@@ -129,17 +173,25 @@ angular.module("sampleApp")
                     function(listOfPaths) {
                         $scope.allPaths = listOfPaths.list;
                         $scope.allPathsHash = listOfPaths.hash;
-                        $scope.dtDef = listOfPaths.dtDef;       //the definitions for a path (use to get the options)...
+                        $scope.edHash = listOfPaths.edHash;     //all the ed's keyed by path
+                       // $scope.dtDef = listOfPaths.dtDef;       //the definitions for a path (use to get the options)...
+                        setup(editNode);
                     },function(err) {
                         alert("A Base type of "+ baseType +" was selected, but I couldn't locate the profile to get the element paths")
                     }
                 )
 
+            } else {
+                setup(editNode);
             }
 
 
 
+
             function setup(node) {
+                if (! node) {
+                    return;
+                }
 
                // if (editNode) {
                     //editing an existing node
@@ -163,9 +215,26 @@ angular.module("sampleApp")
 
                     $scope.input.mappingPath = getMapValueForIdentity('fhir');
 
-                    if ($scope.input.mappingPath && $scope.input.mappingPath.indexOf('xtension')>-1) {
-                        $scope.isExtension = true;
+                    if ($scope.input.mappingPath) {
+
+                        var ed = $scope.allPathsHash[$scope.input.mappingPath];
+                        console.log(ed)
+
+                        $scope.selectedED = $scope.edHash[$scope.input.mappingPath];    //used to show the ED
+                        if ($scope.input.mappingPath.indexOf('xtension')>-1) {
+                            $scope.isExtension = true;
+                        }
+                        /*
+
+
+                        //is there a mapping path which refers to an ED?
+                        if ($scope.edHash[$scope.input.mappingPath]) {
+                            $scope.selectedED = $scope.edHash[$scope.input.mappingPath];
+                        }
+
+                        */
                     }
+
 
                     isDiscriminatorRequired();      //true if there is another fhir mapping the same
                     $scope.input.mappingPathV2 = getMapValueForIdentity('hl7V2');
@@ -266,9 +335,6 @@ angular.module("sampleApp")
 
 
             }
-
-
-
 
             $scope.selectExistingExtension = function(){
 
@@ -496,6 +562,8 @@ angular.module("sampleApp")
                 $scope.canSave = true;
 
 
+
+
                 if (! $scope.input.name) {
                     //if (! $scope.input.name || $scope.input.name.indexOf('0') > -1) { ????? why look for 0 ???
                     $scope.canSave = false;
@@ -511,6 +579,11 @@ angular.module("sampleApp")
                 if ($scope.input.name && $scope.input.name.indexOf(".") > -1) {
                     $scope.canSave = false;
                     modalService.showModal({},{bodyText:"The name cannot have a dot/period (.) in it. Try again."})
+                }
+
+                if ($scope.input.name && $scope.input.name.indexOf("_") > -1) {
+                    $scope.canSave = false;
+                    modalService.showModal({},{bodyText:"The name cannot have an underscore (_) in it. Try again."})
                 }
 
                 //for now, only do duplicate checking for adding new nodes - not renaming - todo
@@ -627,6 +700,8 @@ angular.module("sampleApp")
                     $scope.isDirty = true;
 
 
+
+
                 }
 //setDataType(input.dataType)
 
@@ -659,6 +734,11 @@ angular.module("sampleApp")
 
 
             $scope.save = function() {
+
+                //check that the
+
+
+
                 //if adding a new mapping and forget to click the plus
                 if ($scope.input.addOtherMap) {
                     $scope.addNewMap($scope.input.newMapIdentity,$scope.input.newMapValue)
