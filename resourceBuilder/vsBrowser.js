@@ -72,77 +72,7 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                             $scope.helpTopic = topic;
                         };
 
-/*
-                        $scope.searchForVSDEP = function() {
 
-                            var searchString = "ValueSet?";
-                            ['name','description','type','publisher','url'].forEach(function(param){
-                                //console.log()
-                                if ($scope.searchParams[param]) {
-                                    searchString += param + "=" + $scope.searchParams[param] + "&";
-                                }
-                            });
-
-                            //strip off the trailing &
-                            if (searchString.substr(searchString.length-1,1) == '&') {
-                                searchString = searchString.substr(0,searchString.length-1)
-                            }
-
-                            //console.log(searchString);
-                            $scope.query=searchString;
-
-                            $scope.showWaiting = true;
-                            GetDataFromServer.queryFHIRServer(searchString,true).then(
-                                function(bundle){
-                                    if (bundle.entry && bundle.entry.length > 0) {
-                                        $scope.selectedVS = bundle;
-                                        //$scope.tab.tabQuery = false;
-                                        $scope.tab.searchResults = true;
-                                           //console.log(bundle)
-                                    } else {
-                                        $scope.showNone = true;
-                                    }
-
-                                    $scope.showWaiting = false;
-                                },function(err){
-                                    $scope.showWaiting = false;
-                                    console.log('Error: '+err);
-                                    alert("Unable to retrieve Profile, sorry..." + angular.toJson(err,true))
-                                });
-
-
-
-                        };
-
-*/
-/*
-                        $scope.showVSDEP = function(ev,entry) {
-
-                            //this is the callback when a user selects the valueset
-                            if ($scope.selectVSFn) {
-                                $scope.showVSSelectButton = true;       //allow the user to select the vs
-                            }
-
-
-                            $scope.selectedvs = entry.resource;
-                            if ($scope.selectedvs.text) {
-                                $scope.selectedvs.text.div = "Narrative removed";
-                            } else {
-                                $scope.selectedvs.text = {div:"Narrative removed"};
-                            }
-
-                            $scope.selectedvsJSON  = angular.toJson(entry.resource,true);
-
-                            $scope.tab.noexpand = false;
-
-
-                            //$scope.selectVSFn()(entry.resource.id);
-
-                            ev.stopPropagation();
-                            ev.preventDefault();
-                        };
-
-*/
                         //when the user is performing an expansion...
                         $scope.data = [];
 
