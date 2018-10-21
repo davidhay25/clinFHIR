@@ -57,6 +57,14 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                             $scope.$dismiss();
                         };
 
+
+                        $scope.checkForEnter = function(evt) {
+                            var keyCode = evt.which || evt.keyCode;
+                            console.log(keyCode)
+                            if (keyCode === 13) {
+                                $scope.expand();
+                            }
+                        }
                         $scope.tab = {};
                         $scope.tab.tabDescription = true;
 
