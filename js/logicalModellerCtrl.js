@@ -133,6 +133,12 @@ angular.module("sampleApp")
                             appConfigSvc.setServerType('conformance',conformanceServer.url);
                             appConfigSvc.setServerType('data',conformanceServer.url);       //set the data server to the same as the conformance for the comments
 
+
+                            var termServer = sc.config.terminologyServer;
+                            if (termServer) {
+                                appConfigSvc.setServerType('terminology',termServer.url);
+                            }
+
                             var id = sc.config.model.id;    //the id of the model on this server
                             //get the model from the server...
                             var url = conformanceServer.url + 'StructureDefinition/'+id;
@@ -1266,6 +1272,8 @@ angular.module("sampleApp")
                 var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
                 sc.modelId = $scope.currentType.id;     //this should make it possible to query below...
                 sc.config = {conformanceServer:appConfigSvc.getCurrentConformanceServer()};
+                sc.config.terminologyServer = appConfigSvc.getCurrentTerminologyServer();
+
                 sc.config.model = {id:$scope.currentType.id}
                 sc.shortCut = shortCut;     //the full shortcut
                 sc.$save().then(
