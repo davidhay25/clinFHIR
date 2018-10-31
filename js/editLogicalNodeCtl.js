@@ -74,6 +74,8 @@ angular.module("sampleApp")
                     },
                     resolve : {
                         ed: function () {          //the default config
+                            //return ED
+
                             var t = angular.copy(ED);
                             delete t.mapping;       //just to save space
                             return t;
@@ -141,6 +143,7 @@ angular.module("sampleApp")
                 }
             };
 
+
             $scope.baseType = baseType;
 
 
@@ -178,6 +181,7 @@ angular.module("sampleApp")
                         setup(editNode);
                     },function(err) {
                         alert("A Base type of "+ baseType +" was selected, but I couldn't locate the profile to get the element paths")
+                        setup(editNode);
                     }
                 )
 
@@ -737,8 +741,6 @@ angular.module("sampleApp")
 
                 //check that the
 
-
-
                 //if adding a new mapping and forget to click the plus
                 if ($scope.input.addOtherMap) {
                     $scope.addNewMap($scope.input.newMapIdentity,$scope.input.newMapValue)
@@ -760,7 +762,7 @@ angular.module("sampleApp")
                     vo.conceptMap = $scope.input.conceptMap;
 
                     vo.mappingPath = $scope.input.mappingPath;      //this is the FHIR path
-                    vo.mappingFromED = $scope.input.mappingFromED;      //all mappings
+                    vo.mappingFromED = $scope.input.mappingFromED || [];      //all mappings
                     vo.mappingPathV2 = $scope.input.mappingPathV2;
                     vo.mappingPathSnomed = $scope.input.mappingPathSnomed;
                     vo.mappingPathLM = $scope.input.mappingPathLM;
@@ -834,8 +836,6 @@ angular.module("sampleApp")
                             vo.min =1; vo.max='*';
                             break;
                     }
-
-
 
                     $scope.$close(vo);
                 };

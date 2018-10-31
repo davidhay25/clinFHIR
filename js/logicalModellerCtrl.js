@@ -2421,7 +2421,8 @@ angular.module("sampleApp")
                     resolve : {
                         allDataTypes: function () {          //the default config
                             return $scope.dataTypes;
-                        }, editNode : function() {
+                        },
+                        editNode : function() {
                             return nodeToEdit
                         },
                         parentPath : function(){
@@ -2507,7 +2508,7 @@ angular.module("sampleApp")
                                     delete clone.editNode;
                                     item.data = clone;
 
-                                    //2018-10-12 - needed when editing a node from a filtered view
+                                    //2018-10-12 - needed when editing a node from a filtered view. Currently it's undefined...
                                     item.data.ed = {path:item.id}
 
                                     item.text = clone.name;
