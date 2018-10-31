@@ -230,7 +230,12 @@ angular.module("sampleApp")
                 $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([download],
                     {type: "text/text"}));
 
-                $scope.downloadLinkJsonName = "downloaded"
+                //$scope.downloadLinkJsonName = "downloaded"
+                var now = moment().format();
+                $scope.downloadLinkJsonName = $scope.treeData[0].data.header.name + '-' + now + '.csv';
+
+                console.log($scope.downloadLinkJsonName)
+
             }
 
 

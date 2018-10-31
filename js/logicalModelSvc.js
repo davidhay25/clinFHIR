@@ -169,8 +169,24 @@ angular.module("sampleApp")
                         if (ar.length > 1) {
                             ar.splice(0,1)
                             var lne = ar.join('.') + ',';
+
+                            //the type - first one only ATM
                             if (ed.type) {
-                                lne += ed.type[0].code + ',';
+
+                                ed.type.forEach(function(typ){
+                                    lne += typ.code;
+
+                                    if (typ.code == 'Reference') {
+                                        var resourceType = $filter('referenceType')(ed.type[0].targetProfile)
+                                        lne += ' -> '+ resourceType
+
+
+                                    }
+                                })
+
+
+
+                                lne += ','
                             } else {
                                 lne += ','
                             }
@@ -207,10 +223,18 @@ angular.module("sampleApp")
                 //remove comma's and convert " -> '
                 function makeSafe(s) {
                     if (s) {
+                        //the string 'definition' is inserted if no comment is entered (it is mandatory in the ED)
+                        if (s == 'definition' || s == 'No description') {
+                            return ""
+                        }
+
                         s = s.replace(/"/g, "'");
                         s = s.replace(/,/g, "-");
                         return '"' + s + '"';
+                    } else {
+                        return "";
                     }
+
 
                 }
 
