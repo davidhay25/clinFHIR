@@ -74,6 +74,69 @@ angular.module("sampleApp").service('profileDiffSvc',
 
     return {
 
+        validateArtifactsOnServer : function(type,lst) {
+            //check that a conformance artifact (ValueSet / CodeSystem) is on the terminology server
+            var deferred = $q.defer();
+            var arQuery = [], arResult=[];
+            var svr = appConfigSvc.getCurrentTerminologyServer().url;
+            lst.forEach(function (item) {
+                var url = item.url;
+                var srch;
+
+                switch (type) {
+                    case 'ValueSet' :
+                        srch = svr + "ValueSet?url="+ url;
+                        break;
+                    case 'CodeSystem' :
+                        srch = svr + "CodeSystem?url="+ url;
+                        break;
+
+                }
+
+                if (srch) {
+                    arQuery.push(checkArtifactExists(url));
+                }
+
+            });
+
+            $q.all(arQuery).then(
+                function(data){
+                    deferred.resolve(arResult)
+                }
+            );
+
+
+
+            return deferred.promise;
+
+            function checkArtifactExists(url) {
+                var deferred1 = $q.defer()
+
+
+                var termServer = appConfigSvc.getCurrentTerminologyServer().url;
+                var srch = termServer + 'ValueSet?url='+ url;
+                console.log(srch)
+                $http.get(srch).then(
+                    function(data) {
+                        if (data.data && data.data.entry &&  data.data.entry.length > 0) {
+                            arResult.push({url:url,outcome:'present',present:true})
+                            //hash[url] = 'present'
+                        } else {
+                            arResult.push({url:url,outcome:'absent',absent:true})   //makes the display simpler
+                            //hash[url] = 'absent'
+                        }
+                        deferred1.resolve()
+                    },
+                    function(){
+                        deferred1.resolve()
+                    }
+                )
+
+                return deferred1.promise;
+            }
+
+        },
+
        findShortCutForModel : function(id) {
             var deferred = $q.defer();
             var scCollection = $firebaseArray(firebase.database().ref().child("shortCut"));
@@ -446,7 +509,7 @@ angular.module("sampleApp").service('profileDiffSvc',
 
 
                         }
-                        console.log(resourceType)
+                        //console.log(resourceType)
 
 
                        // console.log('ex '+ text, art)

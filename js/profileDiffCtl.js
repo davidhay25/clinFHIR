@@ -43,6 +43,19 @@ angular.module("sampleApp")
             $scope.typeDescription.other = 'Other artifact';
 
 
+            $scope.validateArtifactsOnServer = function(type) {
+                delete $scope.artifactChecks;
+                var vs = $scope.artifacts[$scope.selectedArtifactType];
+                console.log(vs)
+                profileDiffSvc.validateArtifactsOnServer(type,vs).then(
+                    function(arResult) {
+                        console.log(arResult)
+                        $scope.artifactChecks = arResult;
+                    }
+                )
+
+            };
+
             $scope.showDT = function(dt) {
                 var msg = "";
                 switch (dt) {
@@ -469,6 +482,8 @@ angular.module("sampleApp")
                 $('#pagesTreeView').jstree(
                     {'core': {'multiple': false, 'data': $scope.pageTreeData, 'themes': {name: 'proton', responsive: true}}}
                 ).on('changed.jstree', function (e, data) {
+
+                    delete $scope.artifactChecks;
 
                     if (data.node) {
                         $scope.selectedPageNode = data.node;

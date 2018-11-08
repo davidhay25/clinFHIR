@@ -131,6 +131,15 @@
             transform: translateY(-100%);
         }
 
+
+        .present {
+            color:green;
+        }
+
+        .absent {
+            color:red;
+        }
+
     </style>
         <title>IG Viewer</title>
 
@@ -360,6 +369,22 @@
                                     </td>
                                 </tr>
                             </table>
+
+
+                            <div ng-show="typeDescription[selectedArtifactType] == 'ValueSet' || typeDescription[selectedArtifactType] == 'CodeSystem'">
+                                <button class="btn btn-link pull-right" ng-click="validateArtifactsOnServer(typeDescription[selectedArtifactType])">Check that {{typeDescription[selectedArtifactType]}}s are present on the Terminology server</button>
+                            </div>
+
+
+
+
+                            <table class="table table-bordered">
+                                <tr ng-repeat="row in artifactChecks" ng-class="{absent:row.absent,present:row.present}">
+                                    <td>{{row.url}}</td>
+                                    <td>{{row.outcome}}</td>
+                                </tr>
+                            </table>
+
 
                         </div>
 

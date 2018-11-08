@@ -143,11 +143,7 @@ angular.module("sampleApp")
                         }
                     )
 
-
-
-
                     return deferred1.promise;
-
                 }
 
             },
