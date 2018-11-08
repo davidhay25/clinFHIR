@@ -223,6 +223,17 @@ angular.module("sampleApp")
             });
 
 
+            $scope.checkValueSetsOnServer = function() {
+                $scope.checkingVSs = true
+                logicalModelSvc.checkValueSetsOnServer($scope.treeData).then(
+                    function(arResult) {
+                        delete $scope.checkingVSs;
+                        $scope.vsChecks = arResult;
+                        //console.log(arResult)
+                    }
+                )
+            }
+
             //generate the mapping download file
             function makeMappingDownload(SD) {
 

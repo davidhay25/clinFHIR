@@ -101,6 +101,56 @@ angular.module("sampleApp")
         multiple['Composition.section.entry'] = "*"
 
         return {
+            checkValueSetsOnServer : function(treeData){
+                var deferred = $q.defer();
+                var arQuery=[], arResult = []
+                if (treeData) {
+                    treeData.forEach(function(row){
+                        if (row.data && row.data.isCoded && row.data.selectedValueSet && row.data.selectedValueSet.vs) {
+                            arQuery.push(checkVS(row.data.selectedValueSet.vs.url));
+                        }
+                    });
+
+                    $q.all(arQuery).then(
+                        function(data){
+                            deferred.resolve(arResult)
+                        }
+                    )
+
+                }
+                return deferred.promise;
+
+                function checkVS(url) {
+                    var deferred1 = $q.defer()
+
+
+                    var termServer = appConfigSvc.getCurrentTerminologyServer().url;
+                    var srch = termServer + 'ValueSet?url='+ url;
+                    console.log(srch)
+                    $http.get(srch).then(
+                        function(data) {
+                            if (data.data && data.data.entry &&  data.data.entry.length > 0) {
+                                arResult.push({url:url,outcome:'present',present:true})
+                                //hash[url] = 'present'
+                            } else {
+                                arResult.push({url:url,outcome:'absent',absent:true})   //makes the display simpler
+                                //hash[url] = 'absent'
+                            }
+                            deferred1.resolve()
+                        },
+                        function(){
+                            deferred1.resolve()
+                        }
+                    )
+
+
+
+
+                    return deferred1.promise;
+
+                }
+
+            },
             makeIG : function(tree){
                 var deferred = $q.defer();
                 //construct an Implementation Guide based on the model...
@@ -210,8 +260,6 @@ angular.module("sampleApp")
                             if (ext && ext.valueString) {
                                 lne += ed.valueString
                             }
-
-
                             download += lne + "\n";
                         }
 

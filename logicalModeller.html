@@ -53,6 +53,14 @@
             overflow-y: scroll;
         }
 
+        .present {
+            color:green;
+        }
+
+        .absent {
+            color:red;
+        }
+
         /* These seem only to apply to the markdown generated html (which is the intention*/
 
         /*
@@ -558,7 +566,7 @@
                             <br/>
 
                             <uib-tabset>
-                                <uib-tab heading="Mapping">
+                                <uib-tab heading="Mapping by Element">
 
 
                                     <table class="table table-bordered table-condensed">
@@ -701,7 +709,12 @@
 
                                                     <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
                                                 </td>
-                                                <td>{{row.data.selectedValueSet.vs.url}}</td>
+                                                <td>
+                                                    <div class="clickable" ng-click="viewVS(row.data.selectedValueSet.vs.url)">
+                                                        {{row.data.selectedValueSet.vs.url}}
+                                                    </div>
+
+                                                </td>
                                                 <td>{{row.data.description}}</td>
 
                                             </tr>
@@ -709,6 +722,24 @@
                                     </div>
                                 </div>
                             </div>
+                        </uib-tab>
+
+                        <uib-tab heading="Check Server">
+                            <div class="pull-right">
+                                <button class="btn btn-link" ng-click="checkValueSetsOnServer()">Refresh</button>
+                            </div>
+                            <div class="clearfix"></div>
+
+                            <div class="alert alert-warning" ng-show="checkingVSs">
+                                Checking the terminology servers for all the ValueSets in the model. Please wait (this can take a while)...
+                            </div>
+
+                            <table class="table table-bordered">
+                                <tr ng-repeat="row in vsChecks" ng-class="{absent:row.absent,present:row.present}">
+                                    <td>{{row.url}}</td>
+                                    <td>{{row.outcome}}</td>
+                                </tr>
+                            </table>
                         </uib-tab>
 
                         <uib-tab heading="Extensions">
