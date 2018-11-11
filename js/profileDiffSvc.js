@@ -79,22 +79,32 @@ angular.module("sampleApp").service('profileDiffSvc',
             var deferred = $q.defer();
             var arQuery = [], arResult=[];
             var svr = appConfigSvc.getCurrentTerminologyServer().url;
+            var resourceType;
             lst.forEach(function (item) {
                 var url = item.url;
                 var srch;
 
                 switch (type) {
                     case 'ValueSet' :
-                        srch = svr + "ValueSet?url="+ url;
+                        //srch = svr + "ValueSet?url="+ url;
+                        resourceType = "ValueSet";
                         break;
                     case 'CodeSystem' :
-                        srch = svr + "CodeSystem?url="+ url;
+                        //srch = svr + "CodeSystem?url="+ url;
+                        resourceType = "CodeSystem";
                         break;
-
+                    case 'Profile' :
+                        //srch = svr + "StructureDefinition?url="+ url;
+                        resourceType = "StructureDefinition";
+                        break;
+                    case 'Extension Definition' :
+                        //srch = svr + "StructureDefinition?url="+ url;
+                        resourceType = "StructureDefinition";
+                        break;
                 }
 
-                if (srch) {
-                    arQuery.push(checkArtifactExists(url));
+                if (resourceType) {
+                    arQuery.push(checkArtifactExists(resourceType,url));
                 }
 
             });
@@ -109,12 +119,12 @@ angular.module("sampleApp").service('profileDiffSvc',
 
             return deferred.promise;
 
-            function checkArtifactExists(url) {
+            function checkArtifactExists(resourceType,url) {
                 var deferred1 = $q.defer()
 
 
                 var termServer = appConfigSvc.getCurrentTerminologyServer().url;
-                var srch = termServer + 'ValueSet?url='+ url;
+                var srch = termServer +resourceType + '?url='+ url;
                 console.log(srch)
                 $http.get(srch).then(
                     function(data) {

@@ -370,10 +370,14 @@
                                 </tr>
                             </table>
 
-
+<!--
                             <div ng-show="typeDescription[selectedArtifactType] == 'ValueSet' || typeDescription[selectedArtifactType] == 'CodeSystem'">
                                 <button class="btn btn-link pull-right" ng-click="validateArtifactsOnServer(typeDescription[selectedArtifactType])">Check that {{typeDescription[selectedArtifactType]}}s are present on the Terminology server</button>
                             </div>
+-->
+                            <button class="btn btn-link pull-right"
+                                    ng-click="validateArtifactsOnServer(typeDescription[selectedArtifactType])">
+                                Check that {{typeDescription[selectedArtifactType]}}s are present on the Terminology server</button>
 
                             <div ng-show="typeDescription[selectedArtifactType] == 'ValueSet'">
                                 <div class="clearfix"></div>

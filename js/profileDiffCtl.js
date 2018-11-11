@@ -58,7 +58,7 @@ angular.module("sampleApp")
                 //check that the artifacts of the given type are on the server
                 delete $scope.artifactChecks;
                 var vs = $scope.artifacts[$scope.selectedArtifactType];
-                console.log(vs)
+                console.log(type,vs)
                 profileDiffSvc.validateArtifactsOnServer(type,vs).then(
                     function(arResult) {
                         console.log(arResult)
