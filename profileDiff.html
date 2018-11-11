@@ -375,7 +375,11 @@
                                 <button class="btn btn-link pull-right" ng-click="validateArtifactsOnServer(typeDescription[selectedArtifactType])">Check that {{typeDescription[selectedArtifactType]}}s are present on the Terminology server</button>
                             </div>
 
-
+                            <div ng-show="typeDescription[selectedArtifactType] == 'ValueSet'">
+                                <div class="clearfix"></div>
+                                <button class="btn btn-link pull-right"
+                                        ng-click="checkAllVSinIG()">Check that all ValueSets referenced by all profiles are present in the IG</button>
+                            </div>
 
 
                             <table class="table table-bordered">
@@ -384,6 +388,22 @@
                                     <td>{{row.outcome}}</td>
                                 </tr>
                             </table>
+
+
+                            <div ng-show = "hashVS">
+                                <h4>ValueSets referenced in a profile or extensiion definition that are not listed in the IG</h4>
+                                <table class="table table-bordered">
+                                    <tr ng-repeat="(k,v) in hashVS" ng-show="v=='absent'">
+                                        <td>{{k}}</td>
+                                        <td>{{v}}</td>
+
+                                    </tr>
+                                </table>
+                            </div>
+
+
+
+
 
 
                         </div>

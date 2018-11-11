@@ -43,7 +43,19 @@ angular.module("sampleApp")
             $scope.typeDescription.other = 'Other artifact';
 
 
+            $scope.checkAllVSinIG = function() {
+                //check that all the VS mentioned in all the profiles are in the IG
+
+                profileDiffSvc.checkAllVSinIG($scope.currentIG).then(
+                    function (hashVS) {
+                        console.log(hashVS)
+                        $scope.hashVS = hashVS;
+                    }
+                )
+            };
+
             $scope.validateArtifactsOnServer = function(type) {
+                //check that the artifacts of the given type are on the server
                 delete $scope.artifactChecks;
                 var vs = $scope.artifacts[$scope.selectedArtifactType];
                 console.log(vs)

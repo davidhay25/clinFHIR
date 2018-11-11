@@ -137,6 +137,82 @@ angular.module("sampleApp").service('profileDiffSvc',
 
         },
 
+        checkAllVSinIG : function(IG) {
+            var deferred = $q.defer();
+            var that = this;
+            var arQuery= [];
+            var hashVS = {};         //this will be a hash of all valuesets referenced by all profiles in the IG
+
+            var hashCurrentTerm = {};
+
+            IG.package.forEach(function (pack) {
+                pack.resource.forEach(function (resource) {
+                    if (resource.acronym == 'terminology') {
+                        if (resource.sourceReference) {
+                            hashCurrentTerm[resource.sourceReference.reference] = true
+                        }
+                    }
+                })
+            })
+
+            for (var i=0; i< IG.package.length; i++) {
+                var package = IG.package[i];
+                for (var j=0; j < package.resource.length; j++) {
+                    var resource = package.resource[j]
+                    console.log(resource)
+                    if (resource.acronym == 'profile' || resource.acronym == 'extension') {
+                        if (resource.sourceReference) {
+                            arQuery.push(parseSD(resource.sourceReference.reference))
+                        }
+                    }
+                }
+            }
+
+            $q.all(arQuery).then(
+                function(data){
+                    console.log(hashVS)
+                    deferred.resolve(hashVS)
+                }
+            );
+
+
+
+
+            return deferred.promise;
+
+            function parseSD(url) {
+                var deferred1 = $q.defer();
+                that.getSD(url).then(
+                    function (SD) {
+                        console.log(SD)
+
+                        if (SD.snapshot && SD.snapshot.element) {
+                            SD.snapshot.element.forEach(function (ed) {
+                                if (ed.binding) {
+                                    if (ed.binding.valueSetReference) {
+                                        var url = ed.binding.valueSetReference.reference;
+                                        if (hashCurrentTerm[url]) {
+                                            hashVS[url] = 'present'
+                                        } else {
+                                            hashVS[url] = 'absent'
+
+                                        }
+                                    }
+                                }
+                            })
+                        }
+                        deferred1.resolve();
+                    },
+                    function (err) {
+                        console.log(err)
+                        deferred1.resolve();
+                    }
+                )
+                return deferred1.promise;
+            }
+
+
+        },
        findShortCutForModel : function(id) {
             var deferred = $q.defer();
             var scCollection = $firebaseArray(firebase.database().ref().child("shortCut"));
