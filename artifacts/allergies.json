@@ -1,36 +1,126 @@
-{
-  "resourceType": "Organization",
-  "id": "cf-1488989192317",
-  "text": {
-    "status": "generated",
-    "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Good Health Clinicname: Good Health Clinicname: daves clinic<a name='mm'/></div>"
-  },
-  "name": "daves clinic",
-  "contact": [
+[
+    
     {
-      "purpose": {
-        "coding": [
-          {
-            "extension": [
-              {
-                "url": "http://hl7.org/fhir/StructureDefinition/valueset-definition",
-                "valueString": "Contact details for administrative enquiries."
-              }
-            ],
-            "system": "http://hl7.org/fhir/contactentity-type",
-            "code": "ADMIN",
-            "display": "Administrative"
-          }
-        ]
-      },
-      "name": {
-        "use": "Usual",
-        "given": [
-          "John",
-          "Doe"
-        ]
-      }
-    },
-    {}
-  ]
-}
+                "resourceType": "AllergyIntolerance",
+               
+                "meta": {
+                    "versionId": "6",
+                    "lastUpdated": "2018-09-16T21:18:01.143-04:00"
+                },
+                "text": {
+                    "status": "generated",
+                    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: allergyintolerance-example0</p><p><b>clinicalStatus</b>: active</p><p><b>verificationStatus</b>: confirmed</p><p><b>type</b>: allergy</p><p><b>code</b>: Ibuprofen <span style=\"background: LightGoldenRodYellow\">(Details : {SNOMED CT code '387207008' = 'Ibuprofen (substance)', given as 'Ibuprofen'})</span></p><p><b>patient</b>: <a href=\"Patient-example1.html\">Harry DAN. Generated Summary: id: example1; IHI = 8003608000024083, Department of Veterans' Affairs Number = NBUR9080; Harry Dan ; hdan@amail.com.au(HOME); gender: male; birthDate: Aug 25, 1939</a></p><p><b>assertedDate</b>: Mar 7, 2016</p><p><b>recorder</b>: <a href=\"Practitioner-example0.html\">Dr Helen Mayo. Generated Summary: id: example0; HPI-I = 8003610833334085, Prescriber Number = 453221; active; Helen Mayo ; helen.mayo@downunderhospital.com.au(WORK)</a></p><h3>Reactions</h3><table class=\"grid\"><tr><td>-</td><td><b>Manifestation</b></td></tr><tr><td>*</td><td>Urticaria <span style=\"background: LightGoldenRodYellow\">(Details : {SNOMED CT code '126485001' = 'Urticaria (disorder)', given as 'Urticaria'})</span></td></tr></table></div>"
+                },
+                "clinicalStatus": "active",
+                "verificationStatus": "confirmed",
+                "type": "allergy",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://snomed.info/sct",
+                            "code": "387207008",
+                            "display": "Ibuprofen"
+                        }
+                    ]
+                },
+                "patient": {
+                    "reference": "Patient/example1",
+                    "display": "Harry DAN"
+                },
+                "assertedDate": "2016-03-07",
+                "recorder": {
+                    "reference": "Practitioner/example0",
+                    "display": "Dr Helen Mayo"
+                },
+                "reaction": [
+                    {
+                        "manifestation": [
+                            {
+                                "coding": [
+                                    {
+                                        "system": "http://snomed.info/sct",
+                                        "code": "126485001",
+                                        "display": "Urticaria"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+    {
+                "resourceType": "AllergyIntolerance",
+               
+                "meta": {
+                    "versionId": "6",
+                    "lastUpdated": "2018-09-16T21:18:01.542-04:00"
+                },
+                "text": {
+                    "status": "generated",
+                    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: allergyintolerance-example1</p><p><b>clinicalStatus</b>: active</p><p><b>verificationStatus</b>: unconfirmed</p><p><b>type</b>: allergy</p><p><b>category</b>: food</p><p><b>code</b>: Allergy to eggs <span style=\"background: LightGoldenRodYellow\">(Details : {SNOMED CT code '91930004' = 'Allergy to eggs', given as 'Allergy to eggs'})</span></p><p><b>patient</b>: <a href=\"Patient-example2.html\">Sally Grant. Generated Summary: id: example2; Medicare Number = 1234567892; Sally Grant ; sgrant@amail.com.au; gender: female</a></p><p><b>onset</b>: 4 year<span style=\"background: LightGoldenRodYellow\"> (Details: UCUM code a = 'a')</span></p><p><b>assertedDate</b>: Mar 7, 2018</p><p><b>asserter</b>: <a href=\"Patient-example2.html\">Sally Grant. Generated Summary: id: example2; Medicare Number = 1234567892; Sally Grant ; sgrant@amail.com.au; gender: female</a></p><h3>Reactions</h3><table class=\"grid\"><tr><td>-</td><td><b>Manifestation</b></td></tr><tr><td>*</td><td>Hives <span style=\"background: LightGoldenRodYellow\">(Details : {SNOMED CT code '247472004' = 'Wheal', given as 'Hives'})</span></td></tr></table></div>"
+                },
+                "clinicalStatus": "active",
+                "verificationStatus": "unconfirmed",
+                "type": "allergy",
+                "category": [
+                    "food"
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://snomed.info/sct",
+                            "code": "91930004",
+                            "display": "Allergy to eggs"
+                        }
+                    ]
+                },
+                "patient": {
+                    "reference": "Patient/example2",
+                    "display": "Sally Grant"
+                },
+                "onsetAge": {
+                    "value": 4,
+                    "unit": "year",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "a"
+                },
+                "assertedDate": "2018-03-07",
+                "asserter": {
+                    "reference": "Patient/example2",
+                    "display": "Sally Grant"
+                },
+                "reaction": [
+                    {
+                        "manifestation": [
+                            {
+                                "coding": [
+                                    {
+                                        "system": "http://snomed.info/sct",
+                                        "code": "247472004",
+                                        "display": "Hives"
+                                    }
+                                ]
+                            },
+                            {
+                                "coding": [
+                                    {
+                                        "system": "http://snomed.info/sct",
+                                        "code": "422587007",
+                                        "display": "Nausea"
+                                    }
+                                ]
+                            },
+                            {
+                                "coding": [
+                                    {
+                                        "system": "http://snomed.info/sct",
+                                        "code": "422400008",
+                                        "display": "Vomiting"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+]

@@ -379,9 +379,9 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
         buildAllergiesList : function(patientId,options) {
 
             var deferred = $q.defer();
-            deferred.resolve();
-            return deferred.promise;
-
+            //deferred.resolve();
+            //return deferred.promise;
+            var that = this;
 
 
             var today = moment().format();
@@ -404,9 +404,14 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                         //each entry is a basic medication statement - needs to have the patient specific stuff added
                         allergy.patient = {reference:'Patient/'+patientId};
                         allergy.id = 'al'+inx;
-                        allergy.reporter = {reference:'Patient/'+patientId};
+                        //allergy.reporter = {reference:'Patient/'+patientId};
 
-                       
+                        var practitioner = that.getRandomReferenceResource('Practitioner');     //there will always be a practitioner
+                        allergy.recorder = {reference: "Practitioner/"+ practitioner.id};
+
+
+
+
                         var entry = {date: today, item : {reference : 'AllergyIntolerance/'+allergy.id}}
                         allergyList.entry.push(entry);
 

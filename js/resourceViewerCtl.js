@@ -659,7 +659,7 @@ angular.module("sampleApp")
                         var nodeId = obj.nodes[0];  //get the first node
                         var node = graphData.nodes.get(nodeId);
                         $scope.resourceSelected({resource:node.resource});
-                        $scope.$digest();
+                       // $scope.$digest();
                     })
 
                 });

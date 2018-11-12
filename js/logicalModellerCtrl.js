@@ -2988,7 +2988,7 @@ angular.module("sampleApp")
 
             //remove a nde and all of its children
             pruneBranch = function(path) {
-                var arChildren = getChildren(path);
+                var arChildren = getChildren(path,true);
 
                 //remove all the children from the array
                 var pos = findPositionInTree(path);

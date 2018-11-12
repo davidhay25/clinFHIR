@@ -781,7 +781,20 @@ angular.module("sampleApp")
                     vo.type = [{code:$scope.input.dataType.code}];
                     vo.editNode = editNode;
                     //I don't think this is used .... vo.parentPath = parentPath;
-                    vo.fixedString = $scope.input.fixedString;
+
+
+                    if ($scope.input.fixedString) {
+                        try {
+                            var tmp = angular.fromJson($scope.input.fixedString);
+
+                        } catch (ex) {
+                            alert('The fixed string value must be valid Json - double quotes and all')
+                            return;
+                        }
+                        vo.fixedString = $scope.input.fixedString;
+                    }
+
+
 
                     vo.extensionAnalyse = $scope.extensionAnalyse;
 

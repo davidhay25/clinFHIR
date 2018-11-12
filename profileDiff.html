@@ -370,15 +370,18 @@
                                 </tr>
                             </table>
 
-<!--
-                            <div ng-show="typeDescription[selectedArtifactType] == 'ValueSet' || typeDescription[selectedArtifactType] == 'CodeSystem'">
+
+                            <div ng-show="typeDescription[selectedArtifactType] == 'ValueSet' ||
+                                typeDescription[selectedArtifactType] == 'CodeSystem' ||
+                                typeDescription[selectedArtifactType] == 'Profile' ||
+                                typeDescription[selectedArtifactType] == 'Extension Definition'">
                                 <button class="btn btn-link pull-right" ng-click="validateArtifactsOnServer(typeDescription[selectedArtifactType])">Check that {{typeDescription[selectedArtifactType]}}s are present on the Terminology server</button>
                             </div>
--->
-                            <button class="btn btn-link pull-right"
-                                    ng-click="validateArtifactsOnServer(typeDescription[selectedArtifactType])">
-                                Check that {{typeDescription[selectedArtifactType]}}s are present on the Terminology server</button>
-
+                            <!--
+                                                        <button class="btn btn-link pull-right"
+                                                                ng-click="validateArtifactsOnServer(typeDescription[selectedArtifactType])">
+                                                            Check that {{typeDescription[selectedArtifactType]}}s are present on the Terminology server</button>
+                            -->
                             <div ng-show="typeDescription[selectedArtifactType] == 'ValueSet'">
                                 <div class="clearfix"></div>
                                 <button class="btn btn-link pull-right"
