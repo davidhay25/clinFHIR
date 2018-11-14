@@ -3018,7 +3018,6 @@ angular.module("sampleApp")
                     }
                 });
                 return ar;
-
             };
 
             //get all the children of this path.

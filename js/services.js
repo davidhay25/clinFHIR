@@ -389,6 +389,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 subject : {reference:'Patient/'+patientId},
                 status : 'current',
                 mode: 'snapshot',
+                text:{status:'generated',div:"<div xmlns='http://www.w3.org/1999/xhtml'>Allergies list</div>"},
                 code : {coding : [{code:'allergies',system:'http://hl7.org/fhir/list-example-use-codes'}]}};
 
 
@@ -460,6 +461,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 subject : {reference:'Patient/'+patientId},
                 status : 'current',
                 mode: 'snapshot',
+                text:{status:'generated',div:"<div xmlns='http://www.w3.org/1999/xhtml'>Problem list</div>"},
                 code : {coding : [{code:'problems',system:'http://hl7.org/fhir/list-example-use-codes'}]}};
 
             var deferred = $q.defer();
@@ -537,6 +539,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 subject : {reference:'Patient/'+patientId},
                 status : 'current',
                 mode: 'snapshot',
+                text:{status:'generated',div:"<div xmlns='http://www.w3.org/1999/xhtml'>Medication list</div>"},
                 code : {coding : [{code:'medications',system:'http://hl7.org/fhir/list-example-use-codes'}]}};
 
             var deferred = $q.defer();
@@ -610,13 +613,16 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             console.log(bundleConditions)
             var deferred = $q.defer();
             options = options || {}
-            options.count = options.count || 10;     //number to reate
+            options.count = options.count || 10;     //number to create
             options.period = options.period || 60;  //what period of time the enounters should be over
             var bundle = {resourceType:'Bundle',type:'transaction',entry:[]};
 
             for (var i= 0; i< options.count;i++) {
                 var id = 't'+ new Date().getTime() + i;
                 var enc = {resourceType:'Encounter',status:'finished'};
+
+
+
                 enc.id = id;
 
 
@@ -667,6 +673,10 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 enc.type = [(this.getRandomEntryFromOptions('encounterType'))];
                 //var da = moment().subtract(parseInt(options.period * Math.random()),'days');
                 enc.period = {start:moment().subtract(parseInt(options.period * Math.random()),'days')};
+
+                var txt = moment(enc.period.start).format("MMM Do YYYY") + " for " + enc.reason[0].text;
+                enc.text = {status:'generated',div:"<div xmlns='http://www.w3.org/1999/xhtml'>"+txt+"</div>"}
+
                 var practitioner = this.getRandomReferenceResource('Practitioner');
                 enc.participant = [];
                 enc.participant.push({individual:{reference:'Practitioner/'+practitioner.id,display:practitioner.name.text}});  //safe 'cause I created the practitioner...
