@@ -11,6 +11,10 @@
     <script src="js/libs/lodash.core.js"></script>
     <script src="js/libs/moment.min.js"></script>
 
+    <script src="js/libs/firebase.js"></script>
+    <script src="js/libs/angularfire.min.js"></script>
+
+
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="css/main.css"/>
     <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
@@ -50,7 +54,7 @@
     <script src="js/libs/angular-bootstrap-checkbox.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.checkbox','ui.bootstrap','ngStorage','ngSanitize']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.checkbox','ui.bootstrap',"firebase",'ngStorage','ngSanitize']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -113,13 +117,27 @@
     <script src="resourceBuilder/vsBrowser.js"></script>
 
 
-    <!-- for the 3d graph -->
+    <!-- for the 3d graph
     <script src="//unpkg.com/3d-force-graph@1"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/qwest/4.4.5/qwest.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.4/papaparse.min.js"></script>
     <script src="//unpkg.com/three"></script>
     <script src="//unpkg.com/three-spritetext"></script>
+-->
+    <script>
+        var config = {
+            apiKey: "AIzaSyBNMohLbPiSKwpGwfARopdeW_6LLXujcUo",
+            authDomain: "clinfhir.firebaseapp.com",
+            databaseURL: "https://clinfhir.firebaseio.com",
+            storageBucket: ""
+        };
 
+        //  console.log(firebase)
+        if (firebase) {
+            firebase.initializeApp(config);
+
+        }
+    </script>
 
     <title>Patient Viewer</title>
 
@@ -133,7 +151,7 @@
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 
         <div class="container-fluid">
-            <div class="col-md-3 col-sm-3">
+            <div class="col-md-2 col-sm-2">
 
 
                 <a class="navbar-brand" href="#"
@@ -145,12 +163,16 @@
 
 
             </div>
-            <div class="col-md-5 col-sm-5">
+            <div class="col-md-6 col-sm-6">
 
                 <div class="navbar-text" ng-show="currentPatient">
                     {{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}} ({{currentPatient.id}})
+
+
+
                 </div>
             </div>
+
             <div class="col-md-1 col-sm-1">
                 <div class="pull-right navbar-form" ng-show="waiting">
                     <img src="css/ajax_loader_blue_32.gif"/>
@@ -162,8 +184,12 @@
                     <button class="btn btn-danger" ng-click="smartLogin()">Logon</button>
                 </form>
 
-                <form ng-hideDEP = "appConfigSvc.getCurrentDataServer().smart && ! oauthAccessToken" class="navbar-form navbar-right">
-                    <button class="btn btn-primary" ng-click="findPatient()">Select Patient</button>
+                <div class="navbar-text " ng-show="currentPatient && !loadedFromBookmark" ng-click="generateShortCut()">
+                    <span class="clickable">Share</span> </div>
+
+                <form ng-hide = "loadedFromBookmark" class="navbar-form navbar-right">
+
+                    <button class="btn btn-primary pull-right" ng-click="findPatient()">Select Patient</button>
                 </form>
             </div>
         </div>

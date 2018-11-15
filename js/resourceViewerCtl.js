@@ -2,7 +2,8 @@
 angular.module("sampleApp")
     .controller('resourceViewerCtrl',
         function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,sessionSvc,questionnaireSvc,
-                  $uibModal, $timeout,GetDataFromServer,modalService,ResourceUtilsSvc,builderSvc,$window,$http) {
+                  $uibModal, $timeout,GetDataFromServer,modalService,ResourceUtilsSvc,builderSvc,$window,$http,$location,
+                  $firebaseObject,Utilities) {
 
 
 
@@ -59,6 +60,56 @@ angular.module("sampleApp")
 
             $scope.ResourceUtilsSvc = ResourceUtilsSvc; //needed for 1 line summary
             $scope.appConfigSvc = appConfigSvc;     //for displaying the patient json
+
+
+            //was a 'share' link (like in logocal modeller passed)...
+
+            //create a shortcut to this patient
+            $scope.generateShortCut = function() {
+                var hash = Utilities.generateHash();
+                var shortCut = $window.location.href+"#"+hash;
+
+                var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
+                sc.config = {dataServer:appConfigSvc.getCurrentDataServer()};
+                sc.config.patient = {id:$scope.currentPatient.id}
+                sc.shortCut = shortCut;     //the full shortcut
+                sc.$save().then(
+                    function(){
+                        modalService.showModal({}, {bodyText: "The shortcut  " +  shortCut + "  has been generated for this patient"})
+                    }
+                )
+            };
+
+
+            //if a shortcut has been used there will be a hash so load that
+            var hash = $location.hash();
+            if (hash) {
+                $scope.waiting = true;
+                var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
+                // console.log(sc)
+                sc.$loaded().then(
+                    function(){
+                        $scope.loadedFromBookmark = true;
+
+                        //set the data server to the one in the bookmark
+                        var dataServer =  sc.config.dataServer;
+                        appConfigSvc.setServerType('data',dataServer.url);       //set the data server to the same as the conformance for the comments
+
+                        var patientId = sc.config.patient.id;    //the id of the model on this server
+                        var url = dataServer.url + "Patient/"+patientId;
+
+                        $http.get(url).then(
+                            function(data) {
+                                loadPatientById(data.data)
+                            },
+                            function(err) {
+                                alert("Error loading patient: " + angular.toJson(err))
+                            }
+                        );
+                    }
+                )
+            }
+
 
             $scope.isSMART = appConfigSvc.getCurrentDataServer().smart;     //if true, this server requires SMART
             $scope.oauthAccessToken;    //if SMART, this will be the access token...
@@ -427,6 +478,8 @@ angular.module("sampleApp")
                 delete $scope.vitalsTable;
                 delete $scope.outcome.resourceTypes;
                 delete $scope.outcome.allResourcesOfOneType;
+                delete $scope.loadedFromBookmark;
+                delete $scope.currentPatient;
 
                 delete $scope.resourcesFromServer;
                 $uibModal.open({
@@ -439,17 +492,16 @@ angular.module("sampleApp")
                     function(resource){
                         console.log(resource)
                         if (resource) {
+                            loadPatientById(resource);
+                            /*
                             $scope.currentPatient = resource;
                             //load the existing resources for this patient...
                             appConfigSvc.setCurrentPatient(resource);
-
                             $scope.waiting = true;
-
                              supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
                                 //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
 
                                 function(data){
-
                                     if (data.DocumentReference) {
                                         $scope.documentReferenceList = data.DocumentReference.entry;
                                     }
@@ -470,7 +522,7 @@ angular.module("sampleApp")
                                      $scope.waiting = false;
                                  }
                              )
-
+*/
                         }
 
                     }
@@ -478,6 +530,38 @@ angular.module("sampleApp")
             };
 
 
+            function loadPatientById(resource) {
+                $scope.currentPatient = resource;
+                //load the existing resources for this patient...
+                appConfigSvc.setCurrentPatient(resource);
+                $scope.waiting = true;
+                supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
+                    //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
+
+                    function(data){
+                        if (data.DocumentReference) {
+                            $scope.documentReferenceList = data.DocumentReference.entry;
+                        }
+
+                        //need to make sure the patient resource is in the allPatients object (set in renderPatientDetails)
+                        if (! data.Patient) {
+                            var patientBundle = {resourceType:'Bundle',total:1,entry:[{resource:resource}]}
+                            data.Patient = patientBundle
+                        }
+
+                        renderPatientDetails(data)
+                        $scope.$broadcast('patientObservations',data['Observation']);//used to draw the observation charts...
+                    },
+                    function(err){
+                        console.log(err)
+                    }).finally(
+                    function(){
+                        $scope.waiting = false;
+                    }
+                )
+
+
+            }
 
 
             function renderPatientDetails(allResources,showPatient) {
