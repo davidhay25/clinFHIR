@@ -203,10 +203,13 @@
         <ng-include src="'/includes/resourceViewer.html'"></ng-include>
     </div>
 
-    <div ng-hide="appConfigSvc.getCurrentPatient()">
+    <div ng-hide="appConfigSvc.getCurrentPatient() || loadedFromBookmark">
+
         <p>Please select a patient using the 'Select Patient' button at the upper right</p>
         <p>If you want to add a new patient, then click the 'Select Patient' button, and in the modal dialog
         that appears, there's a link to add a new patient.</p>
+
+
     </div>
 
 

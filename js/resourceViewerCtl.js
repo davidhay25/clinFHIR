@@ -85,11 +85,12 @@ angular.module("sampleApp")
             var hash = $location.hash();
             if (hash) {
                 $scope.waiting = true;
+                $scope.loadedFromBookmark = true;
                 var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
                 // console.log(sc)
                 sc.$loaded().then(
                     function(){
-                        $scope.loadedFromBookmark = true;
+
 
                         //set the data server to the one in the bookmark
                         var dataServer =  sc.config.dataServer;
