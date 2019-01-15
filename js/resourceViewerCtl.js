@@ -789,8 +789,7 @@ angular.module("sampleApp")
                         $scope.loadVersions(resource);  //load all the versions for this resource...
                     }
 
-
-                    createGraphOneResource(resource,'resourcenetwork')
+                    createGraphOneResource(resource,'resourcenetwork');
 
                     $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(resource, true)], {type: "text/text"}));
                     $scope.downloadLinkJsonName = resource.resourceType + "-" + resource.id;

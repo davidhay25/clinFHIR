@@ -6,6 +6,14 @@
 angular.module("sampleApp")
 
 
+
+    .filter('trustAsResourceUrl', ['$sce', function($sce) {
+        return function(val) {
+            return $sce.trustAsResourceUrl(val);
+        };
+    }])
+
+
     .filter('mapPath',function(){
         return function(s) {
 

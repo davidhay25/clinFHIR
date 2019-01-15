@@ -1122,13 +1122,8 @@ angular.module("sampleApp")
                     $scope.waiting = false;
                 });
 
-            }
-
-            $scope.selectAdHocProfileDEP = function(SD) {
-                setupProfile(SD)
-                $scope.selectedItemType = 'profile';
-                $scope.currentIG = {};      //to show the tabset
             };
+
 
 
             //note that we're using an IG to hold all the resources in this collection
@@ -1141,61 +1136,7 @@ angular.module("sampleApp")
 
                 //now pull out the various artifacts into an easy to use object
                 makeArtifact();
-                /*
-                $scope.artifacts = {}
 
-                $scope.currentIG.package.forEach(function (package) {
-                    if (package && package.resource) {
-                        package.resource.forEach(function (resource) {
-
-
-                            var purpose = profileDiffSvc.getPurpose(resource)
-
-                            // var purpose = resource.purpose || resource.acronym;     //<<< todo - 'purpose' was removed in R3...
-                            var type;
-
-                            if (resource.example || resource.purpose == 'example') {         //another R2/3 difference...
-                                purpose = 'example'
-                                var t = Utilities.getSingleExtensionValue(resource, extDef);
-                                if (t) {
-                                    type = t.valueString;
-                                }
-                            }
-
-                            $scope.artifacts[purpose] = $scope.artifacts[purpose] || []
-
-                            var item2 = {description: resource.description, type: type, name:resource.name}
-
-                            if (resource.sourceReference) {
-                                item2.url = resource.sourceReference.reference;
-                            }
-
-                            if (resource.sourceUri) {
-                                item2.url = resource.sourceUri;
-                                item2.uri = resource.sourceUri;     //for OID type references...
-                            }
-
-                            $scope.artifacts[purpose].push(item2)
-                        })
-                     }
-                });
-
-                //sort 'em all...
-                ['extension','profile','terminology','logical','other','example'].forEach(function (purpose) {
-                    if ($scope.artifacts[purpose]) {
-                        $scope.artifacts[purpose].sort(function(item1,item2) {
-                            var typ1 =  $filter('getLogicalID')(item1.url);
-                            var typ2 =  $filter('getLogicalID')(item2.url);
-                            if (typ1 > typ2) {
-                                return 1
-                            } else {
-                                return -1
-                            }
-                        })
-                    }
-
-                })
-*/
                 $scope.pageTreeData = profileDiffSvc.generatePageTree($scope.currentIG,$scope.artifacts,$scope.typeDescription);
 
                 drawPageTree();
@@ -1207,6 +1148,13 @@ angular.module("sampleApp")
 
             function makeArtifact() {
                 $scope.artifacts = {}
+                let cfpubIgRoot = "";
+                var cfpubIgRootExt = Utilities.getSingleExtensionValue($scope.currentIG, appConfigSvc.config().standardExtensionUrl.cfpubIgRoot);
+                if (cfpubIgRootExt) {
+                    cfpubIgRoot = cfpubIgRootExt.valueUri;
+                }
+
+
                 $scope.currentIG.package.forEach(function (package) {
                     if (package && package.resource) {
 
@@ -1230,9 +1178,26 @@ angular.module("sampleApp")
                                 }
                             }
 
+
+
                             $scope.artifacts[purpose] = $scope.artifacts[purpose] || []
 
-                            var item2 = {description: resource.description, type: type, name:resource.name}
+                            var item2 = {description: resource.description, type: type, name:resource.name};
+                            let igDocExtUrl = appConfigSvc.config().standardExtensionUrl.igDocumentation;
+                            var t = Utilities.getSingleExtensionValue(resource, igDocExtUrl);
+                            if (t) {
+                                item2.documentationUri = cfpubIgRoot +t.valueUri;
+                            }
+
+/*
+
+                            var docUrl = Utilities.getSingleExtensionValue(resource, "http://hl7.org/fhir/StructureDefinition/implementationguide-page");   //todo magic number
+
+                            if (docUrl) {
+                                item2.documenationUri =  docUrl.valueUri
+                            }
+//console.log(resource,docUrl)
+*/
 
                             if (resource.sourceReference) {
                                 item2.url = resource.sourceReference.reference;
@@ -1493,6 +1458,9 @@ console.log(SD)
                        }
                    }
 
+                   console.log('item',item)
+                    $scope.iframeUrl = item.documentationUri
+
                    $scope.waiting = true;
 
                    profileDiffSvc.getSD(url).then(
@@ -1616,6 +1584,8 @@ console.log(SD)
             function setupProfile(SD) {
                 $scope.selectedSD = SD;
                 $scope.arV2 = profileDiffSvc.generateV2MapFromSD(SD);
+
+
 
 
 

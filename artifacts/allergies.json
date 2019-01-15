@@ -1,5 +1,4 @@
 [
-    
     {
                 "resourceType": "AllergyIntolerance",
                
@@ -86,10 +85,6 @@
                     "code": "a"
                 },
                 "assertedDate": "2018-03-07",
-                "asserter": {
-                    "reference": "Patient/example2",
-                    "display": "Sally Grant"
-                },
                 "reaction": [
                     {
                         "manifestation": [

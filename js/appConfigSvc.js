@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2018-11-18';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2019-01-16';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -47,6 +47,9 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.qItemDescription = 'http://clinfhir.com/fhir/StructureDefinition/qItemDescription';
         defaultConfig.standardExtensionUrl.fhirPath = 'http://clinfhir.com/fhir/StructureDefinition/fhirPath';
         defaultConfig.standardExtensionUrl.editor = 'http://clinfhir.com/fhir/StructureDefinition/editor';
+        defaultConfig.standardExtensionUrl.igDocumentation = 'http://hl7.org/fhir/StructureDefinition/implementationguide-page';
+        defaultConfig.standardExtensionUrl.cfpubIgRoot = "http://clinfhir.com/fhir/StructureDefinition/cfpubIgRoot";
+
 
 
 
@@ -106,10 +109,6 @@ angular.module("sampleApp")
         defaultConfig.terminologyServers.push({name:"Ontoserver",url:"https://ontoserver.csiro.au/stu3-latest/",version:3});
         defaultConfig.terminologyServers.push({name:"Ontoserver-PC",url:"https://primarycare.ontoserver.csiro.au/fhir/",version:3});
 
-
-
-
-
         defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://test.fhir.org/r2/",version:2,everythingOperation:true,isTerminology:true});
         defaultConfig.allKnownServers.push({name:"Grahames STU3 server",url:"http://test.fhir.org/r3/",version:3,everythingOperation:true,isTerminology:true});
         defaultConfig.allKnownServers.push({name:"Grahames R4 server",url:"http://test.fhir.org/r4/",version:4,everythingOperation:true,isTerminology:true});
@@ -119,6 +118,11 @@ angular.module("sampleApp")
 
 
         defaultConfig.allKnownServers.push({name:"Public HAPI STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true,isTerminology:true});
+
+        defaultConfig.allKnownServers.push({name:"Public HAPI R4 server",url:" http://fhirtest.uhn.ca/baseR4/",version:4,everythingOperation:true,isTerminology:true});
+
+
+
 
         defaultConfig.allKnownServers.push({name:"Vonk STU3 server",url:"http://vonk.fire.ly/",version:3,everythingOperation:false});
 

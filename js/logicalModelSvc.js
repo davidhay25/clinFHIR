@@ -2241,12 +2241,22 @@ angular.module("sampleApp")
 
                                 //test that the parent exists
                                 var found = false;
+
+                                for (let item of treeData) {
+                                    if (item.id == parentId) {
+                                        found = true;
+                                        break
+                                    }
+                                }
+
+                                /*
                                 treeData.forEach(function (item) {
                                     if (item.id == parentId) {
                                         found = true;
                                     }
 
                                 });
+                                */
 
                                 if (!found) {
                                     console.log('Missing parent element ' + parentId)
@@ -2274,7 +2284,6 @@ angular.module("sampleApp")
                                                 typ.targetProfile = typ.profile[0];
                                                 delete typ.profile;
                                                 item.data.type.push(typ)
-                                                //item.data.type.targetProfile = typ.profile[0]
                                             } else {
                                                 //Other data types
                                                 item.data.type.push(typ)
@@ -2284,21 +2293,7 @@ angular.module("sampleApp")
                                         item.data.type = ed.type;
                                     }
                                 }
-/*
 
-                                if (fhirVersion == 2 && ed.type) {
-                                    var item.data.type = []
-                                    //the profile is multiple
-                                    ed.type.forEach(function (typ) {
-                                        if (typ.profile) {
-                                            item.data.type.targetProfile = typ.profile[0]
-                                        }
-                                    })
-
-                                } else {
-                                    item.data.type.targetProfile = typ.targetProfile;
-                                }
-*/
                                 //item.data.type = ed.type;
                                 item.data.min = ed.min;
                                 item.data.max = ed.max;
@@ -2306,25 +2301,12 @@ angular.module("sampleApp")
                                 item.data.comments = ed.comments;
 
                                 //set the mapping
-                                //item.data.mappingPath = path; //[{identity: 'fhir', map: path}]
 
                                 item.data.mappingFromED = [{identity: 'fhir', map: path}];
                                 //decorate the type elements...
 
                                 decorateTreeView(item,ed);     //common decorator functions like isComplex
 
-                                /*
-                                if (item.data.type) {
-                                    item.data.type.forEach(function(typ){
-                                        if (typ.code) {
-                                            var first = typ.code.substr(0,1);
-                                            if (first == first.toUpperCase()) {
-                                                typ.isComplexDT = true;
-                                            }
-                                        }
-                                    })
-                                }
-                                */
 
 
                                 //note that we don't retrieve the complete valueset...
@@ -2544,7 +2526,7 @@ angular.module("sampleApp")
 
 
 
-                            })
+                            });
 
 
 
@@ -2583,10 +2565,6 @@ angular.module("sampleApp")
                                 item.data.mappingFromED.push(internalMap);
 
                             });
-
-
-
-
 
                         }
 

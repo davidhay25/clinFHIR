@@ -912,6 +912,12 @@
 
                                 -->
 
+                                <uib-tab heading="Doc">
+                                    <iframe ng-src="{{iframeUrl | trustAsResourceUrl}}" height="800px" width="100%"></iframe>
+
+                                </uib-tab>
+
+
                                 <uib-tab heading="Graph"  select="fitGraph()">
                                     <p class="banner"><em>Relationships between the Profile and other resources, Extensions and ValueSets.</em></p>
                                     <div class="row" ng-show="currentIG">
