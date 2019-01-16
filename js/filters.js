@@ -135,9 +135,14 @@ angular.module("sampleApp")
                 }
 
                 //console.log(id);
-                var ar = url.split('/');
-                var lid = ar[ar.length-1];
-                return lid;
+                if (url) {
+                    var ar = url.split('/');
+                    var lid = ar[ar.length-1];
+                    return lid;
+                } else {
+                    console.log('filter: getLogicalId - likely array of undefined')
+                }
+
             } else {
                 return "" ; //nov 11 - was returning an array
             }

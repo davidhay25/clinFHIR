@@ -994,58 +994,96 @@
                                     <td>
                                     <div ng-repeat = "typ in selectedNode.data.type">
 
-                                        <!-- todo - get rid of hard coded Dosage here-->
-
-                                        <a ng-show="typ.code == 'Dosage'" href="http://hl7.org/fhir/dosage.html" target="_blank">
-                                            <i class="glyphicon glyphicon-eye-open clickable"></i>
-                                        </a>
-
-                                        <a ng-hide="typ.code == 'Dosage'" ng-href="{{rootForDataType}}{{typ.code}}" target="_blank">
-                                            <i class="glyphicon glyphicon-eye-open clickable"></i>
-                                        </a>
 
 
 
-                                        {{typ.code}}
 
-                                        <span  ng-hide="typ.code == 'Reference'" class="clickable pull-right"
-                                              ng-click="viewDataType(typ.code)">View</span>
 
-                                        <!-- - hiding this for the moment as it might be confusing (was added for rod & mapping)
-                                        <span class="clickable" ng-click="explodeDT(typ.code)" ng-show = "typ.isComplexDT">Expand</span>
 
-                                        <span class="clickable" ng-click="explodeReference(selectedNode)"
-                                              ng-show = "selectedNode.text == 'reference'">Expand</span>
+                                        <div ng-hide = "typ.code == 'Reference'">
 
--->
-                                        <!-- Show any profile. If a reference, then hyperlink to the 'display' functionality... -->
+                                            <!-- todo - get rid of hard coded Dosage here-->
+                                            <a ng-show="typ.code == 'Dosage'" href="http://hl7.org/fhir/dosage.html" target="_blank">
+                                                <i class="glyphicon glyphicon-eye-open clickable"></i>
+                                            </a>
+
+                                            <a ng-hide="typ.code == 'Dosage'" ng-href="{{rootForDataType}}{{typ.code}}" target="_blank">
+                                                <i class="glyphicon glyphicon-eye-open clickable"></i>
+                                            </a>
+
+
+                                            {{typ.code}}
+                                            <span class="clickable pull-right"
+                                                   ng-click="viewDataType(typ.code)">View elements</span>
+                                        </div>
+
+
+
+                                        <!-- targetProfile is now multiple in internal model (Jan 2019) -->
+                                        <div ng-show = "typ.code == 'Reference'">
+                                            <div ng-repeat = 'targetProfile in typ.targetProfile'>
+                                                    <span ng-show="isCoreType(targetProfile)">
+                                                    <a ng-href="http://hl7.org/fhir/{{targetProfile | getLogicalID}}.html" target="_blank">
+                                                        <i class="glyphicon glyphicon-eye-open clickable"></i>
+                                                    </a>
+
+                                                </span>
+
+
+                                                <span class="clickable pull-right" ng-click="viewReferencedModel(targetProfile)">View elements</span>
+                                                Reference -> {{targetProfile | getLogicalID}}
+
+
+
+<!--
+                                                <div ng-hide="isCoreType(typ.targetProfile)">
+                                                    {{typ.profile}}{{typ.targetProfile}}
+                                                </div>
+                                                -->
+
+
+
+                                            </div>
+
+
+
+                                        </div>
+
+                                        <!-- Show any profile. If a reference, then hyperlink to the 'display' functionality...
                                         <span ng-show="typ.code == 'Reference'" class="pull-right">
+
                                             <span class="clickable" ng-click="viewReferencedModel(typ.targetProfile)">View</span>
 
-                                            <!--
-                                              <span ng-hide="isDirty" class="clickable" ng-click="loadReferencedModel(selectedNode.data.referenceUri)">Load</span>
-                                          -->
+
 
                                         </span>
-
-                                        <!-- Reference to another model -->
+-->
+                                        <!-- Reference to another model
                                         <div ng-show="isCoreType(typ.targetProfile)">
                                             <a ng-href="http://hl7.org/fhir/{{typ.targetProfile | getLogicalID}}.html" target="_blank">
                                                 {{typ.profile}}{{typ.targetProfile}}
                                             </a>
 
                                         </div>
+
                                         <div ng-hide="isCoreType(typ.targetProfile)">
                                             {{typ.profile}}{{typ.targetProfile}}
                                         </div>
+                                        -->
 
 
                                     </div>
                                     <!-- If there's a ValueSet defined, allow it to be selected... -->
                                     <span ng-show="selectedNode.data.selectedValueSet">
-                                        <span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.vs.url)">
+
+                                         <span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.valueSet)">
+                                            {{selectedNode.data.selectedValueSet.valueSet}}</span>
+                                            ({{selectedNode.data.selectedValueSet.strength}})
+
+                                        <!--<span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.vs.url)">
                                             {{selectedNode.data.selectedValueSet.vs.url}}</span>
                                             ({{selectedNode.data.selectedValueSet.strength}})
+                                        -->
 
                                     </span>
 

@@ -2273,25 +2273,43 @@ angular.module("sampleApp")
                                 item.data.description = ed.definition;
 
                                 //if this is stu2, then the 'profile' array becomes a single 'targetType' on each type
+                                //in stu3 targetProfile is single, in R4 it is multiple. in the tree array, we'll make it multiple
                                 if (ed.type) {
-                                    if (fhirVersion == 2) {
-                                        //need to walk through each type in the type array and set the 'targetProfile' property...
-                                        item.data.type = [];
+                                    switch (fhirVersion) {
+                                        case 2 :
+                                            //need to walk through each type in the type array and set the 'targetProfile' property...
+                                            item.data.type = [];
 
-                                        ed.type.forEach(function (typ) {
-                                            if (typ.profile) {
-                                                //if there's a profile, then this is a refrence.. todo - what about quantity???
-                                                typ.targetProfile = typ.profile[0];
-                                                delete typ.profile;
-                                                item.data.type.push(typ)
-                                            } else {
-                                                //Other data types
-                                                item.data.type.push(typ)
-                                            }
-                                        })
-                                    } else {
-                                        item.data.type = ed.type;
+                                            ed.type.forEach(function (typ) {
+                                                if (typ.profile) {
+                                                    //if there's a profile, then this is a refrence.. todo - what about quantity???
+                                                    typ.targetProfile = [typ.profile[0]];
+                                                    delete typ.profile;
+                                                    item.data.type.push(typ)
+                                                } else {
+                                                    //Other data types
+                                                    item.data.type.push(typ)
+                                                }
+                                            })
+                                            break;
+                                        case 3 :
+                                            //targetprofile is single - make it multiple
+                                            ed.type.forEach(function (typ) {
+                                                if (typ.targetProfile) {
+                                                    typ.targetProfile = [typ.targetProfile]
+                                                }
+                                            });
+
+                                            //item.data.type = ed.type;
+                                            break;
+                                        case 4 :
+                                            item.data.type = ed.type;
+                                            break;
+                                        default :
+                                            alert('unknown FHIR version: '+fhirVersion)
+
                                     }
+
                                 }
 
                                 //item.data.type = ed.type;
@@ -2307,8 +2325,32 @@ angular.module("sampleApp")
 
                                 decorateTreeView(item,ed);     //common decorator functions like isComplex
 
+                                if (ed.binding) {
+                                    if (fhirVersion == 4) {
+                                        //{strength:, description:, valueSet:}
+                                        item.data.selectedValueSet = ed.binding;
+                                    } else {
+                                        item.data.selectedValueSet = {strength: ed.binding.strength};
 
 
+
+                                        //  12/2/2018  change to using vsReference, but need to preserve the old stuff...
+                                        if (ed.binding.valueSetUri) {
+                                            item.data.selectedValueSet.vs = {url: ed.binding.valueSetUri};
+                                        }
+
+                                        if (ed.binding.valueSetReference && ed.binding.valueSetReference.reference) {
+                                            item.data.selectedValueSet.vs = {url: ed.binding.valueSetReference.reference};
+                                        }
+
+                                        if (item.data.selectedValueSet.vs) {
+                                            item.data.selectedValueSet.vs.name = ed.binding.description;
+                                        }
+
+                                    }
+                                }
+
+/*
                                 //note that we don't retrieve the complete valueset...
                                 if (ed.binding) {
                                     item.data.selectedValueSet = {strength: ed.binding.strength};
@@ -2323,7 +2365,7 @@ angular.module("sampleApp")
                                     }
 
                                 }
-
+*/
 
                                 treeData.push(item);
                             }
@@ -2480,38 +2522,69 @@ angular.module("sampleApp")
 
                                 if (typ.code) {
                                     var newTyp = {code:typ.code}
+                                    switch (fhirVersion) {
+                                        case 2 :
+                                            //the profile is multiple
+                                            if (typ.profile) {
+                                                newTyp.targetProfile = typ.profile
+                                            }
+                                            break;
+                                        case 3 :
+                                            //targetProfile is single - make it multi
+                                            if (typ.targetProfile) {
+                                                newTyp.targetProfile = [typ.targetProfile];
+                                            }
+
+                                            break;
+                                        case 4 :
+                                            //targetProfile is multiple
+                                            if (typ.targetProfile) {
+                                                newTyp.targetProfile = typ.targetProfile;
+                                            }
+
+                                            break;
+                                        default:
+                                            alert('unknown FHIR version: '+fhirVersion)
+                                    }
+                                    /*
                                     if (fhirVersion == 2) {
-                                        //the profile is multiple
-                                        if (typ.profile) {
-                                            newTyp.targetProfile = typ.profile[0]
-                                        }
+
                                     } else {
                                         newTyp.targetProfile = typ.targetProfile;
                                     }
-                                    // item.type = newTyp;
 
+*/
                                     //is this a coded type
                                     if (['CodeableConcept', 'Coding', 'code'].indexOf(typ.code) > -1) {
                                         item.data.isCoded = true;
                                     }
 
-
                                     //is this a reference
                                     if (typ.code == 'Reference') {
                                         item.data.isReference = true;   //used to populate the 'is reference' table...
 
-                                        //stu2/3
-                                        if (typ.profile) {
-                                            item.data.referenceUrl = typ.profile[0];
-                                        } else {
-                                            item.data.referenceUrl = typ.targetProfile;
+                                        //todo = referenceUrl will need to become multiple when the tool supports that..
+                                        switch (fhirVersion) {
+                                            case 2 :
+                                                //the profile is multiple
+                                                item.data.referenceUrl = typ.profile[0];
+                                                break;
+                                            case 3 :
+                                                //targetProfile is single
+                                                item.data.referenceUrl = typ.targetProfile;
+                                                break;
+                                            case 4 :
+                                                //targetProfile is multiple
+                                                item.data.referenceUrl = typ.targetProfile[0];
+                                                break;
+                                            default:
+                                                alert('unknown FHIR version: '+fhirVersion)
                                         }
-
 
 
                                     }
 
-                                    //is this complex
+                                    //is this a complex DT
                                     var first = newTyp.code.substr(0,1);
                                     if (first == first.toUpperCase()) {
                                         newTyp.isComplexDT = true;
@@ -2544,7 +2617,6 @@ angular.module("sampleApp")
 
 
 
-                            //item.data.mappingFromED.forEach(function(map){
                             ed.mapping.forEach(function(map){
                                 var internalMap = {identity:map.identity}
                                 var ar = map.map.split('|');        //the 'map' will always include the comment separated by '|'
@@ -2565,10 +2637,7 @@ angular.module("sampleApp")
                                 item.data.mappingFromED.push(internalMap);
 
                             });
-
                         }
-
-
 
                         if (fhirVersion == 2) {
                             item.data.comments = ed.comments;
@@ -2579,8 +2648,32 @@ angular.module("sampleApp")
 
                         //note that we don't retrieve the complete valueset...
                         if (ed.binding) {
-                            item.data.selectedValueSet = {strength: ed.binding.strength};
 
+
+                            if (fhirVersion == 4) {
+                                //{strength:, description:, valueSet:}
+                                item.data.selectedValueSet = ed.binding;
+                            } else {
+                                item.data.selectedValueSet = {strength: ed.binding.strength};
+
+
+
+                                //  12/2/2018  change to using vsReference, but need to preserve the old stuff...
+                                if (ed.binding.valueSetUri) {
+                                    item.data.selectedValueSet.vs = {url: ed.binding.valueSetUri};
+                                }
+
+                                if (ed.binding.valueSetReference && ed.binding.valueSetReference.reference) {
+                                    item.data.selectedValueSet.vs = {url: ed.binding.valueSetReference.reference};
+                                }
+
+                                if (item.data.selectedValueSet.vs) {
+                                    item.data.selectedValueSet.vs.name = ed.binding.description;
+                                }
+
+                            }
+                            /*
+                            item.data.selectedValueSet = {strength: ed.binding.strength};
 
 
 
@@ -2596,7 +2689,7 @@ angular.module("sampleApp")
                             if (item.data.selectedValueSet.vs) {
                                 item.data.selectedValueSet.vs.name = ed.binding.description;
                             }
-
+*/
 
                         }
 
@@ -2632,7 +2725,6 @@ angular.module("sampleApp")
                     this.addSimpleExtension(sd, appConfigSvc.config().standardExtensionUrl.userEmail, currentUser.email)
                 }
 
-
                 if (header.baseType) {
                     Utilities.addExtensionOnce(sd, baseTypeForModelUrl, {valueString: header.baseType})
                 }
@@ -2640,8 +2732,6 @@ angular.module("sampleApp")
                 if (header.editor) {
                     Utilities.addExtensionOnce(sd, editorUrl, {valueString: header.editor})
                 }
-
-
 
                 sd.id = scope.rootName;
                 sd.url = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/" + sd.id;
@@ -2727,10 +2817,6 @@ angular.module("sampleApp")
 
 
 
-
-
-
-
                     //a conceptMap associated with this element
                     if (data.conceptMap) {
                         Utilities.addExtensionOnce(ed, conceptMapUrl, {valueString: data.conceptMap})
@@ -2796,11 +2882,34 @@ angular.module("sampleApp")
                             if (typ.code == 'Reference') {
                                 newTyp = {code:'Reference'}
                                 //in the treeview, the profile is always named targetProfile and is single
+
+
+
+                                switch (fhirVersion) {
+                                    case 2 :
+                                        //the profile is multiple
+                                        newTyp.profile = typ.targetProfile;
+                                        break;
+                                    case 3 :
+                                        //targetProfile is single
+                                        newTyp.targetProfile = typ.targetProfile[0];
+                                        break;
+                                    case 4 :
+                                        //targetProfile is multiple
+                                        newTyp.targetProfile = typ.targetProfile;
+                                        break;
+                                    default:
+                                        alert('unknown FHIR version: '+fhirVersion)
+                                }
+
+
+                                /*
                                 if (fhirVersion == 2) {
                                     newTyp.profile = [typ.targetProfile]
                                 } else {
                                     newTyp.targetProfile = typ.targetProfile;
                                 }
+                                */
                             } else {
                                 newTyp = typ;
                             }
@@ -2813,6 +2922,22 @@ angular.module("sampleApp")
                     };
 
                     if (data.selectedValueSet) {
+
+
+                        if (fhirVersion == 4) {
+                            ed.binding = data.selectedValueSet;     //this is now the default format
+
+                        } else {
+                            ed.binding = {strength: data.selectedValueSet.strength};
+
+                            //  12/2/2018 - change to a reference...
+                            //ed.binding.valueSetUri = data.selectedValueSet.vs.url;
+
+                            ed.binding.valueSetReference = {reference: data.selectedValueSet.valueSet};
+                            ed.binding.description = data.selectedValueSet.description;
+                        }
+
+                        /*
                         ed.binding = {strength: data.selectedValueSet.strength};
 
                         //  12/2/2018 - change to a reference...
@@ -2820,7 +2945,7 @@ angular.module("sampleApp")
 
                         ed.binding.valueSetReference = {reference: data.selectedValueSet.vs.url};
                         ed.binding.description = data.selectedValueSet.vs.name;
-
+*/
                     }
 
                     ed.fixedString = data.fixedString;  //todo needs to be a compatible type

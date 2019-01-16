@@ -130,15 +130,38 @@ angular.module("sampleApp")
 
                         if (ed && ed.binding) {
                             //this is a coded element...
+                            //Note that this is drectly from the SD = so the format is different in R4...
+                            if (ed.binding.valueSet) {
+                                //this is R4
+                                $scope.selectedValueSet = ed.binding.valueSet
+                            } else {
+                                //this is R3
+                                var ref = ed.binding.valueSetReference;
+                                if (ref) {
+                                    var url = ref.reference;
+                                    var ar = url.split('/');
+                                    var name = ar[ar.length-1];
+                                    //var vo={vs:{url:url,name:name},strength:ed.binding.strength}
+                                    var vo={vs:{url:url,name:name},strength:ed.binding.strength}
+                                    $scope.selectedValueSet = vo;
+                                }
+                            }
+
+
+                            /*
                             var ref = ed.binding.valueSetReference;
                             if (ref) {
                                 var url = ref.reference;
                                 var ar = url.split('/');
                                 var name = ar[ar.length-1];
+                                //var vo={vs:{url:url,name:name},strength:ed.binding.strength}
                                 var vo={vs:{url:url,name:name},strength:ed.binding.strength}
                                 $scope.selectedValueSet = vo;
                             }
+                            */
                         }
+
+
                     }
                 }
             };
@@ -282,14 +305,23 @@ angular.module("sampleApp")
 
 
                     //set the dropdown if this is a valueset from the IG...
-                    if (data.selectedValueSet && data.selectedValueSet.vs){
+                    if (data.selectedValueSet){
                         $scope.isCoded = true;
                         $scope.vsInGuide.forEach(function(vs){
-                            if (vs.sourceUri ==data.selectedValueSet.vs.url) {
+                            if (vs.sourceUri ==data.selectedValueSet.valueSet) {
                                 $scope.input.vsFromIg = vs
                             }
                         })
                     }
+/*
+                if (data.selectedValueSet && data.selectedValueSet.vs){
+                    $scope.isCoded = true;
+                    $scope.vsInGuide.forEach(function(vs){
+                        if (vs.sourceUri ==data.selectedValueSet.vs.url) {
+                            $scope.input.vsFromIg = vs
+                        }
+                    })
+                } */
 
                     $scope.selectedValueSet = data.selectedValueSet;
 
@@ -298,7 +330,7 @@ angular.module("sampleApp")
 
                         //for a core type reference, find the name of the type (it's the last segment in the url)
                         if (data.type) {
-                            var profileUrl = data.type[0].targetProfile;    //normalized to this...
+                            var profileUrl = data.type[0].targetProfile[0];    //normalized to this...
                             if (profileUrl) {
                                 var ar = profileUrl.split('/');
                                 var typeName = ar[ar.length-1];
@@ -821,7 +853,8 @@ angular.module("sampleApp")
                             vo.referenceUrl = "http://hl7.org/fhir/StructureDefinition/" + $scope.input.referenceToCoreFromIg.name;
                         }
 
-                        vo.type[0].targetProfile = vo.referenceUrl;     //we use targetProfile here - service will downgrade to R2...
+                        //In supporting R4, targetProfile is always multiple
+                        vo.type[0].targetProfile = [vo.referenceUrl];     //we use targetProfile here - service will downgrade to R2...
 
 
 
@@ -829,7 +862,7 @@ angular.module("sampleApp")
                             //vo.isReference = true;
                             vo.referenceUrl = $scope.input.referenceFromIg.resource.url; // for the reference table...
                             // (this is the older stu3 veriosn)  vo.type[0].profile = $scope.input.referenceFromIg.resource.url;
-                            vo.type[0].targetProfile = $scope.input.referenceFromIg.resource.url;   //not quite sure why we need both...
+                            vo.type[0].targetProfile = [$scope.input.referenceFromIg.resource.url];   //not quite sure why we need both...
 
                         }
 
@@ -905,11 +938,14 @@ angular.module("sampleApp")
                     }
                 }).result.then(
                     function (vo) {
-
+                        //returns the R3 style. A bit hairy to change at the moment... - actually returns the whole VS
+                       if (vo.vs) {
+                           $scope.selectedValueSet = {valueSet : vo.vs.url, strength: vo.strength, description : vo.description}
+                       }
 
                        // console.log(vo)
 
-                        $scope.selectedValueSet = vo;
+                        //$scope.selectedValueSet = vo;
 
                     }
                 )
@@ -917,7 +953,8 @@ angular.module("sampleApp")
 
             $scope.selectVsFromIg = function(){
                 var vs = $scope.input.vsFromIg;
-                var vo={vs:{url:vs.sourceUri,name:vs.name},strength:'preferred'}
+                //var vo={vs:{url:vs.sourceUri,name:vs.name},strength:'preferred'}
+                var vo={valueSet:vs.sourceUri,name:vs.name,strength:'preferred'};
                 $scope.selectedValueSet = vo;
 
 

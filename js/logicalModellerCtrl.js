@@ -815,7 +815,6 @@ angular.module("sampleApp")
 
             }
 
-
             $scope.showCommentEntryDEP = function(comment,index) {
 
 
@@ -952,21 +951,21 @@ angular.module("sampleApp")
                    // var resourceType;
                     for (var i=0; i< parent.data.type.length; i++) {
                         var typ = parent.data.type[i];
-                        if (typ.targetProfile) {
+                        if (typ.targetProfile && typ.targetProfile.length > 0) {
 
 
                             //set the resource type as a mapping. need to update both node and treeData (a scoping issue no doubt)..
-                            node.data.mappingFromED = [{identity:'fhir',map: typ.targetProfile}]
+                            node.data.mappingFromED = [{identity:'fhir',map: typ.targetProfile[0]}]
                             $scope.treeData.forEach(function(item){
                                 if (item.data.path == node.data.path) {
-                                    item.data.mappingFromED = [{identity:'fhir',map: typ.targetProfile}]
+                                    item.data.mappingFromED = [{identity:'fhir',map: typ.targetProfile[0]}]
                                 }
                             })
 
 
-                            var ar = typ.targetProfile.split('/');
+                            var ar = typ.targetProfile[0].split('/');
                             parent.text += " ("+ ar[ar.length-1] + ")"
-                            logicalModelSvc.explodeResource($scope.treeData,$scope.selectedNode,typ.targetProfile).then(
+                            logicalModelSvc.explodeResource($scope.treeData,$scope.selectedNode,typ.targetProfile[0]).then(
                                 function() {
                                     drawTree();
                                     $scope.isDirty = true;
@@ -987,7 +986,7 @@ angular.module("sampleApp")
 
             }
 
-            $scope.explodeDT = function(dt) {
+            $scope.explodeDTDEP = function(dt) {
 
 
                 logicalModelSvc.explodeDataType($scope.treeData,$scope.selectedNode,dt).then(
@@ -1700,8 +1699,8 @@ angular.module("sampleApp")
                             }
 
                             $scope.selectBaseType = function() {
-                                //$scope.input.createElementsFromBase = true;     //default to copy elements across
-                            }
+                                $scope.input.createElementsFromBase = true;     //default to copy elements across
+                            };
 
                             $scope.checkName = function() {
                                 if ($scope.input.name) {
@@ -2472,7 +2471,9 @@ angular.module("sampleApp")
                                         node.data.type.forEach(function (typ) {
                                             if (typ.code == 'Reference') {
                                                 //r2/r3 difference
-                                                var profile = typ.targetProfile
+
+
+                                                var profile = typ.targetProfile[0]; //now always multiple
                                                 if (!profile && typ.profile) {
                                                     profile = typ.profile[0]
                                                 }
@@ -2600,7 +2601,8 @@ angular.module("sampleApp")
 
                                     if (child.boundValueSet) {
                                         newNode.data.selectedValueSet = {strength: child.bindingStrength};
-                                        newNode.data.selectedValueSet.vs = {url: child.boundValueSet};
+                                        //newNode.data.selectedValueSet.vs = {url: child.boundValueSet};
+                                        newNode.data.selectedValueSet.valueSet = child.boundValueSet;
                                     }
 
 
