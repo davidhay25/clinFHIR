@@ -206,7 +206,7 @@ angular.module("sampleApp")
 
             },
             makeMappingDownload : function(SD) {
-                var download = "Path,Type,Multiplicity,Definition,Comment,Mapping,Fixed Value,Extension Url\n";
+                var download = "Path,Type,Multiplicity,Definition,Comment,Mapping,Fixed Value,Extension Url,Usage Notes,Misuse,Legacy\n";
 
                 if (SD && SD.snapshot && SD.snapshot.element) {
                     SD.snapshot.element.forEach(function (ed) {
@@ -252,10 +252,14 @@ angular.module("sampleApp")
                             }
                             lne += ',';
 
-                            var ext = Utilities.getSingleExtensionValue(ed,simpleExtensionUrl);
+                            var ext = Utilities.getSingleExtensionValue(ed,simpleExtensionUrl); //in case this is an extension
                             if (ext && ext.valueString) {
                                 lne += ed.valueString
                             }
+                            lne += ',';
+                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.usageGuide) +',';
+                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.legacy) +',';
+                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.misuse) ;
                             download += lne + "\n";
                         }
 
@@ -263,6 +267,18 @@ angular.module("sampleApp")
 
                 }
                 return download;
+
+
+
+
+                function getStringExtensionValue(ed,url) {
+                    var ext = Utilities.getSingleExtensionValue(ed,url); //in case this is an extension
+                    if (ext && ext.valueString) {
+                        return ext.valueString
+                    } else {
+                        return "";
+                    }
+                }
 
                 //remove comma's and convert " -> '
                 function makeSafe(s) {
@@ -2397,7 +2413,7 @@ angular.module("sampleApp")
                 var discriminatorUrl = appConfigSvc.config().standardExtensionUrl.discriminatorUrl;
                 var conceptMapUrl = appConfigSvc.config().standardExtensionUrl.conceptMapUrl;
                 var editorUrl = appConfigSvc.config().standardExtensionUrl.editor;
-                var usageGuideUrl = appConfigSvc.config().standardExtensionUrl.editor;
+                var usageGuideUrl = appConfigSvc.config().standardExtensionUrl.usageGuide;
                 var legacyUrl = appConfigSvc.config().standardExtensionUrl.legacy;
                 var misuseUrl = appConfigSvc.config().standardExtensionUrl.misuse;
 
@@ -2740,7 +2756,7 @@ angular.module("sampleApp")
                 var discriminatorUrl = appConfigSvc.config().standardExtensionUrl.discriminatorUrl;
                 var conceptMapUrl = appConfigSvc.config().standardExtensionUrl.conceptMapUrl;
                 var editorUrl = appConfigSvc.config().standardExtensionUrl.editor;
-                var usageGuideUrl = appConfigSvc.config().standardExtensionUrl.editor;
+                var usageGuideUrl = appConfigSvc.config().standardExtensionUrl.usageGuide;
                 var legacyUrl = appConfigSvc.config().standardExtensionUrl.legacy;
                 var misuseUrl = appConfigSvc.config().standardExtensionUrl.misuse;
 
