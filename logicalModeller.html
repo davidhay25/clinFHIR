@@ -963,6 +963,28 @@
                                     </td>
                                 </tr>
 
+                                <tr ng-show="selectedNode.data.usageGuide">
+                                    <td>Usage Guide</td>
+                                    <td>
+                                        {{selectedNode.data.usageGuide}}
+
+                                    </td>
+                                </tr>
+                                <tr ng-show="selectedNode.data.misuse">
+                                    <td>Misuse</td>
+                                    <td>
+                                        {{selectedNode.data.misuse}}
+
+                                    </td>
+                                </tr>
+                                <tr ng-show="selectedNode.data.legacy">
+                                    <td>Legacy issues</td>
+                                    <td>
+                                        {{selectedNode.data.legacy}}
+
+                                    </td>
+                                </tr>
+
                                 <tr ng-show="selectedNode.data.mappingFromED.length > 0"><td>Mappings</td><td>
                                     <table class="table table-condensed table-bordered"  style="margin-bottom: 2px">
                                         <tr><th>Identity</th><th>Map</th><th>Comment</th></tr>

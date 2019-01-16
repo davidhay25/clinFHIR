@@ -135,9 +135,37 @@
             <div class="form-group">
                 <div class="row">
                     <div class="col-md-6 col-sm-6">
+                        <uib-tabset>
+                            <uib-tab>
+                                <uib-tab-heading><strong>Comments</strong></uib-tab-heading>
+                                <textarea class="form-control" rows="4" ng-model="input.comments"
+                                          placeholder="Any comments on the use of this element"></textarea>
+                            </uib-tab>
+                            <uib-tab>
+                                <uib-tab-heading><strong>Use Guide</strong></uib-tab-heading>
+                                <textarea class="form-control" rows="4" ng-model="input.usageGuide"
+                                          placeholder="Notes on how this element should be used"></textarea>
+                            </uib-tab>
+                            <uib-tab>
+                                <uib-tab-heading><strong>Misuse</strong></uib-tab-heading>
+                                <textarea class="form-control" rows="4" ng-model="input.misuse"
+                                          placeholder="How this element should NOT be used"></textarea>
+                            </uib-tab>
+                            <uib-tab>
+                                <uib-tab-heading><strong>Legacy</strong></uib-tab-heading>
+                                <textarea class="form-control" rows="4" ng-model="input.legacy"
+                                          placeholder="Legacy issues"></textarea>
+                            </uib-tab>
+
+                        </uib-tabset>
+
+
+                        <!--
                         <div><label>Comments</label></div>
                         <textarea class="form-control" rows="4" ng-model="input.comments"
                                   placeholder="Any comments on the use of this element"></textarea>
+
+                        -->
 
                     </div>
                     <div class="col-md-6 col-sm-6">

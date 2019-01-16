@@ -2397,6 +2397,10 @@ angular.module("sampleApp")
                 var discriminatorUrl = appConfigSvc.config().standardExtensionUrl.discriminatorUrl;
                 var conceptMapUrl = appConfigSvc.config().standardExtensionUrl.conceptMapUrl;
                 var editorUrl = appConfigSvc.config().standardExtensionUrl.editor;
+                var usageGuideUrl = appConfigSvc.config().standardExtensionUrl.editor;
+                var legacyUrl = appConfigSvc.config().standardExtensionUrl.legacy;
+                var misuseUrl = appConfigSvc.config().standardExtensionUrl.misuse;
+
                 var cntExtension = 0;
                 var arTree = [];
                 if (sd && sd.snapshot && sd.snapshot.element) {
@@ -2467,6 +2471,8 @@ angular.module("sampleApp")
                                 item.data.header.editor = ext1.valueString;
                             }
 
+
+
                             //note that mapping node is different in the SD and the ED - but in the same place in the treeData
                             if (sd.mapping && sd.mapping.length > 0) {
 
@@ -2485,6 +2491,22 @@ angular.module("sampleApp")
 
                         }
                         item.state = {opened: true};     //default to fully expanded
+
+                        //look for usageGuide
+                        var ext1 = Utilities.getSingleExtensionValue(ed, usageGuideUrl);
+                        if (ext1 && ext1.valueString) {
+                            item.data.usageGuide = ext1.valueString;
+                        }
+                        //look for misuse note
+                        var ext1 = Utilities.getSingleExtensionValue(ed, misuseUrl);
+                        if (ext1 && ext1.valueString) {
+                            item.data.misuse = ext1.valueString;
+                        }
+                        //look for legacy note
+                        var ext1 = Utilities.getSingleExtensionValue(ed, legacyUrl);
+                        if (ext1 && ext1.valueString) {
+                            item.data.legacy = ext1.valueString;
+                        }
 
 
                         item.data.fixedString = ed.fixedString;      //todo, this should probably be a type compatible with this element
@@ -2718,6 +2740,9 @@ angular.module("sampleApp")
                 var discriminatorUrl = appConfigSvc.config().standardExtensionUrl.discriminatorUrl;
                 var conceptMapUrl = appConfigSvc.config().standardExtensionUrl.conceptMapUrl;
                 var editorUrl = appConfigSvc.config().standardExtensionUrl.editor;
+                var usageGuideUrl = appConfigSvc.config().standardExtensionUrl.editor;
+                var legacyUrl = appConfigSvc.config().standardExtensionUrl.legacy;
+                var misuseUrl = appConfigSvc.config().standardExtensionUrl.misuse;
 
                 //todo - should use Utile.addExtension...
                 var sd = {resourceType: 'StructureDefinition'};
@@ -2954,6 +2979,18 @@ angular.module("sampleApp")
                     if (data.discriminator) {
                         Utilities.addExtensionOnce(ed, discriminatorUrl, {valueString: data.discriminator})
                     }
+
+                    if (data.usageGuide) {
+                        Utilities.addExtensionOnce(ed, usageGuideUrl, {valueString: data.usageGuide})
+                    }
+
+                    if (data.misuse) {
+                        Utilities.addExtensionOnce(ed, misuseUrl, {valueString: data.misuse})
+                    }
+                    if (data.legacy) {
+                        Utilities.addExtensionOnce(ed, legacyUrl, {valueString: data.legacy})
+                    }
+
 
                     sd.snapshot.element.push(ed)
                 });

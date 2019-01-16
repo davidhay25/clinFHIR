@@ -231,6 +231,11 @@ angular.module("sampleApp")
                     $scope.input.comments = data.comments;
                     $scope.input.mapping = data.mapping;
 
+                    //these 3 are from extensions...
+                    $scope.input.misuse = data.misuse;
+                    $scope.input.usageGuide = data.usageGuide;
+                    $scope.input.legacy = data.legacy;
+
                     $scope.input.conceptMap = data.conceptMap;
 
                     //$scope.input.mappingPath = data.mappingPath;
@@ -882,6 +887,17 @@ angular.module("sampleApp")
                             vo.min =1; vo.max='*';
                             break;
                     }
+
+                    if ($scope.input.usageGuide) {
+                        vo.usageGuide = $scope.input.usageGuide;
+                    }
+                    if ($scope.input.misuse) {
+                        vo.misuse = $scope.input.misuse;
+                    }
+                    if ($scope.input.legacy) {
+                        vo.legacy = $scope.input.legacy;
+                    }
+
 
                     $scope.$close(vo);
                 };
