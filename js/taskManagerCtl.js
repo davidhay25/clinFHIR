@@ -1,28 +1,51 @@
-angular.module("sampleApp").controller('taskCtrl',
-    function ($scope,$http,appConfigSvc,logicalModelSvc,Utilities) {
+angular.module("sampleApp").controller('taskManagerCtrl',
+    function ($scope,$http,appConfigSvc) {
 
         let clinFhirDevice = 'Device/cfDevice';
-        let fhirVersion = $scope.conformanceServer.version;     //from parent
-        let taskCode =  {system:"http://loinc.org",code:"48767-8"}
-        var pathExtUrl = appConfigSvc.config().standardExtensionUrl.path;  //the extension for recording the model path for a comment
+        $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
+        $scope.input = {}
 
+        let fhirVersion = $scope.conformanceServer.version;     //from parent
+        let taskCode =  {system:"http://loinc.org",code:"48767-8"};
+        var pathExtUrl = appConfigSvc.config().standardExtensionUrl.path;  //the extension for recording the model path for a comment
+        var states = ['requested','received','accepted','rejected']
+
+        $scope.model = {id:"StructureDefinition/ADRAllergyIntolerance"};    //load from a selector
 
         if (!pathExtUrl) {
             alert("Task warning: You must restart clinFHIR then the Logical Modeller to reset updated config")
         }
 
-        $scope.model;
-        $scope.$on('modelSelected',function(event,entry){
-            console.log(event,entry)
+        //add a new not as an annotation
+        $scope.addNote = function(note) {
+            $scope.localTask.notes = $scope.localTask.notes || []
+            var annot = {text:note,time: new Date().toISOString()};
+            $scope.localTask.notes.push(annot);
+            delete $scope.input.note;
 
-            if (entry && entry.resource) {
-                $scope.model = entry.resource;
+            //update the task resource
+            let fhirTask = $scope.selectedTask.resource;
+            fhirTask.note = fhirTask.note || []
+            fhirTask.note.push(annot);
+            let url = $scope.conformanceServer.url + "Task/"+fhirTask.id
+            $http.put(url,fhirTask).then(
+                function(data){
 
-                loadTasksForModel(entry.resource.id)
+                },function (err) {
+                    alert(angular.toJson(err))
+                }
+            )
 
-            }
-        });
+        };
 
+        $scope.selectTask = function(task) {
+            $scope.selectedTask = task;
+            $scope.fhirTask = task.resource
+            $scope.localTask = angular.copy(task)
+            delete $scope.localTask.resource;
+        }
+
+        //load all the tasks for a given model
         function loadTasksForModel(id) {
             $scope.tasks = []
             let url = $scope.conformanceServer.url + "Task";    //from parent controller
@@ -37,8 +60,9 @@ angular.module("sampleApp").controller('taskCtrl',
                         data.data.entry.forEach(function (entry) {
                             let resource = entry.resource;      //the fhir Task
                             let task = {}       //internal task
-                            task.resource = resource;       //for degugging...
+                            //task.resource = resource;       //for degugging...
                             task.description = resource.description;
+                            task.notes = resource.note
 
                             if (resource.requester) {
                                 switch (fhirVersion) {
@@ -58,10 +82,12 @@ angular.module("sampleApp").controller('taskCtrl',
                             }
 
 
-                            let extSimpleExt = Utilities.getSingleExtensionValue(resource, pathExtUrl);
+                            let extSimpleExt = getSingleExtensionValue(resource, pathExtUrl);
                             if (extSimpleExt) {
                                 task.path = extSimpleExt.valueString;
                             }
+
+                            task.resource = resource;       //for degugging...
 
 
                             console.log(task);
@@ -77,13 +103,13 @@ angular.module("sampleApp").controller('taskCtrl',
             console.log(url)
         }
 
+        loadTasksForModel($scope.model.id);
 
         $scope.addTask = function() {
             let comment = window.prompt('Enter comment');       //todo make dialog
             if (comment) {
                 let task = {resourceType:'Task'};
                 task.id = 'id'+ new Date().getTime() + "-" + Math.floor(Math.random() * Math.floor(1000));
-                task.status = 'requested';
                 task.description = comment;
                 task.code = {coding:taskCode};
                 task.focus = {reference:"StructureDefinition/"+$scope.treeData[0].data.header.SDID};    //from the parent
@@ -132,11 +158,20 @@ angular.module("sampleApp").controller('taskCtrl',
             }
         };
 
+        function getSingleExtensionValue(resource,url) {
+            //return the value of an extension assuming there is only 1...
+            var extension;
+            if (resource) {
+                resource.extension = resource.extension || []
+                resource.extension.forEach(function (ext) {
+                    if (ext.url == url) {
+                        extension = ext
+                    }
+                });
+            }
 
-        $scope.$watch(function($scope) {return $scope.selectedNode},function(node,olfV){
-            $scope.taskNode = node;
-         //   $scope.currentTaskPath = node.id
-            console.log(node);
-        })
+            return extension;
+        }
+
 
     })

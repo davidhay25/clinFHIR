@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <base href="/" />
+    <meta charset="UTF-8">
+
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+        angular.module("sampleApp").constant("moment", moment);
+
+    </script>
+    <script src="js/taskManagerCtl.js"></script>
+    <script src="js/modalDialogSvc.js"></script>
+    <script src="js/appConfigSvc.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/filters.js"></script>
+    <!--
+  <script src="js/components/dataTypes.js"></script>
+
+  <script src="js/services.js"></script>
+  <script src="js/resourceCreatorSvc.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/documentBuilder.js"></script>
+  <script src="resourceBuilder/rbServices.js"></script>
+  <script src="js/reporterCtrl.js"></script>
+
+  <script src="js/libs/ngStorage.min.js"></script>
+
+
+
+  <script src="js/profileCreatorSvc.js"></script>
+  -->
+
+    <title>Task Manager</title>
+
+</head>
+
+
+<body style="padding: 8px" >
+
+<div ng-app="sampleApp" ng-controller="taskManagerCtrl" class="container-fluid">
+
+<h3>Tasks / Comments</h3>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3">
+        <table class="table table-bordered">
+            <tr><th>Path</th><th>Comment</th><th>Notes</th></tr>
+            <tr ng-repeat="task in tasks | orderBy: task.path">
+                <td><div ng-click="selectTask(task)" class="clickable">{{task.path | dropFirstInPath}}</div></td>
+                <td>{{task.description}}</td>
+                <td>{{task.notes.length}}</td>
+
+            </tr>
+        </table>
+    </div>
+
+    <div class="col-md-3 col-sm-3">
+        <pre>{{localTask | json}}</pre>
+        <pre>{{fhirTask | json}}</pre>
+    </div>
+    <div class="col-md-3 col-sm-3">
+       <strong>Notes</strong>
+        <table class="table">
+            <tr ng-repeat="note in localTask.notes">
+                <td>{{note.time}}</td>
+                <td>{{note.text}}</td>
+            </tr>
+
+            <td>
+                <textarea class="form-control" ng-model="input.note"></textarea>
+
+                <div>
+                    <button class="btn btn-link" ng-click="addNote(input.note)">Add note</button>
+                </div>
+
+            </td>
+        </table>
+    </div>
+
+    <div class="col-md-3 col-sm-3">
+
+    </div>
+
+
+
+</div>
+
+
+</div>
+</body>
+</html>

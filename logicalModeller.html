@@ -1311,6 +1311,35 @@
 
                                 </table>
                             </uib-tab>
+
+                            <uib-tab>
+
+                                <uib-tab-heading ng-controller="taskCtrl">Comments
+                                    <span class="badge"> {{tasks.length}}</span>
+                                </uib-tab-heading>
+
+                                <div ng-controller="taskCtrl">
+                                    <table class="table table-bordered">
+                                        <tr><th>Path</th><th>Comment</th><th>Email</th></tr>
+                                        <tr ng-repeat="task in tasks | orderBy: task.path">
+                                            <td>{{task.path | dropFirstInPath}}</td>
+                                            <td>{{task.description}}</td>
+
+                                            <td>{{task.requesterDisplay}}</td>
+
+
+
+
+                                        </tr>
+                                    </table>
+
+
+
+                                </div>
+
+                            </uib-tab>
+
+
                             <uib-tab heading="History">
                                 <br/>
                                 <ul class="list-group">
@@ -1342,6 +1371,10 @@
                                 </ul>
 
                             </uib-tab>
+
+
+
+
 <!--
                             <uib-tab ng-show="input.modelChat && 1==2">
                                 <uib-tab-heading>Comments <span class="badge">{{input.modelChat.length-1}}</span> </uib-tab-heading>
