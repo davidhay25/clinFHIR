@@ -970,7 +970,7 @@ angular.module("sampleApp")
             $scope.selectVsFromIg = function(){
                 var vs = $scope.input.vsFromIg;
                 //var vo={vs:{url:vs.sourceUri,name:vs.name},strength:'preferred'}
-                var vo={valueSet:vs.sourceUri,name:vs.name,strength:'preferred'};
+                var vo={valueSet:vs.sourceUri,description:vs.name,strength:'preferred'};
                 $scope.selectedValueSet = vo;
 
 

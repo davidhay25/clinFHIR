@@ -245,7 +245,7 @@ angular.module("sampleApp")
                 var now = moment().format();
                 $scope.downloadLinkJsonName = $scope.treeData[0].data.header.name + '-' + now + '.csv';
 
-                console.log($scope.downloadLinkJsonName)
+                //console.log($scope.downloadLinkJsonName)
 
             }
 
@@ -1017,7 +1017,7 @@ angular.module("sampleApp")
 
                         logicalModelSvc.getOptionsFromValueSet($scope.selectedNode.data).then(
                             function(lst) {
-
+/* - don't sort as term server will define order...
                                 $scope.valueSetOptions = lst;
 
                                 if (lst) {
@@ -1029,7 +1029,7 @@ angular.module("sampleApp")
                                         }
                                     })
                                 }
-
+*/
 
 
 
@@ -2025,7 +2025,6 @@ angular.module("sampleApp")
                         $scope.treeData.shortCut = vo;  //safe to put here as it will be ignored...
                     }
                 );
-
 
 
                 var vo = logicalModelSvc.makeReferencedMapsModel(entry.resource,$scope.bundleModels);   //todo - may not be the right place...

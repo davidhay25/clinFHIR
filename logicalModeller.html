@@ -202,6 +202,7 @@
     <script src="js/lmFilterCtrl.js"></script>
     <script src="js/lmFilterSvc.js"></script>
     <script src="js/autoFocus.js"></script>
+    <script src="js/task.js"></script>
 
     <!--
 
@@ -1113,6 +1114,17 @@
                                 </td>
 
 
+                                </tr>
+
+
+                                <tr>
+                                    <td>User Comments</td>
+                                    <td>
+                                        <div ng-controller="taskCtrl">
+                                            <ng-include src="'/includes/tasksOneElement.html'"></ng-include>
+                                        </div>
+
+                                    </td>
                                 </tr>
 
                                 <tr ng-show="selectedNode.data.conceptMap">

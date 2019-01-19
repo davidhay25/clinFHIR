@@ -1,0 +1,18 @@
+<div>
+
+    <div class="pull-right clickable" style="cursor: pointer" ng-click="addTask()">Add comment</div>
+    <div class="clearfix"></div>
+
+
+
+
+    <div class="list-group" style="margin-top: 16px">
+        <div class="list-group-item" ng-repeat="task in tasks"  ng-if = "task.path==taskNode.id">
+
+            {{task.description}}
+        </div>
+
+    </div>
+
+
+</div>

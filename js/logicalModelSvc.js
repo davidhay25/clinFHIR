@@ -2417,6 +2417,11 @@ angular.module("sampleApp")
                 var legacyUrl = appConfigSvc.config().standardExtensionUrl.legacy;
                 var misuseUrl = appConfigSvc.config().standardExtensionUrl.misuse;
 
+                if (!misuseUrl) {
+                    alert("You must restart clinFHIR then the Logical Modeller to reset updated config")
+                    return [];
+                }
+
                 var cntExtension = 0;
                 var arTree = [];
                 if (sd && sd.snapshot && sd.snapshot.element) {
@@ -2634,9 +2639,6 @@ angular.module("sampleApp")
                                     console.log(ed)
                                 }
 
-
-
-
                             });
 
 
@@ -2665,7 +2667,6 @@ angular.module("sampleApp")
                                     item.data.isExtension = true;
                                 }
 
-
                                 if (map.comment) {
                                     internalMap.comment = map.comment
                                 } else {
@@ -2683,7 +2684,6 @@ angular.module("sampleApp")
                             item.data.comments = ed.comment;
                         }
 
-
                         //note that we don't retrieve the complete valueset...
                         if (ed.binding) {
 
@@ -2693,22 +2693,28 @@ angular.module("sampleApp")
                                 item.data.selectedValueSet = ed.binding;
                             } else {
                                 item.data.selectedValueSet = {strength: ed.binding.strength};
-
+                                item.data.selectedValueSet.description = ed.binding.description;
 
 
                                 //  12/2/2018  change to using vsReference, but need to preserve the old stuff...
                                 if (ed.binding.valueSetUri) {
-                                    item.data.selectedValueSet.vs = {url: ed.binding.valueSetUri};
+                                    //what to do? This is not a reference...
+                                    //item.data.selectedValueSet.vs = {url: ed.binding.valueSetUri};
+                                  //  alert("There's a valueSet Uri binding on " + path + " which will be lost when you save this model.")\
+                                    item.data.selectedValueSet.valueSet =  ed.binding.valueSetUri;  //was saving these as uri at one point...
                                 }
 
                                 if (ed.binding.valueSetReference && ed.binding.valueSetReference.reference) {
-                                    item.data.selectedValueSet.vs = {url: ed.binding.valueSetReference.reference};
+                                    //item.data.selectedValueSet.vs = {url: ed.binding.valueSetReference.reference};
+                                    item.data.selectedValueSet.valueSet =  ed.binding.valueSetReference.reference;
                                 }
-
+/*
                                 if (item.data.selectedValueSet.vs) {
+                                    //also what to do??
+
                                     item.data.selectedValueSet.vs.name = ed.binding.description;
                                 }
-
+*/
                             }
                             /*
                             item.data.selectedValueSet = {strength: ed.binding.strength};
