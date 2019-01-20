@@ -1320,6 +1320,13 @@
                                 </uib-tab-heading>
 
                                 <div>
+
+                                    <a class="btn btn-link pull-right" download="{{downloadTaskName}}.csv"
+                                       href="{{downloadTaskContent}}" title="{{downloadTaskName}}" >
+                                        Download CSV of list
+                                    </a>
+                                    <hr/>
+
                                     <table class="table table-bordered">
                                         <tr><th>Path</th><th>Comment</th><th>Email</th><th># notes</th><th></th></tr>
                                         <tr ng-repeat="task in taskList | orderBy: 'path'">

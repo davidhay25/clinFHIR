@@ -43,15 +43,22 @@
         <!-- THis is an edit-->
         <div class="row">
             <div ng-show = 'task'>
-                <div class="col-sm-6 col-md-6">
+                <div class="col-sm-4 col-md-4">
                     <strong>Comment</strong>
                     <p>{{task.description}}</p>
+                    <strong>Author</strong>
+                    <p>{{task.requesterDisplay}}</p>
+                    <strong>Authored</strong>
+                    <p>{{task.authoredOn | getAgeSeconds}} ago</p>
+
+
+
 <!--
                     <pre>{{task | json}}</pre>
 -->
                 </div>
 
-                <div class="col-sm-6 col-md-6">
+                <div class="col-sm-8 col-md-8">
                     <strong>Notes</strong>
 
                     <table class="table">

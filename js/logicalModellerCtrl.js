@@ -4,7 +4,7 @@ angular.module("sampleApp")
     .controller('logicalModellerCtrl',
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
                   GetDataFromServer,$firebaseObject,$firebaseArray,$location,igSvc,SaveDataToServer,$window,RenderProfileSvc,
-                  $q,Utilities, securitySvc,$filter,builderSvc,questionnaireSvc,$localStorage,projectSvc,lmFilterSvc) {
+                  $q,Utilities, securitySvc,$filter,builderSvc,questionnaireSvc,$localStorage,projectSvc,lmFilterSvc,taskSvc) {
             $scope.input = {};
 
             $scope.firebase = firebase;
@@ -27,7 +27,14 @@ angular.module("sampleApp")
             $scope.$on('taskListUpdated',function(event,list){
                 $scope.taskList= list;
 
-                //console.log(list);
+
+                //generate a new download link
+
+                let download = taskSvc.makeTaskListload(list)
+                $scope.downloadTaskContent = window.URL.createObjectURL(new Blob([download],
+                    {type: "text/text"}));
+                var now = moment().format();
+                $scope.downloadTaskName = $scope.treeData[0].data.header.name + '-task-' + now;// + '.csv';
             })
 
             $scope.lmEditTask = function(task) {

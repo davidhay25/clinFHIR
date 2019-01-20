@@ -53,7 +53,7 @@ angular.module("sampleApp").controller('taskCtrl',
                 size: 'lg',
                 controller: function ($scope, $http, appConfigSvc, task, practitioner, taskCode, modelId,modelPath) {
                     $scope.task = task;
-                   // $scope.practitioner = practitioner;
+                    $scope.practitioner = practitioner;     //used in html page...
                     $scope.modelPath = modelPath;
                     console.log(practitioner);
                     $scope.input = {}
@@ -64,6 +64,9 @@ angular.module("sampleApp").controller('taskCtrl',
                         if (comment) {
                             let task = {resourceType:'Task'};
                             task.id = 'id'+ new Date().getTime() + "-" + Math.floor(Math.random() * Math.floor(1000));
+
+                            task.authoredOn = new Date().toISOString();
+
                             task.status = 'requested';
                             task.description = comment;
                             task.code = {coding:taskCode};
@@ -121,7 +124,7 @@ angular.module("sampleApp").controller('taskCtrl',
                         }
 
                         //update the task resource
-                        let fhirTask = task.resource;
+                        let fhirTask = angular.copy(task.resource);
                         if (fhirTask) {
                             fhirTask.note = fhirTask.note || [];
                             fhirTask.note.push(annot);
@@ -152,11 +155,17 @@ angular.module("sampleApp").controller('taskCtrl',
                         return taskCode;
                     },
                     "modelId" : function(){
+                        if (task) {
+                            return task.id;
+                        } else {
+                            return $scope.treeData[0].data.header.SDID //from the parent scope
+                        }
 
-                        return $scope.treeData[0].data.header.SDID //from the parent scope
                     },
                     "modelPath" : function() {
-                        if ($scope.taskNode) {      //taskNode is set by the $watch below...
+                        if (task) {
+                            return task.path;
+                        } else if ($scope.taskNode) {      //taskNode is set by the $watch below...
                             return $scope.taskNode.id;
                         } else {
                             return null;

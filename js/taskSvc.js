@@ -26,11 +26,52 @@ angular.module("sampleApp")
 
         return {
             //return an internal task object from a FHIR resource
-            getInternalTaskFromResource: function (resource,fhirVersion) {
+            makeTaskListload : function(taskList) {
+                let download = "Path,Comment,Email,Notes\n";
+
+                taskList.forEach(function(task) {
+                    let lne = task.path + ",";
+                    lne += makeSafe(task.description) + ",";
+                    lne += makeSafe(task.requesterDisplay) + ",";
+                    let notes = "";
+
+                    if (task.notes) {
+                        task.notes.forEach(function (note) {
+                            let n = note.text + ' ('+ note.authorString + ')\n';
+                            n = n.replace(/"/g, "'");
+                            n = n.replace(/,/g, "-");
+                            //let s = makeSafe(n);
+
+                            notes += '"'+n +'"'
+                        })
+                    }
+
+                    lne += notes;
+                    download += lne + "\n";
+
+                });
+
+
+                return download;
+
+                //remove comma's and convert " -> '
+                function makeSafe(s) {
+                    if (s) {
+                        s = s.replace(/"/g, "'");
+                        s = s.replace(/,/g, "-");
+                        return '"' + s + '"';
+                    } else {
+                        return "";
+                    }
+
+
+                }},
+                getInternalTaskFromResource: function (resource,fhirVersion) {
                 let task = {}       //internal task
                 //task.resource = resource;       //for degugging...
                 task.description = resource.description;
                 task.notes = resource.note;
+                task.authoredOn = resource.authoredOn;
 
                 task.status = resource.status || 'requested';
 

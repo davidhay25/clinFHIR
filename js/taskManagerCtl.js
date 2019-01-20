@@ -1,5 +1,5 @@
 angular.module("sampleApp").controller('taskManagerCtrl',
-    function ($scope,$http,appConfigSvc,$firebaseObject,$firebaseArray,$uibModal,modalService) {
+    function ($scope,$http,appConfigSvc,$firebaseObject,$firebaseArray,$uibModal,modalService,taskSvc) {
 
         $scope.firebase = firebase;
         $scope.appConfigSvc = appConfigSvc;
@@ -153,7 +153,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                         data.data.entry.forEach(function (entry) {
                             let resource = entry.resource;      //the fhir Task
 
-                            let iTask = taskSvc.getInternalTaskFromResource(rtn,fhirVersion)
+                            let iTask = taskSvc.getInternalTaskFromResource(resource,fhirVersion)
 
                             /*
                             let task = {}       //internal task
