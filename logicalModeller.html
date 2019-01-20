@@ -1321,7 +1321,7 @@
                                 <div ng-controller="taskCtrl">
                                     <table class="table table-bordered">
                                         <tr><th>Path</th><th>Comment</th><th>Email</th></tr>
-                                        <tr ng-repeat="task in tasks | orderBy: task.path">
+                                        <tr ng-repeat="task in tasks | orderBy: 'path'">
                                             <td>{{task.path | dropFirstInPath}}</td>
                                             <td>{{task.description}}</td>
 

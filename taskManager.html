@@ -13,9 +13,11 @@
     <link rel="stylesheet" type="text/css" href="css/main.css"/>
 
     <script src="js/libs/angular-sanitize.js"></script>
+    <script src="js/libs/firebase.js"></script>
+    <script src="js/libs/angularfire.min.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -24,78 +26,235 @@
         angular.module("sampleApp").constant("moment", moment);
 
     </script>
+
+    <script>
+        var config = {
+            apiKey: "AIzaSyBNMohLbPiSKwpGwfARopdeW_6LLXujcUo",
+            authDomain: "clinfhir.firebaseapp.com",
+            databaseURL: "https://clinfhir.firebaseio.com",
+            storageBucket: ""
+        };
+
+        //  console.log(firebase)
+        if (firebase) {
+            firebase.initializeApp(config);
+
+        }
+    </script>
+
+    <style>
+        .myForm {
+            padding: 8px;
+        }
+    </style>
     <script src="js/taskManagerCtl.js"></script>
     <script src="js/modalDialogSvc.js"></script>
     <script src="js/appConfigSvc.js"></script>
     <script src="js/libs/ngStorage.min.js"></script>
     <script src="js/filters.js"></script>
-    <!--
-  <script src="js/components/dataTypes.js"></script>
+    <script src="js/loginCtrl.js"></script>
 
-  <script src="js/services.js"></script>
-  <script src="js/resourceCreatorSvc.js"></script>
-  <script src="js/filters.js"></script>
-  <script src="js/documentBuilder.js"></script>
-  <script src="resourceBuilder/rbServices.js"></script>
-  <script src="js/reporterCtrl.js"></script>
-
-  <script src="js/libs/ngStorage.min.js"></script>
-
-
-
-  <script src="js/profileCreatorSvc.js"></script>
-  -->
 
     <title>Task Manager</title>
 
 </head>
 
 
-<body style="padding: 8px" >
+<body style="padding: 8px;padding-top: 80px" >
 
 <div ng-app="sampleApp" ng-controller="taskManagerCtrl" class="container-fluid">
 
-<h3>Tasks / Comments</h3>
 
-<div class="row">
-    <div class="col-md-3 col-sm-3">
-        <table class="table table-bordered">
-            <tr><th>Path</th><th>Comment</th><th>Notes</th></tr>
-            <tr ng-repeat="task in tasks | orderBy: task.path">
-                <td><div ng-click="selectTask(task)" class="clickable">{{task.path | dropFirstInPath}}</div></td>
-                <td>{{task.description}}</td>
-                <td>{{task.notes.length}}</td>
 
-            </tr>
-        </table>
-    </div>
+    <nav ng-hide="startupParams.hideNav" class="navbar navbar-default navbar-fixed-top" role="navigation">
 
-    <div class="col-md-3 col-sm-3">
-        <pre>{{localTask | json}}</pre>
-        <pre>{{fhirTask | json}}</pre>
-    </div>
-    <div class="col-md-3 col-sm-3">
-       <strong>Notes</strong>
-        <table class="table">
-            <tr ng-repeat="note in localTask.notes">
-                <td>{{note.time}}</td>
-                <td>{{note.text}}</td>
-            </tr>
+        <div class="container-fluid">
+            <div class="col-md-3 col-sm-3">
+                    <span>
+                        <a class="navbar-brand" href="#" ng-click="showVersion()">
+                            Task Manager
+                        </a>
+                    </span>
+                <span>
 
-            <td>
-                <textarea class="form-control" ng-model="input.note"></textarea>
+                    </span>
 
-                <div>
-                    <button class="btn btn-link" ng-click="addNote(input.note)">Add note</button>
+            </div>
+            <div class="col-md-2 col-sm-2">
+                <span style="cursor:pointer" ng-click='setServers()' class="navbar-text pull-right"> {{appConfigSvc.getCurrentConformanceServer().name}}</span>
+            </div>
+
+            <div class="col-md-1 col-sm-1">
+                <form class="navbar-form navbar-left">
+                    <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
+
+
+
+                </form>
+
+
+            </div>
+
+            <div class="col-md-5 col-sm-5">
+
+            </div>
+
+            <div class="col-md-1 col-sm-1">
+
+                <div class="nav navbar-form navbar-right" ng-hide="user">
+                    <span style="font-size:1.8em; cursor: pointer"uib-popover="Click to log in"
+                          popover-placement="left"
+                          popover-trigger="'mouseenter'">
+                        <div ng-click="login()">
+                            <i class="glyphicon glyphicon-log-in"></i>
+                        </div>
+                    </span>
                 </div>
 
-            </td>
+                <div class="nav navbar-form navbar-right" ng-show="user">
+                    <span style="font-size:1.8em; cursor: pointer"
+                          uib-popover="Current user: {{user.email}}. Click to log out"
+                          popover-placement="left"
+                          popover-trigger="'mouseenter'">
+
+                        <div href="#" ng-click="logout()"> <i class="glyphicon glyphicon-log-out"></i></div>
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+
+
+
+
+    <h3>Tasks / Comments</h3>
+
+<div class="row">
+    <div class="col-md-4 col-sm-4">
+        <select ng-model="input.filterStatus" class="form-control"
+                ng-options="state.display for state in states"></select>
+        <table class="table table-bordered">
+            <tr><th>Path</th><th>Comment</th><th>Status</th><th>Notes</th></tr>
+            <tr ng-repeat="task in tasks | orderBy: 'path'" ng-show="canShowTask(task,input.filterStatus)">
+                <td><div ng-click="selectTask(task)" class="clickable">{{task.path | dropFirstInPath}}</div></td>
+                <td>{{task.description | limitTo :30}}</td>
+                <td>{{stateHash[task.status]}}</td>
+                <td>{{task.notes.length}}</td>
+            </tr>
         </table>
     </div>
 
+    <div class="col-md-5 col-sm-5">
+
+        <uib-tabset>
+            <uib-tab heading="Details">
+
+                <div ng-show="localTask" >
+
+                    <div class="row myForm">
+                        <div class="col-md-2">
+                            <div>
+                                <strong>Path</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-10">
+                            {{localTask.path}}
+                        </div>
+                    </div>
+
+                    <div class="row myForm">
+                        <div class="col-md-2">
+                            <div>
+                                <strong>Comment</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-10">
+                            {{localTask.description}}
+                        </div>
+                    </div>
+
+                    <div class="row myForm">
+                        <div class="col-md-2">
+                            <strong>Email</strong>
+                        </div>
+                        <div class="col-md-10">
+                            {{localTask.requesterDisplay}}
+                        </div>
+                    </div>
+
+                    <div class="row myForm">
+                        <div class="col-md-2">
+                            <strong>Status</strong>
+                        </div>
+                        <div class="col-md-3">
+                            {{stateHash[localTask.status]}}
+                        </div>
+                        <div class="col-md-7">
+                            <div ng-show="localTask.status && user">
+                                <button class="btn btn-default" ng-click="changeState('received')"
+                                        ng-show="showStateChange('received',localTask.status)">Reviewed</button>
+                                <button class="btn btn-default"  ng-click="changeState('accepted')"
+                                        ng-show="showStateChange('accepted',localTask.status)">Accepted</button>
+                                <button class="btn btn-default"  ng-click="changeState('declined')"
+                                        ng-show="showStateChange('declined',localTask.status)">Declined</button>
+                            </div>
+                            <div ng-hide="user">
+                                <em>Please login to change the status or add a new note</em>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row myForm">
+                    <div class="col-md-2">
+                        <strong>Notes</strong>
+                    </div>
+                    <div class="col-md-10">
+                        <table class="table">
+                            <tr><th>Note</th><th>When</th><th>Who</th></tr>
+                            <tr ng-repeat="note in localTask.notes">
+                                <td>{{note.text}}</td>
+                                <td>{{note.time | getAgeSeconds}}</td>
+                                <td>{{note.authorString}}</td>
+
+                            </tr>
+                            <tr ng-show="user">
+                                <td >
+                                    <textarea class="form-control" ng-model="input.note"></textarea>
+
+                                    <div>
+                                        <button class="btn btn-link pull-right" ng-click="addNote(input.note)">Add note</button>
+                                    </div>
+
+                                </td>
+                            </tr>
+
+
+                        </table>
+                    </div>
+                </div>
+
+
+                </div>
+
+
+
+            </uib-tab>
+            <uib-tab heading="Json">
+                <strong>Local Task object</strong>
+                <pre>{{localTask | json}}</pre>
+                <strong>FHIR Task resource</strong>
+                <pre>{{fhirTask | json}}</pre>
+            </uib-tab>
+        </uib-tabset>
+
+
+    </div>
     <div class="col-md-3 col-sm-3">
 
     </div>
+
+
 
 
 
