@@ -23,6 +23,18 @@ angular.module("sampleApp")
             GetDataFromServer.registerAccess('logical');
 
 
+            //when a new comment is added or updated, then an event is rasied to allow the model level list ot be updated
+            $scope.$on('taskListUpdated',function(event,list){
+                $scope.taskList= list;
+
+                //console.log(list);
+            })
+
+            $scope.lmEditTask = function(task) {
+                $scope.$broadcast('editTask',task)  //will be picked up by the task controller...
+
+            };
+
             //change the email of the model editor. Would be nice to be able to check that the email is valid...
             $scope.changeEditor = function(){
 
@@ -1980,6 +1992,8 @@ angular.module("sampleApp")
                 delete $scope.taskOutputs;      //the outputs of the task (Communication resource currently)
                 delete $scope.isFilteredModel;  //true if this model is filtered...
 
+               // $scope.$broadcast('loadTasks',entry)
+
                 $scope.canSaveModel = true;     //allow edits to the model to be saved
 
                 $scope.isDirty = false;
@@ -2080,9 +2094,6 @@ angular.module("sampleApp")
 
 
                 });
-
-
-
 
                 $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                 drawTree();
@@ -2430,6 +2441,7 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editLogicalItem.html',
                     size: 'lg',
+                    //windowClass: 'nb-modal-window',
                     controller: 'editLogicalNodeCtrl',
 
                     resolve : {

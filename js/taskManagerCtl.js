@@ -152,6 +152,10 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                     if (data.data && data.data.entry) {
                         data.data.entry.forEach(function (entry) {
                             let resource = entry.resource;      //the fhir Task
+
+                            let iTask = taskSvc.getInternalTaskFromResource(rtn,fhirVersion)
+
+                            /*
                             let task = {}       //internal task
                             //task.resource = resource;       //for degugging...
                             task.description = resource.description;
@@ -182,9 +186,9 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                             }
 
                             task.resource = resource;       //for degugging...
+*/
 
-
-                            $scope.tasks.push(task)
+                            $scope.tasks.push(iTask)
                         })
                     }
 

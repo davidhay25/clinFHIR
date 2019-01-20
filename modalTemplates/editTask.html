@@ -1,0 +1,88 @@
+<div>
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+
+                <h3 ng-hide="task">Add a new comment</h3>
+                <h3 ng-show="task">View comment, and add note</h3>
+
+            </div>
+
+
+            <div class="col-md-4 col-sm-4">
+
+                <div class="pull-right">
+                    <img ng-show='showWaiting' src="css/ajax_loader_blue_32.gif"/>
+                    <button class="btn btn-link" ng-click="$dismiss()">Close</button>
+                    <!-- <button class="btn btn-success" ng-click="save()">Save</button> -->
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+
+        <!-- THis is a new comment/task-->
+        <div ng-hide = 'task'>
+            <div class="row">
+                <div class="col-sm-2 col-md-2">
+                </div>
+                <div class="col-sm-6 col-md-6">
+                    <textarea class="form-control" ng-model="input.text" placeholder="Enter comment here" rows="8"></textarea>
+                    <div>
+                        <button class="btn btn-link pull-right" ng-click="addTask(input.text)">Add comment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- THis is an edit-->
+        <div class="row">
+            <div ng-show = 'task'>
+                <div class="col-sm-6 col-md-6">
+                    <strong>Comment</strong>
+                    <p>{{task.description}}</p>
+<!--
+                    <pre>{{task | json}}</pre>
+-->
+                </div>
+
+                <div class="col-sm-6 col-md-6">
+                    <strong>Notes</strong>
+
+                    <table class="table">
+                        <tr><th>Note</th><th>When</th><th>Who</th></tr>
+                        <tr ng-repeat="note in task.notes">
+                            <td>{{note.text}}</td>
+                            <td>{{note.time | getAgeSeconds}}</td>
+                            <td>{{note.authorString}}</td>
+                        </tr>
+                        <tr ng-show="practitioner">
+                            <td colspan="3">
+                                <textarea class="form-control" ng-model="input.note"></textarea>
+
+                                <div>
+                                    <button class="btn btn-link pull-right" ng-click="addNote(input.note)">Add note</button>
+                                </div>
+
+                            </td>
+                        </tr>
+
+
+                    </table>
+                </div>
+        </div>
+        </div>
+
+
+    </div>
+
+    <div class="modal-header">
+        <strong><em>{{modelPath}}</em></strong>
+
+    </div>
+</div>

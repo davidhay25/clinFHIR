@@ -1,15 +1,30 @@
 <div>
 
-    <div class="pull-right clickable" style="cursor: pointer" ng-click="addTask()">Add comment</div>
+    <div class="pull-right clickable" style="cursor: pointer" ng-click="addNewTask()">Add comment</div>
     <div class="clearfix"></div>
 
 
 
 
     <div class="list-group" style="margin-top: 16px">
-        <div class="list-group-item" ng-repeat="task in tasks"  ng-if = "task.path==taskNode.id">
+        <div class="list-group-item" ng-repeat="task in tasks" ng-if = "task.path==taskNode.id">
 
-            {{task.description}}
+            <div class="row">
+                <div class="col-md-10">
+                    {{task.description}}
+                </div>
+                <div class="col-md-2">
+                    <span class="pull-right">
+                        <span class="badge"
+                              uib-popover="There are  {{task.notes.length}} notes on this comment"
+                              popover-placement="left"
+                              popover-trigger="'mouseenter'"
+                        >{{task.notes.length}}</span>
+                        <i class="glyphicon glyphicon-edit clickable" ng-click="editTask(task)"></i></span>
+                </div>
+            </div>
+
+
         </div>
 
     </div>

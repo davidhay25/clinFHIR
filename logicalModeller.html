@@ -203,6 +203,7 @@
     <script src="js/lmFilterSvc.js"></script>
     <script src="js/autoFocus.js"></script>
     <script src="js/task.js"></script>
+    <script src="js/taskSvc.js"></script>
 
     <!--
 
@@ -1314,22 +1315,23 @@
 
                             <uib-tab>
 
-                                <uib-tab-heading ng-controller="taskCtrl">Comments
-                                    <span class="badge"> {{tasks.length}}</span>
+                                <uib-tab-heading>Comments
+                                    <span class="badge"> {{taskList.length}}</span>
                                 </uib-tab-heading>
 
-                                <div ng-controller="taskCtrl">
+                                <div>
                                     <table class="table table-bordered">
-                                        <tr><th>Path</th><th>Comment</th><th>Email</th></tr>
-                                        <tr ng-repeat="task in tasks | orderBy: 'path'">
+                                        <tr><th>Path</th><th>Comment</th><th>Email</th><th># notes</th><th></th></tr>
+                                        <tr ng-repeat="task in taskList | orderBy: 'path'">
                                             <td>{{task.path | dropFirstInPath}}</td>
                                             <td>{{task.description}}</td>
-
                                             <td>{{task.requesterDisplay}}</td>
-
-
-
-
+                                            <td> <span class="badge" ng-show="task.notes.length > 0"
+                                                       uib-popover="There are  {{task.notes.length}} notes on this comment"
+                                                       popover-placement="left"
+                                                       popover-trigger="'mouseenter'">
+                                                {{task.notes.length}}</span></td>
+                                            <td><i class="glyphicon glyphicon-edit clickable" ng-click="lmEditTask(task)"></i></td>
                                         </tr>
                                     </table>
 
