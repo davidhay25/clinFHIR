@@ -9,8 +9,9 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
         let fhirVersion = $scope.conformanceServer.version;     //from parent
         let taskCode =  {system:"http://loinc.org",code:"48767-8"};
-        var pathExtUrl = appConfigSvc.config().standardExtensionUrl.path;  //the extension for recording the model path for a comment
+        let pathExtUrl = appConfigSvc.config().standardExtensionUrl.path;  //the extension for recording the model path for a comment
 
+        let hashED = {};    //will have a hash of element definitions by path
         //-----------  login stuff....
 
         $scope.login=function(){
@@ -39,7 +40,6 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             console.log('onauth',user)
             delete $scope.user;
 
-
             if (user) {
                 $scope.user = user;
                 //$scope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
@@ -49,7 +49,64 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
         });
 
-        
+
+        //Load the IG to get the list of models from. todo - Actually could extend to include profiles...
+        let url =  $scope.conformanceServer.url + 'ImplementationGuide/cf-artifacts-au3';
+        $http.get(url).then(
+            function(data) {
+                if (data.data && data.data) {
+                    $scope.allModels = []
+                    let IG = data.data;
+                    IG.package.forEach(function (package) {
+                        package.resource.forEach(function (res) {
+                            if (res.acronym == 'logical') {
+                                if (res.sourceReference && res.sourceReference.reference) {
+                                    let ar = res.sourceReference.reference.split('/')
+
+                                    $scope.allModels.push({id:ar[ar.length-1]})
+                                }
+                            }
+
+
+                        })
+                    })
+
+                }
+                if ($scope.allModels.length > 0) {
+                    $scope.input.selectedModel = $scope.allModels[0]
+                    $scope.selectModel($scope.input.selectedModel)
+                }
+
+
+                console.log($scope.allModels);
+            }, function(err) {
+                console.log(err)
+            }
+        );
+
+        $scope.selectModel = function(entry) {
+            console.log(entry)
+            loadTasksForModel(entry.id)
+
+        };
+
+        /*
+        //load all tasks of type 'model comment'
+        let url =  $scope.conformanceServer.url + "Task?code="+taskCode.system +"|"+taskCode.code;
+        $http.get(url).then(
+            function(data) {
+                if (data.data && data.data.entry) {
+                //    $scope.allTasks =
+                    data.data.entry.forEach(function (entry) {
+
+                    })
+                }
+                console.log(data);
+            }, function(err) {
+                console.log(err)
+            }
+        );
+        */
         //allow the display for a state to be different to the actual code...
         $scope.stateHash = {};
         $scope.stateHash.requested = 'new';
@@ -63,7 +120,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
         });
 
         $scope.input.filterStatus = $scope.states[0];
-        $scope.model = {id:"StructureDefinition/ADRAllergyIntolerance"};    //load from a selector
+       // $scope.model = {id:"StructureDefinition/ADRAllergyIntolerance"};    //load from a selector
 
         if (!pathExtUrl) {
             alert("Task warning: You must restart clinFHIR then the Task Manager to reset updated config")
@@ -108,13 +165,17 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             $scope.fhirTask = task.resource
             $scope.localTask = angular.copy(task)
             delete $scope.localTask.resource;
+
+
+            $scope.selectedEd = hashED[task.path];
+           // console.log( $scope.selectedEd)
         };
 
         
         $scope.showStateChange = function(newState,currentState) {
             switch (newState) {
                 case 'received' :
-                    if (currentState == 'requested') {return true}
+                    if (currentState == 'requested' || currentState == 'accepted' || currentState == 'declined') {return true}
                     break;
                 case 'accepted' :
                     if (currentState == 'requested' || currentState == 'received') {return true}
@@ -126,9 +187,24 @@ angular.module("sampleApp").controller('taskManagerCtrl',
         };
 
         $scope.changeState = function(newState) {
+
+            let note = window.prompt('Enter note about change (Cancel for none)');
+            if (note) {
+                var annot = {text:note,time: new Date().toISOString()};
+                annot.authorString = $scope.user.email;
+                $scope.fhirTask.note = $scope.fhirTask.note || []
+                $scope.fhirTask.note.push(annot)
+
+                //for display
+                $scope.localTask.notes = $scope.localTask.notes || []
+                $scope.localTask.notes.push(annot)
+
+            }
             $scope.selectedTask.status = newState;
             $scope.localTask.status = newState;
             $scope.fhirTask.status = newState;
+
+
             let url = $scope.conformanceServer.url + "Task/"+$scope.fhirTask.id;    //from parent controller
             $http.put(url,$scope.fhirTask).then(
                 function() {
@@ -138,12 +214,17 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                 }
             )
         };
-        
+
+
+
+
         //load all the tasks for a given model
         function loadTasksForModel(id) {
+            hashED = {};       //hash of element definitions by path
             $scope.tasks = []
             let url = $scope.conformanceServer.url + "Task";    //from parent controller
             url += "?code="+taskCode.system +"|"+taskCode.code;
+            url += "&focus=StructureDefinition/"+ id
             url += "&_count=100";    //todo - need the follow links
 
             $http.get(url).then(
@@ -155,38 +236,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
                             let iTask = taskSvc.getInternalTaskFromResource(resource,fhirVersion)
 
-                            /*
-                            let task = {}       //internal task
-                            //task.resource = resource;       //for degugging...
-                            task.description = resource.description;
-                            task.notes = resource.note;
 
-                            task.status = resource.status || 'requested';
-
-                            if (resource.requester) {
-                                switch (fhirVersion) {
-                                    case 3 :
-                                        if (resource.requester.agent) {
-                                            task.requesterReference = resource.requester.agent;      //this is a reference
-                                            task.requesterDisplay = resource.requester.agent.display;
-                                        }
-
-                                        break;
-                                    default :
-                                        task.requesterReference = resource.requester
-                                        task.requesterDisplay = resource.requester.display;
-                                        break;
-
-                                }
-                            }
-
-                            let extSimpleExt = getSingleExtensionValue(resource, pathExtUrl);
-                            if (extSimpleExt) {
-                                task.path = extSimpleExt.valueString;
-                            }
-
-                            task.resource = resource;       //for degugging...
-*/
 
                             $scope.tasks.push(iTask)
                         })
@@ -196,12 +246,33 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                 },function(err) {
                     console.log(err)
                 }
+            );
+            //console.log(url)
+
+            //load the model also. Assume it is on the same server as tasks (both on conformance)
+            let urlModel = $scope.conformanceServer.url + "StructureDefinition/"+id;
+            $http.get(urlModel).then(
+                function(data) {
+                    let model = data.data;
+
+
+                    if (model.snapshot && model.snapshot.element) {
+                        model.snapshot.element.forEach(function (ed) {
+                            hashED[ed.path] = ed;
+                        })
+                    }
+                },
+                function(err) {
+                    alert(angular.toJson(err))
+                }
             )
-            console.log(url)
+
+
+
         }
 
-        loadTasksForModel($scope.model.id);
-
+        //loadTasksForModel($scope.model.id);
+/*
         $scope.addTaskDEP = function() {
             let comment = window.prompt('Enter comment');       //todo make dialog
             if (comment) {
@@ -255,7 +326,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             }
         };
 
-        function getSingleExtensionValue(resource,url) {
+        function getSingleExtensionValueDEP(resource,url) {
             //return the value of an extension assuming there is only 1...
             var extension;
             if (resource) {
@@ -269,6 +340,8 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
             return extension;
         }
+
+        */
 
 
     })
