@@ -115,6 +115,7 @@ angular.module("sampleApp").controller('taskCtrl',
                     //add the note and close the dialog...
                     $scope.addNote = function(note) {
 
+                        //create the note...
                         var annot = {text:note,time: new Date().toISOString()};
                         if (practitioner && practitioner.telecom) {
                             //todo might want to use authorReference at some stage...
@@ -123,9 +124,28 @@ angular.module("sampleApp").controller('taskCtrl',
                             annot.authorString = 'Anonymous';
                         }
 
-                        //update the task resource
-                        let fhirTask = angular.copy(task.resource);
+
+                        //This is an 'update' object
+                        let obj = {}
+                        obj.note = annot;
+                        obj.fhirServer = appConfigSvc.getCurrentConformanceServer().url;
+
+                        let fhirTask = task.resource;
+
                         if (fhirTask) {
+                            //this will add the note to teh task from the server...
+                            let url =  "/myTask/addNote/"+fhirTask.id
+                            $http.post(url,obj).then(
+                                function(data){
+                                    $scope.$close(annot);
+                                },function (err) {
+                                    alert('Error saving note: ' + angular.toJson(err))
+                                }
+                            )
+
+                            /*
+
+
                             fhirTask.note = fhirTask.note || [];
                             fhirTask.note.push(annot);
                             let url = appConfigSvc.getCurrentConformanceServer().url + "Task/"+fhirTask.id
@@ -136,12 +156,12 @@ angular.module("sampleApp").controller('taskCtrl',
                                     alert('Error saving note: ' + angular.toJson(err))
                                 }
                             )
+
+                            */
                         } else {
                             alert('FHIR Task resource not found')
                         }
-
                     }
-
                 },
                 resolve : {
                     "task": function() {

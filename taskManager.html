@@ -70,8 +70,6 @@
 
 <div ng-app="sampleApp" ng-controller="taskManagerCtrl" class="container-fluid">
 
-
-
     <nav ng-hide="startupParams.hideNav" class="navbar navbar-default navbar-fixed-top" role="navigation">
 
         <div class="container-fluid">
@@ -91,11 +89,14 @@
                         ng-options="model.id for model in allModels"></select>
             </div>
 
+            <div class="col-md-1 col-sm-1">
+                <button class="btn btn-default  navbar-text" ng-click="refresh()">Refresh</button>
+            </div>
             <div class="col-md-3 col-sm-3">
                 <span style="cursor:pointer" ng-click='setServers()' class="navbar-text pull-right"> {{appConfigSvc.getCurrentConformanceServer().name}}</span>
             </div>
 
-            <div class="col-md-3 col-sm-3">
+            <div class="col-md-2 col-sm-2">
                 <form class="navbar-form navbar-left">
                     <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
 
@@ -134,8 +135,6 @@
         </div>
     </nav>
 
-
-
     <uib-tabset>
         <uib-tab heading="Workflow">
             <br/>
@@ -157,7 +156,7 @@
 
                 </div>
 
-                <div class="col-md-5 col-sm-5">
+                <div class="col-md-4 col-sm-4">
 
                     <uib-tabset>
                         <uib-tab heading="Details">
@@ -230,10 +229,18 @@
                                         <div ng-show="localTask.status && user">
                                             <button class="btn btn-default" ng-click="changeState('received')"
                                                     ng-show="showStateChange('received',localTask.status)">Reviewed</button>
+
                                             <button class="btn btn-default"  ng-click="changeState('accepted')"
                                                     ng-show="showStateChange('accepted',localTask.status)">Accepted</button>
+
+                                            <button class="btn btn-default"  ng-click="changeState('completed')"
+                                                    ng-show="showStateChange('completed',localTask.status)">Completed</button>
+
                                             <button class="btn btn-default"  ng-click="changeState('declined')"
-                                                    ng-show="showStateChange('declined',localTask.status)">Declined</button>
+                                                    ng-show="showStateChange('completed',localTask.status)">Declined</button>
+
+                                            <button class="btn btn-default"  ng-click="changeState('cancelled')"
+                                                    ng-show="showStateChange('cancelled',localTask.status)">Cancelled</button>
                                         </div>
                                         <div ng-hide="user">
                                             <em>Please login to change the status or add a new note</em>
@@ -259,13 +266,12 @@
                                                     <textarea class="form-control" ng-model="input.note"></textarea>
 
                                                     <div>
-                                                        <button class="btn btn-link pull-right" ng-click="addNote(input.note)">Add note</button>
+                                                        <button class="btn btn-link pull-right" ng-show="input.note"
+                                                                ng-click="addNote(input.note)">Add note</button>
                                                     </div>
 
                                                 </td>
                                             </tr>
-
-
                                         </table>
                                     </div>
                                 </div>
@@ -276,17 +282,32 @@
 
 
                         </uib-tab>
+                        <uib-tab ng-show="localTask" heading="Status change history">
+                            <button  style="margin: 8px" class="btn btn-primary pull-right" ng-click="refreshHistory()">Load history</button>
+
+                            <table class="table table-bordered" ng-show="statusHistory">
+                                <tr><th>Date</th><th>Status</th><th>Reason</th></tr>
+                                <tr ng-repeat="task in statusHistory">
+                                    <td>{{task.meta.lastUpdated | getPrettyDate}}</td>
+                                    <td>{{stateHash[task.status]}}</td>
+                                    <td>{{task.statusReason.text}}</td>
+                                </tr>
+                            </table>
+
+                        </uib-tab>
                         <uib-tab heading="Json">
-                            <strong>Local Task object</strong>
-                            <pre>{{localTask | json}}</pre>
                             <strong>FHIR Task resource</strong>
                             <pre>{{fhirTask | json}}</pre>
+
+                            <strong>Local Task object</strong>
+                            <pre>{{localTask | json}}</pre>
+
                         </uib-tab>
                     </uib-tabset>
 
 
                 </div>
-                <div class="col-md-3 col-sm-3">
+                <div class="col-md-4 col-sm-4">
                     <h4>State Diagram</h4>
                     <img src="artifacts/workFlowState.png"/>
 
@@ -302,9 +323,10 @@
         <uib-tab heading="Report">
             <br/>
             <table class="table table-bordered">
-                <tr><th>Path</th><th>Comment</th><th>Email</th><th>Notes</th></tr>
+                <tr><th>Path</th><th>Status</th><th>Comment</th><th>Email</th><th>Notes</th></tr>
                 <tr ng-repeat="task in tasks | orderBy: 'path'">
                     <td>{{task.path | dropFirstInPath}}</td>
+                    <td>{{task.state}}</td>
                     <td>{{task.description}}</td>
                     <td>{{task.requesterDisplay}}</td>
                     <td>
@@ -327,7 +349,7 @@
 
         </uib-tab>
     </uib-tabset>
-{{selectedEd}}
+
 
 </div>
 </body>

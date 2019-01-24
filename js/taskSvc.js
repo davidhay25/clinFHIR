@@ -67,30 +67,31 @@ angular.module("sampleApp")
 
                 }},
                 getInternalTaskFromResource: function (resource,fhirVersion) {
-                let task = {}       //internal task
-                //task.resource = resource;       //for degugging...
-                task.description = resource.description;
-                task.notes = resource.note;
-                task.authoredOn = resource.authoredOn;
+                    let task = {}       //internal task
+                    //task.resource = resource;       //for degugging...
+                    task.id = resource.id;
+                    task.description = resource.description;
+                    task.notes = resource.note;
+                    task.authoredOn = resource.authoredOn;
 
-                task.status = resource.status || 'requested';
+                    task.status = resource.status || 'requested';
 
-                if (resource.requester) {
-                    switch (fhirVersion) {
-                        case 3 :
-                            if (resource.requester.agent) {
-                                task.requesterReference = resource.requester.agent;      //this is a reference
-                                task.requesterDisplay = resource.requester.agent.display;
-                            }
+                    if (resource.requester) {
+                        switch (fhirVersion) {
+                            case 3 :
+                                if (resource.requester.agent) {
+                                    task.requesterReference = resource.requester.agent;      //this is a reference
+                                    task.requesterDisplay = resource.requester.agent.display;
+                                }
 
-                            break;
-                        default :
-                            task.requesterReference = resource.requester
-                            task.requesterDisplay = resource.requester.display;
-                            break;
+                                break;
+                            default :
+                                task.requesterReference = resource.requester
+                                task.requesterDisplay = resource.requester.display;
+                                break;
 
+                        }
                     }
-                }
 
                 let extSimpleExt = getSingleExtensionValue(resource, pathExtUrl);
                 if (extSimpleExt) {

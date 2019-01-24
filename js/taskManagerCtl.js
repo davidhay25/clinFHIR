@@ -90,29 +90,19 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
         };
 
-        /*
-        //load all tasks of type 'model comment'
-        let url =  $scope.conformanceServer.url + "Task?code="+taskCode.system +"|"+taskCode.code;
-        $http.get(url).then(
-            function(data) {
-                if (data.data && data.data.entry) {
-                //    $scope.allTasks =
-                    data.data.entry.forEach(function (entry) {
+        $scope.refresh = function() {
+            loadTasksForModel($scope.currentModelId)
 
-                    })
-                }
-                console.log(data);
-            }, function(err) {
-                console.log(err)
-            }
-        );
-        */
+        }
+
+
         //allow the display for a state to be different to the actual code...
         $scope.stateHash = {};
         $scope.stateHash.requested = 'new';
         $scope.stateHash.received = 'reviewed';
         $scope.stateHash.accepted = 'accepted';
         $scope.stateHash.rejected = 'rejected';
+        $scope.stateHash.cancelled = 'cancelled';
 
         $scope.states = [{display:'-- All statuses --',code:''}]
         angular.forEach($scope.stateHash,function(v,k){
@@ -138,6 +128,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
         //add a new note as an annotation
         $scope.addNote = function(note) {
+
             $scope.localTask.notes = $scope.localTask.notes || [];
 
             var annot = {text:note,time: new Date().toISOString()};
@@ -145,19 +136,27 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             $scope.localTask.notes.push(annot);
             delete $scope.input.note;
 
-            //update the task resource
-            let fhirTask = $scope.selectedTask.resource;
-            fhirTask.note = fhirTask.note || []
-            fhirTask.note.push(annot);
-            let url = $scope.conformanceServer.url + "Task/"+fhirTask.id
-            $http.put(url,fhirTask).then(
-                function(data){
 
-                },function (err) {
-                    alert(angular.toJson(err))
-                }
-            )
+            //This is an 'update' object
+            let obj = {}
+            obj.note = annot;
+            obj.fhirServer = appConfigSvc.getCurrentConformanceServer().url;
 
+            let fhirTask =  $scope.selectedTask.resource;
+
+            if (fhirTask) {
+                //this will add the note to teh task from the server...
+                let url = "/myTask/addNote/" + fhirTask.id
+                $http.post(url, obj).then(
+                    function (data) {
+                        //for the local display
+                        fhirTask.note = fhirTask.note || []
+                        fhirTask.note.push(annot);
+                    }, function (err) {
+                        alert('Error saving note: ' + angular.toJson(err))
+                    }
+                )
+            }
         };
 
         $scope.selectTask = function(task) {
@@ -171,8 +170,8 @@ angular.module("sampleApp").controller('taskManagerCtrl',
            // console.log( $scope.selectedEd)
         };
 
-        
         $scope.showStateChange = function(newState,currentState) {
+            //requested == new, received = reviewed
             switch (newState) {
                 case 'received' :
                     if (currentState == 'requested' || currentState == 'accepted' || currentState == 'declined') {return true}
@@ -183,28 +182,56 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                 case 'declined' :
                     if (currentState == 'requested' || currentState == 'received') {return true}
                     break;
+                case 'cancelled' :
+                    if (currentState == 'cancelled') {return false} else {return true}
+                    break;
+                case 'completed' :
+                    if (currentState == 'accepted') {return true}
+                    break;
             }
         };
 
         $scope.changeState = function(newState) {
 
-            let note = window.prompt('Enter note about change (Cancel for none)');
-            if (note) {
-                var annot = {text:note,time: new Date().toISOString()};
-                annot.authorString = $scope.user.email;
-                $scope.fhirTask.note = $scope.fhirTask.note || []
-                $scope.fhirTask.note.push(annot)
+            delete $scope.fhirTask.statusReason;
 
-                //for display
-                $scope.localTask.notes = $scope.localTask.notes || []
-                $scope.localTask.notes.push(annot)
-
+            let note = window.prompt('Enter mandatory note about change');
+            if (! note) {
+                return;
             }
+
+
+            var annot = {text:note,time: new Date().toISOString()};
+            annot.authorString = $scope.user.email;
+            $scope.fhirTask.note = $scope.fhirTask.note || []
+            $scope.fhirTask.note.push(annot)
+
+            $scope.fhirTask.statusReason = {text:note}
+            //for display
+            $scope.localTask.notes = $scope.localTask.notes || []
+            $scope.localTask.notes.push(annot)
+
+
             $scope.selectedTask.status = newState;
             $scope.localTask.status = newState;
             $scope.fhirTask.status = newState;
 
-
+            //{note:, fhirServer:, status:}
+            let obj = {}
+            obj.note = annot;
+            obj.fhirServer = appConfigSvc.getCurrentConformanceServer().url;
+            obj.status = newState;
+            let url = "/myTask/changeStatus/" +  $scope.fhirTask.id
+            $http.post(url, obj).then(
+                function (data) {
+                    //for the local display
+                    fhirTask.note = fhirTask.note || []
+                    fhirTask.note.push(annot);
+                }, function (err) {
+                    alert('Error saving note: ' + angular.toJson(err))
+                }
+            )
+/*
             let url = $scope.conformanceServer.url + "Task/"+$scope.fhirTask.id;    //from parent controller
             $http.put(url,$scope.fhirTask).then(
                 function() {
@@ -213,13 +240,46 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                     alert(angular.toJson(err))
                 }
             )
+            */
         };
 
 
+        $scope.refreshHistory = function(){
+            //create a status history for the current task
+            let fhirTask =  $scope.selectedTask.resource;
+
+            if (fhirTask) {
+                //this will add the note to teh task from the server...
+                let url = $scope.conformanceServer.url + "Task/"+$scope.localTask.id + '/_history';    //from parent controller
+                $http.get(url).then(
+                    function (data) {
+                        let hxBundle = data.data;
+                        $scope.statusHistory = [];
+                        let lastStatus="xx"
+                        if (hxBundle && hxBundle.entry) {
+                            hxBundle.entry.forEach(function (entry) {
+                                let task = entry.resource;
+                                if (task.status !== lastStatus) {
+                                    //only add the state changes...
+                                    //$scope.statusHistory.push(task)
+                                    $scope.statusHistory.splice(0,0,task)      //time order
+                                    lastStatus = task.status;
+                                }
+
+                            })
+                        }
+                        console.log($scope.statusHistory)
+                    }, function (err) {
+                        alert('Error saving note: ' + angular.toJson(err))
+                    }
+                )
+            }
+        };
 
 
         //load all the tasks for a given model
         function loadTasksForModel(id) {
+            $scope.currentModelId = id;
             hashED = {};       //hash of element definitions by path
             $scope.tasks = []
             let url = $scope.conformanceServer.url + "Task";    //from parent controller
@@ -271,77 +331,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
         }
 
-        //loadTasksForModel($scope.model.id);
-/*
-        $scope.addTaskDEP = function() {
-            let comment = window.prompt('Enter comment');       //todo make dialog
-            if (comment) {
-                let task = {resourceType:'Task'};
-                task.id = 'id'+ new Date().getTime() + "-" + Math.floor(Math.random() * Math.floor(1000));
-                task.description = comment;
-                task.code = {coding:taskCode};
-                task.focus = {reference:"StructureDefinition/"+$scope.treeData[0].data.header.SDID};    //from the parent
 
-                //treeData[0].data.header.SDUrl
-
-
-                logicalModelSvc.addSimpleExtension(task, pathExtUrl, $scope.taskNode.id)   //the path in the model
-
-
-                //todo - what is there's no logged in user?
-                if ( $scope.Practitioner) {     //This is the user - from the parent controller
-                    let ref = 'Practitioner/'+$scope.Practitioner.id;
-
-                    let display = "";
-                    if ($scope.Practitioner.telecom) {
-                        display = $scope.Practitioner.telecom[0].value
-                    };
-
-
-                    switch (fhirVersion) {
-                        case 3 :
-                            task.requester = {agent: {reference:ref,display:display}};
-                            break;
-                        default :
-                            task.requester = {reference:ref,display:display};
-                            break;
-
-                    }
-                }
-
-
-
-
-
-                let url = $scope.conformanceServer.url + "Task/"+ task.id;    //from parent controller
-                $http.put(url,task).then(
-                    function(data) {
-                        $scope.tasks = $scope.tasks || []
-                        $scope.tasks.push({description: task.description,path:$scope.taskNode.id});
-                        alert('Comment has been added.')
-                    }, function(err) {
-                        alert(angular.toJson(err))
-                    }
-                )
-            }
-        };
-
-        function getSingleExtensionValueDEP(resource,url) {
-            //return the value of an extension assuming there is only 1...
-            var extension;
-            if (resource) {
-                resource.extension = resource.extension || []
-                resource.extension.forEach(function (ext) {
-                    if (ext.url == url) {
-                        extension = ext
-                    }
-                });
-            }
-
-            return extension;
-        }
-
-        */
 
 
     })

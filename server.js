@@ -3,7 +3,7 @@
 var request  = require('request');
 var moment = require('moment');
 
-var httpProxy = require('http-proxy')
+//var httpProxy = require('http-proxy')
 
 //  remove for proxy var myParser = require("body-parser");
 var Cookies = require( "cookies" )
@@ -14,6 +14,8 @@ var app = express();
 
 var orionModule = require("./serverModuleOrion.js")
 var smartModule = require("./serverModuleSMART.js")
+var taskModule = require("./serverModuleTask");
+taskModule.setup(app)
 
 //var connect = require('connect');
 var http = require('http');
@@ -130,6 +132,8 @@ app.get('/createExample',function(req,res){
 
 
 //======== temp ======= for Orion calling the medication dispense endpoint
+
+/*
 app.get('/orion/:nhi',function(req,res){
     var nhi = req.params['nhi'];
 
@@ -179,7 +183,7 @@ app.get('/orion/:nhi',function(req,res){
     }
 
 });
-
+*/
 
 //when a user navigates to cf
 app.post('/stats/login',function(req,res){

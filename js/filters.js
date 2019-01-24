@@ -181,6 +181,15 @@ angular.module("sampleApp")
 
         }
     })
+
+    .filter('getPrettyDate',function(){
+        return function(da){
+            if (da) {
+                return moment(da).format('Do MMM  hh:mm a')
+            }
+
+        }
+    })
     .filter('getAgeSeconds',function(){
         return function(da,inBrackets){
             if (da) {
@@ -314,7 +323,10 @@ angular.module("sampleApp")
                 //return the last part of a path
                 if (path) {
                     var ar = path.split('.');
-                    ar.splice(0,1);
+                    if (ar.length > 1){
+                        ar.splice(0,1);
+                    }
+
                     return ar.join('.') //removed training space...
                 }
             }
