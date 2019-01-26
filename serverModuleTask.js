@@ -52,7 +52,7 @@ function setup(app) {
 
             try {
                 var obj = JSON.parse(body);
-                //{note:, fhirServer:, status:}
+                //{note:, fhirServer:, status:, email:, who:}
             } catch (ex) {
                 res.status(500).send({msg:'Unable to parse input'})
                 return
@@ -61,15 +61,35 @@ function setup(app) {
             //console.log(obj.note,req.params.taskId,obj.fhirServer)
             let vo = {};
             vo.res = res;
-            vo.data = {status: obj.status, note:obj.note};
+            vo.data = {status: obj.status, note:obj.note, who: obj.who};
             vo.fhirServer =  obj.fhirServer;
             vo.taskId = req.params.taskId;
+            vo.createProvenance = false;
+            vo.email = obj.email;
 
             let url = obj.fhirServer + "Task/"+req.params.taskId;
 
             vo.updateFunction = function(task,obj) {
                 //obj = {note:, status:}
                 task.status = obj.status;       //the new status
+                if (obj.who) {
+                    //this is an extension   {url:, valueReference: }
+                    task.extension = task.extension || []
+                    //remove any existing with this url
+                    let found = false;
+                    for (var ext in task.extension) {
+                        if (ext.url == obj.who.url) {
+                            ext.valueReference = obj.who.valueReference;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (! found) {
+                        task.extension.push(obj.who)
+                    }
+
+                    //task.extension.push
+                }
                 if (obj.note) {
                     task.statusReason = {text:obj.note.text};       //is a CC
                     task.note = task.note || [];
@@ -114,9 +134,39 @@ function updateTask(vo) {
                     options.body = JSON.stringify(task);
                     request(options,function(error,response,body){
                         if (response && response.statusCode == '200' ) {
-                            vo.res.send();
+
+                            //Create provenance. needs to be version specific...
+                            if (vo.createProvenance && vo.email) {
+                                let provenance = {resourceType:'Provenance',target:[],agent:[]}
+                                provenance.recorded = new Date().toISOString();
+                                provenance.target.push({reference:response.headers.location});  //from the previous call
+                               // provenance.target.push({reference:'Task/'+task.id});  //from the previous call
+                               // provenance.target.push('Task/'+task.id);
+                                provenance.agent.push({whoReference : {display:vo.email}});
+                                options.method = 'POST';
+                                options.body = JSON.stringify(provenance);
+                                options.uri = vo.fhirServer + "Provenance/";
+                                request(options,function(error,response,body) {
+                                    if (response && response.statusCode == '201') {
+                                        vo.res.send();
+                                    } else {
+                                        vo.res.status(500).send({
+                                            msg: 'Error creating Provenance ' + ex.message,
+                                            oo: body
+                                        })
+                                    }
+                                })
+
+
+                            } else {
+                                vo.res.send();
+                            }
+
+
+
+
                         } else {
-                            vo.res.status(500).send({msg:'Unable to PUT updated task '+ex.message,oo:body})
+                            vo.res.status(500).send({msg:'Unable to PUT updated task. ',oo:body})
                         }
                     })
                 } catch (ex) {

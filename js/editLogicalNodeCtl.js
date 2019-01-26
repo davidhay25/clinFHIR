@@ -85,6 +85,16 @@ angular.module("sampleApp")
             };
 
 
+            $scope.addAlias = function() {
+                let alias = window.prompt("Alias")
+                $scope.input.alias = $scope.input.alias || []
+                $scope.input.alias.push(alias)
+            };
+
+            $scope.removeAlias = function(inx) {
+                $scope.input.alias.splice(inx,1);
+            }
+
             //when a fhir path is selected from the type-ahead in the mapping...
             $scope.fhirPathSelect = function(item) {
                 console.log(item)
@@ -178,20 +188,7 @@ angular.module("sampleApp")
                 }
             }
             $scope.input.multiplicity = 'opt';      //default multiplicity
-            /*
-            if (editNode) {
-                setup(editNode);
-            } else {
-                for (var i=0; i< $scope.allDataTypes.length; i++) {
-                    if ($scope.allDataTypes[i].code == 'string') {
-                        $scope.input.dataType = $scope.allDataTypes[i];
-                        break;
-                    }
-                }
 
-                $scope.input.multiplicity = 'opt';
-            }
-*/
 
             if (baseType) {
                 //get all the paths - including expanding logical models...
@@ -222,78 +219,80 @@ angular.module("sampleApp")
 
                // if (editNode) {
                     //editing an existing node
-                    $scope.pathDescription = 'Path'
-                    var data = node.data;
-                    $scope.input.name = data.name;
-                    $scope.input.pathSegment = data.pathSegment;
-                    $scope.input.short= data.short;
-                    $scope.input.description = data.description;
-                    $scope.input.comments = data.comments;
-                    $scope.input.mapping = data.mapping;
+                $scope.pathDescription = 'Path'
+                var data = node.data;
+                $scope.input.name = data.name;
+                $scope.input.pathSegment = data.pathSegment;
+                $scope.input.short= data.short;
+                $scope.input.description = data.description;
+                $scope.input.comments = data.comments;
+                $scope.input.mapping = data.mapping;
 
-                    //these 3 are from extensions...
-                    $scope.input.misuse = data.misuse;
-                    $scope.input.usageGuide = data.usageGuide;
-                    $scope.input.legacy = data.legacy;
+                $scope.input.alias = data.alias;    //[string]
 
-                    $scope.input.conceptMap = data.conceptMap;
+                //these 3 are from extensions...
+                $scope.input.misuse = data.misuse;
+                $scope.input.usageGuide = data.usageGuide;
+                $scope.input.legacy = data.legacy;
 
-                    //$scope.input.mappingPath = data.mappingPath;
-                    $scope.fhirMapping(data.mappingPath);       //check for an extension
-                    $scope.input.fixedString = data.fixedString;
-                    //$scope.input.mappingPathV2 = data.mappingPathV2;
+                $scope.input.conceptMap = data.conceptMap;
 
-                    $scope.input.mappingFromED = angular.copy(data.mappingFromED);    //all the current mappings. Only want to update on save...
+                //$scope.input.mappingPath = data.mappingPath;
+                $scope.fhirMapping(data.mappingPath);       //check for an extension
+                $scope.input.fixedString = data.fixedString;
+                //$scope.input.mappingPathV2 = data.mappingPathV2;
 
-                    $scope.input.mappingPath = getMapValueForIdentity('fhir');
+                $scope.input.mappingFromED = angular.copy(data.mappingFromED);    //all the current mappings. Only want to update on save...
 
-                    if ($scope.input.mappingPath) {
+                $scope.input.mappingPath = getMapValueForIdentity('fhir');
 
-                        var ed = $scope.allPathsHash[$scope.input.mappingPath];
-                        console.log(ed)
+                if ($scope.input.mappingPath) {
 
-                        $scope.selectedED = $scope.edHash[$scope.input.mappingPath];    //used to show the ED
-                        if ($scope.input.mappingPath.indexOf('xtension')>-1) {
-                            $scope.isExtension = true;
-                        }
-                        /*
+                    var ed = $scope.allPathsHash[$scope.input.mappingPath];
+                    console.log(ed)
+
+                    $scope.selectedED = $scope.edHash[$scope.input.mappingPath];    //used to show the ED
+                    if ($scope.input.mappingPath.indexOf('xtension')>-1) {
+                        $scope.isExtension = true;
+                    }
+                    /*
 
 
-                        //is there a mapping path which refers to an ED?
-                        if ($scope.edHash[$scope.input.mappingPath]) {
-                            $scope.selectedED = $scope.edHash[$scope.input.mappingPath];
-                        }
-
-                        */
+                    //is there a mapping path which refers to an ED?
+                    if ($scope.edHash[$scope.input.mappingPath]) {
+                        $scope.selectedED = $scope.edHash[$scope.input.mappingPath];
                     }
 
-
-                    isDiscriminatorRequired();      //true if there is another fhir mapping the same
-                    $scope.input.mappingPathV2 = getMapValueForIdentity('hl7V2');
-                    $scope.input.mappingPathSnomed = getMapValueForIdentity('snomed');
-                    $scope.input.mappingPathLM = getMapValueForIdentity('lm');
-
-                    $scope.input.fhirMappingExtensionUrl = data.fhirMappingExtensionUrl;
+                    */
+                }
 
 
-                    if (data.min == 0) {
-                        $scope.input.multiplicity = 'opt';
-                        if (data.max == '*') {$scope.input.multiplicity = 'mult'}
-                    }
-                    if (data.min == 1){
-                        $scope.input.multiplicity = 'req';
-                        if (data.max == '*') {$scope.input.multiplicity = 'multreq'}
-                    }
+                isDiscriminatorRequired();      //true if there is another fhir mapping the same
+                $scope.input.mappingPathV2 = getMapValueForIdentity('hl7V2');
+                $scope.input.mappingPathSnomed = getMapValueForIdentity('snomed');
+                $scope.input.mappingPathLM = getMapValueForIdentity('lm');
+
+                $scope.input.fhirMappingExtensionUrl = data.fhirMappingExtensionUrl;
 
 
-                    if (! data.type) {
-                        alert("For some reason the 'type' element is absent. Setting it to a string.")
-                        data.type = [{code:'string'}]
-                    }
+                if (data.min == 0) {
+                    $scope.input.multiplicity = 'opt';
+                    if (data.max == '*') {$scope.input.multiplicity = 'mult'}
+                }
+                if (data.min == 1){
+                    $scope.input.multiplicity = 'req';
+                    if (data.max == '*') {$scope.input.multiplicity = 'multreq'}
+                }
 
 
-                    $scope.dt = data.type[0];   //the selected datatype...
-                    var dtCode = data.type[0].code;     //only the first datatype (we only support 1 right now)
+                if (! data.type) {
+                    alert("For some reason the 'type' element is absent. Setting it to a string.")
+                    data.type = [{code:'string'}]
+                }
+
+
+                $scope.dt = data.type[0];   //the selected datatype...
+                var dtCode = data.type[0].code;     //only the first datatype (we only support 1 right now)
 
 
                     //$timeout(setOptionsForDtAndPath,1000);      //check options for this dt & path (need to wait for the config to be loaded
@@ -798,7 +797,9 @@ angular.module("sampleApp")
 
                     vo.conceptMap = $scope.input.conceptMap;
 
-                    vo.mappingPath = $scope.input.mappingPath;      //this is the FHIR path
+                vo.alias = $scope.input.alias ;
+
+                vo.mappingPath = $scope.input.mappingPath;      //this is the FHIR path
                     vo.mappingFromED = $scope.input.mappingFromED || [];      //all mappings
                     vo.mappingPathV2 = $scope.input.mappingPathV2;
                     vo.mappingPathSnomed = $scope.input.mappingPathSnomed;

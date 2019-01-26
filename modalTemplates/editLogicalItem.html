@@ -67,8 +67,37 @@
                 <div class="form-group">
                 <div class="row">
                     <div class="col-md-8 col-sm-8">
-                        <div><label>Description</label></div>
-                        <textarea class="form-control" rows="3" ng-model="input.description" placeholder="Description of element"></textarea>
+                        <uib-tabset>
+                            <uib-tab heading="">
+                                <uib-tab-heading><strong>Description</strong></uib-tab-heading>
+                                <!--<div><label>Description</label></div>-->
+                                <textarea class="form-control" rows="3" ng-model="input.description" placeholder="Description of element"></textarea>
+                            </uib-tab>
+                            <uib-tab>
+                                <uib-tab-heading><strong>Comments</strong></uib-tab-heading>
+                                <textarea class="form-control" rows="4" ng-model="input.comments"
+                                          placeholder="Any comments on the use of this element"></textarea>
+                            </uib-tab>
+                            <uib-tab>
+                                <uib-tab-heading>Alias <span class="badge">{{input.alias.length}}</span></uib-tab-heading>
+                                <ul>
+                                    <li ng-repeat="al in input.alias">
+
+                                        {{al}}
+                                        <span class="pull-right">
+                                            <i class="glyphicon glyphicon-minus-sign clickable pull-right" ng-click="removeAlias($index)"></i>
+                                        </span>
+
+
+                                    </li>
+
+                                </ul>
+                                <i class="glyphicon glyphicon-plus-sign clickable pull-right" ng-click="addAlias()"></i>
+                            </uib-tab>
+
+                        </uib-tabset>
+
+
                     </div>
                     <div class="col-md-4 col-sm-4">
                         <div ng-show="dt.code=='Reference'">
@@ -136,11 +165,7 @@
                 <div class="row">
                     <div class="col-md-6 col-sm-6">
                         <uib-tabset>
-                            <uib-tab>
-                                <uib-tab-heading><strong>Comments</strong></uib-tab-heading>
-                                <textarea class="form-control" rows="4" ng-model="input.comments"
-                                          placeholder="Any comments on the use of this element"></textarea>
-                            </uib-tab>
+
                             <uib-tab>
                                 <uib-tab-heading><strong>Usage Guide</strong></uib-tab-heading>
                                 <textarea class="form-control" rows="4" ng-model="input.usageGuide"

@@ -956,7 +956,34 @@
 
                             <table class="table table-bordered">
                                 <!--<tr><td width="20%">Name</td><td>{{selectedNode.data.name}}</td></tr> -->
-                                <tr><td width="20%">Model path</td><td>{{selectedNode.data.path}}</td></tr>
+                                <tr>
+                                    <td width="20%">Name</td>
+                                    <td>{{selectedNode.data.name}}
+
+
+
+
+                                    </td>
+                                </tr>
+
+                                <tr ng-show="selectedNode.data.alias">
+                                    <td width="20%">Alias</td>
+                                    <td>
+
+                                        <ul>
+                                            <li ng-repeat="al in selectedNode.data.alias">
+                                                {{al}}
+                                            </li>
+                                        </ul>
+
+
+                                    </td>
+                                </tr>
+                                <!--
+                                <tr>
+                                    <td width="20%">Model path</td><td>{{selectedNode.data.path}}</td>
+                                </tr>
+                                -->
                                 <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
                                 <tr><td>Description</td>
                                     <td>

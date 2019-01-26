@@ -2650,6 +2650,8 @@ angular.module("sampleApp")
                         item.data.min = ed.min;
                         item.data.max = ed.max;
 
+                        item.data.alias = ed.alias;
+
                         if (ed.mapping) {           //the mapping path in the target resource...
                             item.data.mappingFromED = []; //ed.mapping;       //save all the mappings in an array...
 
@@ -2861,6 +2863,8 @@ angular.module("sampleApp")
                     ed.definition = data.description || 'No description';
                     ed.min = data.min;
                     ed.max = data.max;
+
+                    ed.alias = data.alias;
 
 
 

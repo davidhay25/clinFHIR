@@ -145,7 +145,8 @@
                     <div class="taskListScroll">
                         <table class="table table-bordered">
                             <tr><th>Path</th><th>Comment</th><th>Status</th><th>Notes</th></tr>
-                            <tr ng-repeat="task in tasks | orderBy: 'path'" ng-show="canShowTask(task,input.filterStatus)">
+                            <tr ng-class="{'active' : task.id == localTask.id}"
+                                 ng-repeat="task in tasks | orderBy: 'path'" ng-show="canShowTask(task,input.filterStatus)">
                                 <td><div ng-click="selectTask(task)" class="clickable">{{task.path | dropFirstInPath}}</div></td>
                                 <td>{{task.description | limitTo :30}}</td>
                                 <td>{{stateHash[task.status]}}</td>
@@ -197,6 +198,40 @@
                                     </div>
                                 </div>
 
+                                <div class="row myForm">
+                                    <div class="col-md-3">
+                                        <strong>Status</strong>
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{stateHash[localTask.status]}}
+                                    </div>
+                                    <div class="col-md-7">
+                                        <!-- Must be a logged in user. If the model has an editor, then must be the same.  -->
+                                        <div ng-show="localTask.status && user && (!editorEmail || editorEmail == user.email)">
+                                            <button class="btn btn-default" ng-click="changeState('received')"
+                                                    ng-show="showStateChange('received',localTask.status)">Reviewed</button>
+
+                                            <button class="btn btn-default"  ng-click="changeState('accepted')"
+                                                    ng-show="showStateChange('accepted',localTask.status)">Accepted</button>
+
+                                            <button class="btn btn-default"  ng-click="changeState('completed')"
+                                                    ng-show="showStateChange('completed',localTask.status)">Completed</button>
+
+                                            <button class="btn btn-default"  ng-click="changeState('rejected')"
+                                                    ng-show="showStateChange('rejected',localTask.status)">Rejected</button>
+
+                                            <button class="btn btn-default"  ng-click="changeState('cancelled')"
+                                                    ng-show="showStateChange('cancelled',localTask.status)">Cancelled</button>
+                                        </div>
+                                        <div ng-hide="user">
+                                            <em>Please login to change the status or add a new note</em>
+                                        </div>
+                                        <div ng-show="user && editorEmail && (editorEmail != user.email)">
+                                            <em>You cannot change the state as you are not the Model editor ({{editorEmail}}. (You can add a note though)</em>
+                                        </div>
+                                    </div>
+                                </div>
+
 
                                 <div class="row myForm">
                                     <div class="col-md-3">
@@ -211,42 +246,13 @@
 
                                 <div class="row myForm">
                                     <div class="col-md-3">
-                                        <strong>Email</strong>
+                                        <strong>User email</strong>
                                     </div>
                                     <div class="col-md-9">
                                         {{localTask.requesterDisplay}}
                                     </div>
                                 </div>
 
-                                <div class="row myForm">
-                                    <div class="col-md-3">
-                                        <strong>Status</strong>
-                                    </div>
-                                    <div class="col-md-2">
-                                        {{stateHash[localTask.status]}}
-                                    </div>
-                                    <div class="col-md-7">
-                                        <div ng-show="localTask.status && user">
-                                            <button class="btn btn-default" ng-click="changeState('received')"
-                                                    ng-show="showStateChange('received',localTask.status)">Reviewed</button>
-
-                                            <button class="btn btn-default"  ng-click="changeState('accepted')"
-                                                    ng-show="showStateChange('accepted',localTask.status)">Accepted</button>
-
-                                            <button class="btn btn-default"  ng-click="changeState('completed')"
-                                                    ng-show="showStateChange('completed',localTask.status)">Completed</button>
-
-                                            <button class="btn btn-default"  ng-click="changeState('declined')"
-                                                    ng-show="showStateChange('completed',localTask.status)">Declined</button>
-
-                                            <button class="btn btn-default"  ng-click="changeState('cancelled')"
-                                                    ng-show="showStateChange('cancelled',localTask.status)">Cancelled</button>
-                                        </div>
-                                        <div ng-hide="user">
-                                            <em>Please login to change the status or add a new note</em>
-                                        </div>
-                                    </div>
-                                </div>
 
                                 <div class="row myForm">
                                     <div class="col-md-2">
@@ -286,11 +292,12 @@
                             <button  style="margin: 8px" class="btn btn-primary pull-right" ng-click="refreshHistory()">Load history</button>
 
                             <table class="table table-bordered" ng-show="statusHistory">
-                                <tr><th>Date</th><th>Status</th><th>Reason</th></tr>
+                                <tr><th>Date</th><th>Status</th><th>Reason</th><th>Who</th></tr>
                                 <tr ng-repeat="task in statusHistory">
                                     <td>{{task.meta.lastUpdated | getPrettyDate}}</td>
                                     <td>{{stateHash[task.status]}}</td>
                                     <td>{{task.statusReason.text}}</td>
+                                    <td>{{task.instanceAuthor.display}}</td>
                                 </tr>
                             </table>
 
@@ -330,7 +337,7 @@
                     <td>{{task.description}}</td>
                     <td>{{task.requesterDisplay}}</td>
                     <td>
-                        <div ng-repeat="note in task.notes">
+                        <div ng-repeat="note in task.notes track by $index">
                             <div class="row">
                                 <div class="col-sm-8 col-md-8">
                                     {{note.text}}

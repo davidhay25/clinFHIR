@@ -9,7 +9,12 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
         let fhirVersion = $scope.conformanceServer.version;     //from parent
         let taskCode =  {system:"http://loinc.org",code:"48767-8"};
-        let pathExtUrl = appConfigSvc.config().standardExtensionUrl.path;  //the extension for recording the model path for a comment
+
+        $scope.instanceAuthor = appConfigSvc.config().standardExtensionUrl.instanceAuthor;  //the extension for recording the model path for a comment
+        if (!$scope.instanceAuthor) {
+            alert("Task warning: You must restart clinFHIR then the Task Manager to reset updated config. Note that this will reset the configured servers.")
+        }
+
 
         let hashED = {};    //will have a hash of element definitions by path
         //-----------  login stuff....
@@ -86,6 +91,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
         $scope.selectModel = function(entry) {
             console.log(entry)
+            delete $scope.statusHistory;
             loadTasksForModel(entry.id)
 
         };
@@ -103,6 +109,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
         $scope.stateHash.accepted = 'accepted';
         $scope.stateHash.rejected = 'rejected';
         $scope.stateHash.cancelled = 'cancelled';
+        $scope.stateHash.completed = 'completed';
 
         $scope.states = [{display:'-- All statuses --',code:''}]
         angular.forEach($scope.stateHash,function(v,k){
@@ -112,9 +119,6 @@ angular.module("sampleApp").controller('taskManagerCtrl',
         $scope.input.filterStatus = $scope.states[0];
        // $scope.model = {id:"StructureDefinition/ADRAllergyIntolerance"};    //load from a selector
 
-        if (!pathExtUrl) {
-            alert("Task warning: You must restart clinFHIR then the Task Manager to reset updated config")
-        }
 
         //for the task list filter...
         $scope.canShowTask = function(task,filter) {
@@ -164,6 +168,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             $scope.fhirTask = task.resource
             $scope.localTask = angular.copy(task)
             delete $scope.localTask.resource;
+            delete $scope.statusHistory;
 
 
             $scope.selectedEd = hashED[task.path];
@@ -174,16 +179,16 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             //requested == new, received = reviewed
             switch (newState) {
                 case 'received' :
-                    if (currentState == 'requested' || currentState == 'accepted' || currentState == 'declined') {return true}
+                    if (currentState == 'requested' || currentState == 'accepted' || currentState == 'rejected') {return true}
                     break;
                 case 'accepted' :
                     if (currentState == 'requested' || currentState == 'received') {return true}
                     break;
-                case 'declined' :
+                case 'rejected' :
                     if (currentState == 'requested' || currentState == 'received') {return true}
                     break;
                 case 'cancelled' :
-                    if (currentState == 'cancelled') {return false} else {return true}
+                    if (currentState == 'cancelled' || currentState == 'completed') {return false} else {return true}
                     break;
                 case 'completed' :
                     if (currentState == 'accepted') {return true}
@@ -221,26 +226,29 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             obj.note = annot;
             obj.fhirServer = appConfigSvc.getCurrentConformanceServer().url;
             obj.status = newState;
+            if ($scope.user) {      //should always be present for a state change
+                obj.who = {
+                    url:  $scope.instanceAuthor,
+                    valueReference : {display: $scope.user.email}
+                }
+            }
+
+
+            if ($scope.user) {
+                obj.email = $scope.user.email;
+            }
+
             let url = "/myTask/changeStatus/" +  $scope.fhirTask.id
             $http.post(url, obj).then(
                 function (data) {
                     //for the local display
-                    fhirTask.note = fhirTask.note || []
-                    fhirTask.note.push(annot);
+                    $scope.fhirTask.note = $scope.fhirTask.note || []
+                    $scope.fhirTask.note.push(annot);
                 }, function (err) {
                     alert('Error saving note: ' + angular.toJson(err))
                 }
             )
-/*
-            let url = $scope.conformanceServer.url + "Task/"+$scope.fhirTask.id;    //from parent controller
-            $http.put(url,$scope.fhirTask).then(
-                function() {
 
-                }, function (err) {
-                    alert(angular.toJson(err))
-                }
-            )
-            */
         };
 
 
@@ -262,7 +270,13 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                                 if (task.status !== lastStatus) {
                                     //only add the state changes...
                                     //$scope.statusHistory.push(task)
-                                    $scope.statusHistory.splice(0,0,task)      //time order
+                                    //the last note in the notes is the reason for the change - and hence teh user
+
+                                    let iTask = taskSvc.getInternalTaskFromResource(task)
+
+                                    $scope.statusHistory.splice(0,0,iTask)      //time order
+
+
                                     lastStatus = task.status;
                                 }
 
@@ -280,7 +294,8 @@ angular.module("sampleApp").controller('taskManagerCtrl',
         //load all the tasks for a given model
         function loadTasksForModel(id) {
             $scope.currentModelId = id;
-            hashED = {};       //hash of element definitions by path
+            delete $scope.editorEmail;
+            hashED = {};       //hash of element definitions by path - used to display details
             $scope.tasks = []
             let url = $scope.conformanceServer.url + "Task";    //from parent controller
             url += "?code="+taskCode.system +"|"+taskCode.code;
@@ -315,6 +330,9 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                 function(data) {
                     let model = data.data;
 
+
+                    //let editorExtUrl = appConfigSvc.config().standardExtensionUrl.editor;
+                    $scope.editorEmail = taskSvc.getModelEditor(model);
 
                     if (model.snapshot && model.snapshot.element) {
                         model.snapshot.element.forEach(function (ed) {
