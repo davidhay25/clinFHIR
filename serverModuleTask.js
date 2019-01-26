@@ -1,24 +1,95 @@
 //endpoints for Task functionity
 
-var request  = require('request');
+let request  = require('request');
+
+let wss,WebSocket;
 
 
+function setup(app,iwss,iWebSocket) {
+    wss = iwss
+    WebSocket = iWebSocket
 
-function setup(app) {
+
+    app.post('/myTask/addTask/:taskId',function(req,res){
+        var body = "";
+        req.on('data', function (data) {
+            body += data;
+        });
+        req.on('end', function (data) {
+            if (data) {
+                body += data;
+            }
+
+
+            let vo;
+            try {
+                vo = JSON.parse(body);
+            } catch (ex) {
+                res.status(500).send({msg: 'Unable to parse input'})
+                return
+            }
+
+            let task = vo.task;
+            let ip = req.connection.remoteAddress;
+            sendSocketBroadcast(task, ip);
+
+            let url = vo.fhirServer + "Task/"+task.id;
+            let options = {
+                method:'PUT',
+                body: JSON.stringify(task),
+                rejectUnauthorized: false,
+                uri : url,
+                headers: {
+                    'Content-Type': 'application/fhir+json'
+                }
+            };
+
+            request(options,function(error,response,body){
+
+                if (response && (response.statusCode == '200' || response.statusCode == '201') ) {
+                    res.send()
+                } else {
+                    res.status(500).send({msg:'Unable to save task'})
+                }
+            })
+
+
+        })
+
+    });
+
     app.post('/myTask/addNote/:taskId',function(req,res){
         var body = "";
         req.on('data', function (data) {
             body += data;
         });
         req.on('end', function (data) {
+
+
+
             let obj;
             try {
                 obj = JSON.parse(body);
-                //{note: fhirServer:}
             } catch (ex) {
                 res.status(500).send({msg:'Unable to parse input'})
                 return
             }
+
+            let ip = req.connection.remoteAddress;
+            sendSocketBroadcast(obj,ip);
+
+/*
+            try {
+                wss.clients.forEach(function each(client) {
+                    if (client.readyState === WebSocket.OPEN) {
+                        client.send(body);
+                    }
+                });
+            } catch (ex) {
+                console.log('Error sending socket update')
+            }
+*/
+
 
             //console.log(obj.note,req.params.taskId,obj.fhirServer)
             let vo = {};
@@ -28,13 +99,13 @@ function setup(app) {
             vo.taskId = req.params.taskId
 
             //console.log(obj.note,req.params.taskId,obj.fhirServer)
-            let url = obj.fhirServer + "Task/"+req.params.taskId;
+            //let url = obj.fhirServer + "Task/"+req.params.taskId;
 
             //function to actually apply the task update
 
-            vo.updateFunction =  function(task,obj) {
+            vo.updateFunction =  function(task,note) {
                 task.note = task.note || [];
-                task.note.push(obj.note);
+                task.note.push(note);
 
             };
 
@@ -57,6 +128,9 @@ function setup(app) {
                 res.status(500).send({msg:'Unable to parse input'})
                 return
             }
+
+            let ip = req.connection.remoteAddress;
+            sendSocketBroadcast(obj,ip);
 
             //console.log(obj.note,req.params.taskId,obj.fhirServer)
             let vo = {};
@@ -106,11 +180,11 @@ function setup(app) {
 
 }
 
-//function updateTask(taskId, fhirServer, updateFn,res) {
+//function updateTask(taskId, fhirServer, updateFn, res) {
 function updateTask(vo) {
     try {
 
-        console.log (vo)
+        //console.log (vo)
 
         let url = vo.fhirServer + "Task/"+vo.taskId;
         let options = {
@@ -125,7 +199,7 @@ function updateTask(vo) {
         request(options,function(error,response,body){
 
             if (body) {
-                console.log(body)
+                //console.log(body)
                 try {
                     let task = JSON.parse(body)
                     vo.updateFunction(task,vo.data);
@@ -136,7 +210,7 @@ function updateTask(vo) {
                         if (response && response.statusCode == '200' ) {
 
                             //Create provenance. needs to be version specific...
-                            if (vo.createProvenance && vo.email) {
+                            if (1==2 && vo.createProvenance && vo.email) {
                                 let provenance = {resourceType:'Provenance',target:[],agent:[]}
                                 provenance.recorded = new Date().toISOString();
                                 provenance.target.push({reference:response.headers.location});  //from the previous call
@@ -182,6 +256,21 @@ function updateTask(vo) {
 
     } catch (ex) {
         vo.res.status(500).send({msg:'Unexpected error: ' + ex.message})
+    }
+}
+
+
+function sendSocketBroadcast(msg,ip) {
+    try {
+        msg.ip = ip;
+        let message = JSON.stringify(msg)
+        wss.clients.forEach(function each(client) {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(message);
+            }
+        });
+    } catch (ex) {
+        console.log('Error sending socket update')
     }
 }
 

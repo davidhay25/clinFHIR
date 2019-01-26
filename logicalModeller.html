@@ -970,11 +970,11 @@
                                     <td width="20%">Alias</td>
                                     <td>
 
-                                        <ul>
-                                            <li ng-repeat="al in selectedNode.data.alias">
+
+                                            <div ng-repeat="al in selectedNode.data.alias">
                                                 {{al}}
-                                            </li>
-                                        </ul>
+                                            </div>
+
 
 
                                     </td>
@@ -1035,7 +1035,8 @@
                                     </td>
                                 </tr>
 
-                                <tr><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>
+                                <tr ng-show="selectedNode.data.comments"><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>
+
                                 <tr><td>Multiplicity</td><td>{{selectedNode.data.min}}..{{selectedNode.data.max}}</td></tr>
                                 <tr ng-show="selectedNode.data.analysis">
                                     <td>Extension data</td>
@@ -1083,46 +1084,9 @@
 
                                                 <span class="clickable pull-right" ng-click="viewReferencedModel(targetProfile)">View elements</span>
                                                 Reference -> {{targetProfile | getLogicalID}}
-
-
-
-<!--
-                                                <div ng-hide="isCoreType(typ.targetProfile)">
-                                                    {{typ.profile}}{{typ.targetProfile}}
-                                                </div>
-                                                -->
-
-
-
                                             </div>
 
-
-
                                         </div>
-
-                                        <!-- Show any profile. If a reference, then hyperlink to the 'display' functionality...
-                                        <span ng-show="typ.code == 'Reference'" class="pull-right">
-
-                                            <span class="clickable" ng-click="viewReferencedModel(typ.targetProfile)">View</span>
-
-
-
-                                        </span>
--->
-                                        <!-- Reference to another model
-                                        <div ng-show="isCoreType(typ.targetProfile)">
-                                            <a ng-href="http://hl7.org/fhir/{{typ.targetProfile | getLogicalID}}.html" target="_blank">
-                                                {{typ.profile}}{{typ.targetProfile}}
-                                            </a>
-
-                                        </div>
-
-                                        <div ng-hide="isCoreType(typ.targetProfile)">
-                                            {{typ.profile}}{{typ.targetProfile}}
-                                        </div>
-                                        -->
-
-
                                     </div>
                                     <!-- If there's a ValueSet defined, allow it to be selected... -->
                                     <span ng-show="selectedNode.data.selectedValueSet">
@@ -1130,11 +1094,6 @@
                                          <span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.valueSet)">
                                             {{selectedNode.data.selectedValueSet.valueSet}}</span>
                                             ({{selectedNode.data.selectedValueSet.strength}})
-
-                                        <!--<span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.vs.url)">
-                                            {{selectedNode.data.selectedValueSet.vs.url}}</span>
-                                            ({{selectedNode.data.selectedValueSet.strength}})
-                                        -->
 
                                     </span>
 

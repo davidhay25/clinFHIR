@@ -2,6 +2,10 @@
 
 var request  = require('request');
 var moment = require('moment');
+let http = require('http');
+
+
+
 
 //var httpProxy = require('http-proxy')
 
@@ -12,13 +16,14 @@ var express = require('express');
 var app = express();
 
 
-var orionModule = require("./serverModuleOrion.js")
+
+
+//var orionModule = require("./serverModuleOrion.js")
 var smartModule = require("./serverModuleSMART.js")
-var taskModule = require("./serverModuleTask");
-taskModule.setup(app)
+
 
 //var connect = require('connect');
-var http = require('http');
+//var http = require('http');
 
 
 process.on('uncaughtException', function(err) {
@@ -30,6 +35,36 @@ var port = process.env.port;
 if (! port) {
     port=80;
 }
+
+let server = http.createServer(app).listen(port);
+
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({server:server});
+
+var taskModule = require("./serverModuleTask");
+taskModule.setup(app,wss,WebSocket)     // need WebSocket for the constants
+
+/*
+const wss = new WebSocket.Server({
+    verifyClient: function(info, done) {
+        console.log('verifyClient() -> ', info.req.headers);
+        //supposed to be able to parse the session here - would be good to associate the connection with it...
+        done(info.req.headers);
+    },
+    server
+});
+*/
+
+wss.on('connection', function connection(ws) {
+    console.log('connection made');
+
+    ws.on('message', function incoming(message) {
+        console.log('received: %s', message);
+    });
+
+    ws.send('Socket connection made');
+});
+
 
 //if the port was passed in on a command line
 process.argv.forEach(function (val, index) {
@@ -49,7 +84,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
         console.log('>>> Mongo server not running')
     } else {
         db = ldb;
-        orionModule.setup(app,db);
+       // orionModule.setup(app,db);
         smartModule.setup(app,db);
 
     }
@@ -463,7 +498,7 @@ app.get('/errorReport/:type?',function(req,res){
 
 
 
-app.listen(port);
+//sunday app.listen(port);
 
 
 var updateLocation = function(doc,ip) {

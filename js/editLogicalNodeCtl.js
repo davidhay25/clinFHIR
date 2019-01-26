@@ -833,7 +833,6 @@ angular.module("sampleApp")
                     }
 
 
-
                     vo.extensionAnalyse = $scope.extensionAnalyse;
 
                     //coded elements...

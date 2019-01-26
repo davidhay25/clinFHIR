@@ -16,6 +16,16 @@ angular.module("sampleApp")
                 controls: ["bold", "italic", "separator", "bullets","separator", "heading","separator", "preview"]
             };
 
+
+            let wsUrl = 'ws://'+ window.location.host;
+            let ws = new WebSocket(wsUrl);
+
+            ws.onmessage = function(event) {
+                console.log('socket event:', event.data)
+
+                $scope.$digest();
+            };
+
             $scope.appConfigSvc = appConfigSvc
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
@@ -844,7 +854,7 @@ angular.module("sampleApp")
                 $scope.currentLevelKey = levelKey;
 
             }
-
+/*
             $scope.saveCommentDEP = function() {
                 //save the comment. For now, a single comment only...
                 var QuestionnaireResponse;
@@ -897,7 +907,9 @@ angular.module("sampleApp")
 
                 
             };
+*/
 
+           /*
             $scope.saveCommentDEP = function() {
                 //save the comment. For now, a single comment only...
                 var Communication;
@@ -950,6 +962,8 @@ angular.module("sampleApp")
 
             };
 
+
+            */
             $scope.updateDoc = function(){
                 logicalModelSvc.generateDoc($scope.treeData).then(
                     function(doc) {
@@ -1004,7 +1018,7 @@ angular.module("sampleApp")
 
 
             }
-
+/*
             $scope.explodeDTDEP = function(dt) {
 
 
@@ -1022,7 +1036,7 @@ angular.module("sampleApp")
                 )
 
             }
-            
+            */
             //if the selected node changes, look to see if we can expand any binding...
             $scope.$watch(
                 function() {return $scope.selectedNode},
@@ -1284,7 +1298,7 @@ angular.module("sampleApp")
 
                 }
             };
-
+/*
             $scope.createTaskDEP = function(){
                 //create a new task for this practitioner against this model.
                 SaveDataToServer.addTaskForPractitioner($scope.Practitioner,{focus:$scope.currentType}).then(
@@ -1298,6 +1312,7 @@ angular.module("sampleApp")
                     }
                 )
             };
+            */
 
             $scope.generateShortCut = function() {
                 var hash = Utilities.generateHash();
@@ -2448,7 +2463,7 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editLogicalItem.html',
                     size: 'lg',
-                    //windowClass: 'nb-modal-window',
+                    windowClass: 'nb-modal-window',
                     controller: 'editLogicalNodeCtrl',
 
                     resolve : {

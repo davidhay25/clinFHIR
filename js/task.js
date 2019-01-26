@@ -95,6 +95,26 @@ angular.module("sampleApp").controller('taskCtrl',
                                 }
                             }
 
+                            let url =  "/myTask/addTask/"+task.id
+                            let obj = {}
+                            obj.task = task;
+                            obj.fhirServer = appConfigSvc.getCurrentConformanceServer().url;
+
+
+                            $http.post(url,obj).then(
+                                function(data){
+                                    alert('Comment has been added.');
+                                    $scope.$close(task);
+                                },function (err) {
+                                    alert('Error saving note: ' + angular.toJson(err))
+                                }
+                            ).finally(
+                                function(){
+                                    $scope.showWaiting = false;
+                                }
+                            )
+
+/*
                             let url = appConfigSvc.getCurrentConformanceServer().url + "Task/"+ task.id;    //from parent controller
                             $scope.showWaiting = true;
                             $http.put(url,task).then(
@@ -110,6 +130,7 @@ angular.module("sampleApp").controller('taskCtrl',
                                     $scope.showWaiting = false;
                                 }
                             )
+                            */
                         }
                     };
                     //add the note and close the dialog...
@@ -143,21 +164,7 @@ angular.module("sampleApp").controller('taskCtrl',
                                 }
                             )
 
-                            /*
 
-
-                            fhirTask.note = fhirTask.note || [];
-                            fhirTask.note.push(annot);
-                            let url = appConfigSvc.getCurrentConformanceServer().url + "Task/"+fhirTask.id
-                            $http.put(url,fhirTask).then(
-                                function(data){
-                                    $scope.$close(annot);
-                                },function (err) {
-                                    alert('Error saving note: ' + angular.toJson(err))
-                                }
-                            )
-
-                            */
                         } else {
                             alert('FHIR Task resource not found')
                         }
@@ -234,37 +241,7 @@ angular.module("sampleApp").controller('taskCtrl',
                         data.data.entry.forEach(function (entry) {
                             let resource = entry.resource;      //the fhir Task
                             let iTask = taskSvc.getInternalTaskFromResource(resource,fhirVersion)
-                            /*
-                            let task = {}       //internal task
-                            task.resource = resource;
-                            task.description = resource.description;
-                            task.notes = resource.note;
 
-                            if (resource.requester) {
-                                switch (fhirVersion) {
-                                    case 3 :
-                                        if (resource.requester.agent) {
-                                            task.requesterReference = resource.requester.agent;      //this is a reference
-                                            task.requesterDisplay = resource.requester.agent.display;
-                                        }
-
-                                        break;
-                                    default :
-                                        task.requesterReference = resource.requester
-                                        task.requesterDisplay = resource.requester.display;
-                                        break;
-
-                                }
-                            }
-
-
-                            let extSimpleExt = Utilities.getSingleExtensionValue(resource, pathExtUrl);
-                            if (extSimpleExt) {
-                                task.path = extSimpleExt.valueString;
-                            }
-*/
-
-                            //console.log(task);
                             $scope.tasks.push(iTask)
                         })
                     }
@@ -273,65 +250,9 @@ angular.module("sampleApp").controller('taskCtrl',
                 },function(err) {
                     console.log(err)
                 }
-            )
+            );
             console.log(url)
         }
-
-/*
-        addTaskDEP = function(comment) {
-            //let comment = window.prompt('Enter comment');       //todo make dialog
-            if (comment) {
-                let task = {resourceType:'Task'};
-                task.id = 'id'+ new Date().getTime() + "-" + Math.floor(Math.random() * Math.floor(1000));
-                task.status = 'requested';
-                task.description = comment;
-                task.code = {coding:taskCode};
-                task.focus = {reference:"StructureDefinition/"+$scope.treeData[0].data.header.SDID};    //from the parent
-
-                //treeData[0].data.header.SDUrl
-
-
-                logicalModelSvc.addSimpleExtension(task, pathExtUrl, $scope.taskNode.id)   //the path in the model
-
-
-                //todo - what is there's no logged in user?
-                if ( $scope.Practitioner) {     //This is the user - from the parent controller
-                    let ref = 'Practitioner/'+$scope.Practitioner.id;
-
-                    let display = "";
-                    if ($scope.Practitioner.telecom) {
-                        display = $scope.Practitioner.telecom[0].value
-                    };
-
-
-                    switch (fhirVersion) {
-                        case 3 :
-                            task.requester = {agent: {reference:ref,display:display}};
-                            break;
-                        default :
-                            task.requester = {reference:ref,display:display};
-                            break;
-
-                    }
-                }
-
-
-
-
-
-                let url = $scope.conformanceServer.url + "Task/"+ task.id;    //from parent controller
-                $http.put(url,task).then(
-                    function(data) {
-                        $scope.tasks = $scope.tasks || []
-                        $scope.tasks.push({description: task.description,path:$scope.taskNode.id});
-                        alert('Comment has been added.')
-                    }, function(err) {
-                        alert(angular.toJson(err))
-                    }
-                )
-            }
-        };
-*/
 
         //when a node is selected in the designer...
         $scope.$watch(function($scope) {return $scope.selectedNode},function(node,olfV){
@@ -339,4 +260,4 @@ angular.module("sampleApp").controller('taskCtrl',
             console.log(node);
         })
 
-    })
+    });
