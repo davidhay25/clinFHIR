@@ -1,5 +1,5 @@
 angular.module("sampleApp").controller('taskCtrl',
-    function ($scope,$http,appConfigSvc,logicalModelSvc,Utilities,$uibModal,taskSvc) {
+    function ($scope,$http,appConfigSvc,logicalModelSvc,Utilities,$uibModal,taskSvc,$timeout) {
 
         let clinFhirDevice = 'Device/cfDevice';
         let fhirVersion = $scope.conformanceServer.version;     //from parent
@@ -11,6 +11,52 @@ angular.module("sampleApp").controller('taskCtrl',
         if (!pathExtUrl) {
             alert("Task warning: You must restart clinFHIR then the Logical Modeller to reset updated config")
         }
+
+        let wsUrl = 'ws://'+ window.location.host;
+        let ws = new WebSocket(wsUrl);
+
+        ws.onmessage = function(event) {
+            console.log('socket event:', event.data)
+
+            let obj;
+            try {
+                obj = angular.fromJson(event.data)
+            } catch (ex) {
+                console.log('Ignoring non Json message')
+                $scope.$digest();
+            }
+
+            console.log(obj)
+            if (obj) {
+                if (obj.modelId) {
+                    //this will be a note to a task...
+                    if ($scope.model && (obj.modelId === $scope.model.id)) {
+                        //this is an update to a task for this model...
+                        loadTasksForModel(obj.modelId);
+
+                        $timeout(function(){
+                            $scope.$digest()
+                            console.log('digest...')
+                        },5000)
+
+                    }
+
+                } else if (obj.resourceType == 'Task' && $scope.model) {
+                    //this is a new task. Is it for the model that is currently open?
+                    let focus = obj.focus.reference;
+                    let ar = focus.split('/');
+                    //assume that the model id and url are related (as when created in the Logical Modeller)
+                    if (ar[ar.length-1] == $scope.model.id) {
+                        loadTasksForModel($scope.model.id)
+                        $scope.$digest()
+                    }
+
+                }
+            }
+
+
+        };
+
 
         //When a model is selected.
         //note - called once for each instance (ng-controller) in the logical model...
@@ -107,6 +153,7 @@ angular.module("sampleApp").controller('taskCtrl',
                                     $scope.$close(task);
                                 },function (err) {
                                     alert('Error saving note: ' + angular.toJson(err))
+                                    $scope.$close();
                                 }
                             ).finally(
                                 function(){
@@ -137,7 +184,7 @@ angular.module("sampleApp").controller('taskCtrl',
                     $scope.addNote = function(note) {
 
                         //create the note...
-                        var annot = {text:note,time: new Date().toISOString()};
+                        let annot = {text:note,time: new Date().toISOString()};
                         if (practitioner && practitioner.telecom) {
                             //todo might want to use authorReference at some stage...
                             annot.authorString = practitioner.telecom[0].value;
@@ -147,11 +194,14 @@ angular.module("sampleApp").controller('taskCtrl',
 
 
                         //This is an 'update' object
-                        let obj = {}
+                        let obj = {};
+                        let fhirTask = task.resource;
+                        //obj.taskId = fhirTask.id;
+                        obj.modelId =  modelId;    //used in the webhooks handler to decide whether to refresh tasks- not saved...
                         obj.note = annot;
                         obj.fhirServer = appConfigSvc.getCurrentConformanceServer().url;
 
-                        let fhirTask = task.resource;
+
 
                         if (fhirTask) {
                             //this will add the note to teh task from the server...
@@ -182,12 +232,14 @@ angular.module("sampleApp").controller('taskCtrl',
                         return taskCode;
                     },
                     "modelId" : function(){
+                        return $scope.treeData[0].data.header.SDID //from the parent scope
+                        /*
                         if (task) {
                             return task.id;
                         } else {
                             return $scope.treeData[0].data.header.SDID //from the parent scope
                         }
-
+*/
                     },
                     "modelPath" : function() {
                         if (task) {
@@ -205,17 +257,38 @@ angular.module("sampleApp").controller('taskCtrl',
                     if (rtn) {
                         //could be a Task or an annotation...
                         if (rtn.resourceType == 'Task') {
+                            let iTask = taskSvc.getInternalTaskFromResource(rtn,fhirVersion);
+                            let found = false;
+                            $timeout(function() {
+                                //check that the tasks were re-loaded via the websocket connection. We know it was actually added - as the routine checks...
+                                for (let tsk of $scope.tasks) {
+                                    if (tsk.id == iTask.id) {
+                                        console.log(tsk.id, iTask.id)
+                                        //yep - it's there
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (!found) {
+                                    $scope.tasks.push(iTask);
+                                    $scope.$emit('taskListUpdated',$scope.tasks);   //so the list in LM can be updated
+
+                                }
+
+                            },5000)
+
+
                             //want to add the new task to the list of tasks...
-                            let iTask = taskSvc.getInternalTaskFromResource(rtn,fhirVersion)
-                            $scope.tasks.push(iTask)
-                            $scope.$emit('taskListUpdated',$scope.tasks);   //so the list in LM can be updated
+                           // let iTask = taskSvc.getInternalTaskFromResource(rtn,fhirVersion)
+                          //  $scope.tasks.push(iTask)
+                         //   $scope.$emit('taskListUpdated',$scope.tasks);   //so the list in LM can be updated
 
 
                         } else {
                             //annotation
-                            task.notes = task.notes || []
-                            task.notes.push(rtn)      //for the display - the task was updated in the dialog...
-                            $scope.$emit('taskListUpdated',$scope.tasks);
+                          //  task.notes = task.notes || []
+                           // task.notes.push(rtn)      //for the display - the task was updated in the dialog...
+                           // $scope.$emit('taskListUpdated',$scope.tasks);
                         }
 
                     }
@@ -228,6 +301,7 @@ angular.module("sampleApp").controller('taskCtrl',
 
         //todo - should move this to a service - used by taskManager as well...
         function loadTasksForModel(id) {
+            console.log('loading tasks for model...')
             $scope.tasks = []
             let url = $scope.conformanceServer.url + "Task";    //from parent controller
             url += "?code="+taskCode.system +"|"+taskCode.code;
@@ -236,12 +310,11 @@ angular.module("sampleApp").controller('taskCtrl',
 
             $http.get(url).then(
                 function(data) {
-                    console.log(data)
+
                     if (data.data && data.data.entry) {
                         data.data.entry.forEach(function (entry) {
                             let resource = entry.resource;      //the fhir Task
                             let iTask = taskSvc.getInternalTaskFromResource(resource,fhirVersion)
-
                             $scope.tasks.push(iTask)
                         })
                     }
@@ -251,13 +324,13 @@ angular.module("sampleApp").controller('taskCtrl',
                     console.log(err)
                 }
             );
-            console.log(url)
+            //console.log(url)
         }
 
         //when a node is selected in the designer...
         $scope.$watch(function($scope) {return $scope.selectedNode},function(node,olfV){
             $scope.taskNode = node;
-            console.log(node);
+            //console.log(node);
         })
 
     });

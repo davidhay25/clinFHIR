@@ -7,8 +7,55 @@ angular.module("sampleApp").controller('taskManagerCtrl',
         $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
         $scope.input = {}
 
-        let fhirVersion = $scope.conformanceServer.version;     //from parent
+        let fhirVersion = $scope.conformanceServer.version;
         let taskCode =  {system:"http://loinc.org",code:"48767-8"};
+
+
+        let wsUrl = 'ws://'+ window.location.host;
+        let ws = new WebSocket(wsUrl);
+
+        ws.onmessage = function(event) {
+            console.log('socket event:', event.data)
+
+            let obj;
+            try {
+                obj = angular.fromJson(event.data)
+            } catch (ex) {
+                console.log('Ignoring non Json message')
+                $scope.$digest();
+            }
+
+            console.log(obj)
+            if (obj) {
+                if (obj.modelId) {
+                    //this will be a note to a task...
+                    if ($scope.currentModelId && (obj.modelId === $scope.currentModelId)) {
+                        //this is an update to a task for this model...
+                        loadTasksForModel($scope.currentModelId)
+                        /*
+                        $timeout(function(){
+                            $scope.$digest()
+                            console.log('digest...')
+                        },5000)
+*/
+                    }
+
+                } else if (obj.resourceType == 'Task' && $scope.currentModelId) {
+                    //this is a new task. Is it for the model that is currently open?
+                    let focus = obj.focus.reference;
+                    let ar = focus.split('/');
+                    //assume that the model id and url are related (as when created in the Logical Modeller)
+                    if (ar[ar.length-1] == $scope.currentModelId) {
+                        loadTasksForModel($scope.currentModelId)
+                        $scope.$digest()
+                    }
+
+                }
+            }
+
+
+        };
+
 
         $scope.instanceAuthor = appConfigSvc.config().standardExtensionUrl.instanceAuthor;  //the extension for recording the model path for a comment
         if (!$scope.instanceAuthor) {
@@ -121,13 +168,32 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
 
         //for the task list filter...
-        $scope.canShowTask = function(task,filter) {
-            if (filter.code === "") {
-                return true
-            } else if (task.status == filter.code) {
-                return true;
+        $scope.canShowTask = function(task,filterStatus, filterEmail) {
+            let canShow = false
+
+            //check the status
+            if (filterStatus.code === "") {
+                canShow = true
+            } else if (task.status == filterStatus.code) {
+                canShow = true
             }
-            return false;
+
+            if (canShow) {
+                //so it passed the status check = what about the author check
+                if (filterEmail !== "Anyone") {
+                    if (task.requesterDisplay == filterEmail) {
+                        canShow = true
+                    } else {
+                        canShow = false
+                    }
+                }
+                return canShow;
+
+            } else {
+                return false;
+            }
+
+
         };
 
         //add a new note as an annotation
@@ -145,7 +211,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             let obj = {}
             obj.note = annot;
             obj.fhirServer = appConfigSvc.getCurrentConformanceServer().url;
-
+            obj.modelId =  $scope.currentModelId;
             let fhirTask =  $scope.selectedTask.resource;
 
             if (fhirTask) {
@@ -248,9 +314,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                     alert('Error saving note: ' + angular.toJson(err))
                 }
             )
-
         };
-
 
         $scope.refreshHistory = function(){
             //create a status history for the current task
@@ -290,11 +354,19 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             }
         };
 
+        $scope.canShowReportLine = function(task,filterEmail) {
+            if (filterEmail == "Anyone") {
+                return true
+            } else if (task.requesterDisplay == filterEmail) {
+                return true
+            }
+        };
 
         //load all the tasks for a given model
         function loadTasksForModel(id) {
             $scope.currentModelId = id;
             delete $scope.editorEmail;
+            let hashEmail = {};      //all the emails of users with comments
             hashED = {};       //hash of element definitions by path - used to display details
             $scope.tasks = []
             let url = $scope.conformanceServer.url + "Task";    //from parent controller
@@ -310,11 +382,18 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                             let resource = entry.resource;      //the fhir Task
 
                             let iTask = taskSvc.getInternalTaskFromResource(resource,fhirVersion)
-
+                            hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
 
 
                             $scope.tasks.push(iTask)
                         })
+
+                        $scope.allEmail = ['Anyone'];
+                        for (var n in hashEmail) {
+                            $scope.allEmail.push(n)
+                        }
+
+                        $scope.input.filterEmail = $scope.allEmail[0]
                     }
 
 
@@ -322,7 +401,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                     console.log(err)
                 }
             );
-            //console.log(url)
+
 
             //load the model also. Assume it is on the same server as tasks (both on conformance)
             let urlModel = $scope.conformanceServer.url + "StructureDefinition/"+id;
@@ -352,4 +431,4 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
 
 
-    })
+    });

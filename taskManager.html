@@ -139,25 +139,49 @@
         <uib-tab heading="Workflow">
             <br/>
             <div class="row">
-                <div class="col-md-4 col-sm-4">
-                    <select ng-model="input.filterStatus" class="form-control"
-                            ng-options="state.display for state in states"></select>
-                    <div class="taskListScroll">
-                        <table class="table table-bordered">
-                            <tr><th>Path</th><th>Comment</th><th>Status</th><th>Notes</th></tr>
-                            <tr ng-class="{'active' : task.id == localTask.id}"
-                                 ng-repeat="task in tasks | orderBy: 'path'" ng-show="canShowTask(task,input.filterStatus)">
-                                <td><div ng-click="selectTask(task)" class="clickable">{{task.path | dropFirstInPath}}</div></td>
-                                <td>{{task.description | limitTo :30}}</td>
-                                <td>{{stateHash[task.status]}}</td>
-                                <td>{{task.notes.length}}</td>
-                            </tr>
-                        </table>
+                <div class="col-md-6 col-sm-6">
+
+
+                    <div ng-show="tasks.length > 0">
+                        <div class="row">
+                            <div class="col-md-1 col-sm-1">
+                                <strong class="pull-right">Who</strong>
+                            </div>
+                            <div class="col-md-3 col-sm-3">
+                                <select ng-model = 'input.filterEmail' class="form-control"
+                                        ng-options = "email for email in allEmail"></select>
+                            </div>
+                            <div class="col-md-1 col-sm-1">
+                                <strong class="pull-right">Status</strong>
+
+                            </div>
+                            <div class="col-md-3 col-sm-3">
+                                <select ng-model="input.filterStatus" class="form-control"
+                                        ng-options="state.display for state in states"></select>
+
+                            </div>
+                        </div>
+                        <br/>
+
+                        <div class="taskListScroll">
+                            <table class="table table-bordered">
+                                <tr><th>Path</th><th>Who</th><th>Comment</th><th>Status</th><th>Notes</th></tr>
+                                <tr ng-class="{'active' : task.id == localTask.id}"
+                                    ng-repeat="task in tasks | orderBy: 'path'" ng-show="canShowTask(task,input.filterStatus,input.filterEmail)">
+                                    <td><div ng-click="selectTask(task)" class="clickable">{{task.path | dropFirstInPath}}</div></td>
+                                    <td>{{task.requesterDisplay }}</td>
+                                    <td>{{task.description | limitTo :30}}</td>
+                                    <td>{{stateHash[task.status]}}</td>
+                                    <td>{{task.notes.length}}</td>
+                                </tr>
+                            </table>
+                        </div>
+
                     </div>
 
                 </div>
 
-                <div class="col-md-4 col-sm-4">
+                <div class="col-md-6 col-sm-6">
 
                     <uib-tabset>
                         <uib-tab heading="Details">
@@ -201,6 +225,9 @@
                                 <div class="row myForm">
                                     <div class="col-md-3">
                                         <strong>Status</strong>
+                                        <i class="glyphicon glyphicon-question-sign"
+                                            ng-click = "input.showStateDiagram = ! input.showStateDiagram">
+                                        </i>
                                     </div>
                                     <div class="col-md-2">
                                         {{stateHash[localTask.status]}}
@@ -222,6 +249,10 @@
 
                                             <button class="btn btn-default"  ng-click="changeState('cancelled')"
                                                     ng-show="showStateChange('cancelled',localTask.status)">Cancelled</button>
+
+
+
+
                                         </div>
                                         <div ng-hide="user">
                                             <em>Please login to change the status or add a new note</em>
@@ -232,6 +263,14 @@
                                     </div>
                                 </div>
 
+
+
+                                <div class="row myForm" ng-show="input.showStateDiagram">
+                                    <div>
+                                        <h4>State Diagram</h4>
+                                        <img src="artifacts/workFlowState.png"/>
+                                    </div>
+                                </div>
 
                                 <div class="row myForm">
                                     <div class="col-md-3">
@@ -268,7 +307,7 @@
 
                                             </tr>
                                             <tr ng-show="user">
-                                                <td >
+                                                <td colspan="3">
                                                     <textarea class="form-control" ng-model="input.note"></textarea>
 
                                                     <div>
@@ -314,11 +353,7 @@
 
 
                 </div>
-                <div class="col-md-4 col-sm-4">
-                    <h4>State Diagram</h4>
-                    <img src="artifacts/workFlowState.png"/>
 
-                </div>
 
 
 
@@ -329,9 +364,19 @@
         </uib-tab>
         <uib-tab heading="Report">
             <br/>
+            <div class="row">
+                <div class="col-md-1 col-sm-1">
+                    <strong>Filter</strong>
+                </div>
+                <div class="col-md-3 col-sm-3">
+                    <select ng-model = 'input.filterEmail' class="form-control"
+                            ng-options = "email for email in allEmail"></select>
+                </div>
+            </div>
+            <br/>
             <table class="table table-bordered">
                 <tr><th>Path</th><th>Status</th><th>Comment</th><th>Email</th><th>Notes</th></tr>
-                <tr ng-repeat="task in tasks | orderBy: 'path'">
+                <tr ng-repeat="task in tasks | orderBy: 'path'" ng-show="canShowReportLine(task,input.filterEmail)">
                     <td>{{task.path | dropFirstInPath}}</td>
                     <td>{{task.state}}</td>
                     <td>{{task.description}}</td>

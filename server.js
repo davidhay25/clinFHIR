@@ -4,9 +4,6 @@ var request  = require('request');
 var moment = require('moment');
 let http = require('http');
 
-
-
-
 //var httpProxy = require('http-proxy')
 
 //  remove for proxy var myParser = require("body-parser");
@@ -15,15 +12,8 @@ var Cookies = require( "cookies" )
 var express = require('express');
 var app = express();
 
-
-
-
 //var orionModule = require("./serverModuleOrion.js")
 var smartModule = require("./serverModuleSMART.js")
-
-
-//var connect = require('connect');
-//var http = require('http');
 
 
 process.on('uncaughtException', function(err) {
@@ -44,16 +34,6 @@ const wss = new WebSocket.Server({server:server});
 var taskModule = require("./serverModuleTask");
 taskModule.setup(app,wss,WebSocket)     // need WebSocket for the constants
 
-/*
-const wss = new WebSocket.Server({
-    verifyClient: function(info, done) {
-        console.log('verifyClient() -> ', info.req.headers);
-        //supposed to be able to parse the session here - would be good to associate the connection with it...
-        done(info.req.headers);
-    },
-    server
-});
-*/
 
 wss.on('connection', function connection(ws) {
     console.log('connection made');
@@ -68,14 +48,10 @@ wss.on('connection', function connection(ws) {
 
 //if the port was passed in on a command line
 process.argv.forEach(function (val, index) {
-    //console.log(index + ': ' + val);
     if (val == '-p') {
         port = process.argv[index+1];
     }
-
 });
-
-
 
 var MongoClient = require('mongodb').MongoClient;
 MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
@@ -90,28 +66,9 @@ MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
     }
 });
 
-/*
-// proxy - for servers not implementing CORS
-var proxy = httpProxy.createProxyServer({});
-proxy.on('error', function (err, req, res) {
-    console.log('proxy error',err)
-    res.writeHead(500, {
-        'Content-Type': 'text/plain'
-    });
-    res.end('Something went wrong. And we are reporting a custom error message.');
-});
 
-proxy.on('proxyRes', function (proxyRes, req, res) {
-    console.log('RAW Response from the target', JSON.stringify(proxyRes.headers, true, 2));
-});
-proxy.on('proxyReq', function (proxyRes, req, res) {
-    console.log('sending');
-});
-
-*/
 
 function recordAccess(req,data) {
-    console.log(data)
     var clientIp = req.headers['x-forwarded-for'] ||
         req.connection.remoteAddress ||
         req.socket.remoteAddress ||
@@ -128,7 +85,6 @@ function recordAccess(req,data) {
             } else {
 
                 if (result && result.length) {
-                    console.log('logged ',err)
                     updateLocation(result[0],clientIp);
 
                 }
@@ -139,21 +95,8 @@ function recordAccess(req,data) {
 }
 
 
-//return status pages, index is resourceCeator.html
-//app.use('/', express.static(__dirname,{index:'/resourceCreator.html'}));
+
 app.use('/', express.static(__dirname,{index:'/launcher.html'}));
-
-/*
-app.all('/proxy/*',function(req,res){
-    console.log(req.url)
-    req.url = req.url.replace('proxy/','')
-    console.log('-->'+req.url)
-    proxy.web(req, res, { target: 'http://snapp.clinfhir.com:8081/baseDstu3/' });
-});
-
-*/
-
-
 
 
 //this is used for the re-direct from simplifier
@@ -166,63 +109,9 @@ app.get('/createExample',function(req,res){
 });
 
 
-//======== temp ======= for Orion calling the medication dispense endpoint
-
-/*
-app.get('/orion/:nhi',function(req,res){
-    var nhi = req.params['nhi'];
-
-    //var url = "https://frontend1.solution-nzmoh-dataset-leahr-graviton-jump-host-auckland.graviton.odl.io/fhir/1.0/MedicationDispense?patient.identifier=SYS_A|"+nhi
-    //var url = "https://52.41.169.101/fhir/1.0/MedicationDispense?patient.identifier=SYS_A|"+nhi
-
-
-    var url = "http://fhir.hl7.org.nz/baseDstu2/MedicationDispense?patient.identifier="+nhi
-
-
-    if (nhi) {
-        var options = {
-            method:'GET',
-            rejectUnauthorized: false,
-            uri : url,
-            auth : {
-                'user':'level1.sys_a',
-                'password':'Orionsy5!?'
-            },headers: {
-                'Accept': 'application/json+fhir'
-            }
-        };
-
-        request(options,function(error,response,body){
-
-            //console.log('error:', error); // Print the error if one occurred
-            //console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-            //console.log('body:', body); // Print the HTML for the Google homepage.
-
-            if (body) {
-                if (response) {
-                    res.status(response.statusCode)
-                }
-                res.end(body);
-            }
-
-            if (error) {
-                if (response) {
-                    res.status(response.statusCode)
-                }
-                res.end(error);
-            }
-
-        });
-    } else {
-        res.end({"error":"No NHI"});
-    }
-
-});
-*/
 
 //when a user navigates to cf
 app.post('/stats/login',function(req,res){
-    console.log('access')
 
     var body = '';
     req.on('data', function (data) {
@@ -241,8 +130,6 @@ app.post('/stats/login',function(req,res){
         res.end('ok');
     });
 
-    //recordAccess(req);
-    //res.end();
 });
 
 
@@ -261,9 +148,7 @@ app.get('/stats/summary',function(req,res){
     var max = req.query.max;
 
     if (min) {
-        console.log('min=',min)
-        //var minDate = new Date(parseFloat(min))
-        console.log(new Date(parseFloat(max)))
+
         query.date = {$gte : parseInt(min),$lte:parseInt(max)}
     }
 
@@ -275,7 +160,7 @@ app.get('/stats/summary',function(req,res){
             var rtn = {cnt:doc.length,item:[],country:{},lastAccess : {date:0},module:{}};
             var daySum = {};
 
-            //console.log(doc.length)
+
 
             doc.forEach(function(d,inx){
 
@@ -388,7 +273,6 @@ app.get('/stats/summary',function(req,res){
 });
 
 function updateServerCount(serverName,type,obj) {
-
     if (serverName) {
         var key = type+'Server'
         obj[key] = obj[key] || {};
@@ -397,18 +281,16 @@ function updateServerCount(serverName,type,obj) {
         o[serverName].cnt++
 
 
-
-        //return obj;
-
-
     }
 }
 
-
+/*
 //old clients trying to access server...
 app.use('/socket.io',function(req,res){
     res.end();
 });
+
+*/
 
 app.post('/errorReport',function(req,res){
     if(! db) {
@@ -473,7 +355,7 @@ app.get('/errorReport/distinct',function(req,res){
 //return all results
 app.get('/errorReport/:type?',function(req,res){
 
-    console.log(req.params.type);
+
     var qry = {};
     if (req.params.type) {
         qry = {"resource.resourceType":req.params.type}
@@ -494,11 +376,6 @@ app.get('/errorReport/:type?',function(req,res){
     }
 
 });
-
-
-
-
-//sunday app.listen(port);
 
 
 var updateLocation = function(doc,ip) {
@@ -538,50 +415,4 @@ var updateLocation = function(doc,ip) {
 };
 
 console.log('listening on port '+port);
-
-//========== not currently used ===========
-
-//which profiles are being used...
-function getProfileUsage(summary,cb) {
-    db.collection("profileAudit").find().toArray(function(err,doc){
-
-            if (err) {
-                cb();
-            } else {
-                summary.profileAccess = [];
-
-
-                var profiles = {};
-                doc.forEach(function(item,inx){
-
-                    if (item.profile) {
-                        var profile = item.profile;
-                        if (! profiles[profile]) {
-                            profiles[profile] = {profile:profile,cnt:0}
-                        }
-                        profiles[profile].cnt++;
-
-                    }
-                });
-
-                for (var p in profiles) {
-                    summary.profileAccess.push(profiles[p])
-
-                }
-
-                summary.profileAccess.sort(function(a,b){
-                    if (a.cnt < b.cnt) {
-                        return 1
-                    } else {
-                        return -1
-                    }
-                });
-
-
-
-                cb();
-            }
-        }
-    )};
-
 

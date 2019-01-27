@@ -4,7 +4,7 @@ angular.module("sampleApp")
     .controller('logicalModellerCtrl',
         function ($scope,$rootScope,$uibModal,$http,resourceCreatorSvc,modalService,appConfigSvc,logicalModelSvc,$timeout,
                   GetDataFromServer,$firebaseObject,$firebaseArray,$location,igSvc,SaveDataToServer,$window,RenderProfileSvc,
-                  $q,Utilities, securitySvc,$filter,builderSvc,questionnaireSvc,$localStorage,projectSvc,lmFilterSvc,taskSvc) {
+                  $q,Utilities, securitySvc,$filter,builderSvc,$localStorage,projectSvc,lmFilterSvc,taskSvc) {
             $scope.input = {};
 
             $scope.firebase = firebase;
@@ -16,7 +16,7 @@ angular.module("sampleApp")
                 controls: ["bold", "italic", "separator", "bullets","separator", "heading","separator", "preview"]
             };
 
-
+/*
             let wsUrl = 'ws://'+ window.location.host;
             let ws = new WebSocket(wsUrl);
 
@@ -25,6 +25,7 @@ angular.module("sampleApp")
 
                 $scope.$digest();
             };
+            */
 
             $scope.appConfigSvc = appConfigSvc
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
@@ -87,7 +88,7 @@ angular.module("sampleApp")
                 }
             }
 
-           // console.log($http.defaults.headers.common);
+
 
             //-----------  login stuff....
 
@@ -133,11 +134,10 @@ angular.module("sampleApp")
                     logicalModelSvc.setCurrentUser(user);
                     securitySvc.setCurrentUser(user);
 
-                   // console.log(user);
+
 
                     //is there a selected model? if so, load it
                     var model = $localStorage.cfModel;
-                    //console.log(model)
                     //return the practitioner resource that corresponds to the current user (the service will create if absent)
                     GetDataFromServer.getPractitionerByLogin(user).then(
                         function (practitioner) {
@@ -151,7 +151,7 @@ angular.module("sampleApp")
                 } else {
                     //this
                     var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
-                   // console.log(sc)
+
                     sc.$loaded().then(
                         function(){
 
@@ -258,7 +258,7 @@ angular.module("sampleApp")
                     function(arResult) {
                         delete $scope.checkingVSs;
                         $scope.vsChecks = arResult;
-                        //console.log(arResult)
+
                     }
                 )
             }
@@ -274,7 +274,6 @@ angular.module("sampleApp")
                 var now = moment().format();
                 $scope.downloadLinkJsonName = $scope.treeData[0].data.header.name + '-' + now + '.csv';
 
-                //console.log($scope.downloadLinkJsonName)
 
             }
 
@@ -508,7 +507,7 @@ angular.module("sampleApp")
                 )
             }
 
-
+/*
             //generate and save a questionnaire
             $scope.generateQ = function(){
 
@@ -527,7 +526,7 @@ angular.module("sampleApp")
                     }
                 )
             };
-
+*/
             $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
 
             $scope.input.newCommentboxInxDEP = -1;
@@ -1387,7 +1386,7 @@ angular.module("sampleApp")
                                 $('#vmTreeView').jstree(
                                     {'core': {'multiple': false, 'data': vmTreeData, 'themes': {name: 'proton', responsive: true}}}
                                 ).on('select_node.jstree', function (e, data) {
-                                   // console.log(data);
+
 
                                     if (data.node && data.node.data) {
                                         $scope.selectedED = data.node.data.ed;
@@ -2334,7 +2333,7 @@ angular.module("sampleApp")
                     }
                 )
             }
-
+/*
             function checkForCommentsDEP(resource) {
                 //if there's a practitioner (ie a logged in user) then see if there is an active task to comment on this model
                 if (resource && $scope.Practitioner) {
@@ -2376,7 +2375,8 @@ angular.module("sampleApp")
                     )
                 }
             }
-            
+
+            */
             function loadHistory(id) {
                 logicalModelSvc.getModelHistory(id).then(
                     function(data){
@@ -3129,7 +3129,7 @@ angular.module("sampleApp")
 
                 //not sure about this...  logicalModelSvc.resetTreeState($scope.treeData);    //reset the opened/closed status to the most recent saved...
 
-                //console.log($scope.treeData)
+
 
 
                 $('#lmTreeView').jstree('destroy');

@@ -13,19 +13,15 @@
                 </div>
                 <div class="col-md-2">
                     <span class="pull-right">
-                        <span class="badge"
-                              uib-popover="There are  {{task.notes.length}} notes on this comment"
+                        <span class="badge" ng-show="task.notes.length > 0"
+                              uib-popover="There are {{task.notes.length}} notes on this comment"
                               popover-placement="left"
-                              popover-trigger="'mouseenter'"
-                        >{{task.notes.length}}</span>
+                              popover-trigger="'mouseenter'">
+                        {{task.notes.length}}</span>
+
                         <i class="glyphicon glyphicon-edit clickable" ng-click="editTask(task)"></i></span>
                 </div>
             </div>
-
-
         </div>
-
     </div>
-
-
 </div>

@@ -26,6 +26,9 @@ angular.module("sampleApp")
 
 
         return {
+            logError : function(obj) {
+
+            },
             //return an internal task object from a FHIR resource
             getModelEditor : function(model) {
                 let extSimpleExt = getSingleExtensionValue(model, editorExtUrl);

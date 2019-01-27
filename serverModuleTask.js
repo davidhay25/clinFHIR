@@ -30,8 +30,8 @@ function setup(app,iwss,iWebSocket) {
             }
 
             let task = vo.task;
-            let ip = req.connection.remoteAddress;
-            sendSocketBroadcast(task, ip);
+           // let ip = req.connection.remoteAddress;
+           // sendSocketBroadcast(task, ip);
 
             let url = vo.fhirServer + "Task/"+task.id;
             let options = {
@@ -46,7 +46,11 @@ function setup(app,iwss,iWebSocket) {
 
             request(options,function(error,response,body){
 
-                if (response && (response.statusCode == '200' || response.statusCode == '201') ) {
+                if (response && (response.statusCode == '200' || response.statusCode == '201') ) {      //should always be 201...
+
+                    let tsk = vo.task;
+                    tsk.ip = req.connection.remoteAddress;
+                    sendSocketBroadcast(tsk);
                     res.send()
                 } else {
                     res.status(500).send({msg:'Unable to save task'})
@@ -75,20 +79,8 @@ function setup(app,iwss,iWebSocket) {
                 return
             }
 
-            let ip = req.connection.remoteAddress;
-            sendSocketBroadcast(obj,ip);
-
-/*
-            try {
-                wss.clients.forEach(function each(client) {
-                    if (client.readyState === WebSocket.OPEN) {
-                        client.send(body);
-                    }
-                });
-            } catch (ex) {
-                console.log('Error sending socket update')
-            }
-*/
+            //let ip = req.connection.remoteAddress;
+            //sendSocketBroadcast(obj,ip);
 
 
             //console.log(obj.note,req.params.taskId,obj.fhirServer)
@@ -97,6 +89,12 @@ function setup(app,iwss,iWebSocket) {
             vo.data = obj.note;
             vo.fhirServer =  obj.fhirServer;
             vo.taskId = req.params.taskId
+            vo.socketObj = obj;
+            vo.socketObj.ip = req.connection.remoteAddress;
+
+
+
+
 
             //console.log(obj.note,req.params.taskId,obj.fhirServer)
             //let url = obj.fhirServer + "Task/"+req.params.taskId;
@@ -129,8 +127,8 @@ function setup(app,iwss,iWebSocket) {
                 return
             }
 
-            let ip = req.connection.remoteAddress;
-            sendSocketBroadcast(obj,ip);
+            //let ip = req.connection.remoteAddress;
+            //sendSocketBroadcast(obj,ip);
 
             //console.log(obj.note,req.params.taskId,obj.fhirServer)
             let vo = {};
@@ -140,6 +138,10 @@ function setup(app,iwss,iWebSocket) {
             vo.taskId = req.params.taskId;
             vo.createProvenance = false;
             vo.email = obj.email;
+
+            vo.socketObj = obj;
+            vo.socketObj.ip = req.connection.remoteAddress;
+
 
             let url = obj.fhirServer + "Task/"+req.params.taskId;
 
@@ -233,10 +235,11 @@ function updateTask(vo) {
 
 
                             } else {
+                                if (vo.socketObj) {
+                                    sendSocketBroadcast(vo.socketObj);
+                                }
                                 vo.res.send();
                             }
-
-
 
 
                         } else {
@@ -260,9 +263,9 @@ function updateTask(vo) {
 }
 
 
-function sendSocketBroadcast(msg,ip) {
+function sendSocketBroadcast(msg) {
     try {
-        msg.ip = ip;
+        //msg.ip = ip;
         let message = JSON.stringify(msg)
         wss.clients.forEach(function each(client) {
             if (client.readyState === WebSocket.OPEN) {
