@@ -261,7 +261,7 @@ angular.module("sampleApp")
 
                     }
                 )
-            }
+            };
 
             //generate the mapping download file
             function makeMappingDownload(SD) {

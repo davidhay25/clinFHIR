@@ -2416,6 +2416,7 @@ angular.module("sampleApp")
                 var usageGuideUrl = appConfigSvc.config().standardExtensionUrl.usageGuide;
                 var legacyUrl = appConfigSvc.config().standardExtensionUrl.legacy;
                 var misuseUrl = appConfigSvc.config().standardExtensionUrl.misuse;
+                var edStatusUrl = appConfigSvc.config().standardExtensionUrl.edStatus;
 
                 if (!misuseUrl) {
                     alert("You must restart clinFHIR then the Logical Modeller to reset updated config")
@@ -2527,6 +2528,14 @@ angular.module("sampleApp")
                         var ext1 = Utilities.getSingleExtensionValue(ed, legacyUrl);
                         if (ext1 && ext1.valueString) {
                             item.data.legacy = ext1.valueString;
+                        }
+
+                        //look for ed Status
+                        var ext1 = Utilities.getSingleExtensionValue(ed, edStatusUrl);
+                        if (ext1 && ext1.valueString) {
+                            item.data.edStatus = ext1.valueString;
+                        } else {
+                            item.data.edStatus = 'included';
                         }
 
 
@@ -2649,7 +2658,6 @@ angular.module("sampleApp")
 
                         item.data.min = ed.min;
                         item.data.max = ed.max;
-
                         item.data.alias = ed.alias;
 
                         if (ed.mapping) {           //the mapping path in the target resource...
@@ -2767,6 +2775,7 @@ angular.module("sampleApp")
                 var usageGuideUrl = appConfigSvc.config().standardExtensionUrl.usageGuide;
                 var legacyUrl = appConfigSvc.config().standardExtensionUrl.legacy;
                 var misuseUrl = appConfigSvc.config().standardExtensionUrl.misuse;
+                var edStatusUrl = appConfigSvc.config().standardExtensionUrl.edStatus;
 
                 //todo - should use Utile.addExtension...
                 var sd = {resourceType: 'StructureDefinition'};
@@ -3016,7 +3025,9 @@ angular.module("sampleApp")
                     if (data.legacy) {
                         Utilities.addExtensionOnce(ed, legacyUrl, {valueString: data.legacy})
                     }
-
+                    if (data.edStatus) {
+                        Utilities.addExtensionOnce(ed, edStatusUrl, {valueString: data.edStatus})
+                    }
 
                     sd.snapshot.element.push(ed)
                 });

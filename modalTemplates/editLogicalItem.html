@@ -25,12 +25,17 @@
             <form>
             <div class="row">
 
-                <div class="col-md-4 col-sm-4">
+                <div class="col-md-3 col-sm-3">
                     <div class="form-group">
                         <label>Item name (no spaces)</label>
                         <input type="text" class="form-control" ng-model="input.name" auto-focus  autocapitalize="off"
                                 placeholder="Name of element">   <!-- ng-blur="checkName()" -->
                     </div>
+                </div>
+
+                <div class="col-md-2 col-sm-2">
+                    <label>Status</label>
+                    <select ng-model="input.edStatus" class="form-control" ng-options="status for status in statuses"></select>
                 </div>
 
                 <div class="col-md-4 col-sm-4">
@@ -39,7 +44,7 @@
                            ng-model="input.short" class="form-control" placeholder="Short description">
                 </div>
 
-                <div class="col-md-4 col-sm-4">
+                <div class="col-md-3 col-sm-3">
                     <label>Datatype</label>
 
                     <div class="row">

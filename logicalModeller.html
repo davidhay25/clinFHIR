@@ -744,6 +744,21 @@
                             </table>
                         </uib-tab>
 
+                        <uib-tab heading="Status">
+                            <br/>
+                            <table class="table table-bordered table-condensed">
+                                <tr><th>Element</th><th>Status</th></tr>
+                                <tr ng-repeat="row in treeData">
+                                    <td>
+                                        <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
+                                    </td>
+                                    <td>{{row.data.edStatus}}</td>
+
+                                </tr>
+                            </table>
+
+                        </uib-tab>
+
                         <uib-tab heading="Extensions">
                             <br/>
                             <table class="table table-bordered table-condensed">
@@ -984,6 +999,9 @@
                                     <td width="20%">Model path</td><td>{{selectedNode.data.path}}</td>
                                 </tr>
                                 -->
+
+                                <tr><td>Status</td><td>{{selectedNode.data.edStatus}}</td></tr>
+
                                 <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
                                 <tr><td>Description</td>
                                     <td>

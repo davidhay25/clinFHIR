@@ -19,6 +19,8 @@ angular.module("sampleApp")
 
             var that = this;
 
+            $scope.statuses = ['included','excluded','possible'];       //note: value set in createTreeArrayFromSD()
+
 
             //the display of logical models.
             $scope.lmDisplay = function(resource) {
@@ -230,10 +232,14 @@ angular.module("sampleApp")
 
                 $scope.input.alias = data.alias;    //[string]
 
-                //these 3 are from extensions...
+                //these 4 are from extensions...
                 $scope.input.misuse = data.misuse;
                 $scope.input.usageGuide = data.usageGuide;
                 $scope.input.legacy = data.legacy;
+
+
+                //data.edStatus = data.edStatus || 'included'
+                $scope.input.edStatus = data.edStatus;
 
                 $scope.input.conceptMap = data.conceptMap;
 
@@ -898,6 +904,9 @@ angular.module("sampleApp")
                         vo.legacy = $scope.input.legacy;
                     }
 
+                if ($scope.input.edStatus) {
+                    vo.edStatus = $scope.input.edStatus;
+                }
 
                     $scope.$close(vo);
                 };
