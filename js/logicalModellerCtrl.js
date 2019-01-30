@@ -12,6 +12,7 @@ angular.module("sampleApp")
             $scope.code.lmPalette = 'lmPalette';        //the list code for the paletteof models...
             $scope.treeData = [];           //populates the resource tree
 
+
             $scope.mdOptions = {
                 controls: ["bold", "italic", "separator", "bullets","separator", "heading","separator", "preview"]
             };
@@ -33,6 +34,13 @@ angular.module("sampleApp")
 
             GetDataFromServer.registerAccess('logical');
 
+            $scope.displayServers = function(){
+                let servers = ""
+                servers += '<div>Data: ' + appConfigSvc.getCurrentDataServer().url + "</div>"
+                servers += '<div>Conf: ' + appConfigSvc.getCurrentConformanceServer().url + "</div>"
+                servers += '<div>Term: ' + appConfigSvc.getCurrentTerminologyServer().url + "</div>"
+                return servers;
+            };
 
             //when a new comment is added or updated, then an event is rasied to allow the model level list ot be updated
             $scope.$on('taskListUpdated',function(event,list){
@@ -74,11 +82,23 @@ angular.module("sampleApp")
                 //is there an editor defined for the model?
                 try {
                     if ($scope.treeData[0].data.header.editor) {
-                        //there is an editor
-                        if ($scope.treeData[0].data.header.editor == $scope.Practitioner.telecom[0].value) {
-                            return true
-                        } else {return false;}
-                    } else {
+                        //there is an editor - then it must match the editor in the model
+                        let editorEmail = $scope.treeData[0].data.header.editor.toLowerCase();
+                        if ($scope.Practitioner && $scope.Practitioner.telecom &&  $scope.Practitioner.telecom[0].value) {
+                            let practitionerTelecom = $scope.Practitioner.telecom[0].value.toLowerCase();
+                            if (editorEmail == practitionerTelecom) {
+                                return true
+                            } else {
+                                return false
+                            }
+                        }
+
+                        //if ($scope.treeData[0].data.header.editor == $scope.Practitioner.telecom[0].value) {
+                          //  return true
+                        //} else {return false;}
+                    }
+
+                    else {
                         //no editor (and the other conditions are true) so can edit
                         return true;
                     }
@@ -86,9 +106,21 @@ angular.module("sampleApp")
                 } catch (ex) {
                     return false;
                 }
-            }
+            };
 
-
+            //load all the models. Called whne a shortcut is NOT used...
+            let loadAllModels = function() {
+                logicalModelSvc.loadAllModels($scope.conformanceServer.url).then(
+                    function(bundle) {
+                        $scope.bundleModels = bundle
+                        //save all the models for the search facility
+                        $scope.originalAllModels = angular.copy($scope.bundleModels);
+                    },
+                    function(err) {
+                        alert('Error loading all models: '+ angular.toJson(err))
+                    }
+                )
+            };
 
             //-----------  login stuff....
 
@@ -115,10 +147,8 @@ angular.module("sampleApp")
             //if a shortcut has been used there will be a hash so load that
             var hash = $location.hash();
             if (hash) {
-
-
-
                 //if there's a hash starting with $$$ then this has been started from the project, with an authenticted user...
+                //todo - I think this can be removed...
                 if (hash && hash.substr(0,3) == '$$$') {
                     //loaded from project. Need to get user details, servers...
 
@@ -194,6 +224,7 @@ angular.module("sampleApp")
 
 
             } else {
+                loadAllModels();
                 /*
                 if ($scope.conformanceServer.url !== appConfigSvc.getCurrentDataServer().url) {
                     var msg = 'The Conformance and Data servers must be the same for the Comments to work correctly.\n';
@@ -208,6 +239,7 @@ angular.module("sampleApp")
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
             firebase.auth().onAuthStateChanged(function(user) {
                 //if there's a hash starting with $$$ then this has been started from the project, with an authenticted user...
+                //todo - remove
                 if (hash && hash.substr(0, 3) == '$$$') {
                     //nothing to see here, move right along...
                    // return
@@ -230,8 +262,8 @@ angular.module("sampleApp")
                                 // checkForComments($scope.currentType);     //get comments for this user against this model...
                                 getPalette(practitioner);       //get the palette of logical models
 
-
                             }, function (err) {
+                                alert("Error loading user's Practitioner resource from the data server. This can occur when the data server is unavailable. You should correct before continuing.")// + angular.toJson(err))
                                 //swallow errorsalert(err)
                             }
                         );
@@ -797,7 +829,7 @@ angular.module("sampleApp")
 
 
             };
-
+/*
             //view and change servers
             $scope.setServersDEP = function(){
                 $uibModal.open({
@@ -818,7 +850,7 @@ angular.module("sampleApp")
 
                 })
             };
-
+*/
             //merge the referenced model into this one at this point
             $scope.mergeModel = function(url){
                 $scope.canSaveModel = false;        //to prevent the base model from being replaced... 
@@ -842,17 +874,21 @@ angular.module("sampleApp")
 
 
             }
-
+/*
             $scope.showCommentEntryDEP = function(comment,index) {
 
 
                 return ((comment.levelKey == $scope.currentLevelKey) || comment.level==1);
             }
 
+            */
+/*
             $scope.showConversationDEP = function(levelKey) {
                 $scope.currentLevelKey = levelKey;
 
             }
+
+            */
 /*
             $scope.saveCommentDEP = function() {
                 //save the comment. For now, a single comment only...
@@ -1445,12 +1481,21 @@ angular.module("sampleApp")
             };
 
 
+
+
+
+
+
+/* in service
+
+
+
+
             //load all the logical models created by clinFHIR
-            loadAllModels = function() {
 
+            let loadAllModels = function() {
+                console.log('load all models')
                 var url= $scope.conformanceServer.url + "StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
-
-
 
                 GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
                     function(data) {
@@ -1475,6 +1520,10 @@ angular.module("sampleApp")
                 )
             };
 
+
+
+
+            */
             //used to provide the filtering capability...
             $scope.filterModelList = function(filter) {
                 filter = filter.toLowerCase();
@@ -1487,6 +1536,7 @@ angular.module("sampleApp")
             };
 
 
+/* - $scope.initialLM doen't seem to be defined - is it a hangover?
 
             if (!$scope.initialLM) {
                // $scope.hideLMSelector();
@@ -1502,7 +1552,7 @@ angular.module("sampleApp")
                     }
                 )
             }
-
+*/
 
 
             //functions and prperties to enable the valueset viewer
@@ -1956,10 +2006,13 @@ angular.module("sampleApp")
                 //$http.put(url,SDToSave).then(
                     function(data) {
 
+                        loadAllModels();        //todo - do we really need a re-load after every save???
+/*
                         if (!$scope.initialLM) {
                             //if there wasn't a model passed in, re-load the list
                             loadAllModels();
                         }
+                        */
 
                         var res = data.data;
                         var oo;

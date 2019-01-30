@@ -101,7 +101,6 @@ angular.module("sampleApp")
             );
 
 
-
             $scope.showChart = function() {
                 if ($scope.displayMode == 'access') {
                     $scope.displayMode = 'front'

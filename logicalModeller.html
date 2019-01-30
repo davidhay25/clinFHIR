@@ -261,7 +261,12 @@
                 </div>
                 <div class="col-md-2 col-sm-2">
 
-                    <span style="cursor:pointer" ng-click='setServers()' class="navbar-text pull-right"> {{appConfigSvc.getCurrentConformanceServer().name}}</span>
+                    <span style="cursor:pointer"
+
+                          uib-popover-html="displayServers()"
+                          popover-trigger="'mouseenter'"
+                          popover-placement="bottom"
+                          ng-click='setServers()' class="navbar-text pull-right"> {{appConfigSvc.getCurrentConformanceServer().name}}</span>
 
 
                 </div>
@@ -328,7 +333,8 @@
 
     <div class="row" ng-show="showNotLoggedIn">
         <div class="col-md-12 col-sm-12">
-            <div ng-hide="Practitioner" class="alert alert-warning">
+            <!--  ?? why hide if a practitioner<div ng-hide="Practitioner" class="alert alert-warning">-->
+            <div class="alert alert-warning">
                 <p>As you have not logged in, you are able to view Models, but not edit them.
                 To log in, click the  <i class="glyphicon glyphicon-log-in"></i>  icon to the upper right. You can create an account there if you don't already
                     have one - all you need is an email address.</p>
@@ -359,7 +365,7 @@
 
             <uib-tabset>
 
-                <uib-tab heading="Palette">
+                <uib-tab heading="Palette" >
 
                     <ul class="list-group" style=" height:500px; overflow: auto;" >
                         <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.id == entry.item.display}"
