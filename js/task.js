@@ -21,12 +21,13 @@ angular.module("sampleApp").controller('taskCtrl',
             let obj;
             try {
                 obj = angular.fromJson(event.data)
+                console.log(obj)
             } catch (ex) {
                 console.log('Ignoring non Json message')
                 $scope.$digest();
             }
 
-            console.log(obj)
+
             if (obj) {
                 if (obj.modelId) {
                     //this will be a note to a task...

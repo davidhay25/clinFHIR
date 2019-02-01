@@ -978,10 +978,18 @@
 
                         <div ng-show="selectedNode">
                             <div class="row">
-                                <div class="col-md-10 col-sm-10">
+                                <div class="col-md-8 col-sm-8">
+                                    <h4>{{selectedNode.text}}</h4>
+                                    <!--
                                     <h4>Element path <em>{{selectedNode.text}}</em> properties</h4>
+                                    -->
                                 </div>
-                                <div class="col-md-2 col-sm-2">
+                                <div class="col-md-4 col-sm-4">
+                                    <div class="pull-right">
+                                        <input style="margin-top: 15px"
+                                               ng-click="setClinicalView(clinicalView)"
+                                               type = "checkbox" ng-model="clinicalView"/> Clinical View
+                                    </div>
 
                                 </div>
                             </div>
@@ -1017,7 +1025,11 @@
                                 </tr>
                                 -->
 
-                                <tr><td>Status</td><td>{{selectedNode.data.edStatus}}</td></tr>
+
+
+                                <tr ng-show = "selectedNode.data.edStatus && (selectedNode.data.edStatus !== 'included')" class="required">
+                                    <td>Status</td><td>{{selectedNode.data.edStatus}}</td>
+                                </tr>
 
                                 <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
                                 <tr><td>Description</td>
@@ -1049,7 +1061,7 @@
                                     </td>
                                 </tr>
 
-                                <tr ng-show="selectedNode.data.mappingFromED.length > 0"><td>Mappings</td><td>
+                                <tr ng-show="selectedNode.data.mappingFromED.length > 0 && ! clinicalView"><td>Mappings</td><td>
                                     <table class="table table-condensed table-bordered"  style="margin-bottom: 2px">
                                         <tr><th>Identity</th><th>Map</th><th>Comment</th></tr>
                                         <tr ng-repeat="map in selectedNode.data.mappingFromED">

@@ -1,0 +1,1257 @@
+{
+    "resourceType": "Bundle",
+    "id": "7c5669ad-1bda-42da-bb1b-9ba3b017f3cd",
+    "meta": {
+        "lastUpdated": "2019-02-01T15:35:54.573-05:00"
+    },
+    "type": "searchset",
+    "total": 31,
+    "link": [
+        {
+            "relation": "self",
+            "url": "http://snapp.clinfhir.com:8081/baseDstu3/Task?_count=100&requester=Practitioner%2FclinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2"
+        }
+    ],
+    "entry": [
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548980678583-771",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548980678583-771",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T19:26:45.984-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.encounters.encounter.prescriptions"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "Current Medications *may* be documented directly from each encounter prescription, and copied through to this list. Some users prefer to use Encounter Prescription to derive this list. Other users prefer to enter information directly to this List. These Medication and Encounter Prescription data elements are duplicated to account for both behaviours and functionality available.",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-02-01T00:24:38.583Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548981158646-317",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548981158646-317",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T19:34:46.351-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.encounters.encounter.prescriptions"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "There is a functional relationship between Encounter Prescription and Current Medications List (above). The data elements are repeated in both - but in Encounter Prescription Repeats are included. This repetition in the model is to allow both direct and derived information",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-02-01T00:32:38.646Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548893647870-982",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548893647870-982",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-30T19:16:14.293-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.Current-Medication-List.Medication-Name.reasonCode?"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "May also need to consider OTC and non-Rx medications?",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T00:14:07.870Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548894443294-409",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548894443294-409",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-30T19:29:29.818-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.Current-Medication-List.Medication-Name.reasonCode?"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "is there a better name? Is it clinical  indication? should both be present",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T00:27:23.294Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548115224359-826",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548115224359-826",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-21T19:02:27.286-05:00"
+                },
+                "extension": [
+                    {
+                        "url": null,
+                        "valueString": "CsiroUberModel--common.clinical.conditions.condition"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "These are the diagnoses or problems that appear on a Problem List that can be denoted as active or inactive (see status). A Problem/History List - those conditions, disorders that a Patient has or has previously experienced that provide information about their current problems (active) or clinical history (inactive).  Sometimes called History. This excludes Procedures because (i) we need Px in Px fields, Px auto populates from a different data element (ii) procedures are not always ongoing, they are almost always 'past' (complications of previous procedures are 'new' problems).",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroUberModel--common"
+                },
+                "authoredOn": "2019-01-22T00:00:24.359Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548959776685-247",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548959776685-247",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T13:38:23.984-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.conditions.condition"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "Disease, Disorders, Problems, Symptoms are distinct from Procedures, Interventions, Treatments.  These are recorded separately in GP desktop systems (different data elements) and will auto-populate through (or be saved to) a persistent, sequential or summary list.",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T18:36:16.685Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548959849857-988",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548959849857-988",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T13:39:36.853-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.conditions.condition"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "SNOMED ValueSets are distinctively partitioned  - one for Problem-Diagnosis, another for Procedures.  Not all native termsets that are on-board in existing software systems have such partitions/bindings.",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T18:37:29.857Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548960194604-891",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548960194604-891",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T13:45:22.008-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.Adverse-Reaction-List.Adverse-Reaction.Comments"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "Can be included where available",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T18:43:14.604Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548960218331-993",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548960218331-993",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T13:45:45.342-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.conditions.condition.comment?"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "Can be included where available",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T18:43:38.331Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548122029762-513",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548122029762-513",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-21T20:55:52.396-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.clinical.conditions.condition"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "test comment 1",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-22T01:53:49.762Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548962054287-167",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548962054287-167",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T14:16:21.636-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.procedures.procedure?"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "SNOMED ValueSets are distinctively partitioned - one for Problem-Diagnosis, another for Procedures. Not all native termsets that are on-board in existing software systems have such partitions/bindings.",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T19:14:14.287Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548122083035-61",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548122083035-61",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-21T20:56:46.005-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.clinical.conditions.condition.name"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "the actual disorder disease problem that the patient has (has had) CODED, in a list (see also status for active inactive)",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-22T01:54:43.035Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548962102189-171",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548962102189-171",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T14:17:09.323-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.procedures.procedure?"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "Procedures, Interventions, Treatments  are distinct from  Disease, Disorders, Problems, Symptoms. These are recorded separately in GP desktop systems (different data elements) and will auto-populate through (or be saved to) a persistent, sequential or summary list.",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T19:15:02.189Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548962592076-406",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548962592076-406",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T14:25:19.365-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.procedures.noinfo-noprocedures?"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "Need to distinguish between Pt has had no Px, versus no information about Px is available",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T19:23:12.076Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548971884669-368",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548971884669-368",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T17:00:12.201-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.Reminders"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "Reminders are important information that the destination practice should receive. Clinicians will need to know what follow-up, reviews, services have already been scheduled for the Patient and the due dates.",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T21:58:04.669Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548972108225-790",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548972108225-790",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T17:03:55.773-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.Reminders.Service-Request"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "Egs: will inform destination practice that the patient needs a scheduled review of a care plan; that the Patient is die for another blood test or PAP smear",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T22:01:48.225Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548972389854-635",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548972389854-635",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T17:08:37.383-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.Current-Medication-List.No-medications"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "May need to distinguish between Pt has no medications currently versus there is no medication information available",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T22:06:29.854Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548972541195-606",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548972541195-606",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T17:11:08.505-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.Current-Medication-List.No-medications"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "Distinguishing between info absence, meds absence, exclusion or Pt refusal might be achieved with a small valueset of selectable codes that can denote the various NULL or EMPTY data elements.  Consider the use of a ValueSet to do this because many GP systems don;t currently have distinct data elements to fulfil this requirement",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T22:09:01.195Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548972586603-939",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548972586603-939",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T17:11:53.953-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.Current-Medication-List.No-medications"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "This NO INFO data element is repeated for other \"EMPTY LIST\" items.  Consider uniform use throughout the model.",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T22:09:46.603Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548972657873-142",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548972657873-142",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T17:13:05.194-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.conditions.noinfo-noconditions?"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "This NO INFO data element is repeated for other \"EMPTY LIST\" items. Consider uniform use throughout the model.",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T22:10:57.873Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548972678833-936",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548972678833-936",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T17:13:26.153-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.Adverse-Reaction-List.No-Adverse-Reactions"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "This NO INFO data element is repeated for other \"EMPTY LIST\" items. Consider uniform use throughout the model.",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T22:11:18.833Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548972693034-431",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548972693034-431",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T17:13:40.304-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.procedures.noinfo-noprocedures?"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "This NO INFO data element is repeated for other \"EMPTY LIST\" items. Consider uniform use throughout the model.",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T22:11:33.034Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548975174999-410",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548975174999-410",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T17:55:02.318-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.Reminders.Reminder-Due-Date"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "This data element allows for recording of the timing for a single service, either as a date and time, a date ranges or a text descriptor which can allow for 'next available. In practice, clinicians will often think in terms of ordering services as approximate timing, for example: review in 3 months, 6 months or 12 months. As clinical systems need more exact parameters to operate on, this '3 months' will usually be converted to an exact date 3 months from the date of recording and stored using this data element. If complex timing or sequences of timings are required, use the CLUSTER.service_direction archetype within the 'Complex timing' SLOT and this data element becomes redundant.",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T22:52:54.999Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548975951886-647",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548975951886-647",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T18:07:59.499-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.encounters.encounter.type"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "May require a small valueset",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T23:05:51.886Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548976242270-959",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548976242270-959",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T18:12:49.831-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.encounters.encounter.reason"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "Need to decide if this is (a) the patient reported RfE, and there is a view that this is not desirable (b) that this is the clinician judgement about the symptoms/worries/concerns that best explained the visit or consultation (c) and some views that administrative reasons need to be distinguished.",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T23:10:42.270Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548976287036-254",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548976287036-254",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T18:13:34.338-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.encounters.encounter.reason"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "Some software systems allow 'copy-though' to the problem list or to Encounter Diagnosis or both)",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T23:11:27.036Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548976331933-292",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548976331933-292",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T18:14:19.270-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.encounters.encounter.reason"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "Some visit are triggered by recalls or reminders and these are sometimes considered 'administrative' RfE",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T23:12:11.933Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548976467459-459",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548976467459-459",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T18:16:35.085-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.encounters.encounter.reason"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "Few GP systems distinguish between administrative, patient reported or clinical RfE.  \nThe use of SNOMED (and it's definitions and structure) can help differentiate these types, in a data collection/post hoc analyses.  Not all other termsets denote (or categorise) these different RfE. Need to decide the scope",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T23:14:27.459Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548976583204-519",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548976583204-519",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T18:18:30.571-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.encounters.encounter.type"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "Not all GP systems have this data element available. \nEven when available the frequency of use of this data element is low.",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T23:16:23.204Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548977492592-844",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548977492592-844",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T18:33:40.401-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.encounters.encounter.type"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "Questions arise about 'case reviews' and whether the Patient has to be present or in contact for this encounter to be considered a true 'encounter' ; clinician behaviours of opening/editing/closing a patient's record might trigger a new encounter and encounter period.",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-01-31T23:31:32.592Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        },
+        {
+            "fullUrl": "http://snapp.clinfhir.com:8081/baseDstu3/Task/id1548980656716-849",
+            "resource": {
+                "resourceType": "Task",
+                "id": "id1548980656716-849",
+                "meta": {
+                    "versionId": "1",
+                    "lastUpdated": "2019-01-31T19:26:24.528-05:00"
+                },
+                "extension": [
+                    {
+                        "url": "http://clinfhir.com/fhir/StructureDefinition/path",
+                        "valueString": "CsiroCommon.Clinical.Current-Medication-List"
+                    }
+                ],
+                "status": "requested",
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "48767-8"
+                        }
+                    ]
+                },
+                "description": "Current Medications *may* be documented directly from each encounter prescription, and copied through to this list. Some users prefer to use Encounter Prescription to derive this list.  Other users prefer to enter information directly to this List.  These Medication and Encounter Prescription data elements are duplicated to account for both behaviours and functionality available.",
+                "focus": {
+                    "reference": "StructureDefinition/CsiroCommon"
+                },
+                "authoredOn": "2019-02-01T00:24:16.716Z",
+                "requester": {
+                    "agent": {
+                        "reference": "Practitioner/clinFhirYyBIJCXGquSgXPKxNuIu2knSyjh2",
+                        "display": "donna.truran@csiro.au"
+                    }
+                }
+            },
+            "search": {
+                "mode": "match"
+            }
+        }
+    ]
+}

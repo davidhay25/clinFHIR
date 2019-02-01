@@ -17,6 +17,13 @@ angular.module("sampleApp")
                 controls: ["bold", "italic", "separator", "bullets","separator", "heading","separator", "preview"]
             };
 
+
+            $scope.clinicalView =  $localStorage.clinicalView;
+            $scope.setClinicalView = function(state) {
+                $localStorage.clinicalView = state;//! $localStorage.clinicalView;
+            };
+
+
             $scope.appConfigSvc = appConfigSvc
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
@@ -153,7 +160,6 @@ angular.module("sampleApp")
                     let modelId = hash.substr(3);
                     if (modelId) {
                         //if there is a modelId, then load it
-                        console.log(modelId);
                         let conformanceServer = appConfigSvc.getCurrentConformanceServer();     //set by the project app...
 
                         //get the model from the server...
@@ -1180,6 +1186,10 @@ angular.module("sampleApp")
                 if ($scope.LMDetailVisible) {
 
                     $scope.midPaneClass = "col-md-7 col-sm-7"
+                    //we can make the right pa
+                    //$scope.midPaneClass = "col-md-5 col-sm-5"
+                    //$scope.rightPaneClass = "col-md-7 col-sm-7";
+
                 } else {
                     $scope.midPaneClass = "col-md-12 col-sm-12"
                 }
