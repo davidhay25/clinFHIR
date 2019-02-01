@@ -106,8 +106,10 @@ angular.module("sampleApp")
                 var arQuery=[], arResult = []
                 if (treeData) {
                     treeData.forEach(function(row){
-                        if (row.data && row.data.isCoded && row.data.selectedValueSet && row.data.selectedValueSet.vs) {
-                            arQuery.push(checkVS(row.data.selectedValueSet.vs.url));
+                        //item.data.selectedValueSet.valueSet
+                        if (row.data && row.data.isCoded && row.data.selectedValueSet && row.data.selectedValueSet.valueSet) {
+                            //if (row.data && row.data.isCoded && row.data.selectedValueSet && row.data.selectedValueSet.vs) {
+                            arQuery.push(checkVS(row.data.selectedValueSet.valueSet));
                         }
                     });
 
@@ -2265,14 +2267,7 @@ angular.module("sampleApp")
                                     }
                                 }
 
-                                /*
-                                treeData.forEach(function (item) {
-                                    if (item.id == parentId) {
-                                        found = true;
-                                    }
 
-                                });
-                                */
 
                                 if (!found) {
                                     console.log('Missing parent element ' + parentId)
@@ -2309,11 +2304,13 @@ angular.module("sampleApp")
                                             })
                                             break;
                                         case 3 :
+                                            item.data.type = [];
                                             //targetprofile is single - make it multiple
                                             ed.type.forEach(function (typ) {
                                                 if (typ.targetProfile) {
                                                     typ.targetProfile = [typ.targetProfile]
                                                 }
+                                                item.data.type.push(typ)
                                             });
 
                                             //item.data.type = ed.type;
@@ -2327,6 +2324,13 @@ angular.module("sampleApp")
                                     }
 
                                 }
+
+                                item.data.type.forEach(function(typ) {
+                                    if (['CodeableConcept', 'Coding', 'code'].indexOf(typ.code) > -1) {
+                                        item.data.isCoded = true;
+                                    }
+                                })
+
 
                                 //item.data.type = ed.type;
                                 item.data.min = ed.min;
@@ -2352,15 +2356,17 @@ angular.module("sampleApp")
 
                                         //  12/2/2018  change to using vsReference, but need to preserve the old stuff...
                                         if (ed.binding.valueSetUri) {
-                                            item.data.selectedValueSet.vs = {url: ed.binding.valueSetUri};
+                                            item.data.selectedValueSet.valueSet = ed.binding.valueSetUri;   //todo - not sure of this..
                                         }
 
                                         if (ed.binding.valueSetReference && ed.binding.valueSetReference.reference) {
-                                            item.data.selectedValueSet.vs = {url: ed.binding.valueSetReference.reference};
+                                            item.data.selectedValueSet.valueSet = ed.binding.valueSetReference.reference;
+                                            //item.data.selectedValueSet.vs = {url: ed.binding.valueSetReference.reference};
                                         }
 
                                         if (item.data.selectedValueSet.vs) {
-                                            item.data.selectedValueSet.vs.name = ed.binding.description;
+                                            //item.data.selectedValueSet.vs.name = ed.binding.description;
+                                            item.data.selectedValueSet.description = ed.binding.description;
                                         }
 
                                     }
@@ -2619,7 +2625,10 @@ angular.module("sampleApp")
                                         switch (fhirVersion) {
                                             case 2 :
                                                 //the profile is multiple
-                                                item.data.referenceUrl = typ.profile[0];
+                                                if (typ.profile) {
+                                                    item.data.referenceUrl = typ.profile[0];
+                                                }
+
                                                 break;
                                             case 3 :
                                                 //targetProfile is single

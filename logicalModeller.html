@@ -178,11 +178,12 @@
     <script src="js/setServers.js"></script>
     <script src="js/securitySvc.js"></script>
     <script src="js/editLogicalNodeCtl.js"></script>
-    <script src="js/editLMDocCtl.js"></script>
+
     <script src="js/components/extensionDirective.js"></script>
     <script src="js/newExtensionDefinitionCtrl.js"></script>
     <script src="js/edBuilderSvc.js"></script>
 <!--
+ <script src="js/editLMDocCtl.js"></script>
     <script src="js/questionnaireSvc.js"></script>
 
     <script src="directive/questionnaire/questionnaireCtl.js"></script>
@@ -266,7 +267,7 @@
                           uib-popover-html="displayServers()"
                           popover-trigger="'mouseenter'"
                           popover-placement="bottom"
-                          ng-click='setServers()' class="navbar-text pull-right"> {{appConfigSvc.getCurrentConformanceServer().name}}</span>
+                           class="navbar-text pull-right"> {{appConfigSvc.getCurrentConformanceServer().name}}</span>
 
 
                 </div>
@@ -752,11 +753,21 @@
 
                         <uib-tab heading="Status">
                             <br/>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="pull-right">
+                                        <input type="checkbox" ng-model="input.hideIncludedStatus"/>
+                                        Hide included
+                                    </div>
+                                </div>
+                            </div>
+
+
                             <table class="table table-bordered table-condensed">
                                 <tr><th>Element</th><th>Status</th></tr>
-                                <tr ng-repeat="row in treeData">
+                                <tr ng-repeat="row in treeData" ng-hide = "input.hideIncludedStatus && row.data.edStatus=='included' ">
                                     <td>
-                                        <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
+                                        <div ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
                                     </td>
                                     <td>{{row.data.edStatus}}</td>
 
@@ -1516,7 +1527,7 @@
                     <uib-tab ng-show = "selectedNode" heading="EDJson">
                         <pre>{{selectedED | json}}</pre>
                     </uib-tab>
-
+<!--
 
                     <uib-tab ng-show="1==2" heading="Comments" >
                         <br/>
@@ -1567,7 +1578,7 @@
                                 <div ng-hide="commentTask">
                                     <p><button ng-click="createTask()" class="btn btn-default">Click here </button> to add a comment about this model</p>
                                     <!--
-                                    <p>Click <span ng-click="createTask()" class="clickable">here</span> to add a comment about this model</p> -->
+                                    <p>Click <span ng-click="createTask()" class="clickable">here</span> to add a comment about this model</p>
                                 </div>
                             </uib-tab>
 
@@ -1584,7 +1595,7 @@
                     </uib-tab>
 
 
-
+-->
 
                 </uib-tabset>
 

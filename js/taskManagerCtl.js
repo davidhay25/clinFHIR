@@ -62,6 +62,15 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             alert("Task warning: You must restart clinFHIR then the Task Manager to reset updated config. Note that this will reset the configured servers.")
         }
 
+        $scope.displayServers = function(){
+            let servers = "";
+            servers += '<div>Data: ' + appConfigSvc.getCurrentDataServer().name + "</div>"
+            servers += '<div>Conf: ' + appConfigSvc.getCurrentConformanceServer().name + "</div>"
+            servers += '<div>Term: ' + appConfigSvc.getCurrentTerminologyServer().name + "</div>"
+            return servers;
+        };
+
+
 
         let hashED = {};    //will have a hash of element definitions by path
         //-----------  login stuff....

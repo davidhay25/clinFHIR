@@ -354,13 +354,16 @@ angular.module("sampleApp")
 
 
                                 //this is for references to Logical Models
-                                $scope.references.entry.forEach(function(ent){
-                                    if (ent.resource.url == profileUrl) {
-                                        $scope.input.referenceFromIg = ent;
+                                if ($scope.references && $scope.references.entry) {
+                                    $scope.references.entry.forEach(function(ent){
+                                        if (ent.resource.url == profileUrl) {
+                                            $scope.input.referenceFromIg = ent;
 
 
-                                    }
-                                })
+                                        }
+                                    })
+                                }
+
                             }
 
                         }

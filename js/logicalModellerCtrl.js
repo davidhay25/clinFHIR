@@ -17,17 +17,6 @@ angular.module("sampleApp")
                 controls: ["bold", "italic", "separator", "bullets","separator", "heading","separator", "preview"]
             };
 
-/*
-            let wsUrl = 'ws://'+ window.location.host;
-            let ws = new WebSocket(wsUrl);
-
-            ws.onmessage = function(event) {
-                console.log('socket event:', event.data)
-
-                $scope.$digest();
-            };
-            */
-
             $scope.appConfigSvc = appConfigSvc
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
@@ -35,10 +24,10 @@ angular.module("sampleApp")
             GetDataFromServer.registerAccess('logical');
 
             $scope.displayServers = function(){
-                let servers = ""
-                servers += '<div>Data: ' + appConfigSvc.getCurrentDataServer().url + "</div>"
-                servers += '<div>Conf: ' + appConfigSvc.getCurrentConformanceServer().url + "</div>"
-                servers += '<div>Term: ' + appConfigSvc.getCurrentTerminologyServer().url + "</div>"
+                let servers = "";
+                servers += '<div>Data: ' + appConfigSvc.getCurrentDataServer().name + "</div>"
+                servers += '<div>Conf: ' + appConfigSvc.getCurrentConformanceServer().name + "</div>"
+                servers += '<div>Term: ' + appConfigSvc.getCurrentTerminologyServer().name + "</div>"
                 return servers;
             };
 
@@ -150,21 +139,47 @@ angular.module("sampleApp")
                 //if there's a hash starting with $$$ then this has been started from the project, with an authenticted user...
                 //todo - I think this can be removed...
                 if (hash && hash.substr(0,3) == '$$$') {
-                    //loaded from project. Need to get user details, servers...
+                    //loaded from project. Assume that the servers have been set to the correct location
+                    //the user will be set using the firebase events as usual...
 
-                    //the access token is set in the local storage. Think this is OK, though may need a synchronous call to get from the server...
-                    var at = $localStorage.cfAt;
+                    //the access token (if any) is set in the local storage.
+                    let at = $localStorage.cfAt;
                     if (at) {
-
                         $http.defaults.headers.common.Authorization = 'Bearer '+ at;
                     }
 
+                    //is there a model id included?
+
+                    let modelId = hash.substr(3);
+                    if (modelId) {
+                        //if there is a modelId, then load it
+                        console.log(modelId);
+                        let conformanceServer = appConfigSvc.getCurrentConformanceServer();     //set by the project app...
+
+                        //get the model from the server...
+                        var url = conformanceServer.url + 'StructureDefinition/'+modelId;
+                        $scope.showWaiting = true;
+                        projectSvc.smartGet(url).then(
+                            //GetDataFromServer.adHocFHIRQuery(url).then(
+                            function(data){
+                                var model = data.data;
+                                $scope.hideLMSelector();            //only want to see this model...
+                                selectEntry({resource:model});       //select the model
+                            },
+                            function(){
+                                modalService.showModal({}, {bodyText: "The model with the id '"+modelId + "' is not on the "+conformanceServer.name + " server"})
+                            }
+                        ).finally(function(){
+                            $scope.showWaiting = false;
+                        })
+
+                    }
+
+                    /*
                     //the user is also set by the project controller...
                     var user = $localStorage.user;
                     logicalModelSvc.setCurrentUser(user);
                     securitySvc.setCurrentUser(user);
-
-
 
                     //is there a selected model? if so, load it
                     var model = $localStorage.cfModel;
@@ -177,6 +192,8 @@ angular.module("sampleApp")
                             console.log(err)
                         }
                     );
+
+                    */
 
                 } else {
                     //this
@@ -192,6 +209,11 @@ angular.module("sampleApp")
                             appConfigSvc.setServerType('conformance',conformanceServer.url);
                             appConfigSvc.setServerType('data',conformanceServer.url);       //set the data server to the same as the conformance for the comments
 
+
+                            let dataServer = sc.config.dataServer;
+                            if (dataServer) {
+                                appConfigSvc.setServerType('data',dataServer.url);
+                            }
 
                             var termServer = sc.config.terminologyServer;
                             if (termServer) {
@@ -220,10 +242,8 @@ angular.module("sampleApp")
                 }
 
 
-
-
-
             } else {
+                //if there's no hash, then load all the cf created models
                 loadAllModels();
                 /*
                 if ($scope.conformanceServer.url !== appConfigSvc.getCurrentDataServer().url) {
@@ -240,12 +260,12 @@ angular.module("sampleApp")
             firebase.auth().onAuthStateChanged(function(user) {
                 //if there's a hash starting with $$$ then this has been started from the project, with an authenticted user...
                 //todo - remove
-                if (hash && hash.substr(0, 3) == '$$$') {
+                if (1==2 && hash && hash.substr(0, 3) == '$$$') {
                     //nothing to see here, move right along...
                    // return
                 } else {
-
-                    delete $scope.input.mdComment;
+                    //otherwise get the Practitioner resource that corresponds to this user, and show their palette
+                    //delete $scope.input.mdComment;
 
                     if (user) {
                         $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
@@ -507,9 +527,9 @@ angular.module("sampleApp")
             };
 
 
-            //for selecting a profile to import
-           // $scope.showFindProfileDialog = {};
-            //all the base types for the selection...
+
+
+            //all the standard resource types
             RenderProfileSvc.getAllStandardResourceTypes().then(
                 function(data){
                     $scope.allResourceTypes = data;
@@ -563,6 +583,7 @@ angular.module("sampleApp")
 
             $scope.input.newCommentboxInxDEP = -1;
 
+            /*
             //this is the new builder model
             $scope.showForm = function(){
 
@@ -605,7 +626,7 @@ angular.module("sampleApp")
 
 
             };
-
+*/
             $scope.redrawChart = function(){
                 $timeout(function(){
                     if ($scope.instanceGraph) {
@@ -616,7 +637,7 @@ angular.module("sampleApp")
                 },1000)
 
             };
-
+/*
             $scope.editLMDocDEP = function(){
                 $uibModal.open({
                     templateUrl: 'modalTemplates/editLMDoc.html',
@@ -632,7 +653,7 @@ angular.module("sampleApp")
 
                     })
             };
-
+*/
             $scope.expandAll = function() {
                 $scope.treeData.forEach(function (item) {
 
@@ -1282,19 +1303,18 @@ angular.module("sampleApp")
                     var url = appConfigSvc.getCurrentConformanceServer().url+item.reference;
                     $scope.showWaiting = true;
                     projectSvc.smartGet(url).then(
-                    //GetDataFromServer.adHocFHIRQuery(url).then(
+
                         function(data){
 
                             selectEntry({resource:data.data})
                         }, function(err) {
-                            alert('error getting model '+angular.toJson(err));
+                            alert('error loading model. It may not be present on the current conformance server ('+ $scope.conformanceServer.name +') ');
                         }
                     ).finally(
                         function(){
                             $scope.showWaiting = false;
                         }
                     );
-
                 }
 
             };
@@ -1357,8 +1377,8 @@ angular.module("sampleApp")
                 sc.modelId = $scope.currentType.id;     //this should make it possible to query below...
                 sc.config = {conformanceServer:appConfigSvc.getCurrentConformanceServer()};
                 sc.config.terminologyServer = appConfigSvc.getCurrentTerminologyServer();
-
-                sc.config.model = {id:$scope.currentType.id}
+                sc.config.dataServer = appConfigSvc.getCurrentDataServer();
+                sc.config.model = {id:$scope.currentType.id};
                 sc.shortCut = shortCut;     //the full shortcut
                 sc.$save().then(
                     function(){
@@ -1415,6 +1435,7 @@ angular.module("sampleApp")
                     controller: function ($scope,allModels,modelUrl,$timeout) {
 
                         $scope.url = modelUrl;
+
                         function vmDrawTree(model){
 
                             $timeout(function(){
@@ -1436,11 +1457,14 @@ angular.module("sampleApp")
                         }
 
                         //locate the specific model from the list of models. This won't scale of course...
-                        for (var i=0; i < allModels.entry.length ; i++) {
-                            if (allModels.entry[i].resource.url == modelUrl) {
-                                $scope.model = allModels.entry[i].resource;
+                        if (allModels && allModels.entry) {
+                            for (var i=0; i < allModels.entry.length ; i++) {
+                                if (allModels.entry[i].resource.url == modelUrl) {
+                                    $scope.model = allModels.entry[i].resource;
+                                }
                             }
                         }
+
 
                         //draw a tree if a model was found
                         if ($scope.model) {
@@ -2062,7 +2086,7 @@ angular.module("sampleApp")
                 delete $scope.modelHistory;
                 delete $scope.selectedNode;
                 delete $scope.commentTask;      //the task to comment on this model...
-                delete $scope.input.mdComment;  //the comment
+                //delete $scope.input.mdComment;  //the comment
                 delete $scope.taskOutputs;      //the outputs of the task (Communication resource currently)
                 delete $scope.isFilteredModel;  //true if this model is filtered...
 

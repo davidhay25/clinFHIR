@@ -17,7 +17,7 @@
     <script src="js/libs/angularfire.min.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase',"ngSanitize"]).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -93,7 +93,11 @@
                 <button class="btn btn-default  navbar-text" ng-click="refresh()">Refresh</button>
             </div>
             <div class="col-md-3 col-sm-3">
-                <span style="cursor:pointer" ng-click='setServers()' class="navbar-text pull-right"> {{appConfigSvc.getCurrentConformanceServer().name}}</span>
+                <span style="cursor:pointer"
+                      uib-popover-html="displayServers()"
+                      popover-trigger="'mouseenter'"
+                      popover-placement="bottom"
+                      class="navbar-text pull-right"> {{appConfigSvc.getCurrentConformanceServer().name}}</span>
             </div>
 
             <div class="col-md-2 col-sm-2">

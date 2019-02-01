@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2019-01-29';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2019-02-01';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -178,6 +178,7 @@ angular.module("sampleApp")
 
         defaultConfig.allKnownServers.push({name:'eip',version:3,url:"http://eip-fhir.experimental.aimsplatform.com/hapi-fhir/baseDstu3/"});
         defaultConfig.allKnownServers.push({name:'Ontoserver-PC',version:3,url:"https://primarycare.ontoserver.csiro.au/fhir/"});
+        defaultConfig.allKnownServers.push({name:'csiroProject',version:3,url:"http://home.clinfhir.com:8030/baseDstu3/",everythingOperation:true});
 
 
 
@@ -315,9 +316,7 @@ angular.module("sampleApp")
                     //a disabled log;
                     config.log = function() {}
                 }
-                
-                
-                
+
                 return config;
 
             },
