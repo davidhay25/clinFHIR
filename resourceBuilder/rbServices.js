@@ -1878,7 +1878,7 @@ console.log(summary);
         getSingleExtensionValue : function(resource,url) {
             //return the value of an extension assuming there is only 1...
             var extension;
-            if (resource) {
+            if (resource && url) {
                 resource.extension = resource.extension || []
                 resource.extension.forEach(function(ext){
                     if (ext.url == url) {extension = ext}
