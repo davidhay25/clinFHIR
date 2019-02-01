@@ -271,12 +271,13 @@ angular.module("sampleApp").controller('taskCtrl',
                                     }
                                 }
                                 if (!found) {
+                                    console.log(iTask.id + " not found, adding manually")
                                     $scope.tasks.push(iTask);
                                     $scope.$emit('taskListUpdated',$scope.tasks);   //so the list in LM can be updated
 
                                 }
 
-                            },5000)
+                            },10000)
 
 
                             //want to add the new task to the list of tasks...
@@ -302,6 +303,18 @@ angular.module("sampleApp").controller('taskCtrl',
 
         //todo - should move this to a service - used by taskManager as well...
         function loadTasksForModel(id) {
+
+            let missing = {}
+            let hash = {}
+            if ($scope.treeData) {
+                $scope.treeData.forEach(function(item){
+                    hash[item.id] = item;
+                })
+            }
+
+            console.log($scope.treeData )
+            console.log(hash )
+
             console.log('loading tasks for model...')
             $scope.tasks = []
             let url = $scope.conformanceServer.url + "Task";    //from parent controller
@@ -309,15 +322,35 @@ angular.module("sampleApp").controller('taskCtrl',
             url += "&focus=StructureDefinition/"+id;
             url += "&_count=100";    //todo - need the follow links
 
+
             $http.get(url).then(
                 function(data) {
 
                     if (data.data && data.data.entry) {
                         data.data.entry.forEach(function (entry) {
                             let resource = entry.resource;      //the fhir Task
-                            let iTask = taskSvc.getInternalTaskFromResource(resource,fhirVersion)
-                            $scope.tasks.push(iTask)
+
+                            let pathExt = Utilities.getSingleExtensionValue(resource,pathExtUrl)
+                            if (pathExt) {
+                                let path = pathExt.valueString;
+                                if (hash[path]) {
+                                    let iTask = taskSvc.getInternalTaskFromResource(resource,fhirVersion)
+                                    $scope.tasks.push(iTask)
+                                } else {
+                                    missing[path] = resource.description;
+                                    //console.log('Path:'+ path + " not found in model in task #" + resource.id)
+                                }
+
+                            } else {
+                               // console.log('Task #'+ resource.id + ' has no extension for the path')
+                            }
+
+
+
+
                         })
+                       // console.log($scope.tasks)
+                       // console.log(angular.toJson(missing));
                     }
                     $scope.$emit('taskListUpdated',$scope.tasks);   //so the list in LM can be updated
 
