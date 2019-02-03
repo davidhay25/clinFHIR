@@ -1309,10 +1309,10 @@
                                     <hr/>
 
                                     <table class="table table-bordered">
-                                        <tr><th>Path</th><th>orig</th><th>Comment</th><th>Email</th><th># notes</th><th></th></tr>
+                                        <tr><th>Path</th><th>Comment</th><th>Email</th><th># notes</th><th></th></tr>
                                         <tr ng-repeat="task in taskList | orderBy: 'path'">
                                             <td>{{task.currentPath | dropFirstInPath}}</td>
-                                            <td>{{task.path | dropFirstInPath}}</td>
+                                            <!--<td>{{task.path | dropFirstInPath}}</td>-->
                                             <td>{{task.description}}</td>
                                             <td>{{task.requesterDisplay}}</td>
                                             <td> <span class="badge" ng-show="task.notes.length > 0"

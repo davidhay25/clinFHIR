@@ -11,7 +11,7 @@ angular.module("sampleApp")
         return function(str,len) {
             if (str) {
                 if (str.length > len) {
-                    let s = str.substr(0,27) + '...'
+                    let s = str.substr(0,len-3) + '...'
                     return s;
                 } else {
                     return str
