@@ -372,11 +372,18 @@ angular.module("sampleApp").controller('taskManagerCtrl',
         };
 
         //load all the tasks for a given model
+
+
         function loadTasksForModel(id) {
             $scope.currentModelId = id;
             delete $scope.editorEmail;
             let hashEmail = {};      //all the emails of users with comments
             hashED = {};       //hash of element definitions by path - used to display details
+
+
+            $scope.canRefresh = false;
+
+
             $scope.tasks = []
             let url = $scope.conformanceServer.url + "Task";    //from parent controller
             url += "?code="+taskCode.system +"|"+taskCode.code;
@@ -391,6 +398,9 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                             let resource = entry.resource;      //the fhir Task
 
                             let iTask = taskSvc.getInternalTaskFromResource(resource,fhirVersion)
+
+
+
                             hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
 
 
@@ -404,6 +414,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
                         $scope.input.filterEmail = $scope.allEmail[0]
                     }
+                    $scope.canRefresh = true;
 
 
                 },function(err) {
@@ -425,6 +436,16 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                     if (model.snapshot && model.snapshot.element) {
                         model.snapshot.element.forEach(function (ed) {
                             hashED[ed.path] = ed;
+                            //the id property is the original path when the element was created and is unchanged if the element is moved.
+                            //the comment path is actualluy that element...
+                            if (ed.id) {
+                                hashED[ed.id] = ed;
+                            }
+
+
+
+
+
                         })
                     }
                 },
@@ -433,11 +454,5 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                 }
             )
 
-
-
         }
-
-
-
-
     });

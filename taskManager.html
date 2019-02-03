@@ -90,7 +90,7 @@
             </div>
 
             <div class="col-md-1 col-sm-1">
-                <button class="btn btn-default  navbar-text" ng-click="refresh()">Refresh</button>
+                <button ng-show="canRefresh" class="btn btn-default  navbar-text" ng-click="refresh()">Refresh</button>
             </div>
             <div class="col-md-3 col-sm-3">
                 <span style="cursor:pointer"
@@ -206,6 +206,17 @@
                                 <div class="row myForm">
                                     <div class="col-md-3">
                                         <div>
+                                            <strong>Task Id</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        {{localTask.id}}
+                                    </div>
+                                </div>
+
+                                <div class="row myForm">
+                                    <div class="col-md-3">
+                                        <div>
                                             <strong>Element Definition</strong>
                                         </div>
                                     </div>
@@ -240,18 +251,33 @@
                                         <!-- Must be a logged in user. If the model has an editor, then must be the same.  -->
                                         <div ng-show="localTask.status && user && (!editorEmail || editorEmail == user.email)">
                                             <button class="btn btn-default" ng-click="changeState('received')"
+                                                    uib-popover="The task has been initially reviewed (or triaged) but no disposition has been made"
+                                                    popover-placement="top"
+                                                    popover-trigger="'mouseenter'"
                                                     ng-show="showStateChange('received',localTask.status)">Reviewed</button>
 
                                             <button class="btn btn-default"  ng-click="changeState('accepted')"
+                                                    uib-popover="The task has been accepted as one that should be actioned, but that action has not yet occurred."
+                                                    popover-placement="top"
+                                                    popover-trigger="'mouseenter'"
                                                     ng-show="showStateChange('accepted',localTask.status)">Accepted</button>
 
                                             <button class="btn btn-default"  ng-click="changeState('completed')"
+                                                    uib-popover="Any actions required for this task have been completed. The task is complete."
+                                                    popover-placement="top"
+                                                    popover-trigger="'mouseenter'"
                                                     ng-show="showStateChange('completed',localTask.status)">Completed</button>
 
                                             <button class="btn btn-default"  ng-click="changeState('rejected')"
+                                                    uib-popover="No actions will follow from the Task. The task is complete."
+                                                    popover-placement="top"
+                                                    popover-trigger="'mouseenter'"
                                                     ng-show="showStateChange('rejected',localTask.status)">Rejected</button>
 
                                             <button class="btn btn-default"  ng-click="changeState('cancelled')"
+                                                    uib-popover="The task does not need to be reviewed or actioned - for example it was entered in error. The task is complete."
+                                                    popover-placement="top"
+                                                    popover-trigger="'mouseenter'"
                                                     ng-show="showStateChange('cancelled',localTask.status)">Cancelled</button>
 
 
