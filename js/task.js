@@ -1,7 +1,7 @@
 angular.module("sampleApp").controller('taskCtrl',
     function ($scope,$http,appConfigSvc,logicalModelSvc,Utilities,$uibModal,taskSvc,$timeout) {
 
-        let clinFhirDevice = 'Device/cfDevice';
+        //let clinFhirDevice = 'Device/cfDevice';
         let fhirVersion = $scope.conformanceServer.version;     //from parent
         let taskCode =  {system:"http://loinc.org",code:"48767-8"}
         var pathExtUrl = appConfigSvc.config().standardExtensionUrl.path;  //the extension for recording the model path for a comment
@@ -105,6 +105,11 @@ angular.module("sampleApp").controller('taskCtrl',
                     console.log(practitioner);
                     $scope.input = {}
 
+                    if (!modelPath) {
+                        alert("Can't add comment, 'modelPath' is null")
+                        $scope.$close()
+                        return;
+                    }
 
                     $scope.addTask = function(comment) {
                         //let comment = window.prompt('Enter comment');       //todo make dialog
@@ -162,23 +167,6 @@ angular.module("sampleApp").controller('taskCtrl',
                                 }
                             )
 
-/*
-                            let url = appConfigSvc.getCurrentConformanceServer().url + "Task/"+ task.id;    //from parent controller
-                            $scope.showWaiting = true;
-                            $http.put(url,task).then(
-                                function(data) {
-                                    alert('Comment has been added.');
-                                    $scope.$close(task);
-                                }, function(err) {
-                                    alert(angular.toJson(err))
-                                    $scope.$close();
-                                }
-                            ).finally(
-                                function(){
-                                    $scope.showWaiting = false;
-                                }
-                            )
-                            */
                         }
                     };
                     //add the note and close the dialog...
@@ -234,19 +222,16 @@ angular.module("sampleApp").controller('taskCtrl',
                     },
                     "modelId" : function(){
                         return $scope.treeData[0].data.header.SDID //from the parent scope
-                        /*
-                        if (task) {
-                            return task.id;
-                        } else {
-                            return $scope.treeData[0].data.header.SDID //from the parent scope
-                        }
-*/
+
                     },
                     "modelPath" : function() {
                         if (task) {
                             return task.path;
                         } else if ($scope.taskNode) {      //taskNode is set by the $watch below...
-                            return $scope.taskNode.id;
+console.log($scope.taskNode.data.idFromSD)
+                            return $scope.taskNode.data.idFromSD
+
+                            //return $scope.taskNode.id;
                         } else {
                             return null;
                         }
@@ -304,16 +289,23 @@ angular.module("sampleApp").controller('taskCtrl',
         //todo - should move this to a service - used by taskManager as well...
         function loadTasksForModel(id) {
 
+/*
             let missing = {}
-            let hash = {}
+
+            */
+
+            let hash = {};  //hash of current path to original path
             if ($scope.treeData) {
                 $scope.treeData.forEach(function(item){
-                    hash[item.id] = item;
+                    //console.log(item)
+                    let originalPath = item.data.idFromSD;
+                    let currentPath = item.id;
+                    hash[originalPath] = currentPath;
                 })
             }
 
-            console.log($scope.treeData )
-            console.log(hash )
+           // console.log($scope.treeData )
+           // console.log(hash )
 
             console.log('loading tasks for model...')
             $scope.tasks = []
@@ -321,7 +313,6 @@ angular.module("sampleApp").controller('taskCtrl',
             url += "?code="+taskCode.system +"|"+taskCode.code;
             url += "&focus=StructureDefinition/"+id;
             url += "&_count=100";    //todo - need the follow links
-
 
             $http.get(url).then(
                 function(data) {
@@ -333,6 +324,11 @@ angular.module("sampleApp").controller('taskCtrl',
                             let pathExt = Utilities.getSingleExtensionValue(resource,pathExtUrl)
                             if (pathExt) {
                                 let path = pathExt.valueString;
+                                let iTask = taskSvc.getInternalTaskFromResource(resource,fhirVersion);
+                                iTask.currentPath = hash[iTask.path]
+                                //console.log(iTask);
+                                $scope.tasks.push(iTask)
+                                /*
                                 if (hash[path]) {
                                     let iTask = taskSvc.getInternalTaskFromResource(resource,fhirVersion)
                                     $scope.tasks.push(iTask)
@@ -340,15 +336,14 @@ angular.module("sampleApp").controller('taskCtrl',
                                     missing[path] = resource.description;
                                     //console.log('Path:'+ path + " not found in model in task #" + resource.id)
                                 }
+                                */
 
                             } else {
                                // console.log('Task #'+ resource.id + ' has no extension for the path')
                             }
 
-
-
-
                         })
+                        console.log($scope.tasks)
                        // console.log($scope.tasks)
                        // console.log(angular.toJson(missing));
                     }
@@ -364,7 +359,7 @@ angular.module("sampleApp").controller('taskCtrl',
         //when a node is selected in the designer...
         $scope.$watch(function($scope) {return $scope.selectedNode},function(node,olfV){
             $scope.taskNode = node;
-            //console.log(node);
+            console.log(node);
         })
 
     });

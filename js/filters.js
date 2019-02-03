@@ -6,6 +6,23 @@
 angular.module("sampleApp")
 
 
+    .filter('maxLength',function(){
+        //return the value of an extension
+        return function(str,len) {
+            if (str) {
+                if (str.length > len) {
+                    let s = str.substr(0,27) + '...'
+                    return s;
+                } else {
+                    return str
+                }
+
+            }
+
+
+
+        }
+    })
 
     .filter('trustAsResourceUrl', ['$sce', function($sce) {
         return function(val) {
@@ -48,8 +65,6 @@ angular.module("sampleApp")
 
         }
     }])
-
-
     .filter('typeFromUrl', function() {
         return function(s) {
             //assume a url in the format: (http://hl7.org/fhir/us/core/CodeSystem/careplan-category
@@ -349,7 +364,8 @@ angular.module("sampleApp")
     return function(text) {
         return text;
     }
-    }).filter('bundleDisplayDEP',function(){
+    })
+    .filter('bundleDisplayDEP',function(){
         //return a display version of the bundle
         return function(bundle) {
             //is this a message or a document?
@@ -378,7 +394,8 @@ angular.module("sampleApp")
             }
 
         }
-    }).filter('containerMeta',function(){
+    })
+    .filter('containerMeta',function(){
     //return the metadata in the container
     return function(container) {
         if (container) {
@@ -400,7 +417,8 @@ angular.module("sampleApp")
                 }, 0);
             }
         };
-    }).filter('resourcesOfType',function(){
+    })
+    .filter('resourcesOfType',function(){
     return function(ar,filt) {
         console.log(ar,filt);
         return ar;

@@ -2641,6 +2641,12 @@ angular.module("sampleApp")
                             //editing an existing node - replace the data property in the node with the results......
                             $scope.treeData.forEach(function (item, index) {
                                 if (item.id == result.editNode.id) {
+
+
+                                    if (item.data.path !== result.editNode.data.path) {
+                                        alert('name change')
+                                    }
+
                                     var clone = angular.copy(result)
                                     delete clone.editNode;
                                     item.data = clone;

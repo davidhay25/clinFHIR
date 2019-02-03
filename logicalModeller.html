@@ -562,11 +562,7 @@
 
 
                 </uib-tab>
-<!--
-                <uib-tab heading="Form" ng-show="1==2">
-                    <lm-populator model="SD" select-item="selectItemFromForm"></lm-populator>
-                </uib-tab>
--->
+
 
                 <uib-tab heading="Analysis">
                     <uib-tabset>
@@ -856,17 +852,7 @@
                             <div id="mmLogicalModel"></div>
 
                         </uib-tab>
-<!--
-                        <uib-tab heading="Resources Graph" select="redrawChart()">
-                            <span class="clickable iconSpacing pull-right" ng-show="hidePatientFlag"
-                            ng-click="showAllInGraph()">Show All</span>
 
-                            <span class="clickable iconSpacing pull-right"
-                                  ng-hide="hidePatientFlag" ng-click="hidePatient()">Hide Patient</span>
-
-                            <div id="resourceGraph"></div>
-                        </uib-tab>
--->
 
 
                     </uib-tabset>
@@ -900,21 +886,7 @@
 
 
                 </uib-tab>
-<!--
-                <uib-tab heading="Sample">
-                    <br/>
-                    <uib-tabset>
-                        <uib-tab heading="Json">
-                            <pre>{{scenarioBundle | json}}</pre>
-                        </uib-tab>
-                        <uib-tab heading="Tree">
-                            <div id="docTreeView"></div>
-                        </uib-tab>
-                    </uib-tabset>
 
-                </uib-tab>
-
-                -->
 
                 <uib-tab heading="Dev">
                     <br />
@@ -939,22 +911,6 @@
                             </table>
                         </uib-tab>
 
-
-
-
-
-
-<!--
-                        <uib-tab heading="Questionnaire">
-                            <pre>{{Q | json}}</pre>
-                        </uib-tab>
-
-                        <uib-tab heading="Questionnaire Form">
-
-                            <questionnaire model="Q"></questionnaire>
-                        </uib-tab>
-
-                        -->
 
                     </uib-tabset>
                 </uib-tab>
@@ -1000,8 +956,9 @@
                                     <td width="20%">Name</td>
                                     <td>{{selectedNode.data.name}}
 
-
-
+<!--
+                                        <div>{{selectedNode.data.idFromSD}}</div>
+-->
 
                                     </td>
                                 </tr>
@@ -1019,11 +976,7 @@
 
                                     </td>
                                 </tr>
-                                <!--
-                                <tr>
-                                    <td width="20%">Model path</td><td>{{selectedNode.data.path}}</td>
-                                </tr>
-                                -->
+
 
 
 
@@ -1356,8 +1309,9 @@
                                     <hr/>
 
                                     <table class="table table-bordered">
-                                        <tr><th>Path</th><th>Comment</th><th>Email</th><th># notes</th><th></th></tr>
+                                        <tr><th>Path</th><th>orig</th><th>Comment</th><th>Email</th><th># notes</th><th></th></tr>
                                         <tr ng-repeat="task in taskList | orderBy: 'path'">
+                                            <td>{{task.currentPath | dropFirstInPath}}</td>
                                             <td>{{task.path | dropFirstInPath}}</td>
                                             <td>{{task.description}}</td>
                                             <td>{{task.requesterDisplay}}</td>

@@ -1297,7 +1297,7 @@ angular.module("sampleApp")
 
                     }
 
-                })
+                });
 
                 //note - not using any queries yet - thinking is to support looking up extensions...
                 if (arQueries.length > 0) {
@@ -2439,7 +2439,10 @@ angular.module("sampleApp")
                         var path = ed.path;     //this is always unique in a logical model...
                         var arPath = path.split('.');
                         var item = {data:{}}
+
                         item.id = path
+
+                        item.data.idFromSD = ed.id;   //retain the original id - won't change even of the path changes...
 
                         var text = arPath[arPath.length - 1];   //the text will be the last entry in the path...
 
@@ -2875,7 +2878,12 @@ angular.module("sampleApp")
                     }
 
 
-                    ed.id = data.path;
+                    //console.log(data.idFromSD)
+                    ed.id = data.idFromSD || data.path;  //gets assigned to the original path when the element is created
+
+                   //  ed.id = data.path;
+
+
                     ed.path = data.path;
                     ed.short = data.short;
                     ed.definition = data.description || 'No description';

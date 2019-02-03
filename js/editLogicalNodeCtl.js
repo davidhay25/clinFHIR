@@ -19,8 +19,7 @@ angular.module("sampleApp")
 
             var that = this;
 
-            $scope.statuses = ['included','excluded','possible'];       //note: value set in createTreeArrayFromSD()
-
+            $scope.statuses = ['included','confirm','later','excluded'];       //note: value set in createTreeArrayFromSD()
 
             //the display of logical models.
             $scope.lmDisplay = function(resource) {
@@ -32,10 +31,7 @@ angular.module("sampleApp")
                 }
 
 
-
-
-
-            }
+            };
 /*
             //NOT WORKING RIGHT NOW...
             function setOptionsForDtAndPathDep() {
@@ -797,6 +793,9 @@ angular.module("sampleApp")
                     return
                 }
                     var vo = {};
+
+                    vo.idFromSD = editNode.data.idFromSD;
+
                     vo.name = $scope.input.name;
                     vo.short = $scope.input.short;
                     vo.description = $scope.input.description || 'No description';
