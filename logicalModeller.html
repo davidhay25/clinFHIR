@@ -763,7 +763,7 @@
                                 <tr><th>Element</th><th>Status</th></tr>
                                 <tr ng-repeat="row in treeData" ng-hide = "input.hideIncludedStatus && row.data.edStatus=='included' ">
                                     <td>
-                                        <div ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
+                                        <div ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path | dropFirstInPath}}</div>
                                     </td>
                                     <td>{{row.data.edStatus}}</td>
 
@@ -1099,7 +1099,7 @@
                                 </tr>
 
 
-                                <tr>
+                                <tr ng-show="selectedNode.data.idFromSD">
                                     <td>User Comments</td>
                                     <td>
                                         <div ng-controller="taskCtrl">
@@ -1311,7 +1311,12 @@
                                     <table class="table table-bordered">
                                         <tr><th>Path</th><th>Comment</th><th>Email</th><th># notes</th><th></th></tr>
                                         <tr ng-repeat="task in taskList | orderBy: 'path'">
-                                            <td>{{task.currentPath | dropFirstInPath}}</td>
+                                            <td>{{task.currentPath | dropFirstInPath}}
+                                                <div ng-show="task.currentPath !== task.path">
+                                                    <em>({{task.path | dropFirstInPath}})</em>
+                                                </div>
+
+                                            </td>
                                             <!--<td>{{task.path | dropFirstInPath}}</td>-->
                                             <td>{{task.description}}</td>
                                             <td>{{task.requesterDisplay}}</td>

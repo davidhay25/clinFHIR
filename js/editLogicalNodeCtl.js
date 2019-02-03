@@ -794,7 +794,12 @@ angular.module("sampleApp")
                 }
                     var vo = {};
 
-                    vo.idFromSD = editNode.data.idFromSD;
+                    if (editNode && editNode.data) {
+                        vo.idFromSD = editNode.data.idFromSD;
+                    } //else {
+                       // vo.idFromSD =
+                   // }
+
 
                     vo.name = $scope.input.name;
                     vo.short = $scope.input.short;
