@@ -740,8 +740,11 @@
                             </div>
 
                             <table class="table table-bordered">
-                                <tr ng-repeat="row in vsChecks" ng-class="{absent:row.absent,present:row.present}">
+                                <tr><th>Url</th><th>Path</th><th>Outcome</th></tr>
+                                <tr ng-repeat="row in vsChecks" ng-class="{absent:row.absent,present:row.present}"
+                                    >
                                     <td>{{row.url}}</td>
+                                    <td><span class="clickable" ng-click="selectNodeFromServerCheck(row.row)">{{row.path}}</span></td>
                                     <td>{{row.outcome}}</td>
                                 </tr>
                             </table>
@@ -761,7 +764,8 @@
 
                             <table class="table table-bordered table-condensed">
                                 <tr><th>Element</th><th>Status</th></tr>
-                                <tr ng-repeat="row in treeData" ng-hide = "input.hideIncludedStatus && row.data.edStatus=='included' ">
+                                <tr ng-repeat="row in treeData" 
+                                    ng-hide = "input.hideIncludedStatus && row.data.edStatus=='included' ">
                                     <td>
                                         <div ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path | dropFirstInPath}}</div>
                                     </td>

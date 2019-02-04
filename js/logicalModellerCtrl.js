@@ -3269,5 +3269,11 @@ angular.module("sampleApp")
 
             }
 
+            $scope.selectNodeFromServerCheck = function(row) {
+
+                $scope.selectedNode = row;
+                $scope.selectedED = logicalModelSvc.getEDForPath($scope.SD,row)
+            }
+
 
     });

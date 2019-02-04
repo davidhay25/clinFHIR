@@ -109,7 +109,7 @@ angular.module("sampleApp")
                         //item.data.selectedValueSet.valueSet
                         if (row.data && row.data.isCoded && row.data.selectedValueSet && row.data.selectedValueSet.valueSet) {
                             //if (row.data && row.data.isCoded && row.data.selectedValueSet && row.data.selectedValueSet.vs) {
-                            arQuery.push(checkVS(row.data.selectedValueSet.valueSet));
+                            arQuery.push(checkVS(row.data.selectedValueSet.valueSet,row));
                         }
                     });
 
@@ -122,9 +122,13 @@ angular.module("sampleApp")
                 }
                 return deferred.promise;
 
-                function checkVS(url) {
+                function checkVS(url,row) {
                     var deferred1 = $q.defer()
 
+                    let path;
+                    if (row.data && row.data.path) {
+                        path = row.data.path;
+                    }
 
                     var termServer = appConfigSvc.getCurrentTerminologyServer().url;
                     var srch = termServer + 'ValueSet?url='+ url;
@@ -132,10 +136,11 @@ angular.module("sampleApp")
                     $http.get(srch).then(
                         function(data) {
                             if (data.data && data.data.entry &&  data.data.entry.length > 0) {
-                                arResult.push({url:url,outcome:'present',present:true})
+
+                                arResult.push({url:url,outcome:'present',present:true,path:path,row:row})
                                 //hash[url] = 'present'
                             } else {
-                                arResult.push({url:url,outcome:'absent',absent:true})   //makes the display simpler
+                                arResult.push({url:url,outcome:'absent',absent:true,path:path,row:row})   //makes the display simpler
                                 //hash[url] = 'absent'
                             }
                             deferred1.resolve()
