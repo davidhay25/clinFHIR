@@ -758,14 +758,21 @@
                                         <input type="checkbox" ng-model="input.hideIncludedStatus"/>
                                         Hide included
                                     </div>
+
+                                    <div class="pull-right">
+                                        <input type="checkbox" ng-model="input.showIncludedStatusOnly"/>
+                                        Show included only
+                                    </div>
+
                                 </div>
                             </div>
 
 
                             <table class="table table-bordered table-condensed">
                                 <tr><th>Element</th><th>Status</th></tr>
-                                <tr ng-repeat="row in treeData" 
-                                    ng-hide = "input.hideIncludedStatus && row.data.edStatus=='included' ">
+                                <tr ng-repeat="row in treeData"
+                                    ng-show="showStatus(row)"
+                                    ng-hideX = "input.hideIncludedStatus && row.data.edStatus=='included' ">
                                     <td>
                                         <div ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path | dropFirstInPath}}</div>
                                     </td>
@@ -971,10 +978,12 @@
                                     <td width="20%">Alias</td>
                                     <td>
 
+                                            <ul>
+                                                <li ng-repeat="al in selectedNode.data.alias">
+                                                    {{al}}
+                                                </li>
+                                            </ul>
 
-                                            <div ng-repeat="al in selectedNode.data.alias">
-                                                {{al}}
-                                            </div>
 
 
 

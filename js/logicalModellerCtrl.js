@@ -3269,6 +3269,22 @@ angular.module("sampleApp")
 
             }
 
+            $scope.showStatus = function(row) {
+                let show = true
+                if ($scope.input.hideIncludedStatus && row.data.edStatus == 'included') {
+                    show = false;
+                }
+
+                if ($scope.input.showIncludedStatusOnly && row.data.edStatus !== 'included') {
+                    show = false;
+                }
+
+
+
+
+                return show;
+            }
+
             $scope.selectNodeFromServerCheck = function(row) {
 
                 $scope.selectedNode = row;

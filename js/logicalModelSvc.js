@@ -92,6 +92,20 @@ angular.module("sampleApp")
             if (ed.fixedString) {
                 item['li_attr'] = {class: 'elementFixed'};
             }
+
+
+            if (item.data.edStatus == 'excluded') {
+                item['a_attr'] = { "style": "text-decoration: line-through" }
+            } else if (item.data.edStatus !== 'included') {
+                item['a_attr'] = { "style": "text-decoration: underline dotted green" }
+            }
+
+
+
+
+            //text-decoration: green wavy underline;
+
+
         }
 
 
