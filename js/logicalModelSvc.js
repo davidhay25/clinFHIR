@@ -97,7 +97,7 @@ angular.module("sampleApp")
             if (item.data.edStatus == 'excluded') {
                 item['a_attr'] = { "style": "text-decoration: line-through" }
             } else if (item.data.edStatus !== 'included') {
-                item['a_attr'] = { "style": "text-decoration: underline dotted green" }
+                item['a_attr'] = { "style": "text-decoration: underline dotted red" }
             }
 
 
