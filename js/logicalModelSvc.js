@@ -98,6 +98,8 @@ angular.module("sampleApp")
                 item['a_attr'] = { "style": "text-decoration: line-through" }
             } else if (item.data.edStatus !== 'included') {
                 item['a_attr'] = { "style": "text-decoration: underline dotted red" }
+            } else {
+                item['a_attr'] = {};
             }
 
 
@@ -115,6 +117,9 @@ angular.module("sampleApp")
         multiple['Composition.section.entry'] = "*"
 
         return {
+            decorateTreeItem : function(item,ed) {
+                decorateTreeView(item,ed);
+            },
             checkValueSetsOnServer : function(treeData){
                 var deferred = $q.defer();
                 var arQuery=[], arResult = []

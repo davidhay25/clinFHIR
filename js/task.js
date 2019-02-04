@@ -312,6 +312,7 @@ console.log($scope.taskNode.data.idFromSD)
             let url = $scope.conformanceServer.url + "Task";    //from parent controller
             url += "?code="+taskCode.system +"|"+taskCode.code;
             url += "&focus=StructureDefinition/"+id;
+            url += '&status:not=cancelled';
             url += "&_count=100";    //todo - need the follow links
 
             $http.get(url).then(

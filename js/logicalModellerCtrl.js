@@ -2650,16 +2650,21 @@ angular.module("sampleApp")
                                 if (item.id == result.editNode.id) {
 
 
-                                    if (item.data.path !== result.editNode.data.path) {
-                                        alert('name change')
-                                    }
 
                                     var clone = angular.copy(result)
                                     delete clone.editNode;
                                     item.data = clone;
 
                                     //2018-10-12 - needed when editing a node from a filtered view. Currently it's undefined...
-                                    item.data.ed = {path:item.id}
+                                    //todo - 2019-02-04 - is this correct
+                                    if (! item.data.ed) {
+                                        item.data.ed = {path:item.id}
+                                    }
+
+
+                                    item.data.edStatus = clone.edStatus;       //so the tree display is updated...
+
+                                    logicalModelSvc.decorateTreeItem(item,item.data.ed)
 
                                     item.text = clone.name;
 
@@ -2693,11 +2698,8 @@ angular.module("sampleApp")
 
                             $scope.treeData.push(newNode);
 
-
                             //so the table is sorted correctly (otherwise the new node is at the bottom)...
                             $scope.treeData = logicalModelSvc.reOrderTree($scope.treeData);
-
-
 
                             if (result.extensionAnalyse && result.extensionAnalyse.isComplexExtension
                                 && result.extensionAnalyse.children) {
@@ -2752,8 +2754,6 @@ angular.module("sampleApp")
                                 })
                                 
                             }
-
-
 
                         }
 
