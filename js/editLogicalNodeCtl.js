@@ -15,6 +15,8 @@ angular.module("sampleApp")
             $scope.vsInGuide = igSvc.getResourcesInGuide('valueSet');       //so we can show the list of ValueSets in the IG
             $scope.input = {};
 
+
+            $scope.fhirRoot =  'http://hl7.org/fhir/STU3/'; //  'http://hl7.org/fhir/';
             var baseTypeUrl = appConfigSvc.config().standardExtensionUrl.baseTypeForModel;
 
             var that = this;

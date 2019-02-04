@@ -86,7 +86,7 @@
                             <uib-tab>
                                 <uib-tab-heading>Alias <span class="badge">{{input.alias.length}}</span></uib-tab-heading>
 
-                                    <div ng-repeat="al in input.alias">
+                                    <div ng-repeat="al in input.alias track by $index">
 
                                         {{al}}
                                         <span class="pull-right">
@@ -122,7 +122,7 @@
                                             </select>
                                         </div>
                                         <div class="col-sm-2 col-md-2">
-                                            <a ng-href="http://hl7.org/fhir/{{input.referenceToCoreFromIg.name}}.html" target="_blank">
+                                            <a ng-href="{{fhirRoot}}{{input.referenceToCoreFromIg.name}}.html" target="_blank">
                                                 <i class="glyphicon glyphicon-eye-open clickable"></i>
                                             </a>
                                         </div>
@@ -395,7 +395,7 @@
                     <div class="pull-right">
                         <strong>BaseType:</strong> {{baseType}}
 
-                        <a ng-href="http://hl7.org/fhir/{{baseType}}.html" target="_blank">
+                        <a ng-href="{{fhirRoot}}{{baseType}}.html" target="_blank">
                             <i class="glyphicon glyphicon-eye-open clickable"></i>
                         </a>
 

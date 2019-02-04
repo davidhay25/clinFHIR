@@ -17,6 +17,9 @@ angular.module("sampleApp")
                 controls: ["bold", "italic", "separator", "bullets","separator", "heading","separator", "preview"]
             };
 
+            $scope.fhirRoot =  'http://hl7.org/fhir/STU3/'; //  'http://hl7.org/fhir/';
+
+
 
             $scope.clinicalView =  $localStorage.clinicalView;
             $scope.setClinicalView = function(state) {
@@ -585,7 +588,10 @@ angular.module("sampleApp")
                 )
             };
 */
-            $scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
+            $scope.rootForDataType= $scope.fhirRoot +  "datatypes.html#";
+
+
+            //$scope.rootForDataType="http://hl7.org/fhir/datatypes.html#";
 
             $scope.input.newCommentboxInxDEP = -1;
 
@@ -1432,7 +1438,8 @@ angular.module("sampleApp")
 
             //display a complex datatype
             $scope.viewDataType = function(dt) {
-                var url = 'http://hl7.org/fhir/StructureDefinition/'+dt;
+                //var url = 'http://hl7.org/fhir/StructureDefinition/'+dt;
+                var url = $scope.fhirRoot +  'StructureDefinition/'+dt;
                 $scope.viewReferencedModel(url)
             };
 

@@ -979,7 +979,7 @@
                                     <td>
 
                                             <ul>
-                                                <li ng-repeat="al in selectedNode.data.alias">
+                                                <li ng-repeat="al in selectedNode.data.alias track by $index">
                                                     {{al}}
                                                 </li>
                                             </ul>
@@ -1083,7 +1083,9 @@
                                         <div ng-show = "typ.code == 'Reference'">
                                             <div ng-repeat = 'targetProfile in typ.targetProfile'>
                                                     <span ng-show="isCoreType(targetProfile)">
-                                                    <a ng-href="http://hl7.org/fhir/{{targetProfile | getLogicalID}}.html" target="_blank">
+                                                    <a ng-href="{{fhirRoot}}{{targetProfile | getLogicalID}}.html" target="_blank">
+                                                        <!--<a ng-href="http://hl7.org/fhir/{{targetProfile | getLogicalID}}.html" target="_blank">-->
+
                                                         <i class="glyphicon glyphicon-eye-open clickable"></i>
                                                     </a>
 
