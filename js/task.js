@@ -410,14 +410,21 @@ console.log($scope.taskNode.data.idFromSD)
             let url = $scope.conformanceServer.url + "Task";    //from parent controller
             url += "?code="+taskCode.system +"|"+taskCode.code;
             url += "&focus=StructureDefinition/"+id;
-            url += '&status:not=cancelled';
-            url += "&_count=100";    //todo - need the follow links
+           // url += '&status:not=cancelled';
+            //url += "&_count=100";    //todo - need the follow links
 
-            $http.get(url).then(
+
+            Utilities.perfromQueryFollowingPaging(url).then(
+
+           // $http.get(url).then(
                 function(data) {
+                    /*if (data.data && data.data.entry) {
+                        console.log(data.data)
+                        data.data.entry.forEach(function (entry) {*/
 
-                    if (data.data && data.data.entry) {
-                        data.data.entry.forEach(function (entry) {
+                    if (data && data.entry) {
+                        console.log(data)
+                        data.entry.forEach(function (entry) {
                             let resource = entry.resource;      //the fhir Task
 
                             let pathExt = Utilities.getSingleExtensionValue(resource,pathExtUrl)
@@ -438,7 +445,7 @@ console.log($scope.taskNode.data.idFromSD)
                                 */
 
                             } else {
-                               // console.log('Task #'+ resource.id + ' has no extension for the path')
+                                console.log('Task #'+ resource.id + ' has no extension for the path')
                             }
 
                         })

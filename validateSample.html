@@ -16,6 +16,11 @@
     <script src="js/libs/firebase.js"></script>
     <script src="js/libs/angularfire.min.js"></script>
 
+    <style>
+        .error {
+            color:red;
+        }
+    </style>
 
     <script>
         angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase']).config(function($locationProvider) {
@@ -32,6 +37,7 @@
 
 
                     $scope.input = {};
+                    $scope.error = 'error'
 
                     $scope.validate = function( ){
                         let resource = $scope.input.resource;
@@ -48,9 +54,12 @@
                             } else {
                                 //assume json
                                 try {
-                                   // let
+                                    let r = angular.fromJson(resource);
+                                    resourceType = r.resourceType;
+                                    config.headers['Content-type'] = 'application/json+fhir'
                                 } catch (ex) {
-
+                                    alert("I thought this was Json, but I couldn't parse it");
+                                    return;
                                 }
                             }
 
@@ -63,6 +72,7 @@
                             let url = baseUrl + resourceType + '/$validate';
                             $scope.url = url;
 
+                            $scope.showWaiting = true;
                             $http.post(url,resource,config).then(
                                 function(data){
                                     console.log(data)
@@ -72,6 +82,10 @@
                                 function(err) {
                                     console.log(err)
                                     alert(angular.toJson(err))
+                                }
+                            ).finally(
+                                function(){
+                                    $scope.showWaiting = false;
                                 }
                             )
 
@@ -256,7 +270,9 @@
         <div class="col-md-6">
             <h4 ng-show="oo">Outcome of Validation</h4>
             <table class="table table-bordered">
-                <tr ng-repeat = "iss in oo.issue">
+                <tr ng-repeat = "iss in oo.issue"
+                    ng-class="{error:iss.severity=='error'}"
+                >
                     <td>{{iss.diagnostics}}</td>
                     <td>{{iss.severity}}</td>
 

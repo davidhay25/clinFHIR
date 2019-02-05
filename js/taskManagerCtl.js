@@ -1,5 +1,5 @@
 angular.module("sampleApp").controller('taskManagerCtrl',
-    function ($scope,$http,appConfigSvc,$firebaseObject,$firebaseArray,$uibModal,modalService,taskSvc) {
+    function ($scope,$http,appConfigSvc,Utilities,$firebaseObject,$firebaseArray,$uibModal,modalService,taskSvc) {
 
         $scope.firebase = firebase;
         $scope.appConfigSvc = appConfigSvc;
@@ -389,11 +389,22 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             url += "&focus=StructureDefinition/"+ id
             url += "&_count=100";    //todo - need the follow links
 
-            $http.get(url).then(
+
+            Utilities.perfromQueryFollowingPaging(url).then(
+
+
+
+                function(data) {
+                    console.log(data)
+                    if (data && data.entry) {
+                        data.entry.forEach(function (entry) {
+
+
+                            /*                $http.get(url).then(
                 function(data) {
                     console.log(data)
                     if (data.data && data.data.entry) {
-                        data.data.entry.forEach(function (entry) {
+                        data.data.entry.forEach(function (entry) {*/
                             let resource = entry.resource;      //the fhir Task
 
                             let iTask = taskSvc.getInternalTaskFromResource(resource,fhirVersion)

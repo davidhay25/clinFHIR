@@ -930,15 +930,59 @@
                     </uib-tabset>
                 </uib-tab>
 
-
+<!--
                 <uib-tab heading="Filter" ng-hide="isFilteredModel">
                     <div ng-controller="lmFilterCtrl">
                         <ng-include src="'/includes/lmFilter.html'"></ng-include>
                     </div>
 
                 </uib-tab>
+                -->
+<!--
+                <uib-tab>
+
+                    <uib-tab-heading>Comments
+                        <span class="badge"> {{taskList.length}}</span>
+                    </uib-tab-heading>
+
+                    <div>
+
+                        <a class="btn btn-link pull-right" download="{{downloadTaskName}}.csv"
+                           href="{{downloadTaskContent}}" title="{{downloadTaskName}}" >
+                            Download CSV of list
+                        </a>
+                        <div class="clearfix"/>
+
+                        <table class="table table-bordered">
+                            <tr><th>Path</th><th>Comment</th><th>Email</th><th># notes</th><th></th></tr>
+                            <tr ng-repeat="task in taskList | orderBy: 'path'">
+                                <td>
+                                    <div class="clickable" ng-click="selectNodeFromTable(task.currentPath)">{{task.currentPath | dropFirstInPath}}</div>
+                                    <div ng-show="task.currentPath !== task.path">
+                                        <em>({{task.path | dropFirstInPath}})</em>
+                                    </div>
+
+                                </td>
+
+                                <td>{{task.description}}</td>
+                                <td>{{task.requesterDisplay}}</td>
+                                <td> <span class="badge" ng-show="task.notes.length > 0"
+                                           uib-popover="There are  {{task.notes.length}} notes on this comment"
+                                           popover-placement="left"
+                                           popover-trigger="'mouseenter'">
+                                                {{task.notes.length}}</span></td>
+                                <td><i class="glyphicon glyphicon-edit clickable" ng-click="lmEditTask(task)"></i></td>
+                            </tr>
+                        </table>
 
 
+
+                    </div>
+
+                </uib-tab>
+
+
+-->
             </uib-tabset>
         </div>
         <div ng-class="rightPaneClass">
