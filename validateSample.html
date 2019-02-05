@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <base href="/" />
+    <meta charset="UTF-8">
+
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+    <script src="js/libs/firebase.js"></script>
+    <script src="js/libs/angularfire.min.js"></script>
+
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+        angular.module("sampleApp").constant("moment", moment);
+
+        angular.module("sampleApp")
+            .controller('csiroCtrl',
+                function ($scope,$uibModal,$http,modalService,$timeout,$firebaseObject,appConfigSvc,$location) {
+
+
+                    $scope.input = {};
+
+                    $scope.validate = function( ){
+                        let resource = $scope.input.resource;
+                        if (resource) {
+                            let resourceType;
+                            let config = {headers: {'Content-type':'application/xml+fhir', accept:'application/json+fhir'}};
+                            resource = resource.trim();
+
+                            if (resource.substr(0,1) == '<') {
+                                //this is xml
+                                let g = resource.indexOf('>');
+                                resourceType = resource.substr(1,g-1);
+
+                            } else {
+                                //assume json
+                                try {
+                                   // let
+                                } catch (ex) {
+
+                                }
+                            }
+
+
+                           // let resourceType = "Patient";
+
+                            let baseUrl = "https://primarycare.ontoserver.csiro.au/fhir/";
+
+
+                            let url = baseUrl + resourceType + '/$validate';
+                            $scope.url = url;
+
+                            $http.post(url,resource,config).then(
+                                function(data){
+                                    console.log(data)
+                                    $scope.oo = data.data;
+
+                                },
+                                function(err) {
+                                    console.log(err)
+                                    alert(angular.toJson(err))
+                                }
+                            )
+
+                        }
+
+
+                    }
+                    console.log(location.host)
+                    //will update the config. We don't care if manually entered servers are lost or the default servers changed
+                    if (appConfigSvc.checkConfigVersion()) {
+                        alert('The config was updated. You can continue.')
+                    };
+
+                    firebase.auth().onAuthStateChanged(function(user) {
+
+
+                        if (user) {
+                            $scope.user = user;
+
+                           console.log(user)
+
+
+                        } else {
+                            delete $scope.user
+
+                        }
+
+                    });
+
+                    $scope.login=function(){
+                        $uibModal.open({
+                            backdrop: 'static',      //means can't close by clicking on the backdrop.
+                            keyboard: false,       //same as above.
+                            templateUrl: 'modalTemplates/login.html',
+                            controller: 'loginCtrl'
+                        })
+                    };
+
+                    $scope.logout=function(){
+                        firebase.auth().signOut().then(function() {
+                            delete $scope.user;
+                            modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
+
+                        }, function(error) {
+                            modalService.showModal({}, {bodyText: 'Sorry, there was an error logging out - please try again'})
+                        });
+
+                    };
+
+
+                    let appRoot = location.host;
+
+                    /*
+                    //set the servers to the ones used by the csiro project.
+                    appConfigSvc.setServerType('conformance','http://home.clinfhir.com:8030/baseDstu3/');
+                    appConfigSvc.setServerType('data','http://home.clinfhir.com:8030/baseDstu3/');       //set the data server to the same as the conformance for the comments
+                    appConfigSvc.setServerType('terminology',"https://primarycare.ontoserver.csiro.au/fhir/");
+
+
+                    //$scope.uberModel = "http://clinfhir.com/logicalModeller.html#9xmtt";
+                    //$scope.commonModel = "http://clinfhir.com/logicalModeller.html#f5jor";
+                    $scope.taskManager = "/taskManager.html"
+
+                    $scope.uberModel =  "/logicalModeller.html#$$$CsiroUberModel";
+                    $scope.commonModel = "/logicalModeller.html#$$$CsiroCommon";
+                    $scope.testModel = "/logicalModeller.html#$$$ConditionTest";
+                    //$scope.taskManager = "/taskManager.html";
+
+*/
+                }
+            )
+
+    </script>
+
+    <script>
+        var config = {
+            apiKey: "AIzaSyBNMohLbPiSKwpGwfARopdeW_6LLXujcUo",
+            authDomain: "clinfhir.firebaseapp.com",
+            databaseURL: "https://clinfhir.firebaseio.com",
+            storageBucket: ""
+        };
+
+        //  console.log(firebase)
+        if (firebase) {
+            firebase.initializeApp(config);
+
+        }
+    </script>
+
+
+    <style>
+        .myForm {
+            padding: 8px;
+        }
+        .taskListScroll {
+            height: 900px;
+            overflow-y: scroll;
+        }
+
+    </style>
+    <script src="js/taskManagerCtl.js"></script>
+    <script src="js/modalDialogSvc.js"></script>
+    <script src="js/appConfigSvc.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/filters.js"></script>
+    <script src="js/loginCtrl.js"></script>
+
+
+
+    <title>Sample Validator</title>
+
+</head>
+
+
+<body style="padding: 8px;padding-top: 80px" >
+
+<div ng-app="sampleApp" ng-controller="csiroCtrl" class="container-fluid">
+
+    <nav ng-hide="startupParams.hideNav" class="navbar navbar-default navbar-fixed-top" role="navigation">
+
+        <div class="container-fluid">
+            <div class="col-md-7 col-sm-7">
+                <span>
+                    <a class="navbar-brand" href="#" ng-click="showVersion()">
+                        Sample Validator
+                    </a>
+                </span>
+
+            </div>
+
+
+
+
+
+            <div class="col-md-2 col-sm-2">
+                <form class="navbar-form navbar-left">
+                    <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
+
+
+
+                </form>
+            </div>
+
+
+
+            <div class="col-md-3 col-sm-3">
+
+                <div class="nav navbar-form navbar-right" ng-hide="user">
+                    <span style="font-size:1.8em; cursor: pointer"uib-popover="Click to log in"
+                          popover-placement="left"
+                          popover-trigger="'mouseenter'">
+                        <div ng-click="login()">
+                            <i class="glyphicon glyphicon-log-in"></i>
+                        </div>
+                    </span>
+                </div>
+
+                <div class="nav navbar-form navbar-right" ng-show="user">
+                    <span style="font-size:1.8em; cursor: pointer"
+                          uib-popover="Current user: {{user.email}}. Click to log out"
+                          popover-placement="left"
+                          popover-trigger="'mouseenter'">
+
+                        <div href="#" ng-click="logout()"> <i class="glyphicon glyphicon-log-out"></i></div>
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+
+
+
+    <div class="row">
+        <div class="col-md-6">
+            <textarea class="form-control" rows="20" ng-model="input.resource"
+            placeholder="Paste the resource (XML or Json) and click 'validate'"
+            ></textarea>
+            <button class="btn btn-link" ng-click="validate()">Validate</button>
+            {{url}}
+        </div>
+        <div class="col-md-6">
+            <h4 ng-show="oo">Outcome of Validation</h4>
+            <table class="table table-bordered">
+                <tr ng-repeat = "iss in oo.issue">
+                    <td>{{iss.diagnostics}}</td>
+                    <td>{{iss.severity}}</td>
+
+                </tr>
+            </table>
+
+        </div>
+    </div>
+
+
+
+
+
+
+
+</div>
+</body>
+</html>
