@@ -715,8 +715,9 @@
                                                     <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
                                                 </td>
                                                 <td>
-                                                    <div class="clickable" ng-click="viewVS(row.data.selectedValueSet.vs.url)">
-                                                        {{row.data.selectedValueSet.vs.url}}
+                                                    <div class="clickable" ng-click="viewVS(row.data.selectedValueSet.valueSet)">
+                                                        {{row.data.selectedValueSet.valueSet}} ({{row.data.selectedValueSet.strength}})
+
                                                     </div>
 
                                                 </td>
@@ -739,15 +740,18 @@
                                 Checking the terminology servers for all the ValueSets in the model. Please wait (this can take a while)...
                             </div>
 
-                            <table class="table table-bordered">
-                                <tr><th>Url</th><th>Path</th><th>Outcome</th></tr>
-                                <tr ng-repeat="row in vsChecks" ng-class="{absent:row.absent,present:row.present}"
+                            <div class="designerScroll">
+                                <table class="table table-bordered">
+                                    <tr><th>Url</th><th>Path</th><th>Outcome</th></tr>
+                                    <tr ng-repeat="row in vsChecks" ng-class="{absent:row.absent,present:row.present}"
                                     >
-                                    <td>{{row.url}}</td>
-                                    <td><span class="clickable" ng-click="selectNodeFromServerCheck(row.row)">{{row.path}}</span></td>
-                                    <td>{{row.outcome}}</td>
-                                </tr>
-                            </table>
+                                        <td>{{row.url}}</td>
+                                        <td><span class="clickable" ng-click="selectNodeFromServerCheck(row.row)">{{row.path}}</span></td>
+                                        <td>{{row.outcome}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+
                         </uib-tab>
 
                         <uib-tab heading="Status">

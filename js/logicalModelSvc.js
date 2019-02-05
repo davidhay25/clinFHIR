@@ -102,12 +102,6 @@ angular.module("sampleApp")
                 item['a_attr'] = {};
             }
 
-
-
-
-            //text-decoration: green wavy underline;
-
-
         }
 
 

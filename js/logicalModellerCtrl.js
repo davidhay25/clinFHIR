@@ -2664,7 +2664,7 @@ angular.module("sampleApp")
 
                                     item.data.edStatus = clone.edStatus;       //so the tree display is updated...
 
-                                    logicalModelSvc.decorateTreeItem(item,item.data.ed)
+                                    logicalModelSvc.decorateTreeItem(item,item.data.ed);
 
                                     item.text = clone.name;
 

@@ -174,7 +174,7 @@
                                     ng-repeat="task in tasks | orderBy: 'path'" ng-show="canShowTask(task,input.filterStatus,input.filterEmail)">
                                     <td><div ng-click="selectTask(task)" class="clickable">{{task.path | dropFirstInPath}}</div></td>
                                     <td>{{task.requesterDisplay }}</td>
-                                    <td>{{task.description | limitTo :30}}</td>
+                                    <td>{{task.description | maxLength : 80}}</td>
                                     <td>{{stateHash[task.status]}}</td>
                                     <td>{{task.notes.length}}</td>
                                 </tr>

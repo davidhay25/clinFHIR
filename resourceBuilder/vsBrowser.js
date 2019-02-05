@@ -116,6 +116,7 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
 
 
                                 $scope.query = url;
+                                $scope.showWaiting = true
                                 $http.get(url).then(
                                     function(data){
                                         var expandedVs = data.data;
@@ -137,7 +138,11 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                                             alert('Sorry, there was an error performing the expansion: '+angular.toJson(err));
                                         }
                                     }
-                                )
+                                ).finally(
+                                    function(){
+                                        $scope.showWaiting = false
+                                    }
+                                );
 
                                 return;
                             }

@@ -280,7 +280,6 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                 return;
             }
 
-
             var annot = {text:note,time: new Date().toISOString()};
             annot.authorString = $scope.user.email;
             $scope.fhirTask.note = $scope.fhirTask.note || []

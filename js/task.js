@@ -59,6 +59,8 @@ angular.module("sampleApp").controller('taskCtrl',
         };
 
 
+
+
         //When a model is selected.
         //note - called once for each instance (ng-controller) in the logical model...
         $scope.$on('modelSelected',function(event,entry){
@@ -93,24 +95,120 @@ angular.module("sampleApp").controller('taskCtrl',
         };
 
 
+        //edit a single task
         function editTask(task) {
             $uibModal.open({
                 templateUrl: 'modalTemplates/editTask.html',
                 //windowClass: 'nb-modal-window',
                 size: 'lg',
                 controller: function ($scope, $http, appConfigSvc, task, practitioner, taskCode, modelId,modelPath) {
-                    $scope.task = task;
+                    $scope.task = task;     //this is an iTask!!!
                     $scope.practitioner = practitioner;     //used in html page...
                     $scope.modelPath = modelPath;
                     console.log(practitioner);
-                    $scope.input = {}
+                    $scope.input = {};
+
+                    //todo - this is a copy from taskManager - move to a common place
+                    //allow the display for a state to be different to the actual code...
+                    $scope.stateHash = {};
+                    $scope.stateHash.requested = 'new';
+                    $scope.stateHash.received = 'reviewed';
+                    $scope.stateHash.accepted = 'accepted';
+                    $scope.stateHash.rejected = 'rejected';
+                    $scope.stateHash.cancelled = 'cancelled';
+                    $scope.stateHash.completed = 'completed';
+
 
                     if (!modelPath) {
                         alert("Can't add comment, 'modelPath' is null")
-                        $scope.$close()
+                        $scope.$close();
                         return;
                     }
 
+                    let userEmail;
+                    if (practitioner && practitioner.telecom) {
+                        practitioner.telecom.forEach(function(tele){
+                            if (tele.system = 'email') {
+                                userEmail = tele.value;
+                            }
+                        })
+                    }
+
+
+                    $scope.showStateChange = function(newState,currentState) {
+                        //requested == new, received = reviewed
+                        //return true;
+                        switch (newState) {
+                            case 'received' :
+                                if (currentState == 'requested' || currentState == 'accepted' || currentState == 'rejected') {return true}
+                                break;
+                            case 'accepted' :
+                                if (currentState == 'requested' || currentState == 'received') {return true}
+                                break;
+                            case 'rejected' :
+                                if (currentState == 'requested' || currentState == 'received') {return true}
+                                break;
+                            case 'cancelled' :
+                                if (currentState == 'cancelled' || currentState == 'completed') {return false} else {return true}
+                                break;
+                            case 'completed' :
+                                if (currentState == 'accepted') {return true}
+                                break;
+                        }
+                    };
+
+
+
+                    $scope.changeState = function(newState) {
+
+                        delete $scope.task.statusReason;
+
+                        let note = window.prompt('Enter mandatory note about change');
+                        if (! note) {
+                            return;
+                        }
+
+                        var annot = {text:note,time: new Date().toISOString()};
+                        annot.authorString = userEmail;
+
+                        $scope.task.notes = $scope.task.notes || []
+                        $scope.task.notes.push(annot)
+
+                        $scope.task.statusReason = {text:note}
+                        $scope.task.status = newState;
+
+                        //{note:, fhirServer:, status:}
+                        let obj = {}
+                        obj.note = annot;
+                        obj.fhirServer = appConfigSvc.getCurrentConformanceServer().url;
+                        obj.status = newState;
+
+                        if ($scope.user) {      //should always be present for a state change
+                            obj.who = {
+                                url:  "Practitioner/"+practitioner.id,
+                                valueReference : {display: userEmail}
+                            }
+                        }
+                        obj.email = userEmail;
+
+                        let url = "/myTask/changeStatus/" +  $scope.task.id
+                        $http.post(url, obj).then(
+                            function (data) {
+                                //for the local display
+                              //  $scope.task.note = $scope.task.note || []
+                               // $scope.task.note.push(annot);
+                                alert('Status has been changed')
+                            }, function (err) {
+                                alert('Error saving note: ' + angular.toJson(err))
+                            }
+                        )
+                    };
+
+
+
+
+
+                    //add a new task
                     $scope.addTask = function(comment) {
                         //let comment = window.prompt('Enter comment');       //todo make dialog
                         if (comment) {
