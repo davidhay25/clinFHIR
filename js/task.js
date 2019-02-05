@@ -80,6 +80,12 @@ angular.module("sampleApp").controller('taskCtrl',
         });
 
 
+        $scope.taskPopover = function(task) {
+            let disp = task.description;
+            disp += "<div><em>"+task.requesterDisplay+"</em></div>"
+            return disp;
+        }
+
         //when a task is selected for editing in the LM
         $scope.$on('editTask',function(event,task){
             editTask(task)
@@ -410,21 +416,21 @@ console.log($scope.taskNode.data.idFromSD)
             let url = $scope.conformanceServer.url + "Task";    //from parent controller
             url += "?code="+taskCode.system +"|"+taskCode.code;
             url += "&focus=StructureDefinition/"+id;
-           // url += '&status:not=cancelled';
+            url += '&status:not=cancelled';
             //url += "&_count=100";    //todo - need the follow links
 
 
             Utilities.perfromQueryFollowingPaging(url).then(
 
            // $http.get(url).then(
-                function(data) {
+                function(bundle) {
                     /*if (data.data && data.data.entry) {
                         console.log(data.data)
                         data.data.entry.forEach(function (entry) {*/
 
-                    if (data && data.entry) {
-                        console.log(data)
-                        data.entry.forEach(function (entry) {
+                    if (bundle && bundle.entry) {
+                        console.log(bundle)
+                        bundle.entry.forEach(function (entry) {
                             let resource = entry.resource;      //the fhir Task
 
                             let pathExt = Utilities.getSingleExtensionValue(resource,pathExtUrl)

@@ -10,7 +10,6 @@ angular.module("sampleApp").controller('taskManagerCtrl',
         let fhirVersion = $scope.conformanceServer.version;
         let taskCode =  {system:"http://loinc.org",code:"48767-8"};
 
-
         let wsUrl = 'ws://'+ window.location.host;
         let ws = new WebSocket(wsUrl);
 
@@ -56,7 +55,6 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
         };
 
-
         $scope.instanceAuthor = appConfigSvc.config().standardExtensionUrl.instanceAuthor;  //the extension for recording the model path for a comment
         if (!$scope.instanceAuthor) {
             alert("Task warning: You must restart clinFHIR then the Task Manager to reset updated config. Note that this will reset the configured servers.")
@@ -69,8 +67,6 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             servers += '<div>Term: ' + appConfigSvc.getCurrentTerminologyServer().name + "</div>"
             return servers;
         };
-
-
 
         let hashED = {};    //will have a hash of element definitions by path
         //-----------  login stuff....
@@ -307,7 +303,6 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                 }
             }
 
-
             if ($scope.user) {
                 obj.email = $scope.user.email;
             }
@@ -347,8 +342,6 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                                     let iTask = taskSvc.getInternalTaskFromResource(task)
 
                                     $scope.statusHistory.splice(0,0,iTask)      //time order
-
-
                                     lastStatus = task.status;
                                 }
 
@@ -394,11 +387,10 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
 
 
-                function(data) {
-                    console.log(data)
-                    if (data && data.entry) {
-                        data.entry.forEach(function (entry) {
-
+                function(bundle) {
+                    console.log(bundle)
+                    if (bundle && bundle.entry) {
+                        bundle.entry.forEach(function (entry) {
 
                             /*                $http.get(url).then(
                 function(data) {
@@ -408,8 +400,6 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                             let resource = entry.resource;      //the fhir Task
 
                             let iTask = taskSvc.getInternalTaskFromResource(resource,fhirVersion)
-
-
 
                             hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
 
@@ -432,13 +422,11 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                 }
             );
 
-
             //load the model also. Assume it is on the same server as tasks (both on conformance)
             let urlModel = $scope.conformanceServer.url + "StructureDefinition/"+id;
             $http.get(urlModel).then(
                 function(data) {
                     let model = data.data;
-
 
                     //let editorExtUrl = appConfigSvc.config().standardExtensionUrl.editor;
                     $scope.editorEmail = taskSvc.getModelEditor(model);
@@ -451,11 +439,6 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                             if (ed.id) {
                                 hashED[ed.id] = ed;
                             }
-
-
-
-
-
                         })
                     }
                 },
@@ -463,6 +446,5 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                     alert(angular.toJson(err))
                 }
             )
-
         }
     });

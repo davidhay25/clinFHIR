@@ -41,12 +41,28 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
 
                     templateUrl: 'resourceBuilder/vsBrowser.html',
                     size:'lg',
-                    controller: function($scope,selectedvs,GetDataFromServer,$filter,$localStorage,vsUrl) {
+                    controller: function($scope,selectedvs,GetDataFromServer,$filter,$localStorage,vsUrl,appConfigSvc) {
 
 
                         $scope.config = $localStorage.config;
                         $scope.newVS = {canSave : false};
                         $scope.vsUrl = vsUrl
+
+
+                        //retrieve the actual ValueSet
+                        let url = appConfigSvc.getCurrentTerminologyServer().url;
+                        url += "ValueSet?url="+ vsUrl;
+
+                        $http.get(url).then(
+                            function(data) {
+                                if (data.data && data.data.entry) {
+                                    $scope.valueSet = data.data.entry[0].resource;
+                                    console.log($scope.valueSet);
+                                }
+                            }
+                        );
+
+
 
                         $scope.selectConcept = function(concept) {
                             $scope.$close(concept)

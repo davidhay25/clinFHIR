@@ -938,51 +938,60 @@
 
                 </uib-tab>
                 -->
-<!--
+
                 <uib-tab>
 
                     <uib-tab-heading>Comments
                         <span class="badge"> {{taskList.length}}</span>
                     </uib-tab-heading>
+                    <br/>
 
-                    <div>
-
+<!--
                         <a class="btn btn-link pull-right" download="{{downloadTaskName}}.csv"
                            href="{{downloadTaskContent}}" title="{{downloadTaskName}}" >
                             Download CSV of list
                         </a>
-                        <div class="clearfix"/>
+                        -->
 
-                        <table class="table table-bordered">
-                            <tr><th>Path</th><th>Comment</th><th>Email</th><th># notes</th><th></th></tr>
-                            <tr ng-repeat="task in taskList | orderBy: 'path'">
-                                <td>
-                                    <div class="clickable" ng-click="selectNodeFromTable(task.currentPath)">{{task.currentPath | dropFirstInPath}}</div>
-                                    <div ng-show="task.currentPath !== task.path">
-                                        <em>({{task.path | dropFirstInPath}})</em>
-                                    </div>
+                        <div class="designerScroll">
+                            <table class="table table-bordered">
+                                <tr><th>Path</th><th>Comment</th><th># notes</th><th></th></tr>
+                                <tr ng-repeat="task in taskList | orderBy: 'path'">
+                                    <td>
+                                        <div class="clickable" ng-click="selectNodeFromTable(task.currentPath)">{{task.currentPath | dropFirstInPath}}</div>
+                                        <div ng-show="task.currentPath !== task.path">
+                                            <em>({{task.path | dropFirstInPath}})</em>
+                                        </div>
 
-                                </td>
+                                    </td>
 
-                                <td>{{task.description}}</td>
-                                <td>{{task.requesterDisplay}}</td>
-                                <td> <span class="badge" ng-show="task.notes.length > 0"
-                                           uib-popover="There are  {{task.notes.length}} notes on this comment"
-                                           popover-placement="left"
-                                           popover-trigger="'mouseenter'">
+                                    <td>
+
+                                        {{task.description}}
+                                        <div><em>{{task.requesterDisplay}}</em></div>
+                                    </td>
+                                    <!-- <td>{{task.requesterDisplay}}</td> -->
+                                    <td> <span class="badge" ng-show="task.notes.length > 0"
+                                               uib-popover="There are  {{task.notes.length}} notes on this comment"
+                                               popover-placement="left"
+                                               popover-trigger="'mouseenter'">
                                                 {{task.notes.length}}</span></td>
-                                <td><i class="glyphicon glyphicon-edit clickable" ng-click="lmEditTask(task)"></i></td>
-                            </tr>
-                        </table>
+                                    <td><i class="glyphicon glyphicon-edit clickable" ng-click="lmEditTask(task)"></i></td>
+                                </tr>
+                            </table>
+                        </div>
 
 
 
-                    </div>
+
+
+
+
 
                 </uib-tab>
 
 
--->
+
             </uib-tabset>
         </div>
         <div ng-class="rightPaneClass">
@@ -1357,6 +1366,7 @@
                                 </table>
                             </uib-tab>
 
+                           <!--
                             <uib-tab>
 
                                 <uib-tab-heading>Comments
@@ -1380,7 +1390,7 @@
                                                 </div>
 
                                             </td>
-                                            <!--<td>{{task.path | dropFirstInPath}}</td>-->
+
                                             <td>{{task.description}}</td>
                                             <td>{{task.requesterDisplay}}</td>
                                             <td> <span class="badge" ng-show="task.notes.length > 0"
@@ -1397,6 +1407,8 @@
                                 </div>
 
                             </uib-tab>
+
+-->
 
 
                             <uib-tab heading="History">

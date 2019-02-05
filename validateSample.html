@@ -48,8 +48,25 @@
 
                             if (resource.substr(0,1) == '<') {
                                 //this is xml
-                                let g = resource.indexOf('>');
-                                resourceType = resource.substr(1,g-1);
+                                let g = resource.indexOf('<?xml');
+                                if (g > -1) {
+                                    let gg = resource.indexOf('?>');
+                                    resource = resource.substr(gg+2)
+                                    console.log(resource)
+                                    resource = resource.trim()
+                                }
+
+                                let g1 = resource.indexOf('>');
+                                let gg1 = resource.indexOf(' ');
+                                if (gg1 < g1) {
+                                    //there's a space before the '<' - probably means that there's a namespece there...
+                                    resourceType = resource.substr(1,gg1-1);
+                                } else {
+                                    resourceType = resource.substr(1,g1-1);
+                                }
+
+
+                                console.log(resourceType)
 
                             } else {
                                 //assume json
@@ -66,9 +83,8 @@
 
                            // let resourceType = "Patient";
 
+                            delete $scope.oo;
                             let baseUrl = "https://primarycare.ontoserver.csiro.au/fhir/";
-
-
                             let url = baseUrl + resourceType + '/$validate';
                             $scope.url = url;
 
@@ -77,7 +93,6 @@
                                 function(data){
                                     console.log(data)
                                     $scope.oo = data.data;
-
                                 },
                                 function(err) {
                                     console.log(err)
@@ -269,10 +284,15 @@
         </div>
         <div class="col-md-6">
             <h4 ng-show="oo">Outcome of Validation</h4>
-            <table class="table table-bordered">
+            <table ng-show="oo" class="table table-bordered">
+                <tr><th>Location</th><th>Diagnostics</th><th>Severity</th></tr>
                 <tr ng-repeat = "iss in oo.issue"
-                    ng-class="{error:iss.severity=='error'}"
-                >
+                    ng-class="{error:iss.severity=='error'}">
+                    <td>
+                        <div ng-repeat = 'l in iss.location'>
+                            {{l}}
+                        </div>
+                    </td>
                     <td>{{iss.diagnostics}}</td>
                     <td>{{iss.severity}}</td>
 

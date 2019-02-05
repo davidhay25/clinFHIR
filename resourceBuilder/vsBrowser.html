@@ -5,7 +5,7 @@
 
         <div class="row">
             <div class="col-md-9 col-sm-9">
-                <h3 class="modal-title">Display ValueSet: {{selectedvs.id}}</h3>
+                <h3 class="modal-title">Display ValueSet: {{vsUrl}}</h3>
 
             </div>
             <div class="col-md-3 col-sm-3" >
@@ -70,35 +70,35 @@
                 <br />
                 <div class="row">
                     <div class="col-md-2 col-sm-2">ID</div>
-                    <div class="col-md-10 col-sm-10">{{selectedvs.id}}</div>
+                    <div class="col-md-10 col-sm-10">{{valueSet.id}}</div>
                 </div>
                 <div class="row">
-                    <div class="col-md-2 col-sm-2">url</div>
-                    <div class="col-md-10 col-sm-10">{{selectedvs.url}}</div>
+                    <div class="col-md-2 col-sm-2">Url</div>
+                    <div class="col-md-10 col-sm-10">{{valueSet.url}}</div>
                 </div>
                 <div class="row">
-                    <div class="col-md-2 col-sm-2">version</div>
-                    <div class="col-md-10 col-sm-10">{{selectedvs.version}}</div>
+                    <div class="col-md-2 col-sm-2">Version</div>
+                    <div class="col-md-10 col-sm-10">{{valueSet.version}}</div>
                 </div>
                 <div class="row">
                     <div class="col-md-2 col-sm-2">Name</div>
-                    <div class="col-md-10 col-sm-10">{{selectedvs.name}}</div>
+                    <div class="col-md-10 col-sm-10">{{valueSet.name}}</div>
                 </div>
                 <div class="row">
                     <div class="col-md-2 col-sm-2">Publisher</div>
-                    <div class="col-md-10 col-sm-10">{{selectedvs.publisher}}</div>
+                    <div class="col-md-10 col-sm-10">{{valueSet.publisher}}</div>
                 </div>
                 <div class="row">
                     <div class="col-md-2 col-sm-2">Description</div>
-                    <div class="col-md-10 col-sm-10">{{selectedvs.description}}</div>
+                    <div class="col-md-10 col-sm-10">{{valueSet.description}}</div>
                 </div>
                 <div class="row">
                     <div class="col-md-2 col-sm-2">Status</div>
-                    <div class="col-md-10 col-sm-10">{{selectedvs.status}}</div>
+                    <div class="col-md-10 col-sm-10">{{valueSet.status}}</div>
                 </div>
                 <div class="row">
                     <div class="col-md-2 col-sm-2">Date</div>
-                    <div class="col-md-10 col-sm-10">{{selectedvs.date}}</div>
+                    <div class="col-md-10 col-sm-10">{{valueSet.date}}</div>
                 </div>
 
             </uib-tab>
@@ -120,7 +120,7 @@
 
             </uib-tab>
             -->
-
+<!--
             <uib-tab heading="Compose"  select="setHelpTopic('compose')">
                 <br />
                 <uib-tabset>
@@ -210,10 +210,10 @@
 
 
                     </uib-tab>
-
+-->
             <uib-tab heading="JSON"  select="setHelpTopic('json')">
                 <br />
-                <pre>{{selectedvsJSON}}</pre>
+                <pre>{{valueSet | json}}</pre>
             </uib-tab>
 
 
