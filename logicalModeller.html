@@ -473,7 +473,7 @@
                     <div class="col-sm-6 col-md-6">
                         <div class="clickable pull-right" ng-click="exitHistory()">Back to current</div>
                         <br/>
-                        <div class="clickable pull-right" ng-click="revert()">Revert to this version</div>
+                        <div ng-show="canEdit()" class="clickable pull-right" ng-click="revert()">Revert to this version</div>
                     </div>
                 </div>
             </div>
@@ -1427,6 +1427,8 @@
                                                 {{entry.resource.meta.lastUpdated | date:'medium'}}
                                             </div>
                                             <div class="col-md-4 col-sm-4">
+                                                {{entry.resource.extension | extensionValue : 'http://clinfhir.com/fhir/StructureDefinition/editor'}}
+
                                                 {{entry.resource.extension | extensionValue : 'http:www.clinfhir.com/StructureDefinition/userEmail'}}
                                             </div>
                                             <div class="col-md-4 col-sm-4">

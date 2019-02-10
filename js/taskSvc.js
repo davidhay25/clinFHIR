@@ -2,7 +2,7 @@ angular.module("sampleApp")
 //this performs marking services
 
 
-    .service('taskSvc', function(appConfigSvc) {
+    .service('taskSvc', function(appConfigSvc,moment) {
 
 
         let pathExtUrl = appConfigSvc.config().standardExtensionUrl.path;  //the extension for recording the model path for a comment
@@ -84,8 +84,28 @@ angular.module("sampleApp")
                 iTask.id = resource.id;
                 iTask.description = resource.description;
                 iTask.statusReason = resource.statusReason;
-                iTask.notes = resource.note;
+                if (resource.note) {
+                    iTask.notes = []
+                    resource.note.forEach(function (note) {
+                        let newNote = angular.copy(note);
+                        if (note.time) {
+                            let m = moment(note.time);
+                            note.age = moment().diff(m,'hours');
+                        }
+                        iTask.notes.push(note)
+                    })
+                }
+
+                //iTask.notes = resource.note;
+
+
                 iTask.authoredOn = resource.authoredOn;
+
+                let m = moment(iTask.authoredOn);
+                iTask.age = moment().diff(m,'hours');
+                //console.log(iTask.age)
+
+
                 iTask.meta = resource.meta;
 
                 iTask.status = resource.status || 'requested';

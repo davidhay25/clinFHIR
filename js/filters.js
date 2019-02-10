@@ -7,7 +7,7 @@ angular.module("sampleApp")
 
 
     .filter('maxLength',function(){
-        //return the value of an extension
+        //maximum length
         return function(str,len) {
             if (str) {
                 if (str.length > len) {
@@ -18,9 +18,21 @@ angular.module("sampleApp")
                 }
 
             }
+        }
+    })
+    .filter('hoursToDays',function(){
+        //hours display
+        return function(hrs) {
+            if (hrs) {
+                if (hrs < 24) {
+                    return hrs + 'h'
+                } else {
+                    let d = parseInt(hrs/24);
+                    let h = hrs - (d*24)
+                    return d + 'd '+ h + 'h'
+                }
 
-
-
+            }
         }
     })
 

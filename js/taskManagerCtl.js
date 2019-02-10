@@ -1,11 +1,14 @@
 angular.module("sampleApp").controller('taskManagerCtrl',
-    function ($scope,$http,appConfigSvc,Utilities,$firebaseObject,$firebaseArray,$uibModal,modalService,taskSvc) {
+    function ($scope,$http,appConfigSvc,Utilities,$firebaseObject,$firebaseArray,$uibModal,modalService,taskSvc,logicalModelSvc) {
 
         $scope.firebase = firebase;
         $scope.appConfigSvc = appConfigSvc;
         //let clinFhirDevice = 'Device/cfDevice';
         $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
         $scope.input = {}
+        $scope.input.period = 'all'
+
+        $scope.tasks = [];
 
         let fhirVersion = $scope.conformanceServer.version;
         let taskCode =  {system:"http://loinc.org",code:"48767-8"};
@@ -25,7 +28,8 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             }
 
             console.log(obj)
-            if (obj) {
+            //just disable the autorefresh for now... (Maybe just activate the refresh button
+            if (1==2 && obj) {
                 if (obj.modelId) {
                     //this will be a note to a task...
                     if ($scope.currentModelId && (obj.modelId === $scope.currentModelId)) {
@@ -201,8 +205,45 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
         };
 
+
+        //add a note to a comment from the tree view display...
+        $scope.addNoteFromTreeView = function(iTask) {
+            note = prompt('Enter note');
+            if (note && iTask) {
+
+                var annot = {text:note,time: new Date().toISOString()};
+                annot.authorString = $scope.user.email;
+
+                //This is an 'update' object
+                let obj = {}
+                obj.note = annot;
+                obj.fhirServer = appConfigSvc.getCurrentConformanceServer().url;
+                obj.modelId =  $scope.currentModelId;
+
+                //this will add the note to the task from the server...
+                let url = "/myTask/addNote/" + iTask.id;
+                $scope.showWaiting = true;
+                $http.post(url, obj).then(
+                    function (data) {
+                        //for the local display
+                        iTask.notes = iTask.notes || [];
+                        iTask.notes.push(annot);
+
+                    }, function (err) {
+                        alert('Error saving note: ' + angular.toJson(err))
+                    }
+                ).finally(function(){
+                    $scope.showWaiting = false;
+                })
+            }
+        };
+
+
+
         //add a new note as an annotation
         $scope.addNote = function(note) {
+
+
 
             $scope.localTask.notes = $scope.localTask.notes || [];
 
@@ -220,7 +261,41 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             let fhirTask =  $scope.selectedTask.resource;
 
             if (fhirTask) {
-                //this will add the note to teh task from the server...
+                //this will add the note to the task from the server...
+                let url = "/myTask/addNote/" + fhirTask.id
+                $http.post(url, obj).then(
+                    function (data) {
+                        //for the local display
+                        fhirTask.note = fhirTask.note || []
+                        fhirTask.note.push(annot);
+                    }, function (err) {
+                        alert('Error saving note: ' + angular.toJson(err))
+                    }
+                )
+            }
+        };
+
+        $scope.addNoteFromTreeViewDEP = function(note) {
+
+
+
+            $scope.localTask.notes = $scope.localTask.notes || [];
+
+            var annot = {text:note,time: new Date().toISOString()};
+            annot.authorString = $scope.user.email;
+            $scope.localTask.notes.push(annot);
+            delete $scope.input.note;
+
+
+            //This is an 'update' object
+            let obj = {}
+            obj.note = annot;
+            obj.fhirServer = appConfigSvc.getCurrentConformanceServer().url;
+            obj.modelId =  $scope.currentModelId;
+            let fhirTask =  $scope.selectedTask.resource;
+
+            if (fhirTask) {
+                //this will add the note to the task from the server...
                 let url = "/myTask/addNote/" + fhirTask.id
                 $http.post(url, obj).then(
                     function (data) {
@@ -240,9 +315,14 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             $scope.localTask = angular.copy(task)
             delete $scope.localTask.resource;
             delete $scope.statusHistory;
+            delete $scope.selectedEd;
 
 
-            $scope.selectedEd = hashED[task.path];
+
+            if (hashED[task.path]) {
+                $scope.selectedEd = hashED[task.path].ed;
+            }
+
            // console.log( $scope.selectedEd)
         };
 
@@ -364,49 +444,43 @@ angular.module("sampleApp").controller('taskManagerCtrl',
         };
 
         //load all the tasks for a given model
-
-
         function loadTasksForModel(id) {
+            console.log('load')
             $scope.currentModelId = id;
             delete $scope.editorEmail;
             let hashEmail = {};      //all the emails of users with comments
-            hashED = {};       //hash of element definitions by path - used to display details
-
+            let hashED = {};       //hash of element definitions by path - used to display details
+            //let hashNumberOfComments = {}
 
             $scope.canRefresh = false;
 
-
-            $scope.tasks = []
+            $scope.tasks.length = 0;
             let url = $scope.conformanceServer.url + "Task";    //from parent controller
             url += "?code="+taskCode.system +"|"+taskCode.code;
             url += "&focus=StructureDefinition/"+ id
-            url += "&_count=100";    //todo - need the follow links
-
 
             Utilities.perfromQueryFollowingPaging(url).then(
-
-
-
                 function(bundle) {
                     console.log(bundle)
                     if (bundle && bundle.entry) {
+                        $scope.allTasksBundle = bundle;
+
                         bundle.entry.forEach(function (entry) {
 
-                            /*                $http.get(url).then(
-                function(data) {
-                    console.log(data)
-                    if (data.data && data.data.entry) {
-                        data.data.entry.forEach(function (entry) {*/
                             let resource = entry.resource;      //the fhir Task
 
                             let iTask = taskSvc.getInternalTaskFromResource(resource,fhirVersion)
 
+                           // hashNumberOfComments[iTask.path] = hashNumberOfComments[iTask.path] || 0
+                            //hashNumberOfComments[iTask.path] ++
                             hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
 
 
                             $scope.tasks.push(iTask)
-                        })
+                        });
 
+
+                        //for filtering by task creator...
                         $scope.allEmail = ['Anyone'];
                         for (var n in hashEmail) {
                             $scope.allEmail.push(n)
@@ -415,6 +489,10 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                         $scope.input.filterEmail = $scope.allEmail[0]
                     }
                     $scope.canRefresh = true;
+                    //load the model also. Assume it is on the same server as tasks (both on conformance)
+                    let urlModel = $scope.conformanceServer.url + "StructureDefinition/"+id;
+                    let hashNumberOfComments = countComments($scope.tasks)
+                    loadModel(urlModel,hashNumberOfComments);
 
 
                 },function(err) {
@@ -422,8 +500,9 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                 }
             );
 
-            //load the model also. Assume it is on the same server as tasks (both on conformance)
-            let urlModel = $scope.conformanceServer.url + "StructureDefinition/"+id;
+
+
+            /*
             $http.get(urlModel).then(
                 function(data) {
                     let model = data.data;
@@ -446,5 +525,238 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                     alert(angular.toJson(err))
                 }
             )
+            */
         }
+
+        function getTasksForPeriod(period,email) {
+
+            let filterEmail;
+            if (email && email.indexOf('@') > -1) {
+                filterEmail = email;
+            }
+            let hashEmail = {};
+            period = period || 'all';
+            let newTasks = [];
+            $scope.allTasksBundle.entry.forEach(function (entry) {
+
+                let resource = entry.resource;      //the fhir Task
+
+                let iTask = taskSvc.getInternalTaskFromResource(resource,fhirVersion)
+
+                // hashNumberOfComments[iTask.path] = hashNumberOfComments[iTask.path] || 0
+                //hashNumberOfComments[iTask.path] ++
+
+                //find the most recent age - whether the task creatoin or a note...
+                let age = iTask.age;        //when the task was created
+                if (iTask.notes) {
+                    iTask.notes.forEach(function (note) {
+                        if (note.age < age) {
+                            age = note.age;
+                        }
+                    })
+                }
+
+
+
+                switch (period) {
+                    case 'all' :
+                        addTask(iTask,filterEmail);
+                       // newTasks.push(iTask);
+                       // hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
+                        break;
+                    case 'day' :
+                        if (age < 25) {
+                            addTask(iTask,filterEmail)
+                            //newTasks.push(iTask);
+                            //hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
+                        }
+                        break;
+                    case 'week' :
+                        if (age < 168) {
+                            addTask(iTask,filterEmail)
+                            //newTasks.push(iTask);
+                            //hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
+                        }
+                        break;
+
+                }
+            });
+
+            //for filtering by task creator...
+            if (!filterEmail) {
+                $scope.allEmail = ['Anyone'];
+                for (var n in hashEmail) {
+                    $scope.allEmail.push(n)
+                }
+
+                $scope.input.filterEmail = $scope.allEmail[0]
+            }
+
+
+            return newTasks;
+
+            function addTask(iTask,email) {
+                if (email) {
+
+                    if (iTask.requesterDisplay !== email) {
+                        return;
+                    }
+                }
+                newTasks.push(iTask);
+                hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
+            }
+
+        }
+
+        //count the numbers of tasks by path for the given period
+        function countComments(tasks) {
+            //period = period || 'all';
+            let hashNumberOfComments = {}
+            tasks.forEach(function (iTask) {
+                hashNumberOfComments[iTask.path] = hashNumberOfComments[iTask.path] || 0
+                hashNumberOfComments[iTask.path] ++
+              //  hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
+
+
+            })
+            return hashNumberOfComments
+        }
+
+        //load the model and set the treeData...
+        function loadModel(urlModel,hash) {
+            //let urlModel = $scope.conformanceServer.url + "StructureDefinition/"+id;
+            $http.get(urlModel).then(
+                function(data) {
+                    $scope.model = data.data;
+                    //let model = data.data;
+
+                    $scope.treeData = logicalModelSvc.createTreeArrayFromSD( $scope.model);
+                    $scope.originalTreeData = angular.copy($scope.treeData);        //besaue the tree will be decorated later...
+
+                    decorateTree( $scope.treeData,hash);
+                    /*
+                    $scope.treeData.forEach(function (item) {
+                        let id = item.data.idFromSD;
+                        if (hash[id]) {
+                            item.text += " <span class='badge'>"+hash[id]+"</span>"
+                        }
+
+                    });
+*/
+                    console.log($scope.treeData[1])
+                    
+                    
+
+                    //$scope.treeData[1].text += "<span class='badge'>test</span>"
+                    drawTree()
+
+
+                    //let editorExtUrl = appConfigSvc.config().standardExtensionUrl.editor;
+                    $scope.editorEmail = taskSvc.getModelEditor( $scope.model);
+
+                    if ( $scope.model.snapshot &&  $scope.model.snapshot.element) {
+                        $scope.model.snapshot.element.forEach(function (ed) {
+                            hashED[ed.path] = {ed:ed};
+                            //the id property is the original path when the element was created and is unchanged if the element is moved.
+                            //the comment path is actualluy that element...
+                            if (ed.id) {
+                                hashED[ed.id] = {ed:ed};
+                            }
+                        })
+                    }
+                },
+                function(err) {
+                    alert(angular.toJson(err))
+                }
+            )
+        }
+
+        //add the count of comments to the treee
+        function decorateTree(arTree,hashNumberOfComments) {
+            arTree.forEach(function (item) {
+                let id = item.data.idFromSD;
+                if (hashNumberOfComments[id]) {
+                    item.text += " <span class='badge'>"+hashNumberOfComments[id]+"</span>"
+                }
+
+            });
+        }
+
+        function drawTree() {
+
+            //not sure about this...  logicalModelSvc.resetTreeState($scope.treeData);    //reset the opened/closed status to the most recent saved...
+
+
+
+
+            $('#lmTreeView').jstree('destroy');
+            $('#lmTreeView').jstree(
+                {'core': {'multiple': false, 'data': $scope.treeData, 'themes': {name: 'proton', responsive: true}}}
+            ).on('changed.jstree', function (e, data) {
+                //seems to be the node selection event...
+
+                if (data.node) {
+                    console.log(data.node)
+                    $scope.selectedNode = data.node;
+                    $scope.selectedED = logicalModelSvc.getEDForPath($scope.model,data.node)
+console.log($scope.selectedED)
+                   // $scope.
+
+
+                }
+
+                $scope.$digest();       //as the event occurred outside of angular...
+
+            }).on('redraw.jstree', function (e, data) {
+/*
+                //ensure the selected node remains so after a redraw...
+                if ($scope.treeIdToSelect) {
+                    $("#lmTreeView").jstree("select_node", "#"+$scope.treeIdToSelect);
+                    delete $scope.treeIdToSelect
+                }
+*/
+            }).on('open_node.jstree',function(e,data){
+/*
+                //set the opened status of the scope property to the same as the tree node so we can remember the state...
+                $scope.treeData.forEach(function(node){
+                    if (node.id == data.node.id){
+                        node.state.opened = data.node.state.opened;
+                    }
+                });
+                $scope.$digest();
+                */
+            }).on('close_node.jstree',function(e,data){
+/*
+                //set the opened status of the scope propert to the same as the tree node so we can remember the state...
+                $scope.treeData.forEach(function(node){
+                    if (node.id == data.node.id){
+                        node.state.opened = data.node.state.opened;
+                    }
+                })
+                $scope.$digest();
+                */
+            });
+
+
+        }
+
+
+        //
+        $scope.setPeriod = function(period) {
+            $scope.tasks = getTasksForPeriod(period,$scope.input.filterEmail);   //get the tasks for this period (including notes)
+
+            let hashNumberOfComments = countComments($scope.tasks);     //get the count of tasks by path
+            $scope.treeData = angular.copy($scope.originalTreeData);    //reset the tree to the original
+
+            decorateTree($scope.treeData,hashNumberOfComments)          //set the count of tasks in the tree...
+            drawTree();
+            //let tree = angular.copy()
+        };
+
+        $scope.setAuthor = function(email) {
+
+
+        }
+
+
     });

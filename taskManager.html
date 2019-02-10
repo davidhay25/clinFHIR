@@ -3,7 +3,7 @@
 <head lang="en">
     <base href="/" />
     <meta charset="UTF-8">
-
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
     <script src="js/libs/angular.min1-5.js"></script>
     <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
 
@@ -11,10 +11,13 @@
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="css/main.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
 
     <script src="js/libs/angular-sanitize.js"></script>
     <script src="js/libs/firebase.js"></script>
     <script src="js/libs/angularfire.min.js"></script>
+    <script src="js/libs/jstree.min.js"></script>
 
 
     <script>
@@ -61,6 +64,7 @@
     <script src="js/loginCtrl.js"></script>
     <script src="js/taskSvc.js"></script>
     <script src="resourceBuilder/rbServices.js"></script>
+    <script src="js/logicalModelSvc.js"></script>
 
     <title>Task Manager</title>
 
@@ -141,6 +145,131 @@
     </nav>
 
     <uib-tabset>
+        <uib-tab heading="Tree">
+            <nav class="navbar navbar-default">
+                <div class="row">
+                    <div class="col-md-1">
+                        <strong class="navbar-text">Time</strong>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-control navbar-text" ng-model="input.period" ng-change="setPeriod(input.period)">
+                            <option value="all">All</option>
+                            <option value="day">Last 24 hours</option>
+                            <option value="week">Last week</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1 col-sm-1">
+                        <strong class="pull-right navbar-text">Who</strong>
+                    </div>
+                    <div class="col-md-3 col-sm-3 navbar-text">
+                        <select ng-model = 'input.filterEmail' class="form-control" ng-change="setPeriod(input.period)"
+                                ng-options = "email for email in allEmail"></select>
+                    </div>
+                    <div class="col-md-1 col-sm-1">
+                        <strong class="pull-right navbar-text">Status</strong>
+
+                    </div>
+                    <div class="col-md-3 col-sm-3">
+                        <select ng-model="input.filterStatus" class="form-control navbar-text"
+                                ng-options="state.display for state in states"></select>
+
+                    </div>
+
+
+                </div>
+            </nav>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="taskListScroll" id="lmTreeView"></div>
+                </div>
+                <div class="col-md-8">
+
+
+
+
+                    <uib-tabset>
+                        <uib-tab heading="Comments">
+                           <br/>
+
+                            <table class="table">
+                                <tr><th>Comment</th><th>Notes</th><th>Status</th></tr>
+                                <!-- task is an iTask-->
+                                <tr ng-repeat = "task in tasks" ng-show="task.path == selectedED.id">
+                                    <td width="50%">
+                                        {{task.description}}
+                                        <div><em>{{task.requesterDisplay}}</em> <span class="badge">{{task.age | hoursToDays}}</span> </div>
+                                    </td>
+                                    <td>
+                                        <div ng-repeat = "note in task.notes">
+                                            {{note.text}}
+                                            <div><em>{{note.authorString}}</em> <span class="badge">{{note.age | hoursToDays}}</span></div>
+                                            <hr ng-show="task.notes.length > 1 && $index < task.notes.length -1" />
+                                        </div>
+
+                                        <div>
+                                            <div class="pull-right clickable" ng-click="addNoteFromTreeView(task)" >Add note</div>
+                                        </div>
+
+
+                                    </td>
+
+                                    <td>{{stateHash[task.status]}}</td>
+                                    <!--
+                                    <td><pre>{{task | json}}</pre></td>
+-->
+                                </tr>
+                            </table>
+
+                        </uib-tab>
+                        <uib-tab heading="Element Details">
+
+
+
+
+                            <div ng-show="selectedED" >
+
+
+
+                                <div class="row myForm">
+                                    <div class="col-md-3">
+                                        <div>
+                                            <strong>Element Definition</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div>{{selectedED.short}}</div>
+                                        {{selectedED.definition}}
+                                    </div>
+                                </div>
+
+                                <div class="row myForm" ng-show="selectedED.comment">
+                                    <div class="col-md-3">
+                                        <div>
+                                            <strong>Element Comment</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        {{selectedED.comment}}
+                                    </div>
+                                </div>
+
+
+
+
+
+                            </div>
+
+
+
+                            <!-- -->
+
+                        </uib-tab>
+                    </uib-tabset>
+                </div>
+            </div>
+
+        </uib-tab>
         <uib-tab heading="Workflow">
             <br/>
             <div class="row">
@@ -431,6 +560,7 @@
             </table>
 
         </uib-tab>
+
     </uib-tabset>
 
 
