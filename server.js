@@ -92,14 +92,26 @@ function recordAccess(req,data) {
     }
 }
 
-app.use('/',function(req,res,next){
+//a hash of supported domains and the default page.
+let domains = {}
+domains['csiro.clinfhir.com'] = '/csiroProject.html'
 
+
+app.use('/',function(req,res,next){
 
     if (req.originalUrl.length == 1) {
         console.log('call to root. Domain='+req.headers.host)
+        if (domains[req.headers.host]) {
+            console.log('redirecting to ' + domains[req.headers.host])
+            res.redirect(domains[req.headers.host])
+        } else {
+            next();
+        }
+    } else {
+        next();
     }
 
-    next();
+
 });
 
 
