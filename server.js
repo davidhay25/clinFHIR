@@ -36,7 +36,7 @@ taskModule.setup(app,wss,WebSocket)     // need WebSocket for the constants
 
 
 wss.on('connection', function connection(ws) {
-    console.log('connection made');
+
 
     ws.on('message', function incoming(message) {
         console.log('received: %s', message);
@@ -66,8 +66,6 @@ MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
     }
 });
 
-
-
 function recordAccess(req,data) {
     var clientIp = req.headers['x-forwarded-for'] ||
         req.connection.remoteAddress ||
@@ -94,6 +92,15 @@ function recordAccess(req,data) {
     }
 }
 
+app.use('/',function(req,res,next){
+
+
+    if (req.originalUrl.length == 1) {
+        console.log('call to root. Domain='+req.headers.host)
+    }
+
+    next();
+});
 
 
 app.use('/', express.static(__dirname,{index:'/launcher.html'}));
