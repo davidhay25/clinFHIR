@@ -575,7 +575,10 @@
 
 
                                     <table class="table table-bordered table-condensed">
-                                        <tr><th></th><th>Element</th><th>DataType</th><th>Mult.</th><th>Description</th><th>Comments</th><th>Mapping notes</th></tr>
+                                        <tr><th></th><th>Element</th><th>DataType</th><th>Mult.</th>
+                                            <th>Description & Comments </th>
+                                          <!--  <th>Comments</th> -->
+                                            <th>Mapping notes</th></tr>
                                         <tr ng-repeat="ed in SD.snapshot.element">
                                             <td>{{$index}}</td>
                                             <td>
@@ -586,8 +589,12 @@
                                                 <div ng-show="ed.type[0].targetProfile">-> {{ed.type[0].targetProfile | getLogicalID}}</div>
                                             </td>
                                             <td>{{ed.min}}..{{ed.max}}</td>
-                                            <td>{{ed.definition}}</td>
+                                            <td>{{ed.definition}}
+                                                <div>{{ed.comment}}</div>
+                                            </td>
+                                            <!--
                                             <td>{{ed.comment}}</td>
+                                            -->
                                             <td>
                                                 <div ng-repeat="map in ed.mapping">{{map.identity}}:{{map.map | showMapOnly}}</div>
 
@@ -662,6 +669,7 @@
                                         </label>
                                     </div>
                                     <br/> <br/>
+
                                     <table class="table table-condensed table-bordered">
                                         <tr><th>Identity</th><th>Path</th><th>Map</th></tr>
                                         <tr ng-repeat="map in allMappings" ng-show="map.identity == input.mi">

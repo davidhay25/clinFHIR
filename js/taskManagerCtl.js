@@ -1,12 +1,13 @@
 angular.module("sampleApp").controller('taskManagerCtrl',
-    function ($scope,$http,appConfigSvc,Utilities,$firebaseObject,$firebaseArray,$uibModal,modalService,taskSvc,logicalModelSvc) {
+    function ($scope,$http,appConfigSvc,Utilities,$firebaseObject,$firebaseArray,$uibModal,modalService,taskSvc,logicalModelSvc,
+              $location) {
 
         $scope.firebase = firebase;
         $scope.appConfigSvc = appConfigSvc;
         //let clinFhirDevice = 'Device/cfDevice';
         $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
-        $scope.input = {}
-        $scope.input.period = 'all'
+        $scope.input = {};
+        $scope.input.period = 'all';
 
         $scope.tasks = [];
 
@@ -15,6 +16,22 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
         let wsUrl = 'ws://'+ window.location.host;
         let ws = new WebSocket(wsUrl);
+
+
+
+        //the url of the Implementation Guide
+        let IgUrl =  $scope.conformanceServer.url + 'ImplementationGuide/cf-artifacts-au3';
+
+        var hash = $location.hash();
+        if (hash) {
+            //if there's a hash starting with $$$ then this has been started from the project, with an authenticted user...
+
+            if (hash.substr(0,3) == '$$$') {
+                IgUrl =  $scope.conformanceServer.url + 'ImplementationGuide/' + hash.substr(3);
+            }
+        }
+
+
 
         ws.onmessage = function(event) {
             console.log('socket event:', event.data)
@@ -84,6 +101,17 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             })
         };
 
+        $scope.showVSBrowserDialog = {};
+        $scope.showVSBrowserDEP = function(vs) {
+            $scope.showVSBrowserDialog.open(vs);        //the open method defined in the directive...
+        };
+
+
+        $scope.viewVS = function(uri) {
+            //var url = appConfigSvc
+            $scope.showVSBrowserDialog.open(null, uri);
+        }
+
         $scope.logout=function(){
             firebase.auth().signOut().then(function() {
                 delete $scope.user;
@@ -111,9 +139,9 @@ angular.module("sampleApp").controller('taskManagerCtrl',
         });
 
 
-        //Load the IG to get the list of models from. todo - Actually could extend to include profiles...
-        let url =  $scope.conformanceServer.url + 'ImplementationGuide/cf-artifacts-au3';
-        $http.get(url).then(
+
+
+        $http.get(IgUrl).then(
             function(data) {
                 if (data.data && data.data) {
                     $scope.allModels = []
@@ -528,7 +556,9 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             */
         }
 
-        function getTasksForPeriod(period,email) {
+        function getTasksForPeriod(period,email,status) {
+
+
 
             let filterEmail;
             if (email && email.indexOf('@') > -1) {
@@ -560,20 +590,20 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
                 switch (period) {
                     case 'all' :
-                        addTask(iTask,filterEmail);
+                        addTask(iTask,filterEmail,status);
                        // newTasks.push(iTask);
                        // hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
                         break;
                     case 'day' :
                         if (age < 25) {
-                            addTask(iTask,filterEmail)
+                            addTask(iTask,filterEmail,status)
                             //newTasks.push(iTask);
                             //hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
                         }
                         break;
                     case 'week' :
                         if (age < 168) {
-                            addTask(iTask,filterEmail)
+                            addTask(iTask,filterEmail,status)
                             //newTasks.push(iTask);
                             //hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
                         }
@@ -595,13 +625,21 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
             return newTasks;
 
-            function addTask(iTask,email) {
+            function addTask(iTask,email,status) {
                 if (email) {
 
                     if (iTask.requesterDisplay !== email) {
                         return;
                     }
                 }
+
+                if (status && status.code) {
+                    if (iTask.status !== status.code) {
+                        return;
+                    }
+                }
+
+
                 newTasks.push(iTask);
                 hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
             }
@@ -743,7 +781,7 @@ console.log($scope.selectedED)
 
         //
         $scope.setPeriod = function(period) {
-            $scope.tasks = getTasksForPeriod(period,$scope.input.filterEmail);   //get the tasks for this period (including notes)
+            $scope.tasks = getTasksForPeriod(period,$scope.input.filterEmail,$scope.input.filterStatus);   //get the tasks for this period (including notes)
 
             let hashNumberOfComments = countComments($scope.tasks);     //get the count of tasks by path
             $scope.treeData = angular.copy($scope.originalTreeData);    //reset the tree to the original

@@ -23,7 +23,6 @@
     <script>
         angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase',"ngSanitize"]).config(function($locationProvider) {
 
-            // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
             $locationProvider.hashPrefix('!');
         });
@@ -39,7 +38,6 @@
             storageBucket: ""
         };
 
-        //  console.log(firebase)
         if (firebase) {
             firebase.initializeApp(config);
 
@@ -51,7 +49,7 @@
             padding: 8px;
         }
         .taskListScroll {
-            height: 900px;
+            height: 700px;
             overflow-y: scroll;
         }
 
@@ -65,7 +63,7 @@
     <script src="js/taskSvc.js"></script>
     <script src="resourceBuilder/rbServices.js"></script>
     <script src="js/logicalModelSvc.js"></script>
-
+    <script src="resourceBuilder/vsBrowser.js"></script>
     <title>Task Manager</title>
 
 </head>
@@ -80,7 +78,7 @@
         <div class="container-fluid">
             <div class="col-md-2 col-sm-2">
                 <span>
-                    <a class="navbar-brand" href="#" ng-click="showVersion()">
+                    <a class="navbar-brand" href="#">
                         Task Manager
                     </a>
                 </span>
@@ -170,7 +168,7 @@
 
                     </div>
                     <div class="col-md-3 col-sm-3">
-                        <select ng-model="input.filterStatus" class="form-control navbar-text"
+                        <select ng-model="input.filterStatus" class="form-control navbar-text" ng-change="setPeriod(input.period)"
                                 ng-options="state.display for state in states"></select>
 
                     </div>
@@ -181,7 +179,10 @@
 
             <div class="row">
                 <div class="col-md-4">
-                    <div class="taskListScroll" id="lmTreeView"></div>
+                    <div class="taskListScroll">
+                        <div id="lmTreeView"></div>
+                    </div>
+
                 </div>
                 <div class="col-md-8">
 
@@ -229,7 +230,32 @@
 
                             <div ng-show="selectedED" >
 
+                                <div class="row myForm" ng-show="selectedED.alias">
+                                    <div class="col-md-3">
+                                        <div>
+                                            <strong>Aliases</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <ul class="list-unstyled">
+                                            <li ng-repeat="alias in selectedED.alias">
+                                                {{alias}}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
 
+
+                                <div class="row myForm" ng-show="selectedED.short">
+                                    <div class="col-md-3">
+                                        <div>
+                                            <strong>Short name</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        {{selectedED.short}}
+                                    </div>
+                                </div>
 
                                 <div class="row myForm">
                                     <div class="col-md-3">
@@ -238,7 +264,7 @@
                                         </div>
                                     </div>
                                     <div class="col-md-9">
-                                        <div>{{selectedED.short}}</div>
+
                                         {{selectedED.definition}}
                                     </div>
                                 </div>
@@ -254,7 +280,48 @@
                                     </div>
                                 </div>
 
+                                <div class="row myForm">
+                                    <div class="col-md-3">
+                                        <div>
+                                            <strong>Multiplicity</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        {{selectedED.min}}..{{selectedED.max}}
+                                    </div>
+                                </div>
 
+
+                                <div class="row myForm">
+                                    <div class="col-md-3">
+                                        <div>
+                                            <strong>Type/s</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <ul class="list-unstyled">
+                                            <li ng-repeat="type in selectedED.type">
+                                                {{type.code}}
+                                                <span ng-show="type.targetProfile"> --> {{type.targetProfile}}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+
+                                <div class="row myForm" ng-show="selectedED.binding">
+                                    <div class="col-md-3">
+                                        <div>
+                                            <strong>ValueSet</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                         <span class="clickable" ng-click="viewVS(selectedED.binding.valueSetReference.reference)">
+                                            {{selectedED.binding.valueSetReference.reference}}</span>
+
+                                         ({{selectedED.binding.strength}})
+                                    </div>
+                                </div>
 
 
 
@@ -264,6 +331,11 @@
 
                             <!-- -->
 
+                        </uib-tab>
+                        <uib-tab heading="Element Json">
+                             <pre>
+                                    {{selectedED | json}}
+                                </pre>
                         </uib-tab>
                     </uib-tabset>
                 </div>
@@ -563,6 +635,8 @@
 
     </uib-tabset>
 
+    <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
+                vs-selected="vsSelected"></vs-browser>
 
 </div>
 </body>
