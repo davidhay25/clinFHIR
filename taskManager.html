@@ -147,7 +147,7 @@
             <nav class="navbar navbar-default">
                 <div class="row">
                     <div class="col-md-1">
-                        <strong class="navbar-text">Time</strong>
+                        <strong class="navbar-text" style="margin-top: 20px">Time</strong>
                     </div>
                     <div class="col-md-2">
                         <select class="form-control navbar-text" ng-model="input.period" ng-change="setPeriod(input.period)">
@@ -157,14 +157,14 @@
                         </select>
                     </div>
                     <div class="col-md-1 col-sm-1">
-                        <strong class="pull-right navbar-text">Who</strong>
+                        <strong class="pull-right navbar-text" style="margin-top: 20px">Who</strong>
                     </div>
                     <div class="col-md-3 col-sm-3 navbar-text">
                         <select ng-model = 'input.filterEmail' class="form-control" ng-change="setPeriod(input.period)"
                                 ng-options = "email for email in allEmail"></select>
                     </div>
                     <div class="col-md-1 col-sm-1">
-                        <strong class="pull-right navbar-text">Status</strong>
+                        <strong class="pull-right navbar-text" style="margin-top: 20px">Status</strong>
 
                     </div>
                     <div class="col-md-3 col-sm-3">
@@ -607,14 +607,19 @@
             </div>
             <br/>
             <table class="table table-bordered">
-                <tr><th>Path</th><th>Status</th><th>Comment</th><th>Email</th><th>Notes</th></tr>
+                <tr><th>Path</th><th>Status</th><th>Comment</th><th>Notes</th></tr>
                 <tr ng-repeat="task in tasks | orderBy: 'path'" ng-show="canShowReportLine(task,input.filterEmail)">
                     <td>{{task.path | dropFirstInPath}}</td>
-                    <td>{{task.state}}</td>
-                    <td>{{task.description}}</td>
-                    <td>{{task.requesterDisplay}}</td>
+                    <td>{{stateHash[task.status]}}</td>
+                    <td>{{task.description}}
+                        <div><em>{{task.requesterDisplay}}</em></div>
+                    </td>
+
                     <td>
                         <div ng-repeat="note in task.notes track by $index">
+                            {{note.text}}
+                            <div><em>{{note.authorString}}</em></div>
+                            <!--
                             <div class="row">
                                 <div class="col-sm-8 col-md-8">
                                     {{note.text}}
@@ -623,6 +628,7 @@
                                     {{note.authorString}}
                                 </div>
                             </div>
+                            -->
                         </div>
 
 

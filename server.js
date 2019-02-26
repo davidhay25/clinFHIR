@@ -97,7 +97,9 @@ function recordAccess(req,data) {
 //need to create the domain in digitalocean as well...
 //a hash of supported domains and the default page.
 let domains = {}
-domains['csiro.clinfhir.com'] = '/csiroProject.html'
+domains['csiro.clinfhir.com'] = '/csiroProject.html';
+domains['nz.clinfhir.com'] = '/nzProject.html';
+
 app.use('/',function(req,res,next){
 
     if (req.originalUrl.length == 1) {
