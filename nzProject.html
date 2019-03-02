@@ -68,15 +68,14 @@
                         }, function(error) {
                             modalService.showModal({}, {bodyText: 'Sorry, there was an error logging out - please try again'})
                         });
-
                     };
 
 
                     let appRoot = location.host;
 
                     //set the servers to the ones used by the nz project.
-                    appConfigSvc.setServerType('conformance','http://localhost:8080/baseDstu3/');
-                    appConfigSvc.setServerType('data','http://localhost:8080/baseDstu3/');       //set the data server to the same as the conformance for the comments
+                    appConfigSvc.setServerType('conformance','http://home.clinfhir.com:8040/baseDstu3/');
+                    appConfigSvc.setServerType('data','http://home.clinfhir.com:8040/baseDstu3/');       //set the data server to the same as the conformance for the comments
                     appConfigSvc.setServerType('terminology',"https://ontoserver.csiro.au/stu3-latest/");
 
 
