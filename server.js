@@ -12,7 +12,7 @@ var Cookies = require( "cookies" )
 var express = require('express');
 var app = express();
 
-//var orionModule = require("./serverModuleOrion.js")
+var orionModule = require("./serverModuleOrion.js")
 var smartModule = require("./serverModuleSMART.js")
 
 
@@ -60,7 +60,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
         console.log('>>> Mongo server not running')
     } else {
         db = ldb;
-       // orionModule.setup(app,db);
+        orionModule.setup(app,db);
         smartModule.setup(app,db);
 
     }

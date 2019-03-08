@@ -574,6 +574,8 @@
                                 <uib-tab heading="Mapping by Element">
 
 
+                                    <div class="designerScroll">
+
                                     <table class="table table-bordered table-condensed">
                                         <tr><th></th><th>Element</th><th>DataType</th><th>Mult.</th>
                                             <th>Description & Comments </th>
@@ -619,11 +621,12 @@
 
                                     </table>
 
+                                    </div>
 
 
                                 </uib-tab>
 
-                                <uib-tab heading="Differences from base" ng-show="differenceFromBase">
+                                <uib-tab heading="Differences from base" ng-show="1==2 && differenceFromBase">
                                     <h5>Elements added to the base</h5>
                                     <table>
                                         <tr ng-repeat = "diff in differenceFromBase.added">
@@ -700,9 +703,6 @@
                                         </tr>
                                     </table>
 
-
-
-
                                 </uib-tab>
 
                             </uib-tabset>
@@ -723,7 +723,9 @@
                                                     <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
                                                 </td>
                                                 <td>
-                                                    <div class="clickable" ng-click="viewVS(row.data.selectedValueSet.valueSet)">
+
+                                                    <div class="clickable" ng-click="viewVS(row.data.selectedValueSet.valueSet)"
+                                                        ng-show="row.data.selectedValueSet.valueSet">
                                                         {{row.data.selectedValueSet.valueSet}} ({{row.data.selectedValueSet.strength}})
 
                                                     </div>
@@ -750,14 +752,20 @@
 
                             <div class="designerScroll">
                                 <table class="table table-bordered">
-                                    <tr><th>Url</th><th>Path</th><th>Outcome</th></tr>
-                                    <tr ng-repeat="row in vsChecks" ng-class="{absent:row.absent,present:row.present}"
-                                    >
-                                        <td>{{row.url}}</td>
+                                    <tr><th>Path</th><th>ValueSet url</th><th>CodeSystems</th><th>Outcome</th></tr>
+                                    <tr ng-repeat="row in vsChecks">
                                         <td><span class="clickable" ng-click="selectNodeFromServerCheck(row.row)">{{row.path}}</span></td>
-                                        <td>{{row.outcome}}</td>
+                                        <td>{{row.url}}
+                                            <div><em>{{row.vs.description}}</em></div>
+                                        </td>
+                                        <td>
+                                            <div ng-repeat="cs in row.cs">{{cs}}</div>
+                                        </td>
+
+                                        <td ng-class="{absent:row.absent,present:row.present}">{{row.outcome}}</td>
                                     </tr>
                                 </table>
+                                <div><em>This table only includes elements for which there is a terminology binding</em></div>
                             </div>
 
                         </uib-tab>
@@ -779,8 +787,9 @@
                                 </div>
                             </div>
 
+                            <div class="designerScroll">
 
-                            <table class="table table-bordered table-condensed">
+                                <table class="table table-bordered table-condensed">
                                 <tr><th>Element</th><th>Status</th></tr>
                                 <tr ng-repeat="row in treeData"
                                     ng-show="showStatus(row)"
@@ -792,16 +801,20 @@
 
                                 </tr>
                             </table>
+                            </div>
 
                         </uib-tab>
 
                         <uib-tab heading="Extensions">
                             <br/>
                             <table class="table table-bordered table-condensed">
-                                <tr><th>Element</th></tr>
+                                <tr><th>Element</th><th>Url</th></tr>
                                 <tr ng-repeat="row in treeData" ng-show="row.data.isExtension">
                                     <td>
                                         <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
+                                    </td>
+                                    <td>
+                                        {{row.data.fhirMappingExtensionUrl}}
                                     </td>
 
 
@@ -989,13 +1002,6 @@
                             </table>
                         </div>
 
-
-
-
-
-
-
-
                 </uib-tab>
 
 
@@ -1042,20 +1048,13 @@
                                 <tr ng-show="selectedNode.data.alias">
                                     <td width="20%">Alias</td>
                                     <td>
-
-                                            <ul>
-                                                <li ng-repeat="al in selectedNode.data.alias track by $index">
-                                                    {{al}}
-                                                </li>
-                                            </ul>
-
-
-
-
+                                        <ul>
+                                            <li ng-repeat="al in selectedNode.data.alias track by $index">
+                                                {{al}}
+                                            </li>
+                                        </ul>
                                     </td>
                                 </tr>
-
-
 
 
                                 <tr ng-show = "selectedNode.data.edStatus && (selectedNode.data.edStatus !== 'included')" class="required">

@@ -1438,8 +1438,9 @@ angular.module("sampleApp")
 
             //display a complex datatype
             $scope.viewDataType = function(dt) {
-                //var url = 'http://hl7.org/fhir/StructureDefinition/'+dt;
-                var url = $scope.fhirRoot +  'StructureDefinition/'+dt;
+                //for datatypes, only the current spec seems to have datatypees...
+                var url = 'http://hl7.org/fhir/StructureDefinition/'+dt;
+                //var url = $scope.fhirRoot +  'StructureDefinition/'+dt;
                 $scope.viewReferencedModel(url)
             };
 

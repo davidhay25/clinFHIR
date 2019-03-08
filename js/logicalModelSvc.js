@@ -150,7 +150,16 @@ angular.module("sampleApp")
                         function(data) {
                             if (data.data && data.data.entry &&  data.data.entry.length > 0) {
 
-                                arResult.push({url:url,outcome:'present',present:true,path:path,row:row})
+                                console.log(data.data.entry[0])
+                                let vs = data.data.entry[0].resource;
+                                let cs = [];        //code systems
+                                if (vs.compose && vs.compose.include) {
+                                    vs.compose.include.forEach(function(inc) {
+                                        cs.push(inc.system)
+                                    })
+                                }
+
+                                arResult.push({url:url,outcome:'present',present:true,cs:cs,vs:vs,path:path,row:row})
                                 //hash[url] = 'present'
                             } else {
                                 arResult.push({url:url,outcome:'absent',absent:true,path:path,row:row})   //makes the display simpler
@@ -2674,7 +2683,8 @@ angular.module("sampleApp")
 
                                     tvType.push(newTyp)
                                 } else {
-                                    alert('The Path '+ ed.path + ' has a type with no code')
+                                    //todo - not sure of the significane of this, so don't show an alert...
+                                    //alert('The Path '+ ed.path + ' has a type with no code')
                                     console.log(ed)
                                 }
 
