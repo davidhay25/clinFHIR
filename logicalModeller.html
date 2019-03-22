@@ -53,6 +53,12 @@
             overflow-y: scroll;
         }
 
+        .subTabScroll {
+            height: 700px;
+            overflow-y: scroll;
+        }
+
+
         .present {
             color:green;
         }
@@ -673,21 +679,24 @@
                                     </div>
                                     <br/> <br/>
 
-                                    <table class="table table-condensed table-bordered">
-                                        <tr><th>Identity</th><th>Path</th><th>Map</th></tr>
-                                        <tr ng-repeat="map in allMappings" ng-show="map.identity == input.mi">
+                                    <div class="subTabScroll">
+                                        <table class="table table-condensed table-bordered">
+                                            <tr><th>Identity</th><th>Path</th><th>Map</th></tr>
+                                            <tr ng-repeat="map in allMappings" ng-show="map.identity == input.mi">
 
-                                            <td>
-                                                {{map.identity}}
-                                            </td>
+                                                <td>
+                                                    {{map.identity}}
+                                                </td>
 
 
 
-                                            <td class="clickable" ng-click="selectNodeFromTable(map.path)">
-                                                {{map.name}}</td>
-                                            <td>{{map.map}}</td>
-                                        </tr>
-                                    </table>
+                                                <td class="clickable" ng-click="selectNodeFromTable(map.path)">
+                                                    {{map.name}}</td>
+                                                <td>{{map.map}}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
 
                                 </uib-tab>
 
@@ -1108,8 +1117,13 @@
 
                                 <tr ng-show="selectedNode.data.fhirMappingExtensionUrl"><td>Extension Url</td>
                                     <td>
+                                        {{selectedNode.data.fhirMappingExtensionUrl}}
+                                    </td>
+<!--
+                                    <td>
                                         <a href="#" ng-click="editExtension(selectedNode.data.fhirMappingExtensionUrl)">{{selectedNode.data.fhirMappingExtensionUrl}}</a>
                                     </td>
+                                    -->
                                 </tr>
 
                                 <tr ng-show="selectedNode.data.comments"><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>

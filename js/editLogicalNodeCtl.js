@@ -252,13 +252,18 @@ angular.module("sampleApp")
 
                 if ($scope.input.mappingPath) {
 
-                    var ed = $scope.allPathsHash[$scope.input.mappingPath];
-                    console.log(ed)
 
-                    $scope.selectedED = $scope.edHash[$scope.input.mappingPath];    //used to show the ED
-                    if ($scope.input.mappingPath.indexOf('xtension')>-1) {
-                        $scope.isExtension = true;
+                   // var ed = $scope.allPathsHash[$scope.input.mappingPath];
+                   // console.log(ed)
+
+                    //the $scope.selectedED is for display. Only worls if there is an underlying base model
+                    if ($scope.edHash) {
+                        $scope.selectedED = $scope.edHash[$scope.input.mappingPath];    //used to show the ED
+                        if ($scope.input.mappingPath.indexOf('xtension')>-1) {
+                            $scope.isExtension = true;
+                        }
                     }
+
                     /*
 
 
