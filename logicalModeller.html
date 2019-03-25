@@ -801,8 +801,7 @@
                                 <table class="table table-bordered table-condensed">
                                 <tr><th>Element</th><th>Status</th></tr>
                                 <tr ng-repeat="row in treeData"
-                                    ng-show="showStatus(row)"
-                                    ng-hideX = "input.hideIncludedStatus && row.data.edStatus=='included' ">
+                                    ng-show="showStatus(row)">
                                     <td>
                                         <div ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path | dropFirstInPath}}</div>
                                     </td>
@@ -1067,7 +1066,12 @@
 
 
                                 <tr ng-show = "selectedNode.data.edStatus && (selectedNode.data.edStatus !== 'included')" class="required">
-                                    <td>Status</td><td>{{selectedNode.data.edStatus}}</td>
+                                    <td>Status</td><td>{{selectedNode.data.edStatus}}
+
+                                    <span class="pull-right"><em>{{statusDescription[selectedNode.data.edStatus]}}</em></span>
+
+
+                                </td>
                                 </tr>
 
                                 <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>

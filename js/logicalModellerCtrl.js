@@ -20,7 +20,10 @@ angular.module("sampleApp")
             $scope.fhirRoot =  'http://hl7.org/fhir/STU3/'; //  'http://hl7.org/fhir/';
 
 
-
+            $scope.statusDescription = {'excluded':'This element will be removed from the model'}
+            $scope.statusDescription.confirm = "We think this should be included, but not sure";
+            $scope.statusDescription.review = "We think this should be removed, but not sure";
+            $scope.statusDescription.later = 'To be removed, but might be in a future version'
             $scope.clinicalView =  $localStorage.clinicalView;
             $scope.setClinicalView = function(state) {
                 $localStorage.clinicalView = state;//! $localStorage.clinicalView;
@@ -2501,7 +2504,7 @@ angular.module("sampleApp")
                 if (ext) {
                     $scope.editExtension(ext.valueString);
                 }
-            }
+            };
 
             $scope.editExtension = function (extensionUrl) {
                 //var extensionUrl = $scope.selectedNode.data.fhirMappingExtensionUrl;

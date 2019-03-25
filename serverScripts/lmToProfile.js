@@ -28,13 +28,10 @@ let model = JSON.parse(response.body.toString());
 let baseType = getSingleExtensionValue(model,baseTypeExt).valueString;
 
 
-
-
-
 let err = [];
 //let modelHashByMappedPath = {};          //a hash of all paths in the model keyed by mapped path (to detect those removed from the model
 let modelPathHash = {};     //a hash of all the elements by mapped path
-let rootExtensions = [];     //hash of extensions by path
+let rootExtensions = [];     //a list of extensions on the root
 let baseExtensionsHash = {}; //hash of extensions for a base path
 model.snapshot.element.forEach(function(ed,inx){
     let modelPath = ed.path;
@@ -142,7 +139,6 @@ profile.differential.element.push(top);
 
 let discriminatorAdded = false;
 let extensionCount = 0;
-//for (const key in rootExtensions) {
     rootExtensions.forEach(function(item) {
     //let item = rootExtensions[key]
     let extED = item.ed;
@@ -150,26 +146,25 @@ let extensionCount = 0;
 
     if (extUrl) {
         let path = extED.path;
-        //let ar = path.split('.')
-        //if (ar.length == 2) {
-            //this is an extension off the root...
-            if (!discriminatorAdded) {
-                //add the discriminator element...
-                let element = {}
-                element.id = baseType + ":extensionDiscriminator";
-                element.path = baseType + ".extension";
-                element.slicing = {discriminator:[{type:'value',path:'url'}]};
-                element.slicing.rules = 'open';
-                profile.differential.element.push(element);
-                discriminatorAdded = true
-            }
-            //now add the extension definition;
-            if (extensionCount < 1000) { //just while testing
-                addExtensionReference(profile.differential.element, extUrl, extED, baseType)
-            }
 
-            extensionCount++
-       // }
+        //this is an extension off the root...
+        if (!discriminatorAdded) {
+            //add the discriminator element...
+            let element = {}
+            element.id = baseType + ":extensionDiscriminator";
+            element.path = baseType + ".extension";
+            element.slicing = {discriminator:[{type:'value',path:'url'}]};
+            element.slicing.rules = 'open';
+            profile.differential.element.push(element);
+            discriminatorAdded = true
+        }
+        //now add the extension definition;
+        if (extensionCount < 1000) { //just while testing
+            addExtensionReference(profile.differential.element, extUrl, extED, baseType)
+        }
+
+        extensionCount++
+
     }
 
 })
@@ -181,17 +176,33 @@ baseModel.snapshot.element.forEach(function(ed,inx){
         let basePath = ed.path;
 
         if (!modelPathHash[basePath]) {
-            //There is no element in the model mapped to this one...
-            console.log(basePath + " not found")
+            //There is no element in the model mapped to this one - or it has been excluded...
+            //console.log('Warning: ' + basePath + " not found")
 
             //just make sure this isn't one of the elements in the profile, even if not in the model
             let ar = basePath.split('.');
 
+            //arFixedElements are elements like text, contained that generally aren't in the model, but shoudl not be excluded from the profile
             if (arFixedElements.indexOf(ar[1]) == -1){
                 //cleanED(newEd,baseType)
-                ed.max = "0";
-                ed.min = 0;
-                profile.differential.element.push(ed);
+                //if the parent element is already in the diff, then don't add it
+                let parentInDiff = false;
+                profile.differential.element.forEach(function(elementDef){
+                    if (basePath.startsWith(elementDef.path)) {
+                        parentInDiff = true;
+                    }
+                });
+
+                if (!parentInDiff) {
+                    ed.max = "0";
+                    ed.min = 0;  //todo - is there a situation where the base min = 1??
+                    profile.differential.element.push(ed);
+                    console.log('Warning: ' + basePath + " not found, min & max set to 0 in the diff")
+                } else {
+
+
+                }
+
             }
 
         } else if (modelPathHash[ed.path].length >1) {
@@ -205,32 +216,25 @@ baseModel.snapshot.element.forEach(function(ed,inx){
             //this element has a mapping in the model. Is it different to the base...
             let isEDDifferent = isDifferent(ed)
             if (isEDDifferent) {
-                //console.log(isEDDifferent.msg);//ed.path + ' is different')
-                // let ar = ed.path.split('.');
-                // ar[0] = rootName
-                // ed.path = ar.join('.')
+
                 if (isEDDifferent.type == 'minmax') {
 
-                    //console.log('Looking for an ED in the model mapped to the path: '+ed.path)
+
                     let hash = modelPathHash[ed.path];  //the ed from the model that is mapped to this path from the base...
                     if (hash) {
                         if (hash.length == 1) {
 
                             let newEd = hash[0].ed
-                            //console.log(newEd)
+
                             cleanED(newEd, baseType)
                             profile.differential.element.push(newEd);
                         } else {
                             //this is a sliced element - ie more than one element in the model is mapped to this base element...
                         }
 
-
                     }
 
                 }
-
-                //profile.differential.element.push(JSON.stringify(ed));
-
 
             }
 
@@ -251,8 +255,8 @@ baseModel.snapshot.element.forEach(function(ed,inx){
 
 fs.writeFileSync("/Users/davidhay/nzIG/resources/structuredefinition-nhipatient.json",JSON.stringify(profile))
 
-function addSlices(baseType,diff,ed,mappings) {
-    console.log(mappings)
+function addSlices(baseType,diff,baseED,mappings) {
+
     //get the data type from the first mapping
     let type = mappings[0].ed.type;
     let code = type[0].code
@@ -261,11 +265,23 @@ function addSlices(baseType,diff,ed,mappings) {
         case "Identifier" :
             //add the discriminator
             let element = {}
-            element.id = baseType + ":identifierDiscriminator";
-            element.path = baseType// + ".extension";
+            element.id = baseED.path;
+            element.path = baseED.path;// + ".extension";
             element.slicing = {discriminator:[{type:'value',path:'system'}]};
             element.slicing.rules = 'open';
             diff.push(element);
+
+            //now the individual slices
+            mappings.forEach(function(item){
+                let iEd = item.ed;
+                cleanED(iEd,baseType);
+                iEd.path = baseED.path;
+                iEd.sliceName = iEd.label;
+                iEd.id = baseED.path + ':'+ iEd.label;
+                diff.push(iEd);
+            });
+
+
             break;
     }
 

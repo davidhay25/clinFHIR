@@ -4,7 +4,8 @@ var JSONPath = require('JSONPath');
 var mongoDb;
 var ObjectID = require('mongodb').ObjectID;
 
-var fp = require('fhirpath.js');
+//var fp = require('fhirpath.js');
+var fp = require('fhirpath');
 var fpContext;      //the context for subsequent fhirPath requests
 
 function setup(app,db) {
@@ -30,7 +31,7 @@ function setup(app,db) {
         })
 
 
-    })
+    });
 
     app.post('/clinFHIR/executeFP',function(req,res){
 
@@ -47,7 +48,11 @@ function setup(app,db) {
             var query = JSON.parse(body);
 
             try {
-                var result = fp.evaluate(query.resource,query.path);
+                let resource = query.resource;
+                let fpQuery = query.path;
+
+
+                var result = fp.evaluate(resource,fpQuery);
                 res.json(result)
             } catch (ex) {
                 console.log('error evaluating fhirpath ',ex);
