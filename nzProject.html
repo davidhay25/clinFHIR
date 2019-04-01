@@ -83,11 +83,13 @@
 
                     //get the IG
                     let url = appConfigSvc.getCurrentConformanceServer().url + 'ImplementationGuide/cf-artifacts-nz3';
-                    $scope.models = []
+                    $scope.models = [];
+                    $scope.modelsByPackage = {};      //alternative display
                     $http.get(url).then(
                         function(data) {
                             $scope.IG = data.data;
                             $scope.IG.package.forEach(function (package) {
+                                $scope.modelsByPackage[package.name] = [];      //todo - assume that name exists...
                                 package.resource.forEach(function (item) {
                                     let type = fhirUtilsSvc.getSingleExtensionValue(item,igTypeUrl);
                                     if (type) {
@@ -103,6 +105,7 @@
 
                                                 let entry = {url:url,description:item.description,name:item.name}
                                                 $scope.models.push(entry)
+                                                $scope.modelsByPackage[package.name].push(entry)
                                                 break;
                                         }
                                     }
@@ -253,7 +256,7 @@
 
                 <tr>
                     <td width = "20%">
-                        <a target="_blank" href="snapp.clinfhir.com:8000/output/index.html">
+                        <a target="_blank" href="http://snapp.clinfhir.com:8000/output/index.html">
                             NHI Implementation Guide.
                         </a>
                     </td>
@@ -272,44 +275,19 @@
                 </tr>
 
 
+                <!--
+                <tr ng-repeat="(v,k) in modelsByPackage">
+                    <td>{{}}</td>
+                </tr>
+                -->
+
+
                 <tr ng-repeat="model in models">
                     <td><a  target="_blank" ng-href="{{model.url}}">{{model.name}}</a></td>
                     <td>{{model.description}}
                     </td>
                 </tr>
-<!--
-                <tr>
-                    <td><a  target="_blank" ng-href="{{commonModel}}">Common model</a></td>
-                    <td>
-                        This is the current version of the common model which describes the information to be included in the extract.
-                        The view is read-only, but there is the ability to add comments, which will be used as the contents
-                        of the model are discussed. The comments can be viewed in the model itself, and also through the
-                        <a  target="_blank" ng-href="{{uberModel}}">Comments viewer</a> (see below).
-                        <p>
 
-                        </p>
-                    </td>
-                </tr>
-                <tr>
-                    <td><a target="_blank" ng-href="{{uberModel}}">Uber model</a></td>
-                    <td>
-                        This is the original 'uber' model that contained an aggregate of all the elements that could
-                        appear in the extract based on all reporting requirements. The
-                        <a  target="_blank" ng-href="{{commonModel}}">common model</a> above contains a subset
-                        of those elements - the ones that are usually available - and useful. This model serves as a
-                        repository of all these 'possible' elements so they can be reviewed at a later date.
-                    </td>
-                </tr>
-                <tr>
-                    <td><a target="_blank" ng-href="{{testModel}}">Test model</a></td>
-                    <td>
-                        This is a test model to practice making comments & notes without effecting the real models. There
-                        is no editor set on the model - which means that you can edit the model directly, but it's very likely that any
-                        changes will be overwritten by other users. (You can always create your own model if you want - just set
-                        the editor property in the 'Model' tab to make it read-only to others).
-                    </td>
-                </tr>
--->
                 <tr>
                     <td colspan="2">
                         <h4>Tools</h4>
