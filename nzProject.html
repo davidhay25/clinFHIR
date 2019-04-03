@@ -183,7 +183,7 @@
             <div class="col-md-7 col-sm-7">
                 <span>
                     <a class="navbar-brand" href="#" ng-click="showVersion()">
-                        Tooling to support the New Zealand FHIR profiles project
+                        Tooling to support the New Zealand FHIR profiling project
                     </a>
                 </span>
 
@@ -235,56 +235,51 @@
     <div class="row">
         <div class="col-md-6">
 
+            <h4>Models</h4>
 
             <table class="table">
-                <tr>
+               <!-- <tr>
                     <td colspan="2">
                         <h4>Links</h4>
                     </td>
                 </tr>
+-->
 
+
+
+
+
+<!--
                 <tr>
-                    <td width = "20%">
-                        <a target="_blank" href="https://docs.google.com/presentation/d/1bIFjSjDuMmuxNXPLuc-YerzBuJJYNx9gFC5EgJeizF0/edit?usp=sharing">
-                            Summary presentation
-                        </a>
-                    </td>
                     <td>
-                        An overview of the Logical Modeller in review mode. Also describes the comments and notes
-                    </td>
-                </tr>
-
-                <tr>
-                    <td width = "20%">
-                        <a target="_blank" href="http://snapp.clinfhir.com:8000/output/index.html">
-                            NHI Implementation Guide.
-                        </a>
-                    </td>
-                    <td>
-                        The draft version of the Implementation guide for the NHI interface. This can be quite slow to load. If it doesn't load
-                        at first, just click the browser refresh button.
-                    </td>
-                </tr>
-
-
-
-                <tr>
-                    <td colspan="2">
                         <h4>Models</h4>
                     </td>
+                    <td></td>
                 </tr>
-
-
-                <!--
-                <tr ng-repeat="(v,k) in modelsByPackage">
-                    <td>{{}}</td>
-                </tr>
-                -->
+-->
 
 
                 <tr ng-repeat="model in models">
                     <td><a  target="_blank" ng-href="{{model.url}}">{{model.name}}</a></td>
                     <td>{{model.description}}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2">
+                        <h4>Implementation guides</h4>
+                    </td>
+
+                </tr>
+
+                <tr>
+                    <td width = "20%">
+                        <a target="_blank" href="http://snapp.clinfhir.com:8000/output/index.html">
+                            NHI Implementation Guide
+                        </a>
+                    </td>
+                    <td>
+                        The draft version of the Implementation guide for the NHI interface. 
                     </td>
                 </tr>
 
@@ -298,18 +293,7 @@
                 <tr>
                     <td><a  target="_blank" ng-href="{{taskManager}}">Comments viewer</a></td>
                     <td>
-                        <p>Any logged in user can add a comment to an element in the model to record suggestions for updating such as:</p>
-                        <ul>
-                            <li>A change to the documentation</li>
-                            <li>Additions / Changes to the ValueSet for a coded elements</li>
-                            <li>Changes to multiplicity (if the element can repeat></li>
-                        </ul>
-
-                        <p>These comments can be viewed in the model itself (select any element and the comments are shown to the right)
-                            and also in a specialized application - the Task viewer. This application treats the comments as if each
-                            one was a task that needs to be resolved - accepted or rejected. </p>
-                        <p>It's really intended for an administrator, but useful for an individual to see what the resolution
-                            to their comment was.</p>
+                        <p>An app that displays all the comments for a model, and allows their disposition to be tracked.</p>
                     </td>
                 </tr>
 
@@ -322,9 +306,13 @@
 
 
                 <tr>
-                    <td><a target="_blank" href="http://conman.clinfhir.com/connectathon.html?event=hl7Webinar">conMan</a></td>
+                    <td width = "20%">
+                        <a target="_blank" href="http://conman.clinfhir.com/connectathon.html?event=nz">
+                            ConMan
+                        </a>
+                    </td>
                     <td>
-                        Connectathon Manager. Contains a number of functions useful when testing profiles such as a graph generator
+                        The Connectathon Manager instance for the NZ profile development work.
                     </td>
                 </tr>
 
@@ -342,6 +330,23 @@
 
         </div>
         <div class="col-md-6">
+
+            <h4>Documentation and Help</h4>
+            <table class="table">
+                <tr>
+                    <td width = "20%">
+                        <a target="_blank" href="https://docs.google.com/presentation/d/1bIFjSjDuMmuxNXPLuc-YerzBuJJYNx9gFC5EgJeizF0/edit?usp=sharing">
+                            Summary presentation
+                        </a>
+                    </td>
+                    <td>
+                        An overview of the Logical Modeller in review mode. Also describes the comments and notes
+                    </td>
+                </tr>
+
+            </table>
+
+
             <h4>FAQ</h4>
 
             <uib-accordion >
@@ -389,9 +394,25 @@
                         <li>If you're wanting to suggest an additional element, then select the 'parent' element
                         where the new one would logically fit, and add a new comment there.</li>
                         <li>To just make a comment about the model overall, select the topmost element
-                        (eg CsiroCommon) and add the comment there.</li>
+                        (eg NhiPatient) and add the comment there.</li>
                     </ul>
                 </div>
+
+                <div uib-accordion-group class="panel-default" heading="What is the comments viewer">
+                    <p>Any logged in user can add a comment to an element in the model to record suggestions for updating such as:</p>
+                    <ul>
+                        <li>A change to the documentation</li>
+                        <li>Additions / Changes to the ValueSet for a coded elements</li>
+                        <li>Changes to multiplicity (if the element can repeat></li>
+                    </ul>
+
+                    <p>These comments can be viewed in the model itself (select any element and the comments are shown to the right)
+                        and also in a specialized application - the Task viewer. This application treats the comments as if each
+                        one was a task that needs to be resolved - accepted or rejected. </p>
+                    <p>It's really intended for an administrator, but useful for an individual to see what the resolution
+                        to their comment was.</p>
+                </div>
+
             </uib-accordion>
 
 
