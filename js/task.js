@@ -1,7 +1,7 @@
 angular.module("sampleApp").controller('taskCtrl',
     function ($scope,$http,appConfigSvc,logicalModelSvc,Utilities,$uibModal,taskSvc,$timeout) {
 
-        //let clinFhirDevice = 'Device/cfDevice';
+
         let fhirVersion = $scope.conformanceServer.version;     //from parent
         let taskCode =  {system:"http://loinc.org",code:"48767-8"}
         var pathExtUrl = appConfigSvc.config().standardExtensionUrl.path;  //the extension for recording the model path for a comment
@@ -259,7 +259,10 @@ angular.module("sampleApp").controller('taskCtrl',
 
                             $http.post(url,obj).then(
                                 function(data){
-                                    alert('Comment has been added.');
+
+                                    //alert('Comment has been added.');
+
+
                                     $scope.$close(task);
                                 },function (err) {
                                     alert('Error saving note: ' + angular.toJson(err))
