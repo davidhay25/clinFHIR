@@ -21,8 +21,8 @@ angular.module("sampleApp")
 
             var that = this;
 
-            $scope.statuses = ['included','confirm','review','later','excluded'];       //note: value set in createTreeArrayFromSD()
-
+           // $scope.statuses = ['included','confirm','review','later','excluded'];       //note: value set in createTreeArrayFromSD()
+            $scope.statuses = ['included','review','excluded'];       //note: value set in createTreeArrayFromSD()
             //the display of logical models.
             $scope.lmDisplay = function(resource) {
                 var baseType = Utilities.getSingleExtensionValue(resource,baseTypeUrl);
@@ -234,7 +234,7 @@ angular.module("sampleApp")
                 $scope.input.misuse = data.misuse;
                 $scope.input.usageGuide = data.usageGuide;
                 $scope.input.legacy = data.legacy;
-
+                $scope.input.lmReviewReason = data.lmReviewReason;
 
                 //data.edStatus = data.edStatus || 'included'
                 $scope.input.edStatus = data.edStatus;
@@ -917,6 +917,9 @@ angular.module("sampleApp")
                     if ($scope.input.legacy) {
                         vo.legacy = $scope.input.legacy;
                     }
+                    if ($scope.input.lmReviewReason) {
+                        vo.lmReviewReason = $scope.input.lmReviewReason;
+                    }
 
                 if ($scope.input.edStatus) {
                     vo.edStatus = $scope.input.edStatus;
@@ -961,6 +964,10 @@ angular.module("sampleApp")
                     $scope.isCoded = true;
                 }
               //  setOptionsForDtAndPath();       //see if this datatype & path has an options element set
+            }
+
+            $scope.removeBinding = function(){
+                delete $scope.selectedValueSet;
             }
 
             $scope.selectVsFromServer = function(){

@@ -20,10 +20,10 @@ angular.module("sampleApp")
             $scope.fhirRoot =  'http://hl7.org/fhir/STU3/'; //  'http://hl7.org/fhir/';
 
 
-            $scope.statusDescription = {'excluded':'This element will be removed from the model'}
+            $scope.statusDescription = {'excluded':'This element will be removed from the model'};
             $scope.statusDescription.confirm = "We think this should be included, but not sure";
-            $scope.statusDescription.review = "We think this should be removed, but not sure";
-            $scope.statusDescription.later = 'To be removed, but might be in a future version'
+            $scope.statusDescription.review = "There are things to check - see the review reason";
+            $scope.statusDescription.later = 'To be removed, but might be in a future version';
             $scope.clinicalView =  $localStorage.clinicalView;
             $scope.setClinicalView = function(state) {
                 $localStorage.clinicalView = state;//! $localStorage.clinicalView;
@@ -703,6 +703,7 @@ angular.module("sampleApp")
             //collapseLayout
 
             //set the current node as the discriminator for all nodes with the sam path..
+            /*
             $scope.setAsDiscriminator = function (treeNode) {
                 logicalModelSvc.setAsDiscriminator(treeNode,$scope.treeData)
                 drawTree()
@@ -710,6 +711,8 @@ angular.module("sampleApp")
                 makeSD();
 
             };
+
+            */
 
             $scope.showConceptMap = function(url) {
 
@@ -1114,7 +1117,7 @@ angular.module("sampleApp")
                 function() {
                     if ($scope.selectedNode) {
 
-                        $scope.discriminatorReq = logicalModelSvc.isDiscriminatorRequired($scope.selectedNode,$scope.treeData)
+                        //$scope.discriminatorReq = logicalModelSvc.isDiscriminatorRequired($scope.selectedNode,$scope.treeData)
 
 
                         delete $scope.valueSetOptions;

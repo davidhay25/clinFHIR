@@ -58,43 +58,55 @@
                     <strong>Status</strong>
                     <p>{{stateHash[task.status]}}</p>
 
-                    <button class="btn btn-default buttonSize"  ng-click="changeState('received')"
-                            ng-show="showStateChange('received',task.status)"
-                            uib-popover="The task has been initially reviewed (or triaged) but no disposition has been made"
-                            popover-placement="top"
-                            popover-trigger="'mouseenter'">
-                            Reviewed</button>
+                    <!--
+                                        {{treeData[0].data.header.editor}}
+                                        {{Practitioner.telecom[0].value}}
 
-                    <button class="btn btn-default buttonSize"  ng-click="changeState('accepted')"
-                            uib-popover="The task has been accepted as one that should be actioned, but that action has not yet occurred."
-                            popover-placement="top"
-                            popover-trigger="'mouseenter'"
-                            ng-show="showStateChange('accepted',task.status)">Accepted</button>
+                                        <div ng-show = "treeData[0].data.header.editor && (Practitioner.telecom[0].value !== treeData[0].data.header.editor)">
+                                            The model editor is {{treeData[0].data.header.editor}}. Only they can make changes
+                                        </div>
+                                        -->
 
-                    <button class="btn btn-default buttonSize"  ng-click="changeState('completed')"
-                            uib-popover="Any actions required for this task have been completed. The task is complete."
-                            popover-placement="top"
-                            popover-trigger="'mouseenter'"
-                            ng-show="showStateChange('completed',task.status)">Completed</button>
+                    <!--
 
-                    <button class="btn btn-default buttonSize"  ng-click="changeState('rejected')"
-                            uib-popover="No actions will follow from the Task. The task is complete."
-                            popover-placement="top"
-                            popover-trigger="'mouseenter'"
-                            ng-show="showStateChange('rejected',task.status)">Rejected</button>
+                    for now, don't allow status edit from modeller. need to pass in editor & current user
+                                        <button class="btn btn-default buttonSize"  ng-click="changeState('received')"
+                                                ng-show="showStateChange('received',task.status)"
+                                                uib-popover="The task has been initially reviewed (or triaged) but no disposition has been made"
+                                                popover-placement="top"
+                                                popover-trigger="'mouseenter'">
+                                                Reviewed</button>
 
-                    <button class="btn btn-default buttonSize"  ng-click="changeState('cancelled')"
-                            uib-popover="The task does not need to be reviewed or actioned - for example it was entered in error. The task is complete."
-                            popover-placement="top"
-                            popover-trigger="'mouseenter'"
-                            ng-show="showStateChange('cancelled',task.status)">Cancelled</button>
+                                        <button class="btn btn-default buttonSize"  ng-click="changeState('accepted')"
+                                                uib-popover="The task has been accepted as one that should be actioned, but that action has not yet occurred."
+                                                popover-placement="top"
+                                                popover-trigger="'mouseenter'"
+                                                ng-show="showStateChange('accepted',task.status)">Accepted</button>
+
+                                        <button class="btn btn-default buttonSize"  ng-click="changeState('completed')"
+                                                uib-popover="Any actions required for this task have been completed. The task is complete."
+                                                popover-placement="top"
+                                                popover-trigger="'mouseenter'"
+                                                ng-show="showStateChange('completed',task.status)">Completed</button>
+
+                                        <button class="btn btn-default buttonSize"  ng-click="changeState('rejected')"
+                                                uib-popover="No actions will follow from the Task. The task is complete."
+                                                popover-placement="top"
+                                                popover-trigger="'mouseenter'"
+                                                ng-show="showStateChange('rejected',task.status)">Rejected</button>
+
+                                        <button class="btn btn-default buttonSize"  ng-click="changeState('cancelled')"
+                                                uib-popover="The task does not need to be reviewed or actioned - for example it was entered in error. The task is complete."
+                                                popover-placement="top"
+                                                popover-trigger="'mouseenter'"
+                                                ng-show="showStateChange('cancelled',task.status)">Cancelled</button>
 
 
 
 
-<!--
-                    <pre>{{task | json}}</pre>
--->
+
+
+                    -->
                 </div>
 
                 <div class="col-sm-8 col-md-8">

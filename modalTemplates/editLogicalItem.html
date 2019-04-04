@@ -156,7 +156,7 @@
                             </select>
 
                             <div class="clickable " ng-click="selectVsFromServer()">Select ValueSet from Server</div>
-
+                            <div class="clickable " ng-show="selectedValueSet" ng-click="removeBinding()">Remove ValueSet binding</div>
 
 
                         </div>
@@ -187,6 +187,11 @@
                                 <uib-tab-heading><strong>Legacy</strong></uib-tab-heading>
                                 <textarea class="form-control" rows="4" ng-model="input.legacy"
                                           placeholder="Legacy issues"></textarea>
+                            </uib-tab>
+                            <uib-tab>
+                                <uib-tab-heading><strong>Review reason</strong></uib-tab-heading>
+                                <textarea class="form-control" rows="4" ng-model="input.lmReviewReason"
+                                          placeholder="Why is this element flagged for review"></textarea>
                             </uib-tab>
 
                         </uib-tabset>

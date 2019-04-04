@@ -1053,6 +1053,24 @@
                                     </td>
                                 </tr>
 
+
+
+
+                                <tr ng-show = "selectedNode.data.edStatus && (selectedNode.data.edStatus !== 'included')" class="required">
+                                    <td>Status</td><td>{{selectedNode.data.edStatus}}
+
+                                    <span class="pull-right"><em>{{statusDescription[selectedNode.data.edStatus]}}</em></span>
+
+
+                                </td>
+                                </tr>
+                                <tr ng-show="selectedNode.data.lmReviewReason">
+                                    <td>Reason for review</td>
+                                    <td>
+                                        {{selectedNode.data.lmReviewReason}}
+
+                                    </td>
+                                </tr>
                                 <tr ng-show="selectedNode.data.alias">
                                     <td width="20%">Alias</td>
                                     <td>
@@ -1065,15 +1083,6 @@
                                 </tr>
 
 
-                                <tr ng-show = "selectedNode.data.edStatus && (selectedNode.data.edStatus !== 'included')" class="required">
-                                    <td>Status</td><td>{{selectedNode.data.edStatus}}
-
-                                    <span class="pull-right"><em>{{statusDescription[selectedNode.data.edStatus]}}</em></span>
-
-
-                                </td>
-                                </tr>
-
                                 <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
                                 <tr><td>Description</td>
                                     <td>
@@ -1081,6 +1090,8 @@
 
                                     </td>
                                 </tr>
+
+
 
                                 <tr ng-show="selectedNode.data.usageGuide">
                                     <td>Usage Guide</td>
@@ -1218,11 +1229,11 @@
                                 <tr ng-show="selectedNode.data.fixedString">
                                     <td>Fixed</td><td>{{selectedNode.data.fixedString}}</td>
                                 </tr>
-
+<!--
                                 <tr ng-show="selectedNode.data.discriminator">
                                     <td>Discriminator</td><td>{{selectedNode.data.discriminator}}</td>
                                 </tr>
-
+-->
                                 <tr><td>Actions</td><td>
 
 

@@ -10,7 +10,7 @@ angular.module("sampleApp").controller('vsFinderCtrl',
 
         $scope.input.arStrength = ['required','extensible','preferred','example'];
 
-        $scope.input.strength = currentBinding.strength;
+        $scope.input.strength = currentBinding.strength || 'preferred';
         $scope.input.description = currentBinding.description;
 
         $scope.selectVSForDisplay = function(vs){

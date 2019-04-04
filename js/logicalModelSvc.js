@@ -66,7 +66,6 @@ angular.module("sampleApp")
             return fhirPath;
         };
 
-
         //common function for decorating various properties of the treeview when building form an SD. Used when creating a new one & editing
         function decorateTreeView(item,ed) {
             //decorate the type elements...
@@ -103,7 +102,6 @@ angular.module("sampleApp")
             }
 
         }
-
 
         //a cache of patient references by type. todo may need to enhance this when supporting profiles...
         var patientReferenceCache = {};
@@ -235,7 +233,7 @@ angular.module("sampleApp")
 
             },
             makeMappingDownload : function(SD) {
-                var download = "Path,Type,Multiplicity,Definition,Comment,Mapping,Fixed Value,Extension Url,Usage Notes,Misuse,Legacy\n";
+                var download = "Path,Type,Multiplicity,Definition,Comment,Mapping,Fixed Value,Extension Url,Usage Notes,Misuse,Legacy,reviewReason\n";
 
                 if (SD && SD.snapshot && SD.snapshot.element) {
                     SD.snapshot.element.forEach(function (ed) {
@@ -288,6 +286,7 @@ angular.module("sampleApp")
                             lne += ',';
                             lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.usageGuide) +',';
                             lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.legacy) +',';
+                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.lmReviewReason) +',';
                             lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.misuse) ;
                             download += lne + "\n";
                         }
@@ -947,7 +946,7 @@ angular.module("sampleApp")
 
 
             },
-            isDiscriminatorRequired : function(node,treeData){
+            isDiscriminatorRequiredDEP : function(node,treeData){
                 var discriminatorReq = false;
                 if (node.data && node.data.mappingFromED) {
                     var fhirPath = getFhirMapping(node.data.mappingFromED);     //the map for this element
@@ -2448,11 +2447,12 @@ angular.module("sampleApp")
                 var editorUrl = appConfigSvc.config().standardExtensionUrl.editor;
                 var usageGuideUrl = appConfigSvc.config().standardExtensionUrl.usageGuide;
                 var legacyUrl = appConfigSvc.config().standardExtensionUrl.legacy;
+                var lmReviewReasonUrl = appConfigSvc.config().standardExtensionUrl.lmReviewReason;
                 var misuseUrl = appConfigSvc.config().standardExtensionUrl.misuse;
                 var edStatusUrl = appConfigSvc.config().standardExtensionUrl.edStatus;
 
-                if (!misuseUrl) {
-                    alert("You must restart clinFHIR then the Logical Modeller to reset updated config")
+                if (!lmReviewReasonUrl) {
+                    alert("You must restart clinFHIR (clinfhir.com) then reload Logical Modeller to reset updated config")
                     return [];
                 }
 
@@ -2564,6 +2564,12 @@ angular.module("sampleApp")
                         var ext1 = Utilities.getSingleExtensionValue(ed, legacyUrl);
                         if (ext1 && ext1.valueString) {
                             item.data.legacy = ext1.valueString;
+                        }
+
+                        //look for review reason
+                        var ext1 = Utilities.getSingleExtensionValue(ed, lmReviewReasonUrl);
+                        if (ext1 && ext1.valueString) {
+                            item.data.lmReviewReason = ext1.valueString;
                         }
 
                         //look for ed Status
@@ -2814,6 +2820,7 @@ angular.module("sampleApp")
                 var editorUrl = appConfigSvc.config().standardExtensionUrl.editor;
                 var usageGuideUrl = appConfigSvc.config().standardExtensionUrl.usageGuide;
                 var legacyUrl = appConfigSvc.config().standardExtensionUrl.legacy;
+                var lmReviewReasonUrl = appConfigSvc.config().standardExtensionUrl.lmReviewReason;
                 var misuseUrl = appConfigSvc.config().standardExtensionUrl.misuse;
                 var edStatusUrl = appConfigSvc.config().standardExtensionUrl.edStatus;
 
@@ -3067,8 +3074,8 @@ angular.module("sampleApp")
                     if (data.misuse) {
                         Utilities.addExtensionOnce(ed, misuseUrl, {valueString: data.misuse})
                     }
-                    if (data.legacy) {
-                        Utilities.addExtensionOnce(ed, legacyUrl, {valueString: data.legacy})
+                    if (data.lmReviewReason) {
+                        Utilities.addExtensionOnce(ed, lmReviewReasonUrl, {valueString: data.lmReviewReason})
                     }
                     if (data.edStatus) {
                         Utilities.addExtensionOnce(ed, edStatusUrl, {valueString: data.edStatus})
