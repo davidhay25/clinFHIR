@@ -115,7 +115,7 @@ response = syncRequest('GET', baseUrl, options);
 let baseModel = JSON.parse(response.body.toString())
 
 let profile = {resourceType:'StructureDefinition'};
-let rootName = "NhiPatient"
+let rootName = "nhipatient"
 profile.url = "http://hl7.org.nz/fhir/StructureDefinition/"+rootName;
 profile.id=rootName;
 profile.name = rootName;
@@ -253,7 +253,7 @@ baseModel.snapshot.element.forEach(function(ed,inx){
 });
 
 
-fs.writeFileSync("/Users/davidhay/nzIG/resources/structuredefinition-nhipatient.json",JSON.stringify(profile))
+fs.writeFileSync("/Users/davidhay/nhiIG/resources/structuredefinition-nhipatient.json",JSON.stringify(profile))
 
 function addSlices(baseType,diff,baseED,mappings) {
 

@@ -369,7 +369,7 @@ console.log($scope.taskNode.data.idFromSD)
 
                                 }
 
-                            },10000)
+                            },5000)
 
 
                             //want to add the new task to the list of tasks...
@@ -425,11 +425,8 @@ console.log($scope.taskNode.data.idFromSD)
 
             Utilities.perfromQueryFollowingPaging(url).then(
 
-           // $http.get(url).then(
+
                 function(bundle) {
-                    /*if (data.data && data.data.entry) {
-                        console.log(data.data)
-                        data.data.entry.forEach(function (entry) {*/
 
                     if (bundle && bundle.entry) {
                         console.log(bundle)
@@ -457,8 +454,9 @@ console.log($scope.taskNode.data.idFromSD)
                                 console.log('Task #'+ resource.id + ' has no extension for the path')
                             }
 
-                        })
+                        });
                         console.log($scope.tasks)
+                        //$scope.$digest();
                        // console.log($scope.tasks)
                        // console.log(angular.toJson(missing));
                     }
