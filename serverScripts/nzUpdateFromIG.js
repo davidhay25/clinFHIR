@@ -19,7 +19,7 @@ ig.package.forEach(function (package) {
             console.log(ref)
             let ar = ref.split('/');
             let type = ar[0].toLowerCase();
-            let id = ar[1].toLowerCase();
+            let id = ar[1]; //.toLowerCase();
             let result = loadResource(type,id)
             if (result) {
                 console.log('found: '+ type + " : " + result.file)
@@ -64,6 +64,8 @@ ig.package.forEach(function (package) {
 
 
 
+            } else {
+                console.log()
             }
 
 
@@ -76,7 +78,7 @@ function loadResource(type,id) {
     let ar = []
     let t = type.toLowerCase();
 
-    if (t = 'structuredefinition') {
+    if (t == 'structuredefinition') {
         //grab the SD that the ig builder created as it will have the snapshot
         let fileName = igRoot + 'output/StructureDefinition-'+id + '.xml'
         try {
@@ -99,7 +101,7 @@ function loadResource(type,id) {
                 let contents = fs.readFileSync(ar[i],{encoding:'utf8'});
                 return {content: contents,file: ar[i]};
             } catch (ex) {
-
+                console.log(ar[i] + ' not found')
             }
 
         }
