@@ -911,11 +911,22 @@
                     <br/>
                     <div class="pull-right">
                         <button class="btn btn-link " ng-click="updateDoc()">Update</button>
+
+                        <a ng-show="downloadLinkDocName" class="btn btn-link pull-right" download="{{downloadLinkDocName}}"
+                           href="{{downloadLinkDoc}}" title="{{downloadLinkDocName}}" >
+                            Download HTML file
+                        </a>
+
+
                     </div>
 
                     <uib-tabset>
+
                         <uib-tab heading="Html">
                             <br/>
+
+                            <iframe id="htmlDoc" width="100%" height = "600px"></iframe>
+
                             <div class="md">
                                 <p ng-bind-html="mdDoc |markDown"></p>
                             </div>

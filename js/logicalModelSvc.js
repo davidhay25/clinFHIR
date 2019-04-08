@@ -1195,12 +1195,14 @@ angular.module("sampleApp")
             generateDoc : function(tree) {
                 var deferred = $q.defer();
                 //var simpleExtensionUrl = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl;
-                var arDoc = []
+                var arDoc = [];
+
                 var arQueries = [];
 
 
 
-                tree.forEach(function (branch) {
+
+                        tree.forEach(function (branch) {
                     var data = branch.data;
 
                     var path = data.path;     //this is the
@@ -1351,6 +1353,169 @@ angular.module("sampleApp")
                         ar.push("")
                     }
                 }
+            },
+            generateHTML : function(tree) {
+                var deferred = $q.defer();
+                var arDoc = []
+
+                //arDoc.push('<style> ')
+
+
+
+                tree.forEach(function (branch) {
+                    var data = branch.data;
+
+                    var path = data.path;     //this is the
+                    var arPath = path.split('.');
+                    if (arPath.length == 1) {
+                        //this is the first node. Has 'model level' data...
+                        if (data.header) {
+                            var title = data.header.title || data.header.name;
+
+                            arDoc.push("<h1>" + title) + "<h1>";
+
+/*
+                            addTextIfNotEmpty(arDoc, data.header.purpose);
+
+                            if (data.header.baseType) {
+                                arDoc.push("**Base type is " + data.header.baseType + "**");
+                                arDoc.push("");
+                            }
+                            */
+
+                        }
+
+
+                    } else {
+                        //this is an 'ordinary node
+                        arPath.splice(0, 1);     //ar is the path as an array...
+
+                        //if this is a backbone element, create a new section
+                        if (data.type) {
+                            if (data.type[0].code == 'BackboneElement' ){
+                                arDoc.push("<br/><br/><hr/>")
+                                arDoc.push(addTaggedLine("h2",arPath.join('.')));
+                                arDoc.push(addTaggedLine("p",data.description))
+
+                            } else {
+                                arDoc.push(addTaggedLine("h3",arPath.join('.')));
+
+                                arDoc.push("<table class='dTable'>");
+
+                                addRowIfNotEmpty(arDoc,'Name',data.name);
+
+                                if (data.alias) {
+                                    let alias = "";
+                                    data.alias.forEach(function (al) {
+                                        alias += "<div>" + al + "</div>";
+
+                                    })
+                                    //alias = alias.substring(0,alias.length -2);
+                                    addRowIfNotEmpty(arDoc,'Aliases',alias)
+                                }
+
+                                //console.log(data.alias)
+
+                                addRowIfNotEmpty(arDoc,'Short description',data.short);
+                                addRowIfNotEmpty(arDoc,'Full description',data.description);
+                                addRowIfNotEmpty(arDoc,'Comments',data.comments);
+
+                                let mult = data.min + ".." + data.max;
+                                addRowIfNotEmpty(arDoc,'Multiplicity',mult);
+
+                                let type = "";
+                                data.type.forEach(function(typ){
+                                    let targ = ""
+                                    if (typ.code == 'Reference') {
+                                        if (typ.targetProfile) {
+                                            targ = " --> " + $filter('referenceType')(typ.targetProfile[0])
+                                        }
+
+
+                                        console.log(typ)
+
+                                    }
+
+                                    type += "<div>" + typ.code + targ +  "</div>";
+
+
+                                })
+                                //type = type.substring(0,type.length -2);
+
+                                addRowIfNotEmpty(arDoc,'Datatype/s',type)
+
+
+
+                                addRowIfNotEmpty(arDoc,'Usage Guide',data.usageGuide);
+                                addRowIfNotEmpty(arDoc,'Misuse',data.misuse);
+
+                                arDoc.push("</table>");
+                            }
+                        }
+
+
+
+
+
+                    }
+                });
+
+
+                const header = `   
+                    <html><head>
+                    <style>
+                    
+                        h1, h2, h3, h4 {
+                         font-family: Arial, Helvetica, sans-serif;
+                        }
+                    
+                        tr, td {
+                            border: 1px solid black;
+                            padding : 10px;
+                        }
+                    
+                        .dTable {
+                            font-family: Arial, Helvetica, sans-serif;
+                            width:100%;
+                            border: 1px solid black;
+                            border-collapse: collapse;
+                        }
+                        
+                        .col1 {
+                            background-color:Gainsboro;
+                        }
+                                   
+                    </style>
+                    </head>
+                    <body style="padding: 8px;">
+                    
+                `;
+
+                const footer = "</body></html>"
+
+
+                let html = header + arDoc.join("\n") + footer;
+                //console.log(html)
+
+                deferred.resolve(html)
+                return deferred.promise;
+
+                function addRowIfNotEmpty(ar,description,data) {
+                    if (data) {
+                        ar.push('<tr>');
+                        ar.push('<td width="20%" class="col1">' + description + "</td>");
+                        ar.push('<td>' + data + "</td>");
+                        ar.push('</tr>');
+
+                    }
+
+                }
+
+                function addTaggedLine(tag,line) {
+                    return "<"+tag + ">"+line+"</"+tag+">"
+                }
+
+
             },
             generateFHIRProfile : function(internalLM) {
                 //generate a real FHIR profile from the logical model

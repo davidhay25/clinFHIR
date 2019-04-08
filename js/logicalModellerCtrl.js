@@ -1039,11 +1039,33 @@ angular.module("sampleApp")
 
             */
             $scope.updateDoc = function(){
+
+                logicalModelSvc.generateHTML($scope.treeData).then(
+                    function(doc) {
+                        $scope.mdDoc = doc;
+                        $('#htmlDoc').contents().find('html').html(doc)
+
+
+
+                        $scope.downloadLinkDoc = window.URL.createObjectURL(new Blob([doc],
+                            {type: "text/html"}));
+
+                        //$scope.downloadLinkJsonName = "downloaded"
+                        var now = moment().format();
+                        $scope.downloadLinkDocName = $scope.treeData[0].data.header.name + '-' + now + '.html';
+
+
+
+
+                    }
+                )
+                /*
                 logicalModelSvc.generateDoc($scope.treeData).then(
                     function(doc) {
                         $scope.mdDoc = doc;
                     }
                 )
+                */
 
             };
 
