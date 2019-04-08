@@ -285,9 +285,9 @@ angular.module("sampleApp")
                             }
                             lne += ',';
                             lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.usageGuide) +',';
-                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.misuse) ;
+                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.misuse) +',';
                             lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.legacy) +',';
-                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.lmReviewReason) +',';
+                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.lmReviewReason)
 
                             download += lne + "\n";
                         }
