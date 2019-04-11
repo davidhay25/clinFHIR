@@ -3,12 +3,13 @@
 // upload files in an IG buolder ig to a server
 const fs = require('fs');
 const syncRequest = require('sync-request');
-const confServerRoot = "http://snapp.clinfhir.com:8081/baseDstu3/"
+//const confServerRoot = "http://snapp.clinfhir.com:8081/baseDstu3/"
+const confServerRoot = "http://moh.clinfhir.com:8040/baseDstu3/"
 const termServerRoot = "https://ontoserver.csiro.au/stu3-latest/"
 
 let igRoot = '/Users/davidhay/nhiIG/';
 
-let fileName = igRoot + 'resources/ig.json';
+let fileName = igRoot + 'resources/nzig.json';
 
 var ig = JSON.parse( fs.readFileSync(fileName,{encoding:'utf8'}));
 
@@ -33,6 +34,9 @@ ig.package.forEach(function (package) {
                         break;
                     case 'codesystem' :
                         url = termServerRoot + 'CodeSystem/'+id
+                        break;
+                    case 'operationdefinition' :
+                        url = confServerRoot + 'OperationDefinition/'+id
                         break;
                 }
 

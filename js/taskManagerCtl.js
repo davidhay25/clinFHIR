@@ -139,6 +139,53 @@ angular.module("sampleApp").controller('taskManagerCtrl',
         });
 
 
+        $scope.makeReport = function() {
+            console.log( $scope.hashComments)
+            console.log($scope.treeData)
+
+
+            let report = taskSvc.makeHTMLFile($scope.treeData,$scope.hashComments,$scope.model,$scope.stateHash);
+            //$scope.htmlReport = report;
+
+            $('#htmlReport').contents().find('html').html(report)
+
+            $scope.downloadReport = window.URL.createObjectURL(new Blob([report],
+                {type: "text/html"}));
+
+            //$scope.downloadLinkJsonName = "downloaded"
+            var now = moment().format();
+            $scope.downloadReportName = "commentReport" + '-' + now + '.html';
+
+
+
+/*
+
+            logicalModelSvc.generateHTML($scope.treeData).then(
+                function(doc) {
+                    $scope.mdDoc = doc;
+                    $('#htmlDoc').contents().find('html').html(doc)
+
+
+
+                    $scope.downloadLinkDoc = window.URL.createObjectURL(new Blob([doc],
+                        {type: "text/html"}));
+
+                    //$scope.downloadLinkJsonName = "downloaded"
+                    var now = moment().format();
+                    $scope.downloadLinkDocName = $scope.treeData[0].data.header.name + '-' + now + '.html';
+
+
+
+
+                }
+            )
+
+            */
+
+
+
+        }
+
 
 
         $http.get(IgUrl).then(
@@ -151,12 +198,9 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                             if (res.acronym == 'logical') {
                                 if (res.sourceReference && res.sourceReference.reference) {
                                     let ar = res.sourceReference.reference.split('/')
-
                                     $scope.allModels.push({id:ar[ar.length-1]})
                                 }
                             }
-
-
                         })
                     })
 
@@ -176,6 +220,25 @@ angular.module("sampleApp").controller('taskManagerCtrl',
         $scope.selectModel = function(entry) {
             console.log(entry)
             delete $scope.statusHistory;
+/*
+            $scope.elements = []
+            let url =  $scope.conformanceServer.url + 'StructureDefinition/'+ entry.id;
+            $http.get(url).then(
+                function(data) {
+                    console.log(data.data)
+                    data.data.snapshot.element.forEach(function (ed) {
+                        $scope.elements.push(ed.path)
+                    });
+
+                    console.log($scope.elements)
+
+                },
+                function(err) {
+                    console.log(err)
+                }
+            );
+*/
+
             loadTasksForModel(entry.id)
 
         };
@@ -304,8 +367,6 @@ angular.module("sampleApp").controller('taskManagerCtrl',
         };
 
         $scope.addNoteFromTreeViewDEP = function(note) {
-
-
 
             $scope.localTask.notes = $scope.localTask.notes || [];
 
@@ -485,7 +546,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             $scope.tasks.length = 0;
             let url = $scope.conformanceServer.url + "Task";    //from parent controller
             url += "?code="+taskCode.system +"|"+taskCode.code;
-            url += "&focus=StructureDefinition/"+ id
+            url += "&focus=StructureDefinition/"+ id;
 
             Utilities.perfromQueryFollowingPaging(url).then(
                 function(bundle) {
@@ -498,12 +559,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                             let resource = entry.resource;      //the fhir Task
 
                             let iTask = taskSvc.getInternalTaskFromResource(resource,fhirVersion)
-
-                           // hashNumberOfComments[iTask.path] = hashNumberOfComments[iTask.path] || 0
-                            //hashNumberOfComments[iTask.path] ++
                             hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
-
-
                             $scope.tasks.push(iTask)
                         });
 
@@ -528,32 +584,10 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                 }
             );
 
+            //sort by position in the tree
+            //$scope.elements
+//console.log($scope.treeData)
 
-
-            /*
-            $http.get(urlModel).then(
-                function(data) {
-                    let model = data.data;
-
-                    //let editorExtUrl = appConfigSvc.config().standardExtensionUrl.editor;
-                    $scope.editorEmail = taskSvc.getModelEditor(model);
-
-                    if (model.snapshot && model.snapshot.element) {
-                        model.snapshot.element.forEach(function (ed) {
-                            hashED[ed.path] = ed;
-                            //the id property is the original path when the element was created and is unchanged if the element is moved.
-                            //the comment path is actualluy that element...
-                            if (ed.id) {
-                                hashED[ed.id] = ed;
-                            }
-                        })
-                    }
-                },
-                function(err) {
-                    alert(angular.toJson(err))
-                }
-            )
-            */
         }
 
         function getTasksForPeriod(period,email,status) {
@@ -649,14 +683,16 @@ angular.module("sampleApp").controller('taskManagerCtrl',
         //count the numbers of tasks by path for the given period
         function countComments(tasks) {
             //period = period || 'all';
-            let hashNumberOfComments = {}
+            let hashNumberOfComments = {};      //just a count of comments
+            $scope.hashComments = {};              //a hash of the actual comment
             tasks.forEach(function (iTask) {
                 hashNumberOfComments[iTask.path] = hashNumberOfComments[iTask.path] || 0
                 hashNumberOfComments[iTask.path] ++
               //  hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
 
-
-            })
+                $scope.hashComments[iTask.path] = $scope.hashComments[iTask.path] || []
+                $scope.hashComments[iTask.path].push(iTask)
+            });
             return hashNumberOfComments
         }
 
@@ -666,12 +702,15 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             $http.get(urlModel).then(
                 function(data) {
                     $scope.model = data.data;
-                    //let model = data.data;
+
 
                     $scope.treeData = logicalModelSvc.createTreeArrayFromSD( $scope.model);
                     $scope.originalTreeData = angular.copy($scope.treeData);        //besaue the tree will be decorated later...
 
                     decorateTree( $scope.treeData,hash);
+                  //  $scope
+
+
                     /*
                     $scope.treeData.forEach(function (item) {
                         let id = item.data.idFromSD;

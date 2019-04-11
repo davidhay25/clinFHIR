@@ -1374,6 +1374,14 @@ angular.module("sampleApp")
 
                             arDoc.push("<h1>" + title) + "<h1>";
 
+
+                            if (data.header.purpose) {
+                                let tmp = $filter('markDown')(data.header.purpose)
+                                arDoc.push("<h2>Purpose of model</h2>");
+                                arDoc.push(tmp);
+
+                            }
+
 /*
                             addTextIfNotEmpty(arDoc, data.header.purpose);
 
@@ -1384,6 +1392,8 @@ angular.module("sampleApp")
                             */
 
                         }
+
+                        arDoc.push("<h1>Structured content</h1>");
 
 
                     } else {
@@ -1432,14 +1442,21 @@ angular.module("sampleApp")
                                         }
 
 
-                                        console.log(typ)
+                                        //console.log(typ)
 
                                     }
 
                                     type += "<div>" + typ.code + targ +  "</div>";
 
 
+
                                 })
+                                if (data.selectedValueSet && data.selectedValueSet.valueSet) {
+                                    type +=  "<i>"+ data.selectedValueSet.valueSet + "</i> ("+ data.selectedValueSet.strength + ")"
+
+
+                                }
+
                                 //type = type.substring(0,type.length -2);
 
                                 addRowIfNotEmpty(arDoc,'Datatype/s',type)
@@ -1448,6 +1465,17 @@ angular.module("sampleApp")
 
                                 addRowIfNotEmpty(arDoc,'Usage Guide',data.usageGuide);
                                 addRowIfNotEmpty(arDoc,'Misuse',data.misuse);
+                                let fhirMapping;
+                                if (data.mappingFromED) {
+                                    data.mappingFromED.forEach(function (map) {
+                                        if (map.identity=='fhir') {
+                                            fhirMapping = map.map;
+                                        }
+                                    })
+                                }
+                                if (fhirMapping) {
+                                    addRowIfNotEmpty(arDoc,'Profile mapping',fhirMapping);
+                                }
 
                                 arDoc.push("</table>");
                             }
@@ -1471,7 +1499,7 @@ angular.module("sampleApp")
                     
                         tr, td {
                             border: 1px solid black;
-                            padding : 10px;
+                            padding : 8px;
                         }
                     
                         .dTable {
@@ -1517,7 +1545,7 @@ angular.module("sampleApp")
 
 
             },
-            generateFHIRProfile : function(internalLM) {
+            generateFHIRProfileDEP : function(internalLM) {
                 //generate a real FHIR profile from the logical model
                 var deferred = $q.defer();
                 var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
@@ -3017,7 +3045,6 @@ angular.module("sampleApp")
                     sd.purpose = header.purpose;
                 }
 
-
                 sd.publisher = header.publisher;
                 sd.status = 'draft';
                 sd.date = moment().format();
@@ -3194,7 +3221,7 @@ angular.module("sampleApp")
                             ed.type.push(newTyp);
                         })
                     }
-
+//todo - wrong!
                     ed.base = {
                         path: ed.path, min: 0, max: '1'
                     };

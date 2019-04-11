@@ -26,6 +26,92 @@ angular.module("sampleApp")
 
 
         return {
+            makeHTMLFile : function(treedata,hashComments,model,stateHash) {
+
+
+                let arReport = []
+                treedata.forEach(function (element) {
+                    console.log(element)
+                    let arComments = hashComments[element.id]
+                    if (arComments) {
+                        arReport.push(addTaggedLine('h2',element.id))
+
+                        arComments.forEach(function (comment) {
+                            arReport.push("<table width='100%'>")
+                            //arReport.push("<col style='width:50%'>")
+                            //arReport.push("<col width='50%'>")
+                            arReport.push("<tr>")
+
+                            arReport.push("<td valign='top'  width='40%'>")
+                            arReport.push(addTaggedLine('div',comment.description))
+                            arReport.push(addTaggedLine('i',comment.requesterDisplay))
+                            arReport.push("</td>")
+
+                            arReport.push("<td width='40%'>")
+                            if (comment.notes){
+                                comment.notes.forEach(function (note) {
+                                    arReport.push(addTaggedLine('div',note.text))
+                                    arReport.push(addTaggedLine('i',note.authorString))
+                                    arReport.push("<br/><br/>")
+                                })
+                            }
+
+                            arReport.push("</td>")
+                            arReport.push("<td valign='top' width='20%'>");
+                            arReport.push(stateHash[comment.status])
+                            arReport.push("</td>")
+                            arReport.push("</tr>")
+                            arReport.push("</table>")
+                        })
+
+                    }
+
+                });
+
+                const header = `   
+                    <html><head>
+                    <style>
+                    
+                        h1, h2, h3, h4 {
+                         font-family: Arial, Helvetica, sans-serif;
+                        }
+                    
+                        tr, td {
+                            border: 1px solid black;
+                            padding : 8px;
+                        }
+                    
+                        .dTable {
+                            font-family: Arial, Helvetica, sans-serif;
+                            width:100%;
+                            border: 1px solid black;
+                            border-collapse: collapse;
+                        }
+                        
+                        .col1 {
+                            background-color:Gainsboro;
+                        }
+                                   
+                    </style>
+                    </head>
+                    <body style="padding: 8px;">
+                    
+                `;
+
+                const footer = "</body></html>"
+
+
+                let html = header + arReport.join("\n") + footer;
+
+
+                return html;
+
+                function addTaggedLine(tag,line) {
+                    return "<"+tag + ">"+line+"</"+tag+">"
+                }
+
+            },
+
             logError : function(obj) {
 
             },
