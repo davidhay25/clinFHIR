@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2019-04-26';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2019-04-26a';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -181,7 +181,7 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'csiroProject',version:3,url:"http://home.clinfhir.com:8030/baseDstu3/",everythingOperation:true});
         defaultConfig.allKnownServers.push({name:'nzProject',version:3,url:"http://home.clinfhir.com:8040/baseDstu3/",everythingOperation:true});
 
-        defaultConfig.allKnownServers.push({name:'HSPC Tutorial',version:3,url:"https://api-v8-stu3.hspconsortium.org/ClinFHIRTutorial/open/",everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:'HSPC Tutorial',version:3,url:"https://api-v8-stu3.hspconsortium.org/ClinFHIRTutorial/open/",everythingOperation:false});
 
 
 
