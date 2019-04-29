@@ -1142,6 +1142,18 @@
                                     <div ng-show="selectedNode.data.mapping"><em>{{selectedNode.data.mapping}}</em></div>-->
                                 </td></tr>
 
+                                <tr ng-show="selectedNode.data.lmElementLink">
+                                    <td>Link to IG page</td>
+                                    <td>
+                                        <a ng-href="{{selectedNode.data.lmElementLink}}" target="_blank">
+                                            {{selectedNode.data.lmElementLink}}
+                                        </a>
+
+
+
+                                    </td>
+                                </tr>
+
 
 
                                 <tr ng-show="selectedNode.data.fhirMappingExtensionUrl"><td>Extension Url</td>

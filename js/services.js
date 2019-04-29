@@ -32,10 +32,17 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
         //find where the serverId is...
         var serverId;
+
         serverId = headers('Content-Location');
+        serverId = serverId ||  headers('content-location');
+        serverId = serverId ||  headers('location');
+        serverId = serverId ||  headers('Location');
+
+/*
         if (! serverId) {
             serverId = headers('Location');
         }
+        */
         if (! serverId) {
             return null;
         }

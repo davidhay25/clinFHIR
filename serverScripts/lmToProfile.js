@@ -177,7 +177,7 @@ baseModel.snapshot.element.forEach(function(ed,inx){
 
         if (!modelPathHash[basePath]) {
             //There is no element in the model mapped to this one - or it has been excluded...
-            //console.log('Warning: ' + basePath + " not found")
+            console.log('Warning: ' + basePath + " not found")
 
             //just make sure this isn't one of the elements in the profile, even if not in the model
             let ar = basePath.split('.');
@@ -185,14 +185,16 @@ baseModel.snapshot.element.forEach(function(ed,inx){
             //arFixedElements are elements like text, contained that generally aren't in the model, but shoudl not be excluded from the profile
             if (arFixedElements.indexOf(ar[1]) == -1){
                 //cleanED(newEd,baseType)
+
                 //if the parent element is already in the diff, then don't add it
                 let parentInDiff = false;
+                /* temp
                 profile.differential.element.forEach(function(elementDef){
                     if (basePath.startsWith(elementDef.path)) {
                         parentInDiff = true;
                     }
                 });
-
+*/
                 if (!parentInDiff) {
                     ed.max = "0";
                     ed.min = 0;  //todo - is there a situation where the base min = 1??

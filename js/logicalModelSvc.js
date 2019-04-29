@@ -287,7 +287,8 @@ angular.module("sampleApp")
                             lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.usageGuide) +',';
                             lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.misuse) +',';
                             lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.legacy) +',';
-                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.lmReviewReason)
+                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.lmReviewReason),
+                                lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.lmElementLink)
 
                             download += lne + "\n";
                         }
@@ -2645,7 +2646,10 @@ angular.module("sampleApp")
                 var misuseUrl = appConfigSvc.config().standardExtensionUrl.misuse;
                 var edStatusUrl = appConfigSvc.config().standardExtensionUrl.edStatus;
 
-                if (!lmReviewReasonUrl) {
+                var lmElementLinkUrl = appConfigSvc.config().standardExtensionUrl.lmElementLink;
+
+
+                if (!lmElementLinkUrl) {
                     alert("You must restart clinFHIR (clinfhir.com) then reload Logical Modeller to reset updated config")
                     return [];
                 }
@@ -2764,6 +2768,12 @@ angular.module("sampleApp")
                         var ext1 = Utilities.getSingleExtensionValue(ed, lmReviewReasonUrl);
                         if (ext1 && ext1.valueString) {
                             item.data.lmReviewReason = ext1.valueString;
+                        }
+
+                        //look for review reason
+                        var ext1 = Utilities.getSingleExtensionValue(ed, lmElementLinkUrl);
+                        if (ext1 && ext1.valueString) {
+                            item.data.lmElementLink = ext1.valueString;
                         }
 
                         //look for ed Status
@@ -3017,6 +3027,7 @@ angular.module("sampleApp")
                 var lmReviewReasonUrl = appConfigSvc.config().standardExtensionUrl.lmReviewReason;
                 var misuseUrl = appConfigSvc.config().standardExtensionUrl.misuse;
                 var edStatusUrl = appConfigSvc.config().standardExtensionUrl.edStatus;
+                var lmElementLinkUrl = appConfigSvc.config().standardExtensionUrl.lmElementLink;
 
                 //todo - should use Utile.addExtension...
                 var sd = {resourceType: 'StructureDefinition'};
@@ -3269,6 +3280,10 @@ angular.module("sampleApp")
                     }
                     if (data.lmReviewReason) {
                         Utilities.addExtensionOnce(ed, lmReviewReasonUrl, {valueString: data.lmReviewReason})
+                    }
+
+                    if (data.lmElementLink) {
+                        Utilities.addExtensionOnce(ed, lmElementLinkUrl, {valueString: data.lmElementLink})
                     }
                     if (data.edStatus) {
                         Utilities.addExtensionOnce(ed, edStatusUrl, {valueString: data.edStatus})

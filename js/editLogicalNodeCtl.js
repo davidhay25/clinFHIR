@@ -235,6 +235,7 @@ angular.module("sampleApp")
                 $scope.input.usageGuide = data.usageGuide;
                 $scope.input.legacy = data.legacy;
                 $scope.input.lmReviewReason = data.lmReviewReason;
+                $scope.input.lmElementLink = data.lmElementLink;
 
                 //data.edStatus = data.edStatus || 'included'
                 $scope.input.edStatus = data.edStatus;
@@ -920,6 +921,10 @@ angular.module("sampleApp")
                     if ($scope.input.lmReviewReason) {
                         vo.lmReviewReason = $scope.input.lmReviewReason;
                     }
+
+                if ($scope.input.lmElementLink) {
+                    vo.lmElementLink = $scope.input.lmElementLink;
+                }
 
                 if ($scope.input.edStatus) {
                     vo.edStatus = $scope.input.edStatus;
