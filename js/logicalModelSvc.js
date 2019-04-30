@@ -233,7 +233,7 @@ angular.module("sampleApp")
 
             },
             makeMappingDownload : function(SD) {
-                var download = "Path,Type,Multiplicity,Definition,Comment,Mapping,Fixed Value,Extension Url,Usage Notes,Misuse,Legacy,reviewReason\n";
+                var download = "Path,Type,Binding,Multiplicity,Definition,Comment,Mapping,Fixed Value,Extension Url,Usage Notes,Misuse,Legacy,ReviewReason,Link,Status\n";
 
                 if (SD && SD.snapshot && SD.snapshot.element) {
                     SD.snapshot.element.forEach(function (ed) {
@@ -252,10 +252,12 @@ angular.module("sampleApp")
                                     if (typ.code == 'Reference') {
                                         var resourceType = $filter('referenceType')(ed.type[0].targetProfile)
                                         lne += ' -> '+ resourceType
-
-
                                     }
-                                })
+
+
+
+
+                                });
 
 
 
@@ -263,6 +265,24 @@ angular.module("sampleApp")
                             } else {
                                 lne += ','
                             }
+
+                            //add a binding (if any)
+                            if (ed.binding) {
+                                if (ed.binding.valueSet) {
+                                    //this is R4
+                                    lne +=  ed.binding.valueSet
+                                } else {
+                                    //this is R3
+                                    var ref = ed.binding.valueSetReference;
+                                    if (ref) {
+                                        lne += ref.reference;
+
+                                    }
+                                }
+                                lne += ','
+
+                            }
+                            lne += ',';
 
                             lne += ed.min + '..'+ed.max + ',';
                             lne += makeSafe(ed.definition) + ",";
@@ -287,8 +307,12 @@ angular.module("sampleApp")
                             lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.usageGuide) +',';
                             lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.misuse) +',';
                             lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.legacy) +',';
-                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.lmReviewReason),
-                                lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.lmElementLink)
+                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.lmReviewReason) +',';
+                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.lmElementLink) +',';
+                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.edStatus) +',';
+
+                            //var edStatusUrl = appConfigSvc.config().standardExtensionUrl.edStatus;
+
 
                             download += lne + "\n";
                         }
