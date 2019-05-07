@@ -35,9 +35,10 @@ var taskModule = require("./serverModuleTask");
 taskModule.setup(app,wss,WebSocket)     // need WebSocket for the constants
 
 //for v2 processing
+console.log('including server modele')
 let v2Module = require("./serverModuleV2");
 v2Module.setup(app);
-
+console.log('included server modele')
 
 wss.on('connection', function connection(ws) {
     ws.on('message', function incoming(message) {
