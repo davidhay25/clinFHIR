@@ -11,7 +11,6 @@ function setup(app,) {
             res.send(file)
         })
 
-
     });
 
     app.get('/v2/messages', function (req, res) {
@@ -21,16 +20,18 @@ function setup(app,) {
 
 
         let ar = []
+
+
+        fs.readdir(msgFolder,function(err,files) {
+            res.json(files)
+        })
+        /*
         fs.readdir(msgFolder, (err, files) => {
             res.json(files)
            // console.log(files)
-            /*
-            files.forEach(file => {
-                ar.push(file);
-            });
-            */
+            
         });
-
+*/
 
     })
 }
