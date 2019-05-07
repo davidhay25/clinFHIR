@@ -34,10 +34,12 @@ const wss = new WebSocket.Server({server:server});
 var taskModule = require("./serverModuleTask");
 taskModule.setup(app,wss,WebSocket)     // need WebSocket for the constants
 
+//for v2 processing
+let v2Module = require("./serverModuleV2");
+v2Module.setup(app);
+
 
 wss.on('connection', function connection(ws) {
-
-
     ws.on('message', function incoming(message) {
         console.log('received: %s', message);
     });

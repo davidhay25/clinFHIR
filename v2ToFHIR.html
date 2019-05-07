@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <base href="/" />
+    <meta charset="UTF-8">
+
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+    <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+    <script src="js/libs/firebase.js"></script>
+    <script src="js/libs/angularfire.min.js"></script>
+    <script src="js/libs/angular-sanitize.js"></script>
+
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase','ngSanitize']).config(function($locationProvider) {
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+        angular.module("sampleApp").constant("moment", moment);
+
+
+
+    </script>
+    <script src="js/v2ToFHIR.js"></script>
+    <script src="js/v2ToFhirSvc.js"></script>
+    <script src="js/libs/vis.min.js"></script>
+
+    <style>
+        .myForm {
+            padding: 8px;
+        }
+        .modelScroll {
+            height: 500px;
+            overflow-y: scroll;
+        }
+        #resourceGraph {
+            width: 100%;
+            height: 550px;
+            border: 1px solid lightgray;
+        }
+
+    </style>
+
+    <script src="js/modalDialogSvc.js"></script>
+    <script src="js/appConfigSvc.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/filters.js"></script>
+
+    <title>v2 to FHIR</title>
+
+</head>
+
+
+<body style="padding: 8px;padding-top: 80px" >
+
+<div ng-app="sampleApp" ng-controller="v2Ctrl" class="container-fluid">
+
+    <nav ng-hide="startupParams.hideNav" class="navbar navbar-default navbar-fixed-top" role="navigation">
+
+        <div class="container-fluid">
+            <div class="col-md-2 ">
+                <span>
+                    <a class="navbar-brand" href="#" ng-click="showVersion()">
+                        Process v2 message
+                    </a>
+                </span>
+
+            </div>
+
+            <div class="col-md-4">
+                <div class="navbar-text">
+                    Conformance server: {{conformanceServer}}
+                </div>
+
+            </div>
+
+            <div class="col-md-2">
+                <div class="navbar-text">
+                    Transform engine:
+                </div>
+
+            </div>
+            <div class="col-md-3">
+                <div class="navbar-text">
+
+                    <select class="form-control" ng-model="engine"
+                            ng-options = "engine.name for engine in engines"></select>
+                </div>
+
+            </div>
+
+            <div class="col-md-1">
+                <form class="navbar-form navbar-left">
+                    <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
+                </form>
+            </div>
+
+        </div>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-2">
+            <div class="row">
+                <div class="col-sm-4">
+                    <h4>Messages</h4>
+                </div>
+                <div class="col-sm-8">
+                    <button style="padding-top: 10px" class="btn btn-link pull-right" ng-click="pasteV2()">Paste V2</button>
+                </div>
+            </div>
+
+            <div class="list-group">
+                <div ng-class="{'list-group-item':1,'listItemSelected':selectedMessageName == name}"
+                     ng-repeat="name in messageNames"
+                ng-click = selectMessage(name)>
+                    {{name}}
+                </div>
+            </div>
+
+        </div>
+        <div class="col-md-10">
+            <button ng-show="selectedMessage" class="btn btn-primary pull-right" ng-click="convert()">Convert</button>
+
+            <uib-tabset>
+                <uib-tab heading="V2 message" ng-show="arSelectedMessage">
+                    <div class="row">
+                        <div class="col-md-8">
+
+                            <div ng-repeat="line in arSelectedMessage">
+                                <div ng-click="selectLine(line)">{{line}}</div>
+                                <br/>
+                            </div>
+
+
+                        </div>
+                        <div class="col-md-4">
+                            <table class="table">
+                                <tr ng-repeat="cell in arSelectedLine track by $index" ng-hide="cell == ''">
+                                    <td>{{$index}}</td>
+                                    <td>
+
+                                        <div uib-popover-html="showSubComponents(cell)"
+                                             popover-placement="left"
+                                             popover-trigger="'mouseenter'">{{cell}}</div>
+
+                                        </td>
+                                </tr>
+                            </table>
+
+
+
+                        </div>
+                    </div>
+                </uib-tab>
+                <uib-tab heading="FHIR Bundle visualizations" ng-show="fhir">
+                    <br/>
+                    <div>
+                        <!--
+                        <button ng-show="selectedMessage" class="btn btn-primary" ng-click="convert()">Convert</button>
+-->
+                        <button class="btn btn-link pull-right" ng-show="fhir"
+                                ng-click="copyToClipboard()">Copy to Clipboard</button>
+
+                    </div>
+                    <!--
+                    <div class="clearfix"></div>
+-->
+                    <uib-tabset>
+                        <uib-tab heading="Json">
+                            <div>
+                                <pre ng-show="fhir">{{fhir | json}}</pre>
+                            </div>
+                        </uib-tab>
+                        <uib-tab>
+                            <uib-tab-heading>
+                                Bundle entries <span class="badge">{{fhir.entry.length}}</span>
+                            </uib-tab-heading>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="list-group">
+                                        <div ng-class="{'list-group-item':true}" ng-repeat="entry in fhir.entry"
+                                        ng-click="selectBundleEntry(entry)">
+                                            <strong>{{entry.resource.resourceType}}</strong>
+                                            <div><em>{{entry.fullUrl}}</em></div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-8">
+                                    <pre>{{selectedBundleEntry | json}}</pre>
+                                </div>
+
+                            </div>
+                        </uib-tab>
+                        <uib-tab heading="Graph" select="fitGraph()">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div id="resourceGraph"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <pre>{{selectedNode.entry | json}}</pre>
+                                </div>
+                            </div>
+
+                        </uib-tab>
+                    </uib-tabset>
+
+
+
+
+                </uib-tab>
+                <uib-tab ng-show="fhir">
+                    <uib-tab-heading>
+                        Validation results <span class="badge">{{valErrors}} errors  {{valWarnings}} warnings</span>
+                    </uib-tab-heading>
+                    <br/>
+                    <!--
+
+
+
+                    <div>
+                        <button ng-show="fhir" class="btn btn-danger" ng-click="validate()">Validate</button>
+                    </div>
+-->
+
+                   <uib-tabset>
+                       <uib-tab heading="Errors">
+                           <br/>
+
+                           <div class="row">
+                               <div class="col-md-6">
+                                   <div class="modelScroll">
+                                       <table class="table" style="cursor: pointer">
+                                           <tr><th>Severity</th><th>Code</th><th>Location/Diagnostics</th></tr>
+                                           <tr style="background-color: #ffaaaa" ng-repeat="issue in validationResult.issue"
+                                               ng-click = "selectIssue(issue)"
+                                               ng-show="issue.severity=='error'">
+                                               <td >
+                                                   {{issue.severity}}
+                                               </td>
+                                               <td >
+                                                   {{issue.code}}
+                                               </td>
+                                               <td>
+                                                   <div><em>
+                                                       <div ng-repeat="location in issue.location">
+                                                           {{location}}
+                                                       </div>
+                                                   </em></div>
+                                                   {{issue.diagnostics}}
+                                               </td>
+
+                                           </tr>
+
+                                           <tr ng-repeat="issue in validationResult.issue" ng-show="issue.severity !== 'error'"
+                                               ng-click = "selectIssue(issue)">
+                                               <td>
+                                                   {{issue.severity}}
+                                               </td>
+                                               <td >
+                                                   {{issue.code}}
+                                               </td>
+                                               <td >
+                                                   <div><em>
+                                                       <div ng-repeat="location in issue.location">
+                                                           {{location}}
+                                                       </div>
+                                                   </em></div>
+                                                   {{issue.diagnostics}}
+                                               </td>
+
+                                           </tr>
+
+
+                                       </table>
+                                   </div>
+
+                               </div>
+                               <div class="col-md-6">
+                                    <pre>{{selectedIssueEntry | json}}</pre>
+                               </div>
+                           </div>
+
+
+
+                       </uib-tab>
+                       <uib-tab heading="Json">
+                           <div>
+                               <pre ng-show="validationResult">{{validationResult | json}}</pre>
+                           </div>
+                       </uib-tab>
+                   </uib-tabset>
+
+
+
+
+                </uib-tab>
+
+                <uib-tab heading="Mappings in the spec" ng-show="fhir">
+                    <br/>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="list-group">
+                                <div ng-class="{'list-group-item':true,'listItemSelected':selectedBundleType == type}"
+                                     ng-repeat="type in BundleTypes"
+                                     ng-click="selectBundleType(type)">
+                                    {{type}}
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-10">
+                            <table class="table" ng-show="map">
+                                <tr>
+                                    <th>FHIR Path</th><th>Map</th><th>Data types</th>
+                                </tr>
+                                <tr ng-repeat = "element in map">
+                                    <td>{{element.path}}</td>
+                                    <td>{{element.map}}</td>
+
+                                    <td><div ng-repeat = "typ in element.type">
+                                        {{typ.code}}
+                                        <div ng-repeat="profile in typ.targetProfile">
+                                            {{profile}}
+                                        </div>
+                                    </div></td>
+
+                                </tr>
+                            </table>
+                        </div>
+
+                    </div>
+
+
+
+                </uib-tab>
+
+
+            </uib-tabset>
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+</body>
+</html>

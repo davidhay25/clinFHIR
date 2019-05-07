@@ -256,7 +256,6 @@ angular.module("sampleApp")
 
 
 
-
                                 });
 
 
@@ -1475,7 +1474,7 @@ angular.module("sampleApp")
 
 
 
-                                })
+                                });
                                 if (data.selectedValueSet && data.selectedValueSet.valueSet) {
                                     type +=  "<i>"+ data.selectedValueSet.valueSet + "</i> ("+ data.selectedValueSet.strength + ")"
 
