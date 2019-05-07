@@ -7,9 +7,15 @@ function setup(app,) {
     app.get('/v2/message/:name',function(req,res){
         console.log(req.params.name)
         const fileName = __dirname + '/artifacts/v2messages/'+req.params.name;
+
+        fs.readFile(fileName, function(err,file)  {
+            res.send(file)
+        })
+        /*
         fs.readFile(fileName, (err,file) => {
             res.send(file)
         })
+        */
 
     });
 
@@ -29,7 +35,7 @@ function setup(app,) {
         fs.readdir(msgFolder, (err, files) => {
             res.json(files)
            // console.log(files)
-            
+
         });
 */
 
