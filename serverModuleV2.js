@@ -11,11 +11,7 @@ function setup(app,) {
         fs.readFile(fileName, function(err,file)  {
             res.send(file)
         })
-        /*
-        fs.readFile(fileName, (err,file) => {
-            res.send(file)
-        })
-        */
+
 
     });
 
@@ -31,13 +27,7 @@ function setup(app,) {
         fs.readdir(msgFolder,function(err,files) {
             res.json(files)
         })
-        /*
-        fs.readdir(msgFolder, (err, files) => {
-            res.json(files)
-           // console.log(files)
 
-        });
-*/
 
     })
 }
