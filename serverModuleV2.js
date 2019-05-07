@@ -1,7 +1,7 @@
 let fs = require('fs');
 
 
-function setup(app,) {
+function setup(app) {
 
 
     app.get('/v2/message/:name',function(req,res){
