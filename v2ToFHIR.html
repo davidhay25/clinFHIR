@@ -18,15 +18,12 @@
     <script src="js/libs/angularfire.min.js"></script>
     <script src="js/libs/angular-sanitize.js"></script>
 
-
     <script>
         angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase','ngSanitize']).config(function($locationProvider) {
             $locationProvider.html5Mode(true);
             $locationProvider.hashPrefix('!');
         });
         angular.module("sampleApp").constant("moment", moment);
-
-
 
     </script>
     <script src="js/v2ToFHIR.js"></script>
@@ -133,21 +130,33 @@
                 <uib-tab heading="V2 message" ng-show="arSelectedMessage">
                     <div class="row">
                         <div class="col-md-8">
-
+<!--
                             <div ng-repeat="line in arSelectedMessage">
                                 <div ng-click="selectLine(line)">{{line}}</div>
                                 <br/>
+                            </div>
+-->
+                            <div class="list-group">
+                                <div ng-class="{'list-group-item':true,'listItemSelected':selectedLineInx == $index}"
+                                     ng-click="selectLine(line,$index)"
+                                     ng-repeat="line in arSelectedMessage">
+                                    {{line}}
+                                </div>
                             </div>
 
 
                         </div>
                         <div class="col-md-4">
                             <table class="table">
-                                <tr ng-repeat="cell in arSelectedLine track by $index" ng-hide="cell == ''">
+                                <tr ng-repeat="cell in arSelectedLine track by $index" ng-hide="cell == '' || cell == ' '">
                                     <td>{{$index}}</td>
                                     <td>
+                                        <div ng-show="$index==0">
+                                            <strong>{{cell}}</strong>
+                                        </div>
 
-                                        <div uib-popover-html="showSubComponents(cell)"
+
+                                        <div ng-hide="$index==0" uib-popover-html="showSubComponents(cell)"
                                              popover-placement="left"
                                              popover-trigger="'mouseenter'">{{cell}}</div>
 

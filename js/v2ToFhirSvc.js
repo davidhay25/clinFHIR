@@ -22,26 +22,39 @@ angular.module("sampleApp")
         objColours.MedicationDispense = '#FFFFCC';
         objColours.Composition = '#FFFFCC';
         objColours.Medication = '#FF9900';
-        objColours.Immunization = '#aeb76c'
+        objColours.Immunization = '#aeb76c';
 
         return {
 
-            makeGraph: function (bundle,hashErrors) {
+            makeGraph: function (bundle,hashErrors,serverRoot,hidePatient,centralResourceId) {
+
+                //serverRoot is used when the bundle comes from a server, and we want to convert
+                //user to convert relative to absolute references so the fullUrls work
+                //centralResourceId - only nodes with a link to that id are present...
+
                 var arNodes = [], arEdges = [];
                 var objNodes = {};
 
                 var allReferences = [];
-                //gAllReferences.length = 0;
 
                 bundle.entry.forEach(function(entry,inx) {
-                    //should always be a resource.id  todo? should I check
+
                     var resource = entry.resource;
-                    var node = {id: arNodes.length +1, label: resource.resourceType,
-                        shape: 'box',url:entry.fullUrl,cf : {entry:resource}};
+
+                    let url = entry.fullUrl;// || resource.resourceType + "/" + resource.id;
+
+                    //if there's no fullUrl, then make the url a relative one ({type}/{id).
+                    if (!url) {
+                        url = resource.resourceType + "/" + resource.id;
+                    }
+
+
+                    let node = {id: arNodes.length +1, label: resource.resourceType,
+                        shape: 'box',url:url,resource:resource, cf : {entry:resource}};
                     node.title = resource.resourceType ;
 
                     if (hashErrors && hashErrors[inx]) {
-                        node.label += " ("+hashErrors[inx].length +")"
+                        node.label += " ("+hashErrors[inx].length +")";
                         node.issues = hashErrors[inx];
                     }
 
@@ -52,12 +65,26 @@ angular.module("sampleApp")
                     }
 
                     arNodes.push(node);
-                    objNodes[node.url] = node;
+
+                    if (hidePatient) {
+
+                        if (node.title == 'Patient') {
+                            //objNodes[inx] = node;
+                        } else {
+                            objNodes[node.url] = node;
+                        }
+
+                    } else {
+                        objNodes[node.url] = node;
+                    }
+
 
                     var refs = [];
                     findReferences(refs,resource,resource.resourceType);
 
-                    console.log(refs);
+                    //console.log(refs);
+
+
 
                     refs.forEach(function(ref){
                         allReferences.push({src:node,path:ref.path,targ:ref.reference,index:ref.index})
@@ -68,21 +95,56 @@ angular.module("sampleApp")
 
 
                 });
-
+                console.log(objNodes)
 
                 //so now we have the references, build the graph model...
+                let hash = {};      //this will be a hash of nodes that have a reference to centralResourceId (if specified)
+                //hash[]
                 allReferences.forEach(function(ref){
-                    var targetNode = objNodes[ref.targ];
+                    //console.log(ref)
+
+                    let targetNode = objNodes[ref.targ];
+
+                    if (centralResourceId) {
+
+                        if (ref.src.resource.id == centralResourceId) {
+                            //this is from the central resource to the given central resource
+                            hash[ref.targ] = true;      //this is the url property of the node
+                            console.log('ref to central:' + ref.targ)
+                        }
+                    }
+
+
+                    //var targetNode = objNodes[ref.targ];
                     if (targetNode) {
                         var label = $filter('dropFirstInPath')(ref.path);
                         arEdges.push({id: 'e' + arEdges.length +1,from: ref.src.id, to: targetNode.id, label: label,arrows : {to:true}})
                     } else {
                         console.log('>>>>>>> error Node Id '+ref.targ + ' is not present')
                     }
-
                 });
 
-                var nodes = new vis.DataSet(arNodes);
+
+
+                var nodes;
+                if (centralResourceId) {
+                    //only include the nodes that have a reference to or from the central node
+                    let nodesToInclude = []
+                    arNodes.forEach(function(node){
+                        if (node.resource.id == centralResourceId) {
+                            //this is the central node
+                            nodesToInclude.push(node)
+                        } else if (hash[node.url]) {
+                            nodesToInclude.push(node)
+                        }
+                    });
+
+                    nodes = new vis.DataSet(nodesToInclude);
+
+                } else {
+                    nodes = new vis.DataSet(arNodes);
+                }
+
                 var edges = new vis.DataSet(arEdges);
 
                 // provide the data in the vis format
@@ -108,7 +170,21 @@ angular.module("sampleApp")
                                     if (obj.reference) {
                                         //this is a reference!
 
-                                        refs.push({path: lpath, reference: obj.reference})
+                                        if (obj.reference && obj.reference.indexOf('urn:uuid') !== -1) {
+                                            // this is an uuid
+                                            refs.push({path: lpath, reference: obj.reference})
+                                        } else {
+                                            if (serverRoot) {
+                                                //if there's a serverRoot and it this is a relative reference, then convert to an absolute reference
+                                                //todo check if relative first!
+                                                refs.push({path: lpath, reference: serverRoot + obj.reference})
+
+                                            } else {
+                                                refs.push({path: lpath, reference: obj.reference})
+                                            }
+                                        }
+
+
                                     } else {
                                         //if it's not a reference, then does it have any children?
                                         findReferences(refs,obj,lpath,inx)
@@ -123,7 +199,25 @@ angular.module("sampleApp")
                             if (value.reference) {
                                 //this is a reference!
                                 //if (showLog) {console.log('>>>>>>>>'+value.reference)}
-                                refs.push({path:lpath,reference : value.reference,index:index})
+
+
+                                if (value.reference.indexOf('urn:uuid') !== -1) {
+                                    // this is an uuid
+                                    //refs.push({path: lpath, reference: obj.reference})
+                                    refs.push({path: lpath, reference: value.reference, index: index})
+                                } else {
+
+
+                                    if (serverRoot) {
+                                        //if there's a serverRoot and it this is a relative reference, then convert to an absolute reference
+                                        //todo check if relative first!
+                                        refs.push({path: lpath, reference: serverRoot + value.reference, index: index})
+                                    } else {
+                                        refs.push({path: lpath, reference: value.reference, index: index})
+                                    }
+                                }
+
+
                             } else {
                                 //if it's not a reference, then does it have any children?
                                 findReferences(refs,value,lpath)

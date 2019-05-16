@@ -5,13 +5,12 @@ angular.module("sampleApp")
             //$scope.conformanceServer = 'http://snapp.clinfhir.com:8081/baseDstu3/';
             $scope.conformanceServer = 'http://fhirtest.uhn.ca/baseR4/';
 
-            $scope.engines = [{name:'Public Node-Red',api:'http://home.clinfhir.com:1880/v2/'}];
+            $scope.engines = [{name:'Public Node-Red',api:'http://home.clinfhir.com:1880/v2/',documentation:''}];
             //$scope.engines = [{name:'Node-Red',api:'http://localhost:1880/v2/'}];
             $scope.engines.push({name:'redux-r3'});
             $scope.engines.push({name:'redux-r4'});
             $scope.engines.push({name:"{name:'Local Node-Red',api:'http://localhost:1880/v2/'}"});
             $scope.engine = $scope.engines[0];
-
 
 
 
@@ -68,6 +67,14 @@ angular.module("sampleApp")
                 });
             };
 
+
+
+
+
+            $scope.test = function(){
+                alert('test')
+            }
+
             $scope.selectBundleType = function(type) {
                 $scope.selectedBundleType = type;
                 $http.get($scope.conformanceServer + '/StructureDefinition/'+type).then(
@@ -122,12 +129,12 @@ angular.module("sampleApp")
             };
 
             $scope.showSubComponents = function(cell){
-                console.log(cell)
+
                 var t = "";
                 var ar = cell.split('^')
                 ar.forEach(function (element, inx) {
                     t += '<div>'+ (inx+1) + " " +element+'</div>'
-                })
+                });
 
 
                 return t
@@ -283,9 +290,10 @@ angular.module("sampleApp")
                 }
             );
 
-            $scope.selectLine = function(line) {
+            $scope.selectLine = function(line,inx) {
+                $scope.selectedLineInx = inx;
                 $scope.arSelectedLine = line.split('|')
-                console.log($scope.arSelectedLine )
+
             };
 
             $scope.copyToClipboard = function(){
@@ -317,6 +325,12 @@ angular.module("sampleApp")
                 delete $scope.validationResult;
                 delete $scope.selectedMessage;
                 delete $scope.arSelectedMessage;
+                delete $scope.selectedLineInx;
+                delete $scope.arSelectedLine;
+                delete $scope.selectedLineInx;
+                delete $scope.selectedNode;
+                delete $scope.selectedBundleEntry;
+
                 $scope.selectedMessageName = name;
                 var url = 'v2/message/'+name;
                 console.log(url)
@@ -324,7 +338,12 @@ angular.module("sampleApp")
                     function(data) {
                         //console.log(data)
 
-                        let ar = data.data.split(/\n/)
+                        let msg = data.data.replace(/\|/g, '| ');
+
+                        //let msg = data.data.split('|').join('| ');
+                        let ar = msg.split(/\n/)
+
+                        //let ar = data.data.split(/\n/)
                         //console.log(ar)
                         $scope.selectedMessage = data.data;
                         $scope.arSelectedMessage = ar;
@@ -333,16 +352,6 @@ angular.module("sampleApp")
 
                 )
             };
-/*
-            function makeGraph(bundle) {
-                let lst = [];
-                bundle.entry.forEach(function(entry) {
-
-
-
-                })
-            }
-            */
 
 
         }

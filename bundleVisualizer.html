@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <base href="/" />
+    <meta charset="UTF-8">
+
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+    <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+    <script src="js/libs/firebase.js"></script>
+    <script src="js/libs/angularfire.min.js"></script>
+    <script src="js/libs/angular-sanitize.js"></script>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase','ngSanitize']).config(function($locationProvider) {
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+        angular.module("sampleApp").constant("moment", moment);
+
+    </script>
+    <script src="js/bundleVisualizerCtrl.js"></script>
+    <script src="js/v2ToFhirSvc.js"></script>
+    <script src="js/libs/vis.min.js"></script>
+    <script src="js/modalDialogSvc.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
+
+    <style>
+        .myForm {
+            padding: 8px;
+        }
+        .modelScroll {
+            height: 500px;
+            overflow-y: scroll;
+        }
+        .entryListScroll {
+            height: 500px;
+            overflow-y: scroll;
+        }
+        #resourceGraph {
+            width: 100%;
+            height: 550px;
+            border: 1px solid lightgray;
+        }
+        #singleResourceGraph {
+            width: 100%;
+            height: 550px;
+            border: 1px solid lightgray;
+        }
+
+
+
+    </style>
+
+    <script src="js/modalDialogSvc.js"></script>
+    <script src="js/appConfigSvc.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/filters.js"></script>
+    <script src="js/bundleVisualizerCtrl.js"></script>
+
+    <title>Bundle Visualizer</title>
+
+</head>
+
+
+<body style="padding: 8px;padding-top: 80px" >
+
+<div ng-app="sampleApp" ng-controller="bundleVisualizerCtrl" class="container-fluid">
+
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+
+        <div class="container-fluid">
+            <div class="col-md-2 ">
+                <span>
+                    <a class="navbar-brand" href="#" ng-click="showVersion()">
+                        Bundle visualizer
+                    </a>
+                </span>
+
+            </div>
+
+            <div class="col-md-4">
+                <div class="navbar-text">
+                    Conformance server: {{conformanceServer}}
+                </div>
+
+            </div>
+
+            <div class="col-md-2">
+                <div class="navbar-text">
+
+                </div>
+
+            </div>
+            <div class="col-md-3">
+                <div class="navbar-text">
+
+
+                </div>
+
+            </div>
+
+            <div class="col-md-1">
+                <form class="navbar-form navbar-left">
+                    <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
+                </form>
+            </div>
+
+        </div>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-2">
+            <div class="row">
+                <div class="col-sm-4">
+
+
+                    <h4>Bundles</h4>
+                </div>
+                <div class="col-sm-8">
+                    <button style="padding-top: 10px"
+                            class="btn btn-link pull-right"
+                            ng-click="importBundle()">
+                        Import Bundle
+                    </button>
+
+
+                </div>
+            </div>
+
+            <div><strong  class="center-block">Queries</strong></div>
+
+            <div class="list-group">
+                <div ng-class="{'list-group-item':1,'listItemSelected':query==selectedQuery}"
+                     ng-repeat="query in queries"
+                ng-click = "selectQuery(query)">
+                    {{query.display}}
+                </div>
+            </div>
+
+        </div>
+        <div class="col-md-10">
+
+            <uib-tabset>
+
+                <uib-tab heading="FHIR Bundle visualizations" ng-show="fhir">
+                    <br/>
+                    <div>
+
+                        <button class="btn btn-link pull-right" ng-show="fhir"
+                                ng-click="copyToClipboard()">Copy to Clipboard</button>
+
+                    </div>
+
+                    <uib-tabset>
+                        <uib-tab heading="Json">
+                            <div>
+                                <pre ng-show="fhir">{{fhir | json}}</pre>
+                            </div>
+                        </uib-tab>
+                        <uib-tab>
+                            <uib-tab-heading>
+                                Bundle entries <span class="badge">{{fhir.entry.length}}</span>
+                            </uib-tab-heading>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="entryListScroll">
+
+
+                                        <div class="list-group">
+                                        <div ng-class="{'list-group-item':true,'listItemSelected':selectedBundleEntry == entry}" ng-repeat="entry in fhir.entry"
+                                        ng-click="selectBundleEntry(entry,hashErrors[$index])">
+                                            <strong>{{entry.resource.resourceType}}</strong>
+                                            <span class="pull-right badge">{{hashErrors[$index].length}}</span>
+
+
+                                            <!-- if (hashErrors && hashErrors[inx]) {
+                        node.label += " ("+hashErrors[inx].length +")"
+                        node.issues = hashErrors[inx];
+                    }-->
+                                            <div><em>{{entry.fullUrl}}</em></div>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+
+
+                                    <uib-tabset>
+                                        <uib-tab heading="Json">
+                                            <pre>{{selectedBundleEntry | json}}</pre>
+                                        </uib-tab>
+                                        <uib-tab heading="References"  select="fitSingleGraph()">
+                                            <div id="singleResourceGraph"></div>
+                                        </uib-tab>
+                                        <uib-tab ng-show="selectedBundleEntryErrors.length > 0">
+                                            <uib-tab-heading>
+                                                Errors <span class="badge">{{selectedBundleEntryErrors.length}}</span>
+                                            </uib-tab-heading>
+                                            <div uib-alert class="alert-warning">
+                                                <table class="table">
+                                                    <tr ng-repeat="err in selectedBundleEntryErrors">
+                                                        <td>{{err.severity}}</td>
+                                                        <td>{{err.diagnostics}}</td>
+                                                        <td>
+                                                            <div ng-repeat="location in err.location">
+                                                                {{location}}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </uib-tab>
+                                    </uib-tabset>
+
+
+
+
+
+
+                                </div>
+
+                            </div>
+                        </uib-tab>
+                        <uib-tab heading="Graph" select="fitGraph()">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div id="resourceGraph"></div>
+                                </div>
+                                <div class="col-md-6">
+
+<!-- todo - selectedBundleEntryErrors not being created on graph select-->
+                                    <div uib-alert class="alert-warning" ng-show="selectedBundleEntryErrors.length > 0">
+                                        <table class="table">
+                                            <tr ng-repeat="err in selectedBundleEntryErrors">
+                                                <td>{{err.severity}}</td>
+                                                <td>{{err.diagnostics}}</td>
+                                                <td>
+                                                    <div ng-repeat="location in err.location">
+                                                        {{location}}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                    <pre>{{selectedNode.entry | json}}</pre>
+                                </div>
+                            </div>
+
+                        </uib-tab>
+                    </uib-tabset>
+
+
+
+
+                </uib-tab>
+                <uib-tab ng-show="fhir">
+                    <uib-tab-heading>
+                        Validation results <span class="badge">{{valErrors}} errors  {{valWarnings}} warnings</span>
+                    </uib-tab-heading>
+                    <br/>
+                    <!--
+
+
+
+                    <div>
+                        <button ng-show="fhir" class="btn btn-danger" ng-click="validate()">Validate</button>
+                    </div>
+-->
+
+                   <uib-tabset>
+                       <uib-tab heading="Errors">
+                           <br/>
+
+                           <div class="row">
+                               <div class="col-md-6">
+                                   <div class="modelScroll">
+                                       <table class="table" style="cursor: pointer">
+                                           <tr><th>Severity</th><th>Code</th><th>Location/Diagnostics</th></tr>
+                                           <tr style="background-color: #ffaaaa" ng-repeat="issue in validationResult.issue"
+                                               ng-click = "selectIssue(issue)"
+                                               ng-show="issue.severity=='error'">
+                                               <td >
+                                                   {{issue.severity}}
+                                               </td>
+                                               <td >
+                                                   {{issue.code}}
+                                               </td>
+                                               <td>
+                                                   <div><em>
+                                                       <div ng-repeat="location in issue.location">
+                                                           {{location}}
+                                                       </div>
+                                                   </em></div>
+                                                   {{issue.diagnostics}}
+                                               </td>
+
+                                           </tr>
+
+                                           <tr ng-repeat="issue in validationResult.issue" ng-show="issue.severity !== 'error'"
+                                               ng-click = "selectIssue(issue)">
+                                               <td>
+                                                   {{issue.severity}}
+                                               </td>
+                                               <td >
+                                                   {{issue.code}}
+                                               </td>
+                                               <td >
+                                                   <div><em>
+                                                       <div ng-repeat="location in issue.location">
+                                                           {{location}}
+                                                       </div>
+                                                   </em></div>
+                                                   {{issue.diagnostics}}
+                                               </td>
+
+                                           </tr>
+
+
+                                       </table>
+                                   </div>
+
+                               </div>
+                               <div class="col-md-6">
+                                    <pre>{{selectedIssueEntry | json}}</pre>
+                               </div>
+                           </div>
+
+
+
+                       </uib-tab>
+                       <uib-tab heading="Json">
+                           <div>
+                               <pre ng-show="validationResult">{{validationResult | json}}</pre>
+                           </div>
+                       </uib-tab>
+                   </uib-tabset>
+
+
+
+
+                </uib-tab>
+
+
+            </uib-tabset>
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+</body>
+</html>

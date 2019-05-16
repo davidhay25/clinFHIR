@@ -525,7 +525,6 @@ angular.module("sampleApp")
                              )
 */
                         }
-
                     }
                 )
             };

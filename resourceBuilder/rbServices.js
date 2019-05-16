@@ -1743,7 +1743,7 @@ console.log(summary);
             //Get all the resurces specified by a query, following any paging...
             //http://stackoverflow.com/questions/28549164/how-can-i-do-pagination-with-bluebird-promises
 
-            var returnBundle = {total:0,type:'searchset',link:[],entry:[]};
+            var returnBundle = {resourceType:'Bundle',total:0,type:'searchset',link:[],entry:[]};
             returnBundle.link.push({relation:'self',url:url})
 
             //add the count parameter
