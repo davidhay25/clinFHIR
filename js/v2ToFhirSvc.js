@@ -112,6 +112,12 @@ angular.module("sampleApp")
                             hash[ref.targ] = true;      //this is the url property of the node
                             console.log('ref to central:' + ref.targ)
                         }
+
+                        if (targetNode && targetNode.resource.id == centralResourceId) {
+                            //this is a resource eferencing the central node
+                            hash[ref.src.url] = true;
+                        }
+
                     }
 
 

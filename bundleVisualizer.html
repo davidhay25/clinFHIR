@@ -86,26 +86,21 @@
 
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-8">
                 <div class="navbar-text">
-                    Conformance server: {{conformanceServer}}
+                    Conformance server: {{conformanceServer.name}} ({{conformanceServer.url}})
+                    <div>Data server: {{dataServer.name}} ({{dataServer.url}})</div>
                 </div>
 
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-1">
                 <div class="navbar-text">
 
                 </div>
 
             </div>
-            <div class="col-md-3">
-                <div class="navbar-text">
 
-
-                </div>
-
-            </div>
 
             <div class="col-md-1">
                 <form class="navbar-form navbar-left">
@@ -118,32 +113,96 @@
 
     <div class="row">
         <div class="col-md-2">
-            <div class="row">
-                <div class="col-sm-4">
 
 
-                    <h4>Bundles</h4>
-                </div>
-                <div class="col-sm-8">
-                    <button style="padding-top: 10px"
-                            class="btn btn-link pull-right"
-                            ng-click="importBundle()">
-                        Import Bundle
-                    </button>
+            <uib-tabset>
+                <uib-tab heading="Bundles">
+                    <div class="row">
+                        <div class="col-sm-4">
+
+                            <i class="glyphicon glyphicon-question-sign clickable"
+                               style="padding: 10px"
+                               ng-click="showBundleHelp = !showBundleHelp">
+
+                            </i>
+
+                        </div>
+                        <div class="col-sm-8">
+                            <button style="padding-top: 10px"
+                                    class="btn btn-link pull-right"
+                                    ng-click="importBundle()">
+                                Import Bundle
+                            </button>
+                        </div>
+                    </div>
+
+                    <div ng-show="showBundleHelp" class="rounded-box">
+
+                        These are bundles that are saved on the current data server. Selecting them from the list
+                        will download them from the server, then validate and display them.
+                    </div>
+
+                    <div class="list-group">
+                        <div ng-class="{'list-group-item':1,'listItemSelected':entry==selectedEntry}"
+                             ng-repeat="entry in existingBundles.entry"
+                             ng-click = "selectBundleFromList(entry)">
+                            {{entry.resource.identifier.value}}
+                        </div>
+                    </div>
+                </uib-tab>
+
+                <uib-tab heading="Queries">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <i class="glyphicon glyphicon-question-sign clickable"
+                               style="padding: 10px"
+                               ng-click="showQueryHelp = !showQueryHelp">
+
+                            </i>
+                        </div>
+                        <div class="col-sm-8">
+                            <button style="padding-top: 10px"
+                                    class="btn btn-link pull-right"
+                                    ng-click="addQuery()">
+                                Add Query
+                            </button>
+                        </div>
+                    </div>
+
+                    <div ng-show="showQueryHelp" class="rounded-box">
+
+                        These are queries that have been entered and saved to the local browser cache. Only the
+                        query is saved. When selected in the list, the query is executed, and the response
+                        (which must be a Bundle) is retrieved, validated and displayed.
+                        It is possible to specify the server to query (it defaults to the data server).
+                        This is most useful when the server is developing query functionality as it allows the
+                        response to be validated and displayed.
+                    </div>
+
+                    <div class="list-group">
+                        <div ng-class="{'list-group-item':1,'listItemSelected':query==selectedQuery}"
+                             ng-repeat="query in queries"
+                             ng-click = "selectQuery(query)"
+                             uib-popover="{{query.description}}"
+                             popover-placement="right"
+                             popover-trigger="'mouseenter'">
+                            {{query.display}}
+                            <span class="pull-right">
+                                <i class="glyphicon glyphicon-remove clickable"
+                                                         ng-click="deleteQuery($index)"></i>
+                            </span>
+                        </div>
+                    </div>
+                </uib-tab>
+            </uib-tabset>
 
 
-                </div>
-            </div>
 
-            <div><strong  class="center-block">Queries</strong></div>
 
-            <div class="list-group">
-                <div ng-class="{'list-group-item':1,'listItemSelected':query==selectedQuery}"
-                     ng-repeat="query in queries"
-                ng-click = "selectQuery(query)">
-                    {{query.display}}
-                </div>
-            </div>
+
+
+
+
 
         </div>
         <div class="col-md-10">
@@ -237,6 +296,7 @@
                                 <div class="col-md-6">
 
 <!-- todo - selectedBundleEntryErrors not being created on graph select-->
+                                    <!--
                                     <div uib-alert class="alert-warning" ng-show="selectedBundleEntryErrors.length > 0">
                                         <table class="table">
                                             <tr ng-repeat="err in selectedBundleEntryErrors">
@@ -250,6 +310,8 @@
                                             </tr>
                                         </table>
                                     </div>
+
+                                    -->
 
                                     <pre>{{selectedNode.entry | json}}</pre>
                                 </div>

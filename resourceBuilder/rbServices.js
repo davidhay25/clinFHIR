@@ -495,8 +495,18 @@ angular.module("sampleApp").
             var deferred = $q.defer();
             var bundle = Utilities.perfromQueryFollowingPaging(url).then(
                 function(bundle) {
-                    bundle.total = bundle.entry.length;
-                    deferred.resolve({data:bundle});
+                    //May 2019
+                    if (bundle && bundle.resourceType !== 'Bundle') {
+                        deferred.resolve({data:bundle});
+                    } else {
+                        bundle.total = bundle.entry.length;
+                        deferred.resolve({data:bundle});
+                    }
+
+
+
+
+
                 },function(err) {
                     deferred.reject(err)
                 }
@@ -1767,7 +1777,20 @@ console.log(summary);
             function getPage(url) {
                 return $http.get(url).then(
                     function(data) {
+
+
+
                         var bundle = data.data;     //the response is a bundle...
+
+
+                        //added May 2019 - check for when the response is not a query...
+                        if (bundle && bundle.resourceType !== 'Bundle') {
+                            deferred.resolve(bundle);       //isn't really a bundle...
+                            return;
+                        }
+
+
+
 
                         //copy all resources into the array..
                         if (bundle && bundle.entry) {
@@ -1789,7 +1812,7 @@ console.log(summary);
 
                                 //todo - this is a real hack as the NZ server is not setting the paging correctly...
 
-                                    url = url.replace('http://127.0.0.1:8080/baseDstu2','http://fhir.hl7.org.nz/baseDstu2')
+                                    //url = url.replace('http://127.0.0.1:8080/baseDstu2','http://fhir.hl7.org.nz/baseDstu2')
 
                                 
 

@@ -1,24 +1,192 @@
 angular.module("sampleApp")
     .controller('bundleVisualizerCtrl',
-        function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,GetDataFromServer) {
+        function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,GetDataFromServer,appConfigSvc,$localStorage) {
 
             //$scope.conformanceServer = 'http://fhirtest.uhn.ca/baseR4/';
             //$scope.dataServer = 'http://fhirtest.uhn.ca/baseR4/';
             //$scope.dataServer = "http://hapi.fhir.org/baseR4/";
-            $scope.dataServer = "http://snapp.clinfhir.com:8081/baseDstu3/";
-            $scope.conformanceServer = 'http://snapp.clinfhir.com:8081/baseDstu3/';
+            //$scope.dataServer = "http://snapp.clinfhir.com:8081/baseDstu3/";
+            //$scope.conformanceServer = 'http://snapp.clinfhir.com:8081/baseDstu3/';
 
+            //will update the config. We don't care if manually entered servers are lost or the default servers changed
+            if (appConfigSvc.checkConfigVersion()) {
+                alert('The config was updated. You can continue.')
+            }
+
+
+            //pre-defined queries
             $scope.queries = [];
             $scope.queries.push({display:'Patients called eve',query:'Patient?name=hay'});
-            $scope.queries.push({display:'All Florence Hays data',query:'Patient/22101/$everything'});
+            $scope.queries.push({display:'All Florence Hays data',query:'Patient/112529/$everything'});
+
+            if ($localStorage.bvQueries) {
+                $scope.queries = $localStorage.bvQueries
+                /*
+                $localStorage.bvQueries.forEach(function(query){
+                    $scope.queries.push(query)
+                })
+                */
+            }
+
+            $scope.addQuery = function(){
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/addQuery.html',
+                    size: 'lg',
+                    controller: function ($scope,dataServer,$http) {
+                        $scope.input = {};
+                        $scope.dataServer = dataServer
+
+                        $scope.canSave = function() {
+                            if (! $scope.response || ! $scope.input.name) {
+                                return false;
+                            }
+
+                            if ($scope.response) {
+                                if ($scope.response.resourceType !== 'Bundle') {
+                                    return false;
+                                } else {
+                                    if (! $scope.response.entry || $scope.response.entry.length ==0) {
+                                        return false;
+                                    }
+                                }
+                            }
+                            return true;
+                        };
+
+
+                        $scope.save = function(){
+                            $scope.$close({query:$scope.input.query,display:$scope.input.name,description:$scope.input.description})
+                        };
+
+                        $scope.execute = function(qry) {
+
+                            let options = {headers: {'Accept':'application/fhir+json'}};
+                            let fullQry = qry
+
+                            if (qry.substr(0,4) !== 'http') {
+                                 fullQry = dataServer.url + qry
+                            }
+
+                            $scope.actualQuery = fullQry;
+
+                            $scope.waiting = true;
+                            $http.get(fullQry,options).then(
+                                function(data) {
+                                    $scope.response = data.data;
+                                },
+                                function(err) {
+                                    $scope.response = err.data;
+                                }
+                            ).finally(
+                                function(){
+                                    $scope.waiting = false;
+                                }
+                            )
+
+                        }
+                    },
+                    resolve : {
+                        dataServer: function () {          //the default config
+                            return $scope.dataServer;
+
+                        }
+                    }
+                }).result.then(function(vo) {
+                        $localStorage.bvQueries = $localStorage.bvQueries || []
+                        $localStorage.bvQueries.push(vo);
+                        $scope.queries = $localStorage.bvQueries
+                    }
+                )
+            };
+
+            $scope.deleteQuery = function(inx) {
+                if (confirm('Are you sure you wish to remove this query')){
+                    $localStorage.bvQueries.splice(inx,1)
+                }
+
+            };
+
+            $scope.dataServer = appConfigSvc.getCurrentDataServer();
+            $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
+
+
+            //load bundles with an identifier in the cfBundle identifier system
+            let identifierSystem = appConfigSvc.config().standardSystem.bundleIdentifierSystem;
+            let url = $scope.dataServer.url + "Bundle?identifier="+identifierSystem + "|";
+            $http.get(url).then(
+                function(data) {
+                    console.log(data)
+                    $scope.existingBundles = data.data;
+                }
+            );
 
             $scope.importBundle = function() {
                 $uibModal.open({
                     templateUrl: 'modalTemplates/importBundle.html',
-                    //size: 'lg',
-                    controller: function($scope,appConfigSvc,modalService) {
+                    size: 'lg',
+                    controller: function($scope,appConfigSvc,modalService,dataServer) {
                         $scope.input = {};
+                        $scope.identiferChecked = true;     //false if the identifier has been checked (or is null)
 
+                        let identifierSystem = appConfigSvc.config().standardSystem.bundleIdentifierSystem;
+                        //let cfCreatedExt = appConfigSvc.config().standardExtensionUrl.clinFHIRCreated;
+
+                        if (!identifierSystem) {
+                            alert('identifier system null')
+                            return;
+                        }
+
+                        $scope.canSave = function() {
+                            if (!$scope.identiferChecked) {
+                                return false
+                            }
+                            if (! $scope.input.raw) {
+                                return false
+                            }
+                            return true;
+                        };
+
+                        $scope.execute = function(qry) {
+
+                            let options = {headers: {'Accept':'application/fhir+json'}}
+                            let fullQry = dataServer.url + qry
+
+                            GetDataFromServer.adHocFHIRQueryFollowingPaging(fullQry,options).then(
+                                function(data) {
+                                    console.log(data)
+                                    $scope.input.raw = angular.toJson(data.data);
+
+
+                                },
+                                function(err) {
+                                    console.log(err);
+                                }
+                            )
+
+                        }
+
+
+
+
+                        //see if the identifier already exists
+                        $scope.testIdentifier = function(){
+                            let identifier = $scope.input.identifier;
+                            var url = dataServer.url+"Bundle?identifier=";
+                            url += identifierSystem + "|" + $scope.input.identifier ;
+
+                            var config = {headers:{'content-type':'application/fhir+json'}}
+                            $http.get(url,config).then(
+                                function(data) {
+                                    if (data.data && data.data.entry && data.data.entry.length > 0) {
+                                        alert("This identifier has already been used. Try another.");
+                                        delete $scope.input.identifier;
+                                        return;
+                                    } else {
+                                        $scope.identiferChecked = true;
+                                        alert("This identifier is ok to use.")
+                                    }
+                                })
+                        };
 
                         $scope.import = function() {
                             var raw = $scope.input.raw;
@@ -27,7 +195,7 @@ angular.module("sampleApp")
                             if (g > -1) {
                                 //this is Xml (I think!) Use the Bundle endpoint
                                 $scope.waiting = true;
-                                var url = $scope.dataServer+"Bundle";
+                                var url = dataServer.url+"Bundle";
 
                                 var config = {headers:{'content-type':'application/fhir+xml'}}
                                 $http.post(url,raw,config).then(
@@ -39,15 +207,18 @@ angular.module("sampleApp")
                                         serverId = serverId || data.headers('location');
                                         serverId = serverId || data.headers('Location');
 
-                                        console.log(serverId)
+                                        console.log(serverId);
+                                        //this seems to be a full URl - is this always the case?
 
                                         if (serverId) {
-                                            url += "/"+serverId;
+
+                                            //url += "/"+serverId;
                                             config = {headers:{'accept':'application/fhir+json'}};
-                                            $http.get(url).then(
+                                            $http.get(serverId).then(
                                                 function(data){
                                                     //now we can import the bundle
                                                     importFromJson(data.data);
+
                                                 }, function (err) {
                                                     var msg = "The bundle was saved Ok, but couldn't be retrieved from the server";
                                                     modalService.showModal({}, {bodyText:msg});
@@ -108,10 +279,48 @@ angular.module("sampleApp")
 
 
 
-                            $scope.$close(res);     //close the dialog, passing across the resource
+                            if ($scope.input.identifier) {
+                                //alert('save as '+ $scope.identifer)
+                                //res.identifier = res.identifier || []
+                                res.identifier = {"system":identifierSystem,value:$scope.input.identifier}
+
+                                if (res.type == 'transaction') {
+                                    res.type = 'collection'
+                                    alert("Changing bundle type to 'collection' as transactions can't be saved directly")
+                                }
+
+                                var url = dataServer.url+"Bundle";
+                                var config = {headers:{'content-type':'application/fhir+json'}}
+                                $http.post(url,res,config).then(
+                                    function() {
+                                        alert("Bundle has been saved,")
+                                    },
+                                    function(err){
+                                        console.log(err)
+                                        alert("Sorry, there was an error and the bundle wasn't saved:" + angular.toJson(err.data))
+                                    }
+                                ).finally(
+                                    function(){
+                                        $scope.$close(res);
+                                    }
+                                )
+
+                                //identifierSystem + "|" + $scope.input.identifier ;
+                            } else {
+                                $scope.$close(res);     //close the dialog, passing across the resource
+                            }
+
+
+
 
                         }
 
+                    },
+                    resolve : {
+                        dataServer: function () {          //the default config
+                            return $scope.dataServer;
+
+                        }
                     }
 
                 }).result.then(function (bundle) {
@@ -141,14 +350,14 @@ angular.module("sampleApp")
 
             };
 
-            $scope.selectBundleEntry = function(entry,hashErrors) {
+            $scope.selectBundleEntry = function(entry,entryErrors) {
                 $scope.selectedBundleEntry = entry
-                $scope.selectedBundleEntryErrors = hashErrors;
+                $scope.selectedBundleEntryErrors = entryErrors;
 
 
                 console.log(entry)
 
-                let vo = v2ToFhirSvc.makeGraph($scope.fhir,hashErrors,$scope.serverRoot,false,entry.resource.id)
+                let vo = v2ToFhirSvc.makeGraph($scope.fhir,$scope.hashErrors,$scope.serverRoot,false,entry.resource.id)
 
                 console.log(vo);
 
@@ -185,12 +394,36 @@ angular.module("sampleApp")
                 },1000)
             };
 
+            $scope.selectBundleFromList = function(entry) {
+                delete $scope.selectedBundleEntryErrors;
+                delete $scope.selectedBundleEntry;
+
+                $scope.selectedEntry = entry;
+                processBundle(entry.resource);
+
+/*
+                GetDataFromServer.adHocFHIRQueryFollowingPaging($scope.dataServer.url + query.query).then(
+                    function(data) {
+                        console.log(data)
+
+                        let newBundle = deDupeBundle(data.data)
+                        console.log(newBundle)
+                        processBundle(newBundle);
+                    },
+                    function(err) {
+                        console.log(err);
+                    }
+                )
+                */
+            };
+
+
             $scope.selectQuery = function(query) {
                 delete $scope.selectedBundleEntryErrors;
                 delete $scope.selectedBundleEntry;
                 $scope.selectedQuery = query;
 
-                GetDataFromServer.adHocFHIRQueryFollowingPaging($scope.dataServer + query.query).then(
+                GetDataFromServer.adHocFHIRQueryFollowingPaging($scope.dataServer.url + query.query).then(
                     function(data) {
                         console.log(data)
 
@@ -265,7 +498,7 @@ console.log(newBundle)
             }
 
             $scope.validate = function(bundle,cb) {
-                let url = $scope.conformanceServer + "Bundle/$validate";
+                let url = $scope.conformanceServer.url + "Bundle/$validate";
                 $scope.showWaiting = true;
                 //delete $scope.hashErrors;
                 $http.post(url,bundle).then(
@@ -381,11 +614,9 @@ console.log(newBundle)
                     } else {
                         return 0
                     }
-                })
+                });
 
                 return newBundle;
             }
-
-
         }
     );
