@@ -207,15 +207,32 @@
 
                     </div>
                     <div class="col-md-6 col-sm-6">
-                        <div>
-                            <div><label>Multiplicity</label></div>
-                            <div class="btn-group">
-                                <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'opt'">0..1</label>
-                                <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'req'">1..1</label>
-                                <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'mult'">0..*</label>
-                                <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'multreq'">1..*</label>
+                        <div class="row">
+                            <div class="col-sm-6 col-md-6">
+
+                                <div><label>Multiplicity</label></div>
+                                <div class="btn-group">
+                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'opt'">0..1</label>
+                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'req'">1..1</label>
+                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'mult'">0..*</label>
+                                    <label class="btn btn-default" ng-model="input.multiplicity" uib-btn-radio="'multreq'">1..*</label>
+                                </div>
                             </div>
+                            <div class="col-sm-6 col-md-6">
+                                <div><label>Must support</label></div>
+
+                                <div class="btn-group">
+                                    <label class="btn btn-default" ng-model="input.mustSupport" uib-btn-radio="false">No</label>
+                                    <label class="btn btn-default" ng-model="input.mustSupport" uib-btn-radio="true">Yes</label>
+
+                                </div>
+                            </div>
+
+
                         </div>
+
+
+
 
                         <div><label>Fixed Value</label></div>
                         <textarea class="form-control" rows="1" ng-model="input.fixedString"

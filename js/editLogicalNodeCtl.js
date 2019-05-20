@@ -188,7 +188,7 @@ angular.module("sampleApp")
                 }
             }
             $scope.input.multiplicity = 'opt';      //default multiplicity
-
+            $scope.input.mustSupport = false;       //default mustSupport
 
             if (baseType) {
                 //get all the paths - including expanding logical models...
@@ -214,6 +214,7 @@ angular.module("sampleApp")
 
             function setup(node) {
                 if (! node) {
+
                     return;
                 }
 
@@ -227,6 +228,8 @@ angular.module("sampleApp")
                 $scope.input.description = data.description;
                 $scope.input.comments = data.comments;
                 $scope.input.mapping = data.mapping;
+
+                $scope.input.mustSupport = data.mustSupport || false;
 
                 $scope.input.alias = data.alias;    //[string]
 
@@ -817,6 +820,13 @@ angular.module("sampleApp")
                     vo.pathSegment = $scope.input.pathSegment;
 
                     vo.conceptMap = $scope.input.conceptMap;
+
+                vo.mustSupport = $scope.input.mustSupport;
+
+
+
+
+
 
                 vo.alias = $scope.input.alias ;
 

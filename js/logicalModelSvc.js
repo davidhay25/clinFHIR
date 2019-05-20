@@ -2816,6 +2816,8 @@ angular.module("sampleApp")
                         item.data.ed = ed;  //added for profileDiff
                         //item.data.type = ed.type;
 
+                        item.data.mustSupport = ed.mustSupport;
+
 
                         //decorate the type elements...
                         decorateTreeView(item,ed);
@@ -3151,6 +3153,8 @@ angular.module("sampleApp")
                     ed.definition = data.description || 'No description';
                     ed.min = data.min;
                     ed.max = data.max;
+
+                    ed.mustSupport = data.mustSupport;
 
                     ed.alias = data.alias;
 

@@ -124,11 +124,7 @@
 
 
                     $scope.taskManager = "/taskManager.html#$$$cf-artifacts-nz3"
-/*
-                    $scope.uberModel =  "/logicalModeller.html#$$$CsiroUberModel";
-                    $scope.commonModel = "/logicalModeller.html#$$$CsiroCommon";
-                    $scope.testModel = "/logicalModeller.html#$$$ConditionTest";
-*/
+
 
                 }
             )
@@ -238,25 +234,7 @@
             <h4>Models</h4>
 
             <table class="table">
-               <!-- <tr>
-                    <td colspan="2">
-                        <h4>Links</h4>
-                    </td>
-                </tr>
--->
 
-
-
-
-
-<!--
-                <tr>
-                    <td>
-                        <h4>Models</h4>
-                    </td>
-                    <td></td>
-                </tr>
--->
 
 
                 <tr ng-repeat="model in models">
@@ -264,7 +242,16 @@
                     <td>{{model.description}}
                     </td>
                 </tr>
+<!--
 
+                <tr ng-repeat="(key,value) in modelsByPackage">
+                    <td><a  target="_blank" ng-href="{{model.url}}">{{model.name}}</a></td>
+                    <td>{{model.description}}
+                    </td>
+                </tr>
+
+                modelsByPackage
+-->
                 <tr>
                     <td colspan="2">
                         <h4>Implementation Guides</h4>

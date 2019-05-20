@@ -778,6 +778,38 @@
                             </div>
 
                         </uib-tab>
+                        <uib-tab heading="Must Support">
+                            <br/>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="pull-right">
+                                        <input type="checkbox" ng-model="input.showMustSupportOnly"/>
+                                        Show 'Must Support' only
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+                            <div class="designerScroll">
+
+                                <table class="table table-bordered table-condensed">
+                                    <tr><th>Element</th><th>Must Support</th></tr>
+
+                                    <tr ng-repeat="row in treeData"
+                                        ng-hide="$index==0 || (input.showMustSupportOnly && ! row.data.mustSupport)">
+
+                                        <td>
+                                            <div ng-click="selectNodeFromTable(row.data.path)"
+                                                 class="clickable" >{{row.data.path | dropFirstInPath}}</div>
+                                        </td>
+                                        <td>{{row.data.mustSupport}}</td>
+
+                                    </tr>
+                                </table>
+                            </div>
+
+                        </uib-tab>
 
                         <uib-tab heading="Status">
                             <br/>
@@ -1105,6 +1137,19 @@
                                     </td>
                                 </tr>
 
+
+                                <tr>
+                                    <td>Must Support</td>
+                                    <td>
+                                        <div ng-show="selectedNode.data.mustSupport">
+                                            Yes
+                                        </div>
+                                        <div ng-hide="selectedNode.data.mustSupport">
+                                            No
+                                        </div>
+
+                                    </td>
+                                </tr>
 
 
                                 <tr ng-show="selectedNode.data.usageGuide">
