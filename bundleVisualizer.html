@@ -3,11 +3,13 @@
 <head lang="en">
     <base href="/" />
     <meta charset="UTF-8">
-
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
     <script src="js/libs/angular.min1-5.js"></script>
     <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
 
     <script src="js/libs/moment.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="css/main.css"/>
@@ -17,6 +19,7 @@
     <script src="js/libs/firebase.js"></script>
     <script src="js/libs/angularfire.min.js"></script>
     <script src="js/libs/angular-sanitize.js"></script>
+    <script src="js/libs/jstree.min.js"></script>
 
     <script>
         angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase','ngSanitize']).config(function($locationProvider) {
@@ -31,6 +34,7 @@
     <script src="js/libs/vis.min.js"></script>
     <script src="js/modalDialogSvc.js"></script>
     <script src="resourceBuilder/rbServices.js"></script>
+
 
     <style>
         .myForm {
@@ -138,7 +142,8 @@
 
                     <div ng-show="showBundleHelp" class="rounded-box">
 
-                        These are bundles that are saved on the current data server. Selecting them from the list
+                        These are bundles that were imported to the Visualizer (using thr 'Import' link above) and saved to the current data server.
+                        Selecting them from the list below
                         will download them from the server, then validate and display them.
                     </div>
 
@@ -175,8 +180,11 @@
                         query is saved. When selected in the list, the query is executed, and the response
                         (which must be a Bundle) is retrieved, validated and displayed.
                         It is possible to specify the server to query (it defaults to the data server).
-                        This is most useful when the server is developing query functionality as it allows the
-                        response to be validated and displayed.
+                        This is particularly useful when the server is developing query functionality as it allows the
+                        response to be queried, validated and displayed.
+                        Note that the server must support CORS, in particular the headers:
+                        Access-Control-Allow-Origin:*
+                        Access-Control-Expose-Headers:Location, Content-Location
                     </div>
 
                     <div class="list-group">
@@ -256,6 +264,14 @@
                                         <uib-tab heading="Json">
                                             <pre>{{selectedBundleEntry | json}}</pre>
                                         </uib-tab>
+
+                                        <uib-tab heading="Tree">
+                                            <br/>
+
+                                            <div id="builderResourceTree"></div>
+
+                                        </uib-tab>
+
                                         <uib-tab heading="References"  select="fitSingleGraph()">
                                             <div id="singleResourceGraph"></div>
                                         </uib-tab>
@@ -318,6 +334,51 @@
                             </div>
 
                         </uib-tab>
+                        <uib-tab ng-show = "fhir.type == 'document'" heading="Document">
+
+                            <strong>Subject</strong>
+                            <p  style="margin-left: 10px" ng-bind-html="document.subject.text.div"></p>
+
+                            <strong>Document metadata</strong>
+                            <p  style="margin-left: 10px" ng-bind-html="document.composition.text.div"></p>
+
+                            <div ng-repeat = "section in document.composition.section">
+                                <hr style="border-top: 1px solid grey; margin: 1px"/>
+                                <strong>{{section.title}}</strong>
+
+                                <div class="row">
+
+                                    <div class="col-md-5">
+                                        <p style="margin-left: 10px" ng-bind-html="section.text.div"></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div ng-repeat = "resource in section.realResources">
+                                            <div class="rounded-box">
+                                                {{resource.display}}
+                                                <em><p ng-bind-html="resource.resource.text.div"></p></em>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+
+
+                            </div>
+
+                            <div><em>Derived from the Composition and Subject text elements as per the spec</em></div>
+
+                        </uib-tab>
+                        <!--
+                        <uib-tab ng-show = "fhir.type == 'document'" heading="Document (resources)">
+
+                            <div ng-repeat="line in document.lines">
+                                {{line.display}}
+                            </div>
+
+                        </uib-tab>
+                        -->
                     </uib-tabset>
 
 

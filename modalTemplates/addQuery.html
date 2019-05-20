@@ -113,7 +113,14 @@
 
     <div class="modal-header">
         <strong>Default server: </strong> {{dataServer.name}}  ({{dataServer.url}})
-        <div>To specify another server, put in the full url - eg http://server.com/fhir...</div>
+        <div>To specify another server, put the full url in the query - eg http://server.com/fhir... <div>
+            <div>The server must support CORS, in particular the headers:
+            <ul>
+                <li>Access-Control-Allow-Origin:*</li>
+                <li>Access-Control-Expose-Headers:Location, Content-Location</li>
+            </ul>
+
+            </div>
         <div>Only Json responses of type Bundle with 1 or more entries can be processed and saved</div>
     </div>
 

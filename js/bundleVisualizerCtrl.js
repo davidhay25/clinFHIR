@@ -145,7 +145,7 @@ angular.module("sampleApp")
                             }
                             return true;
                         };
-
+/*
                         $scope.execute = function(qry) {
 
                             let options = {headers: {'Accept':'application/fhir+json'}}
@@ -164,7 +164,7 @@ angular.module("sampleApp")
                             )
 
                         }
-
+*/
 
 
 
@@ -273,15 +273,14 @@ angular.module("sampleApp")
                             }
 
                             if (res.resourceType !== 'Bundle') {
-                                modalService.showModal({}, {bodyText:"The 'resourceType' must be 'Bundle."});
+                                modalService.showModal({}, {bodyText:"The 'resourceType' must be 'Bundle'."});
                                 return;
                             }
 
 
 
                             if ($scope.input.identifier) {
-                                //alert('save as '+ $scope.identifer)
-                                //res.identifier = res.identifier || []
+
                                 res.identifier = {"system":identifierSystem,value:$scope.input.identifier}
 
                                 if (res.type == 'transaction') {
@@ -355,11 +354,11 @@ angular.module("sampleApp")
                 $scope.selectedBundleEntryErrors = entryErrors;
 
 
-                console.log(entry)
+                //console.log(entry)
 
                 let vo = v2ToFhirSvc.makeGraph($scope.fhir,$scope.hashErrors,$scope.serverRoot,false,entry.resource.id)
 
-                console.log(vo);
+                //console.log(vo);
 
                 let container = document.getElementById('singleResourceGraph');
                 let options = {
@@ -372,6 +371,13 @@ angular.module("sampleApp")
                 };
                 $scope.singleResourceChart = new vis.Network(container, vo.graphData, options);
 
+                let treeData = v2ToFhirSvc.buildResourceTree(entry.resource);
+
+                //show the tree structure of this resource (adapted from scenario builder)
+                $('#builderResourceTree').jstree('destroy');
+                $('#builderResourceTree').jstree(
+                    {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+                )
 
             };
 
@@ -417,12 +423,11 @@ angular.module("sampleApp")
                 */
             };
 
-
             $scope.selectQuery = function(query) {
                 delete $scope.selectedBundleEntryErrors;
                 delete $scope.selectedBundleEntry;
                 $scope.selectedQuery = query;
-
+                $scope.showWaiting = true
                 GetDataFromServer.adHocFHIRQueryFollowingPaging($scope.dataServer.url + query.query).then(
                     function(data) {
                         console.log(data)
@@ -434,14 +439,16 @@ console.log(newBundle)
                     function(err) {
                         console.log(err);
                     }
-                )
+                ).finally(function(){
+                    $scope.showWaiting = false;
+                })
             };
 
             //create the various renderings from the bundle...
-            let processBundle = function(bundle) {
+            let processBundle = function(oBundle) {
                 delete $scope.serverRoot;
-                $scope.fhir = bundle;
-                $scope.validate(bundle,function(hashErrors){
+                $scope.fhir = oBundle;
+                $scope.validate(oBundle,function(hashErrors){
                     $scope.hashErrors = hashErrors;
 
 
@@ -495,7 +502,92 @@ console.log(newBundle)
                     console.log(vo)
 
                 });
-            }
+
+                let bundle=angular.copy(oBundle)
+
+
+                //if this is a document, then
+                delete $scope.document;     //contains the document specific resources suitable for layout
+                if (bundle.type == 'document') {
+                    let arComposition = [];
+                    //create a hash by type & id - to find document references
+                    let hash = {}
+
+                    bundle.entry.forEach(function (entry) {
+                        if (entry.resource) {
+                            let key = entry.resource.resourceType + "/" + entry.resource.id;
+                            hash[key] = entry.resource;
+                            if (entry.resource.resourceType == 'Composition') {
+                                arComposition.push(entry.resource)
+                            }
+                        }
+
+                    });
+                    switch (arComposition.length) {
+                        case 0 :
+                            alert('This is a document, but there is no Composition resource')
+                            break;
+                        case 1 :
+                            $scope.document = {composition : arComposition[0]};
+                            break;
+                        default:
+                            alert('There were '+arComposition.length + ' Composition resources, and there should only be 1')
+                    }
+
+                    if ($scope.document.composition) {
+                        //now get the subject
+                        if ($scope.document.composition.subject) {
+                            if ($scope.document.composition.subject.reference) {
+                                $scope.document.subject = hash[$scope.document.composition.subject.reference];
+                                if (!$scope.document.subject) {
+                                    alert('The subject reference ('+$scope.document.composition.subject.reference+') is not in the bundle')
+                                }
+                            } else {
+                                alert('The composition resource is missing the subject reference')
+                            }
+                        } else {
+                            alert('The composition resource is missing the subject property')
+                        }
+
+                        //get the resources referenced from the composition
+                        $scope.document.sectionResources = []
+
+                        $scope.document.composition.section.forEach(function(section,inx){
+                            //let section = angular.copy(oSection)
+                            section.realResources = []
+                            if (section.entry) {
+                                section.entry.forEach(function (entry) {
+                                    let resource = hash[entry.reference]
+                                    if (resource) {
+                                        //todo check for list
+                                        section.realResources.push({display:resource.resourceType,resource:resource})
+                                    } else {
+                                        section.realResources.push({display:'unknown reference:'+entry.reference})
+                                    }
+
+                                })
+                            }
+
+
+
+
+                            //let display = section.title || 'Section# '+inx
+                            //$scope.document.lines.push({display:display,level:0,section:section})
+
+                        })
+
+
+console.log($scope.document.composition)
+
+
+
+                        //locate the
+                    }
+                }
+
+
+            };
+
 
             $scope.validate = function(bundle,cb) {
                 let url = $scope.conformanceServer.url + "Bundle/$validate";
