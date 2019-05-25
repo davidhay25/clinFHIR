@@ -3015,6 +3015,7 @@ console.log(summary);
                     case  "MedicationStatement":
                     case  "MedicationOrder":
                         var txt = "";
+
                         if (resource.medicationCodeableConcept) {
                             txt +=  getCCSummary(resource.medicationCodeableConcept);
                         } else if (resource.medicationReference && resource.medicationReference.display) {
@@ -3024,6 +3025,9 @@ console.log(summary);
                             txt =  resource.resourceType;
                         }
 
+                        if (txt) {
+                            txt = txt.trim();
+                        }
 
 
 

@@ -1,4 +1,4 @@
-angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc,GetDataFromServer,Utilities) {
+angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc,GetDataFromServer,ResourceUtilsSvc ,Utilities) {
 
     //options for building the samples that will come from a UI
     var buildConfig = {};
@@ -584,6 +584,9 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                     });
 
 
+
+
+
                     // ... and save - as a transaction
                     var url = appConfigSvc.getCurrentDataServerBase();
                     $http.post(url,bundle).then(
@@ -980,7 +983,48 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                             })
                         }
 
+
+                        //sort medications for Marks course...
+                        let meds = allResources['MedicationStatement']
+                        if (meds) {
+                            meds.entry.sort(function(m1,m2){
+                                let m1Name = getMedName(m1);
+                                let m2Name = getMedName(m2);
+
+                                console.log(m1Name,m2Name)
+                                if (m1Name > m2Name) {
+                                    return 1
+                                } else {
+                                    return -1
+                                }
+                            })
+                        }
+
+
                         deferred.resolve(allResources);
+
+                        //for the medication sort. really only works if display / text are entered. Could make it smarter...
+                        function getMedName(m) {
+
+                            return ResourceUtilsSvc.getOneLineSummaryOfResource(m.resource);
+
+                            /*
+                            let name = ""
+                            if (m.resource) {
+                                if (m.resource.medicationReference) {
+                                    name = m.resource.medicationReference.display;
+                                }
+                                if (m.resource.medicationCodeableConcept) {
+                                    name = m.resource.medicationCodeableConcept.text;
+                                }
+                            }
+                            if (name) {
+                                 return name.trim();
+                            }
+                            */
+                           
+
+                        }
                     },
                     function(err){
                         //alert("error loading all patient data:\n\n"+ angular.toJson(err));

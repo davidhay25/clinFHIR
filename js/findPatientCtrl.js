@@ -70,7 +70,6 @@ angular.module("sampleApp")
 
                 };
 
-
                 $scope.searchForIdentifier = function(identifier) {
                     $scope.nomatch=false;   //if there were no matching patients
                     delete $scope.matchingPatientsList;
@@ -96,8 +95,6 @@ angular.module("sampleApp")
                         $scope.waiting = false;
                     })
                 };
-
-
 
 
                 $scope.searchForPatient = function(name) {
@@ -298,9 +295,6 @@ angular.module("sampleApp")
 
 
                 };
-
-
-
 
                 $scope.cancel = function () {
                     $scope.$close();
