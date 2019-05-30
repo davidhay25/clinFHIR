@@ -24,7 +24,7 @@ let outFilePath = "/Users/davidhay/play/"
 let hashValueSet = {missing:[]}   //all the valuesets in the models. missing are coded with no VS
 
 
-//let arModels = ["NzNHIPatient"];
+//let arModels = ["HpiPractitionerRole"];
 let arModels = [];
 
 let options = {};
@@ -100,7 +100,10 @@ arModels.forEach(function (modelId) {
 
                     } else if (map.map[0] == '#') {
                             //yes, this is a child. Add the ED to the current one
+                        if (currentItem) {      //will be null if the parent extension doesn't have a url defined...
                             currentItem.ed.push(ed);
+                        }
+
 
                     }
                 }

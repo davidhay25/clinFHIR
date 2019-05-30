@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+//build an R4 profile StructureDefinition from a clinFHIR logical model
+
 let fs = require('fs');
 let syncRequest = require('sync-request');
 
@@ -37,8 +39,9 @@ model.snapshot.element.forEach(function(ed,inx){
     let modelPath = ed.path;
     //modelHashByMappedPath[modelPath] = ed;
 
-    let elementStatusExt = getSingleExtensionValue(ed,extElementStatus)
-    let elementStatus = 'included'
+    //is this element included in the profile (default is yes)
+    let elementStatusExt = getSingleExtensionValue(ed,extElementStatus);
+    let elementStatus = 'included';
     if (elementStatusExt) {
         elementStatus = elementStatusExt.valueString;
     }
