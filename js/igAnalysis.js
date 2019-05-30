@@ -2,7 +2,8 @@ angular.module("igApp")
     .controller('igCtrl',
         function ($scope,$uibModal,$http) {
 
-            $scope.hashExtension = {}
+            let hashExtension = {};     //a hash of ed urls
+            let hashType = {};      //a hash of resource types
             //let url = "http://test.fhir.org/usage-stats";
             registerAccess();
 
@@ -16,21 +17,50 @@ angular.module("igApp")
                         //console.log(IG)
                         for (var extUrl in IG.usage) {
                             let arExt = IG.usage[extUrl];
-                            $scope.hashExtension[extUrl] = $scope.hashExtension[extUrl] || []
-                            arExt.forEach(function (res) {
-                                let item = {path : res,ig:IGurl};
+                            hashExtension[extUrl] = hashExtension[extUrl] || []
+                            arExt.forEach(function (path) {
+                                let item = {path : path, ig:IGurl, url: extUrl};
+                                hashExtension[extUrl].push(item)
 
-
-                                $scope.hashExtension[extUrl].push(item)
+                                //now populate the type hash...
+                                if (path) {
+                                    let ar = path.split('.');
+                                    let type = ar[0];
+                                    hashType[type] = hashType[type] || []
+                                    hashType[type].push(item)
+                                }
                             })
 
                         }
 
                     }
-                    //console.log($scope.hashExtension)
 
-                    for (var ext in $scope.hashExtension) {
-                        let arExt = $scope.hashExtension[ext];
+
+
+                    //convert hashType to an array (of arrays) and sort
+                    $scope.arTypes = []
+                    for (var type in hashType) {
+                        let arExt = hashType[type];
+                        $scope.arTypes.push({type:type,items:arExt});
+                    }
+
+                    $scope.sortTypeView('name');
+                    /*
+                    $scope.arTypes.sort(function(a,b){
+                        if (a.type > b.type) {
+                            return 1
+                        } else {
+                            return -1
+                        }
+                    });
+
+                    */
+
+
+
+
+                    for (var ext in hashExtension) {
+                        let arExt = hashExtension[ext];
                         //console.log(arExt)
                         arExt.sort(function (a, b) {
                             if (a.ig > b.ig) {
@@ -42,16 +72,105 @@ angular.module("igApp")
                         })
                     }
 
+                    //need to copy the hash into an array so it can be sorted...
+                    $scope.arExtensions = []
+                    for (var ext in hashExtension) {
+                        let arExt = hashExtension[ext];
+
+                        $scope.arExtensions.push({url:ext,usage: arExt});
+                    }
+
+                    console.log($scope.arExtensions)
+
+                    //console.log($scope.hashExtension)
+
+                    $scope.sortEDView('freq')
+
 
 
                 }
 
             );
 
-            $scope.selectED = function(k,v) {
-                $scope.selectedEDUrl = k;
-                $scope.selectedED = v;
+            $scope.sortEDView = function(key) {
+                switch (key) {
+                    case 'url' :
+                        $scope.arExtensions.sort(function (a,b) {
+                            if (a.url < b.url) {
+                                return -1
+                            } else {
+                                return 1
+                            }
+                        });
+                        break;
+
+                    case 'name' :
+                        $scope.arExtensions.sort(function (a,b) {
+                            let aName = a.url.split('/')
+                            let bName = b.url.split('/')
+                            if (aName[aName.length-1].toLowerCase() < bName[bName.length-1].toLowerCase()) {
+                                return -1
+                            } else {
+                                return 1
+                            }
+                        });
+                        break;
+
+                    case 'freq' :
+
+                        $scope.arExtensions.sort(function (a,b) {
+                            if (a.usage.length > b.usage.length) {
+                                return -1
+                            } else {
+                                return 1
+                            }
+                        });
+
+
+
+
+                        break;
+                }
+            }
+
+            $scope.selectED = function(ext) {
+
+                console.log(ext)
+
+                $scope.selectedEDUrl = ext.url;
+
+                $scope.selectedED = ext.usage;
                 //console.log(k,v)
+            };
+
+            $scope.sortTypeView = function(key) {
+
+                switch (key) {
+                    case 'freq' :
+
+                        $scope.arTypes.sort(function(a,b){
+                            if (a.items.length < b.items.length) {
+                                return 1
+                            } else {
+                                return -1
+                            }
+                        });
+                        break;
+                    case 'name' :
+                        $scope.arTypes.sort(function(a,b){
+                            if (a.type > b.type) {
+                                return 1
+                            } else {
+                                return -1
+                            }
+                        });
+                        break;
+                }
+
+            }
+
+            $scope.selectType = function(type) {
+                $scope.selectedType = type;
             }
 
             function registerAccess(){

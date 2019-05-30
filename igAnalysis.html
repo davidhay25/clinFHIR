@@ -17,6 +17,7 @@
             height: 800px;
             overflow-y: scroll;
         }
+
     </style>
 
 
@@ -81,57 +82,140 @@
     </nav>
 
 
+
+
     <div class="row">
-        <div class="col-md-5">
+        <div class="col-md-12">
+            <uib-tabset>
 
-            <h4>Extension definitions</h4>
-            <div class="myScroll">
-                <div class="list-group">
-                    <div ng-class="{'list-group-item':true,'listItemSelected':k==selectedEDUrl}" ng-repeat="(k,v) in hashExtension"
-                         ng-click="selectED(k,v)" style="cursor: pointer">
-                        {{k}}
-                        <span class="badge pull-right">
-                        {{v.length}}
+                <uib-tab heading="Sort by Resource type">
+
+                    <div class="row">
+                        <div class="col-md-3">
+
+                            <div class="row">
+
+                                <div class="col-md-12">
+                                    <span class="pull-right clickable iconSpacing" ng-click="sortTypeView('freq')">Sort by usage</span>
+                                    <span class="pull-right clickable iconSpacing" ng-click="sortTypeView('name')">Sort by name</span>
+                                </div>
+                            </div>
+
+
+
+                            <div class="myScroll">
+                                <div class="list-group">
+                                    <div ng-class="{'list-group-item':true,'listItemSelected':type.type==selectedType.type}" ng-repeat="type in arTypes"
+                                         ng-click="selectType(type)" style="cursor: pointer">
+                                        {{type.type}}
+                                        <span class="badge pull-right">
+                                            {{type.items.length}}
+                                        </span>
+                                        <span class="clearfix"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <br/>
+                            <table class="table">
+                                <tr><th>Path</th><th>Extension Url</th><th>IG Url</th></tr>
+                                <tr ng-repeat="item in selectedType.items">
+                                    <td>{{item.path}}</td>
+                                    <td>{{item.url}}</td>
+                                    <td>{{item.ig}}</td>
+                                </tr>
+                            </table>
+
+                        </div>
+
+                    </div>
+                    <!--
+                    <pre>{{arTypes | json}}</pre>
+                    -->
+                </uib-tab>
+
+
+
+                <uib-tab heading="Sort by Extension Definition Url">
+                    <div class="row">
+                        <div class="col-md-5">
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h4>Extension definitions</h4>
+                                </div>
+                                <div class="col-md-6">
+                                    <span class="pull-right clickable iconSpacing" ng-click="sortEDView('freq')">Sort by usage</span>
+                                    <span class="pull-right clickable iconSpacing" ng-click="sortEDView('url')">Sort by url</span>
+                                    <span class="pull-right clickable iconSpacing" ng-click="sortEDView('name')">Sort by name</span>
+                                </div>
+                            </div>
+
+
+
+
+                            <div class="myScroll">
+
+
+                                <div class="list-group">
+                                    <div ng-class="{'list-group-item':true,'listItemSelected':ext.url==selectedEDUrl}" ng-repeat="ext in arExtensions"
+                                         ng-click="selectED(ext)" style="cursor: pointer">
+                                        {{ext.url}}
+                                        <span class="badge pull-right">
+                        {{ext.usage.length}}
                     </span>
-                        <span class="clearfix"/>
-                    </div>
-                </div>
-            </div>
+                                        <span class="clearfix"/>
+                                    </div>
+                                </div>
+                            </div>
 
 
-        </div>
-        <div class="col-md-7">
-            <div ng-hide="selectedEDUrl">
-                <div style="margin-top: 80px">
-                    <em> Select an extension definition to the left to view the IG's that are using it...</em>
+                        </div>
+                        <div class="col-md-7">
+                            <div ng-hide="selectedEDUrl">
+                                <div style="margin-top: 80px">
+                                    <em> Select an extension definition to the left to view the IG's that are using it...</em>
 
-                    </div>
-                </div>
-            
-
-            <div ng-show="selectedED">
+                                </div>
+                            </div>
 
 
+                            <div ng-show="selectedED">
 
-                <h4>IGs using {{selectedEDUrl}}</h4>
 
-                <table class="table table-bordered">
-                    <tr><th>IG Url</th><th>Path</th></tr>
-                    <tr ng-repeat="item in selectedED ">
-                        <td>{{item.ig}}</td>
-                        <td>{{item.path}}</td>
-                    </tr>
-                </table>
-            </div>
+
+                                <h4>IGs using {{selectedEDUrl}}</h4>
+
+                                <table class="table table-bordered">
+                                    <tr><th>IG Url</th><th>Path</th></tr>
+                                    <tr ng-repeat="item in selectedED ">
+                                        <td>{{item.ig}}</td>
+                                        <td>{{item.path}}</td>
+                                    </tr>
+                                </table>
+                            </div>
 
 <!--
-            <pre>{{ selectedED | json}}</pre>
-            -->
+                                        <pre>{{ selectedED | json}}</pre>
+                            -->
+
+                        </div>
+
+
+
+                    </div>
+
+
+                </uib-tab>
+
+
+
+            </uib-tabset>
         </div>
 
-
-
     </div>
+
 
 
 
