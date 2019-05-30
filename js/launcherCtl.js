@@ -23,6 +23,7 @@ angular.module("sampleApp")
 
                 if (user) {
                     $scope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+                    $scope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
                     //logicalModelSvc.setCurrentUser(user);
 
 

@@ -192,6 +192,7 @@ angular.module("sampleApp")
 
             if (baseType) {
                 //get all the paths - including expanding logical models...
+                $scope.showWaiting = true;
                 logicalModelSvc.getAllPathsForType(baseType,true).then(
                     function(listOfPaths) {
                         $scope.allPaths = listOfPaths.list;
@@ -203,7 +204,9 @@ angular.module("sampleApp")
                         alert("A Base type of "+ baseType +" was selected, but I couldn't locate the profile to get the element paths")
                         setup(editNode);
                     }
-                )
+                ).finally(function(){
+                    $scope.showWaiting = false;
+                })
 
             } else {
                 setup(editNode);

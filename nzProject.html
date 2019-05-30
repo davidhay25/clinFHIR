@@ -30,7 +30,7 @@
                 function ($scope,$uibModal,$http,modalService,$timeout,$firebaseObject,appConfigSvc,fhirUtilsSvc) {
 
                     console.log(location.host);
-
+                    $scope.input = {}
                     //will update the config. We don't care if manually entered servers are lost or the default servers changed
                     if (appConfigSvc.checkConfigVersion()) {
                         alert('The config was updated. You can continue.')
@@ -74,9 +74,44 @@
                     let appRoot = location.host;
 
                     //set the servers to the ones used by the nz project.
+                    /*
+                    let FHIRVersion =3;
                     appConfigSvc.setServerType('conformance','http://home.clinfhir.com:8040/baseDstu3/');
                     appConfigSvc.setServerType('data','http://home.clinfhir.com:8040/baseDstu3/');       //set the data server to the same as the conformance for the comments
                     appConfigSvc.setServerType('terminology',"https://ontoserver.csiro.au/stu3-latest/");
+*/
+                    let FHIRVersion =4;
+                    appConfigSvc.setServerType('conformance','http://home.clinfhir.com:8054/baseR4/');
+                    appConfigSvc.setServerType('data','http://home.clinfhir.com:8054/baseR4/');       //set the data server to the same as the conformance for the comments
+                    appConfigSvc.setServerType('terminology',"http://home.clinfhir.com:8054/baseR4/");
+
+
+                    //get from the IG when everything is moved to R4...
+                    $scope.selectSample = function(example){
+                        $scope.input.selectedExample = example;
+                        $http.get(example.url).then(
+                            function(data) {
+                                $scope.input.selectedExampleJson = data.data;
+                            },
+                            function(err) {
+                                console.log(err)
+                            }
+                        )
+
+                    };
+
+                    $scope.examples = [];
+                    $scope.examples.push({display:"Patient",url:"http://home.clinfhir.com:8054/baseR4/Patient/patient2"})
+                    $scope.examples.push({display:"Practitioner",url:"http://home.clinfhir.com:8054/baseR4/Practitioner/practitioner1"});
+                    $scope.examples.push({display:"Organization",url:"http://home.clinfhir.com:8054/baseR4/Organization/organization1"})
+                    $scope.examples.push({display:"Location",url:"http://home.clinfhir.com:8054/baseR4/Location/location1"});
+
+
+
+
+                    $scope.selectSample($scope.examples[0])
+
+
 
 
                     let igTypeUrl = appConfigSvc.config().standardExtensionUrl.igEntryType;
@@ -84,13 +119,40 @@
                     //get the IG
                     let url = appConfigSvc.getCurrentConformanceServer().url + 'ImplementationGuide/cf-artifacts-nz3';
                     $scope.models = [];
-                    $scope.modelsByPackage = {};      //alternative display
+                   // $scope.modelsByPackage = {};      //alternative display
                     $http.get(url).then(
                         function(data) {
                             $scope.IG = data.data;
-                            $scope.IG.package.forEach(function (package) {
-                                $scope.modelsByPackage[package.name] = [];      //todo - assume that name exists...
-                                package.resource.forEach(function (item) {
+
+
+                            if (FHIRVersion == 3) {
+                                $scope.IG.package.forEach(function (package) {
+                                    //$scope.modelsByPackage[package.name] = [];      //todo - assume that name exists...
+                                    package.resource.forEach(function (item) {
+                                        let type = fhirUtilsSvc.getSingleExtensionValue(item,igTypeUrl);
+                                        if (type) {
+                                            console.log(type.valueCode)
+                                            switch (type.valueCode) {
+                                                case 'logical' :
+                                                    //we KNOW that this field exists, and that the url is made up from the url...
+                                                    //('cause it's all clinFHIR controlled)
+                                                    let ar = item.sourceReference.reference.split('/');
+                                                    let id = ar[ar.length-1]
+                                                    let url = '/logicalModeller.html#$$$'+id;
+                                                    let entry = {url:url,description:item.description,name:item.name}
+                                                    $scope.models.push(entry)
+                                                    //$scope.modelsByPackage[package.name].push(entry)
+                                                    break;
+                                            }
+                                        }
+
+                                    })
+
+                                });
+                            }
+
+                            if (FHIRVersion == 4) {
+                                $scope.IG.definition.resource.forEach(function (item) {
                                     let type = fhirUtilsSvc.getSingleExtensionValue(item,igTypeUrl);
                                     if (type) {
                                         console.log(type.valueCode)
@@ -98,23 +160,23 @@
                                             case 'logical' :
                                                 //we KNOW that this field exists, and that the url is made up from the url...
                                                 //('cause it's all clinFHIR controlled)
-                                                let ar = item.sourceReference.reference.split('/');
+                                                let ar = item.reference.reference.split('/');
                                                 let id = ar[ar.length-1]
                                                 let url = '/logicalModeller.html#$$$'+id;
-
-
                                                 let entry = {url:url,description:item.description,name:item.name}
                                                 $scope.models.push(entry)
-                                                $scope.modelsByPackage[package.name].push(entry)
+                                                //$scope.modelsByPackage[package.name].push(entry)
                                                 break;
                                         }
                                     }
-
                                 })
 
-                            })
 
-//console.log($scope.models)
+                            }
+
+
+
+console.log($scope.models)
 
 
                         }, function(err) {
@@ -123,7 +185,11 @@
                     );
 
 
+
+
                     $scope.taskManager = "/taskManager.html#$$$cf-artifacts-nz3"
+
+
 
 
                 }
@@ -247,16 +313,7 @@
                     <td>{{model.description}}
                     </td>
                 </tr>
-<!--
 
-                <tr ng-repeat="(key,value) in modelsByPackage">
-                    <td><a  target="_blank" ng-href="{{model.url}}">{{model.name}}</a></td>
-                    <td>{{model.description}}
-                    </td>
-                </tr>
-
-                modelsByPackage
--->
                 <tr>
                     <td colspan="2">
                         <h4>Implementation Guides</h4>
@@ -322,93 +379,113 @@
 
         </div>
         <div class="col-md-6">
-            <h4>HPI model Relationships</h4>
+            <uib-tabset>
+                <uib-tab heading="HPI types">
+                    <h4>HPI model Relationships</h4>
 
-            <img src="artifacts/HPI%20Relationships.png"/>
+                    <img src="artifacts/HPI%20Relationships.png"/>
 
-            <h4>Documentation and Help</h4>
-            <table class="table">
-                <tr>
-                    <td width = "20%">
-                        <a target="_blank" href="https://docs.google.com/presentation/d/1bIFjSjDuMmuxNXPLuc-YerzBuJJYNx9gFC5EgJeizF0/edit?usp=sharing">
-                            Summary presentation
-                        </a>
-                    </td>
-                    <td>
-                        An overview of the Logical Modeller in review mode. Also describes the comments and notes
-                    </td>
-                </tr>
+                </uib-tab>
+                <uib-tab heading="Examples">
 
-            </table>
+                    <select class="form-control" ng-model="input.selectedExample"
+                            ng-options="example.display for example in examples"
+                            ng-change="selectSample(input.selectedExample)"></select>
+
+                    <pre>{{input.selectedExampleJson | json}}</pre>
+                    <div>{{input.selectedExample.url}}</div>
+
+                </uib-tab>
+                <uib-tab heading="Help">
+
+                    <h4>Documentation and Help</h4>
+                    <table class="table">
+                        <tr>
+                            <td width = "20%">
+                                <a target="_blank" href="https://docs.google.com/presentation/d/1bIFjSjDuMmuxNXPLuc-YerzBuJJYNx9gFC5EgJeizF0/edit?usp=sharing">
+                                    Summary presentation
+                                </a>
+                            </td>
+                            <td>
+                                An overview of the Logical Modeller in review mode. Also describes the comments and notes
+                            </td>
+                        </tr>
+
+                    </table>
 
 
-            <h4>FAQ</h4>
+                    <h4>FAQ</h4>
 
-            <uib-accordion >
-                <div uib-accordion-group class="panel-default" heading="Log in to the application">
-                    <p>It's possible to view the model and associated comments without logging in, but to add a new comment - or make a note against
-                    a comment then you do need to log in. Logins are shared across applications so you can log in to
-                    any of them and it will be remembered for the others. There's an icon to the top right ( <i class="glyphicon glyphicon-log-in"></i> )
-                    that will display the login box.</p>
-                    <ul>
-                        <li>If you've logged in before then enter your email and password and click login.</li>
-                        <li>For a new login, enter your email and a password then click the login button. You will get a prompt
-                            about creating a new account.</li>
-                    </ul>
-                    <p>Once you've logged in, your login will be remembered in the browser. To log out, click the
-                    logout ( <i class="glyphicon glyphicon-log-out"></i> ) icon.</p>
+                    <uib-accordion >
+                        <div uib-accordion-group class="panel-default" heading="Log in to the application">
+                            <p>It's possible to view the model and associated comments without logging in, but to add a new comment - or make a note against
+                                a comment then you do need to log in. Logins are shared across applications so you can log in to
+                                any of them and it will be remembered for the others. There's an icon to the top right ( <i class="glyphicon glyphicon-log-in"></i> )
+                                that will display the login box.</p>
+                            <ul>
+                                <li>If you've logged in before then enter your email and password and click login.</li>
+                                <li>For a new login, enter your email and a password then click the login button. You will get a prompt
+                                    about creating a new account.</li>
+                            </ul>
+                            <p>Once you've logged in, your login will be remembered in the browser. To log out, click the
+                                logout ( <i class="glyphicon glyphicon-log-out"></i> ) icon.</p>
 
-                </div>
-                <div uib-accordion-group class="panel-default" heading="Add a comment to a particular element in the model">
-                    To add a comment to an element in the model, select the element in the tree, then click the 'add comment'
-                    link that appears in the detail pane to the right (about half way down the page). A dialog box will
-                    appear into which you can add the comment.
-                    <p>There's an image in <a target="_blank" href="https://docs.google.com/presentation/d/1bIFjSjDuMmuxNXPLuc-YerzBuJJYNx9gFC5EgJeizF0/edit?usp=sharing">
-                        the Summary presentation
-                    </a></p>
-                </div>
-                <div uib-accordion-group class="panel-default" heading="Add a note to an existing comment">
-                    To add a note against an element, select the element, then click the edit icon ( <i class="glyphicon glyphicon-edit"></i> ) against the
-                    comment.  A dialog box will
-                    appear into which you can add the comment.
-                    <p>There's an image in <a target="_blank" href="https://docs.google.com/presentation/d/1bIFjSjDuMmuxNXPLuc-YerzBuJJYNx9gFC5EgJeizF0/edit?usp=sharing">
-                        the Summary presentation</a></p>
-                </div>
-                <div uib-accordion-group class="panel-default" heading="View the existing comments and notes for an element">
-                    Each comment and the notes against it can be viewed individually using the edit option (click the
-                    edit icon - <i class="glyphicon glyphicon-edit"></i> -  against a comment, and a dialog appears with the comment and any notes.
-                </div>
-                <div uib-accordion-group class="panel-default" heading="View all the existing comments and notes for the model">
-                    Select the 'Model' tab to the upper right. A sub-tab will be displayed with a 'Comments' tab. Selecting that
-                    will list all the comments.
-                </div>
-                <div uib-accordion-group class="panel-default" heading="Add a comment to the model">
-                    <p>This is useful if you want to make a comment about the model that is not related
-                        to a specific element.</p>
-                    <ul>
-                        <li>If you're wanting to suggest an additional element, then select the 'parent' element
-                        where the new one would logically fit, and add a new comment there.</li>
-                        <li>To just make a comment about the model overall, select the topmost element
-                        (eg NhiPatient) and add the comment there.</li>
-                    </ul>
-                </div>
+                        </div>
+                        <div uib-accordion-group class="panel-default" heading="Add a comment to a particular element in the model">
+                            To add a comment to an element in the model, select the element in the tree, then click the 'add comment'
+                            link that appears in the detail pane to the right (about half way down the page). A dialog box will
+                            appear into which you can add the comment.
+                            <p>There's an image in <a target="_blank" href="https://docs.google.com/presentation/d/1bIFjSjDuMmuxNXPLuc-YerzBuJJYNx9gFC5EgJeizF0/edit?usp=sharing">
+                                the Summary presentation
+                            </a></p>
+                        </div>
+                        <div uib-accordion-group class="panel-default" heading="Add a note to an existing comment">
+                            To add a note against an element, select the element, then click the edit icon ( <i class="glyphicon glyphicon-edit"></i> ) against the
+                            comment.  A dialog box will
+                            appear into which you can add the comment.
+                            <p>There's an image in <a target="_blank" href="https://docs.google.com/presentation/d/1bIFjSjDuMmuxNXPLuc-YerzBuJJYNx9gFC5EgJeizF0/edit?usp=sharing">
+                                the Summary presentation</a></p>
+                        </div>
+                        <div uib-accordion-group class="panel-default" heading="View the existing comments and notes for an element">
+                            Each comment and the notes against it can be viewed individually using the edit option (click the
+                            edit icon - <i class="glyphicon glyphicon-edit"></i> -  against a comment, and a dialog appears with the comment and any notes.
+                        </div>
+                        <div uib-accordion-group class="panel-default" heading="View all the existing comments and notes for the model">
+                            Select the 'Model' tab to the upper right. A sub-tab will be displayed with a 'Comments' tab. Selecting that
+                            will list all the comments.
+                        </div>
+                        <div uib-accordion-group class="panel-default" heading="Add a comment to the model">
+                            <p>This is useful if you want to make a comment about the model that is not related
+                                to a specific element.</p>
+                            <ul>
+                                <li>If you're wanting to suggest an additional element, then select the 'parent' element
+                                    where the new one would logically fit, and add a new comment there.</li>
+                                <li>To just make a comment about the model overall, select the topmost element
+                                    (eg NhiPatient) and add the comment there.</li>
+                            </ul>
+                        </div>
 
-                <div uib-accordion-group class="panel-default" heading="What is the comments viewer">
-                    <p>Any logged in user can add a comment to an element in the model to record suggestions for updating such as:</p>
-                    <ul>
-                        <li>A change to the documentation</li>
-                        <li>Additions / Changes to the ValueSet for a coded elements</li>
-                        <li>Changes to multiplicity (if the element can repeat></li>
-                    </ul>
+                        <div uib-accordion-group class="panel-default" heading="What is the comments viewer">
+                            <p>Any logged in user can add a comment to an element in the model to record suggestions for updating such as:</p>
+                            <ul>
+                                <li>A change to the documentation</li>
+                                <li>Additions / Changes to the ValueSet for a coded elements</li>
+                                <li>Changes to multiplicity (if the element can repeat></li>
+                            </ul>
 
-                    <p>These comments can be viewed in the model itself (select any element and the comments are shown to the right)
-                        and also in a specialized application - the Task viewer. This application treats the comments as if each
-                        one was a task that needs to be resolved - accepted or rejected. </p>
-                    <p>It's really intended for an administrator, but useful for an individual to see what the resolution
-                        to their comment was.</p>
-                </div>
+                            <p>These comments can be viewed in the model itself (select any element and the comments are shown to the right)
+                                and also in a specialized application - the Task viewer. This application treats the comments as if each
+                                one was a task that needs to be resolved - accepted or rejected. </p>
+                            <p>It's really intended for an administrator, but useful for an individual to see what the resolution
+                                to their comment was.</p>
+                        </div>
 
-            </uib-accordion>
+                    </uib-accordion>
+
+                </uib-tab>
+            </uib-tabset>
+
+
 
 
         </div>

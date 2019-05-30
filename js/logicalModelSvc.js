@@ -1870,7 +1870,7 @@ angular.module("sampleApp")
 
             },
 
-            makeReferencedMapsModel: function (SD, bundle) {
+            makeReferencedMapsModel: function (SD) {
                 //builds the model that has all the models referenced by the indicated SD, recursively...
 
                 var that = this;
@@ -2353,6 +2353,8 @@ angular.module("sampleApp")
                 var deferred = $q.defer();
                 var url = "http://hl7.org/fhir/StructureDefinition/" + typeName;
 
+                console.log('getting resource...')
+
                 GetDataFromServer.findConformanceResourceByUri(url).then(
                     function (SD) {
                         if (SD && SD.snapshot && SD.snapshot.element) {
@@ -2397,6 +2399,10 @@ angular.module("sampleApp")
                     }, function (err) {
                         alert("error qith query: " + url + "\n" + angular.toJson(err));
                         deferred.reject();
+                    }
+                ).finally(
+                    function(){
+                        console.log('call complete...')
                     }
                 )
                 return deferred.promise;
