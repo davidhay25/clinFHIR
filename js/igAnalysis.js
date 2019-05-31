@@ -11,9 +11,11 @@ angular.module("igApp")
             $http.get(url).then(
                 function(data) {
                     let vo = data.data;
+                    $scope.allIGs = [];
                     for (var IGurl in vo) {
 
                         let IG = vo[IGurl];
+                        $scope.allIGs.push({url:IGurl,ig:IG})
                         //console.log(IG)
                         for (var extUrl in IG.usage) {
                             let arExt = IG.usage[extUrl];
@@ -91,6 +93,55 @@ angular.module("igApp")
                 }
 
             );
+
+            $scope.hashIGDetailDescription = {};
+            $scope.hashIGDetailDescription.extensions = "Extensions defined by this IG";
+            $scope.hashIGDetailDescription.profiles = "Profiles defined by thus IG"
+            $scope.hashIGDetailDescription.used = "External extensions used by this IG";
+
+            $scope.selectIG = function(IG) {
+                //delete $scope.selectedIGDetailsKey;
+                $scope.selectedIG = IG;
+                console.log(IG)
+                $scope.usedExtensionsByPath = []
+
+                //create an array of extensions used by path
+                let hashPath = {};
+
+                for (var url in IG.ig.usage) {
+                    let arPath = IG.ig.usage[url];
+                    arPath.forEach(function (path) {
+                        hashPath[path] = hashPath[path] || []
+                        hashPath[path].push({url:url});
+
+                    });
+                }
+
+                for (var path in hashPath) {
+                    let arUrl = hashPath[path];
+                    $scope.usedExtensionsByPath.push({path:path,url:arUrl})
+                }
+                $scope.usedExtensionsByPath.sort(function(a,b){
+                    if (a.path > b.path) {
+                        return 1
+
+                    } else {
+                        return -1
+                    }
+                })
+
+
+
+
+            };
+
+            $scope.showIGDetails = function(key){
+
+                $scope.selectedIGDetailsKey = key;
+
+
+            }
+
 
             $scope.sortEDView = function(key) {
                 switch (key) {
