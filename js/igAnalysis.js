@@ -4,10 +4,10 @@ angular.module("igApp")
 
             let hashExtension = {};     //a hash of ed urls
             let hashType = {};      //a hash of resource types
-            //let url = "http://test.fhir.org/usage-stats";
+            let url = "http://test.fhir.org/usage-stats";
             registerAccess();
 
-            let url = "/artifacts/usagestats.json";
+            //let url = "/artifacts/usagestats.json";
             $http.get(url).then(
                 function(data) {
                     let vo = data.data;
@@ -96,7 +96,7 @@ angular.module("igApp")
 
             $scope.hashIGDetailDescription = {};
             $scope.hashIGDetailDescription.extensions = "Extensions defined by this IG";
-            $scope.hashIGDetailDescription.profiles = "Profiles defined by thus IG"
+            $scope.hashIGDetailDescription.profiles = "Profiles defined by this IG";
             $scope.hashIGDetailDescription.used = "External extensions used by this IG";
 
             $scope.selectIG = function(IG) {
