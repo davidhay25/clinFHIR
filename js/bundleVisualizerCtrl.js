@@ -13,6 +13,14 @@ angular.module("sampleApp")
                 alert('The config was updated. You can continue.')
             }
 
+            $http.post('/stats/login',{module:'bundleVisualizer'}).then(
+                function(data){
+
+                },
+                function(err){
+                    console.log('error accessing clinfhir to register access',err)
+                }
+            );
 
             //pre-defined queries
             $scope.queries = [];
@@ -427,8 +435,14 @@ angular.module("sampleApp")
                 delete $scope.selectedBundleEntryErrors;
                 delete $scope.selectedBundleEntry;
                 $scope.selectedQuery = query;
-                $scope.showWaiting = true
-                GetDataFromServer.adHocFHIRQueryFollowingPaging($scope.dataServer.url + query.query).then(
+                $scope.showWaiting = true;
+                let url = query.query;
+
+                if (url.indexOf('http') == -1) {
+                    url = $scope.dataServer.url + url;
+                }
+
+                GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
                     function(data) {
                         console.log(data)
 

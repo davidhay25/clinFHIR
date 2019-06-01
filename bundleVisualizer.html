@@ -191,7 +191,7 @@
                         <div ng-class="{'list-group-item':1,'listItemSelected':query==selectedQuery}"
                              ng-repeat="query in queries"
                              ng-click = "selectQuery(query)"
-                             uib-popover="{{query.description}}"
+                             uib-popover="{{query.query}}   ({{query.description}})"
                              popover-placement="right"
                              popover-trigger="'mouseenter'">
                             {{query.display}}

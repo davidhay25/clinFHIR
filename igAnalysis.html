@@ -92,7 +92,7 @@
                     <br/>
                     <div class="row">
                         <div class="col-md-3">
-                            <div class="list-group">
+                            <div class="myScroll">
                                 <div ng-class="{'list-group-item':true,'listItemSelected':IG==selectedIG}"
                                      ng-repeat="IG in allIGs"
                                      ng-click="selectIG(IG)" style="cursor: pointer">
@@ -103,6 +103,9 @@
                                      <span class="clearfix"/>
                                      -->
                                 </div>
+                            </div>
+                            <div class="list-group">
+
                             </div>
                         </div>
                         <div class="col-md-9">
@@ -184,9 +187,14 @@
                                     </div>
                                     <div ng-show = "selectedIGDetailsKey =='extensions'">
                                         <table class="table table-bordered">
-                                            <tr><th>Title</th><th>Url</th></tr>
+                                            <tr><th>Title</th><th>Types</th><th>Url</th></tr>
                                             <tr ng-repeat="row in selectedIG.ig.extensions">
                                                 <td>{{row.title}}</td>
+                                                <td>
+                                                    <div ng-repeat="type in row.types">
+                                                        {{type}}
+                                                    </div>
+                                                </td>
                                                 <td>{{row.url}}</td>
                                             </tr>
                                         </table>
@@ -271,7 +279,7 @@
                                          ng-click="selectType(type)" style="cursor: pointer">
                                         {{type.type}}
                                         <span class="badge pull-right">
-                                            {{type.items.length}}
+                                            {{type.uniqueCnt}}
                                         </span>
                                         <span class="clearfix"/>
                                     </div>

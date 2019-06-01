@@ -42,8 +42,21 @@ angular.module("igApp")
                     //convert hashType to an array (of arrays) and sort
                     $scope.arTypes = []
                     for (var type in hashType) {
+                        let hash = {}
                         let arExt = hashType[type];
-                        $scope.arTypes.push({type:type,items:arExt});
+                        //get the count of unique extension defs for this type
+                        let cnt = 0
+                        arExt.forEach(function (item) {
+                            let url = item.url;
+                            if (! hash[url]) {
+                                hash[url] = 'x';
+                                cnt++;
+                            }
+                        })
+
+
+
+                        $scope.arTypes.push({type:type,items:arExt,uniqueCnt : cnt});
                     }
 
                     $scope.sortTypeView('name');
@@ -200,7 +213,7 @@ angular.module("igApp")
                     case 'freq' :
 
                         $scope.arTypes.sort(function(a,b){
-                            if (a.items.length < b.items.length) {
+                            if (a.uniqueCnt < b.uniqueCnt) {
                                 return 1
                             } else {
                                 return -1
@@ -226,12 +239,6 @@ angular.module("igApp")
 
             function registerAccess(){
                 //register access for the logs...
-/*
-                var servers = {};
-                servers.conformance = appConfigSvc.getCurrentConformanceServer().name;
-                servers.terminology = appConfigSvc.getCurrentTerminologyServer().name;
-                servers.data = appConfigSvc.getCurrentDataServer().name;
-*/
                 $http.post('/stats/login',{module:'igAnalysis'}).then(
                     function(data){
 
