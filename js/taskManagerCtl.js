@@ -1,17 +1,22 @@
 angular.module("sampleApp").controller('taskManagerCtrl',
     function ($scope,$http,appConfigSvc,Utilities,$firebaseObject,$firebaseArray,$uibModal,modalService,taskSvc,logicalModelSvc,
-              $location) {
+              $location,commonSvc) {
 
         $scope.firebase = firebase;
         $scope.appConfigSvc = appConfigSvc;
         //let clinFhirDevice = 'Device/cfDevice';
+        //note that if yeh task manager is launched from one of the projects, then it will set the correct server
         $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
+
+
         $scope.input = {};
         $scope.input.period = 'all';
 
         $scope.tasks = [];
 
         let fhirVersion = $scope.conformanceServer.version;
+        console.log(fhirVersion)
+
         let taskCode =  {system:"http://loinc.org",code:"48767-8"};
 
         let wsUrl = 'ws://'+ window.location.host;
@@ -28,6 +33,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
             if (hash.substr(0,3) == '$$$') {
                 IgUrl =  $scope.conformanceServer.url + 'ImplementationGuide/' + hash.substr(3);
+                console.log(IgUrl)
             }
         }
 
@@ -193,16 +199,39 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                 if (data.data && data.data) {
                     $scope.allModels = []
                     let IG = data.data;
-                    IG.package.forEach(function (package) {
-                        package.resource.forEach(function (res) {
-                            if (res.acronym == 'logical') {
-                                if (res.sourceReference && res.sourceReference.reference) {
-                                    let ar = res.sourceReference.reference.split('/')
+                    let igEntryType = appConfigSvc.config().standardExtensionUrl.igEntryType;
+
+                    if (fhirVersion == 4) {
+
+                        IG.definition.resource.forEach(function (res) {
+                            let arExt = commonSvc.getExtension(res,igEntryType)
+                            if (arExt.length > 0) {
+                                let ext = arExt[0]
+                                if (ext.valueCode == 'logical') {
+                                    let ar = res.reference.reference.split('/')
                                     $scope.allModels.push({id:ar[ar.length-1]})
                                 }
                             }
+
                         })
-                    })
+
+                    } else {
+                        IG.package.forEach(function (package) {
+                            package.resource.forEach(function (res) {
+                                if (res.acronym == 'logical') {
+                                    if (res.sourceReference && res.sourceReference.reference) {
+                                        let ar = res.sourceReference.reference.split('/')
+                                        $scope.allModels.push({id:ar[ar.length-1]})
+                                    }
+                                }
+                            })
+                        })
+                    }
+
+
+
+
+
 
                 }
                 if ($scope.allModels.length > 0) {
@@ -299,7 +328,61 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
         //add a note to a comment from the tree view display...
         $scope.addNoteFromTreeView = function(iTask) {
+
+
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop.
+                    keyboard: false,       //same as above.
+                    templateUrl: 'modalTemplates/addNote.html',
+                    controller: function($scope){
+                        $scope.input={}
+
+                        $scope.save = function() {
+                            $scope.$close($scope.input.note)
+                        }
+
+                    }
+                }).result.then(
+                    function(note) {
+                        console.log(note)
+                        if (note && iTask) {
+
+                            var annot = {text:note,time: new Date().toISOString()};
+                            annot.authorString = $scope.user.email;
+
+                            //This is an 'update' object
+                            let obj = {}
+                            obj.note = annot;
+                            obj.fhirServer = appConfigSvc.getCurrentConformanceServer().url;
+                            obj.modelId =  $scope.currentModelId;
+
+                            //this will add the note to the task from the server...
+                            let url = "/myTask/addNote/" + iTask.id;
+                            $scope.showWaiting = true;
+                            $http.post(url, obj).then(
+                                function (data) {
+                                    //for the local display
+                                    iTask.notes = iTask.notes || [];
+                                    iTask.notes.push(annot);
+
+                                }, function (err) {
+                                    alert('Error saving note: ' + angular.toJson(err))
+                                }
+                            ).finally(function(){
+                                $scope.showWaiting = false;
+                            })
+                        }
+
+                    }
+                )
+/*
+
+            return;
+
             note = prompt('Enter note');
+
+
+
             if (note && iTask) {
 
                 var annot = {text:note,time: new Date().toISOString()};
@@ -327,6 +410,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                     $scope.showWaiting = false;
                 })
             }
+            */
         };
 
 

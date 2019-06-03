@@ -39,11 +39,15 @@ let IG = JSON.parse(response.body.toString());
 
 
 IG.definition.resource.forEach(function (item) {
-    let ar = item.reference.reference.split('/');
-    let id = ar[ar.length - 1]
-    console.log(id)
-    arModels.push(id)
-})
+    if (item.exampleCanonical) {
+        //this is an example...
+    } else {
+        let ar = item.reference.reference.split('/');
+        let id = ar[ar.length - 1]
+        console.log(id)
+        arModels.push(id)
+    }
+});
 
 
 

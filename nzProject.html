@@ -15,10 +15,11 @@
     <script src="js/libs/angular-sanitize.js"></script>
     <script src="js/libs/firebase.js"></script>
     <script src="js/libs/angularfire.min.js"></script>
+    <script src="js/libs/angular-sanitize.js"></script>
 
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase','ngSanitize']).config(function($locationProvider) {
 
             $locationProvider.html5Mode(true);
             $locationProvider.hashPrefix('!');
@@ -50,6 +51,13 @@
                         }
 
                     });
+
+                    $http.get('artifacts/nzDirectories.html').then (
+                        function(data) {
+                            $scope.helpText = data.data;
+                        }
+                    )
+
 
                     $scope.login=function(){
                         $uibModal.open({
@@ -89,7 +97,14 @@
                     //get from the IG when everything is moved to R4...
                     $scope.selectSample = function(example){
                         $scope.input.selectedExample = example;
-                        $http.get(example.url).then(
+                        delete $scope.input.selectedExampleJson;
+
+                        let url = example.url;
+                        if (url.indexOf('http') == -1) {
+                            url = 'http://home.clinfhir.com:8054/baseR4/' + url;        //todo
+                        }
+
+                        $http.get(url).then(
                             function(data) {
                                 $scope.input.selectedExampleJson = data.data;
                             },
@@ -101,15 +116,16 @@
                     };
 
                     $scope.examples = [];
+                    /*
                     $scope.examples.push({display:"Patient",url:"http://home.clinfhir.com:8054/baseR4/Patient/patient2"})
                     $scope.examples.push({display:"Practitioner",url:"http://home.clinfhir.com:8054/baseR4/Practitioner/practitioner1"});
                     $scope.examples.push({display:"Organization",url:"http://home.clinfhir.com:8054/baseR4/Organization/organization1"})
                     $scope.examples.push({display:"Location",url:"http://home.clinfhir.com:8054/baseR4/Location/location1"});
+*/
 
 
 
-
-                    $scope.selectSample($scope.examples[0])
+                    //$scope.selectSample($scope.examples[0])
 
 
 
@@ -168,6 +184,13 @@
                                                 //$scope.modelsByPackage[package.name].push(entry)
                                                 break;
                                         }
+                                    } else {
+                                        //if there's no extension, then is is an example?
+                                        if (item.exampleCanonical) {
+                                            //at the moment the canonical is referencing the LM - not the profile
+                                            $scope.examples.push({display:item.name,url:item.reference.reference});
+
+                                        }
                                     }
                                 })
 
@@ -176,7 +199,7 @@
 
 
 
-console.log($scope.models)
+//console.log($scope.models)
 
 
                         }, function(err) {
@@ -225,6 +248,13 @@ console.log($scope.models)
             width: 100%;
             height: 600px;
             object-fit: cover;
+
+
+        }
+
+        .iframeClass {
+            width: 100%;
+            height : 800px;
         }
 
     </style>
@@ -397,6 +427,19 @@ console.log($scope.models)
 
                 </uib-tab>
                 <uib-tab heading="Help">
+
+                    <p ng-bind-html="helpText"></p>
+
+
+<!--
+                    <iframe src="artifacts/nzDirectories.html" class="iframeClass">
+
+
+                    </iframe>
+
+                    -->
+                </uib-tab>
+                <uib-tab heading="Comments Help">
 
                     <h4>Documentation and Help</h4>
                     <table class="table">

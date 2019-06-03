@@ -88,7 +88,8 @@
         <div class="col-md-12">
             <uib-tabset>
 
-                <uib-tab heading="View by IG">
+                <uib-tab>
+                    <uib-tab-heading>View by IG <span class="badge">{{allIGs.length}}</span> </uib-tab-heading>
                     <br/>
                     <div class="row">
                         <div class="col-md-3">
@@ -108,7 +109,7 @@
 
                             </div>
                         </div>
-                        <div class="col-md-9">
+                        <div class="col-md-9"  ng-show="selectedIG">
                             <div class="row">
                                 <div class="col-md-2">
                                     Date
@@ -258,7 +259,10 @@
 
                 </uib-tab>
 
-                <uib-tab heading="View by Resource type">
+                <uib-tab>
+                    <uib-tab-heading>
+                        View by Resource type <span class="badge">{{arTypes.length}}</span>
+                    </uib-tab-heading>
 
                     <div class="row">
                         <div class="col-md-3">
@@ -307,7 +311,10 @@
 
 
 
-                <uib-tab heading="View by Extension Definition Url">
+                <uib-tab>
+                    <uib-tab-heading>
+                        View by Extension Definition Url <span class="badge">{{arExtensions.length}}</span>
+                    </uib-tab-heading>
                     <div class="row">
                         <div class="col-md-5">
 
