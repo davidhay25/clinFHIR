@@ -131,12 +131,26 @@ angular.module("sampleApp")
 
                     var resource = entry.resource;
 
+
+
+
+                    //let resourceId = resource.id || entry.fullUrl;
+
+
+
+
                     let url = entry.fullUrl;// || resource.resourceType + "/" + resource.id;
 
-                    //if there's no fullUrl, then make the url a relative one ({type}/{id).
-                    if (!url) {
+
+                    if (resource.id) {
                         url = resource.resourceType + "/" + resource.id;
                     }
+
+                    //if there's no fullUrl, then make the url a relative one ({type}/{id).
+                 /*   if (!url) {
+                        url = resource.resourceType + "/" + resource.id;
+                    }
+                    */
 
 
                     let node = {id: arNodes.length +1, label: resource.resourceType,
@@ -149,6 +163,7 @@ angular.module("sampleApp")
                     }
 
                     node.entry = entry;
+                    node.normalizedId = url;        //this is either the fullUrl or {resource type}/{id}
 
                     if (objColours[resource.resourceType]) {
                         node.color = objColours[resource.resourceType];
@@ -191,19 +206,21 @@ angular.module("sampleApp")
                 let hash = {};      //this will be a hash of nodes that have a reference to centralResourceId (if specified)
                 //hash[]
                 allReferences.forEach(function(ref){
-                    //console.log(ref)
+                    
 
                     let targetNode = objNodes[ref.targ];
 
                     if (centralResourceId) {
 
-                        if (ref.src.resource.id == centralResourceId) {
+
+                        //if (ref.src.resource.id == centralResourceId) {
+                        if (ref.src.normalizedId == centralResourceId) {
                             //this is from the central resource to the given central resource
                             hash[ref.targ] = true;      //this is the url property of the node
                             //console.log('ref to central:' + ref.targ)
                         }
-
-                        if (targetNode && targetNode.resource.id == centralResourceId) {
+                        //if (targetNode && targetNode.resource.id == centralResourceId) {
+                        if (targetNode && targetNode.normalizedId == centralResourceId) {
                             //this is a resource eferencing the central node
                             hash[ref.src.url] = true;
                         }
@@ -226,7 +243,12 @@ angular.module("sampleApp")
                     //only include the nodes that have a reference to or from the central node
                     let nodesToInclude = []
                     arNodes.forEach(function(node){
-                        if (node.resource.id == centralResourceId) {
+
+                        //let id = node.entry.fullUrl;
+                       // if ()
+
+                        //if (node.resource.id == centralResourceId) {
+                        if (node.normalizedId == centralResourceId) {
                             //this is the central node
                             nodesToInclude.push(node)
                         } else if (hash[node.url]) {

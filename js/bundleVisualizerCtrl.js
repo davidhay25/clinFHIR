@@ -153,26 +153,7 @@ angular.module("sampleApp")
                             }
                             return true;
                         };
-/*
-                        $scope.execute = function(qry) {
 
-                            let options = {headers: {'Accept':'application/fhir+json'}}
-                            let fullQry = dataServer.url + qry
-
-                            GetDataFromServer.adHocFHIRQueryFollowingPaging(fullQry,options).then(
-                                function(data) {
-                                    console.log(data)
-                                    $scope.input.raw = angular.toJson(data.data);
-
-
-                                },
-                                function(err) {
-                                    console.log(err);
-                                }
-                            )
-
-                        }
-*/
 
 
 
@@ -363,8 +344,9 @@ angular.module("sampleApp")
 
 
                 //console.log(entry)
+                let id = entry.resource.id || entry.fullUrl;
 
-                let vo = v2ToFhirSvc.makeGraph($scope.fhir,$scope.hashErrors,$scope.serverRoot,false,entry.resource.id)
+                let vo = v2ToFhirSvc.makeGraph($scope.fhir,$scope.hashErrors,$scope.serverRoot,false,id)
 
                 //console.log(vo);
 
@@ -462,6 +444,7 @@ console.log(newBundle)
             let processBundle = function(oBundle) {
                 delete $scope.serverRoot;
                 $scope.fhir = oBundle;
+
                 $scope.validate(oBundle,function(hashErrors){
                     $scope.hashErrors = hashErrors;
 
@@ -487,8 +470,7 @@ console.log(newBundle)
                     }
 
 
-                    let centralResourceId = null;
-                    let vo = v2ToFhirSvc.makeGraph($scope.fhir,hashErrors,serverRoot,false,centralResourceId)
+                    let vo = v2ToFhirSvc.makeGraph($scope.fhir,hashErrors,serverRoot,false)
 
                     console.log(vo)
                     var container = document.getElementById('resourceGraph');
@@ -529,7 +511,20 @@ console.log(newBundle)
 
                     bundle.entry.forEach(function (entry) {
                         if (entry.resource) {
-                            let key = entry.resource.resourceType + "/" + entry.resource.id;
+
+
+                            let key;
+                            if (entry.resource.id) {
+                                key = entry.resource.resourceType + "/" + id
+                            } else {
+                                key = entry.fullUrl
+                            }
+
+                            //let id = entry.resource.id || entry.fullUrl;
+                            //let key = entry.resource.resourceType + "/" + id;
+
+
+
                             hash[key] = entry.resource;
                             if (entry.resource.resourceType == 'Composition') {
                                 arComposition.push(entry.resource)
@@ -552,9 +547,12 @@ console.log(newBundle)
                         //now get the subject
                         if ($scope.document.composition.subject) {
                             if ($scope.document.composition.subject.reference) {
+
+
+
                                 $scope.document.subject = hash[$scope.document.composition.subject.reference];
                                 if (!$scope.document.subject) {
-                                    alert('The subject reference ('+$scope.document.composition.subject.reference+') is not in the bundle')
+                                    alert('The subject reference from Composition ('+$scope.document.composition.subject.reference+') is not in the bundle')
                                 }
                             } else {
                                 alert('The composition resource is missing the subject reference')
@@ -651,7 +649,7 @@ console.log($scope.document.composition)
                                     hashErrors[inx-1].push(issue)
                                 }
                             }
-                        })
+                        });
 
                         cb(hashErrors)
 
@@ -696,23 +694,52 @@ console.log($scope.document.composition)
                     alert("The bundle has been copied to the clipboard.")
                 }
 
-            }
+            };
 
             function deDupeBundle(bundle) {
                 let newBundle = angular.copy(bundle)
+
+
+                //return newBundle;
+
+                //------- tet
+
                 newBundle.entry.length = 0;
                 let idHash = {};
+
                 bundle.entry.forEach(function (entry) {
-                    if (! idHash[entry.resource.id]) {
-                        newBundle.entry.push(entry);
-                        idHash[entry.resource.id] = true;
+
+                    if (entry.resource) {
+                        let resourceId = entry.fullUrl;
+                        if (entry.resource.id) {
+                            resourceId = entry.resource.resourceType + "/" + entry.resource.id;
+                        }
+
+
+
+
+                        if (! idHash[resourceId]) {
+                            newBundle.entry.push(entry);
+                            idHash[resourceId] = true;
+                        }
+                    } else {
+                        alert("There is an entry with the fullUrl "+ entry.fullUrl + " that has no resource - ignoring...")
                     }
+
 
                 });
 
                 newBundle.entry.sort(function(a,b){
-                    let a1 = a.resource.resourceType + "/" + a.resource.id;
-                    let b1 = b.resource.resourceType + "/" + b.resource.id;
+
+                    let ida = a.resource.id || a.fullUrl;
+                    let idb = b.resource.id || b.fullUrl;
+
+                    let a1 = a.resource.resourceType + "/" + ida;
+                    let b1 = b.resource.resourceType + "/" + idb;
+
+                    //let a1 = a.resource.resourceType + "/" + a.resource.id;
+                    //let b1 = b.resource.resourceType + "/" + b.resource.id;
+
                     if (a1 > b1) {
                         return 1
                     } else if (b1 > a1) {

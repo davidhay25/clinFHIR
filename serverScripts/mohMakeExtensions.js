@@ -13,13 +13,13 @@ let nzPrefix = "http://hl7.org.nz/fhir/StructureDefinition";    //the prefix for
 //let remoteFhirServer = "http://home.clinfhir.com:8040/baseDstu3/";
 let remoteFhirServer = "http://home.clinfhir.com:8054/baseR4/"; //the server where the models are stored
 
-let uploadServer = "http://home.clinfhir.com:8054/baseR4/";     //the server to upload the Extension def SD's to...
-//let uploadServer = null;
+//let uploadServer = "http://home.clinfhir.com:8054/baseR4/";     //the server to upload the Extension def SD's to...
+let uploadServer = null;
 
 let extensionUrl = "http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl";
 
 
-let outFilePath = "/Users/davidhay/play/"
+let outFilePath = "/Users/davidhay/sharedWithVB/mohProfiles/"
 
 let hashValueSet = {missing:[]}   //all the valuesets in the models. missing are coded with no VS
 
@@ -50,7 +50,7 @@ IG.definition.resource.forEach(function (item) {
 });
 
 
-
+arModels = ["HpiPractitioner"];
 
 
 
@@ -89,7 +89,7 @@ arModels.forEach(function (modelId) {
                             let url = ext.valueString;      //the url of the extension
 
                                 let item = {path:path, ed:[ed]} ;    //note there could be multiple ed's - ie a complex extension
-                                item.context = [{type:'element',expression:'Patient'}];         //<<<<<<<<<<
+                                item.context = [{type:'element',expression:'Practitioner'}];         //<<<<<<<<<<
                                 item.dataType = dataType;
                                 item.url = url;
                                 let key = path + url;
@@ -117,7 +117,7 @@ arModels.forEach(function (modelId) {
 
     });
 
-    //console.log(hashExtension);
+    //console.log(JSON.stringify(hashExtension,null,2));
 
     for (var key in hashExtension) {
         let item = hashExtension[key]
@@ -125,9 +125,12 @@ arModels.forEach(function (modelId) {
 
         //only make ED's that are in NZ's domain...
         if (url.startsWith(nzPrefix))  {
+            console.log("working on "+url)
+
             let extDef;
             if (item.ed.length == 1) {
                 //a simple extension...
+
                 extDef = makeSimpleExtDef(item);
                 console.log("simple: "+extDef.url)
 
@@ -135,9 +138,11 @@ arModels.forEach(function (modelId) {
                 fs.writeFileSync(filePath,JSON.stringify(extDef,null,2))
             } else {
                 //a complex extension...
+
                 extDef = makeComplexExtDef(item);
-                //console.log((extDef))
                 console.log("complex: "+extDef.url)
+                //console.log((extDef))
+
                 let filePath = outFilePath + extDef.name + '.json';
                 fs.writeFileSync(filePath,JSON.stringify(extDef,null,2))
             }
@@ -184,10 +189,23 @@ function makeComplexExtDef (item) {
     //now add the elements for the child nodes...
     for (var i=1; i < item.ed.length; i++) {
         let ed = item.ed[i];
-        let childPath = ed.path;
+
+        //we know there must be a mapping, or it wouldn't be in the object
+        let mapPath = ed.mapping[0].map
+        mapPath = mapPath.replace(/\|/g,'')
+        mapPath = mapPath.replace(/#/g,'')
+        console.log(mapPath)
+
+        let sliceName = mapPath
+/*
+        let childPath = ed.path;        //actually, this is the path in the model
         //console.log(childPath)
         let ar = childPath.split('.');
         let sliceName = ar[ar.length-1];
+        */
+        console.log(sliceName)
+
+
         let dataType = 'string';
         let short = "Short not present!"
         if (ed.short) {
@@ -220,7 +238,8 @@ function makeComplexExtDef (item) {
         let ele4 = {id:'Extension.extension:' + sliceName + '.url',path:'Extension.extension.url',short:'Extension url',min:1,max:'1',base:{path:'Extension.url',min:1,max:'1'}};
         ele4.type = [{code:'uri'}];
         ele4.fixedUri = sliceName;
-        ele4.definition = 'The unique Url'
+        ele4.url = sliceName;
+        ele4.definition = 'The unique Url';
         sd.snapshot.element.push(ele4);
 
         let ele5 = {};
