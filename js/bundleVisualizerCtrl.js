@@ -27,6 +27,11 @@ angular.module("sampleApp")
             $scope.queries.push({display:'Patients called eve',query:'Patient?name=hay'});
             $scope.queries.push({display:'All Florence Hays data',query:'Patient/112529/$everything'});
 
+            //inward and outwards references in graph
+            $scope.input = {};
+            $scope.input.showInRef = true;
+            $scope.input.showOutRef = true;
+
             if ($localStorage.bvQueries) {
                 $scope.queries = $localStorage.bvQueries
                 /*
@@ -338,20 +343,23 @@ angular.module("sampleApp")
 
             };
 
+
             $scope.selectBundleEntry = function(entry,entryErrors) {
                 $scope.selectedBundleEntry = entry
                 $scope.selectedBundleEntryErrors = entryErrors;
 
+                $scope.createGraphOneEntry();
 
+/*
                 //console.log(entry)
                 let id = entry.resource.id || entry.fullUrl;
-
-                let vo = v2ToFhirSvc.makeGraph($scope.fhir,$scope.hashErrors,$scope.serverRoot,false,id)
-
+                let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:$scope.serverRoot,centralResourceId:id}
+                let vo = v2ToFhirSvc.makeGraph(options);
+                //let vo = v2ToFhirSvc.makeGraph($scope.fhir,$scope.hashErrors,$scope.serverRoot,false,id)
                 //console.log(vo);
 
                 let container = document.getElementById('singleResourceGraph');
-                let options = {
+                let graphOptions = {
                     physics: {
                         enabled: true,
                         barnesHut: {
@@ -359,8 +367,8 @@ angular.module("sampleApp")
                         }
                     }
                 };
-                $scope.singleResourceChart = new vis.Network(container, vo.graphData, options);
-
+                $scope.singleResourceChart = new vis.Network(container, vo.graphData, graphOptions);
+*/
                 let treeData = v2ToFhirSvc.buildResourceTree(entry.resource);
 
                 //show the tree structure of this resource (adapted from scenario builder)
@@ -370,6 +378,33 @@ angular.module("sampleApp")
                 )
 
             };
+
+            $scope.createGraphOneEntry = function(){
+
+                let id = $scope.selectedBundleEntry.resource.id || $scope.selectedBundleEntry.fullUrl;
+                let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:$scope.serverRoot,centralResourceId:id}
+
+
+                options.showInRef = $scope.input.showInRef;
+                options.showOutRef = $scope.input.showOutRef;
+
+                let vo = v2ToFhirSvc.makeGraph(options);
+                //let vo = v2ToFhirSvc.makeGraph($scope.fhir,$scope.hashErrors,$scope.serverRoot,false,id)
+                //console.log(vo);
+
+                let container = document.getElementById('singleResourceGraph');
+                let graphOptions = {
+                    physics: {
+                        enabled: true,
+                        barnesHut: {
+                            gravitationalConstant: -10000,
+                        }
+                    }
+                };
+                $scope.singleResourceChart = new vis.Network(container, vo.graphData, graphOptions);
+
+            };
+
 
             $scope.fitSingleGraph = function(){
                 $timeout(function(){
@@ -469,12 +504,12 @@ console.log(newBundle)
                         }
                     }
 
-
-                    let vo = v2ToFhirSvc.makeGraph($scope.fhir,hashErrors,serverRoot,false)
-
+                    let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:serverRoot}
+                    let vo = v2ToFhirSvc.makeGraph(options)
+                    //let vo = v2ToFhirSvc.makeGraph($scope.fhir,hashErrors,serverRoot,false)
                     console.log(vo)
                     var container = document.getElementById('resourceGraph');
-                    var options = {
+                    var graphOptions = {
                         physics: {
                             enabled: true,
                             barnesHut: {
@@ -482,7 +517,7 @@ console.log(newBundle)
                             }
                         }
                     };
-                    $scope.chart = new vis.Network(container, vo.graphData, options);
+                    $scope.chart = new vis.Network(container, vo.graphData, graphOptions);
 
                     $scope.chart.on("click", function (obj) {
 
@@ -580,11 +615,6 @@ console.log(newBundle)
                                 })
                             }
 
-
-
-
-                            //let display = section.title || 'Section# '+inx
-                            //$scope.document.lines.push({display:display,level:0,section:section})
 
                         })
 

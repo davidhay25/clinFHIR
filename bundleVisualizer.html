@@ -22,7 +22,7 @@
     <script src="js/libs/jstree.min.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase','ngSanitize']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase','ngSanitize','ui.checkbox']).config(function($locationProvider) {
             $locationProvider.html5Mode(true);
             $locationProvider.hashPrefix('!');
         });
@@ -34,7 +34,7 @@
     <script src="js/libs/vis.min.js"></script>
     <script src="js/modalDialogSvc.js"></script>
     <script src="resourceBuilder/rbServices.js"></script>
-
+    <script src="js/libs/angular-bootstrap-checkbox.js"></script>
 
     <style>
         .myForm {
@@ -273,6 +273,16 @@
                                         </uib-tab>
 
                                         <uib-tab heading="References"  select="fitSingleGraph()">
+                                            <br/>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    Show inward references <checkbox ng-model="input.showInRef" ng-change="createGraphOneEntry()"></checkbox>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    Show outward references <checkbox ng-model="input.showOutRef" ng-change="createGraphOneEntry()"></checkbox>
+                                                </div>
+                                            </div>
+                                            <br/>
                                             <div id="singleResourceGraph"></div>
                                         </uib-tab>
                                         <uib-tab ng-show="selectedBundleEntryErrors.length > 0">

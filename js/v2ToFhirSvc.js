@@ -116,7 +116,15 @@ angular.module("sampleApp")
 
 
             },
-            makeGraph: function (bundle,hashErrors,serverRoot,hidePatient,centralResourceId) {
+            makeGraph: function (options) {
+                //makeGraph: function (bundle,hashErrors,serverRoot,hidePatient,centralResourceId) {
+
+                let bundle = options.bundle;
+                let hashErrors = options.hashErrors;
+                let serverRoot = options.serverRoot;
+                let hidePatient = options.hidePatient;
+                let centralResourceId = options.centralResourceId;
+
 
                 //serverRoot is used when the bundle comes from a server, and we want to convert
                 //user to convert relative to absolute references so the fullUrls work
@@ -206,7 +214,7 @@ angular.module("sampleApp")
                 let hash = {};      //this will be a hash of nodes that have a reference to centralResourceId (if specified)
                 //hash[]
                 allReferences.forEach(function(ref){
-                    
+
 
                     let targetNode = objNodes[ref.targ];
 
@@ -214,13 +222,14 @@ angular.module("sampleApp")
 
 
                         //if (ref.src.resource.id == centralResourceId) {
-                        if (ref.src.normalizedId == centralResourceId) {
+                        if (ref.src.normalizedId == centralResourceId && options.showOutRef) {
                             //this is from the central resource to the given central resource
+
                             hash[ref.targ] = true;      //this is the url property of the node
-                            //console.log('ref to central:' + ref.targ)
+
                         }
                         //if (targetNode && targetNode.resource.id == centralResourceId) {
-                        if (targetNode && targetNode.normalizedId == centralResourceId) {
+                        if (targetNode && targetNode.normalizedId == centralResourceId  && options.showInRef) {
                             //this is a resource eferencing the central node
                             hash[ref.src.url] = true;
                         }
@@ -244,8 +253,7 @@ angular.module("sampleApp")
                     let nodesToInclude = []
                     arNodes.forEach(function(node){
 
-                        //let id = node.entry.fullUrl;
-                       // if ()
+
 
                         //if (node.resource.id == centralResourceId) {
                         if (node.normalizedId == centralResourceId) {
