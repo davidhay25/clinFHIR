@@ -1,0 +1,123 @@
+<html>
+<head>
+    <title>Handlebar test</title>
+
+    <script src="js/libs/handlebars-v4.1.2.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+
+    <script id="main-template" type="text/x-handlebars-template">
+        <h2>{{composition.title}}</h2>
+        <div class="row">
+            <div class="col-md-2">
+                Author:
+            </div>
+            <div class="col-md-10">
+                {{composition.author.display}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                Patient
+            </div>
+            <div class="col-md-10">
+                {{#patient patient}}{{/patient}}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2">
+                Medications List
+            </div>
+            <div class="col-md-10">
+                {{#medication_list composition.medications}}{{/medication_list}}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2">
+                Problem List
+            </div>
+            <div class="col-md-10">
+                {{#problem_list composition.problems}}{{/problem_list}}
+            </div>
+        </div>
+
+    </script>
+
+
+    <!-- Display the patient details-->
+    <script id="patient-template" type="text/x-handlebars-template">
+        <div><strong>{{name}}</strong></div>
+        <div>{{gender}} {{birthDate}}</div>
+
+    </script>
+
+    <!-- Display a single problem-->
+    <script id="condition-template" type="text/x-handlebars-template">
+        <div>
+            <b>{{name}}</b>
+        </div>
+    </script>
+
+    <!-- Display a single medication-->
+    <script id="medication-template" type="text/x-handlebars-template">
+        <div>
+            <b>{{name}}</b>
+        </div>
+    </script>
+
+
+</head>
+<body style="padding: 8px">
+
+<div id="result"></div>
+
+<script>
+
+    let mainTemplate = Handlebars.compile(document.getElementById('main-template').innerHTML)
+    let patient_template = Handlebars.compile(document.getElementById('patient-template').innerHTML)
+    let condition_template = Handlebars.compile(document.getElementById('condition-template').innerHTML)
+    let medication_template = Handlebars.compile(document.getElementById('medication-template').innerHTML)
+
+    Handlebars.registerHelper('patient',function(pat) {
+        return patient_template(pat)
+    });
+
+    Handlebars.registerHelper('problem_list',function(problems) {
+        console.log(problems)
+        let html = ""
+        problems.forEach(function(problem) {
+            html += condition_template(problem)
+        });
+        return html
+    });
+
+    Handlebars.registerHelper('medication_list',function(meds) {
+        let html = ""
+        meds.forEach(function(med) {
+            html += medication_template(med)
+        });
+        return html
+    });
+
+
+
+    let doc = {};
+    doc.composition = {author: {"display":"Dr Marcus Welby"},title:"Discharge Summary"};
+
+    doc.composition.problems = [{name:"asthma"},{name:"diabetes"}];
+    doc.composition.medications = [{name:"Atenolol 25mg mane"},{name:"Frusemide 40mg mane"}];
+
+    doc.patient = {name:'John Doe',gender:"male",birthDate:"1955-12-16"}
+
+
+
+    let html = mainTemplate(doc)
+    document.getElementById('result').innerHTML = html;
+
+
+</script>
+
+
+</body>
+</html>

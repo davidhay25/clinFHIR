@@ -21,6 +21,9 @@
     <script src="js/libs/angular-sanitize.js"></script>
     <script src="js/libs/jstree.min.js"></script>
 
+    <script src="js/libs/handlebars-v4.1.2.js"></script>
+
+
     <script>
         angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase','ngSanitize','ui.checkbox']).config(function($locationProvider) {
             $locationProvider.html5Mode(true);
@@ -92,8 +95,9 @@
 
             <div class="col-md-8">
                 <div class="navbar-text">
-                    Conformance server: {{conformanceServer.name}} ({{conformanceServer.url}})
-                    <div>Data server: {{dataServer.name}} ({{dataServer.url}})</div>
+                    <strong>Validation server:</strong> {{validationServer.name}} ({{validationServer.url}}) <span class="clickable" ng-click="changeServer('validation')">Change</span>
+
+                    <div><strong>Data and XML Conversion server:</strong> {{dataServer.name}} ({{dataServer.url}}) <span class="clickable" ng-click="changeServer('convert')">Change</span> </div>
                 </div>
 
             </div>
@@ -304,12 +308,6 @@
                                             </div>
                                         </uib-tab>
                                     </uib-tabset>
-
-
-
-
-
-
                                 </div>
 
                             </div>
@@ -379,6 +377,15 @@
 
                             <div><em>Derived from the Composition and Subject text elements as per the spec</em></div>
 
+                        </uib-tab>
+
+                        <uib-tab ng-show = "fhir.type == 'document'" heading="HandleBars Document">
+
+                            <button class="btn btn-primary" ng-click="hbDoc()">Load HandleBars template and render document</button>
+                            <hr/>
+
+
+                            <ng-include src="hbTemplate"></ng-include>
                         </uib-tab>
                         <!--
                         <uib-tab ng-show = "fhir.type == 'document'" heading="Document (resources)">

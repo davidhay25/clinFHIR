@@ -1,5 +1,5 @@
 angular.module("sampleApp")
-    .service('v2ToFhirSvc', function($filter) {
+    .service('v2ToFhirSvc', function($filter,$q,$http) {
 
         var objColours ={};
         objColours.Patient = '#93FF1A';
@@ -25,6 +25,48 @@ angular.module("sampleApp")
         objColours.Immunization = '#aeb76c';
 
         return {
+            validateBundle : function(validationServer,bundle) {
+                //validate the contents of a bundle by making separate calls for each resource in it...
+                let deferred = $q.defer();
+                let arQuery = [];
+                let arResult = [];
+
+                bundle.entry.forEach(function (entry) {
+                    if (entry.resource) {
+                        let resource = entry.resource;
+                        let url = validationServer.url + resource.resourceType + "/$validate"
+                        arQuery.push(validate(url,resource))
+                    }
+
+                });
+
+
+                $q.all(arQuery).then(
+                    function(data){
+                        console.log(data.data)
+                        deferred.resolve(arResult)
+                    },function(err) {
+
+                    }
+                );
+
+                function validate(url,resource) {
+                    let deferred = $q.defer();
+                    console.log(url)
+                    $http.post(url,resource).then(
+                        function(data) {
+
+                        },
+                        function(err) {
+
+                        }
+                    )
+
+                }
+
+
+
+            },
             buildResourceTree: function (resource) {
                 //pass in a resource instance...
                 if (! resource) {

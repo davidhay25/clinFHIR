@@ -1,6 +1,6 @@
 angular.module("sampleApp")
     .controller('bundleVisualizerCtrl',
-        function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,GetDataFromServer,appConfigSvc,$localStorage) {
+        function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,GetDataFromServer,appConfigSvc,$localStorage,$timeout) {
 
             //$scope.conformanceServer = 'http://fhirtest.uhn.ca/baseR4/';
             //$scope.dataServer = 'http://fhirtest.uhn.ca/baseR4/';
@@ -34,11 +34,78 @@ angular.module("sampleApp")
 
             if ($localStorage.bvQueries) {
                 $scope.queries = $localStorage.bvQueries
-                /*
-                $localStorage.bvQueries.forEach(function(query){
-                    $scope.queries.push(query)
-                })
-                */
+            }
+
+
+            $scope.hbDoc = function() {
+                $scope.hbTemplate = "artifacts/templates/dischargeSummary.html";
+                $timeout(function(){
+/*
+                    let mainTemplate = Handlebars.compile(document.getElementById('main-template').innerHTML)
+                    let patient_template = Handlebars.compile(document.getElementById('patient-template').innerHTML)
+                    let condition_template = Handlebars.compile(document.getElementById('condition-template').innerHTML)
+                    let medication_template = Handlebars.compile(document.getElementById('medication-template').innerHTML)
+
+                    Handlebars.registerHelper('patient',function(pat) {
+                        return patient_template(pat)
+                    });
+
+                    Handlebars.registerHelper('problem_list',function(problems) {
+                        console.log(problems)
+                        let html = ""
+                        if (problems) {
+                            problems.forEach(function(problem) {
+                                html += condition_template(problem)
+                            });
+                        }
+                        return html
+                    });
+
+                    Handlebars.registerHelper('medication_list',function(meds) {
+                        let html = ""
+                        if (meds) {
+                            meds.forEach(function(med) {
+                                html += medication_template(med)
+                            });
+                        }
+
+                        return html
+                    });
+*/
+
+                    let doc = {};
+
+                    $scope.fhir.entry.forEach(function (entry) {
+                        let resource = entry.resource;
+                        if (resource.resourceType == 'Composition') {
+                            doc.composition = {};
+                            doc.composition.title = resource.title;
+                        }
+
+                    });
+
+/*
+
+                    let doc = {};
+                    doc.composition = {author: {"display":"Dr Marcus Welby"},title:"Discharge Summary"};
+
+                    doc.composition.problems = [{name:"asthma"},{name:"diabetes"}];
+                    doc.composition.medications = [{name:"Atenolol 25mg mane"},{name:"Frusemide 40mg mane"}];
+
+                    doc.patient = {name:'John Doe',gender:"male",birthDate:"1955-12-16"}
+
+
+*/
+                    let html = mainTemplate(doc)
+
+                    document.getElementById('result').innerHTML = html;
+
+                },2000)
+
+
+
+
+
             }
 
             $scope.addQuery = function(){
@@ -119,8 +186,52 @@ angular.module("sampleApp")
 
             };
 
-            $scope.dataServer = appConfigSvc.getCurrentDataServer();
-            $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
+            $scope.dataServer = $localStorage.dataServer || appConfigSvc.getCurrentDataServer();
+            $scope.validationServer = $localStorage.validationServer || appConfigSvc.getCurrentConformanceServer();
+
+            $scope.changeServer = function(type) {
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/setValidationServer.html',
+                    size: 'lg',
+                    controller: function ($scope, dataServer, validationServer,allServers) {
+                        $scope.input = {};
+                        $scope.input.dataServer = dataServer;
+                        $scope.input.validationServer = validationServer;
+                        $scope.allServers = allServers;
+
+                        $scope.save = function() {
+                            let vo = {dataServer: $scope.input.dataServer,validationServer:$scope.input.validationServer}
+                            $scope.$close(vo)
+                        }
+
+                    },
+                    resolve : {
+                        dataServer : function(){
+                            return $scope.dataServer;
+                        },
+                        validationServer : function(){
+                            return $scope.validationServer;
+                        },
+                        allServers : function(){
+                            return appConfigSvc.getAllServers();
+                        }
+                    }
+                }).result.then(
+                    function(vo) {
+                        if (vo.dataServer) {
+                            $localStorage.dataServer = vo.dataServer;
+                            $scope.dataServer = vo.dataServer;
+                        }
+
+                        if (vo.validationServer) {
+                            $localStorage.validationServer = vo.validationServer;
+                            $scope.validationServer = vo.validationServer;
+                        }
+                    }
+                )
+
+            };
+
 
 
             //load bundles with an identifier in the cfBundle identifier system
@@ -475,18 +586,21 @@ console.log(newBundle)
                 })
             };
 
-            //create the various renderings from the bundle...
+            //validate the resources in the bundle, then draw the graph (which needs the errors to display)
             let processBundle = function(oBundle) {
                 delete $scope.serverRoot;
                 $scope.fhir = oBundle;
 
-                $scope.validate(oBundle,function(hashErrors){
+
+
+                validate(oBundle,function(hashErrors){
                     $scope.hashErrors = hashErrors;
 
 
                     //the serverRoot is needed to figure out the references when the reference is relative
                     //we assume that all the resoruces are from the same server, so figure out the server root
                     //by looking at the first fullUrl (remove the /{type}/{id} at the end of the url
+
                     let serverRoot = "";
                     if ($scope.fhir && $scope.fhir.entry) {
                         let first = $scope.fhir.entry[0]
@@ -506,8 +620,7 @@ console.log(newBundle)
 
                     let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:serverRoot}
                     let vo = v2ToFhirSvc.makeGraph(options)
-                    //let vo = v2ToFhirSvc.makeGraph($scope.fhir,hashErrors,serverRoot,false)
-                    console.log(vo)
+
                     var container = document.getElementById('resourceGraph');
                     var graphOptions = {
                         physics: {
@@ -525,12 +638,11 @@ console.log(newBundle)
                         var node = vo.graphData.nodes.get(nodeId);
                         $scope.selectedNode = node;
 
-                        console.log( $scope.selectedNode)
                         $scope.$digest();
-                    })
+                    });
 
 
-                    console.log(vo)
+
 
                 });
 
@@ -619,20 +731,27 @@ console.log(newBundle)
                         })
 
 
-console.log($scope.document.composition)
+//console.log($scope.document.composition)
 
 
-
-                        //locate the
                     }
                 }
+            };
 
+            //when validate called from the UI
+            $scope.validate = function() {
 
             };
 
 
-            $scope.validate = function(bundle,cb) {
-                let url = $scope.conformanceServer.url + "Bundle/$validate";
+
+            //perform a validation of the resources in the bundle...
+            let validate = function(bundle,cb) {
+
+                let url = "http://home.clinfhir.com:8054/baseR4/Bundle/$validate";
+                //let url = $scope.conformanceServer.url + "Bundle/$validate";
+
+
                 $scope.showWaiting = true;
                 //delete $scope.hashErrors;
                 $http.post(url,bundle).then(
