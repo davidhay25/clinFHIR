@@ -1,6 +1,6 @@
 angular.module("sampleApp")
     .controller('bundleVisualizerCtrl',
-        function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,GetDataFromServer,appConfigSvc,$localStorage,$timeout) {
+        function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,GetDataFromServer,appConfigSvc,$localStorage) {
 
             //$scope.conformanceServer = 'http://fhirtest.uhn.ca/baseR4/';
             //$scope.dataServer = 'http://fhirtest.uhn.ca/baseR4/';
@@ -39,39 +39,8 @@ angular.module("sampleApp")
 
             $scope.hbDoc = function() {
                 $scope.hbTemplate = "artifacts/templates/dischargeSummary.html";
+
                 $timeout(function(){
-/*
-                    let mainTemplate = Handlebars.compile(document.getElementById('main-template').innerHTML)
-                    let patient_template = Handlebars.compile(document.getElementById('patient-template').innerHTML)
-                    let condition_template = Handlebars.compile(document.getElementById('condition-template').innerHTML)
-                    let medication_template = Handlebars.compile(document.getElementById('medication-template').innerHTML)
-
-                    Handlebars.registerHelper('patient',function(pat) {
-                        return patient_template(pat)
-                    });
-
-                    Handlebars.registerHelper('problem_list',function(problems) {
-                        console.log(problems)
-                        let html = ""
-                        if (problems) {
-                            problems.forEach(function(problem) {
-                                html += condition_template(problem)
-                            });
-                        }
-                        return html
-                    });
-
-                    Handlebars.registerHelper('medication_list',function(meds) {
-                        let html = ""
-                        if (meds) {
-                            meds.forEach(function(med) {
-                                html += medication_template(med)
-                            });
-                        }
-
-                        return html
-                    });
-*/
 
                     let doc = {};
 
@@ -92,11 +61,18 @@ angular.module("sampleApp")
                     doc.composition.problems = [{name:"asthma"},{name:"diabetes"}];
                     doc.composition.medications = [{name:"Atenolol 25mg mane"},{name:"Frusemide 40mg mane"}];
 
-                    doc.patient = {name:'John Doe',gender:"male",birthDate:"1955-12-16"}
+
 
 
 */
-                    let html = mainTemplate(doc)
+
+                    doc.patient = {name:'John Doe',gender:"male",birthDate:"1955-12-16"}
+
+                    doc.medications = [];
+                    doc.medications.push({text:'Frusemide 40mg'})
+
+console.log(doc)
+                    let html = document.mainTemplate(doc)
 
                     document.getElementById('result').innerHTML = html;
 

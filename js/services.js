@@ -1068,9 +1068,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
 
                 arQuery.push(
-
-                    //GetDataFromServer.adHocFHIRQueryFollowingPaging(uri).then(
-
                     getAllResources(uri).then(
                         function(bundle){
 
@@ -1083,7 +1080,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                                 allResources[item.type] = bundle;    //this will be a bundle
                             }
 
-                            //console.log(bundle)
                         }
                     )
                 )
@@ -1105,30 +1101,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             function getAllResources(uri) {
                 var deferred = $q.defer();
                 var bundle = {entry:[]}
-                /*
-
-                                Utilities.perfromQueryFollowingPaging(uri).then(
-                                    function(data) {
-                                        deferred.resolve(data);
-                                    }
-                                );
-                                return deferred.promise;
-
-
-
-
-                                GetDataFromServer.adHocFHIRQueryFollowingPaging(uri).then(
-                                    function(data) {
-                                        deferred.resolve(data);
-                                    }
-                                )
-
-
-                                return deferred.promise;
-                */
-
-                //thereIsMore = true;
-                //while (thereIsMore) {
 
 
 
@@ -1211,23 +1183,19 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                         deferred.reject(err);
                     }
                 );
-
-                
                 return deferred.promise;
             }
-
-
 
             //return all the data for the indicated patient. Doesn't use the 'everything' operation so there is a fixed set of resources...
             //currently only get a max of 100 resources of each type. Need to implement paging to get more...
 
             var resources = [];
-            resources.push({type:'Observation',patientReference:'subject'});
+            resources.push({type:'Observation',patientReference:'patient'});    //patient only returns patient references
             resources.push({type:'Encounter',patientReference:'patient'});
             resources.push({type:'Appointment',patientReference:'patient'});
             resources.push({type:'Condition',patientReference:'patient'});
-            resources.push({type:'List',patientReference:'subject'});
-            resources.push({type:'Basic',patientReference:'subject'});
+            resources.push({type:'List',patientReference:'patient'});
+            resources.push({type:'Basic',patientReference:'patient'});
 
             var arQuery = [];
 
@@ -1237,6 +1205,10 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 //if the reference is a subject (rather than a patient) then be explicit about the
                 //type that is being searched.
                 var uri;
+
+
+
+
                 if (item.patientReference == 'subject') {
                     uri = appConfigSvc.getCurrentDataServerBase() + item.type + "?" + item.patientReference + "=Patient/" + patientId + "&_count=100";
                 } else {

@@ -1,10 +1,65 @@
+<!--
+
+Template for displaying a Document.
+Assumes a data model in the format:
+
+Composition
+    title
+    synopsis
+    medications (list medication)
+        name                (cc)
+        strength        (quantity)
+        form            (cc)
+        dose
+            route           (cc)
+            frequency       (Timing)
+            duration        (period)
+            instructions    (cc)
+        indication          (cc)
+        comment             (annot)
+        date                (date)
+    nomeds                  (cc)
+    adverseReactions
+        substance
+        criticality
+        verification
+        manifestation
+        comment
+        date
+    noAdverseReactions
+    problems                (list problem)
+        name
+        severity
+        site
+        laterality
+        dateRecognized
+        comment
+        status
+        course
+    procedure
+        name
+        site
+        laterality
+        date
+        comment
+      noMedHistory          (cc)
+
+patient
+    name
+    gender
+    birthDate
+
+
+-->
+
+<!-- Top level div to keep things neat-->
 <div>
-    <h3>Template</h3>
 
-
-
+    <!-- where the rendered template will go -->
     <div id="result"></div>
 
+    <!-- The main layout for the template. Uses the canonical model (built from the bundle)
+    Heavy use of helpers for each block in the document-->
     <script id="main-template" type="text/x-handlebars-template">
         <h2>{{composition.title}}</h2>
         <div class="row">
@@ -44,6 +99,8 @@
 
     </script>
 
+    <!--  Individual display templates - generally one per resource  -->
+
     <!-- Display the patient details-->
     <script id="patient-template" type="text/x-handlebars-template">
         <div><strong>{{name}}</strong></div>
@@ -60,24 +117,53 @@
     <!-- Display a single medication-->
     <script id="medication-template" type="text/x-handlebars-template">
         <div>
-            <b>{{name}}</b>
+            <b>{{text}}</b>
+        </div>
+    </script>
+
+
+
+    <!-- Display a CodeableConcept-->
+    <script id="cc-template" type="text/x-handlebars-template">
+        <div>
+            <b>{{text}}</b>
         </div>
     </script>
 
 
     <script>
-        let mainTemplate = Handlebars.compile(document.getElementById('main-template').innerHTML)
+
+
+        //Note that mainTemplate must be declared against the document object so it can be invoked from the visualizer.
+        document.mainTemplate = Handlebars.compile(document.getElementById('main-template').innerHTML)
+
+        //the individual functions for each resource. Used by the helpers...
         let patient_template = Handlebars.compile(document.getElementById('patient-template').innerHTML)
         let condition_template = Handlebars.compile(document.getElementById('condition-template').innerHTML)
-        let medication_template = Handlebars.compile(document.getElementById('medication-template').innerHTML)
+        let medication_template = Handlebars.compile(document.getElementById('medication-template').innerHTML);
 
+        //Display a CodeableConcept
+        let cc_template = Handlebars.compile(document.getElementById('cc-template').innerHTML)
+
+
+        /*
+        Helpers - each is responsible for rendering a block in teh template
+
+        (invoked by {{#helpername context}}{{/patient}})
+        each returns a block of HTML...
+
+        */
+
+        /* helper to display demographis details using the patient template*/
         Handlebars.registerHelper('patient',function(pat) {
             return patient_template(pat)
         });
 
+
+        /* helper to render the problem list*/
         Handlebars.registerHelper('problem_list',function(problems) {
             console.log(problems)
-            let html = ""
+            let html = "";
             if (problems) {
                 problems.forEach(function(problem) {
                     html += condition_template(problem)
@@ -86,16 +172,22 @@
             return html
         });
 
+        /* helper to return the list of medications*/
         Handlebars.registerHelper('medication_list',function(meds) {
-            let html = ""
+            let html = "";
+            console.log(meds)
             if (meds) {
                 meds.forEach(function(med) {
+                    console.log(med)
                     html += medication_template(med)
                 });
             }
 
             return html
         });
+
+
+
     </script>
 
 </div>
