@@ -51,13 +51,13 @@
                         }
 
                     });
-
+/*
                     $http.get('artifacts/nzDirectories.html').then (
                         function(data) {
                             $scope.helpText = data.data;
                         }
                     )
-
+*/
 
                     $scope.login=function(){
                         $uibModal.open({
@@ -410,6 +410,15 @@
         </div>
         <div class="col-md-6">
             <uib-tabset>
+                <uib-tab heading="Notifications">
+                    <iframe
+                        src="https://docs.google.com/document/d/1dxSOaPXjGAFFpOUby5Z1AYYIIIZV0EzpE7vIr30Ubuc/edit?usp=sharing"
+                        class="iframeClass">
+
+
+                    </iframe>
+
+                </uib-tab>
                 <uib-tab heading="HPI types">
                     <h4>HPI model Relationships</h4>
 
@@ -426,19 +435,16 @@
                     <div>{{input.selectedExample.url}}</div>
 
                 </uib-tab>
+                <!--
                 <uib-tab heading="Help">
 
                     <p ng-bind-html="helpText"></p>
 
 
-<!--
-                    <iframe src="artifacts/nzDirectories.html" class="iframeClass">
 
 
-                    </iframe>
-
-                    -->
                 </uib-tab>
+                -->
                 <uib-tab heading="Comments Help">
 
                     <h4>Documentation and Help</h4>
