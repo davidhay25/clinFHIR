@@ -36,7 +36,6 @@ angular.module("sampleApp")
                 $scope.queries = $localStorage.bvQueries
             }
 
-
             $scope.hbDoc = function() {
                 $scope.hbTemplate = "artifacts/templates/dischargeSummary.html";
 
@@ -68,8 +67,13 @@ angular.module("sampleApp")
 
                     doc.patient = {name:'John Doe',gender:"male",birthDate:"1955-12-16"}
 
-                    doc.medications = [];
-                    doc.medications.push({text:'Frusemide 40mg'})
+                    doc.composition.medications = [];
+
+                    let med = {};       //a single medication
+                    med.name = {text:'Frusemide 40mg',coding:[{system:'http://system',code:'myCode'}]}
+                    med.dose = {route:{text:'Oral'}}
+
+                    doc.composition.medications.push(med)
 
 console.log(doc)
                     let html = document.mainTemplate(doc)

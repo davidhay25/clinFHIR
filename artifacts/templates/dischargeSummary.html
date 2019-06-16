@@ -2,6 +2,7 @@
 
 Template for displaying a Document.
 Assumes a data model in the format:
+All CC - assume the text property has the display (?should use coding.display)
 
 Composition
     title
@@ -54,6 +55,11 @@ patient
 
 <!-- Top level div to keep things neat-->
 <div>
+
+    <style>
+        .indent {margin-left: 10px}
+    </style>
+
 
     <!-- where the rendered template will go -->
     <div id="result"></div>
@@ -117,22 +123,16 @@ patient
     <!-- Display a single medication-->
     <script id="medication-template" type="text/x-handlebars-template">
         <div>
-            <b>{{text}}</b>
-        </div>
-    </script>
-
-
-
-    <!-- Display a CodeableConcept-->
-    <script id="cc-template" type="text/x-handlebars-template">
-        <div>
-            <b>{{text}}</b>
+           <!-- <b>{{text}}</b>-->
+            {{#dtCC name}}{{/dtCC}}
+            <div class="indent">
+                {{#dtCC dose.route}}{{/dtCC}}
+            </div>
         </div>
     </script>
 
 
     <script>
-
 
         //Note that mainTemplate must be declared against the document object so it can be invoked from the visualizer.
         document.mainTemplate = Handlebars.compile(document.getElementById('main-template').innerHTML)
@@ -143,16 +143,30 @@ patient
         let medication_template = Handlebars.compile(document.getElementById('medication-template').innerHTML);
 
         //Display a CodeableConcept
-        let cc_template = Handlebars.compile(document.getElementById('cc-template').innerHTML)
+        //let cc_template = Handlebars.compile(document.getElementById('cc-template').innerHTML)
 
 
         /*
-        Helpers - each is responsible for rendering a block in teh template
-
+        Helpers - each is responsible for rendering a block in the template
         (invoked by {{#helpername context}}{{/patient}})
         each returns a block of HTML...
-
         */
+
+        //codeable concept
+        Handlebars.registerHelper('dtCC',function(cc) {
+            if (cc) {
+                let html = cc.text;
+                console.log(cc)
+                if (cc.coding) {
+                    cc.coding.forEach(function (coding) {
+                        html += coding.code + "  ("+ coding.system + ")"
+                    })
+
+                }
+                return html
+            }
+
+        })
 
         /* helper to display demographis details using the patient template*/
         Handlebars.registerHelper('patient',function(pat) {
