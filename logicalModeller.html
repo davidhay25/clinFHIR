@@ -300,6 +300,10 @@
                     <div class="navbar-text clickable" ng-show="LMDetailVisible" ng-click="hideDetailSelector()">Hide Detail</div>
                     <div class="navbar-text clickable" ng-hide="LMDetailVisible" ng-click="showDetailSelector()">Show Detail</div>
 
+
+                    <div class="navbar-text clickable" ng-show="showComments" ng-click="showComments = ! showComments">Hide Comments</div>
+                    <div class="navbar-text clickable" ng-hide="showComments" ng-click="showComments = ! showComments">Show Comments</div>
+
                     <form ng-show="isDirty" class="navbar-form">
                         <button ng-show="isDirty && canSaveModel"
                                 class="btn btn-success pull-right" ng-click="saveModel()">Save model</button>
@@ -1014,7 +1018,7 @@
                 </uib-tab>
                 -->
 
-                <uib-tab>
+                <uib-tab ng-show="showComments">
 
                     <uib-tab-heading>Comments
                         <span class="badge"> {{taskList.length}}</span>
@@ -1278,7 +1282,7 @@
                                 </tr>
 
 
-                                <tr ng-show="selectedNode.data.idFromSD">
+                                <tr ng-show="selectedNode.data.idFromSD && showComments">
                                     <td>User Comments</td>
                                     <td>
                                         <div ng-controller="taskCtrl">

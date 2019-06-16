@@ -33,6 +33,8 @@ angular.module("sampleApp")
             $scope.appConfigSvc = appConfigSvc
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
+            $scope.showComments = true;
+
 
             GetDataFromServer.registerAccess('logical');
 
