@@ -1061,13 +1061,7 @@ angular.module("sampleApp")
 
                     }
                 )
-                /*
-                logicalModelSvc.generateDoc($scope.treeData).then(
-                    function(doc) {
-                        $scope.mdDoc = doc;
-                    }
-                )
-                */
+
 
             };
 
@@ -1116,25 +1110,7 @@ angular.module("sampleApp")
 
 
             };
-/*
-            $scope.explodeDTDEP = function(dt) {
 
-
-                logicalModelSvc.explodeDataType($scope.treeData,$scope.selectedNode,dt).then(
-                    function() {
-                        drawTree();
-                        $scope.isDirty = true;
-                        makeSD();
-                    },
-                    function(err){
-                        alert(angular.toJson(err))
-                    }
-
-
-                )
-
-            }
-            */
             //if the selected node changes, and this is a clincial view, look to see if we can expand any binding...
             $scope.$watch(
                 function() {return $scope.selectedNode},
@@ -1156,15 +1132,141 @@ angular.module("sampleApp")
 
                             },
                             function(err){
+                                console.log(err)
+                                $scope.valueSetOptions = [{code:'',display:'ValueSet not expanded - Is it present on the server?'}]
                                 //when the function couldn't expand the VS
-                                //$scope.valueSetOptions = [{code:'notExpanded',display:'Unable to get list, may be too long'}]
-                               // $scope.valueSetOptions = [{code:'notExpanded',display:err}]
                             }
                         )
                     }
 
                 });
 
+            $scope.showCodeDetails = function(option) {
+                console.log(option)
+                let url = appConfigSvc.getCurrentTerminologyServer().url + "CodeSystem/$lookup"
+                let params = {resourceType:'Parameters',parameter:[]}
+                params.parameter.push({name:'code',valueCode:option.code});
+                params.parameter.push({name:'system',valueUri:option.system});
+                $http.post(url,params).then(
+                    function(data) {
+
+                        let vo = {designation:[],property:[],option:option}
+
+                        data.data.parameter.forEach(function (param) {
+
+
+                            switch (param.name) {
+                                case "name" :
+                                    vo.name = param.valueString;
+                                    break;
+                                case "version" :
+                                    vo.version = param.valueString;
+                                    break;
+                                case "display" :
+                                    vo.display = param.valueString;
+                                    break;
+                                case "designation" :
+                                    let desig = {}
+                                    param.part.forEach(function(part){
+                                        switch (part.name) {
+                                            case "use" :
+                                                desig.type = part.valueCoding.display;
+                                                break;
+                                            case "value" :
+                                                desig.value = part.valueString;
+                                                break;
+                                            case "language" :
+                                                desig.language = part.valueCode;
+                                        }
+                                    });
+                                    vo.designation.push(desig)
+                                    break;
+                                case "property" :
+                                    let prop = {}
+                                    param.part.forEach(function(part){
+                                        switch (part.name) {
+                                            case "code" :
+                                                prop.type = part.valueCode;
+                                                break;
+                                            case "value" :
+                                                prop.value = part.valueCode;
+                                                prop.value = prop.value || part.valueString;
+                                                prop.value = prop.value || part.valueBoolean;
+                                                break
+
+                                        }
+                                    });
+                                    vo.property.push(prop)
+                                    break;
+                            }
+/*
+                            if (param.name == "designation") {
+                                let desig = {}
+                                param.part.forEach(function(part){
+                                    switch (part.name) {
+                                        case "use" :
+                                            desig.type = part.valueCoding.display;
+                                            break;
+                                        case "value" :
+                                            desig.value = part.valueString;
+                                            break;
+                                        case "language" :
+                                            desig.language = part.valueCode;
+                                    }
+                                });
+                                vo.designation.push(desig)
+                            }
+
+                            if (param.name == "property") {
+                                let prop = {}
+                                param.part.forEach(function(part){
+                                    switch (part.name) {
+                                        case "code" :
+                                            prop.type = part.valueCode;
+                                            break;
+                                        case "value" :
+                                            prop.value = part.valueCode;
+                                            prop.value = prop.value || part.valueString;
+                                            break
+
+                                    }
+                                });
+                                vo.property.push(prop)
+                            }
+
+*/
+                        });
+
+
+                        $uibModal.open({
+                            templateUrl: 'modalTemplates/viewConcept.html',
+                            size: 'lg',
+                            controller: function ($scope,params,vo) {
+                                $scope.params = params;
+                                $scope.vo = vo;
+                            },
+
+                            resolve : {
+                                params : function(){
+
+
+                                    return data.data
+                                },
+                                vo : function(){
+
+
+                                    return vo
+                                }
+                            }
+                        });
+
+
+                        console.log(data)
+                    }
+                )
+
+
+            }
 
             //load the indicated model...
             $scope.loadReferencedModel = function(url){

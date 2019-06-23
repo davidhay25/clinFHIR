@@ -1408,7 +1408,9 @@
                                     <td>
 
                                         <ul>
-                                            <li ng-repeat="option in valueSetOptions">{{option.display}} ({{option.code}})</li>
+                                            <li ng-repeat="option in valueSetOptions">{{option.display}}
+
+                                                <span ng-show="option.code" class="clickable" ng-click="showCodeDetails(option)">({{option.code}})</span></li>
                                         </ul>
 
                                     </td>
