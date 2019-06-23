@@ -1142,6 +1142,53 @@ angular.module("sampleApp")
                 });
 
             $scope.showCodeDetails = function(option) {
+
+
+                //split the part array into an object...
+                let condensePart = function(part) {
+                    var obj = {};
+                    part.forEach(function (p) {
+                        var value = p.valueCode || p.valueCoding || p.valueString;
+                        obj[p.name] = value;
+                    });
+                    return obj;
+                };
+
+
+                let getConceptDescription = function(concept) {
+                    var deferred = $q.defer();
+                    let termServer = appConfigSvc.getCurrentTerminologyServer().url
+
+                    var url = termServer + "CodeSystem/$lookup?system="+concept.system + "&code="+ concept.code;
+                    $http.get(url).then(
+                        function (data) {
+                            //find the Fully specified name & synomyms...
+                            var fsn,synonym=[];
+                            var parameter = data.data;
+                            if (parameter.parameter) {
+                                parameter.parameter.forEach(function (param) {
+                                    if (param.name == 'designation') {
+                                        var obj = condensePart(param.part);     //creat an object from the part
+                                        if (obj.use && obj.use.code == '900000000000003001' ) {
+                                            fsn = obj.value;
+                                            console.log(fsn)
+                                            concept.display = fsn;
+                                        }
+                                    }
+                                })
+                            }
+
+                            deferred.resolve(concept)
+
+                        }, function (err) {
+                            deferred.reject(err)
+                        }
+                    );
+                    return deferred.promise;
+
+                };
+
+
                 console.log(option)
                 let url = appConfigSvc.getCurrentTerminologyServer().url + "CodeSystem/$lookup"
                 let params = {resourceType:'Parameters',parameter:[]}
@@ -1187,6 +1234,7 @@ angular.module("sampleApp")
                                         switch (part.name) {
                                             case "code" :
                                                 prop.type = part.valueCode;
+
                                                 break;
                                             case "value" :
                                                 prop.value = part.valueCode;
@@ -1196,7 +1244,24 @@ angular.module("sampleApp")
 
                                         }
                                     });
-                                    vo.property.push(prop)
+
+
+
+                                    if (prop.type == 'parent' || prop.type == 'child') {
+                                        getConceptDescription({code:prop.value,system:option.system}).then(
+                                            function(data) {
+                                                console.log(data)
+                                                prop.concept = data
+                                                vo.property.push(prop)
+                                            }
+                                        )
+                                    } else if (prop.type == 'child') {
+
+                                    } else {
+                                        vo.property.push(prop)
+                                    }
+
+
                                     break;
                             }
 /*
@@ -1262,6 +1327,9 @@ angular.module("sampleApp")
 
 
                         console.log(data)
+
+
+
                     }
                 )
 
