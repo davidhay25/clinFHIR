@@ -2265,7 +2265,33 @@ angular.module("sampleApp")
 
                 return sample;
             },
-            getOptionsFromValueSet: function (element) {
+
+            getOptionsFromValueSetV2: function (element) {
+                //return the expanded set of options from the ValueSet
+                var deferred = $q.defer();
+                if (element && element.selectedValueSet) {
+                    let url = appConfigSvc.getCurrentTerminologyServer().url + "ValueSet/$expand";
+                    url += "?url="+element.selectedValueSet.valueSet;
+                    $http.get(url).then(
+                        function(data) {
+                            let vs = data.data;
+                            console.log(vs)
+                            if (vs && vs.expansion && vs.expansion.contains) {
+                                deferred.resolve(vs.expansion.contains)
+                            }
+                        },
+                        function(err) {
+                            deferred.reject()
+                        }
+                    )
+
+                } else {
+                    deferred.reject()
+                }
+                return deferred.promise;
+            },
+
+                getOptionsFromValueSet: function (element) {
                 //return the expanded set of options from the ValueSet
                 var deferred = $q.defer();
 

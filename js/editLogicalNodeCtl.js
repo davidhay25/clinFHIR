@@ -986,7 +986,7 @@ angular.module("sampleApp")
 
             $scope.removeBinding = function(){
                 delete $scope.selectedValueSet;
-            }
+            };
 
             $scope.selectVsFromServer = function(){
                 $uibModal.open({
@@ -1006,10 +1006,6 @@ angular.module("sampleApp")
                        if (vo.vs) {
                            $scope.selectedValueSet = {valueSet : vo.vs.url, strength: vo.strength, description : vo.description}
                        }
-
-                       // console.log(vo)
-
-                        //$scope.selectedValueSet = vo;
 
                     }
                 )

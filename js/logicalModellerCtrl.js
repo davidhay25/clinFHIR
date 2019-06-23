@@ -1115,7 +1115,7 @@ angular.module("sampleApp")
 
 
 
-            }
+            };
 /*
             $scope.explodeDTDEP = function(dt) {
 
@@ -1135,39 +1135,30 @@ angular.module("sampleApp")
 
             }
             */
-            //if the selected node changes, look to see if we can expand any binding...
+            //if the selected node changes, and this is a clincial view, look to see if we can expand any binding...
             $scope.$watch(
                 function() {return $scope.selectedNode},
                 function() {
-                    if ($scope.selectedNode) {
+                    delete $scope.valueSetOptions;
+                    if ($scope.selectedNode && $scope.selectedNode.data && $scope.selectedNode.data.selectedValueSet && $scope.clinicalView) {
 
-                        //$scope.discriminatorReq = logicalModelSvc.isDiscriminatorRequired($scope.selectedNode,$scope.treeData)
 
 
-                        delete $scope.valueSetOptions;
 
-                        logicalModelSvc.getOptionsFromValueSet($scope.selectedNode.data).then(
+
+                        $scope.valueSetOptions = [{code:'',display:'Expanding, please wait'}]
+
+                        logicalModelSvc.getOptionsFromValueSetV2($scope.selectedNode.data).then(
                             function(lst) {
-/* - don't sort as term server will define order...
+
+
                                 $scope.valueSetOptions = lst;
-
-                                if (lst) {
-                                    lst.sort(function(a,b){
-                                        if (a.display > b.display) {
-                                            return 1
-                                        } else {
-                                            return -1;
-                                        }
-                                    })
-                                }
-*/
-
-
 
                             },
                             function(err){
+                                //when the function couldn't expand the VS
                                 //$scope.valueSetOptions = [{code:'notExpanded',display:'Unable to get list, may be too long'}]
-                                $scope.valueSetOptions = [{code:'notExpanded',display:err}]
+                               // $scope.valueSetOptions = [{code:'notExpanded',display:err}]
                             }
                         )
                     }
@@ -1608,24 +1599,6 @@ angular.module("sampleApp")
             };
 
 
-/* - $scope.initialLM doen't seem to be defined - is it a hangover?
-
-            if (!$scope.initialLM) {
-               // $scope.hideLMSelector();
-                loadAllModels();
-            } else {
-
-                GetDataFromServer.findConformanceResourceByUri($scope.initialLM).then(
-                    function(resource){
-                        $scope.selectModel({resource:resource})
-                    },
-                    function(err) {
-                        alert("error loading "+$scope.initialLM + angular.toJson(err))
-                    }
-                )
-            }
-*/
-
 
             //functions and prperties to enable the valueset viewer
             $scope.showVSBrowserDialog = {};
@@ -1641,21 +1614,6 @@ angular.module("sampleApp")
                 $scope.showVSBrowserDialog.open(null,uri);
 
 
-
-/*
-                GetDataFromServer.getValueSet(uri).then(
-                    function(vs) {
-
-                        $scope.showVSBrowserDialog.open(vs);
-
-                    }, function(err) {
-                        alert(err)
-                    }
-                ).finally (function(){
-                    $scope.showWaiting = false;
-                });
-
-                */
             };
 
             
@@ -2590,7 +2548,7 @@ angular.module("sampleApp")
                     size: 'lg',
                     windowClass: 'nb-modal-window',
                     controller: 'editLogicalNodeCtrl',
-
+                    backdrop: 'static',
                     resolve : {
                         allDataTypes: function () {          //the default config
                             return $scope.dataTypes;

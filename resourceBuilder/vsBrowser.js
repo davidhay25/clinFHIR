@@ -43,11 +43,14 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                     size:'lg',
                     controller: function($scope,selectedvs,GetDataFromServer,$filter,$localStorage,vsUrl,appConfigSvc) {
 
+                        let snomedUrl = "http://snomed.info/sct";
 
                         $scope.config = $localStorage.config;
                         $scope.newVS = {canSave : false};
                         $scope.vsUrl = vsUrl
+                        $scope.input = {};
 
+                        let authorUrl = appConfigSvc.config().standardExtensionUrl.clinFHIRCreated;
 
                         //retrieve the actual ValueSet
                         let url = appConfigSvc.getCurrentTerminologyServer().url;
@@ -55,14 +58,106 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
 
                         $http.get(url).then(
                             function(data) {
+                                console.log(data.statusCode)
                                 if (data.data && data.data.entry) {
                                     $scope.valueSet = data.data.entry[0].resource;
+
+                                    let ext = Utilities.getSingleExtensionValue($scope.valueSet,authorUrl);
+                                    if (ext && ext.valueBoolean) {
+                                        $scope.authoredbyCF = true;
+                                    }
+
+
                                     console.log($scope.valueSet);
+                                } else {
+                                    $scope.footerMsg = "This ValueSet was not found on the Terminology server";
+                                    $scope.authoredbyCF = true;     //will only show the display/edit tab if true...
+
+                                    //create a new, blank valueset
+                                    //$scope.isNew = true;
+                                    $scope.valueSet = {resourceType:"ValueSet",status:"draft",compose:{include:[]}};
+                                    $scope.valueSet.url = $scope.vsUrl;
+
+
+
+                                    Utilities.addExtensionOnce($scope.valueSet,authorUrl,{valueBoolean:true});
+                                    let inc = {system:snomedUrl,concept:[]};
+                                    $scope.valueSet.compose.include.push(inc);
                                 }
+                            },
+                            function(err) {
+                                console.log(err.statusCode);
                             }
                         );
 
 
+                        $scope.lookupCode = function(code) {
+                            delete $scope.newCodeDisplay;
+                            let url = appConfigSvc.getCurrentTerminologyServer().url + "CodeSystem/$lookup";
+                            let params = {resourceType:"Parameters",parameter:[]}
+                            params.parameter.push({name:'system',valueUri:snomedUrl})
+                            params.parameter.push({name:'code',valueCode:code})
+                            $http.post(url,params).then(
+                                function(data) {
+                                    let params = data.data;
+                                    if (params && params.parameter) {
+                                        params.parameter.forEach(function(param){
+                                            if (param.name=='display') {
+                                                $scope.newCodeDisplay = param.valueString;
+                                            }
+                                        })
+                                    }
+                                }, function(err) {
+                                    console.log(err)
+                                }
+                            )
+                        };
+
+                        $scope.addNewCode = function(code,display) {
+                            $scope.valueSet.compose.include = $scope.valueSet.compose.include || []
+                            let inc = $scope.valueSet.compose.include[0];
+                            inc.concept = inc.concept || []
+                            inc.concept.push({code:code,display:display})
+                            $scope.isDirty = true;
+                            delete $scope.newCodeDisplay;
+                            delete $scope.input.code;
+                        };
+
+                        $scope.removeConcept = function(inx){
+                            let inc = $scope.valueSet.compose.include[0];
+
+                            inc.concept.splice(inx,1);
+                            $scope.isDirty = true;
+                        };
+
+                        $scope.saveVS = function(){
+                            if ($scope.valueSet.id)  {
+                                //this is an update
+                                let url = appConfigSvc.getCurrentTerminologyServer().url + "ValueSet/"+$scope.valueSet.id;
+                                $http.put(url,$scope.valueSet).then(
+                                    function(data) {
+                                        alert('ValueSet was updated')
+                                    },
+                                    function(err){
+                                        alert("Error saving ValueSet:"+angular.toJson(err.data))
+                                    }
+                                )
+                            } else {
+                                //this is new
+                                let url = appConfigSvc.getCurrentTerminologyServer().url + "ValueSet";
+                                $http.post(url,$scope.valueSet).then(
+                                    function(data) {
+                                        alert('ValueSet was created. The dialog needs to close.')
+                                        $scope.$close();
+                                        //need to assign the id so the next update is a put...
+
+                                    },
+                                    function(err){
+                                        alert("Error saving ValueSet:"+angular.toJson(err.data))
+                                    }
+                                )
+                            }
+                        };
 
                         $scope.selectConcept = function(concept) {
                             $scope.$close(concept)
@@ -70,7 +165,14 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
 
                         //when the close button is clicked
                         $scope.close = function(){
-                            $scope.$dismiss();
+                            if ($scope.isDirty) {
+                                if (confirm("There are unsaved changes. Are you sure you wish to close without saving?")) {
+                                    $scope.$dismiss();
+                                }
+                            } else {
+                                $scope.$dismiss();
+                            }
+
                         };
 
 

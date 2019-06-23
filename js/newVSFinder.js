@@ -2,11 +2,12 @@ angular.module("sampleApp").controller('vsFinderCtrl',
     function ($scope, Utilities, appConfigSvc,SaveDataToServer,GetDataFromServer,currentBinding) {
 
 
+
         $scope.input = {};
 
         var config = appConfigSvc.config();
         $scope.termServer = appConfigSvc.getCurrentTerminologyServer().url;//  config.servers.terminology;
-        //$scope.valueSetRoot = config.servers.terminology + "ValueSet/";
+
 
         $scope.input.arStrength = ['required','extensible','preferred','example'];
 
@@ -18,7 +19,7 @@ angular.module("sampleApp").controller('vsFinderCtrl',
             delete $scope.expansion;
             delete $scope.input.filter;
             delete $scope.queryError;
-        }
+        };
 
         $scope.select = function() {
             $scope.$close({vs: $scope.input.vspreview,strength:$scope.input.strength,description : $scope.input.description});
@@ -30,7 +31,7 @@ angular.module("sampleApp").controller('vsFinderCtrl',
             delete $scope.expansion;
             delete $scope.input.filter;
             delete $scope.queryError;
-            //  http://hl7.org/fhir/ValueSet/conditional-read-status
+
 
             //see if this url exists on the terminology servver
             GetDataFromServer.getValueSet(url).then(

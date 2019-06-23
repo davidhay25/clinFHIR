@@ -64,8 +64,6 @@
 
 
             </uib-tab>
-
-
             <uib-tab heading="Description" active="tab.tabDescription" select="setHelpTopic('description')">
                 <br />
                 <div class="row">
@@ -102,6 +100,54 @@
                 </div>
 
             </uib-tab>
+
+
+
+
+            <uib-tab ng-show="authoredbyCF">
+                <uib-tab-heading>
+                    All concepts in Compose <span class="badge">{{valueSet.compose.include[0].concept.length}}</span>
+                </uib-tab-heading>
+                <br>
+
+
+                <div ng-repeat="include in valueSet.compose.include">
+                    <div class="panel panel-default">
+                        <table class="table table-bordered">
+                            <tr ng-repeat="concept in include.concept">
+                                <td>{{concept.code}}</td>
+                                <td>{{concept.display}}</td>
+                                <td> <i class="glyphicon glyphicon-remove-circle clickable" ng-click="removeConcept($index)"></i></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+
+                <div class="banner">Add new concept</div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <input class="form-control" ng-model="input.code" placeholder="SNOMED Code"/>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-link" ng-show="input.code" ng-click="lookupCode(input.code)">Search</button>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div style="padding: 8px">
+                            {{newCodeDisplay}}
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-2" ng-show="newCodeDisplay">
+                        <button class="btn btn-link" ng-click="addNewCode(input.code,newCodeDisplay)">Add code</button>
+                    </div>
+                </div>
+
+
+            </uib-tab>
+
 <!--
             <uib-tab  select="setHelpTopic('define')">
                 <uib-tab-heading>CodeSystem <span ng-show="selectedvs.define">({{selectedvs.define.concept.length}})</span></uib-tab-heading>
@@ -225,18 +271,15 @@
         <div class="row">
             <div class="col-md-8">
                 <div class="text-left">
-                    <em>{{config.servers.terminology}}</em>
-                    <div ng-show="helpTopic=='compose'">
-                        <p>Limitations</p>
-                        <em>Define</em> concepts are not recursive
-                    </div>
-                    <div ng-show="helpTopic=='expand'">
-                        <p>Use the terminology expansion function to explore the ValueSet. Use
-                        a filter to restrict the result set - there is a limit to the number of concepts
-                        that can be returned.</p>
-                    </div>
+                    {{footerMsg}}
+                    <div></div><em>{{config.servers.terminology}}</em>
                 </div>
 
+            </div>
+            <div class="col-md-4">
+                <div ng-show="isDirty">
+                    <div class="btn btn-success" ng-click="saveVS()">Save</div>
+                </div>
             </div>
         </div>
 
