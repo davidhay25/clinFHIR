@@ -34,10 +34,10 @@
                 <br/>
                 <div><strong>Concept display name: </strong><span class="myAlign">{{vo.display}}</span></div>
                 <div><strong>Terminology name: </strong><span class="myAlign">{{vo.name}}</span> </div>
-                <div><strong>Terminology version: </strong><span class="myAlign">{{vo.display}}</span> </div>
+                <div><strong>Terminology version: </strong><span class="myAlign">{{vo.version}}</span> </div>
 
                 <br/>
-                <strong>Designations</strong>
+                <strong ng-show="vo.designation.length > 0">Designations</strong>
                 <table class="table table-bordered">
                     <tr ng-repeat="des in vo.designation">
                         <td width="25%">{{des.type}}</td>
@@ -46,7 +46,7 @@
                     </tr>
                 </table>
 
-                <strong>Properties</strong>
+                <strong ng-show="vo.property.length > 0">Properties</strong>
                 <table class="table table-bordered">
                     <tr ng-repeat="prop in vo.property">
                         <td width="25%">{{prop.type}}</td>
@@ -56,12 +56,13 @@
                     </tr>
                 </table>
             </uib-tab>
-
+<!--
             <uib-tab heading="vo Json">
                 <pre>{{vo | json}}</pre>
 
 
             </uib-tab>
+            -->
             <uib-tab heading="Json">
                 <pre>{{params | json}}</pre>
             </uib-tab>

@@ -190,6 +190,10 @@ angular.module("sampleApp")
             $scope.input.multiplicity = 'opt';      //default multiplicity
             $scope.input.mustSupport = false;       //default mustSupport
 
+            $scope.input.autoExpand = false;       //default autoexpand
+
+
+
             if (baseType) {
                 //get all the paths - including expanding logical models...
                 $scope.showWaiting = true;
@@ -233,6 +237,7 @@ angular.module("sampleApp")
                 $scope.input.mapping = data.mapping;
 
                 $scope.input.mustSupport = data.mustSupport || false;
+                $scope.input.autoExpand = data.autoExpand || false;
 
                 $scope.input.alias = data.alias;    //[string]
 
@@ -271,15 +276,7 @@ angular.module("sampleApp")
                         }
                     }
 
-                    /*
 
-
-                    //is there a mapping path which refers to an ED?
-                    if ($scope.edHash[$scope.input.mappingPath]) {
-                        $scope.selectedED = $scope.edHash[$scope.input.mappingPath];
-                    }
-
-                    */
                 }
 
 
@@ -333,15 +330,7 @@ angular.module("sampleApp")
                             }
                         })
                     }
-/*
-                if (data.selectedValueSet && data.selectedValueSet.vs){
-                    $scope.isCoded = true;
-                    $scope.vsInGuide.forEach(function(vs){
-                        if (vs.sourceUri ==data.selectedValueSet.vs.url) {
-                            $scope.input.vsFromIg = vs
-                        }
-                    })
-                } */
+
 
                     $scope.selectedValueSet = data.selectedValueSet;
 
@@ -368,16 +357,12 @@ angular.module("sampleApp")
                                     $scope.references.entry.forEach(function(ent){
                                         if (ent.resource.url == profileUrl) {
                                             $scope.input.referenceFromIg = ent;
-
-
                                         }
                                     })
                                 }
 
                             }
-
                         }
-
                     }
 
                     //this is the url of the model that this item (and it's children) will map to
@@ -389,9 +374,6 @@ angular.module("sampleApp")
                             }
                         })
                     }
-
-              //  }
-
 
             }
 
@@ -826,7 +808,7 @@ angular.module("sampleApp")
 
                 vo.mustSupport = $scope.input.mustSupport;
 
-
+                vo.autoExpand = $scope.input.autoExpand;
 
 
 

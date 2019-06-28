@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2019-05-30a';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2019-06-24';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -61,7 +61,7 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.instanceAuthor = "http://clinfhir.com/fhir/StructureDefinition/instanceAuthor";
         defaultConfig.standardExtensionUrl.lmReviewReason = "http://clinfhir.com/fhir/StructureDefinition/lmReviewReason";
         defaultConfig.standardExtensionUrl.lmElementLink = "http://clinfhir.com/fhir/StructureDefinition/lmElementLink";
-
+        defaultConfig.standardExtensionUrl.autoExpand = "http://clinfhir.com/fhir/StructureDefinition/autoExpand";
 
 
         defaultConfig.standardSystem.identifierSystem = 'http://clinfhir.com/fhir/NamingSystem/identifier';

@@ -17,8 +17,6 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
             $scope.internalControl = $scope.trigger || {};
 
 
-            //invoke the vs browser. first parameter is a complete valueset, the second a url.
-            //clinFHIR is changing to expect that a terminology server will support the /$expand?url=...  syntax at the moment
             $scope.internalControl.open = function(vs,url) {
                 if (vs) {
                     $scope.selectedvs = angular.copy(vs);
@@ -41,6 +39,7 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
 
                     templateUrl: 'resourceBuilder/vsBrowser.html',
                     size:'lg',
+                    backdrop:'static',
                     controller: function($scope,selectedvs,GetDataFromServer,$filter,$localStorage,vsUrl,appConfigSvc) {
 
                         let snomedUrl = "http://snomed.info/sct";
@@ -67,10 +66,10 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                                         $scope.authoredbyCF = true;
                                     }
 
-
                                     console.log($scope.valueSet);
                                 } else {
                                     $scope.footerMsg = "This ValueSet was not found on the Terminology server";
+                                    $scope.notFound = true;
                                     $scope.authoredbyCF = true;     //will only show the display/edit tab if true...
 
                                     //create a new, blank valueset
@@ -78,11 +77,9 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                                     $scope.valueSet = {resourceType:"ValueSet",status:"draft",compose:{include:[]}};
                                     $scope.valueSet.url = $scope.vsUrl;
 
-
-
                                     Utilities.addExtensionOnce($scope.valueSet,authorUrl,{valueBoolean:true});
-                                    let inc = {system:snomedUrl,concept:[]};
-                                    $scope.valueSet.compose.include.push(inc);
+                                   // let inc = {system:snomedUrl,concept:[]};
+                                   // $scope.valueSet.compose.include.push(inc);
                                 }
                             },
                             function(err) {
@@ -91,6 +88,9 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                         );
 
 
+                        //-------- functions for adding a code to the ValueSet
+                        $scope.codeSystemUrl = ""; //snomedUrl;       //default to SNOMED
+                        $scope.input.usingSNOMED = true;
                         $scope.lookupCode = function(code) {
                             delete $scope.newCodeDisplay;
                             let url = appConfigSvc.getCurrentTerminologyServer().url + "CodeSystem/$lookup";
@@ -108,26 +108,53 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                                         })
                                     }
                                 }, function(err) {
+                                    alert("No concept with this code was found")
                                     console.log(err)
                                 }
                             )
                         };
 
                         $scope.addNewCode = function(code,display) {
-                            $scope.valueSet.compose.include = $scope.valueSet.compose.include || []
-                            let inc = $scope.valueSet.compose.include[0];
-                            inc.concept = inc.concept || []
-                            inc.concept.push({code:code,display:display})
+
+                            //find the include array where this system is located
+                            let url = $scope.input.codeSystemUrl
+                            if ($scope.input.usingSNOMED) {
+                                url = snomedUrl;
+                            }
+
+                            $scope.valueSet.compose.include = $scope.valueSet.compose.include || [];
+                            let includeToUse;
+                            $scope.valueSet.compose.include.forEach(function (include) {
+                                if (include.system == url) {
+                                    includeToUse = include
+                                }
+                            });
+
+                            //add a new section if needed
+                            if (! includeToUse) {
+                                includeToUse = {system:url,concept:[]};
+                                $scope.valueSet.compose.include.push(includeToUse);
+                            }
+
+
+                            //and add the concept
+                            //$scope.valueSet.compose.include = $scope.valueSet.compose.include || []
+                            //let inc = $scope.valueSet.compose.include[0];
+
+                            includeToUse.concept = includeToUse.concept || []
+                            includeToUse.concept.push({code:code,display:display})
                             $scope.isDirty = true;
                             delete $scope.newCodeDisplay;
                             delete $scope.input.code;
                         };
 
-                        $scope.removeConcept = function(inx){
-                            let inc = $scope.valueSet.compose.include[0];
+                        $scope.removeConcept = function(concept){
 
-                            inc.concept.splice(inx,1);
-                            $scope.isDirty = true;
+                            console.log(concept)
+
+                           // let inc = $scope.valueSet.compose.include[0];
+                           // inc.concept.splice(inx,1);
+                           // $scope.isDirty = true;
                         };
 
                         $scope.saveVS = function(){
@@ -182,7 +209,8 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                             if (keyCode === 13) {
                                 $scope.expand();
                             }
-                        }
+                        };
+
                         $scope.tab = {};
                         $scope.tab.tabDescription = true;
 
@@ -214,23 +242,21 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                                     //this is expanding off a snomed refset. see https://www.hl7.org/fhir/snomedct.html
                                     //assume the syntax is http://snomed.info/ValueSet/{refsetid}
                                     var ar = $scope.vsUrl.split('/');
+
+
+
                                     url = "http://its.patientsfirst.org.nz/RestService.svc/Terminz/ValueSet/$expand?url="
                                     url += "http://snomed.info/sct?fhir_vs=refset/" + ar[ar.length -1]
-
 
                                 } else {
                                     url = appConfigSvc.getCurrentTerminologyServer().url;
                                     url += "ValueSet/$expand?url="+$scope.vsUrl;
-
 
                                 }
 
                                 if (filter) {
                                     url += "&filter="+filter;
                                 }
-
-
-
 
 
                                 $scope.query = url;

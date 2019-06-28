@@ -111,13 +111,14 @@
                 <br>
 
 
+
                 <div ng-repeat="include in valueSet.compose.include">
                     <div class="panel panel-default">
                         <table class="table table-bordered">
                             <tr ng-repeat="concept in include.concept">
                                 <td>{{concept.code}}</td>
                                 <td>{{concept.display}}</td>
-                                <td> <i class="glyphicon glyphicon-remove-circle clickable" ng-click="removeConcept($index)"></i></td>
+                                <td> <i class="glyphicon glyphicon-remove-circle clickable" ng-click="removeConcept(concept)"></i></td>
                             </tr>
                         </table>
                     </div>
@@ -125,22 +126,41 @@
 
 
                 <div class="banner">Add new concept</div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <label class="btn btn-default" ng-model="input.usingSNOMED" uib-btn-radio="true">SNOMED</label>
+                        <label class="btn btn-default" ng-model="input.usingSNOMED" uib-btn-radio="false">Other CodeSystem</label>
+
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" placeholder="Full URL of CodeSystem" ng-hide="input.usingSNOMED" class="form-control" ng-model="input.codeSystemUrl"/>
+                    </div>
+
+                </div>
+
+                <br/>
                 <div class="row">
                     <div class="col-md-3">
-                        <input class="form-control" ng-model="input.code" placeholder="SNOMED Code"/>
+                        <input ng-show="input.usingSNOMED" class="form-control" ng-model="input.code" placeholder="SNOMED Code"/>
+                        <input ng-hide="input.usingSNOMED" class="form-control" ng-model="input.code" placeholder="Code"/>
                     </div>
                     <div class="col-md-1">
-                        <button class="btn btn-link" ng-show="input.code" ng-click="lookupCode(input.code)">Search</button>
+                        <button class="btn btn-link" ng-show="input.code && input.usingSNOMED" ng-click="lookupCode(input.code)">Search</button>
                     </div>
 
                     <div class="col-md-6">
-                        <div style="padding: 8px">
+                        <div style="padding: 8px" ng-show="input.usingSNOMED">
                             {{newCodeDisplay}}
                         </div>
 
+                        <div ng-hide="input.usingSNOMED">
+                            <input type="text" class="form-control" ng-model="newCodeDisplay"/>
+
+                        </div>
                     </div>
 
-                    <div class="col-md-2" ng-show="newCodeDisplay">
+                    <div class="col-md-2" ng-show="newCodeDisplay && (input.usingSNOMED || input.codeSystemUrl)">
                         <button class="btn btn-link" ng-click="addNewCode(input.code,newCodeDisplay)">Add code</button>
                     </div>
                 </div>

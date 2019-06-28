@@ -59,12 +59,12 @@
                             </a>
                         </div>
                     </div>
-
+<!--
                     <div class="pull-right" ng-show="isCoded">
                         <em>{{selectedValueSet.valueSet}}</em>
-                       <!-- <em>{{selectedValueSet.vs.name}}</em>-->
-                    </div>
 
+                    </div>
+-->
                 </div>
 
             </div>
@@ -76,7 +76,7 @@
                             <uib-tab heading="">
                                 <uib-tab-heading>Description</uib-tab-heading>
                                 <!--<div><label>Description</label></div>-->
-                                <textarea class="form-control" rows="3" ng-model="input.description" placeholder="Description of element"></textarea>
+                                <textarea class="form-control" rows="4" ng-model="input.description" placeholder="Description of element"></textarea>
                             </uib-tab>
                             <uib-tab>
                                 <uib-tab-heading>Comments</uib-tab-heading>
@@ -147,17 +147,36 @@
                         </div>
 
                         <div ng-show="isCoded">
-                            <div><label>ValueSet & Concept Map</label></div>
 
-                            <select  ng-show="vsInGuide.length > 0" class="form-control" ng-model="input.vsFromIg"
-                                     ng-change="selectVsFromIg()"
-                                     ng-options="vs.name for vs in vsInGuide">
+                            <div><em>{{selectedValueSet.valueSet}}</em></div>
+                            <br/>
 
-                            </select>
+                            <div class="row">
+                                <div class="col-md-6 col-sm-6">
+                                    <div><label>ValueSet</label></div>
 
-                            <div class="clickable " ng-click="selectVsFromServer()">Select ValueSet from Server</div>
-                            <div class="clickable " ng-show="selectedValueSet" ng-click="removeBinding()">Remove ValueSet binding</div>
+                                    <select  ng-show="vsInGuide.length > 0" class="form-control" ng-model="input.vsFromIg"
+                                             ng-change="selectVsFromIg()"
+                                             ng-options="vs.name for vs in vsInGuide">
 
+                                    </select>
+
+
+                                    <div class="clickable " ng-click="selectVsFromServer()">Select ValueSet from Server</div>
+                                    <div class="clickable " ng-show="selectedValueSet" ng-click="removeBinding()">Remove ValueSet binding</div>
+
+
+                                </div>
+                                <div class="col-md-6 col-sm-6">
+                                    <div><label>Auto expand ValueSet in Clinical view</label></div>
+
+                                    <div class="btn-group">
+                                        <label class="btn btn-default" ng-model="input.autoExpand" uib-btn-radio="false">No</label>
+                                        <label class="btn btn-default" ng-model="input.autoExpand" uib-btn-radio="true">Yes</label>
+                                    </div>
+
+                                </div>
+                            </div>
 
                         </div>
 

@@ -1071,7 +1071,23 @@ angular.module("sampleApp")
                 path.pop();
                 var parent = findNodeWithPath(path.join('.')); //note this is the node for the tree view, not the graph
 
-                if (parent && parent.data && parent.data.type) {
+            //    if (parent && parent.data && parent.data.type) {
+
+                let profile = node.data.ed.type[0].targetProfile[0];
+
+                logicalModelSvc.explodeResource($scope.treeData,$scope.selectedNode,profile).then(
+                    function() {
+                        drawTree();
+                        $scope.isDirty = true;
+                        makeSD();
+                    },
+                    function(err){
+                        alert(angular.toJson(err))
+                    }
+
+                );
+                return
+
                     //now find the resource type that is being expanded. For now, use the first one only..
                    // var resourceType;
                     for (var i=0; i< parent.data.type.length; i++) {
@@ -1105,7 +1121,7 @@ angular.module("sampleApp")
                         }
                     }
 
-                }
+            //    }
 
 
 
@@ -1116,27 +1132,30 @@ angular.module("sampleApp")
                 function() {return $scope.selectedNode},
                 function() {
                     delete $scope.valueSetOptions;
-                    if ($scope.selectedNode && $scope.selectedNode.data && $scope.selectedNode.data.selectedValueSet && $scope.clinicalView) {
+
+                    if ($scope.selectedNode && $scope.selectedNode.data && $scope.selectedNode.data.selectedValueSet
+                        && $scope.clinicalView) {
 
 
 
 
+                        if ($scope.selectedNode.data.autoExpand) {
+                            $scope.valueSetOptions = [{code:'',display:'Expanding, please wait'}]
 
-                        $scope.valueSetOptions = [{code:'',display:'Expanding, please wait'}]
+                            logicalModelSvc.getOptionsFromValueSetV2($scope.selectedNode.data).then(
+                                function(lst) {
+                                    $scope.valueSetOptions = lst;
+                                },
+                                function(err){
+                                    console.log(err)
+                                    $scope.valueSetOptions = [{code:'',display:'ValueSet not expanded - Is it present on the server?'}]
+                                    //when the function couldn't expand the VS
+                                }
+                            )
+                        } else {
+                            $scope.valueSetOptions = [{code:'',display:'Autoexpand not enabled for this element'}]
+                        }
 
-                        logicalModelSvc.getOptionsFromValueSetV2($scope.selectedNode.data).then(
-                            function(lst) {
-
-
-                                $scope.valueSetOptions = lst;
-
-                            },
-                            function(err){
-                                console.log(err)
-                                $scope.valueSetOptions = [{code:'',display:'ValueSet not expanded - Is it present on the server?'}]
-                                //when the function couldn't expand the VS
-                            }
-                        )
                     }
 
                 });
@@ -1929,6 +1948,7 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/newLogicalModel.html',
                         size: 'lg',
+                        backdrop:'static',
                         controller: function($scope,appConfigSvc,Utilities,GetDataFromServer,
                                              modalService,RenderProfileSvc,SD,allModels,projectSvc) {
                             $scope.input = {};
@@ -2148,7 +2168,11 @@ angular.module("sampleApp")
                                 makeSD();
                             }
 
-                        })
+                        },
+                        function(err) {
+                            console.log(err)
+                        }
+                    )
                 
             };
 
