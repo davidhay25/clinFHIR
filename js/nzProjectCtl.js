@@ -1,6 +1,6 @@
 angular.module("sampleApp")
     .controller('nzCtrl',
-        function ($scope,$http,modalService,appConfigSvc,fhirUtilsSvc,v2ToFhirSvc) {
+        function ($scope,$http,modalService,appConfigSvc,fhirUtilsSvc,v2ToFhirSvc,$timeout) {
 
             console.log(location.host);
             $scope.input = {}
@@ -24,7 +24,6 @@ angular.module("sampleApp")
 
             });
 
-
             $scope.login=function(){
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
@@ -43,7 +42,6 @@ angular.module("sampleApp")
                     modalService.showModal({}, {bodyText: 'Sorry, there was an error logging out - please try again'})
                 });
             };
-
 
             let appRoot = location.host;
 
@@ -77,10 +75,63 @@ angular.module("sampleApp")
             //appConfigSvc.setServerType('terminology',"http://home.clinfhir.com:8054/baseR4/");
             appConfigSvc.setServerType('terminology',"https://ontoserver.csiro.au/stu3-latest/");
 
+
+            $scope.capStmt = [{id:'nhi',display:'NHI'},{id:'hpi',display:"HPI"}];
+            let hashCapStmt = {};   //keyed on id
+            let hashOpDefn = {};    //keyed on url
+            $scope.capStmt.forEach(function (item) {
+                let url = appConfigSvc.getCurrentConformanceServer().url + "CapabilityStatement/"+item.id;
+                $http.get(url).then(
+                    function(data) {
+                        let capStmt = data.data;
+                        hashCapStmt[item.id] = capStmt;
+                        //now find the OperationDefinitions  todo - ?move all this to a service
+                        if (capStmt.rest && capStmt.rest.length > 0) {
+                            capStmt.rest.forEach(function (rest) {
+                                if (rest.operation) {
+                                    rest.operation.forEach(function (op) {
+                                        let url = op.definition;
+                                        if (url) {
+                                            if (! hashOpDefn[url]) {
+                                                let qry = appConfigSvc.getCurrentConformanceServer().url + "OperationDefinition?url=" + url;
+                                                $http.get(qry).then(
+                                                    function (data) {
+                                                        let bundle = data.data
+                                                        if (bundle.entry && bundle.entry.length > 0) {
+                                                            let opDef = bundle.entry[0].resource;   //todo what if > 1??
+                                                            hashOpDefn[url] = opDef;
+                                                            console.log(hashOpDefn)
+                                                            op.fullDefinition = opDef;      //for the display
+
+                                                        } else {
+                                                            console.log(url + " not found on the conformance server")
+                                                        }
+                                                    }
+                                                )
+                                            } else {
+                                                op.fullDefinition = hashOpDefn[url];      //for the display
+                                            }
+
+                                        }
+                                    })
+                                }
+                            })
+                        }
+                    }
+                )
+            });
+
+            $scope.selectCapStmt = function(id) {
+                $scope.input.selectedCapStmt = hashCapStmt[id]
+            };
+
+
             //get from the IG when everything is moved to R4...
             $scope.selectSample = function(example){
                 $scope.input.selectedExample = example;
                 delete $scope.input.selectedExampleJson;
+                delete $scope.input.selectedExampleXml;
+                $('#resourceTree').jstree('destroy');
 
                 let url = example.url;
                 if (url.indexOf('http') == -1) {
@@ -88,23 +139,34 @@ angular.module("sampleApp")
                     $scope.input.selectedExample.url = url;     //so it displays in full on the page
                 }
 
+
                 $http.get(url).then(
                     function(data) {
                         $scope.input.selectedExampleJson = data.data;
-
                         $scope.treeData = v2ToFhirSvc.buildResourceTree(data.data);
+                        //drawTree();
 
-                        drawTree();
+                        $timeout(function(){
+                                $scope.collapseAll()
+                            }
+                            ,1000
+                        )
 
 
-
+                        $http.get(url+"?_format=xml").then(
+                            function(data) {
+                                $scope.input.selectedExampleXml = data.data;
+                            }
+                        )
 
 
                     },
                     function(err) {
                         console.log(err)
                     }
-                )
+                );
+
+
 
             };
 
@@ -114,8 +176,89 @@ angular.module("sampleApp")
                 $('#resourceTree').jstree('destroy');
                 $('#resourceTree').jstree(
                     {'core': {'multiple': false, 'data': $scope.treeData, 'themes': {name: 'proton', responsive: true}}}
-                )
+                ).on('changed.jstree', function (e, data) {
+                    //seems to be the node selection event...
+
+                    //console.log(data)
+                    if (data.node) {
+
+                        //opens or closes the node and all children on select
+                        if (data.node.state.opened) {
+                            $("#resourceTree").jstree("close_all","#"+data.node.id); // for example :)
+                        } else {
+                            $("#resourceTree").jstree("open_all","#"+data.node.id); // for example :)
+                        }
+
+
+
+                        //$('#resourceTree')
+
+                        $scope.selectedNode = data.node;
+
+                        //$scope.$digest();       //as the event occurred outside of angular...
+
+                    }
+                }) /*.on('ready.jstree',function(e) {
+                    $scope.collapseAll();
+                })
+                */
+
+
+
             };
+
+            $scope.expandAll = function(){
+                $scope.treeData.forEach(function (item) {
+                    item.state.opened = true;
+                });
+
+                drawTree();
+            };
+
+            $scope.expandAtNodeDEP = function(){
+                let currentNodeId = $scope.selectedNode.id;
+
+                console.log($("#resourceTree").jstree(true)._model.data)
+
+                let wholeTree = $("#resourceTree").jstree(true)._model.data;
+                angular.forEach(wholeTree,function(item){
+                    if (item.parents) {
+                        item.parents.forEach(function(parentId){
+                            if (parentId == currentNodeId) {
+                                item.state.opened = true;
+                            }
+                        })
+                    }
+                })
+
+               $scope.$digest()
+
+
+                return
+                $("#resourceTree").jstree(true).each_node(function (node) {
+                    // 'this' contains the jsTree reference
+
+                    console.log(this)
+                    // example usage: hide leaf nodes having a certain data attribute = true
+                 //   if (this.is_leaf(node) && node.data[attribute]) {
+                      //  this.hide_node(node);
+                  //  }
+                });
+                /*
+                $scope.treeData.forEach(function (item) {
+                    if (item.parents) {
+                        item.parents.forEach(function(parentId){
+                            if (parentId == currentNodeId) {
+                                item.state.opened = true;
+                            }
+                        })
+                    }
+
+                })
+                drawTree();
+                */
+            }
+
 
             $scope.collapseAll = function() {
                 $scope.treeData.forEach(function (item) {
@@ -184,7 +327,7 @@ angular.module("sampleApp")
                                 //if there's no extension, then is is an example?
                                 if (item.exampleCanonical || item.exampleBoolean) {
                                     //at the moment the canonical is referencing the LM - not the profile
-                                    $scope.examples.push({display:item.name,url:item.reference.reference});
+                                    $scope.examples.push({display:item.name,url:item.reference.reference,description:item.description});
 
                                 }
                             }
