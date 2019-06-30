@@ -585,7 +585,9 @@
                                      ng-class="{'list-group-item':true,'listItemSelected':input.selectedExample==example}"
                                      ng-click="selectSample(example)">
                                     {{example.display}}
+
                                     <div><em>{{example.description}}</em></div>
+
                                 </div>
                             </div>
 
@@ -651,6 +653,13 @@
                                             <div id="singleResourceGraph"></div>
                                         </div>
                                         <div class="col-md-6">
+                                            <div ng-show="selectedIGExampleEntry">
+                                                {{selectedIGExampleEntry.display}}
+                                                <br/><br/>
+                                                {{selectedIGExampleEntry.description}}
+                                                <br/><br/>
+                                                <button class="btn btn-link" ng-click="selectSample(selectedIGExampleEntry)">Select this resource</button>
+                                            </div>
 
                                         </div>
                                     </div>

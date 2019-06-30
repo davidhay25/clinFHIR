@@ -188,11 +188,6 @@ angular.module("sampleApp")
                         url = resource.resourceType + "/" + resource.id;
                     }
 
-                    //if there's no fullUrl, then make the url a relative one ({type}/{id).
-                 /*   if (!url) {
-                        url = resource.resourceType + "/" + resource.id;
-                    }
-                    */
 
 
                     let node = {id: arNodes.length +1, label: resource.resourceType,

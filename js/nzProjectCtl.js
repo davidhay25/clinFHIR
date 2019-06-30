@@ -126,18 +126,110 @@ angular.module("sampleApp")
             };
 
 
-            //get from the IG when everything is moved to R4...
+            //select an example based on the example object created from the IG...
             $scope.selectSample = function(example){
                 $scope.input.selectedExample = example;
                 delete $scope.input.selectedExampleJson;
                 delete $scope.input.selectedExampleXml;
+                delete $scope.selectedIGExampleEntry;
+                delete $scope.singleResourceChart;
                 $('#resourceTree').jstree('destroy');
 
+
                 let url = example.url;
+
                 if (url.indexOf('http') == -1) {
                     url = 'http://home.clinfhir.com:8054/baseR4/' + url;        //todo
                     $scope.input.selectedExample.url = url;     //so it displays in full on the page
                 }
+
+
+
+                if (hashExampleJson[url]) {
+                    let resource = angular.copy(hashExampleJson[url]);
+
+                    $scope.input.selectedExampleJson = resource;
+                    $scope.input.selectedExampleXml = hashExampleXml[url];
+
+
+
+                    //create the tree and collapse to one level - draws the tree as well...
+                    $scope.treeData = v2ToFhirSvc.buildResourceTree(resource);
+                    $timeout(function(){
+                            $scope.collapseAll()
+                        }
+                        ,1000
+                    );
+
+                    //create the graph
+                    //first, create a bundle with only the details of this resource
+
+
+
+                    let options = {bundle:{entry:[]},hashErrors:{},showOutRef:true,showInRef:true}
+                    options.serverRoot = appConfigSvc.getCurrentDataServer().url;
+                    $scope.examples.forEach(function (ex1) {
+                        let ex = angular.copy(ex1)
+
+                        if (ex.url == url) {
+                            //this is the focus resource
+                            options.centralResourceId = ex.resourceType + "/" + ex.id
+
+                            let entry = {resource:resource}
+                            //delete entry.resource.id;
+                            entry.fullUrl = ex.url;
+
+                            options.bundle.entry.push(entry)
+                        } else {
+                            let r = {resourceType:ex.resourceType}; //,id:ex.id}
+                            let entry = {resource:r};
+                            entry.fullUrl = ex.url;
+                            options.bundle.entry.push(entry)
+                        }
+                    });
+
+
+                    let vo = v2ToFhirSvc.makeGraph(options);
+
+
+                    let container = document.getElementById('singleResourceGraph');
+                    let graphOptions = {
+                        physics: {
+                            enabled: true,
+                            barnesHut: {
+                                gravitationalConstant: -10000,
+                            }
+                        }
+                    };
+
+                    $scope.singleResourceChart = new vis.Network(container, vo.graphData, graphOptions);
+
+
+                    $scope.singleResourceChart.on("click", function (obj) {
+                        delete $scope.selectedIGExampleEntry;
+                        var nodeId = obj.nodes[0];  //get the first node
+                        var node = vo.graphData.nodes.get(nodeId);
+
+                        $scope.selectedGraphNode = node;
+                        let url = node.url;     //the actual (non canonical) url to the resource
+                        $scope.examples.forEach(function (ex) {
+                            if (ex.url == url) {
+                                $scope.selectedIGExampleEntry = ex
+                            }
+
+                        });
+
+
+                        $scope.$digest();
+                    });
+
+
+                } else {
+                    alert('example not found:'+url)
+                }
+
+
+                return;
 
                 $http.get(url).then(
                     function(data) {
@@ -161,23 +253,20 @@ angular.module("sampleApp")
                             let ex = angular.copy(ex1)
                             if (ex.url == url) {
                                 //this is the focus resource
-                                options.centralResourceId = ex.resourceType + "/" + ex.id
+                                options.centralResourceId = url;// ex.resourceType + "/" + ex.id
                                 let entry = {resource:resource}
 
                                 options.bundle.entry.push(entry)
                             } else {
                                 let r = {resourceType:ex.resourceType}; //,id:ex.id}
                                 let entry = {resource:r};
-                                entry.fullUrl = options.serverRoot + ex.url;
+                                entry.fullUrl = ex.url;
                                 options.bundle.entry.push(entry)
                             }
                         });
 
-console.log(options)
-                        //let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:$scope.serverRoot,centralResourceId:id}
-                        //let optionss = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:serverRoot}
+
                         let vo = v2ToFhirSvc.makeGraph(options);
-console.log(vo)
 
                         let container = document.getElementById('singleResourceGraph');
                         let graphOptions = {
@@ -191,6 +280,23 @@ console.log(vo)
 
                         $scope.singleResourceChart = new vis.Network(container, vo.graphData, graphOptions);
 
+                        $scope.singleResourceChart.on("click", function (obj) {
+
+                            var nodeId = obj.nodes[0];  //get the first node
+                            var node = vo.graphData.nodes.get(nodeId);
+
+                            $scope.selectedGraphNode = node;
+                            let url = node.url;     //the actual (non canonical) url to the resource
+                            $scope.examples.forEach(function (ex) {
+                                if (ex.fullUrl == url) {
+                                    $scope.selectedIGExampleEntry = ex
+                                }
+
+                            })
+
+
+                            $scope.$digest();
+                        });
 
 
 
@@ -250,7 +356,7 @@ console.log(vo)
 
                         $scope.selectedNode = data.node;
 
-                        //$scope.$digest();       //as the event occurred outside of angular...
+
 
                     }
                 }) /*.on('ready.jstree',function(e) {
@@ -270,49 +376,7 @@ console.log(vo)
                 drawTree();
             };
 
-            $scope.expandAtNodeDEP = function(){
-                let currentNodeId = $scope.selectedNode.id;
 
-                console.log($("#resourceTree").jstree(true)._model.data)
-
-                let wholeTree = $("#resourceTree").jstree(true)._model.data;
-                angular.forEach(wholeTree,function(item){
-                    if (item.parents) {
-                        item.parents.forEach(function(parentId){
-                            if (parentId == currentNodeId) {
-                                item.state.opened = true;
-                            }
-                        })
-                    }
-                })
-
-               $scope.$digest()
-
-
-                return
-                $("#resourceTree").jstree(true).each_node(function (node) {
-                    // 'this' contains the jsTree reference
-
-                    console.log(this)
-                    // example usage: hide leaf nodes having a certain data attribute = true
-                 //   if (this.is_leaf(node) && node.data[attribute]) {
-                      //  this.hide_node(node);
-                  //  }
-                });
-                /*
-                $scope.treeData.forEach(function (item) {
-                    if (item.parents) {
-                        item.parents.forEach(function(parentId){
-                            if (parentId == currentNodeId) {
-                                item.state.opened = true;
-                            }
-                        })
-                    }
-
-                })
-                drawTree();
-                */
-            }
 
 
             $scope.collapseAll = function() {
@@ -329,6 +393,8 @@ console.log(vo)
 
             //get the IG
             let url = appConfigSvc.getCurrentConformanceServer().url + 'ImplementationGuide/cf-artifacts-nz3';
+            let exampleServerBase = appConfigSvc.getCurrentDataServer().url;
+            let hashExampleJson = {}, hashExampleXml = {};
             $scope.models = [];
             $http.get(url).then(
                 function(data) {
@@ -384,10 +450,43 @@ console.log(vo)
                                     //at the moment the canonical is referencing the LM - not the profile
 
                                     //get the resource type form the reference
-                                    let r = item.reference.reference;
-                                    let ar = r.split("/")
-                                    $scope.examples.push({display:item.name,url:item.reference.reference,
-                                        description:item.description,id:ar[1],resourceType:ar[0]});
+                                    let r = item.reference.reference;   //format {type}/{id}
+                                    let ar = r.split("/");
+                                    //the list of examples from the IG
+                                    $scope.examples.push(
+                                        {
+                                            display:item.name,
+                                            //url:item.reference.reference,
+                                            url:exampleServerBase+item.reference.reference,
+                                            description:item.description,id:ar[1],
+                                            resourceType:ar[0]
+                                        }
+                                    );
+
+                                    //now load the Json version of the example
+                                    let url = item.reference.reference;
+                                    if (url.indexOf('http') == -1) {
+                                        url = exampleServerBase + url;        //todo
+
+                                    }
+                                    $http.get(url).then(
+                                        function(data) {
+                                            hashExampleJson[url] = data.data;
+                                        },
+                                        function(err) {
+                                            console.log(err)
+                                        }
+                                    );
+
+                                    //and the Xml version
+                                    $http.get(url+'?_format=xml').then(
+                                        function(data) {
+                                            hashExampleXml[url] = data.data;
+                                        },
+                                        function(err) {
+                                            console.log(err)
+                                        }
+                                    )
 
                                 }
                             }
@@ -398,7 +497,7 @@ console.log(vo)
 
 
 
-//console.log($scope.models)
+console.log($scope.examples)
 
 
                 }, function(err) {
