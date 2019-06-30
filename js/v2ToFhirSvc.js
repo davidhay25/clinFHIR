@@ -181,14 +181,6 @@ angular.module("sampleApp")
 
                     var resource = entry.resource;
 
-
-
-
-                    //let resourceId = resource.id || entry.fullUrl;
-
-
-
-
                     let url = entry.fullUrl;// || resource.resourceType + "/" + resource.id;
 
 

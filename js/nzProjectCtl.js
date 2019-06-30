@@ -139,25 +139,69 @@ angular.module("sampleApp")
                     $scope.input.selectedExample.url = url;     //so it displays in full on the page
                 }
 
-
                 $http.get(url).then(
                     function(data) {
-                        $scope.input.selectedExampleJson = data.data;
-                        $scope.treeData = v2ToFhirSvc.buildResourceTree(data.data);
-                        //drawTree();
+                        let resource = data.data;
+                        $scope.input.selectedExampleJson = resource;
+                        $scope.treeData = v2ToFhirSvc.buildResourceTree(resource);
 
+                        //collapse the tree to one level...
                         $timeout(function(){
                                 $scope.collapseAll()
                             }
                             ,1000
-                        )
+                        );
+
+                        //create a bundle with only the details of this resource
+                       // $scope.examples.push({display:item.name,url:item.reference.reference,
+                           // description:item.description,id:item.id});
+                        let options = {bundle:{entry:[]},hashErrors:{},showOutRef:true,showInRef:true}
+                        options.serverRoot = appConfigSvc.getCurrentDataServer().url;
+                        $scope.examples.forEach(function (ex1) {
+                            let ex = angular.copy(ex1)
+                            if (ex.url == url) {
+                                //this is the focus resource
+                                options.centralResourceId = ex.resourceType + "/" + ex.id
+                                let entry = {resource:resource}
+
+                                options.bundle.entry.push(entry)
+                            } else {
+                                let r = {resourceType:ex.resourceType}; //,id:ex.id}
+                                let entry = {resource:r};
+                                entry.fullUrl = options.serverRoot + ex.url;
+                                options.bundle.entry.push(entry)
+                            }
+                        });
+
+console.log(options)
+                        //let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:$scope.serverRoot,centralResourceId:id}
+                        //let optionss = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:serverRoot}
+                        let vo = v2ToFhirSvc.makeGraph(options);
+console.log(vo)
+
+                        let container = document.getElementById('singleResourceGraph');
+                        let graphOptions = {
+                            physics: {
+                                enabled: true,
+                                barnesHut: {
+                                    gravitationalConstant: -10000,
+                                }
+                            }
+                        };
+
+                        $scope.singleResourceChart = new vis.Network(container, vo.graphData, graphOptions);
 
 
+
+
+                        //get the Xml version...
                         $http.get(url+"?_format=xml").then(
                             function(data) {
                                 $scope.input.selectedExampleXml = data.data;
                             }
                         )
+
+
 
 
                     },
@@ -167,6 +211,17 @@ angular.module("sampleApp")
                 );
 
 
+
+            };
+
+            $scope.fitSingleGraph = function(){
+                $timeout(function(){
+                    if ($scope.singleResourceChart) {
+                        $scope.singleResourceChart.fit();
+
+                    }
+
+                },1000)
 
             };
 
@@ -327,7 +382,12 @@ angular.module("sampleApp")
                                 //if there's no extension, then is is an example?
                                 if (item.exampleCanonical || item.exampleBoolean) {
                                     //at the moment the canonical is referencing the LM - not the profile
-                                    $scope.examples.push({display:item.name,url:item.reference.reference,description:item.description});
+
+                                    //get the resource type form the reference
+                                    let r = item.reference.reference;
+                                    let ar = r.split("/")
+                                    $scope.examples.push({display:item.name,url:item.reference.reference,
+                                        description:item.description,id:ar[1],resourceType:ar[0]});
 
                                 }
                             }
@@ -351,4 +411,4 @@ angular.module("sampleApp")
 
 
         }
-    )
+    );
