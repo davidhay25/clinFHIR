@@ -32,204 +32,8 @@
         angular.module("sampleApp").constant("moment", moment);
     </script>
     <script src="js/nzProjectCtl.js"> </script>
-        <!--
-
-        angular.module("sampleApp")
-            .controller('nzCtrl',
-                function ($scope,$uibModal,$http,modalService,$timeout,$firebaseObject,appConfigSvc,fhirUtilsSvc) {
-
-                    console.log(location.host);
-                    $scope.input = {}
-                    //will update the config. We don't care if manually entered servers are lost or the default servers changed
-                    if (appConfigSvc.checkConfigVersion()) {
-                        alert('The config was updated. You can continue.')
-                    }
-
-                    firebase.auth().onAuthStateChanged(function(user) {
-
-                        if (user) {
-                            $scope.user = user;
-
-                           console.log(user)
-
-
-                        } else {
-                            delete $scope.user
-
-                        }
-
-                    });
-/*
-                    $http.get('artifacts/nzDirectories.html').then (
-                        function(data) {
-                            $scope.helpText = data.data;
-                        }
-                    )
-*/
-
-                    $scope.login=function(){
-                        $uibModal.open({
-                            backdrop: 'static',      //means can't close by clicking on the backdrop.
-                            keyboard: false,       //same as above.
-                            templateUrl: 'modalTemplates/login.html',
-                            controller: 'loginCtrl'
-                        })
-                    };
-
-                    $scope.logout=function(){
-                        firebase.auth().signOut().then(function() {
-                            delete $scope.user;
-                            modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
-
-                        }, function(error) {
-                            modalService.showModal({}, {bodyText: 'Sorry, there was an error logging out - please try again'})
-                        });
-                    };
-
-
-                    let appRoot = location.host;
-
-                    //set the servers to the ones used by the nz project.
-                    /*
-                    let FHIRVersion =3;
-                    appConfigSvc.setServerType('conformance','http://home.clinfhir.com:8040/baseDstu3/');
-                    appConfigSvc.setServerType('data','http://home.clinfhir.com:8040/baseDstu3/');       //set the data server to the same as the conformance for the comments
-                    appConfigSvc.setServerType('terminology',"https://ontoserver.csiro.au/stu3-latest/");
-*/
-                    let FHIRVersion =4;
-                    appConfigSvc.setServerType('conformance','http://home.clinfhir.com:8054/baseR4/');
-                    appConfigSvc.setServerType('data','http://home.clinfhir.com:8054/baseR4/');       //set the data server to the same as the conformance for the comments
-                    //appConfigSvc.setServerType('terminology',"http://home.clinfhir.com:8054/baseR4/");
-                    appConfigSvc.setServerType('terminology',"https://ontoserver.csiro.au/stu3-latest/");
-
-                    //get from the IG when everything is moved to R4...
-                    $scope.selectSample = function(example){
-                        $scope.input.selectedExample = example;
-                        delete $scope.input.selectedExampleJson;
-
-                        let url = example.url;
-                        if (url.indexOf('http') == -1) {
-                            url = 'http://home.clinfhir.com:8054/baseR4/' + url;        //todo
-                        }
-
-                        $http.get(url).then(
-                            function(data) {
-                                $scope.input.selectedExampleJson = data.data;
-                            },
-                            function(err) {
-                                console.log(err)
-                            }
-                        )
-
-                    };
-
-                    $scope.examples = [];
-                    /*
-                    $scope.examples.push({display:"Patient",url:"http://home.clinfhir.com:8054/baseR4/Patient/patient2"})
-                    $scope.examples.push({display:"Practitioner",url:"http://home.clinfhir.com:8054/baseR4/Practitioner/practitioner1"});
-                    $scope.examples.push({display:"Organization",url:"http://home.clinfhir.com:8054/baseR4/Organization/organization1"})
-                    $scope.examples.push({display:"Location",url:"http://home.clinfhir.com:8054/baseR4/Location/location1"});
-*/
-
-
-
-                    //$scope.selectSample($scope.examples[0])
-
-
-
-
-                    let igTypeUrl = appConfigSvc.config().standardExtensionUrl.igEntryType;
-
-                    //get the IG
-                    let url = appConfigSvc.getCurrentConformanceServer().url + 'ImplementationGuide/cf-artifacts-nz3';
-                    $scope.models = [];
-                   // $scope.modelsByPackage = {};      //alternative display
-                    $http.get(url).then(
-                        function(data) {
-                            $scope.IG = data.data;
-
-
-                            if (FHIRVersion == 3) {
-                                $scope.IG.package.forEach(function (package) {
-                                    //$scope.modelsByPackage[package.name] = [];      //todo - assume that name exists...
-                                    package.resource.forEach(function (item) {
-                                        let type = fhirUtilsSvc.getSingleExtensionValue(item,igTypeUrl);
-                                        if (type) {
-                                            console.log(type.valueCode)
-                                            switch (type.valueCode) {
-                                                case 'logical' :
-                                                    //we KNOW that this field exists, and that the url is made up from the url...
-                                                    //('cause it's all clinFHIR controlled)
-                                                    let ar = item.sourceReference.reference.split('/');
-                                                    let id = ar[ar.length-1]
-                                                    let url = '/logicalModeller.html#$$$'+id;
-                                                    let entry = {url:url,description:item.description,name:item.name}
-                                                    $scope.models.push(entry)
-                                                    //$scope.modelsByPackage[package.name].push(entry)
-                                                    break;
-                                            }
-                                        }
-
-                                    })
-
-                                });
-                            }
-
-                            if (FHIRVersion == 4) {
-                                $scope.IG.definition.resource.forEach(function (item) {
-                                    let type = fhirUtilsSvc.getSingleExtensionValue(item,igTypeUrl);
-                                    if (type) {
-                                        console.log(type.valueCode)
-                                        switch (type.valueCode) {
-                                            case 'logical' :
-                                                //we KNOW that this field exists, and that the url is made up from the url...
-                                                //('cause it's all clinFHIR controlled)
-                                                let ar = item.reference.reference.split('/');
-                                                let id = ar[ar.length-1]
-                                                let url = '/logicalModeller.html#$$$'+id;
-                                                let entry = {url:url,description:item.description,name:item.name}
-                                                $scope.models.push(entry)
-                                                //$scope.modelsByPackage[package.name].push(entry)
-                                                break;
-                                        }
-                                    } else {
-                                        //if there's no extension, then is is an example?
-                                        if (item.exampleCanonical) {
-                                            //at the moment the canonical is referencing the LM - not the profile
-                                            $scope.examples.push({display:item.name,url:item.reference.reference});
-
-                                        }
-                                    }
-                                })
-
-
-                            }
-
-
-
-//console.log($scope.models)
-
-
-                        }, function(err) {
-                            alert(angular.toJson(err));
-                        }
-                    );
-
-
-
-
-                    $scope.taskManager = "/taskManager.html#$$$cf-artifacts-nz3"
-
-
-
-
-                }
-            )
-
-    </script>
-
-
-    -->
+    <script src="resourceBuilder/vsBrowser.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
 
     <script>
         var config = {
@@ -251,7 +55,7 @@
         .myForm {
             padding: 8px;
         }
-        .modelScroll {
+        .capStmtScroll {
             height: 900px;
             overflow-y: scroll;
         }
@@ -576,12 +380,24 @@
 
                 </uib-tab>
                 <uib-tab heading="Examples">
+                    <br/>
                     <div class="row">
                         <div class="col-md-3">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <strong style="margin-top: 25px;margin-left: 25px">Type</strong>
+                                </div>
+                                <div class="col-md-9">
+                                    <select class="form-control" ng-model="input.exampleType"
+                                            ng-options="key for key in arExampleTypes"></select>
+
+                                </div>
+                            </div>
 
                             <div class="list-group">
                                 <div ng-repeat=" example in examples"
                                      style="cursor: pointer"
+                                     ng-show="showExample(example)"
                                      ng-class="{'list-group-item':true,'listItemSelected':input.selectedExample==example}"
                                      ng-click="selectSample(example)">
                                     {{example.display}}
@@ -689,6 +505,7 @@
 
                         </div>
                         <div class="col-md-9">
+                            <div class="capStmtScroll">
                             <uib-tabset>
                                 <uib-tab heading="Display">
 
@@ -720,18 +537,33 @@
                                     </div>
 
                                     <div ng-show="input.selectedCapStmt.rest[0].operation">
-                                        <div class="banner">Operations</div>
+                                        <div class="banner">Operations
+
+                                        <span class="pull-right">
+                                            <input ng-model="input.showDoc" type="checkbox"/>
+                                            <span style="font-weight: normal" >&nbsp;Show documentation</span>
+                                        </span>
+                                        </div>
 
                                         <div ng-repeat="rest in input.selectedCapStmt.rest">
                                             <table class="table">
                                                 <tr><th>Name</th><th>Documentation</th><th>Parameters</th></tr>
                                                 <tr ng-repeat="op in rest.operation">
                                                     <td>{{op.name}}</td>
-                                                    <td width="35%">{{op.documentation}}</td>
+                                                    <td width="35%">
+                                                        {{op.documentation}}
+
+                                                        <div ng-show="input.showDoc"><br/>{{op.fullDefinition.description}}</div>
+                                                    </td>
                                                     <td width="55%">
                                                         <div ng-repeat="param in op.fullDefinition.parameter">
                                                             {{param.name}} ({{param.use}})  {{param.min}}..{{param.max}}
-                                                            <div style="margin-left: 20px"><em>{{param.documentation}}</em></div>
+                                                            <span class="clickable" ng-click="viewVS(param.binding.valueSet)">
+                                                                 {{param.binding.valueSet}}
+                                                            <span ng-show="param.binding.strength"> ({{param.binding.strength}})</span>
+                                                            </span>
+
+                                                            <div ng-show="input.showDoc" style="margin-left: 20px"><em>{{param.documentation}}</em></div>
                                                         </div>
                                                         {{}}
                                                     </td>
@@ -749,7 +581,7 @@
                                     <pre>{{input.selectedCapStmt | json}}</pre>
                                 </uib-tab>
                             </uib-tabset>
-
+                            </div>
                         </div>
                     </div>
 
@@ -785,7 +617,8 @@
 
 
 
-
+    <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
+                vs-selected="vsSelected"></vs-browser>
 
 
 

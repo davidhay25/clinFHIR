@@ -45,6 +45,27 @@ angular.module("sampleApp")
 
             let appRoot = location.host;
 
+
+
+            //functions and prperties to enable the valueset viewer
+            $scope.showVSBrowserDialog = {};
+            $scope.showVSBrowser = function(vs) {
+                $scope.showVSBrowserDialog.open(vs);        //the open method defined in the directive...
+            };
+
+
+            //load the valueset browser. Pass in the url of the vs - the expectation is that the terminology server
+            //can use the $expand?url=  syntax
+            $scope.viewVS = function(uri) {
+                //var url = appConfigSvc
+                $scope.showVSBrowserDialog.open(null,uri);
+
+
+            };
+
+
+
+
             $scope.copyExampleToClipboard = function(item) {
 
                 //https://stackoverflow.com/questions/29267589/angularjs-copy-to-clipboard
@@ -67,7 +88,7 @@ angular.module("sampleApp")
                 alert("The item has been copied to the clipboard.")
 
             }
-
+            $scope.exampleTypes = {};       // a hash of the different types of example
 
             let FHIRVersion =4;
             appConfigSvc.setServerType('conformance','http://home.clinfhir.com:8054/baseR4/');
@@ -399,7 +420,7 @@ angular.module("sampleApp")
             $http.get(url).then(
                 function(data) {
                     $scope.IG = data.data;
-
+/*
 
                     if (FHIRVersion == 3) {
                         $scope.IG.package.forEach(function (package) {
@@ -426,8 +447,9 @@ angular.module("sampleApp")
 
                         });
                     }
+                    */
 
-                    if (FHIRVersion == 4) {
+                 //   if (FHIRVersion == 4) {
                         $scope.IG.definition.resource.forEach(function (item) {
                             let type = fhirUtilsSvc.getSingleExtensionValue(item,igTypeUrl);
                             if (type) {
@@ -452,6 +474,7 @@ angular.module("sampleApp")
                                     //get the resource type form the reference
                                     let r = item.reference.reference;   //format {type}/{id}
                                     let ar = r.split("/");
+                                    let ResourceType = ar[0]
                                     //the list of examples from the IG
                                     $scope.examples.push(
                                         {
@@ -459,9 +482,16 @@ angular.module("sampleApp")
                                             //url:item.reference.reference,
                                             url:exampleServerBase+item.reference.reference,
                                             description:item.description,id:ar[1],
-                                            resourceType:ar[0]
+                                            resourceType:ResourceType
                                         }
                                     );
+
+                                    //update the list of example types, if necessary...
+                                    if ($scope.exampleTypes[ResourceType]) {
+                                        $scope.exampleTypes[ResourceType] ++
+                                    } else {
+                                        $scope.exampleTypes[ResourceType] = '1'
+                                    }
 
                                     //now load the Json version of the example
                                     let url = item.reference.reference;
@@ -490,10 +520,29 @@ angular.module("sampleApp")
 
                                 }
                             }
-                        })
+                        });
+
+                    //create an array of exampleTypes so we can sort
+                    $scope.arExampleTypes = ['All']
+                    angular.forEach($scope.exampleTypes,function(v,k){
+                        //$scope.arExampleTypes.push(k + " ("+ v + ")")
+                        $scope.arExampleTypes.push(k)
+                    })
+                    $scope.arExampleTypes.sort();
+                    $scope.input.exampleType = $scope.arExampleTypes[0]
+                    console.log($scope.arExampleTypes)
 
 
+                    $scope.showExample=function(ex) {
+                        if ($scope.input.exampleType == 'All') {
+                            return true
+                        } else {
+                            if (ex.resourceType == $scope.input.exampleType) {
+                                return true
+                            }
+                        }
                     }
+                   // }
 
 
 

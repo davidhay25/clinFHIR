@@ -280,8 +280,10 @@ angular.module("sampleApp")
                                 }
                                 lne += ','
 
+                            } else {
+                                lne += ','
                             }
-                            lne += ',';
+                            //lne += ',';
 
                             lne += ed.min + '..'+ed.max + ',';
                             lne += makeSafe(ed.definition) + ",";
