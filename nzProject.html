@@ -492,7 +492,7 @@
                 <uib-tab heading="CapabilityStatements">
                     <br/>
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-2">
 
                             <div class="list-group">
                                 <div ng-repeat="cs in capStmt"
@@ -504,7 +504,7 @@
                             </div>
 
                         </div>
-                        <div class="col-md-9">
+                        <div class="col-md-10">
                             <div class="capStmtScroll">
                             <uib-tabset>
                                 <uib-tab heading="Display">
@@ -557,7 +557,9 @@
                                                     </td>
                                                     <td width="55%">
                                                         <div ng-repeat="param in op.fullDefinition.parameter">
-                                                            {{param.name}} ({{param.use}})  {{param.min}}..{{param.max}}
+                                                            {{param.name}} ({{param.use}})
+                                                            <span class="clickable" ng-click="showType(param)">{{param.type}}</span>
+                                                            {{param.min}}..{{param.max}}
                                                             <span class="clickable" ng-click="viewVS(param.binding.valueSet)">
                                                                  {{param.binding.valueSet}}
                                                             <span ng-show="param.binding.strength"> ({{param.binding.strength}})</span>

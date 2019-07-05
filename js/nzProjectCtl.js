@@ -63,7 +63,9 @@ angular.module("sampleApp")
 
             };
 
-
+            $scope.showType = function(param) {
+                alert('show the contents of this type')
+            }
 
 
             $scope.copyExampleToClipboard = function(item) {
