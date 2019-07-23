@@ -92,7 +92,7 @@ angular.module("sampleApp")
             }
             $scope.exampleTypes = {};       // a hash of the different types of example
 
-            let FHIRVersion =4;
+            let FHIRVersion = 4;
             appConfigSvc.setServerType('conformance','http://home.clinfhir.com:8054/baseR4/');
             appConfigSvc.setServerType('data','http://home.clinfhir.com:8054/baseR4/');       //set the data server to the same as the conformance for the comments
             //appConfigSvc.setServerType('terminology',"http://home.clinfhir.com:8054/baseR4/");

@@ -149,7 +149,7 @@ angular.module("sampleApp")
 
             //using the smile login store.
             //Not using this at the moment - need to think this through a bit more...
-            $scope.loginSmile = function(){
+            $scope.loginSmileDEP = function(){
                 $uibModal.open({
                     templateUrl: 'modalTemplates/loginSmile.html',
 
@@ -165,7 +165,7 @@ angular.module("sampleApp")
                 )
             };
 
-            $scope.logoutSmile = function(){
+            $scope.logoutSmileDEP = function(){
                 delete $scope.currentUser;
                 delete $localStorage.currentUser;
                 $scope.canEdit = false;
@@ -282,6 +282,12 @@ angular.module("sampleApp")
             };
 
             //load all the IG's on this server
+
+            //get the version of the conformance server...
+            let FHIRVersion = appConfigSvc.getCurrentConformanceServer().version;
+            console.log(FHIRVersion);
+
+
             var url = appConfigSvc.getCurrentConformanceServer().url + "ImplementationGuide";
             GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
                 function(data) {
@@ -306,6 +312,7 @@ angular.module("sampleApp")
                     }
 
                     $scope.input.selIG = $scope.listOfIG[0]
+                    $scope.input.selIG = $scope.listOfIG[1];  //<<<<<<<<<<<< while develooping
                 },
                 function(err){
                     console.log(err)
@@ -515,15 +522,13 @@ angular.module("sampleApp")
                                // $scope.selectedItemType = 'page';
                             }
 
-                            //this is an artifact type (like 'extension' or 'logical'
+                            //this is an artifact type (like 'extension' or 'logical') - ie a grouping of artifacts
                             if ($scope.selectedPageNode.data.nodeType == 'artifactType') {
                                 var aType = $scope.selectedPageNode.data.artifactType;
-                                //console.log(aType)
-                               // $scope.selectedItemType = 'artifactType';
                                 $scope.selectedArtifactType = $scope.selectedPageNode.data.artifactType;
                             }
 
-                            //this node represents an artifact
+                            //this node represents an actual artifact - like a logical mode or a profile...
                             if ($scope.selectedPageNode.data.nodeType == 'artifact') {
                                 var item = $scope.selectedPageNode.data.art;
 
@@ -1143,11 +1148,18 @@ angular.module("sampleApp")
                 $scope.selectedItemType = 'pageRoot';   //shows the root page for the documentaion
                 console.log($scope.artifacts)
 
-
             };
 
             function makeArtifact() {
-                $scope.artifacts = {}
+                $scope.artifacts = {};
+                //create an entry for every 'purpose' so they can be added in the UI
+                let ar = ['logical','profile','extension','codesystem','terminology','other','example'];
+
+                ar.forEach(function (purpose) {
+                    $scope.artifacts[purpose] = []
+                });
+
+
                 let cfpubIgRoot = "";
                 var cfpubIgRootExt = Utilities.getSingleExtensionValue($scope.currentIG, appConfigSvc.config().standardExtensionUrl.cfpubIgRoot);
                 if (cfpubIgRootExt) {
@@ -1155,81 +1167,106 @@ angular.module("sampleApp")
                 }
 
 
-                $scope.currentIG.package.forEach(function (package) {
-                    if (package && package.resource) {
+                if (FHIRVersion ==4) {
+                    let igTypeUrl = appConfigSvc.config().standardExtensionUrl.igEntryType;
+                    $scope.currentIG.definition.resource.forEach(function (item) {
 
-                        //create an entry for every 'purpose' so they can be added in the UI
-                        ['logical','profile','extension','codesystem','terminology','other','example'].forEach(function (purpose) {
-                            $scope.artifacts[purpose] = []
-                        });
+                        let type = Utilities.getSingleExtensionValue(item,igTypeUrl);
+                        if (type) {
+                            console.log(type.valueCode)
+                            switch (type.valueCode) {
+                                case 'logical' :
 
-                        package.resource.forEach(function (resource) {
-                            var purpose = profileDiffSvc.getPurpose(resource)
+                                    if (item.reference) {
+                                        let ar = item.reference.reference.split('/');
+                                        let id = ar[ar.length-1];
+                                        let url = item.reference.reference;
+                                        //let entry = {url:url,description:item.description,name:item.name}
 
-                            // var purpose = resource.purpose || resource.acronym;     //<<< todo - 'purpose' was removed in R3...
-                            var type;
+                                        let entry = {name:item.name,description:item.description,url:url};
+                                        entry.type = type.valueCode;
 
-                            var extDef = appConfigSvc.config().standardExtensionUrl.resourceTypeUrl;
-                            if (resource.example || resource.purpose == 'example') {         //another R2/3 difference...
-                                purpose = 'example'
-                                var t = Utilities.getSingleExtensionValue(resource, extDef);
-                                if (t) {
-                                    type = t.valueString;
+                                        $scope.artifacts[entry.type].push(entry)
+                                    } else {
+                                        alert('Logical model in IG without reference..')
+                                    }
+
+                                    break;
+                            }
+
+                        } else {
+
+                            if (item.exampleCanonical || item.exampleBoolean) {
+                                let entry = {type:'example',name:item.name,description:item.description};
+                                $scope.artifacts['example'].push(entry)
+                            }
+
+
+                        }
+                    });
+
+                } else {
+                    //this is R3
+                    $scope.currentIG.package.forEach(function (package) {
+                        if (package && package.resource) {
+
+                            package.resource.forEach(function (resource) {
+                                var purpose = profileDiffSvc.getPurpose(resource)
+
+                                var type;
+
+                                var extDef = appConfigSvc.config().standardExtensionUrl.resourceTypeUrl;
+                                if (resource.example || resource.purpose == 'example') {         //another R2/3 difference...
+                                    purpose = 'example'
+                                    var t = Utilities.getSingleExtensionValue(resource, extDef);
+                                    if (t) {
+                                        type = t.valueString;
+                                    }
                                 }
-                            }
+
+                                //$scope.artifacts[purpose] = $scope.artifacts[purpose] || []
+
+                                var item2 = {description: resource.description, type: type, name:resource.name};
+                                let igDocExtUrl = appConfigSvc.config().standardExtensionUrl.igDocumentation;
+                                var t = Utilities.getSingleExtensionValue(resource, igDocExtUrl);
+                                if (t) {
+                                    item2.documentationUri = cfpubIgRoot +t.valueUri;
+                                }
+
+                                if (resource.sourceReference) {
+                                    item2.url = resource.sourceReference.reference;
+                                }
+
+                                if (resource.sourceUri) {
+                                    item2.url = resource.sourceUri;
+                                    item2.uri = resource.sourceUri;     //for OID type references...
+                                }
+
+                                $scope.artifacts[purpose].push(item2)
+                            })
 
 
 
-                            $scope.artifacts[purpose] = $scope.artifacts[purpose] || []
+                        }
+                    });
 
-                            var item2 = {description: resource.description, type: type, name:resource.name};
-                            let igDocExtUrl = appConfigSvc.config().standardExtensionUrl.igDocumentation;
-                            var t = Utilities.getSingleExtensionValue(resource, igDocExtUrl);
-                            if (t) {
-                                item2.documentationUri = cfpubIgRoot +t.valueUri;
-                            }
-
-/*
-
-                            var docUrl = Utilities.getSingleExtensionValue(resource, "http://hl7.org/fhir/StructureDefinition/implementationguide-page");   //todo magic number
-
-                            if (docUrl) {
-                                item2.documenationUri =  docUrl.valueUri
-                            }
-//console.log(resource,docUrl)
-*/
-
-                            if (resource.sourceReference) {
-                                item2.url = resource.sourceReference.reference;
-                            }
-
-                            if (resource.sourceUri) {
-                                item2.url = resource.sourceUri;
-                                item2.uri = resource.sourceUri;     //for OID type references...
-                            }
-
-                            $scope.artifacts[purpose].push(item2)
-                        })
+                    //sort 'em all...
+                    ['extension','profile','terminology','logical','other','example','codesystem'].forEach(function (purpose) {
+                        if ($scope.artifacts[purpose]) {
+                            $scope.artifacts[purpose].sort(function(item1,item2) {
+                                var typ1 =  $filter('getLogicalID')(item1.url);
+                                var typ2 =  $filter('getLogicalID')(item2.url);
+                                if (typ1 > typ2) {
+                                    return 1
+                                } else {
+                                    return -1
+                                }
+                            })
+                        }
+                    })
+                }
 
 
-
-                    }
-                });
-
-                //sort 'em all...
-                ['extension','profile','terminology','logical','other','example','codesystem'].forEach(function (purpose) {
-                    if ($scope.artifacts[purpose]) {
-                        $scope.artifacts[purpose].sort(function(item1,item2) {
-                            var typ1 =  $filter('getLogicalID')(item1.url);
-                            var typ2 =  $filter('getLogicalID')(item2.url);
-                            if (typ1 > typ2) {
-                                return 1
-                            } else {
-                                return -1
-                            }
-                        })
-                    }
-                })
 
                 //now sort the examples by the base resource type. Assume a relative reference. todo - may need to change this...
                 $scope.artifacts.example.sort(function (a,b) {
@@ -1283,7 +1320,7 @@ angular.module("sampleApp")
                 delete $scope.exampleResourceXml
 
 
-                centerNodeInGraph(item.url)
+                //temp - causing re-read of ig ???  centerNodeInGraph(item.url)
 
                 //right now we assume that examples are on the data server...
                 if (type == 'example') {
@@ -1296,6 +1333,7 @@ angular.module("sampleApp")
                     profileDiffSvc.getSD(item.url).then(
                         function (SD) {
 
+                            $scope.$broadcast("loadResource",SD);   //so can load the documentation...
 
 
                             $scope.LMtreeData = logicalModelSvc.createTreeArrayFromSD(angular.copy(SD));
@@ -1348,6 +1386,9 @@ console.log(SD)
                             )
 
 
+                        },
+                        function(err) {
+                            alert(err.msg)
                         }
                     )
 
@@ -1899,11 +1940,9 @@ console.log(SD)
                     }
                 });
 
-
                 if (item.url) {
                     $scope.selectItem(item,'profile')
                 }
-
 
                 if ($scope.input.center && $scope.selectedNodeFromGraph) {
                     var url = $scope.selectedNodeFromGraph.data.url;
@@ -1937,4 +1976,95 @@ console.log(SD)
 
                 },2000)
             }
-    });
+    })
+    .controller('docCtrl',
+        function ($scope,appConfigSvc,$http){
+            $scope.doc = {};
+            $scope.doc.resourceDocType = 'intro';
+
+
+            $scope.sections = [];
+            $scope.sections.push({code:'intro',display:'Introduction'});
+            $scope.sections.push({code:'summary',display:'Summary'});
+            $scope.sections.push({code:'search',display:'Search'});
+
+            $scope.$on("loadResource",function(ev,resource){
+                loadDoc(resource)
+            })
+
+
+            $scope.isDirty = false;
+
+
+            //save the document reference that has content for the uri. Pass in the SD for the model
+            $scope.saveDoc = function(SD) {
+                let dr = {resourceType:'DocumentReference',status:'current',content:[]};
+
+                dr.id = SD.id + '-doc';
+                $scope.sections.forEach(function(sect){
+                    let notes = $scope.doc.resourceDoc[sect.code];
+                    if (notes) {
+                        let att = {title:sect.code};
+                        att.data = btoa(notes);
+                        dr.content.push({attachment:att})
+                    }
+                });
+
+                let url = appConfigSvc.getCurrentConformanceServer().url + "DocumentReference/"+dr.id;
+
+
+                $http.put(url,dr).then(
+                    function() {
+                        console.log('saved')
+                        $scope.isDirty = false;
+                    },
+                    function(err) {
+                        alert('error saving notes' + angular.toJson(err))
+                    }
+                )
+
+
+            };
+
+            //load the document reference that has content for the uri
+            let loadDoc = function(SD) {
+                $scope.doc.resourceDoc = {};    //all the document snippets for the model...
+                let url = appConfigSvc.getCurrentConformanceServer().url + "DocumentReference/"+SD.id+ '-doc';
+                $http.get(url).then(
+                    function(data){
+                        let dr = data.data;
+
+                        if (dr.content) {
+                            dr.content.forEach(function(con){
+                                let att = con.attachment;
+                                if (att && att.title) {
+
+                                    $scope.doc.resourceDoc[att.title] = atob(att.data);
+                                }
+
+                            });
+                            $scope.makeDoc();
+                        }
+                    },
+                    function(err) {
+                        console.log('error retrieving notes' + angular.toJson(err))
+                    }
+                )
+
+            };
+
+            $scope.makeDoc = function() {
+                $scope.fullResourceDoc = "";
+
+                $scope.sections.forEach(function(sect){
+                    $scope.fullResourceDoc += "# "+sect.display +"\n" + ($scope.doc.resourceDoc[sect.code] || "") + "\n";
+                })
+
+
+
+              //  $scope.fullResourceDoc += "# Introduction\n" + ($scope.doc.resourceDoc['intro'] || "") + "\n";
+                //$scope.fullResourceDoc += "# Summary\n" + ($scope.doc.resourceDoc['summary']|| "") + "\n";
+              //  $scope.fullResourceDoc += "# Search\n" + ($scope.doc.resourceDoc['search']|| "") + "\n";
+
+            }
+        });

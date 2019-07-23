@@ -80,7 +80,7 @@
     <script src="js/loginSmileCtrl.js"></script>
     <script src="js/loginCtrl.js"></script>
 
-
+    <script src="js/libs/showdown.min.js"></script>
     <script>
 
         var config = {
@@ -97,6 +97,13 @@
     </script>
 
     <style>
+
+
+
+
+
+
+
         #mmLogicalModel {
             width: 100%;
             height: 800px;
@@ -161,9 +168,16 @@
 
             <div class="col-md-3 col-sm-3">
                 <div class="navbar-text">
-                    <div>Data:{{appConfigSvc.getCurrentDataServer().name}}</div>
-                    <div>Conformance:{{appConfigSvc.getCurrentConformanceServer().name}}</div>
-                    <div>Terminology:{{appConfigSvc.getCurrentTerminologyServer().name}}</div>
+                    <div uib-popover="{{appConfigSvc.getCurrentDataServer().url}}"
+                         popover-placement="right"
+                         popover-trigger="'mouseenter'">Data:{{appConfigSvc.getCurrentDataServer().name}}</div>
+                    <div uib-popover="{{appConfigSvc.getCurrentConformanceServer().url}}"
+                         popover-placement="right"
+                         popover-trigger="'mouseenter'">
+                        Conformance:{{appConfigSvc.getCurrentConformanceServer().name}}</div>
+                    <div uib-popover="{{appConfigSvc.getCurrentTerminologyServer().url}}"
+                         popover-placement="right"
+                         popover-trigger="'mouseenter'">Terminology:{{appConfigSvc.getCurrentTerminologyServer().name}}</div>
 
                 </div>
             </div>
@@ -668,6 +682,53 @@
                                             <pre>{{selectedNodeInLMGraph | json}}</pre>
                                         </div>
                                     </div>
+
+                                </uib-tab>
+                                <uib-tab heading="Documentation">
+                                    <div class="row" ng-controller="docCtrl">
+                                        <div class="col-md-4">
+                                            <br/>
+                                            <div ng-show="isDirty" class="pull-right btn btn-link" ng-click="saveDoc(LMSD)">Save</div>
+                                            <div class="btn-group">
+
+                                                <label ng-repeat = "sect in sections" class="btn btn-default"
+                                                       ng-model="doc.resourceDocType" uib-btn-radio="sect.code">
+                                                    {{sect.display}}
+                                                </label>
+<!--
+                                                <label class="btn btn-default" ng-model="doc.resourceDocType" uib-btn-radio="'intro'">Intro</label>
+                                                <label class="btn btn-default" ng-model="doc.resourceDocType" uib-btn-radio="'summary'">Summary</label>
+                                                <label class="btn btn-default" ng-model="doc.resourceDocType" uib-btn-radio="'search'">Search</label>
+                                                -->
+                                            </div>
+                                            <br/>
+
+                                            <textarea ng-model="doc.resourceDoc[doc.resourceDocType]"
+                                                      ng-change="isDirty=true"
+                                                      rows=20 class="form-control" ng-change="makeDoc()">
+
+                                            </textarea>
+                                        </div>
+                                        <div class="col-md-8">
+
+                                            <uib-tabset>
+                                                <uib-tab heading="Full documentation">
+                                                    <p ng-bind-html="fullResourceDoc | markDown"></p>
+                                                </uib-tab>
+                                                <uib-tab heading="This section only">
+                                                    <p ng-bind-html="doc.resourceDoc[doc.resourceDocType] | markDown"></p>
+                                                </uib-tab>
+                                            </uib-tabset>
+
+                                            <div id="elfullResource">
+
+                                            </div>
+
+
+
+                                        </div>
+                                    </div>
+
 
                                 </uib-tab>
 
