@@ -531,12 +531,18 @@ angular.module("sampleApp").service('profileDiffSvc',
 
         },
 
-        generatePageTree : function(IG,artifacts,typeDescription){
+        generatePageTree : function(IG,artifacts,typeDescription,fhirVersion){
             var treeData = [];
             var exampleTypes = {};      //the types for examples..
 
-            if (IG.page) {
-                addPage(treeData,IG.page,{id:'#'});
+
+            let pageRoot = IG.page;     //Where it is in r3
+            if (fhirVersion == 4 && IG.definition) {
+                pageRoot = IG.definition.page
+            }
+
+            if (pageRoot) {
+                addPage(treeData,pageRoot,{id:'#'});
             } else {
                 //create a front page...
                 var frontPage = {source:"about:blank",kind:'page',page:[]};
@@ -556,7 +562,7 @@ angular.module("sampleApp").service('profileDiffSvc',
             angular.forEach(artifacts,function(value,key) {
 
 
-                //this is each categpry of artifact - LM, ED, example etc...
+                //this is each category of artifact - LM, ED, example etc...
                 var id = 't' + new Date().getTime() + Math.random()*1000
                 var artifactTypeRoot = {id:id,parent:artifactsRoot.id,text:typeDescription[key]+'s',state: {opened: false}};
                 artifactTypeRoot.data = {nodeType:'artifactType',artifactType:key};

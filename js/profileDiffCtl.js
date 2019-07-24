@@ -43,6 +43,35 @@ angular.module("sampleApp")
             $scope.typeDescription.other = 'Other artifact';
 
 
+            $scope.saveBinary = function(url,content) {
+                console.log(url,content)
+
+                if (url && content) {
+                    let ar = url.split('/')
+                    let bin = {resourceType:'Binary', 'contentType':'application/json'}
+                    bin.id = ar[ar.length-1]
+                    bin.content = btoa(content);
+                    let binUrl = appConfigSvc.getCurrentConformanceServer().url + url
+                    $http.put(binUrl,bin).then(
+                        function() {
+                            showDisplay("Documentation saved")
+                        },
+                        function(err){
+                            alert('Error saving docs:'+angular.toJson(err.data))
+                        }
+
+                    )
+                }
+
+            };
+
+            function showDisplay(msg) {
+                $scope.displayMessage = msg;
+                $timeout(function(){
+                    delete $scope.displayMessage
+                },3000)
+            }
+
             $scope.checkAllVSinIG = function() {
                 //check that all the VS mentioned in all the profiles are in the IG
 
@@ -53,6 +82,10 @@ angular.module("sampleApp")
                     }
                 )
             };
+
+
+
+
 
             $scope.validateArtifactsOnServer = function(type) {
                 //check that the artifacts of the given type are on the server
@@ -496,7 +529,7 @@ angular.module("sampleApp")
             function clearPageTree (){
                 $('#pagesTreeView').jstree('destroy');
             }
-            function drawPageTree() {
+            function drawPageTree(cb) {
                 $('#pagesTreeView').jstree('destroy');
                 $('#pagesTreeView').jstree(
                     {'core': {'multiple': false, 'data': $scope.pageTreeData, 'themes': {name: 'proton', responsive: true}}}
@@ -510,16 +543,48 @@ angular.module("sampleApp")
                         if ($scope.selectedPageNode.data) {
 
                             delete $scope.selectedItem;     //actually, specifically an artifact item...
+                            delete $scope.selectedPageIsExternalUrl;    //true when the selected page is an external url and can't be edited...
+                            delete $scope.input.selectedPageContents; //the MD contents if this page is editable in the UI
 
                             $scope.selectedItemType = $scope.selectedPageNode.data.nodeType;
 
                             //console.log($scope.selectedPageNode.data.nodeType);
-                            //this node represents a page...
+
+                            //this node represents a documentation page...
                             if ($scope.selectedPageNode.data.nodeType == 'page') {
-                                var url = $scope.selectedPageNode.data.source
-                                $scope.page.src = $sce.trustAsResourceUrl('about:blank');
-                                $scope.page.src = $sce.trustAsResourceUrl(url);
-                               // $scope.selectedItemType = 'page';
+                                $scope.page.src = $sce.trustAsResourceUrl('about:blank');   //clear the iframe
+
+
+
+
+                                //R3 stores url in 'source' = R4 is 'nameUrl'
+                                if (fhirVersion == 3 ) {
+                                    let url = $scope.selectedPageNode.data.source;
+                                    $scope.selectedPageIsExternalUrl = true;
+                                    $scope.page.src = $sce.trustAsResourceUrl(url);
+                                } else {
+                                    //R4
+                                    let url = $scope.selectedPageNode.data.nameUrl;   //assume relative
+                                    let docUrl = appConfigSvc.getCurrentConformanceServer().url + url;
+
+                                    $scope.waiting = true;
+                                    $http.get(docUrl).then(
+                                        function(data) {
+                                            $scope.input.selectedPageContents = atob(data.data.content);
+
+
+
+                                        },
+                                        function(){
+                                            console.log('not found')
+                                            //ignore not found...
+                                        }
+                                    ).finally(function(){
+                                        $scope.waiting = false;
+                                    })
+                                }
+
+
                             }
 
                             //this is an artifact type (like 'extension' or 'logical') - ie a grouping of artifacts
@@ -545,12 +610,15 @@ angular.module("sampleApp")
 
                 }).on('redraw.jstree',function(e,data){
 
+                }).bind('ready.jstree', function(e, data) {
+                    console.log('loaded')
+                    if (cb) { cb()}
                 })
             }
 
 
             //update the IG on the server..
-            $scope.savePages = function(){
+            $scope.savePages = function(cb){
 
                 //generate a representation of the document tree to save in the IG.page element (ie the user documentation)
                 var pageRoot = {page:[]}
@@ -560,8 +628,14 @@ angular.module("sampleApp")
                 getChildren(pageRoot,topNode);
 
 
+                if (fhirVersion == 3) {
+                    $scope.currentIG.page = pageRoot.page[0];// pageRoot.page;
+                } else {
+                    $scope.currentIG.definition = $scope.currentIG.definition || {}
+                    $scope.currentIG.definition.page = pageRoot.page[0];// pageRoot.page;
+                }
 
-                $scope.currentIG.page = pageRoot.page[0];// pageRoot.page;
+
 
                 //return;
 
@@ -571,7 +645,12 @@ angular.module("sampleApp")
                 SaveDataToServer.saveResource($scope.currentIG,null,$scope.currentUser).then(
                     function (data) {
                         $scope.pageDirty = false;
-                        alert("Implementation Guide has been updated.")
+                        showDisplay("Implementation Guide has been updated.")
+                        if (cb) {
+                            cb();
+                        }
+
+
                     }, function (err) {
                         alert('Error updating IG '+angular.toJson(err))
                     }
@@ -647,7 +726,16 @@ angular.module("sampleApp")
                     $scope.pageTreeData.splice(insertPoint,0,item)
                 }
 
-                drawPageTree()
+
+                drawPageTree(function(){
+                    $timeout(function(){
+                        $scope.savePages();     //savePages actually uses the tree...
+                    },1000)
+
+                })
+
+
+                //drawPageTree()
                 $scope.pageDirty = true;
 
             }
@@ -670,7 +758,17 @@ angular.module("sampleApp")
                     alert("Cannot remove nodes with children")
                 } else if (inx > -1) {
                     $scope.pageTreeData.splice(inx,1);
-                    drawPageTree()
+
+                    drawPageTree(function(){
+                        $timeout(function(){
+                            $scope.savePages();     //savePages actually uses the tree...
+                        },1000)
+
+                    })
+
+
+
+                   // drawPageTree()
                     $scope.pageDirty = true;
                 }
             };
@@ -686,12 +784,17 @@ angular.module("sampleApp")
                             //this is edit
                             $scope.edit = true;
                             $scope.input.link = inputNode.data.source;
-                            $scope.input.title = inputNode.data.title || inputNode.data.name;
 
+                            $scope.input.title = inputNode.data.title || inputNode.data.name;
                         }
 
                         $scope.add = function(){
-                            var vo = {link:$scope.input.link,title:$scope.input.title};
+                            let link = $scope.input.link
+                            if (!link) {
+                                link = "Binary/cf-"+ new Date().getTime();
+                            }
+
+                            var vo = {link:link,title:$scope.input.title};
                             vo.inputNode = inputNode;
                             $scope.$close(vo)
                         }
@@ -710,11 +813,19 @@ angular.module("sampleApp")
 
                             //create a new node...
                             var page = vo.inputNode.data;
-                            page.source = vo.link;
+
+                            if (fhirVersion ==3 ) {
+                                page.source = vo.link;
+                            } else {
+                                page.nameUrl = vo.link;
+                            }
+
+
                             setTitle(page,vo.title);
                             var id = 't' + new Date().getTime();
                             var newNode = {id:id,parent:$scope.selectedPageNode.parent,text:vo.title,state: {opened: true}}
                             newNode.data = page;
+
                             //$scope.pageTreeData.push(node)
 
                             //delete the previous...
@@ -740,7 +851,17 @@ angular.module("sampleApp")
 
                         } else {
                             //add...
-                            var page = {source:vo.link,kind:'page',nodeType:'page'};
+
+                            var page = {nodeType:'page'};
+
+                            if (fhirVersion ==3 ) {
+                                page.source = vo.link;
+                                page.kind = 'page';
+                            } else {
+                                page.nameUrl = vo.link;
+                            }
+
+
                             setTitle(page,vo.title);
                             page.page = [];         //as pages can be nested...
                             var id = 't' + new Date().getTime();
@@ -758,7 +879,18 @@ angular.module("sampleApp")
                             console.log(node)
 
                         }
-                        drawPageTree()
+
+                        drawPageTree(function(){
+                            $timeout(function(){
+                                $scope.savePages();     //savePages actually uses the tree...
+                            },1000)
+
+                        })
+
+
+                      //  $scope.savePages(function() {
+
+                     //   });     //auto update
                 })
 
             };
@@ -1142,7 +1274,7 @@ angular.module("sampleApp")
                 //now pull out the various artifacts into an easy to use object
                 makeArtifact();
 
-                $scope.pageTreeData = profileDiffSvc.generatePageTree($scope.currentIG,$scope.artifacts,$scope.typeDescription);
+                $scope.pageTreeData = profileDiffSvc.generatePageTree($scope.currentIG,$scope.artifacts,$scope.typeDescription,fhirVersion);
 
                 drawPageTree();
                 $scope.selectedItemType = 'pageRoot';   //shows the root page for the documentaion
@@ -1978,7 +2110,7 @@ console.log(SD)
             }
     })
     .controller('docCtrl',
-        function ($scope,appConfigSvc,$http){
+        function ($scope,$rootScope,appConfigSvc,$http){
             $scope.doc = {};
             $scope.doc.resourceDocType = 'intro';
 
@@ -1998,9 +2130,13 @@ console.log(SD)
 
             //save the document reference that has content for the uri. Pass in the SD for the model
             $scope.saveDoc = function(SD) {
-                let dr = {resourceType:'DocumentReference',status:'current',content:[]};
+                let bin = {resourceType:'Binary',contentType:'application/json'};
 
-                dr.id = SD.id + '-doc';
+                bin.id = SD.id + '-doc';
+                bin.data = btoa(angular.toJson($scope.doc.resourceDoc));
+
+
+                /*
                 $scope.sections.forEach(function(sect){
                     let notes = $scope.doc.resourceDoc[sect.code];
                     if (notes) {
@@ -2009,13 +2145,13 @@ console.log(SD)
                         dr.content.push({attachment:att})
                     }
                 });
+*/
+                let url = appConfigSvc.getCurrentConformanceServer().url + "Binary/"+bin.id;
 
-                let url = appConfigSvc.getCurrentConformanceServer().url + "DocumentReference/"+dr.id;
 
-
-                $http.put(url,dr).then(
+                $http.put(url,bin).then(
                     function() {
-                        console.log('saved')
+                        console.log('saved');
                         $scope.isDirty = false;
                     },
                     function(err) {
@@ -2026,28 +2162,29 @@ console.log(SD)
 
             };
 
-            //load the document reference that has content for the uri
+            //load the Binary that has content for the uri
             let loadDoc = function(SD) {
+                delete $scope.fullResourceDoc;
                 $scope.doc.resourceDoc = {};    //all the document snippets for the model...
-                let url = appConfigSvc.getCurrentConformanceServer().url + "DocumentReference/"+SD.id+ '-doc';
+
+                let url = appConfigSvc.getCurrentConformanceServer().url + "Binary/"+SD.id+ '-doc';
+                $rootScope.waiting = true;
                 $http.get(url).then(
                     function(data){
-                        let dr = data.data;
 
-                        if (dr.content) {
-                            dr.content.forEach(function(con){
-                                let att = con.attachment;
-                                if (att && att.title) {
+                        let bin  = data.data;
 
-                                    $scope.doc.resourceDoc[att.title] = atob(att.data);
-                                }
-
-                            });
+                        if (bin.data) {
+                            $scope.doc.resourceDoc = angular.fromJson(atob(bin.data));
                             $scope.makeDoc();
                         }
                     },
                     function(err) {
                         console.log('error retrieving notes' + angular.toJson(err))
+                    }
+                ).finally(
+                    function(){
+                        $rootScope.waiting = false;
                     }
                 )
 

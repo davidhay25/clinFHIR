@@ -99,8 +99,17 @@
     <style>
 
 
+        h1.md {
+            font-size: 25px;
+        }
 
+        h2.md {
+            font-size: 20px;
+        }
 
+        h3.md {
+            font-size: 16px;
+        }
 
 
 
@@ -114,36 +123,30 @@
             height: 800px;
             overflow-y: scroll;
         }
-        .myRequired {
+        .myRequiredDEP {
             color:red;
             background-color:  mistyrose;
         }
-        .extension {
+        .extensionDEP {
             color:blue;
             background-color: powderblue;
         }
-        .borderTop {
+        .borderTopDEP {
             border-top: 2pt solid black
         }
 
-        .comment {
+        .commentDEP {
             background-color: white;
             margin: 8px;
             border:8px
         }
 
-        .vbottomDEP{
-            position: relative;
-            top: 100%;
-            transform: translateY(-100%);
-        }
 
-
-        .present {
+        .presentDEP {
             color:green;
         }
 
-        .absent {
+        .absentDEP {
             color:red;
         }
 
@@ -190,6 +193,14 @@
             </div>
 
             <div class="col-md-2 col-sm-2">
+
+                <div ng-show="displayMessage">
+                    <div class="alert alert-info">
+                        {{displayMessage}}
+                    </div>
+                </div>
+
+
                 <form ng-show="currentIG && !loadedFromBookmark && selectedItemType=='profile'" class="navbar-form">
                     <div class="navbar-text">
                         Full display <checkbox ng-model="input.displayMode" ng-change="changeMode(input.displayMode)"></checkbox>
@@ -430,10 +441,45 @@
                         </div>
 
                         <div ng-show="selectedItemType == 'page'">
-                            <div>
-                                Url: {{selectedPageNode.data.source}}
+
+                            <div ng-hide="selectedPageIsExternalUrl">
+
+                                <uib-tabset>
+                                    <uib-tab heading="Contents">
+                                        <p ng-bind-html="input.selectedPageContents | markDown"></p>
+                                    </uib-tab>
+                                    <uib-tab heading="Edit">
+                                        <div>
+                                            Url: {{selectedPageNode.data.nameUrl}}
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <textarea ng-model = "input.selectedPageContents"
+                                                          ng-blur="saveBinary(selectedPageNode.data.nameUrl,input.selectedPageContents)"
+                                                          rows="20" class="form-control"></textarea>
+
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p ng-bind-html="input.selectedPageContents | markDown"></p>
+
+
+                                            </div>
+
+                                        </div>
+
+                                    </uib-tab>
+
+                                </uib-tabset>
+
+
                             </div>
-                            <iframe height = "600px" width="100%" ng-src="{{page.src}}"></iframe>
+
+                            <div ng-show="selectedPageIsExternalUrl">
+                                <div>
+                                    Url: {{selectedPageNode.data.source}}
+                                </div>
+                                <iframe height = "600px" width="100%" ng-src="{{page.src}}"></iframe>
+                            </div>
                         </div>
 
                         <!--<div class="row" ng-hide="selectedItemType == 'page' || selectedItemType == 'artifactType'">-->
@@ -695,17 +741,12 @@
                                                        ng-model="doc.resourceDocType" uib-btn-radio="sect.code">
                                                     {{sect.display}}
                                                 </label>
-<!--
-                                                <label class="btn btn-default" ng-model="doc.resourceDocType" uib-btn-radio="'intro'">Intro</label>
-                                                <label class="btn btn-default" ng-model="doc.resourceDocType" uib-btn-radio="'summary'">Summary</label>
-                                                <label class="btn btn-default" ng-model="doc.resourceDocType" uib-btn-radio="'search'">Search</label>
-                                                -->
+
                                             </div>
                                             <br/>
 
                                             <textarea ng-model="doc.resourceDoc[doc.resourceDocType]"
-                                                      ng-change="isDirty=true"
-                                                      rows=20 class="form-control" ng-change="makeDoc()">
+                                                      rows=20 class="form-control" ng-change="makeDoc();isDirty=true">
 
                                             </textarea>
                                         </div>
@@ -720,9 +761,6 @@
                                                 </uib-tab>
                                             </uib-tabset>
 
-                                            <div id="elfullResource">
-
-                                            </div>
 
 
 

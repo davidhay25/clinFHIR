@@ -139,7 +139,25 @@ angular.module("sampleApp")
     }])
     .filter('markDown', function() {
         return function(text) {
-            var converter = new showdown.Converter(),
+
+            //https://github.com/showdownjs/showdown/wiki/Add-default-classes-for-each-HTML-element
+            const classMap = {
+                h1: 'md',
+                h2: 'md',
+                ul: 'md',
+                li: 'md'
+            };
+
+            const bindings = Object.keys(classMap)
+                .map(key => ({
+                    type: 'output',
+                    regex: new RegExp(`<${key}(.*)>`, 'g'),
+                    replace: `<${key} class="${classMap[key]}" $1>`
+                }));
+
+            const converter = new showdown.Converter({
+                extensions: [bindings]
+            });
 
                 html  = converter.makeHtml(text);
 
