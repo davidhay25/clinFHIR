@@ -9,12 +9,12 @@ let fs = require('fs');
 //change for different codesystems
 
 
-/*
+
 let name = "nziwi";       //used for both CS and VS - id and name
 let infile = "/Users/davidhay/Dropbox/contracting/MOH/source/iwi.csv";
 let title = "New Zealand IWI";
 let description = "New Zealand IWI";
-*/
+
 /*
 let name = "nzdomcode";       //used for both CS and VS - id and name
 let infile = "/Users/davidhay/Dropbox/contracting/MOH/source/domicileCode.csv";
@@ -26,22 +26,22 @@ let name = "nzmaoridescent";       //used for both CS and VS - id and name
 let infile = "/Users/davidhay/Dropbox/contracting/MOH/source/maoriDescent.csv";
 let title = "New Zealand Maori Descent";
 let description = "Does the person have maori descent";
-*/
 
-/*
+
+
 let name = "addressnotvalidated";       //used for both CS and VS - id and name
 let infile = "/Users/davidhay/Dropbox/contracting/MOH/source/addressNotValidated.csv";
 let title = "Address not validated";
 let description = "The address was not validated";
-*/
+
 let name = "dodinfosource";       //used for both CS and VS - id and name and url
 let infile = "/Users/davidhay/Dropbox/contracting/MOH/source/dodInfosource.csv";
 let title = "Source of information for date of death";
 let description = "Source of information for date of death";
-
+*/
 
 //should be the same for different cs
-let canonicalRoot = "http://hl7.org.nz/fhir/";
+let canonicalRoot = "http://standards.digital.health.nz/fhir/";
 let outFolder = "/Users/davidhay/Dropbox/contracting/MOH/ResourcesForIG/Terminology/";
 let csCanonical = canonicalRoot + "CodeSystem/"+name;
 let csFileName = outFolder+"cs-"+name + ".json";

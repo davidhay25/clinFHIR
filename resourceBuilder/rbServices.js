@@ -609,12 +609,11 @@ angular.module("sampleApp").
             typeOfConformanceResource = typeOfConformanceResource || 'StructureDefinition';
 
             //default to the conformance server...
-            //serverUrl = serverUrl || config.servers.conformance;
             serverUrl = serverUrl || appConfigSvc.getCurrentConformanceServer().url;
 
             var qry = serverUrl  + typeOfConformanceResource + "?url=" + url;
 
-            config.log(qry,'findConformanceResourceByUri');
+            //config.log(qry,'findConformanceResourceByUri');
 
             $http.get(qry).then(
                 function(data){
@@ -666,20 +665,9 @@ angular.module("sampleApp").
 
 
 
-/*
-                       if (entry && entry.resource) {
-                           config.log('resolvedId: '+entry.resource,'findConformanceResourceByUri');
-                           deferred.resolve(entry.resource);
-                       } else {
-
-                           deferred.reject({msg:"No matching profile ("+url+") found on "+serverUrl  + typeOfConformanceResource +" (but not a server error - just not present, although others were)"})
-                       }
-
-*/
-
                     } else {
                         
-                        deferred.reject({msg:"No matching profile ("+url+") found on "+serverUrl  + typeOfConformanceResource +" (but not a server error - just not present)"})
+                        deferred.reject({msg:"No matching profile with the canonical url: "+url+" found on "+serverUrl  + typeOfConformanceResource +" (but not a server error - just not present)"})
                     }
 
                 },function(err){

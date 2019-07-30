@@ -402,29 +402,31 @@
                                 typeDescription[selectedArtifactType] == 'Extension Definition'">
                                 <button class="btn btn-link pull-right" ng-click="validateArtifactsOnServer(typeDescription[selectedArtifactType])">Check that {{typeDescription[selectedArtifactType]}}s are present on the Terminology server</button>
                             </div>
-                            <!--
-                                                        <button class="btn btn-link pull-right"
-                                                                ng-click="validateArtifactsOnServer(typeDescription[selectedArtifactType])">
-                                                            Check that {{typeDescription[selectedArtifactType]}}s are present on the Terminology server</button>
-                            -->
+
+                            <!-- DONT DELETE - just not supporting it now...
                             <div ng-show="typeDescription[selectedArtifactType] == 'ValueSet'">
                                 <div class="clearfix"></div>
                                 <button class="btn btn-link pull-right"
                                         ng-click="checkAllVSinIG()">Check that all ValueSets referenced by all profiles are present in the IG</button>
                             </div>
+-->
 
+                            <div ng-show="artifactChecks">
+                                <table class="table table-bordered">
+                                    <tr><th>Url</th><th>Present</th></tr>
+                                    <tr ng-repeat="row in artifactChecks" ng-class="{absent:row.absent,present:row.present}">
+                                        <td>{{row.url}}</td>
+                                        <td>{{row.outcome}}</td>
+                                    </tr>
+                                </table>
+                            </div>
 
-                            <table class="table table-bordered">
-                                <tr ng-repeat="row in artifactChecks" ng-class="{absent:row.absent,present:row.present}">
-                                    <td>{{row.url}}</td>
-                                    <td>{{row.outcome}}</td>
-                                </tr>
-                            </table>
 
 
                             <div ng-show = "hashVS">
-                                <h4>ValueSets referenced in a profile or extensiion definition that are not listed in the IG</h4>
+                                <h4>ValueSets referenced in a profile or extension definition that are not listed in the IG</h4>
                                 <table class="table table-bordered">
+
                                     <tr ng-repeat="(k,v) in hashVS" ng-show="v=='absent'">
                                         <td>{{k}}</td>
                                         <td>{{v}}</td>
@@ -1420,6 +1422,9 @@
 
                         <div ng-show="selectedItemType == 'extension'">
                             <h4>Extension: {{selectedExtension.url}}</h4>
+                            <div ng-show="extDefNotFound" class="alert alert-warning">
+                                {{extDefNotFound.msg}}
+                            </div>
                             <uib-tabset>
 
                                 <uib-tab heading="Analysis">
@@ -1454,9 +1459,9 @@
 
                         </div>
 
-                        <div ng-show="selectedItemType == 'terminology'">
+                        <div ng-show="selectedItemType == 'valueset'">
                             <!--
-                            <h4>Terminology: {{selectedTerminology.resourceType}}</h4>
+                            <h4>Terminology: {{selectedValueset.resourceType}}</h4>
                             -->
 
                             <uib-tabset>
@@ -1468,43 +1473,43 @@
                                         <div class="col-sm-6 col-md-6">
                                             <div class="row">
                                                 <div class="col-sm-2 col-md-2">Name</div>
-                                                <div class="col-sm-10 col-md-10">{{selectedTerminology.name}}</div>
+                                                <div class="col-sm-10 col-md-10">{{selectedValueset.name}}</div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-sm-2 col-md-2">Description</div>
-                                                <div class="col-sm-10 col-md-10">{{selectedTerminology.description}}</div>
+                                                <div class="col-sm-10 col-md-10">{{selectedValueset.description}}</div>
                                             </div>
-                                            <div class="row" ng-show="selectedTerminology.valueSet">
+                                            <div class="row" ng-show="selectedValueset.valueSet">
                                                 <div class="col-sm-2 col-md-2">ValueSet</div>
-                                                <div class="col-sm-10 col-md-10">{{selectedTerminology.valueSet}}</div>
+                                                <div class="col-sm-10 col-md-10">{{selectedValueset.valueSet}}</div>
                                             </div>
                                         </div>
                                         <div class="col-sm-6 col-md-6">
                                             <div class="row">
                                                 <div class="col-sm-2 col-md-2">Url</div>
-                                                <div class="col-sm-10 col-md-10">{{selectedTerminology.url}}</div>
+                                                <div class="col-sm-10 col-md-10">{{selectedValueset.url}}</div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-sm-2 col-md-2">Publisher</div>
-                                                <div class="col-sm-10 col-md-10">{{selectedTerminology.publisher}}</div>
+                                                <div class="col-sm-10 col-md-10">{{selectedValueset.publisher}}</div>
                                             </div>
-                                            <div class="row" ng-show="selectedTerminology.content">
+                                            <div class="row" ng-show="selectedValueset.content">
                                                 <div class="col-sm-2 col-md-2">Content</div>
-                                                <div class="col-sm-10 col-md-10">{{selectedTerminology.content}}</div>
+                                                <div class="col-sm-10 col-md-10">{{selectedValueset.content}}</div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <br/>
-                                    <a href="#" ng-show="selectedTerminology.resourceType=='ValueSet'" class="clickableDotted"
-                                       ng-click="showValueSet(selectedTerminology.url)">Explore ValueSet</a>
+                                    <a href="#" ng-show="selectedValueset.resourceType=='ValueSet'" class="clickableDotted"
+                                       ng-click="showValueSet(selectedValueset.url)">Explore ValueSet</a>
 
 
 
                                     <div ng-show="igGraphHash[selectedItem.url].usedBy">
                                         <h5>Used By:
                                             <ul class="list-unstyled">
-                                                <li ng-repeat="url in igGraphHash[selectedTerminology.url].usedBy track by $index">
+                                                <li ng-repeat="url in igGraphHash[selectedValueset.url].usedBy track by $index">
                                                     {{url}}
                                                 </li>
                                             </ul>
@@ -1515,9 +1520,17 @@
                                     <br/> <br/>
                                     <div ng-show="valueSetOptions">
                                         <h5>Options</h5>
-                                        <ul>
+                                        <table class="table table-bordered">
+                                            <tr><th>Code</th><th>Display</th><th>System</th></tr>
+                                            <tr ng-repeat="option in valueSetOptions">
+                                                <td>{{option.code}}</td>
+                                                <td>{{option.display}}</td>
+                                                <td>{{option.system}}</td>
+                                            </tr>
+                                        </table>
+                                      <!--  <ul>
                                             <li ng-repeat="option in valueSetOptions">{{option.display}} ({{option.code}})</li>
-                                        </ul>
+                                        </ul>-->
                                         <br/>
                                     </div>
 
@@ -1547,18 +1560,16 @@
 
                                 <uib-tab heading="Json">
                                     <br/>
-                                    <pre>{{selectedTerminology | json}}</pre>
+                                    <pre>{{selectedValueset | json}}</pre>
                                 </uib-tab>
 
 
                             </uib-tabset>
 
-
-
                         </div>
 
                         <div ng-show="selectedItemType == 'codesystem'">
-                            <h4>CodeSystem: {{selectedTerminology.resourceType}}</h4>
+                            <h4>CodeSystem: {{selectedValueset.resourceType}}</h4>
                             <uib-tabset>
                                 <uib-tab heading="Contents">
                                     <br/>
@@ -1602,9 +1613,6 @@
 
                                         </table>
                                     </div>
-
-
-
                                 </uib-tab>
                                 <uib-tab heading="Json">
                                     <pre>{{selectedCodeSystem | json}}</pre>

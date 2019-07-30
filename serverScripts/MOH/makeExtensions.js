@@ -8,18 +8,29 @@
 
 let fs = require('fs');
 let syncRequest = require('sync-request');
+
+
+
+let IGEntryType = 'http://clinfhir.com/StructureDefinition/igEntryType';
+let canonicalUrl = 'http://clinfhir.com/fhir/StructureDefinition/canonicalUrl';
+
+
 let nzPrefix = "http://hl7.org.nz/fhir/StructureDefinition";    //the prefix for NZ extensions...
 
 //let remoteFhirServer = "http://home.clinfhir.com:8040/baseDstu3/";
 let remoteFhirServer = "http://home.clinfhir.com:8054/baseR4/"; //the server where the models are stored
 
-//let uploadServer = "http://home.clinfhir.com:8054/baseR4/";     //the server to upload the Extension def SD's to...
-let uploadServer = null;
 
+let uploadServer = "http://home.clinfhir.com:8054/baseR4/";     //the server to upload the Extension def SD's to...
+//let uploadServer = null;
+
+//the extension from the LM where the extension url is placed...
 let extensionUrl = "http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl";
 
+//let outFolder = "/Users/davidhay/sharedWithVB/mohProfiles/"
 
-let outFilePath = "/Users/davidhay/sharedWithVB/mohProfiles/"
+let outFolder = "/Users/davidhay/Dropbox/contracting/MOH/ResourcesForIG/extensions/";
+
 
 let hashValueSet = {missing:[]}   //all the valuesets in the models. missing are coded with no VS
 
@@ -33,10 +44,17 @@ options.timeout = 20000;        //20 seconds
 
 
 //get all the models in the IG
+
+//the implementation guide - the one on file...
+let IGPath = "/Users/davidhay/Dropbox/contracting/MOH/ResourcesForIG/nzRegistry.json";
+let IG = JSON.parse(fs.readFileSync(IGPath).toString());
+
+/*
 let url = remoteFhirServer + 'ImplementationGuide/cf-artifacts-nz3';
 let response = syncRequest('GET', url, options);
 let IG = JSON.parse(response.body.toString());
 
+*/
 
 IG.definition.resource.forEach(function (item) {
     if (item.exampleCanonical) {
@@ -50,15 +68,18 @@ IG.definition.resource.forEach(function (item) {
 });
 
 
-arModels = ["HpiPractitioner"];
+//arModels = ["HpiPractitioner"];
 
+arModels = ["NzNHIPatient"];
 
-
+//assume all the models are for the same IG...
+let arIgEntry = [];   //a set of definition.resource entries to insert into an IG. ?todo directly update IG?
 
 arModels.forEach(function (modelId) {
     console.log('Examining '+modelId)
     let urlModel = remoteFhirServer + "StructureDefinition/"+modelId;
     console.log("Load model: "+ urlModel)
+
 
     let response = syncRequest('GET', urlModel, options);
     let model = JSON.parse(response.body.toString());
@@ -134,8 +155,10 @@ arModels.forEach(function (modelId) {
                 extDef = makeSimpleExtDef(item);
                 console.log("simple: "+extDef.url)
 
-                let filePath = outFilePath + extDef.name + '.json';
+                let filePath = outFolder + extDef.name + '.json';
                 fs.writeFileSync(filePath,JSON.stringify(extDef,null,2))
+                arIgEntry.push(makeIGResource(extDef));
+
             } else {
                 //a complex extension...
 
@@ -143,8 +166,13 @@ arModels.forEach(function (modelId) {
                 console.log("complex: "+extDef.url)
                 //console.log((extDef))
 
-                let filePath = outFilePath + extDef.name + '.json';
+                let filePath = outFolder + extDef.name + '.json';
+
+
+
                 fs.writeFileSync(filePath,JSON.stringify(extDef,null,2))
+
+                arIgEntry.push(makeIGResource(extDef));
             }
 
             //if there's an upload server specified...
@@ -168,17 +196,60 @@ arModels.forEach(function (modelId) {
                 }
             }
         }
+    }
+
+});
+
+//now write out the snippet for the IG
+let filePath = outFolder +'IG-snippet.json';
+fs.writeFileSync(filePath,JSON.stringify(arIgEntry,null,2))
+
+//write out the IG
+if (IG) {
+    fs.writeFileSync(IGPath,JSON.stringify(IG))
+}
 
 
 
+function makeIGResource(extDef){
+
+    if (IG) {
+        let found = false;
+        let reference = "StructureDefinition/"+extDef.id;
+        IG.definition.resource.forEach(entry =>{
+
+            if (entry.reference && entry.reference.reference == reference) {
+                found = true
+            }
+        });
+        if (! found) {
+            console.log('Adding to IG')
+            let entry = {}
+            entry.extension = [{url:IGEntryType,valueCode:'extension'},{url:canonicalUrl,valueUrl:extDef.url}]
+            entry.reference = {reference:reference};
+            entry.name = extDef.name;
+            entry.description = extDef.id;
+            IG.definition.resource.push(entry)
+
+        }
     }
 
 
 
 
+    let entry = {extension:[]};
+    entry.name = extDef.name;
+    entry.description = extDef.description;
+    entry.reference = {reference:"StructureDefinition/"+extDef.id};
+    let ext = {url:"http://clinfhir.com/StructureDefinition/canonicalUrl",valueUrl:extDef.url};
+    entry.extension.push(ext);
 
-});
+    let extType = {url:"http://clinfhir.com/StructureDefinition/igEntryType",valueCode:'extension'};
+    entry.extension.push(extType);
 
+    return entry;
+
+}
 
 //generate a simple extension
 function makeComplexExtDef (item) {
@@ -314,10 +385,19 @@ function makeSDHeader(item) {
     let url = item.url;
     let sd = {resourceType:'StructureDefinition', url:url};
     let ed = item.ed[0];
-    let ar = ed.path.split('.');
+
+    //console.log(ed)
+
+    let ext = getSingleExtensionValue(ed,'http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl');
+
+    //let ar = ed.path.split('.');
+    let ar = ext.valueString.split('/');
     sd.text = {status:'additional',div:"<div xmlns='http://www.w3.org/1999/xhtml'>Extension Definition</div>"}
     sd.id = 'cf-' + ar[ar.length -1]
     let name = ar[ar.length -1]
+
+
+
     sd.name = name[0].toUpperCase()+name.substr(1)
     sd.status = 'draft'
     sd.fhirVersion = "4.0.0"

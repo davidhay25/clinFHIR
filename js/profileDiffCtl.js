@@ -16,10 +16,13 @@ angular.module("sampleApp")
 
             var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
 
+
+
+
             //retrieve the current user from the browser cache if present. Note that this includes the authHeader...
             if ($localStorage.currentUser) {
                 $scope.currentUser = $localStorage.currentUser;
-                $scope.canEdit = true;
+                // todo - may enable editing through the UI... $scope.canEdit = true;
             }
 
             $scope.history = [];        //
@@ -32,12 +35,13 @@ angular.module("sampleApp")
             $scope.singleLeftPaneClass = "col-sm-3 col-md-3";
             $scope.singleRightPaneClass = "col-sm-9 col-md-9";
 
+            //the desctiption of each artifact type in the tree...
             $scope.typeDescription = {};
-
             $scope.typeDescription.extension = 'Extension Definition';
             $scope.typeDescription.profile = 'Profile';
             $scope.typeDescription.codesystem = 'CodeSystem';
-            $scope.typeDescription.terminology = 'ValueSet';
+            $scope.typeDescription.valueset = 'ValueSet';
+            //$scope.typeDescription.terminology = 'Other Terminology';
             $scope.typeDescription.logical = 'Logical model';
             $scope.typeDescription.example = 'Example';
             $scope.typeDescription.other = 'Other artifact';
@@ -152,7 +156,7 @@ angular.module("sampleApp")
                     $scope.currentUser = user;
 
                     $scope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
-                    $scope.canEdit = true;
+                   //todo may enable write later  $scope.canEdit = true;
                     console.log(user)
                 }
             });
@@ -345,7 +349,7 @@ angular.module("sampleApp")
                     }
 
                     $scope.input.selIG = $scope.listOfIG[0]
-                    $scope.input.selIG = $scope.listOfIG[1];  //<<<<<<<<<<<< while develooping
+                    //$scope.input.selIG = $scope.listOfIG[1];  //<<<<<<<<<<<< while develooping
                 },
                 function(err){
                     console.log(err)
@@ -789,9 +793,12 @@ angular.module("sampleApp")
                         }
 
                         $scope.add = function(){
-                            let link = $scope.input.link
+                            let link = $scope.input.link;
                             if (!link) {
-                                link = "Binary/cf-"+ new Date().getTime();
+                                let id = $scope.input.title.split(" ").join("-") +  new Date().getTime();
+
+
+                                link = "Binary/cf-"+ id;
                             }
 
                             var vo = {link:link,title:$scope.input.title};
@@ -1285,11 +1292,12 @@ angular.module("sampleApp")
             function makeArtifact() {
                 $scope.artifacts = {};
                 //create an entry for every 'purpose' so they can be added in the UI
-                let ar = ['logical','profile','extension','codesystem','terminology','other','example'];
+                let ar = ['logical','profile','extension','codesystem','valueset','other','example'];
 
                 ar.forEach(function (purpose) {
                     $scope.artifacts[purpose] = []
                 });
+
 
 
                 let cfpubIgRoot = "";
@@ -1301,6 +1309,9 @@ angular.module("sampleApp")
 
                 if (FHIRVersion ==4) {
                     let igTypeUrl = appConfigSvc.config().standardExtensionUrl.igEntryType;
+
+                    let extUrl = appConfigSvc.config().standardExtensionUrl.canonicalUrl;
+
                     $scope.currentIG.definition.resource.forEach(function (item) {
 
                         let type = Utilities.getSingleExtensionValue(item,igTypeUrl);
@@ -1308,13 +1319,24 @@ angular.module("sampleApp")
                             console.log(type.valueCode)
                             switch (type.valueCode) {
                                 case 'logical' :
-
+                                case 'extension' :
+                                case 'profile' :
+                                case 'codesystem':
+                                case 'valueset':
                                     if (item.reference) {
                                         let ar = item.reference.reference.split('/');
                                         let id = ar[ar.length-1];
-                                        let url = item.reference.reference;
-                                        //let entry = {url:url,description:item.description,name:item.name}
+                                        //in R4 the url is not a direct reference - not the canonical url...
 
+                                        //if there's not extension in the IG with the canonocal url, assume that it is the conformance server plus reference
+
+                                        let url = item.reference.reference;
+                                        var t = Utilities.getSingleExtensionValue(item, extUrl);
+                                        if (t) {
+                                            url = t.valueUrl;
+                                        }
+
+                                        //note that entry.url is a canonical url (as this was the case in STU3)...
                                         let entry = {name:item.name,description:item.description,url:url};
                                         entry.type = type.valueCode;
 
@@ -1322,6 +1344,12 @@ angular.module("sampleApp")
                                     } else {
                                         alert('Logical model in IG without reference..')
                                     }
+                                    break;
+                                case 'example' :
+
+                                    break;
+                                default :
+
 
                                     break;
                             }
@@ -1329,7 +1357,7 @@ angular.module("sampleApp")
                         } else {
 
                             if (item.exampleCanonical || item.exampleBoolean) {
-                                let entry = {type:'example',name:item.name,description:item.description};
+                                let entry = {type:'example',name:item.name,description:item.description,url:item.reference.reference};
                                 $scope.artifacts['example'].push(entry)
                             }
 
@@ -1383,7 +1411,7 @@ angular.module("sampleApp")
                     });
 
                     //sort 'em all...
-                    ['extension','profile','terminology','logical','other','example','codesystem'].forEach(function (purpose) {
+                    ['extension','profile','logical','other','example','codesystem'].forEach(function (purpose) {
                         if ($scope.artifacts[purpose]) {
                             $scope.artifacts[purpose].sort(function(item1,item2) {
                                 var typ1 =  $filter('getLogicalID')(item1.url);
@@ -1541,22 +1569,69 @@ console.log(SD)
                }
 
 
+                if (type == 'valueset') {
+                    delete $scope.valueSetOptions;
+                    delete $scope.valueSetExpandError;
+
+                    profileDiffSvc.getTerminologyResource(item.url,'ValueSet').then(
+                        function (vs) {
+                            $scope.selectedValueset = vs;
+
+
+                            //call the $expand operation on the terminology server.
+                            let url = appConfigSvc.getCurrentTerminologyServer().url+"ValueSet/$expand";
+                            url += '?url=' + item.url;
+
+                            $http.get(url).then(
+                                function(data) {
+                                    console.log(data.data)
+                                    $scope.valueSetOptions = data.data.expansion.contains;
+                                },
+                                function(err){
+                                    console.log(err)
+                                }
+                            )
+
+/*
+                            //if (tType == 'ValueSet') {
+                            var vo = {selectedValueSet : {vs: {url: vs.url}}}
+
+
+
+
+                            logicalModelSvc.getOptionsFromValueSet(vo).then(
+                                function(lst) {
+
+
+
+                                    if (lst) {
+
+                                        $scope.valueSetOptions = lst;
+                                    }
+
+
+
+
+                                },
+                                function(err){
+                                    //$scope.valueSetOptions = [{code:'notExpanded',display:'Unable to get list, may be too long'}]
+                                    $scope.valueSetExpandError = err.data
+                                }
+                            )
+                            */
+
+                        }, function (err) {
+                            console.log(err)
+                        }
+                    )
+                }
+
+               /*
+                //todo - not really using terminology in latest version ? should delete
                 if (type == 'terminology') {
                     delete $scope.valueSetOptions;
                     delete $scope.valueSetExpandError;
-                    /*
-                    //really only works for ValueSet and CodeSystemat this point...
-                    var tType = 'ValueSet';
-                    if (item.url.indexOf('/CodeSystem/') > -1) {
-                        tType = 'CodeSystem';
-                    }
 
-                    var urlToGet = item.url;
-                    if (item.uri) {
-                        urlToGet = item.uri;
-                        tType = 'CodeSystem';   //todo hack for UScore
-                    }
-*/
                     profileDiffSvc.getTerminologyResource(item.url,'ValueSet').then(
                         function (vs) {
                             $scope.selectedTerminology = vs;
@@ -1602,14 +1677,21 @@ console.log(SD)
                     )
                 }
 
+                */
+
                 if (type=='extension') {
-                    profileDiffSvc.getSD(item.url).then(
+
+                    //if this is R3, the url is a canonical url. If R4 then it's a literal (relative) url
+
+                    delete $scope.extDefNotFound;
+                    profileDiffSvc.getSD(item.url,fhirVersion).then(
                         function (SD) {
                             $scope.selectedExtension = SD;
 
                             $scope.selectedExtensionAnalysis = Utilities.analyseExtensionDefinition3(SD)
                         },function(err) {
                             //can't find the references extension
+                            $scope.extDefNotFound = err
                             $scope.selectedExtension = {resourceType:'StructureDefinition',url:item.url}
                         }
                     )
@@ -1726,7 +1808,7 @@ console.log(SD)
             //called directly and from the getItem()
             $scope.getExample = function(item) {
                 var url = appConfigSvc.getCurrentDataServer().url + item.url;
-                //this is the Json verson...
+                //this is the Json verson (assume that it is the default)...
                 GetDataFromServer.adHocFHIRQuery(url).then (
                     function(data) {
                         $scope.exampleResource = data.data

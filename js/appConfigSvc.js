@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2019-06-24';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2019-07-29a';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -44,6 +44,8 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.qPath = 'http://clinfhir.com/StructureDefinition/qPathUrl';
         defaultConfig.standardExtensionUrl.qMult = 'http://clinfhir.com/StructureDefinition/qMultUrl';
         defaultConfig.standardExtensionUrl.igEntryType = 'http://clinfhir.com/StructureDefinition/igEntryType';
+
+
         defaultConfig.standardExtensionUrl.qItemDescription = 'http://clinfhir.com/fhir/StructureDefinition/qItemDescription';
         defaultConfig.standardExtensionUrl.fhirPath = 'http://clinfhir.com/fhir/StructureDefinition/fhirPath';
         defaultConfig.standardExtensionUrl.editor = 'http://clinfhir.com/fhir/StructureDefinition/editor';
@@ -55,6 +57,9 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.misuse = "http://clinfhir.com/fhir/StructureDefinition/misuse";
         defaultConfig.standardExtensionUrl.edStatus = "http://clinfhir.com/fhir/StructureDefinition/edStatus";
 
+        //defaultConfig.standardExtensionUrl.igEntryUrl = 'http://clinfhir.com/StructureDefinition/igEntryUrl';
+
+
 
 
         defaultConfig.standardExtensionUrl.path = "http://clinfhir.com/fhir/StructureDefinition/path";
@@ -63,6 +68,8 @@ angular.module("sampleApp")
         defaultConfig.standardExtensionUrl.lmElementLink = "http://clinfhir.com/fhir/StructureDefinition/lmElementLink";
         defaultConfig.standardExtensionUrl.autoExpand = "http://clinfhir.com/fhir/StructureDefinition/autoExpand";
 
+
+        defaultConfig.standardExtensionUrl.canonicalUrl = "http://clinfhir.com/fhir/StructureDefinition/canonicalUrl";
 
         defaultConfig.standardSystem.identifierSystem = 'http://clinfhir.com/fhir/NamingSystem/identifier';
         defaultConfig.standardSystem.practitionerIdentifierSystem = 'http://clinfhir.com/fhir/NamingSystem/practitioner';

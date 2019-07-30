@@ -2,7 +2,10 @@ angular.module("sampleApp").service('profileDiffSvc',
     function($q,$http,GetDataFromServer,Utilities,appConfigSvc,$filter,resourceSvc,profileCreatorSvc,
              $localStorage,$firebaseObject,$firebaseArray) {
 
-        $localStorage.extensionDefinitionCache = $localStorage.extensionDefinitionCache || {}
+       // $localStorage.extensionDefinitionCache = $localStorage.extensionDefinitionCache || {};
+
+        //clear the cache each time the app starts up.
+        $localStorage.extensionDefinitionCache = {};
 
         var objColours ={};
 
@@ -52,7 +55,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                 })
             }
             var endSize = Utilities.getObjectSize(SD);
-            var url = SD.url || 'Unknown url'
+            var url = SD.url || 'Unknown url';
 
 
             $localStorage.totalSavings = $localStorage.totalSavings || 0;
@@ -535,6 +538,7 @@ angular.module("sampleApp").service('profileDiffSvc',
             var treeData = [];
             var exampleTypes = {};      //the types for examples..
 
+            //this is the documentation node
 
             let pageRoot = IG.page;     //Where it is in r3
             if (fhirVersion == 4 && IG.definition) {
@@ -558,6 +562,8 @@ angular.module("sampleApp").service('profileDiffSvc',
             artifactsRoot.data = {nodeType:'artifactRoot'};
 
             treeData.push(artifactsRoot);
+
+            //now the artifacts...
 
             angular.forEach(artifacts,function(value,key) {
 
@@ -705,21 +711,6 @@ angular.module("sampleApp").service('profileDiffSvc',
 
 
 
-                  //  }
-
-
-
-                    /*
-                    //prefer the valueSetReference...
-                    var vsUrl = ed.binding.valueSetUri;
-                    if (ed.binding.valueSetReference) {
-                        vsUrl = ed.binding.valueSetReference.reference;
-                    }
-
-                    */
-
-
-                  //  if (vsUrl) {
                         var res = that.findResourceInIGPackage(IG,vsUrl);
 
                         if (!res) {
@@ -2120,7 +2111,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                         deferred.resolve($localStorage.extensionDefinitionCache[url]);
                     },function (err) {
                         console.log(err)
-                        deferred.reject();
+                        deferred.reject(err);
                     }
                 )
             }
@@ -2129,9 +2120,9 @@ angular.module("sampleApp").service('profileDiffSvc',
         clearSDProfile : function(url) {
             delete $localStorage.extensionDefinitionCache[url];
         },
-        getSD : function(url) {
-
-
+        getSD : function(url,fhirVersion) {
+            //retrieve a SD
+            //if this is R3, the url is a canonical url. If R4 then it's a literal (relative) url
 
             var deferred = $q.defer();
             if ($localStorage.extensionDefinitionCache[url]) {
@@ -2165,18 +2156,53 @@ angular.module("sampleApp").service('profileDiffSvc',
                         //no - it's relative - we assume to the conformance server
                         url = appConfigSvc.getCurrentConformanceServer().url+url;
                     }
-                    GetDataFromServer.findConformanceResourceByUri(url,null,null,true).then(
-                        function (sdef) {
-                            delete sdef.text;   //text can be v large in some profiles
 
-                            $localStorage.extensionDefinitionCache[url] = minimizeSD(sdef)
+                    //here is where the R3/R4 difference lies
+                    if (fhirVersion == 3) {  //this is a canonical url
+                        GetDataFromServer.findConformanceResourceByUri(url,null,null,true).then(
+                            function (sdef) {
+                                delete sdef.text;   //text can be v large in some profiles
 
-                            deferred.resolve($localStorage.extensionDefinitionCache[url]);
-                        },function (err) {
-                            console.log(err.msg)
-                            deferred.reject(err);
-                        }
-                    )
+                                $localStorage.extensionDefinitionCache[url] = minimizeSD(sdef)
+
+                                deferred.resolve($localStorage.extensionDefinitionCache[url]);
+                            },function (err) {
+                                console.log(err.msg)
+                                deferred.reject(err);
+                            }
+                        )
+                    } else {
+
+                        //as this is a canonical url, a query rather than direct lookup is needed...
+                        GetDataFromServer.findConformanceResourceByUri(url).then(
+                            function(data) {
+                                $localStorage.extensionDefinitionCache[url] = minimizeSD(data)
+                                deferred.resolve(data)
+                            },
+                            function (err) {
+                                deferred.reject(err)
+                            }
+
+                        )
+
+                        /*
+                        //this is a literal url - assume relative
+                       // let SDurl = appConfigSvc.getCurrentConformanceServer().url+url;
+                        $http.get(url,{headers:{'accept':"application/fhir+json"}}).then(
+                            function(data) {
+                                let sdef = data.data;
+                                $localStorage.extensionDefinitionCache[url] = minimizeSD(sdef)
+                                deferred.resolve($localStorage.extensionDefinitionCache[url]);
+                            }, function (err) {
+                                deferred.reject({msg:"No StructureDefinition was found at "+url});
+                            }
+                        )
+                        */
+
+                    }
+
+
+
                 }
 
 
