@@ -215,8 +215,13 @@
             <div class="col-md-2 col-sm-2">
                 <div class="navbar-text">
                     <div><a href="#" ng-click="clearCache()">Clear Cache</a></div>
+                    <div><a href="#" ng-show="currentIG" ng-click="generateShortCut()">Create shortcut</a></div>
 
                 </div>
+
+
+
+
             </div>
 
             <div class="col-md-1 col-sm-1">
@@ -258,14 +263,14 @@
 
 
 
-
+<!--
                             <li>
                                 <a href="#" ng-click="generateShortCut()"
                                    uib-popover="Create a link for others to view this IG"
                                    popover-placement="left"
                                    popover-trigger="'mouseenter'">Share</a>
                             </li>
-
+-->
                             <li>
                                 <a href="#" ng-click="createDownload()"
                                    uib-popover="Download this IG"
@@ -300,7 +305,7 @@
     <div>
 
         <!-- This is the IG selector...-->
-        <div class="row">
+        <div class="row" ng-hide="loadedFromBookmark">
             <div class="col-sm-4 col-md-4">
             </div>
             <div class="col-sm-3 col-md-3">
@@ -314,6 +319,10 @@
             </div>
         </div>
 
+
+        <div>
+            <div class="pull-right rounded-box"><strong>{{currentIG.name}}</strong></div>
+        </div>
 
         <uib-tabset ng-show="currentIG">
 

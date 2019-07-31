@@ -47,6 +47,58 @@ angular.module("sampleApp")
             $scope.typeDescription.other = 'Other artifact';
 
 
+
+            //shortcut stuff--------
+
+            var hash = $location.hash();
+            if (hash) {
+                var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
+
+                sc.$loaded().then(
+                    function () {
+
+                        $scope.loadedFromBookmark = true;
+                        //set the conformance and data servers to the ones in the bookmark
+                        appConfigSvc.setServerType('conformance', sc.config.conformanceServer.url);
+                        appConfigSvc.setServerType('data', sc.config.dataServer.url);
+                        appConfigSvc.setServerType('terminology', sc.config.terminologyServer.url);
+                        let id = sc.config.model.id;
+                        let url = appConfigSvc.getCurrentConformanceServer().url + "ImplementationGuide/"+id
+                        $http.get(url).then(
+                            function(data) {
+                                let IG = data.data;
+                                $scope.selectIG(IG);
+                            }, function(err) {
+                                alert("Couldn't find implementationGuide at "+ url)
+                            }
+                        )
+
+                    }
+                )
+
+            }
+            $scope.generateShortCut = function() {
+                var hash = Utilities.generateHash();
+                var shortCut = $window.location.href+"#"+hash
+
+                var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
+                //sc.modelId = $scope.currentType.id;     //this should make it possible to query below...
+                sc.config = {conformanceServer:appConfigSvc.getCurrentConformanceServer()};
+                sc.config.terminologyServer = appConfigSvc.getCurrentTerminologyServer();
+                sc.config.dataServer = appConfigSvc.getCurrentDataServer();
+                sc.config.model = {id:$scope.currentIG.id};
+                sc.shortCut = shortCut;     //the full shortcut
+                sc.$save().then(
+                    function(){
+                        modalService.showModal({}, {bodyText: "The shortcut  " +  shortCut + "  has been generated for this model"})
+
+                    }
+                )
+            };
+
+
+            //----------------
+
             $scope.createFullDoc = function(){
                 $scope.loadingFullDoc = true;
                 console.log($scope.pageTreeData)
@@ -970,7 +1022,7 @@ don't change link on edit...
                 })
 
             };
-
+/*
             //see if this page was loaded from a shortcut
             var hash = $location.hash();
             if (hash) {
@@ -1006,7 +1058,7 @@ don't change link on edit...
                     }
                 )
             }
-
+*/
             $scope.clearCache = function(){
                 profileDiffSvc.clearCache();
             };
@@ -1098,7 +1150,7 @@ don't change link on edit...
                 console.log(item)
             };
 
-            $scope.generateShortCut = function() {
+            $scope.generateShortCutDEP = function() {
                 var hash = Utilities.generateHash();
                 var shortCut = $window.location.href+"#"+hash;
 
