@@ -111,6 +111,9 @@
             font-size: 16px;
         }
 
+        h3 {
+            font-size: 16px;
+        }
 
 
         #mmLogicalModel {
@@ -320,7 +323,7 @@
                     <div class="col-md-3 col-sm-3">
                         <div ng-show="selectedItemType=='page' || selectedItemType=='pageRoot'" class="pull-right" style="margin-top: 8px">
 
-                            <span ng-show="selectedPageNode && currentUser">
+                            <span ng-show="selectedPageNode && currentUser && currentUser.email=='david.hay25@gmail.com'">
                                 <i class="glyphicon glyphicon-edit clickable iconSpacing"
                                    ng-click="addPage(selectedPageNode)"></i>
                                 <i class="glyphicon glyphicon-remove clickable iconSpacing"
@@ -351,7 +354,25 @@
 
                         <div ng-show="selectedItemType == 'pageRoot'">
 
-                            <ng-include src="'/includes/pageRoot.html'"></ng-include>
+                            <uib-tabset>
+                                <uib-tab heading="Instructions">
+                                    <ng-include src="'/includes/pageRoot.html'"></ng-include>
+                                </uib-tab>
+                                <uib-tab heading="Full content">
+                                    <button class="btn btn-link" ng-click="createFullDoc()">Refresh</button>
+                                    <div ng-show="loadingFullDoc">
+                                        Loading all snippets, please wait...
+                                    </div>
+                                    <p ng-bind-html="fullDoc | markDown"></p>
+                                </uib-tab>
+                            </uib-tabset>
+
+
+
+
+
+
+
                         </div>
 
                         <div ng-show="selectedItemType == 'artifactRoot'">
@@ -450,14 +471,14 @@
                                     <uib-tab heading="Contents">
                                         <p ng-bind-html="input.selectedPageContents | markDown"></p>
                                     </uib-tab>
-                                    <uib-tab heading="Edit">
+                                    <uib-tab ng-show="currentUser.email=='david.hay25@gmail.com'" heading="Edit">
                                         <div>
                                             Url: {{selectedPageNode.data.nameUrl}}
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <textarea ng-model = "input.selectedPageContents"
-                                                          ng-blur="saveBinary(selectedPageNode.data.nameUrl,input.selectedPageContents)"
+                                                          ng-blur="saveBinary(selectedPageNode.data,input.selectedPageContents)"
                                                           rows="20" class="form-control"></textarea>
 
                                             </div>

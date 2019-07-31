@@ -953,6 +953,10 @@ angular.module("sampleApp").service('profileDiffSvc',
                     display += " F"
                 }
 
+                if (ed.mustSupport) {
+                    display += " M"
+                }
+
                 return display;
             }
 
@@ -983,6 +987,9 @@ angular.module("sampleApp").service('profileDiffSvc',
                             //have to formally add an 'optional' class else the required colour 'cascades' in the tree...
                             node['li_attr'] = {class : 'elementOptional'};
                         }
+
+
+
 
                         //set multiplicity
                         if (node.data.ed.max == "*") {

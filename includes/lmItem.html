@@ -38,6 +38,16 @@
         <!--<tr><td width="20%">Name</td><td>{{selectedNode.data.name}}</td></tr> -->
         <tr><td width="20%">Model path</td><td>{{selectedNode.data.path}}</td></tr>
         <tr ng-show="selectedNode.data.title"><td>Title</td><td>{{selectedNode.data.title}}</td></tr>
+
+        <tr><td>Must Support</td><td>
+            <div ng-show="selectedNode.data.mustSupport">
+                Yes
+            </div>
+                <div ng-hide="selectedNode.data.mustSupport">
+                    No
+                </div>
+            </td>
+        </tr>
         <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
         <tr><td>Description</td><td>{{selectedNode.data.description}}</td></tr>
 

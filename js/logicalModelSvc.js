@@ -82,13 +82,19 @@ angular.module("sampleApp")
             }
             var ar = ed.path.split('.')
             //don't set for the first element (oterwise the colour cascades down....
+
+            let li_attr;
+
             if (ed.min == 1 && ar.length > 1) {
                 item['li_attr'] = {class: 'elementRequired'};
+                li_attr += " elementRequired"
             } else {
+                li_attr += " elementOptional"
                 item['li_attr'] = {class: 'elementOptional'};
             }
 
             if (ed.fixedString) {
+                li_attr += " elementFixed"
                 item['li_attr'] = {class: 'elementFixed'};
             }
 
@@ -99,6 +105,11 @@ angular.module("sampleApp")
                 item['a_attr'] = { "style": "text-decoration: underline dotted red" }
             } else {
                 item['a_attr'] = {};
+            }
+
+
+            if (li_attr) {
+                item['li_attr'] = {class: li_attr};
             }
 
         }

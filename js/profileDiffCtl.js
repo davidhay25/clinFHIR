@@ -47,7 +47,77 @@ angular.module("sampleApp")
             $scope.typeDescription.other = 'Other artifact';
 
 
-            $scope.saveBinary = function(url,content) {
+            $scope.createFullDoc = function(){
+                $scope.loadingFullDoc = true;
+                console.log($scope.pageTreeData)
+                let cnt = 0;
+                let arQuery=[]
+                let docRootId =$scope.pageTreeData[0].id;      //the root of the document tree
+                for (var i=1; i< $scope.pageTreeData.length; i++) {
+                    let item = $scope.pageTreeData[i];
+                    if (item.parent == '#' && cnt > 1) {
+                        //break when we get to the second node off the root
+                        break;
+                    } else {cnt++}
+                   // console.log(item)
+                    if (item.data && item.data.nameUrl && ! item.data.md) {
+                        console.log(item.data.nameUrl)
+                        arQuery.push(getPage(item.data.nameUrl,item,docRootId))
+                    }
+                }
+
+                if (arQuery.length > 0) {
+                    $q.all(arQuery).then(
+                        function() {
+                            console.log($scope.pageTreeData)
+                            assembleFullDoc();
+                            delete $scope.loadingFullDoc;
+
+                        }, function() {
+                            console.log('error')
+                        }
+                    );
+                }
+
+                function assembleFullDoc() {
+                    $scope.fullDoc = "";
+                    for (var i=1; i< $scope.pageTreeData.length; i++) {
+                        let item = $scope.pageTreeData[i];
+                        if (item.data.md) {
+                            $scope.fullDoc += item.data.md
+                        }
+                    }
+                }
+
+
+
+                function getPage(nameUrl,item,docRootId) {
+                    var deferred = $q.defer();
+                    let url = appConfigSvc.getCurrentDataServer().url + nameUrl;
+                    $http.get(url).then(
+                        function(data) {
+                            let md = atob(data.data.content)
+
+                            if (item.parent == docRootId) {
+                                md = "<div class='banner'>"+ item.text + "</div>" + md
+                            }
+
+                            item.data.md = md + "\n\n"
+                            deferred.resolve();
+                        },
+                        function(err) {
+                            //resolve anyway
+                            deferred.resolve();
+                        }
+                    );
+                    return deferred.promise;
+                }
+
+            };
+
+            $scope.saveBinary = function(item,content) {
+                let url = item.nameUrl;
+                item.md = content;      //for use when displaying the full page...
                 console.log(url,content)
 
                 if (url && content) {
@@ -88,9 +158,6 @@ angular.module("sampleApp")
             };
 
 
-
-
-
             $scope.validateArtifactsOnServer = function(type) {
                 //check that the artifacts of the given type are on the server
                 delete $scope.artifactChecks;
@@ -102,7 +169,6 @@ angular.module("sampleApp")
                         $scope.artifactChecks = arResult;
                     }
                 )
-
             };
 
             $scope.showDT = function(dt) {
@@ -793,6 +859,7 @@ angular.module("sampleApp")
                         }
 
                         $scope.add = function(){
+
                             let link = $scope.input.link;
                             if (!link) {
                                 let id = $scope.input.title.split(" ").join("-") +  new Date().getTime();
@@ -820,15 +887,17 @@ angular.module("sampleApp")
 
                             //create a new node...
                             var page = vo.inputNode.data;
-
+/*
+don't change link on edit...
                             if (fhirVersion ==3 ) {
                                 page.source = vo.link;
                             } else {
-                                page.nameUrl = vo.link;
+                               // page.nameUrl = vo.link;
                             }
-
+*/
 
                             setTitle(page,vo.title);
+
                             var id = 't' + new Date().getTime();
                             var newNode = {id:id,parent:$scope.selectedPageNode.parent,text:vo.title,state: {opened: true}}
                             newNode.data = page;
@@ -1498,6 +1567,10 @@ angular.module("sampleApp")
 
                             $scope.LMtreeData = logicalModelSvc.createTreeArrayFromSD(angular.copy(SD));
 console.log(SD)
+
+
+
+
 
 
                             buildMM(SD);        //construct the mind map
