@@ -49,6 +49,9 @@ angular.module("sampleApp")
 
 
             //shortcut stuff--------
+            //get the version of the conformance server...
+            let FHIRVersion = appConfigSvc.getCurrentConformanceServer().version;
+            console.log(FHIRVersion);
 
             var hash = $location.hash();
             if (hash) {
@@ -62,6 +65,8 @@ angular.module("sampleApp")
                         appConfigSvc.setServerType('conformance', sc.config.conformanceServer.url);
                         appConfigSvc.setServerType('data', sc.config.dataServer.url);
                         appConfigSvc.setServerType('terminology', sc.config.terminologyServer.url);
+                        FHIRVersion = appConfigSvc.getCurrentConformanceServer().version;
+                        
                         let id = sc.config.model.id;
                         let url = appConfigSvc.getCurrentConformanceServer().url + "ImplementationGuide/"+id
                         $http.get(url).then(
@@ -438,9 +443,7 @@ angular.module("sampleApp")
 
             //load all the IG's on this server
 
-            //get the version of the conformance server...
-            let FHIRVersion = appConfigSvc.getCurrentConformanceServer().version;
-            console.log(FHIRVersion);
+
 
 
             var url = appConfigSvc.getCurrentConformanceServer().url + "ImplementationGuide";
