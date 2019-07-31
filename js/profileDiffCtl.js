@@ -240,7 +240,7 @@ angular.module("sampleApp")
 
             $scope.logout=function(){
                 firebase.auth().signOut().then(function() {
-                   
+
                     modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
                     $scope.canEdit = false;
 
