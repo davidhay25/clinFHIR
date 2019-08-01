@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 // upload files from a folder to a server
+
 const fs = require('fs');
 const syncRequest = require('sync-request');
 

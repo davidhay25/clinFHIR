@@ -40,6 +40,8 @@
 
         angular.module("sampleApp").constant("moment", moment);
 
+
+
         window.onerror = function(message, url, linenumber) {
             if (message.indexOf('QuotaExceededError') > -1) {
                 alert("It looks as if you've run out of cache memory. Use the Clear Cache option on the NavBar to clear it.")
@@ -372,7 +374,10 @@
                                     <div ng-show="loadingFullDoc">
                                         Loading all snippets, please wait...
                                     </div>
-                                    <p ng-bind-html="fullDoc | markDown"></p>
+
+                                    <div ng-bind-html="deliberatelyTrustDangerousSnippet()"></div>
+
+                                    <p ng-bind-html="fullDoc"></p>
                                 </uib-tab>
                             </uib-tabset>
 

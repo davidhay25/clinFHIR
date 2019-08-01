@@ -3,7 +3,7 @@ angular.module("sampleApp")
     .controller('profileDiffCtrl',
         function ($scope,$q,$http,profileDiffSvc,$uibModal,logicalModelSvc,appConfigSvc,RenderProfileSvc,builderSvc,
                   Utilities,GetDataFromServer,profileCreatorSvc,$filter,$firebaseObject,$firebaseArray,$location,
-                  $window,modalService,$localStorage,$timeout,SaveDataToServer,$sce,resourceCreatorSvc) {
+                  $window,modalService,$localStorage,$timeout,SaveDataToServer,$sce,resourceCreatorSvc,$compile) {
 
             $scope.input = {center:true,includeCore:true,immediateChildren:true,includeExtensions:true,includePatient:true};
             $scope.input.commentReply = {};
@@ -41,7 +41,7 @@ angular.module("sampleApp")
             $scope.typeDescription.profile = 'Profile';
             $scope.typeDescription.codesystem = 'CodeSystem';
             $scope.typeDescription.valueset = 'ValueSet';
-            //$scope.typeDescription.terminology = 'Other Terminology';
+            $scope.typeDescription.terminology = 'Other Terminology';
             $scope.typeDescription.logical = 'Logical model';
             $scope.typeDescription.example = 'Example';
             $scope.typeDescription.other = 'Other artifact';
@@ -66,7 +66,7 @@ angular.module("sampleApp")
                         appConfigSvc.setServerType('data', sc.config.dataServer.url);
                         appConfigSvc.setServerType('terminology', sc.config.terminologyServer.url);
                         FHIRVersion = appConfigSvc.getCurrentConformanceServer().version;
-                        
+
                         let id = sc.config.model.id;
                         let url = appConfigSvc.getCurrentConformanceServer().url + "ImplementationGuide/"+id
                         $http.get(url).then(
@@ -137,15 +137,38 @@ angular.module("sampleApp")
                 }
 
                 function assembleFullDoc() {
-                    $scope.fullDoc = "";
+                    $scope.fullDoc = "<uib-tabset>";
+                    let firstTab = true;
+                    let parentId = $scope.pageTreeData[0].id;
                     for (var i=1; i< $scope.pageTreeData.length; i++) {
                         let item = $scope.pageTreeData[i];
+
+                        if (item.parent == parentId) {
+                            //this is a tab
+                            if (!firstTab) {
+                                $scope.fullDoc += "</uib-tab>"
+                            } else {
+                                firstTab = false;
+                            }
+                            $scope.fullDoc += $compile("<uib-tab heading='test'>")($scope);
+                            $scope.fullDoc += $compile("<div>Parent</div>")($scope);
+                        }
+                        let lvl = item;
+
                         if (item.data.md) {
-                            $scope.fullDoc += item.data.md
+                            $scope.fullDoc += $filter('markDown')(item.data.md)
                         }
                     }
-                }
+                    $scope.fullDoc += $compile("</uib-tab></uib-tabset>")($scope);
 
+
+
+                }
+                $scope.deliberatelyTrustDangerousSnippet = function() {
+                    return $sce.trustAsHtml($scope.fullDoc);
+                    $timeout(function(){$scope.$apply()},1000)
+
+                };
 
 
                 function getPage(nameUrl,item,docRootId) {
@@ -1416,7 +1439,7 @@ don't change link on edit...
             function makeArtifact() {
                 $scope.artifacts = {};
                 //create an entry for every 'purpose' so they can be added in the UI
-                let ar = ['logical','profile','extension','codesystem','valueset','other','example'];
+                let ar = ['logical','profile','extension','codesystem','valueset','terminology','other','example'];
 
                 ar.forEach(function (purpose) {
                     $scope.artifacts[purpose] = []
