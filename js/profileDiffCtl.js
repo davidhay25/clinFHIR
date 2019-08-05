@@ -130,6 +130,67 @@ angular.module("sampleApp")
                             assembleFullDoc();
                             delete $scope.loadingFullDoc;
 
+
+
+                            //make the downlaod doc...
+
+                            const header = `   
+                            <html><head>
+                            <style>
+                            
+                                h1, h2, h3, h4 {
+                                 font-family: Arial, Helvetica, sans-serif;
+                                }
+                            
+                                tr, td {
+                                    border: 1px solid black;
+                                    padding : 8px;
+                                }
+                            
+                                .banner {
+
+                                    border: 1px solid #b8b9b5;
+                                    -webkit-border-radius: 3px;
+                                    -moz-border-radius: 3px;
+                                    border-radius: 3px;
+                                    text-align: center;
+                                    padding: 2px;
+                                    margin-bottom: 5px;
+                                    background-color: #F6F6F6;
+                                    font-weight: bold;
+                                }
+	
+                                .dTable {
+                                    font-family: Arial, Helvetica, sans-serif;
+                                    width:100%;
+                                    border: 1px solid black;
+                                    border-collapse: collapse;
+                                }
+                                
+                                .col1 {
+                                    background-color:Gainsboro;
+                                }
+                                           
+                            </style>
+                            </head>
+                            <body style="padding: 8px;">
+                            
+                        `;
+
+                        const footer = "</body></html>"
+                            let html = header +$scope.fullDoc + footer;
+
+
+                            $scope.downloadLinkDoc = window.URL.createObjectURL(new Blob([html],
+                                {type: "text/html"}));
+
+                            //$scope.downloadLinkJsonName = "downloaded"
+                            var now = moment().format();
+                            $scope.downloadLinkDocName = 'download' + '-' + now + '.html';
+
+
+
+
                         }, function() {
                             console.log('error')
                         }
@@ -137,7 +198,7 @@ angular.module("sampleApp")
                 }
 
                 function assembleFullDoc() {
-                    $scope.fullDoc = "<uib-tabset>";
+                    $scope.fullDoc = ""; //"<uib-tabset>";
                     let firstTab = true;
                     let parentId = $scope.pageTreeData[0].id;
                     for (var i=1; i< $scope.pageTreeData.length; i++) {
@@ -146,12 +207,12 @@ angular.module("sampleApp")
                         if (item.parent == parentId) {
                             //this is a tab
                             if (!firstTab) {
-                                $scope.fullDoc += "</uib-tab>"
+                               // $scope.fullDoc += "</uib-tab>"
                             } else {
                                 firstTab = false;
                             }
-                            $scope.fullDoc += $compile("<uib-tab heading='test'>")($scope);
-                            $scope.fullDoc += $compile("<div>Parent</div>")($scope);
+                           // $scope.fullDoc += $compile("<uib-tab heading='test'>")($scope);
+                           // $scope.fullDoc += $compile("<div>Parent</div>")($scope);
                         }
                         let lvl = item;
 
@@ -159,7 +220,7 @@ angular.module("sampleApp")
                             $scope.fullDoc += $filter('markDown')(item.data.md)
                         }
                     }
-                    $scope.fullDoc += $compile("</uib-tab></uib-tabset>")($scope);
+                   // $scope.fullDoc += $compile("</uib-tab></uib-tabset>")($scope);
 
 
 
@@ -705,14 +766,22 @@ angular.module("sampleApp")
 
 
 
-                                //R3 stores url in 'source' = R4 is 'nameUrl'
+                                //R3 stores url in 'source' = R4 is 'nameUrl' - and R3 is cononical, R4 is direct
                                 if (fhirVersion == 3 ) {
                                     let url = $scope.selectedPageNode.data.source;
-                                    $scope.selectedPageIsExternalUrl = true;
+
+                                    if (url.indexOf('Binary') == -1) {
+                                        $scope.selectedPageIsExternalUrl = true;
+                                    }
+
                                     $scope.page.src = $sce.trustAsResourceUrl(url);
                                 } else {
                                     //R4
                                     let url = $scope.selectedPageNode.data.nameUrl;   //assume relative
+                                    if (url.indexOf('Binary') == -1) {
+                                        $scope.selectedPageIsExternalUrl = true;
+                                    }
+
                                     let docUrl = appConfigSvc.getCurrentConformanceServer().url + url;
 
                                     $scope.waiting = true;

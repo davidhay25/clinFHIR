@@ -217,7 +217,9 @@
             <div class="col-md-2 col-sm-2">
                 <div class="navbar-text">
                     <div><a href="#" ng-click="clearCache()">Clear Cache</a></div>
-                    <div><a href="#" ng-show="currentIG" ng-click="generateShortCut()">Create shortcut</a></div>
+                    <div><a href="#" ng-show="currentIG" ng-click="generateShortCut()">Create Shortcut</a></div>
+
+
 
                 </div>
 
@@ -370,13 +372,27 @@
                                     <ng-include src="'/includes/pageRoot.html'"></ng-include>
                                 </uib-tab>
                                 <uib-tab heading="Full content">
-                                    <button class="btn btn-link" ng-click="createFullDoc()">Refresh</button>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <button class="btn btn-link" ng-click="createFullDoc()">Refresh</button>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <a ng-show="downloadLinkDocName" class="btn btn-link pull-right" download="{{downloadLinkDocName}}"
+                                               href="{{downloadLinkDoc}}" title="{{downloadLinkDocName}}" >
+                                                Download HTML file
+                                            </a>
+                                        </div>
+                                    </div>
+
+
+
+
                                     <div ng-show="loadingFullDoc">
                                         Loading all snippets, please wait...
                                     </div>
-
+<!--
                                     <div ng-bind-html="deliberatelyTrustDangerousSnippet()"></div>
-
+-->
                                     <p ng-bind-html="fullDoc"></p>
                                 </uib-tab>
                             </uib-tabset>
