@@ -4,7 +4,6 @@
 //if an extension is used more than once in the
 
 
-//todo combine with profile generator...
 
 let fs = require('fs');
 let syncRequest = require('sync-request');
@@ -27,9 +26,9 @@ let uploadServer = "http://home.clinfhir.com:8054/baseR4/";     //the server to 
 //the extension from the LM where the extension url is placed...
 let extensionUrl = "http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl";
 
-//let outFolder = "/Users/davidhay/sharedWithVB/mohProfiles/"
+let outFolder = "/Users/davidhay/sharedWithVB/mohProfiles/";
 
-let outFolder = "/Users/davidhay/Dropbox/contracting/MOH/ResourcesForIG/extensions/";
+//let outFolder = "/Users/davidhay/Dropbox/contracting/MOH/ResourcesForIG/extensions/";
 
 
 let hashValueSet = {missing:[]}   //all the valuesets in the models. missing are coded with no VS
@@ -62,7 +61,7 @@ IG.definition.resource.forEach(function (item) {
     } else {
         let ar = item.reference.reference.split('/');
         let id = ar[ar.length - 1]
-        console.log(id)
+        //console.log(id)
         arModels.push(id)
     }
 });
@@ -76,9 +75,9 @@ arModels = ["NzNHIPatient"];
 let arIgEntry = [];   //a set of definition.resource entries to insert into an IG. ?todo directly update IG?
 
 arModels.forEach(function (modelId) {
-    console.log('Examining '+modelId)
+   // console.log('Examining '+modelId)
     let urlModel = remoteFhirServer + "StructureDefinition/"+modelId;
-    console.log("Load model: "+ urlModel)
+    //console.log("Load model: "+ urlModel)
 
 
     let response = syncRequest('GET', urlModel, options);
@@ -88,7 +87,7 @@ arModels.forEach(function (modelId) {
 
     model.snapshot.element.forEach(function(ed,inx) {
         let path = ed.path;
-        //console.log(path)
+
         let description = ed.definition;
 
         if (ed.mapping) {
@@ -108,14 +107,28 @@ arModels.forEach(function (modelId) {
                         let ext = getSingleExtensionValue(ed,extensionUrl);
                         if (ext) {
                             let url = ext.valueString;      //the url of the extension
+                            let item = {path:path, ed:[ed]} ;    //note there could be multiple ed's - ie a complex extension
 
-                                let item = {path:path, ed:[ed]} ;    //note there could be multiple ed's - ie a complex extension
-                                item.context = [{type:'element',expression:'Practitioner'}];         //<<<<<<<<<<
-                                item.dataType = dataType;
-                                item.url = url;
-                                let key = path + url;
-                                hashExtension[key] = item;
-                                currentItem = item;     //used for complex extensions - the children will be added to it...
+                            let arPath = path.split('.');
+                            if (arPath.length == 2) {
+
+                                item.context = [{type:'element',expression:'DomainResource'}];         //means it is off the root...
+                            } else {
+
+                                item.context = [{type:'element',expression:'Element'}];         //means it can be used anywhere...
+                            }
+
+                            item.dataType = dataType;
+                            item.url = url;
+
+                            //item.binding = ed
+
+                            let key = path + url;
+                            hashExtension[key] = item;
+                            currentItem = item;     //used for complex extensions - the children will be added to it...
+
+
+
 
 
 
@@ -124,7 +137,7 @@ arModels.forEach(function (modelId) {
                         }
 
                     } else if (map.map[0] == '#') {
-                            //yes, this is a child. Add the ED to the current one
+                            //yes, this is a child. Add the ED to the current one. Assume the 'child' is immediately after the 'parent'
                         if (currentItem) {      //will be null if the parent extension doesn't have a url defined...
                             currentItem.ed.push(ed);
                         }
@@ -146,14 +159,14 @@ arModels.forEach(function (modelId) {
 
         //only make ED's that are in NZ's domain...
         if (url.startsWith(nzPrefix))  {
-            console.log("working on "+url)
+            //console.log("working on "+url)
 
             let extDef;
             if (item.ed.length == 1) {
                 //a simple extension...
-
+                console.log("simple: "+key)
                 extDef = makeSimpleExtDef(item);
-                console.log("simple: "+extDef.url)
+
 
                 let filePath = outFolder + extDef.name + '.json';
                 fs.writeFileSync(filePath,JSON.stringify(extDef,null,2))
@@ -161,9 +174,9 @@ arModels.forEach(function (modelId) {
 
             } else {
                 //a complex extension...
-
+                console.log("complex: "+key)
                 extDef = makeComplexExtDef(item);
-                console.log("complex: "+extDef.url)
+
                 //console.log((extDef))
 
                 let filePath = outFolder + extDef.name + '.json';
@@ -201,8 +214,8 @@ arModels.forEach(function (modelId) {
 });
 
 //now write out the snippet for the IG
-let filePath = outFolder +'IG-snippet.json';
-fs.writeFileSync(filePath,JSON.stringify(arIgEntry,null,2))
+//let filePath = outFolder +'IG-snippet.json';
+//fs.writeFileSync(filePath,JSON.stringify(arIgEntry,null,2))
 
 //write out the IG
 if (IG) {
@@ -254,8 +267,19 @@ function makeIGResource(extDef){
 //generate a simple extension
 function makeComplexExtDef (item) {
     //let sd = {resourceType:'StructureDefinition', url:url};
-    let sd = makeSDHeader( item)
-    let ed = item.ed[0];
+    let ar = item.url.split('/');
+    let suffix = ':' + ar[ar.length-1];
+
+    let sd = makeSDHeader(item,suffix);
+
+
+    //the third element (extension.extension) needs a discriminator..
+    let ele = sd.snapshot.element[2];
+    ele.slicing = {discriminator : [{type:"value",path:'url'}],rules:'open'}
+
+
+
+    //let ed = item.ed[0];
 
     //now add the elements for the child nodes...
     for (var i=1; i < item.ed.length; i++) {
@@ -263,18 +287,12 @@ function makeComplexExtDef (item) {
 
         //we know there must be a mapping, or it wouldn't be in the object
         let mapPath = ed.mapping[0].map
+        console.log(mapPath)
         mapPath = mapPath.replace(/\|/g,'')
         mapPath = mapPath.replace(/#/g,'')
-        console.log(mapPath)
+       // console.log(mapPath)
 
         let sliceName = mapPath
-/*
-        let childPath = ed.path;        //actually, this is the path in the model
-        //console.log(childPath)
-        let ar = childPath.split('.');
-        let sliceName = ar[ar.length-1];
-        */
-        console.log(sliceName)
 
 
         let dataType = 'string';
@@ -287,35 +305,35 @@ function makeComplexExtDef (item) {
             dataType = ed.type[0].code;
         }
 
-        let ele1 = {id:'Extension.extension'+ ":" + sliceName,path:'Extension.extension',min:0,max:'*',base:{path:'Element.extension',min:0,max:'*'}};
+        let ele1 = {id:'Extension'+suffix+'.extension'+ ":" + sliceName,path:'Extension.extension',min:0,max:'*',base:{path:'Element.extension',min:0,max:'*'}};
         ele1.type = [{code:'Extension'}]
         ele1.definition = ed.definition;
         ele1.short = short;
         ele1.sliceName = sliceName;
         sd.snapshot.element.push(ele1);
 
-        let ele2 = {id:'Extension.extension:' + sliceName + ".id",path:'Extension.extension.id',short:'Extension id',min:0,max:'1',base:{path:'Element.id',min:0,max:'1'}};
+        let ele2 = {id:'Extension'+suffix+'.extension:' + sliceName + ".id",path:'Extension.extension.id',short:'Extension id',min:0,max:'1',base:{path:'Element.id',min:0,max:'1'}};
         ele2.definition = "Unique id for referencing"
         ele2.type = [{code:'string'}]
         sd.snapshot.element.push(ele2);
 
-        let ele3 = {id:'Extension.extension:' + sliceName + '.extension',path:'Extension.extension.extension',short:'extension',min:0,max:'0',base:{path:'Element.extension',min:0,max:'*'}}
+        let ele3 = {id:'Extension'+suffix+'.extension:' + sliceName + '.extension',path:'Extension.extension.extension',short:'extension',min:0,max:'0',base:{path:'Element.extension',min:0,max:'*'}}
         ele3.type = [{code:'Extension'}]
         ele3.slicing = {discriminator:[{type:'value',path:'url'}],rules:"open"};
         ele3.definition = 'child extension'
         sd.snapshot.element.push(ele3);
 
 
-        let ele4 = {id:'Extension.extension:' + sliceName + '.url',path:'Extension.extension.url',short:'Extension url',min:1,max:'1',base:{path:'Extension.url',min:1,max:'1'}};
+        let ele4 = {id:'Extension'+suffix+'.extension:' + sliceName + '.url',path:'Extension.extension.url',short:'Extension url',min:1,max:'1',base:{path:'Extension.url',min:1,max:'1'}};
         ele4.type = [{code:'uri'}];
         ele4.fixedUri = sliceName;
-        ele4.url = sliceName;
+        //ele4.url = sliceName;
         ele4.definition = 'The unique Url';
         sd.snapshot.element.push(ele4);
 
         let ele5 = {};
         let v = "value" + dataType[0].toUpperCase() + dataType.substr(1);
-        ele5.id = "Extension.extension:" + sliceName + '.' +v
+        ele5.id = "Extension"+suffix+".extension:" + sliceName + '.' +v
         ele5.path = "Extension.extension."+v;
         ele5.short = "Value of extension";
         ele5.definition = "Value of extension";
@@ -323,11 +341,37 @@ function makeComplexExtDef (item) {
         ele5.max = '1';
         ele5.base = {path:'Extension.value[x]',min:0,max:'1'};
         ele5.type = [{code:dataType}];
-        ele5.definition = "The actual value of the extension"
+        ele5.definition = "The actual value of the extension";
+
+
+        ele5.binding = ed.binding;
+
+
         sd.snapshot.element.push(ele5);
 
     }
 
+
+    //the url for the overall complex extension...
+    let ele4 = {id:'Extension.url',path:'Extension.url',short:'Extension url',min:1,max:'1',base:{path:'Extension.url',min:1,max:'1'}};
+    ele4.type = [{code:'uri'}];
+    ele4.fixedUri = item.url;
+    ele4.definition = 'The unique Url'
+    sd.snapshot.element.push(ele4);
+
+    //the value
+    let ele5 = {};
+    let v = "value" + item.dataType[0].toUpperCase() + item.dataType.substr(1);
+    ele5.id = "Extension.value[x]"
+    ele5.path = "Extension.value[x]"
+    ele5.short = "Value of extension";
+    ele5.definition = "Value of extension";
+    ele5.min = 0;
+    ele5.max = '0';
+    ele5.base = {path:'Extension.value[x]',min:0,max:'1'};
+    ele5.type = [{code:item.dataType}];
+    ele5.definition = "The actula value of the extension"
+    sd.snapshot.element.push(ele5);
 
     return sd;
 }
@@ -358,7 +402,7 @@ function makeSimpleExtDef (item) {
 */
 
     let ele4 = {id:'Extension.url',path:'Extension.url',short:'Extension url',min:1,max:'1',base:{path:'Extension.url',min:1,max:'1'}};
-    ele4.type = [{code:'url'}];
+    ele4.type = [{code:'uri'}];
     ele4.fixedUri = url;
     ele4.definition = 'The unique Url'
     sd.snapshot.element.push(ele4);
@@ -381,7 +425,8 @@ function makeSimpleExtDef (item) {
 
 }
 
-function makeSDHeader(item) {
+function makeSDHeader(item,suffix) {
+    suffix = suffix || "";
     let url = item.url;
     let sd = {resourceType:'StructureDefinition', url:url};
     let ed = item.ed[0];
@@ -392,10 +437,14 @@ function makeSDHeader(item) {
 
     //let ar = ed.path.split('.');
     let ar = ext.valueString.split('/');
+
     sd.text = {status:'additional',div:"<div xmlns='http://www.w3.org/1999/xhtml'>Extension Definition</div>"}
     sd.id = 'cf-' + ar[ar.length -1]
-    let name = ar[ar.length -1]
+    let name = ar[ar.length -1];
 
+    //the name has a constraint - this is not completely correct, but replaces the common letters
+    name = name.replace(/-/g, '');
+    name = name.replace(/_/g, '');
 
 
     sd.name = name[0].toUpperCase()+name.substr(1)
@@ -412,18 +461,18 @@ function makeSDHeader(item) {
     sd.snapshot = {element:[]};
     //sd.differential = {element:[]};
 
-    let ele1 = {id:'Extension',path:'Extension',short:'Extension',min:0,max:'*',base:{path:'Extension',min:0,max:'*'}};
+    let ele1 = {id:'Extension' + suffix,path:'Extension',short:'Extension',min:0,max:'*',base:{path:'Extension',min:0,max:'*'}};
     ele1.definition = ed.definition;
     sd.snapshot.element.push(ele1);
 
-    let ele2 = {id:'Extension.id',path:'Extension.id',short:'Extension id',min:0,max:'1',base:{path:'Extension.id',min:0,max:'1'}};
+    let ele2 = {id:'Extension'+suffix+'.id',path:'Extension.id',short:'Extension id',min:0,max:'1',base:{path:'Extension.id',min:0,max:'1'}};
     ele2.definition = "Unique id for referencing";
     ele2.type = [{code:'string'}]
     sd.snapshot.element.push(ele2);
 
-    let ele3 = {id:'Extension.extension',path:'Extension.extension',short:'Extension extension',min:0,max:'*',base:{path:'Extension.extension',min:0,max:'*'}}
+    let ele3 = {id:'Extension'+suffix+'.extension',path:'Extension.extension',short:'Extension extension',min:0,max:'*',base:{path:'Element.extension',min:0,max:'*'}}
     ele3.type = [{code:'Extension'}]
-    ele3.slicing = {discriminator:[{type:'value',path:'url'}],rules:"open"};
+    //ele3.slicing = {discriminator:[{type:'value',path:'url'}],rules:"open"};
     ele3.definition = 'extension on extension'
     sd.snapshot.element.push(ele3);
 

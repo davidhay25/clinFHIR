@@ -1,6 +1,6 @@
 angular.module("sampleApp")
     .controller('nzCtrl',
-        function ($scope,$http,modalService,appConfigSvc,fhirUtilsSvc,v2ToFhirSvc,$timeout) {
+        function ($scope,$http,modalService,appConfigSvc,fhirUtilsSvc,v2ToFhirSvc,$timeout,$uibModal) {
 
             console.log(location.host);
             $scope.input = {}

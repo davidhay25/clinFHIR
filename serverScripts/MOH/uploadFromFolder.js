@@ -1,28 +1,28 @@
 #!/usr/bin/env node
 
 // upload files from a folder to a server
+//if IG is present, then check that it is in the IHG - add it if not...
 
 const fs = require('fs');
 const syncRequest = require('sync-request');
-
-
 let IGEntryType = 'http://clinfhir.com/StructureDefinition/igEntryType';
 let canonicalUrl = 'http://clinfhir.com/fhir/StructureDefinition/canonicalUrl';
 
-let IGPath = "/Users/davidhay/Dropbox/contracting/MOH/ResourcesForIG/nzRegistry.json"
-let IG = JSON.parse(fs.readFileSync(IGPath).toString());
 
-//console.log(IG);
+let IG = undefined;
+//let IGPath = "/Users/davidhay/Dropbox/contracting/MOH/ResourcesForIG/nzRegistry.json"
+
+    //let IG = JSON.parse(fs.readFileSync(IGPath).toString());
 
 
 
 
 //const confServerRoot = "http://snapp.clinfhir.com:8081/baseDstu3/"
 const confServerRoot = "http://home.clinfhir.com:8054/baseR4/";
-const termServerRoot = "https://ontoserver.csiro.au/stu3-latest/";
+//const termServerRoot = "https://ontoserver.csiro.au/stu3-latest/";
 
 
-//const termServerRoot = "http://home.clinfhir.com:8054/baseR4/";     //conf server (hapi) needs a copy too...
+const termServerRoot = "http://home.clinfhir.com:8054/baseR4/";     //conf server (hapi) needs a copy too...
 
 
 //where the files to upload are
@@ -104,8 +104,6 @@ folder.forEach(file => {
 
                 }
 
-
-
             } else {
                 console.log('err ===> resource has no id or resourceType: '+ fullPath)
             }
@@ -114,7 +112,9 @@ folder.forEach(file => {
     }
 });
 
+if (IG) {
+    fs.writeFileSync(IGPath,JSON.stringify(IG))
+}
 
-fs.writeFileSync(IGPath,JSON.stringify(IG))
 
 

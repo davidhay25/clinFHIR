@@ -1158,6 +1158,10 @@ angular.module("sampleApp").service('profileDiffSvc',
             var hash = {};
             var allNodeHashById = {};
             var IdToUse = 0;
+
+
+
+
             IG.package.forEach(function (package) {
                 package.resource.forEach(function (item,inx) {
                     IdToUse++;
@@ -1174,6 +1178,8 @@ angular.module("sampleApp").service('profileDiffSvc',
                             }
                             break;
                         case 'terminology' :
+                        case 'valueset' :
+                        case 'codesystem' :
                             if (! options.includeTerminology) {
                                 include = false;
                             }
@@ -1735,14 +1741,28 @@ angular.module("sampleApp").service('profileDiffSvc',
             var result = {required:[],valueSet:{},reference:{}}
 
             //create a hash of all urls in the IG...
-            hashUrl = {}
-            IG.package.forEach(function (pkg) {
-                pkg.resource.forEach(function (r) {
-                    if (r.sourceReference) {
-                        hashUrl[r.sourceReference.reference] = r;
+            let hashUrl = {}
+
+            if (IG.package) {
+                IG.package.forEach(function (pkg) {
+                    pkg.resource.forEach(function (r) {
+                        if (r.sourceReference) {
+                            hashUrl[r.sourceReference.reference] = r;
+                        }
+                    })
+                });
+            } else {
+                IG.definition.resource.forEach(function (res) {
+
+                    if (res.reference) {
+                        hashUrl[res.reference] = res;
                     }
-                })
-            });
+
+                });
+            }
+
+
+
 
 
 
@@ -2181,6 +2201,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                     } else {
 
                         //as this is a canonical url, a query rather than direct lookup is needed...
+                        /*
                         GetDataFromServer.findConformanceResourceByUri(url).then(
                             function(data) {
                                 $localStorage.extensionDefinitionCache[url] = minimizeSD(data)
@@ -2191,9 +2212,9 @@ angular.module("sampleApp").service('profileDiffSvc',
                             }
 
                         )
+*/
 
-                        /*
-                        //this is a literal url - assume relative
+                        //this is a literal reference - assume relative
                        // let SDurl = appConfigSvc.getCurrentConformanceServer().url+url;
                         $http.get(url,{headers:{'accept':"application/fhir+json"}}).then(
                             function(data) {
@@ -2204,7 +2225,7 @@ angular.module("sampleApp").service('profileDiffSvc',
                                 deferred.reject({msg:"No StructureDefinition was found at "+url});
                             }
                         )
-                        */
+
 
                     }
 

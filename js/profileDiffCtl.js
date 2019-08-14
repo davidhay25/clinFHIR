@@ -136,6 +136,8 @@ angular.module("sampleApp")
 
                             const header = `   
                             <html><head>
+                            
+
                             <style>
                             
                                 h1, h2, h3, h4 {
@@ -181,6 +183,9 @@ angular.module("sampleApp")
                             let html = header +$scope.fullDoc + footer;
 
 
+                            $('#htmlDoc').contents().find('html').html(html)
+
+
                             $scope.downloadLinkDoc = window.URL.createObjectURL(new Blob([html],
                                 {type: "text/html"}));
 
@@ -198,7 +203,12 @@ angular.module("sampleApp")
                 }
 
                 function assembleFullDoc() {
-                    $scope.fullDoc = ""; //"<uib-tabset>";
+
+
+
+
+
+                    $scope.fullDoc = ""; //<uib-tabset>";
                     let firstTab = true;
                     let parentId = $scope.pageTreeData[0].id;
                     for (var i=1; i< $scope.pageTreeData.length; i++) {
@@ -207,12 +217,15 @@ angular.module("sampleApp")
                         if (item.parent == parentId) {
                             //this is a tab
                             if (!firstTab) {
-                               // $scope.fullDoc += "</uib-tab>"
+                                $scope.fullDoc += "</uib-tab>"
                             } else {
                                 firstTab = false;
                             }
                            // $scope.fullDoc += $compile("<uib-tab heading='test'>")($scope);
-                           // $scope.fullDoc += $compile("<div>Parent</div>")($scope);
+                            //$scope.fullDoc += $compile("<div>Parent</div>")($scope);
+                           // $scope.fullDoc += "<uib-tab heading='test'>";
+                           // $scope.fullDoc += "<div>Parent</div>";
+
                         }
                         let lvl = item;
 
@@ -220,16 +233,20 @@ angular.module("sampleApp")
                             $scope.fullDoc += $filter('markDown')(item.data.md)
                         }
                     }
-                   // $scope.fullDoc += $compile("</uib-tab></uib-tabset>")($scope);
+                   // $scope.fullDoc += "</uib-tab></uib-tabset>";
+                    //$scope.fullDoc += $compile("</uib-tab></uib-tabset>")($scope);
+
 
 
 
                 }
-                $scope.deliberatelyTrustDangerousSnippet = function() {
+                $scope.deliberatelyTrustDangerousSnippetDEP = function() {
                     return $sce.trustAsHtml($scope.fullDoc);
                     $timeout(function(){$scope.$apply()},1000)
 
                 };
+
+
 
 
                 function getPage(nameUrl,item,docRootId) {
@@ -1756,7 +1773,7 @@ console.log(SD)
 
                                 $scope.$digest();       //as the event occurred outside of angular...
 
-                            })
+                            });
 
                             profileDiffSvc.findShortCutForModel($scope.LMSD.id).then(
                                 function(data){
@@ -2061,8 +2078,7 @@ console.log(SD)
                 $scope.arV2 = profileDiffSvc.generateV2MapFromSD(SD);
 
 
-
-
+                createGraphOfIG($scope.currentIG);
 
 
                 delete $scope.errorsInLM;
@@ -2074,7 +2090,6 @@ console.log(SD)
                         if (vo.errors.length) {
                             $scope.errorsInLM = vo.errors;
                         }
-
 
                         $('#logicalTree').jstree('destroy');
                         $('#logicalTree').jstree(

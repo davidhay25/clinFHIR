@@ -171,7 +171,7 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'GoFHIR',version:3,url:"https://syntheticmass.mitre.org/fhir/",everythingOperation:true});
 
         defaultConfig.allKnownServers.push({name:'HSPC-14',version:3,url:"https://api3.hspconsortium.org/fhirconnect14/open/",everythingOperation:true});
-        defaultConfig.allKnownServers.push({name:'HSPC Careplan',version:3,url:"https://api-stu3.hspconsortium.org/careplantest/open/",everythingOperation:true});
+        //defaultConfig.allKnownServers.push({name:'HSPC Careplan',version:3,url:"https://api-stu3.hspconsortium.org/careplantest/open/",everythingOperation:true});
 
         defaultConfig.allKnownServers.push({name:'Patients First R3',version:3,url:"http://its.patientsfirst.org.nz/RestService.svc/Terminz/"});
 
@@ -192,6 +192,11 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'nzProjectR4',version:4,url:"http://home.clinfhir.com:8054/baseR4/",everythingOperation:true});
 
         defaultConfig.allKnownServers.push({name:'HSPC Tutorial',version:3,url:"https://api-v8-stu3.hspconsortium.org/ClinFHIRTutorial/open/",everythingOperation:false});
+
+
+
+        defaultConfig.allKnownServers.push({name:'HSPC-4',version:4,url:"https://api.logicahealth.org/CoFsandboxR4/open/",everythingOperation:true});
+
 
 
 
