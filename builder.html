@@ -1273,15 +1273,13 @@
 
 
 
-
                                         <div ng-show="hashPath.isReference">
-
-
 
                                             <h5>Potential References</h5>
 
-
-
+                                            <div ng-show="Object.keys(hashReferences).length == 0">
+                                                <em>There are no resources of a suitable type in the graph</em>
+                                            </div>
 
                                             <table class="table table-condensed table-bordered">
                                                 <tr><th>Type</th><th>Potential resources</th></tr>
@@ -1315,8 +1313,6 @@
                                             </table>
 
                                         </div>
-
-
 
                                         <br/>
 

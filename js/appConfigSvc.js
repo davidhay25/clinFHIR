@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2019-08-15';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2019-08-16';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -181,12 +181,16 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'HL7-UK STU-2',version:2,url:"https://fhir-test.hl7.org.uk/"});
 
         defaultConfig.allKnownServers.push({name:'FHIR Registry',version:3,url:"https://registry-api.fhir.org/open/",everythingOperation:true});
-        defaultConfig.allKnownServers.push({name:"Ontoserver (terminology)",url:"https://ontoserver.csiro.au/stu3-latest/",version:3,everythingOperation:true,isTerminology:true});
+        defaultConfig.allKnownServers.push({name:"OntoserverR3 (terminology)",url:"https://ontoserver.csiro.au/stu3-latest/",version:3,everythingOperation:true,isTerminology:true});
+        defaultConfig.allKnownServers.push({name:'OntoserverR4 (terminology)',version:4,url:"https://r4.ontoserver.csiro.au/fhir/",isTerminology:true});
 
         defaultConfig.allKnownServers.push({name:'hofSmile',version:3,url:"https://hof.smilecdr.com:8000/",smart:true});
 
         defaultConfig.allKnownServers.push({name:'eip',version:3,url:"http://eip-fhir.experimental.aimsplatform.com/hapi-fhir/baseDstu3/"});
         defaultConfig.allKnownServers.push({name:'Ontoserver-PC',version:3,url:"https://primarycare.ontoserver.csiro.au/fhir/"});
+
+
+
         defaultConfig.allKnownServers.push({name:'csiroProject',version:3,url:"http://home.clinfhir.com:8030/baseDstu3/",everythingOperation:true});
         defaultConfig.allKnownServers.push({name:'nzProject',version:3,url:"http://home.clinfhir.com:8040/baseDstu3/",everythingOperation:true});
         defaultConfig.allKnownServers.push({name:'nzProjectR4',version:4,url:"http://home.clinfhir.com:8054/baseR4/",everythingOperation:true});

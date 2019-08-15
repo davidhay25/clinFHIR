@@ -1595,6 +1595,9 @@ console.log(summary);
             vsLookup['condition-severity'] = {id:'valueset-condition-severity',minLength:1,type:'list'};
             vsLookup['condition-category'] = {id:'valueset-condition-category',type:'list'};
             vsLookup['condition-certainty'] = {id:'valueset-condition-certainty',minLength:1,type:'list'};
+            vsLookup['condition-status'] = {id:'condition-status',minLength:1,type:'list'};
+            vsLookup['condition-ver-status'] = {id:'condition-ver-status',minLength:1,type:'list'};
+
             vsLookup['list-empty-reason'] = {id:'valueset-list-empty-reason',minLength:1,type:'list'};
             vsLookup['list-item-flag'] = {id:'valueset-list-item-flag',minLength:1,type:'list'};
             vsLookup['basic-resource-type'] = {id:'valueset-basic-resource-type',minLength:1,type:'list'};
@@ -1613,7 +1616,7 @@ console.log(summary);
             vsLookup['observation-status'] = {id:'observation-status',minLength:1,type:'list'};
             vsLookup['observation-category'] = {id:'observation-category',minLength:1,type:'list'};
 
-            vsLookup['condition-status'] = {id:'condition-status',minLength:1,type:'list'};
+
             vsLookup['administrative-gender'] = {id:'administrative-gender',minLength:1,type:'list'};
             vsLookup['reason-medication-not-given-codes'] = {type:'list'};
             vsLookup['care-plan-activity-category'] = {type:'list'};

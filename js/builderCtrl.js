@@ -1068,10 +1068,13 @@ angular.module("sampleApp")
             //set the base path for linking to the spec
             switch (appConfigSvc.getCurrentConformanceServer().version) {
                 case 2:
-                    $scope.fhirBasePath="http://hl7.org/fhir/";
+                    $scope.fhirBasePath="http://hl7.org/fhir/DSTU2/";
                     break;
                 case 3:
-                    $scope.fhirBasePath="http://build.fhir.org/";
+                    $scope.fhirBasePath="http://hl7.org/fhir/STU3/";
+                    break;
+                case 4:
+                    $scope.fhirBasePath="http://hl7.org/fhir/";
                     break;
             }
 
@@ -1986,14 +1989,23 @@ console.log($scope.currentSD)
                                     //get the ValueSet if there is one bound...
                                     var urlToValueSet;
                                     if ($scope.hashPath.ed.binding && $scope.hashPath.ed.binding) {
-                                        //there is a binding - is it a reference or a uri? (The core types use reference - but it seems tobe a uri)
-                                        if ($scope.hashPath.ed.binding && $scope.hashPath.ed.binding.valueSetReference &&
-                                            $scope.hashPath.ed.binding.valueSetReference.reference) {
-                                            urlToValueSet = $scope.hashPath.ed.binding.valueSetReference.reference;
+
+                                        //this is specfic R4 references
+                                        if ($scope.hashPath.ed.binding.valueSet) {
+                                            urlToValueSet = $scope.hashPath.ed.binding.valueSet;
+                                        } else {
+                                            //there is a binding (and not R4 style) - is it a reference or a uri? (The core types use reference - but it seems tobe a uri)
+                                            if ($scope.hashPath.ed.binding && $scope.hashPath.ed.binding.valueSetReference &&
+                                                $scope.hashPath.ed.binding.valueSetReference.reference) {
+                                                urlToValueSet = $scope.hashPath.ed.binding.valueSetReference.reference;
+                                            }
+                                            if ($scope.hashPath.ed.binding && $scope.hashPath.ed.binding.valueSetUri) {
+                                                urlToValueSet = $scope.hashPath.ed.binding && $scope.hashPath.ed.binding.valueSetUri;
+                                            }
                                         }
-                                        if ($scope.hashPath.ed.binding && $scope.hashPath.ed.binding.valueSetUri) {
-                                            urlToValueSet = $scope.hashPath.ed.binding && $scope.hashPath.ed.binding.valueSetUri;
-                                        }
+
+
+
                                     }
 
                                     //if there's a ValueSet then get the details, and display the contents if small (ie is a list)
@@ -2019,6 +2031,20 @@ console.log($scope.currentSD)
                                         })
                                     }
 
+
+                                    //in R4 (at least the core profiles) there is a single type element and targetProfile is an array)
+                                    //we'll add type elements to simulate this for the moment
+                                    //this will only work for core types and is rather scruffy todo
+                                    let typ = ed.type[0];      //only look at the first
+                                    if (typ && ed.type.length == 1 && typ.targetProfile && angular.isArray(typ.targetProfile) &&  typ.targetProfile.length > 1) {
+                                        for (var i=1; i < typ.targetProfile.length;i++) {
+                                            let p = typ.targetProfile[i];
+                                            ed.type.push({code:'Reference',targetProfile:p})
+                                        }
+                                    }
+
+
+
                                     ed.type.forEach(function(typ){
 
                                         //is this a resource reference?
@@ -2032,6 +2058,7 @@ console.log($scope.currentSD)
 
                                            // var type = $filter('getLogicalID')(targetProfile);
 
+                                           // if (angular.is)
 
                                             //want to allow for references to profiled resources being able to link to the core type, so is async...
                                             builderSvc.getBaseTypeForProfile(targetProfile).then(
