@@ -478,7 +478,7 @@
             <div ng-show="isHistory" class="alert alert-warning">
                 <div class="row">
                     <div class="col-sm-6 col-md-6">
-                        <strong>Viewing history</strong>
+                        <strong>Viewing history: </strong><span>{{SD.meta.lastUpdated | getAgeSeconds}} ago</span>
                     </div>
                     <div class="col-sm-6 col-md-6">
                         <div class="clickable pull-right" ng-click="exitHistory()">Back to current</div>
@@ -739,7 +739,9 @@
 
                                                     <div class="clickable" ng-click="viewVS(row.data.selectedValueSet.valueSet)"
                                                         ng-show="row.data.selectedValueSet.valueSet">
-                                                        {{row.data.selectedValueSet.valueSet}} ({{row.data.selectedValueSet.strength}})
+                                                        {{row.data.selectedValueSet.valueSet}}
+
+                                                        <div>({{row.data.selectedValueSet.strength}})</div>
 
                                                     </div>
 
@@ -768,8 +770,15 @@
                                     <tr><th>Path</th><th>ValueSet url</th><th>CodeSystems</th><th>Outcome</th></tr>
                                     <tr ng-repeat="row in vsChecks">
                                         <td><span class="clickable" ng-click="selectNodeFromServerCheck(row.row)">{{row.path}}</span></td>
-                                        <td>{{row.url}}
+                                        <td>
+
+                                            <div class="clickable" ng-click="viewVS(row.url)">
+                                                 {{row.url}}
+                                            </div>
+                                        </td>
                                             <div><em>{{row.vs.description}}</em></div>
+
+
                                         </td>
                                         <td>
                                             <div ng-repeat="cs in row.cs">{{cs}}</div>
@@ -782,6 +791,27 @@
                             </div>
 
                         </uib-tab>
+
+                        <uib-tab heading="Extensions">
+                            <br/>
+                            <table class="table table-bordered table-condensed">
+                                <tr><th>Element</th><th>Url</th></tr>
+                                <tr ng-repeat="row in treeData" ng-show="row.data.isExtension">
+                                    <td>
+                                        <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="clickable" ng-click="editExtension(row.data.fhirMappingExtensionUrl)">{{row.data.fhirMappingExtensionUrl}}</div>
+
+                                    </td>
+
+
+                                </tr>
+                            </table>
+
+                        </uib-tab>
+
+
                         <uib-tab heading="Must Support">
                             <br/>
                             <div class="row">
@@ -798,7 +828,7 @@
                             <div class="designerScroll">
 
                                 <table class="table table-bordered table-condensed">
-                                    <tr><th>Element</th><th>Must Support</th></tr>
+                                    <tr><th>Element</th><th>Description</th><th>Must Support</th></tr>
 
                                     <tr ng-repeat="row in treeData"
                                         ng-hide="$index==0 || (input.showMustSupportOnly && ! row.data.mustSupport)">
@@ -807,6 +837,8 @@
                                             <div ng-click="selectNodeFromTable(row.data.path)"
                                                  class="clickable" >{{row.data.path | dropFirstInPath}}</div>
                                         </td>
+
+                                        <td>{{row.data.description}}</td>
                                         <td>{{row.data.mustSupport}}</td>
 
                                     </tr>
@@ -849,23 +881,6 @@
 
                         </uib-tab>
 
-                        <uib-tab heading="Extensions">
-                            <br/>
-                            <table class="table table-bordered table-condensed">
-                                <tr><th>Element</th><th>Url</th></tr>
-                                <tr ng-repeat="row in treeData" ng-show="row.data.isExtension">
-                                    <td>
-                                        <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
-                                    </td>
-                                    <td>
-                                        {{row.data.fhirMappingExtensionUrl}}
-                                    </td>
-
-
-                                </tr>
-                            </table>
-
-                        </uib-tab>
 
                         <uib-tab heading="References" ng-show="1==2">
                             <br/>
@@ -1206,14 +1221,14 @@
 
 
                                 <tr ng-show="selectedNode.data.fhirMappingExtensionUrl"><td>Extension Url</td>
-                                    <td>
+                                <!--    <td>
                                         {{selectedNode.data.fhirMappingExtensionUrl}}
                                     </td>
-<!--
+-->
                                     <td>
                                         <a href="#" ng-click="editExtension(selectedNode.data.fhirMappingExtensionUrl)">{{selectedNode.data.fhirMappingExtensionUrl}}</a>
                                     </td>
-                                    -->
+
                                 </tr>
 
                                 <tr ng-show="selectedNode.data.comments"><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>
@@ -1444,7 +1459,8 @@
                                 <br/>
                                 <table class="table table-bordered">
 
-
+                                    <tr ng-show="treeData[0].data.header.baseType">
+                                        <td>Base Resource Type</td><td>{{treeData[0].data.header.baseType}}</td></tr>
 
                                     <tr><td width="25%">Model Name</td><td>{{treeData[0].data.header.name}}</td></tr>
                                     <tr><td>Model Url</td><td>{{treeData[0].data.header.SDUrl}}</td></tr>
@@ -1473,16 +1489,16 @@
                                         </td>
                                     </tr>
 
-                                    <tr ng-show="treeData[0].data.header.baseType">
-                                        <td>Base Resource Type</td><td>{{treeData[0].data.header.baseType}}</td></tr>
+
 
 
                                     <tr ng-show="treeData[0].data.header.mapping">
                                         <td>Mapping</td><td>{{treeData[0].data.header.mapping}}</td></tr>
 
-                                    <tr ng-show="treeData[0].data.header.SDUrl">
+                                   <!-- <tr ng-show="treeData[0].data.header.SDUrl">
                                         <td >Profile Url<div>(When generated)</div></td><td>{{treeData[0].data.header.SDUrl + '-cf-profile'}}</td>
                                     </tr>
+                                    -->
 
 
                                 </table>
@@ -1535,35 +1551,31 @@
 
                             <uib-tab heading="History">
                                 <br/>
-                                <ul class="list-group">
 
+                                <div class="designerScroll">
+                                    <ul class="list-group">
+                                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':false}"
+                                            ng-repeat="entry in modelHistory.entry"
+                                            ng-click="selectModelVersion(entry,$index)">
 
-                                    <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':false}"
-                                        ng-repeat="entry in modelHistory.entry"
-                                        ng-click="selectModelVersion(entry,$index)">
+                                            <div class="row">
+                                                <div class="col-md-4 col-sm-4 clickable" >
+                                                    {{entry.resource.meta.lastUpdated | date:'medium'}}
+                                                </div>
+                                                <div class="col-md-4 col-sm-4">
+                                                    {{entry.resource.extension | extensionValue : 'http://clinfhir.com/fhir/StructureDefinition/editor'}}
 
-
-
-                                        <div class="row">
-                                            <div class="col-md-4 col-sm-4">
-                                                {{entry.resource.meta.lastUpdated | date:'medium'}}
+                                                    {{entry.resource.extension | extensionValue : 'http:www.clinfhir.com/StructureDefinition/userEmail'}}
+                                                </div>
+                                                <div class="col-md-4 col-sm-4">
+                                                    <span class="pull-right">{{entry.resource.meta.lastUpdated | getAgeSeconds}}</span>
+                                                </div>
                                             </div>
-                                            <div class="col-md-4 col-sm-4">
-                                                {{entry.resource.extension | extensionValue : 'http://clinfhir.com/fhir/StructureDefinition/editor'}}
+                                        </li>
+                                    </ul>
 
-                                                {{entry.resource.extension | extensionValue : 'http:www.clinfhir.com/StructureDefinition/userEmail'}}
-                                            </div>
-                                            <div class="col-md-4 col-sm-4">
-                                                <span class="pull-right">{{entry.resource.meta.lastUpdated | getAgeSeconds}}</span>
-                                            </div>
+                                </div>
 
-
-                                        </div>
-
-                                    </li>
-
-
-                                </ul>
 
                             </uib-tab>
 
@@ -1690,11 +1702,11 @@
                         </div>
                     </uib-tab>
 -->
-                    <uib-tab ng-show = "selectedNode" heading="TreeJson">
+                    <uib-tab ng-show = "selectedNode && debug" heading="TreeJson">
                         <pre>{{selectedNode | json}}</pre>
                     </uib-tab>
 
-                    <uib-tab ng-show = "selectedNode" heading="EDJson">
+                    <uib-tab ng-show = "selectedNode && debug" heading="EDJson">
                         <pre>{{selectedED | json}}</pre>
                     </uib-tab>
 <!--
@@ -1772,18 +1784,6 @@
             </div>
         </div>
 
-
-
-        <!-- a directive that allows a profile to be selected - not just a base one... -->
-        <!---->
-        <!--
-        <select-profile trigger="showFindProfileDialog"
-                        all-resource-types="allResourceTypes"
-                        profile-selected="selectedProfileFromDialog" type="'profile'">
-
-        </select-profile>
-
-        -->
 
 
 

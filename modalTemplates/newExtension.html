@@ -3,7 +3,8 @@
     <div class="modal-header">
         <div class="row">
             <div class="col-md-8 col-sm-8">
-                <h3 class="modal-title">Create new Extension Definition</h3>
+                <h3 ng-hide="readOnly" class="modal-title">Create new Extension Definition</h3>
+                <h3 ng-show="readOnly" class="modal-title">View Extension Definition</h3>
             </div>
             <div class="col-md-1">
                 <div ng-show="showWaiting">
@@ -11,13 +12,21 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="pull-right">
+
+                <div  ng-hide="readOnly" class="pull-right">
                     <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
                     <button class="btn btn-success" ng-show="canSaveEd" ng-click="save()">Save</button>
                 </div>
+
+                <div  ng-show="readOnly" class="pull-right">
+                    <button class="btn btn-link" ng-click="$dismiss()">Close</button>
+
+                </div>
+
             </div>
         </div>
     </div>
+
     <div class="modal-body">
 
         <div uib-alert close="closeValidationOutcome()" class="alert-warning"
@@ -54,7 +63,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-4 col-sm-4">
-                                    <button class="btn btn-primary pull-right" ng-click="checkEDExists(input.name)">Check</button>
+                                    <button  ng-hide="readOnly" class="btn btn-primary pull-right" ng-click="checkEDExists(input.name)">Check</button>
                                 </div>
                             </div>
 <!--
@@ -108,7 +117,7 @@
                                     </div>
                                 </div>
 
-                                <button class="btn btn-link pull-right" class="btn btn-link" ng-click="addContext()">Add Context</button>
+                                <button  ng-hide="readOnly" class="btn btn-link pull-right" class="btn btn-link" ng-click="addContext()">Add Context</button>
 
 
 
@@ -143,7 +152,7 @@
                         <strong>Extension content</strong>
                     </div>
                     <div class="col-md-6 col-sm-6">
-                        <button class="btn btn-link pull-right" class="btn btn-link" ng-click="addChild()">Add element</button>
+                        <button  ng-hide="readOnly" class="btn btn-link pull-right" class="btn btn-link" ng-click="addChild()">Add element</button>
                     </div>
                 </div>
 
@@ -184,14 +193,19 @@
             <div class="col-md-12">
                 <div class="text-left">
 
-                    <p ng-hide="canSaveEd">
-                        Enter a name for the extension. This must be new on the Conformance server ({{conformanceSvr.name}}), or one that has been
-                        previously created by clinFHIR (and will be replaced by this definition).
-                    </p>
+                    <div ng-hide="readOnly">
+                        <p ng-hide="canSaveEd">
+                            Enter a name for the extension. This must be new on the Conformance server ({{conformanceSvr.name}}), or one that has been
+                            previously created by clinFHIR (and will be replaced by this definition).
+                        </p>
 
-                    <p ng-show="canSaveEd">
-                        Now enter the remaining details. All fields are required. At least one element is required.
-                    </p>
+                        <p ng-show="canSaveEd">
+                            Now enter the remaining details. All fields are required. At least one element is required.
+                        </p>
+
+                    </div>
+
+
 
                 </div>
 

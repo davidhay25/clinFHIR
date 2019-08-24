@@ -1145,10 +1145,15 @@ angular.module("sampleApp").service('profileDiffSvc',
         //generate a chart showing the interrelationships of artifacts in the IG...
         createGraphOfIG: function (inIG,options) {
 
+
+
             var IG = angular.copy(inIG);    //as teh IG gets mutated by this function....
             options = options || {profiles:[]};
 
             var deferred = $q.defer();
+            return deferred.promise
+
+            deferred.resolve();  //todo temp
 
             var that = this;
 

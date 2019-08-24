@@ -706,7 +706,7 @@ angular.module("sampleApp")
             $scope.downLoadItem = function(ev,item,notes) {
                 ev.stopPropagation();
 
-                profileDiffSvc.getSD(item.url).then(
+                profileDiffSvc.getSD(item.url,fhirVersion).then(
                     function (SD) {
                         displayDownLoadDlg(SD)
                     },function(err){
@@ -1197,7 +1197,7 @@ don't change link on edit...
 
                 var url = $window.prompt('Enter the canonical url of the '+itemType.display + " \n(It must be on the Conformance server)");
                 if (url) {
-                    profileDiffSvc.getSD(url).then(
+                    profileDiffSvc.getSD(url,fhirVersion).then(
                         function (SD) {
 
 
@@ -1281,7 +1281,7 @@ don't change link on edit...
 
             //select an extension from within a profile...
             $scope.selectExtensionFromProfile = function (itemExtension) {
-                profileDiffSvc.getSD(itemExtension.url).then(
+                profileDiffSvc.getSD(itemExtension.url,fhirVersion).then(
                     function (SD) {
                         $scope.showExtension(SD);
                     }
@@ -1289,7 +1289,7 @@ don't change link on edit...
             };
 
             $scope.showExtensionFromUrl = function(url){
-                profileDiffSvc.getSD(url).then(
+                profileDiffSvc.getSD(url,fhirVersion).then(
                     function(SD){
                         $scope.showExtension(SD)
                     },
@@ -1723,7 +1723,7 @@ don't change link on edit...
                 if (type == 'logical') {
                     delete $scope.LMSD;
                     delete $scope.lmShortCut;
-                    profileDiffSvc.getSD(item.url).then(
+                    profileDiffSvc.getSD(item.url,fhirVersion).then(
                         function (SD) {
 
                             $scope.$broadcast("loadResource",SD);   //so can load the documentation...
@@ -1955,7 +1955,7 @@ console.log(SD)
 
                    $scope.waiting = true;
 
-                   profileDiffSvc.getSD(url).then(
+                   profileDiffSvc.getSD(url,fhirVersion).then(
                        function(SD){
 
 

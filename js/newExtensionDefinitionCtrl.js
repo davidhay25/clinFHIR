@@ -1,12 +1,13 @@
 
 angular.module("sampleApp").controller('extensionDefCtrl',
         function ($rootScope,$scope,$uibModal,appConfigSvc,GetDataFromServer,Utilities,modalService,
-                  RenderProfileSvc,$http,currentExt,securitySvc,edBuilderSvc) {
+                  RenderProfileSvc,$http,currentExt,securitySvc,edBuilderSvc,readOnly) {
 
             $scope.childElements = [];      //array of child elements
             $scope.input ={};
             $scope.input.multiplicity = 'opt';
             $scope.selectedResourcePaths = [];
+            $scope.readOnly = readOnly;
 
             //if being edited...
             if (currentExt) {

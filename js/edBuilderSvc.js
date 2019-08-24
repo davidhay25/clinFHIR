@@ -40,15 +40,28 @@ angular.module("sampleApp")
                 if (arED.length > 3) {
                     isComplex = true;
                 }
-
+/*
+* nbow in 5 element batches after MOH work on generating from LM
+* extension
+* .id
+* .extension
+* .url
+* .type
+*
+* header has 3
+* */
                 if (isComplex) {
-                    //process in 3-element batches...
-                    for (var i=2; i< arED.length; i=i+3) {
-                        var ar = arED.slice(i,i+3);
+
+
+                    //process in 3-element batches... NOTE change to 5 element
+                    for (var i=2; i< arED.length; i=i+5) {
+                        var ar = arED.slice(i,i+5);
                         var child = processTriplet(ar);
                         console.log(child);
                         voED.childElements.push(child);
                     }
+
+
 
                 } else {
                     var child = processTriplet(arED);   //will look at the first 3 EDs,,

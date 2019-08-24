@@ -110,6 +110,9 @@ angular.module("sampleApp")
                     resolve : {
                         currentExt: function () {          //the default extension
                             return null;
+                        },
+                        readOnly : function(){
+                            return true
                         }
                     }
                 }).result.then(
@@ -154,6 +157,9 @@ angular.module("sampleApp")
                     resolve : {
                         currentExt: function () {          //the default extension
                             return $scope.selectedExtension;
+                        },
+                        readOnly : function(){
+                            return true
                         }
                     }
                 }).result.then(

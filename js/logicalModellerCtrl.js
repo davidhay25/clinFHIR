@@ -12,6 +12,7 @@ angular.module("sampleApp")
             $scope.code.lmPalette = 'lmPalette';        //the list code for the paletteof models...
             $scope.treeData = [];           //populates the resource tree
 
+            $scope.debug = false;
 
             $scope.mdOptions = {
                 controls: ["bold", "italic", "separator", "bullets","separator", "heading","separator", "preview"]
@@ -35,6 +36,11 @@ angular.module("sampleApp")
 
             $scope.showComments = true;
 
+
+
+            $scope.EDDisplayDEP = function(url){
+                alert(url)
+            }
 
             GetDataFromServer.registerAccess('logical');
 
@@ -259,14 +265,7 @@ angular.module("sampleApp")
             } else {
                 //if there's no hash, then load all the cf created models
                 loadAllModels();
-                /*
-                if ($scope.conformanceServer.url !== appConfigSvc.getCurrentDataServer().url) {
-                    var msg = 'The Conformance and Data servers must be the same for the Comments to work correctly.\n';
-                    msg += 'Please reset them and re-load the page if you want comments.'
-                    modalService.showModal({}, {bodyText: msg})
 
-                }
-                */
             }
 
 
@@ -279,7 +278,7 @@ angular.module("sampleApp")
                    // return
                 } else {
                     //otherwise get the Practitioner resource that corresponds to this user, and show their palette
-                    //delete $scope.input.mdComment;
+
 
                     if (user) {
                         $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
@@ -1579,21 +1578,7 @@ angular.module("sampleApp")
 
                 }
             };
-/*
-            $scope.createTaskDEP = function(){
-                //create a new task for this practitioner against this model.
-                SaveDataToServer.addTaskForPractitioner($scope.Practitioner,{focus:$scope.currentType}).then(
-                    function(task){
-                        $scope.commentTask = task
-                        $scope.taskOutputs = [];
 
-                    },
-                    function(err) {
-                        alert(angular.toJson(err))
-                    }
-                )
-            };
-            */
 
             $scope.generateShortCut = function() {
                 var hash = Utilities.generateHash();
@@ -1621,7 +1606,6 @@ angular.module("sampleApp")
                 //var seriesRef = new Firebase(fbUrl+'/series');
                 var scCollection = $firebaseArray(firebase.database().ref().child("shortCut"));
 
-                //seriesCollection.$ref().orderByChild("config.model.id").equalTo('ADR').once("value", function(dataSnapshot){
                 scCollection.$ref().orderByChild("modelId").equalTo(id).once("value", function(dataSnapshot){
                     var series = dataSnapshot.val();
                     if(series){
@@ -1650,7 +1634,6 @@ angular.module("sampleApp")
             $scope.viewDataType = function(dt) {
                 //for datatypes, only the current spec seems to have datatypees...
                 var url = 'http://hl7.org/fhir/StructureDefinition/'+dt;
-                //var url = $scope.fhirRoot +  'StructureDefinition/'+dt;
                 $scope.viewReferencedModel(url)
             };
 
@@ -1894,7 +1877,10 @@ angular.module("sampleApp")
                 $scope.input.graphTabIsSelected = true;
 
                 $timeout(function(){
-                    $scope.profileNetwork.fit();
+                    if ($scope.profileNetwork) {
+                        $scope.profileNetwork.fit();
+                    }
+
 
                 },1000)
 
@@ -2672,6 +2658,9 @@ angular.module("sampleApp")
             $scope.selectModelVersion = function(entry){
                 $scope.SD = entry.resource;
                 $scope.isHistory = true;
+
+
+
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.SD);
                 drawTree();
             };
@@ -2696,6 +2685,9 @@ angular.module("sampleApp")
                             resolve : {
                                 currentExt: function () {          //the default extension
                                     return resource;
+                                },
+                                readOnly : function(){
+                                    return true
                                 }
                             }
                         }).result.then(

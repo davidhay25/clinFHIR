@@ -138,7 +138,7 @@ angular.module("sampleApp")
 
         defaultConfig.allKnownServers.push({name:"Public HAPI STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true,isTerminology:true});
 
-        defaultConfig.allKnownServers.push({name:"Public HAPI R4 server",url:" http://fhirtest.uhn.ca/baseR4/",version:4,everythingOperation:true,isTerminology:true});
+        defaultConfig.allKnownServers.push({name:"Public HAPI R4 server",url:"http://fhirtest.uhn.ca/baseR4/",version:4,everythingOperation:true,isTerminology:true});
 
 
 
@@ -197,9 +197,7 @@ angular.module("sampleApp")
 
         defaultConfig.allKnownServers.push({name:'HSPC Tutorial',version:3,url:"https://api-v8-stu3.hspconsortium.org/ClinFHIRTutorial/open/",everythingOperation:false});
 
-
-
-        defaultConfig.allKnownServers.push({name:'HSPC-4',version:4,url:"https://api.logicahealth.org/CoFsandboxR4/open/",everythingOperation:true});
+        defaultConfig.allKnownServers.push({name:'HSPC-COF-R4',version:4,url:"https://api.logicahealth.org/CoFsandboxR4/open/",everythingOperation:true});
 
 
 

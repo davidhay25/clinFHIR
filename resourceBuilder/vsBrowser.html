@@ -5,16 +5,12 @@
 
         <div class="row">
             <div class="col-md-9 col-sm-9">
-                <h3 class="modal-title">Display ValueSet: {{vsUrl}}</h3>
+                <h3 class="modal-title">ValueSet Browser: {{vsUrl}}</h3>
 
             </div>
             <div class="col-md-3 col-sm-3" >
                 <div class="pull-right">
                     <button class="btn btn-warning" ng-click="close()">Close</button>
-   <!--
-                    <button ng-show="showVSSelectButton" class="btn btn-primary" ng-click="selectNewVS()">Select</button>
--->
-
 
                 </div>
             </div>
@@ -98,6 +94,16 @@
                     <div class="col-md-2 col-sm-2">Date</div>
                     <div class="col-md-10 col-sm-10">{{valueSet.date}}</div>
                 </div>
+                <div class="row">
+                    <div class="col-md-2 col-sm-2">CodeSystems</div>
+                    <div class="col-md-10 col-sm-10">
+
+                        <div ng-repeat="inc in valueSet.compose.include ">
+                            {{inc.system}}
+                        </div>
+                    </div>
+                </div>
+
 
             </uib-tab>
 
