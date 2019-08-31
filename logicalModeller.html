@@ -795,7 +795,7 @@
                         <uib-tab heading="Extensions">
                             <br/>
                             <table class="table table-bordered table-condensed">
-                                <tr><th>Element</th><th>Url</th></tr>
+                                <tr><th>Element</th><th>Url</th><th>Description</th></tr>
                                 <tr ng-repeat="row in treeData" ng-show="row.data.isExtension">
                                     <td>
                                         <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path}}</div>
@@ -804,7 +804,7 @@
                                         <div class="clickable" ng-click="editExtension(row.data.fhirMappingExtensionUrl)">{{row.data.fhirMappingExtensionUrl}}</div>
 
                                     </td>
-
+                                    <td>{{row.data.description}}</td>
 
                                 </tr>
                             </table>
