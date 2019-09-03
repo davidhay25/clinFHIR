@@ -170,7 +170,7 @@ angular.module("sampleApp").
             var deferred = $q.defer();
             var listTypeSystem = appConfigSvc.config().standardSystem.listTypes;
             var url = appConfigSvc.getCurrentDataServer().url +
-                "List?source:Practitioner="+practitioner.id + "&code=" + listTypeSystem + '|' + type;
+                "List?source:Practitioner="+ encodeURIComponent( practitioner.id + "&code=" + listTypeSystem + '|' + type);
 
             $http.get(url).then(
                 function(data) {
@@ -406,8 +406,12 @@ angular.module("sampleApp").
             //the system used by clinFHIR for practitioners...
             var practitionerSystem = appConfigSvc.config().standardSystem.practitionerIdentifierSystem;
 
+           // var url = appConfigSvc.getCurrentDataServer().url +
+            //    "Practitioner?identifier="+practitionerSystem + "|"+loginIdentifier;
+           // url = encodeURIComponent(url);
+
             var url = appConfigSvc.getCurrentDataServer().url +
-                "Practitioner?identifier="+practitionerSystem + "|"+loginIdentifier;
+                "Practitioner?identifier="+encodeURIComponent(practitionerSystem + "|"+loginIdentifier);
 
             this.adHocFHIRQuery(url).then(
                 function(data) {
