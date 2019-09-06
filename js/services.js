@@ -780,7 +780,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 }
 
                 var identifierQuery = encodeURIComponent(res.identifier[0].system + '|' + res.identifier[0].value);
-                
+
                 var url = appConfigSvc.getCurrentDataServerBase() + res.resourceType + "?identifier="+identifierQuery;
 
                 $http.get(url).then(

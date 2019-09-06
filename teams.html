@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!--
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
+    !-->
+
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/firebase.js"></script>
+    <script src="js/libs/angularfire.min.js"></script>
+    <script src="js/libs/moment.min.js"></script>
+
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <title>Teams</title>
+
+
+    <script>
+
+
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+
+        angular.module("sampleApp").constant("moment", moment);
+
+
+    </script>
+
+    <script>
+        var config = {
+            apiKey: "AIzaSyBNMohLbPiSKwpGwfARopdeW_6LLXujcUo",
+            authDomain: "clinfhir.firebaseapp.com",
+            databaseURL: "https://clinfhir.firebaseio.com",
+            storageBucket: ""
+        };
+
+        if (firebase) {
+            firebase.initializeApp(config);
+
+        }
+    </script>
+
+
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/modalDialogSvc.js"></script>
+    <script src="js/teamsCtrl.js"></script>
+    <script src="js/teamsSvc.js"></script>
+
+    <script src="js/filters.js"></script>
+
+    <!--
+        <script src="js/appConfigSvc.js"></script>
+    <script src="js/launcherCtl.js"></script>
+    <script src="js/setServers.js"></script>
+        <script src="resourceBuilder/rbServices.js"></script>
+    <script src="js/logicalModelSvc.js"></script>
+    <script src="js/loginCtrl.js"></script>
+    -->
+
+</head>
+<body style="padding: 8px;padding-top: 80px">
+
+
+<div ng-app="sampleApp" ng-controller="teamsCtrl" class="container-fluid" ng-cloak>
+
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="col-md-8 col-sm-8">
+            <a class="navbar-brand" href="#">clinFHIR Teams prototype</a>
+        </div>
+
+        <div class="col-md-2 col-sm-2">
+            <div class="navbar-text pull-right">
+                {{firebase.auth().currentUser.email}}
+            </div>
+
+        </div>
+
+
+        <div class="col-md-1 col-sm-1">
+
+            <div ng-hide="waiting">
+                <div class="nav navbar-form navbar-right" ng-hide="firebase.auth().currentUser">
+                    <span style="font-size:1.8em; cursor: pointer">
+                        <div ng-click="login()">
+                            <i class="glyphicon glyphicon-log-in"></i>
+                        </div>
+                    </span>
+                </div>
+
+                <div class="nav navbar-form navbar-right" ng-show="firebase.auth().currentUser">
+                        <span style="font-size:1.8em; cursor: pointer"
+                              uib-popover="{{firebase.auth().currentUser.email}}"
+                              popover-placement="left"
+                              popover-trigger="'mouseenter'">
+
+                            <div href="#" ng-click="logout()"> <i class="glyphicon glyphicon-log-out"></i></div>
+                        </span>
+                </div>
+            </div>
+
+
+
+
+        </div>
+
+
+        <div class="col-md-1 col-sm-1">
+            <ul class="nav navbar-nav navbar-right"  ng-hide="waiting">
+                <li uib-dropdown>
+
+                    <a href="#" uib-dropdown-toggle>
+                        <span style="font-size:2em; cursor: pointer">
+                            <i class="glyphicon glyphicon-cog"></i>
+                        </span>
+                    </a>
+
+
+
+                    <ul class="dropdown-menu" role="menu">
+
+
+                        <li>
+                            <a href="#" ng-click="showChart()" ng-hide="displayMode=='access'"
+                               uib-popover="Show how many people are using clinFHIR"
+                               popover-placement="left"
+                               popover-trigger="'mouseenter'">Access statistics</a>
+                        </li>
+
+                        <li>
+                            <a href="#" ng-click="displayMode = 'front'" ng-hide="displayMode=='front'"
+                               uib-popover="Show the main Launcher screen"
+                               popover-placement="left"
+                               popover-trigger="'mouseenter'">Launcher</a>
+                        </li>
+
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+
+    </nav>
+
+
+    <div class="row">
+        <div class="col-md-2 col-sm-2">
+            <div class="list-group">
+                <div ng-class="{'list-group-item':true}" ng-repeat="team in teams track by $index"
+                    ng-click="selectTeam(team)" style="cursor: pointer">
+                    {{team.name}}
+                </div>
+            </div>
+
+
+
+        </div>
+
+        <div class="col-md-8 col-sm-8">
+            <uib-tabset>
+                <uib-tab heading="Json">
+                    <pre>{{team | json}}</pre>
+                </uib-tab>
+                <uib-tab heading="Details">
+                    <div class="row">
+                        <div class="col-md-6">
+
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    Name
+                                </div>
+                                <div class="col-md-8">
+                                    {{team.name}}
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="col-md-6">
+
+                        </div>
+                    </div>
+
+
+                </uib-tab>
+            </uib-tabset>
+
+
+
+        </div>
+
+    </div>
+
+
+
+
+
+</div>
+</body>
+</html>
