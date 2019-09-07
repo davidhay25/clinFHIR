@@ -15,19 +15,23 @@ angular.module("sampleApp")
             }
 
             $scope.reset = function(){
-                teamsSvc.getTeams().then(
-                    function(data) {
+                if (confirm("This will reset the teams back to the default set")) {
+                    teamsSvc.getTeams().then(
+                        function(data) {
 
-                        $scope.teams = data.data;
-                        $localStorage.teams = data.data;
-                    }
-                );
+                            $scope.teams = data.data;
+                            $localStorage.teams = data.data;
+
+                        }
+                    );
+                }
+
             }
 
             $scope.selectTeam = function (team) {
                 $scope.team = team;
                 console.log(team)
-            }
+            };
 
             $scope.editTeam = function () {
                 $uibModal.open({
@@ -101,34 +105,69 @@ angular.module("sampleApp")
             };
 
 
-            $scope.editMember = function (member) {
+            $scope.editMember = function (inx) {
+                let originalMember;
+                if (inx !== undefined) {
+                    originalMember = $scope.team.member[inx];
+                }
+
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
                     keyboard: false,       //same as above.
                     templateUrl: 'modalTemplates/editTeamMember.html',
-                    controller: function($scope) {
+                    controller: function($scope,member) {
                         $scope.input = {};
-                        $scope.add = function() {
-                            let member = {}
-                            member.name = $scope.input.name;
-                            member.CPN = $scope.input.CPN;
-                            member.role = {display: $scope.input.role}
-                            member.contact = [
-                                {type:$scope.input.contactType,value:$scope.input.contactValue}
-                            ]
-                            member.qualification = [{display:$scope.input.qualification}]
-                            $scope.$close(member)
+                        $scope.member = member || {}
+                        let memberb4edit = angular.copy(member);
+                        $scope.addQualification = function(){
+                            $scope.member.qualification = $scope.member.qualification || [];
+                            $scope.member.qualification.push({display:$scope.input.qualification})
+                            delete $scope.input.qualification;
+                        };
+
+                        $scope.addContact = function(){
+                            $scope.member.contact = $scope.member.contact || []
+                            $scope.member.contact.push({type:$scope.input.contactType,value:$scope.input.contactValue});
+                            delete $scope.input.contactType;
+                            delete $scope.input.contactValue;
+                        };
+
+                        $scope.deleteContact = function(inx) {
+                            $scope.member.contact.splice(inx,1)
                         }
 
-                     }
+                        $scope.deleteQualification = function(inx) {
+                            $scope.member.qualification.splice(inx,1)
+                        }
+                        $scope.cancel = function() {
+                            $scope.$close(memberb4edit)
+                        };
+
+                        $scope.add = function() {
+                            $scope.$close($scope.member)
+                        }
+
+                     },
+                resolve : {
+                    member : function(){
+                        return originalMember;
+                    }
+                }
                 }).result.then(
-                    function(member) {
-                        $scope.team.member = $scope.team.member || []
-                        $scope.team.member.push(member)
+                    function(newMember) {
+
+                        if (originalMember) {
+                            //editing
+                            $scope.team.member[inx] = newMember;
+                        } else {
+                            $scope.team.member = $scope.team.member || []
+                            $scope.team.member.push(newMember)
+                        }
+
                         $localStorage.teams = $scope.teams
                     })
 
-            }
+            };
 
             $scope.removeMember = function(inx) {
                 let member = $scope.team.member[inx]

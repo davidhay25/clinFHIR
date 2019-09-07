@@ -78,7 +78,10 @@
         </div>
 
         <div class="col-md-1 col-sm-1">
-            <button class="btn btn-primary" ng-click="reset()">Reswt</button>
+            <div class="navbar-text">
+                <button class="btn btn-primary" ng-click="reset()">Reset</button>
+            </div>
+
         </div>
 
         <div class="col-md-2 col-sm-2">
@@ -332,7 +335,8 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <i class="glyphicon glyphicon-minus-sign pull-right clickable" ng-click="removeMember($index)"></i>
+                                        <i class="glyphicon glyphicon-minus-sign pull-right clickable iconSpacing" ng-click="removeMember($index)"></i>
+                                        <i class="glyphicon glyphicon-edit pull-right clickable iconSpacing" ng-click="editMember($index)"></i>
                                     </td>
                                 </tr>
                             </table>
