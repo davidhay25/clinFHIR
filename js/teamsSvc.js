@@ -1,25 +1,12 @@
 angular.module("sampleApp")
 
-    .service('teamsSvc', function($q) {
+    .service('teamsSvc', function($q,$http) {
 
 
         return {
             getTeams: function (vo) {
-                let deferred = $q.defer();
 
-                let teams = `
-                    [
-                        {"name":"Mental Health"},
-                        {"name":"Stroke Rehab"}
-                    
-                    ]
-
-                `;
-
-
-                deferred.resolve(angular.fromJson(teams));
-
-                return deferred.promise;
+                return $http.get("artifacts/teams.json")
 
 
             }

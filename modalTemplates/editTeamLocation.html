@@ -1,0 +1,85 @@
+<div>
+
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h3 class="modal-title">Add a Location</h3>
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+                <div class="pull-right">
+                    <button class="btn btn-success pull-right" ng-click="add()">Add</button>
+                    <button class="btn btn-link pull-right" ng-click="$dismiss()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-body">
+
+        <div class="row">
+            <div class="col-md-3 col-sm-3">
+                Name
+            </div>
+            <div class="col-md-8 col-sm-8">
+                <input type="text" class="form-control"  ng-model="input.name"/>
+            </div>
+
+        </div>
+        <br/>
+
+        <div class="row">
+            <div class="col-md-3 col-sm-3">
+                Hours
+            </div>
+            <div class="col-md-8 col-sm-8">
+                <input type="text" class="form-control"  ng-model="input.hours"/>
+            </div>
+        </div>
+        <br/>
+
+        <div class="row">
+            <div class="col-md-3 col-sm-3">
+                Contact
+            </div>
+            <div class="col-md-2 col-sm-2">
+                <select class="form-control" ng-model="input.contactType">
+                    <option value="email">Email</option>
+                    <option value="mobile">Mobile</option>
+                    <option value="phone">Phone</option>
+                </select>
+
+            </div>
+            <div class="col-md-7 col-sm-7">
+                <input type="text" class="form-control" ng-model="input.contactValue" />
+            </div>
+        </div>
+    </div>
+
+
+
+
+    </div>
+
+    <div class="modal-header">
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <em>This is a minimal screen to add a new member. Only a single qualification or contact is supported at the
+                    moment (in the actual app there can be multiple). Also - many of the coded fields are currwntly strings -
+                    this will change. The intention is that it will be possible to select the
+                person from the HPI - and potentially update the HPI as well, depending on the rights of the user</em>
+
+
+
+
+
+            </div>
+
+        </div>
+
+
+
+    </div>
+</div>

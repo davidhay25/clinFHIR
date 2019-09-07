@@ -73,8 +73,12 @@
 <div ng-app="sampleApp" ng-controller="teamsCtrl" class="container-fluid" ng-cloak>
 
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-        <div class="col-md-8 col-sm-8">
+        <div class="col-md-7 col-sm-7">
             <a class="navbar-brand" href="#">clinFHIR Teams prototype</a>
+        </div>
+
+        <div class="col-md-1 col-sm-1">
+            <button class="btn btn-primary" ng-click="reset()">Reswt</button>
         </div>
 
         <div class="col-md-2 col-sm-2">
@@ -150,55 +154,220 @@
 
     </nav>
 
+    <uib-tabset>
+        <uib-tab heading="Manage Teams">
 
-    <div class="row">
-        <div class="col-md-2 col-sm-2">
-            <div class="list-group">
-                <div ng-class="{'list-group-item':true}" ng-repeat="team in teams track by $index"
-                    ng-click="selectTeam(team)" style="cursor: pointer">
-                    {{team.name}}
-                </div>
-            </div>
-
-
-
-        </div>
-
-        <div class="col-md-8 col-sm-8">
-            <uib-tabset>
-                <uib-tab heading="Json">
-                    <pre>{{team | json}}</pre>
-                </uib-tab>
-                <uib-tab heading="Details">
-                    <div class="row">
-                        <div class="col-md-6">
-
-
-                            <div class="row">
-                                <div class="col-md-4">
-                                    Name
-                                </div>
-                                <div class="col-md-8">
-                                    {{team.name}}
-                                </div>
-                            </div>
-
-
-                        </div>
-                        <div class="col-md-6">
-
+           <div class="row">
+                <div class="col-md-2 col-sm-2">
+                    <div class="list-group">
+                        <div ng-class="{'list-group-item':true}" ng-repeat="team in teams track by $index"
+                             ng-click="selectTeam(team)" style="cursor: pointer">
+                            {{team.name}}
                         </div>
                     </div>
 
 
-                </uib-tab>
-            </uib-tabset>
+
+                </div>
+
+                <div class="col-md-10 col-sm-10">
+                    <uib-tabset ng-show="team">
+
+                        <uib-tab heading="Details">
+                            <br/>
+
+
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <strong>Name</strong>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Purpose</strong>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Services</strong>
+                                </div>
+                                <div class="col-md-2">
+                                    <strong>Coverage</strong>
+                                </div>
+                                <div class="col-md-2">
+                                    <strong>Contact</strong>
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-md-2">
+                                    {{team.name}}
+                                </div>
+                                <div class="col-md-3">
+                                    {{team.purpose}}
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="row" ng-repeat="service in team.service">
+                                        <div class="col-sm-12 col-md-12">
+                                            {{service.display}}
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    {{team.coverage}}
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="row" ng-repeat="contact in team.contact">
+                                        <div class="col-sm-3 col-md-3">
+                                            {{contact.type}}
+                                        </div>
+                                        <div class="col-sm-9 col-md-9">
+                                            {{contact.value}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+<!--
+                            <div class="row">
+                                <div class="col-md-6">
+
+
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <strong>Team name</strong>
+                                        </div>
+                                        <div class="col-md-4">
+                                            {{team.name}}
+                                        </div>
+                                        <div class="col-md-2">
+                                            <strong>Purpose</strong>
+                                        </div>
+                                        <div class="col-md-4">
+                                            {{team.purpose}}
+                                        </div>
+
+
+                                    </div>
+
+
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="col-md-2">
+                                        <strong>Coverage</strong>
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{team.coverage}}
+                                    </div>
+                                    <div class="col-md-2">
+                                        <strong>Contact</strong>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="row" ng-repeat="contact in team.contact">
+                                            <div class="col-sm-3 col-md-3">
+                                                {{contact.type}}
+                                            </div>
+                                            <div class="col-sm-9 col-md-9">
+                                                {{contact.value}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            -->
+                            <hr/>
+
+
+                            <strong>Locations</strong>
+                            <i class="glyphicon glyphicon-plus-sign pull-right clickable" ng-click="editLocation()"></i>
+                            <table class="table table-bordered">
+                                <tr><th>Name</th><th>Hours</th><th>Contact</th><th>Action</th></tr>
+                                <tr ng-repeat = "location in team.location">
+                                    <td>{{location.display}}</td>
+                                    <td>{{location.hours}}</td>
+
+                                    <td>
+                                        <div class="row" ng-repeat = "contact in location.contact">
+                                            <div class="col-sm-3 col-md-3">
+                                                {{contact.type}}
+                                            </div>
+                                            <div class="col-sm-9 col-md-9">
+                                                {{contact.value}}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <i class="glyphicon glyphicon-minus-sign pull-right clickable" ng-click="removeLocation($index)"></i>
+                                    </td>
+                                </tr>
+                            </table>
 
 
 
-        </div>
+                            <strong>Members</strong>
 
-    </div>
+                            <i class="glyphicon glyphicon-plus-sign pull-right clickable" ng-click="editMember()"></i>
+
+                            <table class="table table-bordered">
+                                <tr><th>Name</th><th>CPN</th><th>Role</th><th>Qualifications</th><th>Contacts</th><th>Action</th></tr>
+                                <tr ng-repeat = "member in team.member">
+                                    <td>{{member.name}}</td>
+                                    <td>{{member.CPN}}</td>
+                                    <td>{{member.role.display}}</td>
+                                    <td>
+                                        <div ng-repeat = "qual in member.qualification">
+                                            {{qual.display}}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="row" ng-repeat = "contact in member.contact">
+                                            <div class="col-sm-3 col-md-3">
+                                                {{contact.type}}
+                                            </div>
+                                            <div class="col-sm-9 col-md-9">
+                                                {{contact.value}}
+
+                                            </div>
+
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <i class="glyphicon glyphicon-minus-sign pull-right clickable" ng-click="removeMember($index)"></i>
+                                    </td>
+                                </tr>
+                            </table>
+
+
+
+                        </uib-tab>
+
+                        <uib-tab heading="Json">
+                            <pre>{{team | json}}</pre>
+                        </uib-tab>
+
+                    </uib-tabset>
+
+
+
+                </div>
+
+            </div>
+
+            <div  class="rounded-box">
+                <em>This is a management screen that allows teams to be created, edited and deleted. The intent is to capture the
+                    data requirements for teams - you could imagine a DHB or PHO Administration using a screen like this. The degree to
+                    which the data will be structured / coded will improve as the design evolves - to start with a lot of the elements
+                    are just text, but will become picklists and structured data eventually.</em>
+
+            </div>
+
+        </uib-tab>
+        <uib-tab heading="Query Teams">
+            <em>This will list / demonstrate the queries that the teams API will support. It is envisaged that other applications
+            will use these API's as part of their operation. The API's will include update as well as query capability.</em>
+        </uib-tab>
+        <uib-tab heading="Log of FHIR Interactions">
+            <em>When the app starts getting data from a FHIR server, the queries will be listed here. Purely for technical analysis & design</em>
+        </uib-tab>
+    </uib-tabset>
 
 
 
