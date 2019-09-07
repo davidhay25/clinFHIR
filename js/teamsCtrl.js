@@ -29,6 +29,41 @@ angular.module("sampleApp")
                 console.log(team)
             }
 
+            $scope.editTeam = function () {
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop.
+                    keyboard: false,       //same as above.
+                    templateUrl: 'modalTemplates/editTeam.html',
+                    controller: function($scope) {
+                        $scope.input = {};
+                        $scope.add = function() {
+                            let team = {}
+                            team.name = $scope.input.name;
+                            team.purpose = $scope.input.purpose;
+                            team.service = {display: $scope.input.service}
+                            team.contact = [
+                                {type:$scope.input.contactType,value:$scope.input.contactValue}
+                            ]
+                            $scope.$close(team)
+                        }
+                    }
+                }).result.then(
+                    function(team) {
+                        $scope.teams.push(team)
+                        $scope.team = team;
+                        $localStorage.teams = $scope.teams
+                    })
+            };
+
+            $scope.removeTeam = function(inx) {
+
+                let team = $scope.teams[inx]
+                if (confirm("Are you sure you wish to remove "+team.name+ "?")) {
+                    $scope.teams.splice(inx,1)
+                    $localStorage.teams = $scope.teams;
+                    delete $scope.team;
+                }
+            };
 
 
             $scope.editLocation = function () {
@@ -51,10 +86,10 @@ angular.module("sampleApp")
                     }
                 }).result.then(
                     function(location) {
+                        $scope.team.location = $scope.team.location || []
                         $scope.team.location.push(location)
                         $localStorage.teams = $scope.teams
                     })
-
             };
 
             $scope.removeLocation = function(inx) {
@@ -88,6 +123,7 @@ angular.module("sampleApp")
                      }
                 }).result.then(
                     function(member) {
+                        $scope.team.member = $scope.team.member || []
                         $scope.team.member.push(member)
                         $localStorage.teams = $scope.teams
                     })
