@@ -1,12 +1,21 @@
 angular.module("sampleApp")
     .controller('teamsCtrl',
-        function ($scope,$firebaseAuth,$uibModal,modalService,teamsSvc,$localStorage) {
+        function ($scope,$firebaseAuth,$uibModal,modalService,teamsSvc,$localStorage,$http) {
 
             $scope.teams = $localStorage.teams;
             $scope.organizations = $localStorage.organizations;
             if ($scope.organizations){
                 $scope.organization = $scope.organizations[0]
             }
+
+            $http.post('/stats/login',{module:"teams",servers:{}}).then(
+                function(data){
+                    //console.log(data);
+                },
+                function(err){
+                    console.log('error accessing clinfhir to register access',err)
+                }
+            );
 
 
             if (! $scope.teams) {
