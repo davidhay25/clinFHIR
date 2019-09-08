@@ -159,14 +159,25 @@
 
     <uib-tabset>
         <uib-tab heading="Manage Teams">
-
+            <br/>
            <div class="row">
                 <div class="col-md-2 col-sm-2">
+                    <strong>Organizations</strong>
+                    <select class="form-control" ng-model="organization"
+                            ng-change="selectOrganization(organization)"
+                            ng-options = "org.display for org in organizations"></select>
+                    <br/>
+                    <strong>Teams</strong>
                     <div class="list-group">
-                        <div ng-class="{'list-group-item':true}" ng-repeat="team in teams track by $index"
-                             ng-click="selectTeam(team)" style="cursor: pointer">
-                            {{team.name}}
+                        <div ng-class="{'list-group-item':true,listItemSelected:team1==team}" ng-repeat="team1 in teams track by $index"
+                             ng-click="selectTeam(team1)" style="cursor: pointer" ng-show="team1.managingOrganization.id == organization.id">
+                            {{team1.name}}
                             <i class="glyphicon glyphicon-minus-sign pull-right clickable" ng-click="removeTeam($index)"></i>
+
+                            <!--
+                            <i class="glyphicon glyphicon-edit pull-right clickable iconSpacing" ng-click="editTeam($index)"></i>
+                            -->
+
                         </div>
                     </div>
                     <i class="glyphicon glyphicon-plus-sign pull-right clickable" ng-click="editTeam()"></i>
@@ -175,10 +186,8 @@
 
                 </div>
 
-                <div class="col-md-10 col-sm-10">
-                    <uib-tabset ng-show="team">
+                <div class="col-md-10 col-sm-10" ng-show="team">
 
-                        <uib-tab heading="Details">
                             <br/>
 
 
@@ -230,6 +239,9 @@
                                     </div>
                                 </div>
                             </div>
+
+
+                            <i class="glyphicon glyphicon-edit pull-right clickable iconSpacing" ng-click="editTeam(team)"></i>
 <!--
                             <div class="row">
                                 <div class="col-md-6">
@@ -282,7 +294,7 @@
 
 
                             <strong>Locations</strong> <span class="badge">{{team.location.length}}</span>
-                            <i class="glyphicon glyphicon-plus-sign pull-right clickable" ng-click="editLocation()"></i>
+                            <i class="glyphicon glyphicon-plus-sign clickable" ng-click="editLocation()"></i>
                             <table class="table table-bordered">
                                 <tr><th>Name</th><th>Hours</th><th>Contact</th><th>Action</th></tr>
                                 <tr ng-repeat = "location in team.location">
@@ -309,7 +321,7 @@
 
                             <strong>Members</strong> <span class="badge">{{team.member.length}}</span>
 
-                            <i class="glyphicon glyphicon-plus-sign pull-right clickable" ng-click="editMember()"></i>
+                            <i class="glyphicon glyphicon-plus-sign clickable" ng-click="editMember()"></i>
 
                             <table class="table table-bordered">
                                 <tr><th>Name</th><th>CPN</th><th>Role</th><th>Qualifications</th><th>Contacts</th><th>Action</th></tr>
@@ -343,13 +355,9 @@
 
 
 
-                        </uib-tab>
 
-                        <uib-tab heading="Json">
-                            <pre>{{team | json}}</pre>
-                        </uib-tab>
 
-                    </uib-tabset>
+
 
 
 

@@ -2,14 +2,21 @@ angular.module("sampleApp")
     .controller('teamsCtrl',
         function ($scope,$firebaseAuth,$uibModal,modalService,teamsSvc,$localStorage) {
 
-
             $scope.teams = $localStorage.teams;
+            $scope.organizations = $localStorage.organizations;
+            if ($scope.organizations){
+                $scope.organization = $scope.organizations[0]
+            }
+
+
             if (! $scope.teams) {
                 teamsSvc.getTeams().then(
                     function(data) {
 
-                        $scope.teams = data.data;
-
+                        $scope.teams = data.data.teams;
+                        $scope.organizations = data.data.orgs;
+                        $scope.organization = $scope.organizations[0]
+                        $localStorage.orgs = data.data.organizations;
                     }
                 );
             }
@@ -19,8 +26,12 @@ angular.module("sampleApp")
                     teamsSvc.getTeams().then(
                         function(data) {
 
-                            $scope.teams = data.data;
-                            $localStorage.teams = data.data;
+                            $scope.teams = data.data.teams;
+                            $scope.organizations = data.data.orgs;
+                            $localStorage.teams = data.data.teams;
+                            $localStorage.organizations = data.data.orgs;
+                            $scope.organization = $scope.organizations[0]
+                            delete $scope.team;
 
                         }
                     );
@@ -28,33 +39,112 @@ angular.module("sampleApp")
 
             }
 
+            $scope.selectOrganization = function(){
+                delete $scope.team;
+            }
+
             $scope.selectTeam = function (team) {
                 $scope.team = team;
                 console.log(team)
             };
 
-            $scope.editTeam = function () {
+            $scope.editTeam = function (originalTeam) {
+
+
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
                     keyboard: false,       //same as above.
                     templateUrl: 'modalTemplates/editTeam.html',
-                    controller: function($scope) {
+                    controller: function($scope,team) {
+                        $scope.team = team || {}
+                        let teamb4edit = angular.copy(team);
+
                         $scope.input = {};
+
+                        $scope.addContact = function(){
+                            $scope.team.contact = $scope.team.contact || [];
+                            $scope.team.contact.push({type:$scope.input.contactType,value:$scope.input.contactValue});
+                            delete $scope.input.contactType;
+                            delete $scope.input.contactValue;
+                        };
+
+
+                        $scope.deleteContact = function(inx) {
+                            $scope.team.contact.splice(inx,1)
+                        };
+
+                        $scope.addService = function() {
+                            if ($scope.input.service) {
+                                team.service = team.service || [];
+                                team.service.push({display:$scope.input.service});
+                                delete $scope.input.service;
+                            }
+
+                        };
+
+                        $scope.deleteService = function(inx) {
+                            $scope.team.service.splice(inx,1)
+                        };
+
                         $scope.add = function() {
-                            let team = {}
-                            team.name = $scope.input.name;
-                            team.purpose = $scope.input.purpose;
-                            team.service = {display: $scope.input.service}
-                            team.contact = [
-                                {type:$scope.input.contactType,value:$scope.input.contactValue}
-                            ]
-                            $scope.$close(team)
+                            if ($scope.input.service) {
+                                let msg = "Looks like you're adding a service but haven't clicked the '+' icon. The service will not be added. Are you sure you want to continue?";
+                                if (! confirm(msg)) {
+                                    return;
+                                };
+
+                            }
+
+                            if ($scope.input.contactType || $scope.input.contactValue) {
+                                let msg = "Looks like you're adding a contact but haven't clicked the '+' icon. The contact will not be added. Are you sure you want to continue?";
+                                if (! confirm(msg)) {
+                                    return;
+                                };
+                            }
+
+                            $scope.$close($scope.team)
+                        };
+
+                        $scope.cancel = function() {
+                            $scope.$close(teamb4edit)
+                        };
+
+                        let checkDirty = function(){
+                            let msg = "";
+                            if ($scope.input.service) {
+                                msg = "Looks like you're adding a service";
+                                return;
+                            }
+                        }
+
+                    },
+                    resolve : {
+                        team : function(){
+                            return originalTeam;
                         }
                     }
                 }).result.then(
                     function(team) {
-                        $scope.teams.push(team)
+
+                        if (originalTeam) {
+                            //editing
+                            for (var i=0; i < $scope.teams.length; i++) {
+                                let t = $scope.teams[i];
+                                if (t.id == originalTeam.id) {
+                                    $scope.teams[i] = team;
+                                    break;
+                                }
+                            }
+                        } else {
+                            //new
+                            team.id = 'id' + new Date().getTime();
+                            team.managingOrganization.id = organization.id;
+                            $scope.teams.push(team)
+                          //  $scope.team = team;
+                        }
+
                         $scope.team = team;
+
                         $localStorage.teams = $scope.teams
                     })
             };
@@ -68,7 +158,6 @@ angular.module("sampleApp")
                     delete $scope.team;
                 }
             };
-
 
             $scope.editLocation = function () {
                 $uibModal.open({
@@ -103,7 +192,6 @@ angular.module("sampleApp")
                     $localStorage.teams = $scope.teams;
                 }
             };
-
 
             $scope.editMember = function (inx) {
                 let originalMember;

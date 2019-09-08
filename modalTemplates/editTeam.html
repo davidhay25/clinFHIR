@@ -5,13 +5,15 @@
 
         <div class="row">
             <div class="col-md-8 col-sm-8">
-                <h3 class="modal-title">Add a new team</h3>
+                <h3 ng-hide = 'team' class="modal-title">Add a new team</h3>
+                <h3 ng-show = 'team' class="modal-title">Edit a team</h3>
             </div>
 
             <div class="col-md-4 col-sm-4">
                 <div class="pull-right">
-                    <button class="btn btn-success pull-right" ng-click="add()">Add</button>
-                    <button class="btn btn-link pull-right" ng-click="$dismiss()">Cancel</button>
+                    <button ng-hide = 'team' class="btn btn-success pull-right" ng-click="add()">Add</button>
+                    <button ng-show = 'team' class="btn btn-success pull-right" ng-click="add()">Save</button>
+                    <button class="btn btn-link pull-right" ng-click="cancel()">Cancel</button>
                 </div>
             </div>
         </div>
@@ -24,7 +26,7 @@
                 Name
             </div>
             <div class="col-md-8 col-sm-8">
-                <input type="text" class="form-control"  ng-model="input.name"/>
+                <input type="text" class="form-control"  ng-model="team.name"/>
             </div>
 
         </div>
@@ -35,7 +37,7 @@
                 Purpose
             </div>
             <div class="col-md-8 col-sm-8">
-                <textarea class="form-control"  ng-model="input.purpose"></textarea>
+                <textarea class="form-control"  ng-model="team.purpose"></textarea>
             </div>
         </div>
         <br/>
@@ -43,22 +45,93 @@
             <div class="col-md-3 col-sm-3">
                 Services
             </div>
-            <div class="col-md-8 col-sm-8">
-                <input type="text" class="form-control"  ng-model="input.service"/>
+            <div class="col-md-9 col-sm-9">
+
+
+                <div ng-repeat="service in team.service">
+                    <div class="row">
+                        <div class="col-md-11 col-sm-11">
+                            {{service.display}}
+                        </div>
+
+                        <div class="col-md-1 col-sm-1">
+                            <i class="glyphicon glyphicon-remove-sign pull-right clickable" ng-click="deleteService($index)"></i>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-11 col-sm-11">
+                        <input type="text" class="form-control"  ng-model="input.service"/>
+
+                    </div>
+
+                    <div class="col-md-1 col-sm-1">
+                        <i ng-show="input.service" style="padding-top: 10px" class="glyphicon glyphicon-plus-sign pull-right clickable" ng-click="addService()"></i>
+                    </div>
+                </div>
+                <!--
+                <input type="text" class="form-control"  ng-model="team.service"/>
+                -->
             </div>
         </div>
+
+
+
         <br/>
         <div class="row">
            <div class="col-md-3 col-sm-3">
                Coverage
            </div>
-           <div class="col-md-9 col-sm-9">
-               <input type="text" class="form-control"  ng-model="input.coverage"/>
+           <div class="col-md-8 col-sm-8">
+               <textarea class="form-control" ng-model="team.coverage"></textarea>
+               <!--<input type="text" class="form-control"  ng-model="team.coverage"/> -->
            </div>
 
         </div>
         <br/>
+        <div class="row">
+            <div class="col-md-3 col-sm-3">
+                Contact
+            </div>
+            <div class="col-md-9 col-sm-9">
+                <div ng-repeat="contact in team.contact">
+                    <div class="row">
+                        <div class="col-md-4 col-sm-4">
+                            {{contact.type}}
+                        </div>
+                        <div class="col-md-7 col-sm-7">
+                            {{contact.value}}
+                        </div>
+                        <div class="col-md-1 col-sm-1">
+                            <i class="glyphicon glyphicon-remove-sign pull-right clickable" ng-click="deleteContact($index)"></i>
+                        </div>
 
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 col-sm-4">
+                        <select class="form-control" ng-model="input.contactType">
+                            <option value="email">Email</option>
+                            <option value="mobile">Mobile</option>
+                            <option value="phone">Phone</option>
+                        </select>
+
+                    </div>
+                    <div class="col-md-7 col-sm-7">
+                        <input type="text" class="form-control" ng-model="input.contactValue" />
+                    </div>
+                    <div class="col-md-1 col-sm-1">
+                        <i ng-show="input.contactType && input.contactValue" style="padding-top: 10px" class="glyphicon glyphicon-plus-sign pull-right clickable" ng-click="addContact()"></i>
+                    </div>
+                </div>
+
+            </div>
+<!--
         <div class="row">
             <div class="col-md-3 col-sm-3">
                 Contact
@@ -75,6 +148,8 @@
                 <input type="text" class="form-control" ng-model="input.contactValue" />
             </div>
         </div>
+
+        -->
     </div>
 
 
