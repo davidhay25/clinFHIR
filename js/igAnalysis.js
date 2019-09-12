@@ -239,12 +239,19 @@ angular.module("igApp")
 
                 $scope.selectedType.items.sort(function(a,b){
                     try {
-                        let keyA = a.path + a.url + a.ig;
-                        let keyB = b.path + b.url + b.ig;
+
+                        let urlA = a.path;
+                        if (urlA.indexOf('.' == -1)) { urlA += '.'}
+
+                        let urlB = b.path;
+                        if (urlB.indexOf('.' == -1)) { urlB += '.'}
+
+                        let keyA = urlA + '.' + a.url + a.ig;
+                        let keyB = urlB + '.' + b.url + b.ig;
                         if (keyA > keyB) {
-                            return -1
-                        } else {
                             return 1
+                        } else {
+                            return -1
                         }
                     } catch (ex) {
                         return 0;
