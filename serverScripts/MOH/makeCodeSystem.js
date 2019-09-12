@@ -8,13 +8,19 @@ let fs = require('fs');
 
 //change for different codesystems
 
-
-
 let name = "nziwi";       //used for both CS and VS - id and name
 let infile = "/Users/davidhay/Dropbox/contracting/MOH/source/iwi.csv";
 let title = "New Zealand IWI";
 let description = "New Zealand IWI";
+/*
+let name = "annotationtype";       //used for both CS and VS - id and name
+let infile = "/Users/davidhay/Dropbox/contracting/MOH/source/annotationtype";
+let title = "Annotation Type";
+let description = "Annotation Type";
+*/
+/*
 
+*/
 /*
 let name = "nzdomcode";       //used for both CS and VS - id and name
 let infile = "/Users/davidhay/Dropbox/contracting/MOH/source/domicileCode.csv";

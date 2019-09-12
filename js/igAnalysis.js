@@ -97,7 +97,7 @@ angular.module("igApp")
 
                     console.log($scope.arExtensions)
 
-                    //console.log($scope.hashExtension)
+
 
                     $scope.sortEDView('freq')
 
@@ -235,7 +235,24 @@ angular.module("igApp")
 
             $scope.selectType = function(type) {
                 $scope.selectedType = type;
-            }
+
+
+                $scope.selectedType.items.sort(function(a,b){
+                    try {
+                        let keyA = a.path + a.url + a.ig;
+                        let keyB = b.path + b.url + b.ig;
+                        if (keyA > keyB) {
+                            return -1
+                        } else {
+                            return 1
+                        }
+                    } catch (ex) {
+                        return 0;
+                    }
+
+                })
+
+            };
 
             function registerAccess(){
                 //register access for the logs...
