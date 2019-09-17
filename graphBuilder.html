@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GraphBuilder</title>
+
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+    <script src="js/libs/angular-sanitize.js"></script>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+        angular.module("sampleApp").constant("moment", moment);
+
+    </script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/graphBuilderCtrl.js"></script>
+
+</head>
+<body>
+<div ng-app="sampleApp" ng-controller="graphBuilderCtrl" class="container-fluid">
+
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+
+    <div class="container-fluid">
+        <div class="col-md-7 col-sm-7">
+                <span>
+                    <a class="navbar-brand" href="#">
+                        Graph Builder
+                    </a>
+                </span>
+        </div>
+        <div class="col-md-2 col-sm-2">
+            <form class="navbar-form navbar-left">
+                <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
+
+            </form>
+        </div>
+        <div class="col-md-3 col-sm-3">
+        </div>
+    </div>
+</nav>
+</div>
+
+</body>
+</html>

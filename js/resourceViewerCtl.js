@@ -91,7 +91,6 @@ angular.module("sampleApp")
                 sc.$loaded().then(
                     function(){
 
-
                         //set the data server to the one in the bookmark
                         var dataServer =  sc.config.dataServer;
                         appConfigSvc.setServerType('data',dataServer.url);       //set the data server to the same as the conformance for the comments
