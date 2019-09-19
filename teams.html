@@ -94,14 +94,14 @@
            <div class="row">
                 <div class="col-md-2 col-sm-2">
                     <strong>Organizations</strong>
-                    <select class="form-control" ng-model="organization"
-                            ng-change="selectOrganization(organization)"
+                    <select class="form-control" ng-model="input.organization"
+                            ng-change="selectOrganization(input.organization)"
                             ng-options = "org.display for org in organizations"></select>
                     <br/>
                     <strong>Teams</strong>
                     <div class="list-group">
                         <div ng-class="{'list-group-item':true,listItemSelected:team1==team}" ng-repeat="team1 in teams track by $index"
-                             ng-click="selectTeam(team1)" style="cursor: pointer" ng-show="team1.managingOrganization.id == organization.id">
+                             ng-click="selectTeam(team1)" style="cursor: pointer" ng-show="team1.managingOrganization.id == input.organization.id">
                             {{team1.name}}
                             <i class="glyphicon glyphicon-minus-sign pull-right clickable" ng-click="removeTeam($index)"></i>
 

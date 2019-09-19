@@ -2,10 +2,11 @@ angular.module("sampleApp")
     .controller('teamsCtrl',
         function ($scope,$firebaseAuth,$uibModal,modalService,teamsSvc,$localStorage,$http) {
 
+        $scope.input = {}
             $scope.teams = $localStorage.teams;
             $scope.organizations = $localStorage.organizations;
             if ($scope.organizations){
-                $scope.organization = $scope.organizations[0]
+                $scope.input.organization = $scope.organizations[0]
             }
 
             $http.post('/stats/login',{module:"teams",servers:{}}).then(
@@ -24,7 +25,7 @@ angular.module("sampleApp")
 
                         $scope.teams = data.data.teams;
                         $scope.organizations = data.data.orgs;
-                        $scope.organization = $scope.organizations[0]
+                        $scope.input.organization = $scope.organizations[0]
                         $localStorage.orgs = data.data.organizations;
                     }
                 );
@@ -39,7 +40,7 @@ angular.module("sampleApp")
                             $scope.organizations = data.data.orgs;
                             $localStorage.teams = data.data.teams;
                             $localStorage.organizations = data.data.orgs;
-                            $scope.organization = $scope.organizations[0]
+                            $scope.input.organization = $scope.organizations[0]
                             delete $scope.team;
 
                         }
@@ -49,6 +50,7 @@ angular.module("sampleApp")
             }
 
             $scope.selectOrganization = function(){
+                //$scope.input.organization set by dropdown
                 delete $scope.team;
             }
 
@@ -84,8 +86,8 @@ angular.module("sampleApp")
 
                         $scope.addService = function() {
                             if ($scope.input.service) {
-                                team.service = team.service || [];
-                                team.service.push({display:$scope.input.service});
+                                $scope.team.service = $scope.team.service || [];
+                                $scope.team.service.push({display:$scope.input.service});
                                 delete $scope.input.service;
                             }
 
@@ -97,18 +99,25 @@ angular.module("sampleApp")
 
                         $scope.add = function() {
                             if ($scope.input.service) {
+                                $scope.team.service = $scope.team.service || [];
+                                $scope.team.service.push({display:$scope.input.service});
+                                /*
                                 let msg = "Looks like you're adding a service but haven't clicked the '+' icon. The service will not be added. Are you sure you want to continue?";
                                 if (! confirm(msg)) {
                                     return;
                                 };
-
+*/
                             }
 
                             if ($scope.input.contactType || $scope.input.contactValue) {
+                                $scope.team.contact = $scope.team.contact || [];
+                                $scope.team.contact.push({type:$scope.input.contactType,value:$scope.input.contactValue});
+                                /*
                                 let msg = "Looks like you're adding a contact but haven't clicked the '+' icon. The contact will not be added. Are you sure you want to continue?";
                                 if (! confirm(msg)) {
                                     return;
                                 };
+                                */
                             }
 
                             $scope.$close($scope.team)
@@ -147,7 +156,7 @@ angular.module("sampleApp")
                         } else {
                             //new
                             team.id = 'id' + new Date().getTime();
-                            team.managingOrganization.id = organization.id;
+                            team.managingOrganization = $scope.input.organization;
                             $scope.teams.push(team)
                           //  $scope.team = team;
                         }
@@ -241,6 +250,16 @@ angular.module("sampleApp")
                         };
 
                         $scope.add = function() {
+                            if ($scope.input.qualification) {
+                                $scope.member.qualification = $scope.member.qualification || [];
+                                $scope.member.qualification.push({display:$scope.input.qualification})
+                            }
+
+                            if ($scope.input.contactType) {
+                                $scope.member.contact = $scope.member.contact || []
+                                $scope.member.contact.push({type:$scope.input.contactType,value:$scope.input.contactValue});
+                            }
+
                             $scope.$close($scope.member)
                         }
 
