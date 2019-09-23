@@ -29,24 +29,42 @@
                 <strong>Scope of Search</strong>
 
                 <div><input type="radio" ng-model="scope" value="org"/> Only this Organization</div>
-                <div><input type="radio" ng-model="scope" value="all"/> All Practitioners</div>
+                <div><input type="radio" ng-model="scope" value="all"/> All HPI</div>
                 <div><input type="radio" ng-model="scope" value="none"/> Not in HPI</div>
 
             </div>
-    <div class="row">
-            <div class="col-md-3 col-sm-3">
-                <strong>Name</strong>
-                <input type="text" class="form-control" ng-model="name" placeholder="Name"/>
-            </div>
-            <div class="col-md-1 col-sm-1">
-                <button class="btn btn-primary" style="margin-top: 20px"
-                        ng-show= "name" ng-click="search(name)">Search</button>
-            </div>
-            <div class="col-md-5 col-sm-5">
 
+            <div class="col-md-5 col-sm-5">
+                <div class="row">
+                    <div class="col-md-8 col-sm-8">
+                        <strong>Name</strong>
+                        <input type="text" class="form-control" ng-model="name" placeholder="Name"/>
+                    </div>
+                    <div class="col-md-4 col-sm-4">
+                        <button class="btn btn-primary" style="margin-top: 20px"
+                                ng-show= "name" ng-click="search(name)">Search</button>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-4">
+                <em ng-show="scope=='org'">
+                    This will only search for Practitioners that already have a relationship with this Origanization
+                    in the HPI. (Technically, it queries on the PractitionerRole resource)
+                </em>
+                <em ng-show="scope=='all'">
+                    This will search for any Practitioner in the HPI. (Technically, it queries on the Practitioner resource)
+                </em>
+                <em ng-show="scope=='none'">
+                    This is used when the the Practitioner is not in the HPI. It will search the local database rather than
+                    the HPI which will allow using adding people not in the HPI into a team. Not yet supported.
+                </em>
             </div>
         </div>
-        <hr/>
+
+
+
+            <hr/>
 
             <div class="row">
                 <div class="col-md-4">
@@ -95,140 +113,8 @@
             </div>
 
 
-<!--
-        <table class="table table-bordered">
-            <tr ng-repeat="prac in practitioners">
-                <td>{{prac.name}}</td>
-                <td>{{prac.cpn}}</td>
-                <td>
-                    <div ng-repeat = "q in prac.qual">
-                        {{q.code.text}}
-                    </div>
-
-                </td>
-            </tr>
-        </table>
--->
-<!--
-        <div class="row">
-            <div class="col-md-3 col-sm-3">
-                Name
-            </div>
-            <div class="col-md-8 col-sm-8">
-                <input type="text" class="form-control"  ng-model="member.name"/>
-            </div>
 
         </div>
-        <br/>
-
-        <div class="row">
-            <div class="col-md-3 col-sm-3">
-                CPN
-            </div>
-            <div class="col-md-8 col-sm-8">
-                <input type="text" class="form-control"  ng-model="member.CPN"/>
-            </div>
-        </div>
-        <br/>
-        <div class="row">
-            <div class="col-md-3 col-sm-3">
-                Role
-            </div>
-            <div class="col-md-8 col-sm-8">
-                <input type="text" class="form-control" ng-model="member.role.display"/>
-            </div>
-        </div>
-
-    -->
-    <!--
-        <br/>
-        <div class="row">
-           <div class="col-md-3 col-sm-3">
-               Qualification
-           </div>
-           <div class="col-md-9 col-sm-9">
-               <div ng-repeat = "qual in member.qualification">
-
-                   <div class="row">
-                       <div class="col-md-10 col-sm-10">
-                           {{qual.display}}
-                       </div>
-                       <div class="col-md-1 col-sm-1">
-                           <i class="glyphicon glyphicon-remove-sign pull-right clickable" ng-click="deleteQualification($index)"></i>
-                       </div>
-                   </div>
-
-
-               </div>
-                <div class="row">
-                    <div class="col-md-10 col-sm-10">
-                        <input type="text" class="form-control"  ng-model="input.qualification"/>
-                    </div>
-                    <div class="col-md-2 col-sm-2">
-                        <i class="glyphicon glyphicon-plus-sign pull-right clickable" ng-click="addQualification()"></i>
-                    </div>
-                </div>
-
-
-           </div>
-
-        </div>
-        <br/>
-
-        <div class="row" ng-show="1==2">
-            <div class="col-md-3 col-sm-3">
-                Contact
-            </div>
-            <div class="col-md-9 col-sm-9">
-                <div ng-repeat="contact in member.contact">
-                    <div class="row">
-                        <div class="col-md-4 col-sm-4">
-                            {{contact.type}}
-                        </div>
-                        <div class="col-md-7 col-sm-7">
-                            {{contact.value}}
-                        </div>
-                        <div class="col-md-1 col-sm-1">
-                            <i class="glyphicon glyphicon-remove-sign pull-right clickable" ng-click="deleteContact($index)"></i>
-                        </div>
-
-
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-4 col-sm-4">
-                        <select class="form-control" ng-model="input.contactType">
-                            <option value="email">Email</option>
-                            <option value="mobile">Mobile</option>
-                            <option value="phone">Phone</option>
-                        </select>
-
-                    </div>
-                    <div class="col-md-7 col-sm-7">
-                        <input type="text" class="form-control" ng-model="input.contactValue" />
-                    </div>
-                    <div class="col-md-1 col-sm-1">
-                        <i class="glyphicon glyphicon-plus-sign pull-right clickable" ng-click="addContact()"></i>
-                    </div>
-                </div>
-
-            </div>
-
-
-
-
-
-
-
-        </div>
-
-    -->
-    </div>
-
-
-
-
     </div>
 
     <div class="modal-header">

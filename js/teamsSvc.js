@@ -125,7 +125,6 @@ angular.module("sampleApp")
 
             },
 
-
             getServices : function() {
                 //return all the team categories. This will be a ValueSet of course;
                 let lst = []
@@ -136,7 +135,6 @@ angular.module("sampleApp")
                 return lst;
             },
 
-
             loadTeams : function(organizations){        //organizations is temp
                 //load all tha teams at the moment...
                 let deferred = $q.defer();
@@ -146,7 +144,6 @@ angular.module("sampleApp")
 
                 $http.get(url).then(
                     function(data) {
-                        console.log(data.data);
                         if (data.data.entry) {
                             let hashPractitioner = {};
                             //create a hash of Practitioner for populating team.member...
@@ -155,14 +152,36 @@ angular.module("sampleApp")
                                     hashPractitioner['Practitioner/'+ entry.resource.id] = entry.resource;
                                 }
                             });
-                            console.log(hashPractitioner)
+
+
                             data.data.entry.forEach(function(entry){
+                                //if a careteam, then add a new team...
                                 if (entry.resource.resourceType == 'CareTeam') {
                                     let team = {member:[],location:[],contact:[]};      //internal representation of team
                                     team.id = entry.resource.id;
                                     team.resource = entry.resource;
                                     team.name = team.resource.name;
+
                                     team.managingOrganization = organizations[0];       //temp
+                                    if ( entry.resource.managingOrganization) {
+                                        let mOrg = entry.resource.managingOrganization[0];  //multiple managing organizations...
+                                        if (mOrg.reference) {
+                                            let ar = mOrg.reference.split('/')
+                                            let id = ar[1]
+
+                                            organizations.forEach(function (org) {
+                                                if (org.id == id ){
+                                                    team.managingOrganization = org;
+
+                                                }
+                                            })
+                                        }
+
+
+                                    }
+
+
+
                                     team.contact = entry.resource.telecom;
 
                                     let arPurpose = getExtension(entry.resource,purposeUrl);
@@ -188,8 +207,7 @@ angular.module("sampleApp")
                                         team.member = []
                                         entry.resource.participant.forEach(function (part) {
                                             let ref = part.member.reference;
-                                            console.log(ref);
-                                            console.log(hashPractitioner[ref])
+
                                             let practitioner = hashPractitioner[ref];
                                             let mem = {};
                                             mem.name = that.getHumanNameSummary(practitioner.name);
@@ -238,6 +256,10 @@ angular.module("sampleApp")
                 let CareTeam = {resourceType:'CareTeam'};      //the resource
                 CareTeam.id = team.id || "id-"+new Date().getTime();
                 CareTeam.name = team.name;
+
+                if (team.managingOrganization && team.managingOrganization.id) {
+                    CareTeam.managingOrganization = [{reference: 'Organization/' + team.managingOrganization.id}]
+                }
 
                 if (team.service && team.service.length > 0) {
                     //CareTeam.

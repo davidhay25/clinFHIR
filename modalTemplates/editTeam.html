@@ -5,8 +5,8 @@
 
         <div class="row">
             <div class="col-md-8 col-sm-8">
-                <h3 ng-hide = 'team.name' class="modal-title">Add a new team</h3>
-                <h3 ng-show = 'team.name' class="modal-title">Edit a team</h3>
+                <h3 ng-show = 'isNew' class="modal-title">Add a new team</h3>
+                <h3 ng-show = '! isNew' class="modal-title">Edit a team</h3>
             </div>
 
             <div class="col-md-4 col-sm-4">
@@ -77,12 +77,6 @@
 
                     </div>
                 </div>
-
-
-
-                <!--
-                <input type="text" class="form-control"  ng-model="team.service"/>
-                -->
             </div>
         </div>
 
@@ -95,11 +89,12 @@
            </div>
            <div class="col-md-8 col-sm-8">
                <textarea class="form-control" ng-model="team.coverage"></textarea>
-               <!--<input type="text" class="form-control"  ng-model="team.coverage"/> -->
+
            </div>
 
         </div>
         <br/>
+
         <div class="row">
             <div class="col-md-3 col-sm-3">
                 Contact
@@ -116,8 +111,6 @@
                         <div class="col-md-1 col-sm-1">
                             <i class="glyphicon glyphicon-remove-sign pull-right clickable" ng-click="deleteContact($index)"></i>
                         </div>
-
-
                     </div>
                 </div>
 
@@ -129,47 +122,8 @@
                         <button class="btn btn-link pull-right" ng-click="addContact()">Add new contact</button>
                     </div>
                 </div>
-
-
-                <!--
-                <div class="row">
-                    <div class="col-md-4 col-sm-4">
-                        <select class="form-control" ng-model="input.contactType">
-                            <option value="email">Email</option>
-                            <option value="mobile">Mobile</option>
-                            <option value="phone">Phone</option>
-                        </select>
-
-                    </div>
-                    <div class="col-md-7 col-sm-7">
-                        <input type="text" class="form-control" ng-model="input.contactValue" />
-                    </div>
-                    <div class="col-md-1 col-sm-1">
-                        <i ng-show="input.contactType && input.contactValue" style="padding-top: 10px" class="glyphicon glyphicon-plus-sign pull-right clickable" ng-click="addContact()"></i>
-                    </div>
-                </div>
-                -->
-
             </div>
-<!--
-        <div class="row">
-            <div class="col-md-3 col-sm-3">
-                Contact
-            </div>
-            <div class="col-md-2 col-sm-2">
-                <select class="form-control" ng-model="input.contactType">
-                    <option value="email">Email</option>
-                    <option value="mobile">Mobile</option>
-                    <option value="phone">Phone</option>
-                </select>
 
-            </div>
-            <div class="col-md-7 col-sm-7">
-                <input type="text" class="form-control" ng-model="input.contactValue" />
-            </div>
-        </div>
-
-        -->
     </div>
 
 
@@ -180,8 +134,15 @@
     <div class="modal-header">
         <div class="row">
             <div class="col-md-12 col-sm-12">
-                <em>This is a minimal screen to add or edit a Team</em>
+                <div ng-show="isNew">
+                    <em>This screen allows a new team to be added. It contains the 'team level' information -
+                        not the members of the team which are added (or removed) after the team has been created.</em>
+                </div>
 
+                <div ng-hide="isNew">
+                    <em>This screen allows the description of the team to be changed. Members are added or removed from the
+                    main management screen.</em>
+                </div>
 
 
 

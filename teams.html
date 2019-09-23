@@ -217,7 +217,7 @@
                                         {{qual}}
                                         <div ng-repeat = "qual in member.qualification">
                                             {{qual.codeDisplay}}
-                                            
+
                                         </div>
                                     </td>
                                     <td>
@@ -269,6 +269,10 @@
         <uib-tab heading="Log of FHIR Interactions">
             <em>When the app starts getting data from a FHIR server, the queries will be listed here. Purely for technical analysis & design</em>
         </uib-tab>
+        <uib-tab heading="Json">
+            <pre>{{team.resource | json}}</pre>
+        </uib-tab>
+
     </uib-tabset>
 
 

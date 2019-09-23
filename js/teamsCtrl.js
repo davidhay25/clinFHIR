@@ -72,7 +72,6 @@ angular.module("sampleApp")
 
             $scope.editTeam = function (originalTeam) {
 
-
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
                     keyboard: false,       //same as above.
@@ -80,8 +79,12 @@ angular.module("sampleApp")
                     controller: function($scope,team,teamsSvc) {
 
                         $scope.services = angular.copy(teamsSvc.getServices());
+                        if ( !team) {
+                            $scope.isNew = true;
+                        }
 
                         $scope.team = team || {}
+
                         let teamb4edit = angular.copy(team);
 
                         $scope.input = {};
@@ -125,8 +128,6 @@ angular.module("sampleApp")
                         $scope.addService = function(svc,inx) {
                             if (svc) {
                                 $scope.team.service = $scope.team.service || [];
-
-                                //$scope.team.service.push({display:$scope.input.service});
                                 $scope.team.service.push(svc);
                                 delete $scope.input.service;
                             }
@@ -140,30 +141,21 @@ angular.module("sampleApp")
                             if ($scope.input.service) {
                                 $scope.team.service = $scope.team.service || [];
                                 $scope.team.service.push({display:$scope.input.service});
-                                /*
-                                let msg = "Looks like you're adding a service but haven't clicked the '+' icon. The service will not be added. Are you sure you want to continue?";
-                                if (! confirm(msg)) {
-                                    return;
-                                };
-*/
+
+
                             }
 
                             if ($scope.input.contactType || $scope.input.contactValue) {
                                 $scope.team.contact = $scope.team.contact || [];
                                 $scope.team.contact.push({type:$scope.input.contactType,value:$scope.input.contactValue});
-                                /*
-                                let msg = "Looks like you're adding a contact but haven't clicked the '+' icon. The contact will not be added. Are you sure you want to continue?";
-                                if (! confirm(msg)) {
-                                    return;
-                                };
-                                */
+
                             }
 
                             $scope.$close($scope.team)
                         };
 
                         $scope.cancel = function() {
-                            $scope.$close(teamb4edit)
+                            $scope.$dismiss()
                         };
 
                         let checkDirty = function(){
@@ -192,14 +184,16 @@ angular.module("sampleApp")
                                     break;
                                 }
                             }
+                            if (! team.managingOrganization) {
+                                team.managingOrganization = $scope.input.organization; // {id: display: }
 
-                           // teamsSvc.updateTeam(team)
 
+                            }
 
                         } else {
                             //new
                             team.id = 'id' + new Date().getTime();
-                            team.managingOrganization = $scope.input.organization;
+                            team.managingOrganization = $scope.input.organization; // {id: display: }
                             $scope.teams.push(team)
 
                         }
@@ -402,8 +396,11 @@ angular.module("sampleApp")
             $scope.removeMember = function(inx) {
                 let member = $scope.team.member[inx]
                 if (confirm("Are you sure you wish to remove "+member.name+ "?")) {
-                    $scope.team.member.splice(inx,1)
-                    $localStorage.teams = $scope.teams;
+                    $scope.team.member.splice(inx,1);
+                    teamsSvc.updateTeam($scope.team);
+
+
+                    //$localStorage.teams = $scope.teams;
                 }
             };
         }
