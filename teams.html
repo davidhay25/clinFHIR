@@ -162,7 +162,7 @@
                                 <div class="col-md-2">
                                     <div class="row" ng-repeat="contact in team.contact">
                                         <div class="col-sm-3 col-md-3">
-                                            {{contact.type}}
+                                            {{contact.system}}
                                         </div>
                                         <div class="col-sm-9 col-md-9">
                                             {{contact.value}}
@@ -173,56 +173,9 @@
 
 
                             <i class="glyphicon glyphicon-edit pull-right clickable iconSpacing" ng-click="editTeam(team)"></i>
-<!--
-                            <div class="row">
-                                <div class="col-md-6">
 
-
-                                    <div class="row">
-                                        <div class="col-md-2">
-                                            <strong>Team name</strong>
-                                        </div>
-                                        <div class="col-md-4">
-                                            {{team.name}}
-                                        </div>
-                                        <div class="col-md-2">
-                                            <strong>Purpose</strong>
-                                        </div>
-                                        <div class="col-md-4">
-                                            {{team.purpose}}
-                                        </div>
-
-
-                                    </div>
-
-
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="col-md-2">
-                                        <strong>Coverage</strong>
-                                    </div>
-                                    <div class="col-md-4">
-                                        {{team.coverage}}
-                                    </div>
-                                    <div class="col-md-2">
-                                        <strong>Contact</strong>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="row" ng-repeat="contact in team.contact">
-                                            <div class="col-sm-3 col-md-3">
-                                                {{contact.type}}
-                                            </div>
-                                            <div class="col-sm-9 col-md-9">
-                                                {{contact.value}}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            -->
                             <hr/>
-
+<!-- temp hiding - don't delete...
 
                             <strong>Locations</strong> <span class="badge">{{team.location.length}}</span>
                             <i class="glyphicon glyphicon-plus-sign clickable" ng-click="editLocation()"></i>
@@ -248,7 +201,7 @@
                                 </tr>
                             </table>
 
-
+-->
 
                             <strong>Members</strong> <span class="badge">{{team.member.length}}</span>
 
@@ -261,8 +214,10 @@
                                     <td>{{member.CPN}}</td>
                                     <td>{{member.role.display}}</td>
                                     <td>
+                                        {{qual}}
                                         <div ng-repeat = "qual in member.qualification">
-                                            {{qual.display}}
+                                            {{qual.codeDisplay}}
+                                            
                                         </div>
                                     </td>
                                     <td>
@@ -279,7 +234,9 @@
                                     </td>
                                     <td>
                                         <i class="glyphicon glyphicon-minus-sign pull-right clickable iconSpacing" ng-click="removeMember($index)"></i>
+                                        <!--
                                         <i class="glyphicon glyphicon-edit pull-right clickable iconSpacing" ng-click="editMember($index)"></i>
+                                        -->
                                     </td>
                                 </tr>
                             </table>

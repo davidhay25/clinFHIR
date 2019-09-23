@@ -5,6 +5,7 @@ angular.module("sampleApp")
     .service('taskSvc', function(appConfigSvc,moment) {
 
 
+
         let pathExtUrl = appConfigSvc.config().standardExtensionUrl.path;  //the extension for recording the model path for a comment
         let editorExtUrl = appConfigSvc.config().standardExtensionUrl.editor;
         let instanceAuthor = appConfigSvc.config().standardExtensionUrl.instanceAuthor;

@@ -5,14 +5,15 @@
 
         <div class="row">
             <div class="col-md-8 col-sm-8">
-                <h3 ng-hide = 'member' class="modal-title">Add a member</h3>
-                <h3 ng-show = 'member' class="modal-title">Edit the member details</h3>
+                <h3>Add a new team member</h3>
+
             </div>
 
             <div class="col-md-4 col-sm-4">
                 <div class="pull-right">
-                    <button ng-hide = 'member' class="btn btn-success pull-right" ng-click="add()">Add</button>
-                    <button ng-show = 'member' class="btn btn-success pull-right" ng-click="add()">Save</button>
+
+
+                    <button ng-show="selectedPractitioner && role" class="btn btn-success pull-right" ng-click="add()">Add</button>
                     <button class="btn btn-link pull-right" ng-click="cancel()">Cancel</button>
                 </div>
             </div>
@@ -21,6 +22,94 @@
 
     <div class="modal-body">
 
+
+
+        <div class="row">
+            <div class="col-md-3 col-sm-3">
+                <strong>Scope of Search</strong>
+
+                <div><input type="radio" ng-model="scope" value="org"/> Only this Organization</div>
+                <div><input type="radio" ng-model="scope" value="all"/> All Practitioners</div>
+                <div><input type="radio" ng-model="scope" value="none"/> Not in HPI</div>
+
+            </div>
+    <div class="row">
+            <div class="col-md-3 col-sm-3">
+                <strong>Name</strong>
+                <input type="text" class="form-control" ng-model="name" placeholder="Name"/>
+            </div>
+            <div class="col-md-1 col-sm-1">
+                <button class="btn btn-primary" style="margin-top: 20px"
+                        ng-show= "name" ng-click="search(name)">Search</button>
+            </div>
+            <div class="col-md-5 col-sm-5">
+
+            </div>
+        </div>
+        <hr/>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="list-group">
+                        <div ng-class="{'list-group-item':true,'listItemSelected':prac == selectedPractitioner}" style="cursor: pointer"
+                             ng-click="selectPractitioner(prac)" ng-repeat="prac in practitioners">
+
+                            <div>{{prac.name}}</div>
+                            <div><span class="pull-right">{{prac.cpn}}</span> </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <uib-tabset ng-show="selectedPractitioner">
+                        <uib-tab heading="Details">
+                            <strong><div>Registrations</div></strong>
+
+                            <table class="table table-bordered">
+                                <tr ng-repeat="reg in selectedPractitioner.qual">
+                                   <td>{{reg.codeDisplay}}</td>
+                                    <td>
+                                        <div ng-repeat="sp in reg.scopePractice">{{sp}}</div>
+
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </uib-tab>
+                        <uib-tab heading="json">
+                            <pre>{{selectedPractitioner | json}}</pre>
+                        </uib-tab>
+                    </uib-tabset>
+
+                    <div class="row"  ng-show="selectedPractitioner">
+                        <div class="col-md-4">
+                            Role in team
+                        </div>
+                        <div class="col-md-4">
+                            <select ng-model="role" class="form-control"
+                                    ng-options = "role.display for role in roles">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+<!--
+        <table class="table table-bordered">
+            <tr ng-repeat="prac in practitioners">
+                <td>{{prac.name}}</td>
+                <td>{{prac.cpn}}</td>
+                <td>
+                    <div ng-repeat = "q in prac.qual">
+                        {{q.code.text}}
+                    </div>
+
+                </td>
+            </tr>
+        </table>
+-->
+<!--
         <div class="row">
             <div class="col-md-3 col-sm-3">
                 Name
@@ -49,6 +138,9 @@
                 <input type="text" class="form-control" ng-model="member.role.display"/>
             </div>
         </div>
+
+    -->
+    <!--
         <br/>
         <div class="row">
            <div class="col-md-3 col-sm-3">
@@ -83,7 +175,7 @@
         </div>
         <br/>
 
-        <div class="row">
+        <div class="row" ng-show="1==2">
             <div class="col-md-3 col-sm-3">
                 Contact
             </div>
@@ -130,6 +222,8 @@
 
 
         </div>
+
+    -->
     </div>
 
 
@@ -140,11 +234,13 @@
     <div class="modal-header">
         <div class="row">
             <div class="col-md-12 col-sm-12">
-                <em>This is a minimal screen to add a new member. Only a single qualification or contact is supported at the
-                    moment (in the actual app there can be multiple). Also - many of the coded fields are currwntly strings -
-                    this will change. The intention is that it will be possible to select the
-                person from the HPI - and potentially update the HPI as well, depending on the rights of the user</em>
-
+                <em>This screen allows you to select a Practitioner from the HPI and add them to the team. The scope of the search can be:</em>
+                <ul>
+                    <li>Only from practitioners already associated with this organization in the HPI</li>
+                    <li>All practitioners in the HPI</li>
+                    <li>Add a practitioner not in the HPI (Not yet enabled)</li>
+                </ul>
+                <em>The practitioner also has a role within the team</em>
 
 
 

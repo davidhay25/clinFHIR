@@ -3,11 +3,21 @@ angular.module("sampleApp")
         function ($scope,$firebaseAuth,$uibModal,modalService,teamsSvc,$localStorage,$http) {
 
         $scope.input = {}
-            $scope.teams = $localStorage.teams;
+            //$scope.teams = $localStorage.teams;
             $scope.organizations = $localStorage.organizations;
             if ($scope.organizations){
                 $scope.input.organization = $scope.organizations[0]
             }
+
+            teamsSvc.loadTeams( $scope.organizations).then(
+                function(teams) {
+                    $scope.teams = teams;
+                    console.log(teams)
+                }, function(err) {
+                    console.log(err)
+                }
+            )
+
 
             $http.post('/stats/login',{module:"teams",servers:{}}).then(
                 function(data){
@@ -17,8 +27,7 @@ angular.module("sampleApp")
                     console.log('error accessing clinfhir to register access',err)
                 }
             );
-
-
+/*
             if (! $scope.teams) {
                 teamsSvc.getTeams().then(
                     function(data) {
@@ -30,6 +39,8 @@ angular.module("sampleApp")
                     }
                 );
             }
+
+            */
 
             $scope.reset = function(){
                 if (confirm("This will reset the teams back to the default set")) {
@@ -66,17 +77,44 @@ angular.module("sampleApp")
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
                     keyboard: false,       //same as above.
                     templateUrl: 'modalTemplates/editTeam.html',
-                    controller: function($scope,team) {
+                    controller: function($scope,team,teamsSvc) {
+
+                        $scope.services = angular.copy(teamsSvc.getServices());
+
                         $scope.team = team || {}
                         let teamb4edit = angular.copy(team);
 
                         $scope.input = {};
 
                         $scope.addContact = function(){
+
+                            $uibModal.open({
+                                    backdrop: 'static',      //means can't close by clicking on the backdrop.
+                                    keyboard: false,       //same as above.
+                                    templateUrl: 'modalTemplates/addContactPoint.html',
+                                    controller: function ($scope) {
+                                        $scope.input = {};
+                                        $scope.add = function(){
+                                            let cp = {system:$scope.input.system,value : $scope.input.value}
+                                            $scope.$close(cp)
+                                        }
+                                    }
+                                }
+                            ).result.then(
+                                function(cp){
+                                    console.log(cp)
+                                    $scope.team.contact = $scope.team.contact || []
+                                    $scope.team.contact.push(cp)
+                                }
+                            )
+
+
+                            /*
                             $scope.team.contact = $scope.team.contact || [];
                             $scope.team.contact.push({type:$scope.input.contactType,value:$scope.input.contactValue});
                             delete $scope.input.contactType;
                             delete $scope.input.contactValue;
+                            */
                         };
 
 
@@ -84,13 +122,14 @@ angular.module("sampleApp")
                             $scope.team.contact.splice(inx,1)
                         };
 
-                        $scope.addService = function() {
-                            if ($scope.input.service) {
+                        $scope.addService = function(svc,inx) {
+                            if (svc) {
                                 $scope.team.service = $scope.team.service || [];
-                                $scope.team.service.push({display:$scope.input.service});
+
+                                //$scope.team.service.push({display:$scope.input.service});
+                                $scope.team.service.push(svc);
                                 delete $scope.input.service;
                             }
-
                         };
 
                         $scope.deleteService = function(inx) {
@@ -153,13 +192,19 @@ angular.module("sampleApp")
                                     break;
                                 }
                             }
+
+                           // teamsSvc.updateTeam(team)
+
+
                         } else {
                             //new
                             team.id = 'id' + new Date().getTime();
                             team.managingOrganization = $scope.input.organization;
                             $scope.teams.push(team)
-                          //  $scope.team = team;
+
                         }
+
+                        teamsSvc.updateTeam(team)
 
                         $scope.team = team;
 
@@ -220,16 +265,88 @@ angular.module("sampleApp")
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
                     keyboard: false,       //same as above.
+                    size:"lg",
                     templateUrl: 'modalTemplates/editTeamMember.html',
+
                     controller: function($scope,member) {
                         $scope.input = {};
-                        $scope.member = member || {}
+                        $scope.member = member || {};
+                        let serverUrl = "http://home.clinfhir.com:8054/baseR4/";
+
+                        $scope.scope = 'all';       //scope of search
                         let memberb4edit = angular.copy(member);
-                        $scope.addQualification = function(){
-                            $scope.member.qualification = $scope.member.qualification || [];
-                            $scope.member.qualification.push({display:$scope.input.qualification})
-                            delete $scope.input.qualification;
+
+                        $scope.roles = teamsSvc.getRoles();
+
+                        $scope.search = function(name) {
+                            let url;
+                            switch ($scope.scope) {
+                                case "org" :
+                                    //todo - add org id
+                                    url = serverUrl + "PractitionerRole?practitioner.name="+name;
+                                    url += "&_include=PractitionerRole:practitioner";
+                                    break;
+                                case "all" :
+                                    url = serverUrl + "Practitioner?name="+name;
+                                    break;
+                                default :
+                                    alert("Direct entry not yet supported")
+                                    return;
+                                break;
+                            }
+
+                            console.log(url);
+                            $http.get(url).then(
+                                function(data) {
+                                    let bundle = data.data;
+                                    console.log(bundle)
+                                    //now construct a list of practitioners
+                                    $scope.practitioners = []
+                                    if (data.data.entry) {
+                                        data.data.entry.forEach(function (entry) {
+                                            let resource = entry.resource;
+                                            if (resource.resourceType == 'Practitioner') {
+                                                let p = {}
+                                                p.resource = resource;
+                                                p.name = teamsSvc.getHumanNameSummary(resource.name);
+                                                if (resource.identifier) {
+                                                    resource.identifier.forEach(function (ident) {
+                                                        if (ident.system == "https://standards.digital.health.nz/id/hpi-person") {
+                                                            p.cpn = ident.value
+                                                        }
+                                                    })
+                                                }
+
+                                                if (resource.qualification) {
+                                                    p.qual = [];
+                                                    resource.qualification.forEach(function (qual) {
+                                                        p.qual.push(teamsSvc.getQualificationObj(qual))
+                                                    })
+                                                }
+                                              //  p.qual =  resource.qualification;
+                                                $scope.practitioners.push(p);
+                                            }
+
+
+
+
+
+                                            }
+                                        )
+                                    }
+
+
+
+                                }
+                            )
+
                         };
+
+                        $scope.selectPractitioner = function(prac){
+                            $scope.selectedPractitioner = prac;
+                        };
+
+
 
                         $scope.addContact = function(){
                             $scope.member.contact = $scope.member.contact || []
@@ -240,27 +357,16 @@ angular.module("sampleApp")
 
                         $scope.deleteContact = function(inx) {
                             $scope.member.contact.splice(inx,1)
-                        }
+                        };
 
-                        $scope.deleteQualification = function(inx) {
-                            $scope.member.qualification.splice(inx,1)
-                        }
+
                         $scope.cancel = function() {
-                            $scope.$close(memberb4edit)
+                            $scope.$dismiss();
                         };
 
                         $scope.add = function() {
-                            if ($scope.input.qualification) {
-                                $scope.member.qualification = $scope.member.qualification || [];
-                                $scope.member.qualification.push({display:$scope.input.qualification})
-                            }
-
-                            if ($scope.input.contactType) {
-                                $scope.member.contact = $scope.member.contact || []
-                                $scope.member.contact.push({type:$scope.input.contactType,value:$scope.input.contactValue});
-                            }
-
-                            $scope.$close($scope.member)
+                            $scope.selectedPractitioner.role = $scope.role;
+                            $scope.$close($scope.selectedPractitioner)
                         }
 
                      },
@@ -270,7 +376,15 @@ angular.module("sampleApp")
                     }
                 }
                 }).result.then(
-                    function(newMember) {
+                    function(prac) {
+
+                        console.log(prac)
+
+                        $scope.team.member = $scope.team.member || []
+                        $scope.team.member.push(prac)
+                        teamsSvc.updateTeam($scope.team);
+
+                        return;
 
                         if (originalMember) {
                             //editing

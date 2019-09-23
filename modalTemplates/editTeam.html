@@ -48,6 +48,22 @@
             <div class="col-md-9 col-sm-9">
 
 
+                <div class="row">
+                    <div class="col-md-11 col-sm-11">
+                        <!-- <input type="text" class="form-control"  ng-model="input.service"/>-->
+                        <select class="form-control" ng-model="input.service"
+                                ng-change="addService(input.service,$index)"
+                                ng-options="concept.display for concept in services"></select>
+
+                    </div>
+                    <!--
+                                        <div class="col-md-1 col-sm-1">
+                                            <i ng-show="input.service" style="padding-top: 10px" class="glyphicon glyphicon-plus-sign pull-right clickable" ng-click="addService()"></i>
+                                        </div>
+                                        -->
+                </div>
+
+
                 <div ng-repeat="service in team.service">
                     <div class="row">
                         <div class="col-md-11 col-sm-11">
@@ -62,16 +78,8 @@
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-11 col-sm-11">
-                        <input type="text" class="form-control"  ng-model="input.service"/>
 
-                    </div>
 
-                    <div class="col-md-1 col-sm-1">
-                        <i ng-show="input.service" style="padding-top: 10px" class="glyphicon glyphicon-plus-sign pull-right clickable" ng-click="addService()"></i>
-                    </div>
-                </div>
                 <!--
                 <input type="text" class="form-control"  ng-model="team.service"/>
                 -->
@@ -100,7 +108,7 @@
                 <div ng-repeat="contact in team.contact">
                     <div class="row">
                         <div class="col-md-4 col-sm-4">
-                            {{contact.type}}
+                            {{contact.system}}
                         </div>
                         <div class="col-md-7 col-sm-7">
                             {{contact.value}}
@@ -113,6 +121,17 @@
                     </div>
                 </div>
 
+
+                <div class="row">
+                    <div class="col-md-4 col-sm-4">
+                    </div>
+                    <div class="col-md-7 col-sm-7">
+                        <button class="btn btn-link pull-right" ng-click="addContact()">Add new contact</button>
+                    </div>
+                </div>
+
+
+                <!--
                 <div class="row">
                     <div class="col-md-4 col-sm-4">
                         <select class="form-control" ng-model="input.contactType">
@@ -129,6 +148,7 @@
                         <i ng-show="input.contactType && input.contactValue" style="padding-top: 10px" class="glyphicon glyphicon-plus-sign pull-right clickable" ng-click="addContact()"></i>
                     </div>
                 </div>
+                -->
 
             </div>
 <!--
