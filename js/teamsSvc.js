@@ -250,6 +250,24 @@ angular.module("sampleApp")
                 return deferred.promise;
             },
 
+            removeTeam : function(team) {
+                if (team) {
+
+                    let url = serverUrl+"CareTeam/"+team.id;
+                    console.log(url)
+                    //return;
+
+                    $http.delete(url).then(
+                        function() {
+
+                        }, function(err) {
+                            alert(angular.toJson(err.data))
+                        }
+                    )
+
+                }
+
+            },
             updateTeam : function(team) {
                 //update a single careTeam resource
 

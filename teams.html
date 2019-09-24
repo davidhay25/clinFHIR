@@ -79,7 +79,7 @@
 
         <div class="col-md-1 col-sm-1">
             <div class="navbar-text">
-                <button class="btn btn-primary" ng-click="reset()">Reset</button>
+
             </div>
 
         </div>
@@ -103,7 +103,7 @@
                         <div ng-class="{'list-group-item':true,listItemSelected:team1==team}" ng-repeat="team1 in teams track by $index"
                              ng-click="selectTeam(team1)" style="cursor: pointer" ng-show="team1.managingOrganization.id == input.organization.id">
                             {{team1.name}}
-                            <i class="glyphicon glyphicon-minus-sign pull-right clickable" ng-click="removeTeam($index)"></i>
+                            <i class="glyphicon glyphicon-minus-sign pull-right clickable" ng-click="removeTeam($index,$event)"></i>
 
                             <!--
                             <i class="glyphicon glyphicon-edit pull-right clickable iconSpacing" ng-click="editTeam($index)"></i>

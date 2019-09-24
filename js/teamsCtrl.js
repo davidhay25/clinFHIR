@@ -3,7 +3,7 @@ angular.module("sampleApp")
         function ($scope,$firebaseAuth,$uibModal,modalService,teamsSvc,$localStorage,$http) {
 
         $scope.input = {}
-            //$scope.teams = $localStorage.teams;
+
             $scope.organizations = $localStorage.organizations;
             if ($scope.organizations){
                 $scope.input.organization = $scope.organizations[0]
@@ -27,38 +27,9 @@ angular.module("sampleApp")
                     console.log('error accessing clinfhir to register access',err)
                 }
             );
-/*
-            if (! $scope.teams) {
-                teamsSvc.getTeams().then(
-                    function(data) {
 
-                        $scope.teams = data.data.teams;
-                        $scope.organizations = data.data.orgs;
-                        $scope.input.organization = $scope.organizations[0]
-                        $localStorage.orgs = data.data.organizations;
-                    }
-                );
-            }
 
-            */
 
-            $scope.reset = function(){
-                if (confirm("This will reset the teams back to the default set")) {
-                    teamsSvc.getTeams().then(
-                        function(data) {
-
-                            $scope.teams = data.data.teams;
-                            $scope.organizations = data.data.orgs;
-                            $localStorage.teams = data.data.teams;
-                            $localStorage.organizations = data.data.orgs;
-                            $scope.input.organization = $scope.organizations[0]
-                            delete $scope.team;
-
-                        }
-                    );
-                }
-
-            }
 
             $scope.selectOrganization = function(){
                 //$scope.input.organization set by dropdown
@@ -206,12 +177,15 @@ angular.module("sampleApp")
                     })
             };
 
-            $scope.removeTeam = function(inx) {
+            $scope.removeTeam = function(inx,event) {
+                event.stopPropagation();
 
                 let team = $scope.teams[inx]
                 if (confirm("Are you sure you wish to remove "+team.name+ "?")) {
+                    teamsSvc.removeTeam(team);
+
                     $scope.teams.splice(inx,1)
-                    $localStorage.teams = $scope.teams;
+
                     delete $scope.team;
                 }
             };
