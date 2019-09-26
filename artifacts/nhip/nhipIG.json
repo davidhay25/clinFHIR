@@ -1,0 +1,68 @@
+{
+  "resourceType": "ImplementationGuide",
+  "id": "nhip",
+  "meta": {
+    "versionId": "62",
+    "lastUpdated": "2019-08-22T18:38:31.575+00:00"
+  },
+  "extension": [
+    {
+      "url": "http://clinfhir.com/fhir/StructureDefinition/cfAuthor",
+      "valueBoolean": true
+    }
+  ],
+  "url": "http:clinfhir.com/fhir/nhip",
+  "name": "nHIP",
+  "status": "draft",
+  "description": "nHIP FHIR support artifacts",
+  "packageId": "nHIP",
+  "fhirVersion": [
+    "4.0.0"
+  ],
+  "definition": {
+    "resource": [
+       {
+        "extension": [
+          {
+            "url": "http://clinfhir.com/StructureDefinition/igEntryType",
+            "valueCode": "logical"
+          }
+        ],
+        "reference": {
+          "reference": "StructureDefinition/Nzulm"
+        },
+        "name": "nzulm",
+        "description": "Medication model"
+      },
+      {
+        "extension": [
+          {
+            "url": "http://clinfhir.com/StructureDefinition/igEntryType",
+            "valueCode": "logical"
+          }
+        ],
+        "reference": {
+          "reference": "StructureDefinition/NhipImmunization"
+        },
+        "name": "nhipImmunization",
+        "description": "Immunization model"
+      },
+      {
+        "extension": [
+          {
+            "url": "http://clinfhir.com/StructureDefinition/igEntryType",
+            "valueCode": "logical"
+          }
+        ],
+        "reference": {
+          "reference": "StructureDefinition/NhipRiskAssessment"
+        },
+        "name": "nhipRiskAssessment",
+        "description": "Risk Assessment model"
+      }
+      
+      
+     
+    ]
+  }
+}
