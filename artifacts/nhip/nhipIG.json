@@ -61,6 +61,22 @@
         "name": "nhipImmunization",
         "description": "Immunization model"
       },
+      
+      
+      {
+        "extension": [
+          {
+            "url": "http://clinfhir.com/StructureDefinition/igEntryType",
+            "valueCode": "logical"
+          }
+        ],
+        "reference": {
+          "reference": "StructureDefinition/NhipAllergy"
+        },
+        "name": "nhipAllergy",
+        "description": "Allergy / Intolerance model"
+      },
+      
       {
         "extension": [
           {

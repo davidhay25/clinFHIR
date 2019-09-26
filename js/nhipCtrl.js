@@ -1,66 +1,65 @@
 angular.module("sampleApp")
     .controller('nhipCtrl',
-        function ($scope,$firebaseAuth,$uibModal,modalService,nhipSvc,logicalModelSvc,$http,$sce) {
+        function ($scope,$firebaseAuth,$uibModal,modalService,nhipSvc,logicalModelSvc,$http,$sce,appConfigSvc) {
 
             $scope.selectedGroup = 'logical';       //initial group to display
             $scope.input = {};
 
+            appConfigSvc.setServerType('conformance','http://home.clinfhir.com:8054/baseR4/');
+            appConfigSvc.setServerType('data','http://home.clinfhir.com:8054/baseR4/');       //set the data server to the same as the conformance for the comments
+            //appConfigSvc.setServerType('terminology',"http://home.clinfhir.com:8054/baseR4/");
+            appConfigSvc.setServerType('terminology',"https://ontoserver.csiro.au/stu3-latest/");
+
 
             $scope.selectIG = function(igCode) {
-                console.log(igCode)
+                //console.log(igCode)
                 nhipSvc.getIG(igCode).then(
                     function(data) {
                         $scope.artifacts = data;
-                        console.log($scope.artifacts)
+                        //console.log($scope.artifacts)
                     }
                 );
             };
 
-            $scope.input.igCode = "nhip";
+            $scope.input.igCode = "nzRegistry";
             $scope.selectIG($scope.input.igCode);
 
+            //for the iframe
             $scope.trustSrc = function(mi) {
                 if (mi) {
                     return $sce.trustAsResourceUrl(mi.url);
                 }
-
-            }
+            };
 
             $scope.selectMI = function(mi) {
-                //$sce.trustAsResourceUrl(mi.url);
                 $scope.mi = mi;
-               // $scope.miUrl = mi.url;
-/*
-                $http.get(mi.url).then(
-                    function(data) {
-                        $('#htmlDoc').contents().find('html').html(data.data)
-                    }
-                )
-                */
-
-
-            }
-
+            };
 
             //get the resource references by the artifact (artifact is the entry in the IG)
             $scope.showWaiting = true;
             $scope.selectItem = function(typ,art) {
-                $scope.selectedArtifact = art;
+                delete $scope.selectedArtifact;
                 delete $scope.selectedResource;
                 delete $scope.selectedNode;
                 delete $scope.selectedED;
                 delete $scope.tasks;
+                delete $scope.mi;
+
+                //$scope.mi={url:'about:blank'}
 
                 let resource = nhipSvc.getResource(art).then(
                     function(resource) {
                         //may want different logic depending on type
+                        $scope.selectedArtifact = art;
+
                         $scope.selectedResource = resource;
-                        console.log(resource)
+                        //console.log(resource)
 
                         switch (resource.resourceType) {
                             case 'StructureDefinition' :
                                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.selectedResource);  //create a new tree
 
+                                console.log($scope.treeData)
                                 //collapse all but the root...
                                 $scope.treeData.forEach(function(node){
                                     node.state = node.state || {}

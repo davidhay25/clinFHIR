@@ -193,7 +193,7 @@ angular.module("sampleApp")
 
                             //get the moreinfo
                             let moreInfo = getExtension(res,extIGMoreInfo);
-                            console.log(res,moreInfo);
+                            //console.log(res,moreInfo);
                             moreInfo.forEach(function (ext) {
                                 let moreInfo = {};
                                 ext.extension.forEach(function(child){
@@ -216,7 +216,7 @@ angular.module("sampleApp")
                                 let code = typ[0].valueCode;
                                 artifacts[code] = artifacts[code] || [];
                                 artifacts[code].push(res)
-                                console.log(res)
+                                //console.log(res)
                             }
                         });
 
