@@ -1,6 +1,6 @@
 angular.module("sampleApp")
     .controller('nhipCtrl',
-        function ($scope,$firebaseAuth,$uibModal,modalService,nhipSvc,logicalModelSvc) {
+        function ($scope,$firebaseAuth,$uibModal,modalService,nhipSvc,logicalModelSvc,$http,$sce) {
 
             $scope.selectedGroup = 'logical';       //initial group to display
             $scope.input = {};
@@ -19,6 +19,28 @@ angular.module("sampleApp")
             $scope.input.igCode = "nhip";
             $scope.selectIG($scope.input.igCode);
 
+            $scope.trustSrc = function(mi) {
+                if (mi) {
+                    return $sce.trustAsResourceUrl(mi.url);
+                }
+
+            }
+
+            $scope.selectMI = function(mi) {
+                //$sce.trustAsResourceUrl(mi.url);
+                $scope.mi = mi;
+               // $scope.miUrl = mi.url;
+/*
+                $http.get(mi.url).then(
+                    function(data) {
+                        $('#htmlDoc').contents().find('html').html(data.data)
+                    }
+                )
+                */
+
+
+            }
+
 
             //get the resource references by the artifact (artifact is the entry in the IG)
             $scope.showWaiting = true;
@@ -26,7 +48,7 @@ angular.module("sampleApp")
                 $scope.selectedArtifact = art;
                 delete $scope.selectedResource;
                 delete $scope.selectedNode;
-                delete $scope.selectedED
+                delete $scope.selectedED;
                 delete $scope.tasks;
 
                 let resource = nhipSvc.getResource(art).then(
@@ -48,14 +70,16 @@ angular.module("sampleApp")
                                         node.state.opened = false;
                                     }
 
-                                })
+                                });
 
                                 drawTree();
+
+
                                 nhipSvc.getTasksForModel($scope.treeData,$scope.selectedResource.id).then(
                                     function (tasks) {
                                         $scope.tasks =tasks;
                                     }
-                                )
+                                );
 
 
                                 break;

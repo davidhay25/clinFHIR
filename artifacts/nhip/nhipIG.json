@@ -26,12 +26,26 @@
           {
             "url": "http://clinfhir.com/StructureDefinition/igEntryType",
             "valueCode": "logical"
+          },
+          {
+            "url": "http://clinfhir.com/StructureDefinition/igMoreInfo",
+            "extension" : [
+                {
+                    "url": "title",
+                    "valueString": "Design Document"
+                  },
+                  {
+                    "url": "url",
+                    "valueUrl": "https://docs.google.com/document/d/1ZL9zrmjPKZa220GwluubhFy5CMRX_zc62gOv6MC3UZA/edit?usp=sharing"
+                  }
+            ]
+            
           }
         ],
         "reference": {
           "reference": "StructureDefinition/Nzulm"
         },
-        "name": "nzulm",
+        "name": "Medication Model",
         "description": "Medication model"
       },
       {

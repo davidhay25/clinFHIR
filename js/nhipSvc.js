@@ -4,6 +4,7 @@ angular.module("sampleApp")
 
         let serverUrl = "http://home.clinfhir.com:8054/baseR4/";
         let extIGEntryType = "http://clinfhir.com/StructureDefinition/igEntryType";
+        let extIGMoreInfo = "http://clinfhir.com/StructureDefinition/igMoreInfo"
 
         var pathExtUrl = appConfigSvc.config().standardExtensionUrl.path;
 
@@ -189,11 +190,33 @@ angular.module("sampleApp")
                         let IG = data.data;
                         let artifacts = {};
                         IG.definition.resource.forEach(function (res) {
+
+                            //get the moreinfo
+                            let moreInfo = getExtension(res,extIGMoreInfo);
+                            console.log(res,moreInfo);
+                            moreInfo.forEach(function (ext) {
+                                let moreInfo = {};
+                                ext.extension.forEach(function(child){
+                                    switch (child.url) {
+                                        case 'title' :
+                                            moreInfo.title = child.valueString;
+                                            break;
+                                        case 'url' :
+                                            moreInfo.url = child.valueUrl;
+                                            break;
+                                    }
+                                })
+                                res.moreInfo = res.moreInfo || []
+                                res.moreInfo.push(moreInfo)
+
+                            })
+
                             let typ = getExtension(res,extIGEntryType);
                             if (typ && typ.length > 0) {
                                 let code = typ[0].valueCode;
                                 artifacts[code] = artifacts[code] || [];
                                 artifacts[code].push(res)
+                                console.log(res)
                             }
                         });
 

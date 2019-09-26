@@ -10,6 +10,7 @@
     <script src="js/libs/angularfire.min.js"></script>
     <script src="js/libs/moment.min.js"></script>
     <script src="js/libs/jstree.min.js"></script>
+    <script src="js/libs/angular-sanitize.js"></script>
 
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
@@ -23,7 +24,7 @@
     <script>
 
 
-        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase',"ngSanitize"]).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -31,8 +32,12 @@
         });
 
         angular.module("sampleApp").constant("moment", moment);
-
-
+/*
+        angular.module("sampleApp").config(['$compileProvider', function ($compileProvider) {
+            $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
+            //$compileProvider.aHrefSanitizationWhitelist(/^\s*(|blob|):/);
+        }]);
+*/
     </script>
 
     <style>
@@ -360,7 +365,21 @@
                                 <div class="list-group-item" ng-repeat="task in tasks track by $index"
                                      ng-if = "task.path==selectedNode.id || task.path==selectedNode.data.idFromSD">
                                     {{task.description}}
-                                    <div>{{task.requestorDisplay}}</div>
+                                    <div><em class="pull-right"> {{task.requesterReference.display}}</em></div>
+
+                                    <div ng-show="task.notes.length >0">
+                                        <hr/>
+                                        <div ng-repeat="note in task.notes">
+
+                                            <div style="margin-left: 20px" >{{note.text}}</div>
+                                            <div><em class="pull-right">{{note.authorString}}</em></div>
+                                            <br/><br/>
+                                        </div>
+
+                                    </div>
+                                    <div class="clearfix"></div>
+
+                                   <!-- <pre>{{task | json}}</pre>-->
                                 </div>
                             </div>
                         </div>
@@ -406,6 +425,27 @@
 
                     </table>
 
+                </uib-tab>
+                <uib-tab heading="More Information" ng-show="selectedArtifact.moreInfo">
+                    {{selectedArtifact.moreInfo}}
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="list-group-item" ng-repeat="mi in selectedArtifact.moreInfo">
+                                <div ng-click="selectMI(mi)">
+                                    <div>{{mi.title}}</div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <!--
+                               <iframe src = "https://docs.google.com/document/d/1ZL9zrmjPKZa220GwluubhFy5CMRX_zc62gOv6MC3UZA/edit?usp=sharing" id="htmlDoc" width="100%" height = "600px"></iframe>
+
+                            -->
+                            <iframe ng-src = "{{trustSrc(mi)}}" id="htmlDoc" width="100%" height = "600px"></iframe>
+                        </div>
+                    </div>
                 </uib-tab>
             </uib-tabset>
 
