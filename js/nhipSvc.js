@@ -116,7 +116,7 @@ angular.module("sampleApp")
                     })
                 }
 
-                console.log('loading tasks for model...')
+                //console.log('loading tasks for model...')
 
                 let url = serverUrl + "Task";    //from parent controller
 
@@ -127,7 +127,7 @@ angular.module("sampleApp")
                 performQueryFollowingPaging(url).then(
                     function(bundle) {
                         if (bundle && bundle.entry) {
-                            console.log(bundle)
+                            //console.log(bundle)
                             bundle.entry.forEach(function (entry) {
                                 let resource = entry.resource;      //the fhir Task
 
@@ -144,7 +144,7 @@ angular.module("sampleApp")
                                 }
 
                             });
-                            console.log(tasks)
+                            //console.log(tasks)
                             deferred.resolve(tasks)
 
                         }
@@ -205,11 +205,11 @@ angular.module("sampleApp")
                                             moreInfo.url = child.valueUrl;
                                             break;
                                     }
-                                })
+                                });
                                 res.moreInfo = res.moreInfo || []
                                 res.moreInfo.push(moreInfo)
 
-                            })
+                            });
 
                             let typ = getExtension(res,extIGEntryType);
                             if (typ && typ.length > 0) {

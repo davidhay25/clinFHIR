@@ -11,12 +11,21 @@ angular.module("sampleApp")
             appConfigSvc.setServerType('terminology',"https://ontoserver.csiro.au/stu3-latest/");
 
 
+            //the capability statement (that has the search's supported). Not sure if there should only be a single one or not...
+            $http.get("http://home.clinfhir.com:8054/baseR4/CapabilityStatement/nhip-capstmt").then(
+                function(data) {
+                    $scope.nhipCapStmt = data.data;
+                }
+            );
+
             $scope.selectIG = function(igCode) {
-                //console.log(igCode)
+
                 nhipSvc.getIG(igCode).then(
                     function(data) {
                         $scope.artifacts = data;
-                        //console.log($scope.artifacts)
+
+                        console.log(data)
+
                     }
                 );
             };
@@ -46,16 +55,20 @@ angular.module("sampleApp")
                 delete $scope.mi;
 
                 //$scope.mi={url:'about:blank'}
-
+                $scope.showWaiting = true;
                 let resource = nhipSvc.getResource(art).then(
                     function(resource) {
+
                         //may want different logic depending on type
                         $scope.selectedArtifact = art;
-
                         $scope.selectedResource = resource;
                         //console.log(resource)
 
                         switch (resource.resourceType) {
+
+                            case 'NamingSystem' :
+
+                                break;
                             case 'StructureDefinition' :
                                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.selectedResource);  //create a new tree
 
@@ -95,6 +108,10 @@ angular.module("sampleApp")
             };
 
 
+            $scope.showTableElement = function(row){
+                console.log(row);
+                return true;
+            }
 
             $scope.showAccordianGroup = function(group){
                 $scope.selectedGroup = group;
