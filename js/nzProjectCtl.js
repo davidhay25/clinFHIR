@@ -89,7 +89,7 @@ angular.module("sampleApp")
 
                 alert("The item has been copied to the clipboard.")
 
-            }
+            };
             $scope.exampleTypes = {};       // a hash of the different types of example
 
             let FHIRVersion = 4;

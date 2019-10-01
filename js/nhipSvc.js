@@ -4,13 +4,17 @@ angular.module("sampleApp")
 
         let serverUrl = "http://home.clinfhir.com:8054/baseR4/";
         let extIGEntryType = "http://clinfhir.com/StructureDefinition/igEntryType";
-        let extIGMoreInfo = "http://clinfhir.com/StructureDefinition/igMoreInfo"
+        let extIGMoreInfo = "http://clinfhir.com/StructureDefinition/igMoreInfo";
+        let extModelBaseType = "http://clinfhir.com/fhir/StructureDefinition/baseTypeForModel";
+        let extProfileForLM = "http://clinfhir.com/StructureDefinition/profileForLM";
 
         var pathExtUrl = appConfigSvc.config().standardExtensionUrl.path;
 
 
         //the code for tasks that correstond to notes against the model
-        let taskCode =  {system:"http://loinc.org",code:"48767-8"}
+        let taskCode =  {system:"http://loinc.org",code:"48767-8"};
+
+        let cache = {};
 
         //get the value of a single extension
         function getExtension(resource, url) {
@@ -102,9 +106,17 @@ angular.module("sampleApp")
 
         return {
 
+            getModelBaseType :function(SD) {
+
+                let baseType = getExtension(SD,extModelBaseType)
+                if (baseType && baseType.length > 0) {
+                    return baseType[0].valueString
+                }
+            },
+
             getTasksForModel : function(treeData,modelCode){
                 let deferred = $q.defer();
-                let tasks = []
+                let tasks = [];
 
                 let hash = {};  //hash of current path to original path
                 if (treeData) {
@@ -162,13 +174,22 @@ angular.module("sampleApp")
             },
 
 
-            getResource: function(artifact) {
+
+            getResource: function(artifact,asXml) {
                 //get the resource references by the artifact
+
                 let deferred = $q.defer();
                 if (artifact.reference && artifact.reference.reference) {
                     let url = serverUrl + artifact.reference.reference;
+                    if (asXml) {
+                        url += '?_format=xml';
+                    }
                     $http.get(url).then(
                         function(data) {
+
+
+
+
                             deferred.resolve(data.data)
                         }, function(err) {
                             deferred.reject();
@@ -190,33 +211,54 @@ angular.module("sampleApp")
                         let IG = data.data;
                         let artifacts = {};
                         IG.definition.resource.forEach(function (res) {
+                            if (res.reference && res.reference.reference) {
 
-                            //get the moreinfo
-                            let moreInfo = getExtension(res,extIGMoreInfo);
-                            //console.log(res,moreInfo);
-                            moreInfo.forEach(function (ext) {
-                                let moreInfo = {};
-                                ext.extension.forEach(function(child){
-                                    switch (child.url) {
-                                        case 'title' :
-                                            moreInfo.title = child.valueString;
-                                            break;
-                                        case 'url' :
-                                            moreInfo.url = child.valueUrl;
-                                            break;
-                                    }
+
+                                //get the moreinfo, if any
+                                let moreInfo = getExtension(res, extIGMoreInfo);
+                                //console.log(res,moreInfo);
+                                moreInfo.forEach(function (ext) {
+                                    let moreInfo = {};
+                                    ext.extension.forEach(function (child) {
+                                        switch (child.url) {
+                                            case 'title' :
+                                                moreInfo.title = child.valueString;
+                                                break;
+                                            case 'url' :
+                                                moreInfo.url = child.valueUrl;
+                                                break;
+                                        }
+                                    });
+                                    res.moreInfo = res.moreInfo || []
+                                    res.moreInfo.push(moreInfo)
+
                                 });
-                                res.moreInfo = res.moreInfo || []
-                                res.moreInfo.push(moreInfo)
 
-                            });
+                                //is there an extension for the profile that defines the LM?
+                                let prof = getExtension(res, extProfileForLM);
+                                if (prof && prof.length > 0) {
+                                    res.profileForLM = prof[0].valueUrl;
 
-                            let typ = getExtension(res,extIGEntryType);
-                            if (typ && typ.length > 0) {
-                                let code = typ[0].valueCode;
-                                artifacts[code] = artifacts[code] || [];
-                                artifacts[code].push(res)
-                                //console.log(res)
+                                }
+
+
+                                let typ = getExtension(res, extIGEntryType);
+                                if (typ && typ.length > 0) {
+                                    let code = typ[0].valueCode;
+                                    artifacts[code] = artifacts[code] || [];
+                                    artifacts[code].push(res)
+                                    //console.log(res)
+                                } else {
+                                    //this might be an extension
+                                    if (res.exampleBoolean || res.exampleCanonical) {
+                                        artifacts.example = artifacts.example || []
+                                        let ar = res.reference.reference.split('/');
+                                        res.baseType = ar[0]
+                                        artifacts.example.push(res)
+
+
+                                    }
+                                }
                             }
                         });
 

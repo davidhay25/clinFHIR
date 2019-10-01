@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
 //generate extensiondefinitions from models
+
 //if an extension is used more than once in the
-
-
 
 let fs = require('fs');
 let syncRequest = require('sync-request');
@@ -13,19 +12,20 @@ let syncRequest = require('sync-request');
 let IGEntryType = 'http://clinfhir.com/StructureDefinition/igEntryType';
 let canonicalUrl = 'http://clinfhir.com/fhir/StructureDefinition/canonicalUrl';
 
-
 let nzPrefix = "http://hl7.org.nz/fhir/StructureDefinition";    //the prefix for NZ extensions...
 
 //let remoteFhirServer = "http://home.clinfhir.com:8040/baseDstu3/";
 let remoteFhirServer = "http://home.clinfhir.com:8054/baseR4/"; //the server where the models are stored
 
 
+//if the url is null, then no upload
 let uploadServer = "http://home.clinfhir.com:8054/baseR4/";     //the server to upload the Extension def SD's to...
 //let uploadServer = null;
 
 //the extension from the LM where the extension url is placed...
 let extensionUrl = "http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl";
 
+//where a copy of the ExrDef is placed
 let outFolder = "/Users/davidhay/sharedWithVB/mohProfiles/";
 
 //let outFolder = "/Users/davidhay/Dropbox/contracting/MOH/ResourcesForIG/extensions/";
@@ -45,7 +45,8 @@ options.timeout = 20000;        //20 seconds
 //get all the models in the IG
 
 //the implementation guide - the one on file...
-let IGPath = "/Users/davidhay/Dropbox/contracting/MOH/ResourcesForIG/nzRegistry.json";
+//let IGPath = "/Users/davidhay/Dropbox/contracting/MOH/ResourcesForIG/nzRegistry.json";
+let IGPath = "/Users/davidhay/Dropbox/contracting/MOH/ResourcesForNhipIG/nhipIG.json";
 let IG = JSON.parse(fs.readFileSync(IGPath).toString());
 
 /*
@@ -69,7 +70,8 @@ IG.definition.resource.forEach(function (item) {
 
 //arModels = ["HpiPractitioner"];
 
-arModels = ["NzNHIPatient"];
+//arModels = ["NzNHIPatient"];
+arModels = ["Nzulm"];
 
 //assume all the models are for the same IG...
 let arIgEntry = [];   //a set of definition.resource entries to insert into an IG. ?todo directly update IG?

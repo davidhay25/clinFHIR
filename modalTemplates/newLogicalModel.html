@@ -179,6 +179,20 @@
 
 
             </uib-tab>
+
+            <uib-tab heading="Expanded Purpose">
+                <br />
+                <div class="row">
+                    <div class="col-md-12 col-sm-12">
+                        <textarea class="form-control" rows="15" ng-model="input.purpose"
+                                  placeholder="Why has this model been developed? What is it intended to do?"></textarea>
+                        <em>A place for a longer edit. Supports markdown.</em>
+                    </div>
+
+                </div>
+
+            </uib-tab>
+
             <uib-tab ng-show = "isNew && !input.clone && 1==2" heading="Base Resource ">
                 <br/>
 
