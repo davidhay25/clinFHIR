@@ -3,10 +3,14 @@ angular.module("sampleApp")
     .service('nhipSvc', function($q,$http,taskSvc,appConfigSvc) {
 
         let serverUrl = "http://home.clinfhir.com:8054/baseR4/";
+        let termServerUrl = "https://ontoserver.csiro.au/stu3-latest/";
+
+
         let extIGEntryType = "http://clinfhir.com/StructureDefinition/igEntryType";
         let extIGMoreInfo = "http://clinfhir.com/StructureDefinition/igMoreInfo";
         let extModelBaseType = "http://clinfhir.com/fhir/StructureDefinition/baseTypeForModel";
         let extProfileForLM = "http://clinfhir.com/StructureDefinition/profileForLM";
+        let extExtensionUrl = "http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl";
 
         var pathExtUrl = appConfigSvc.config().standardExtensionUrl.path;
 
@@ -101,10 +105,189 @@ angular.module("sampleApp")
 
         }
 
+        let hashResource = {}
+        function getResourceAsync(url) {
+            let deferred = $q.defer();
+            if (hashResource[url]) {
+                deferred.resolve(hashResource[url])
+            } else {
+                let fullUrl = serverUrl + url;
+                $http.get(fullUrl).then(
+                    function(data){
+                        hashResource[url] = data.data;
+                        deferred.resolve(hashResource[url])
+                    },
+                    function(err) {
+                        deferred.reject(err.data);
+                    }
+                )
+            }
 
+
+            return deferred.promise
+
+        }
 
 
         return {
+
+            analyseIG : function(artifacts) {
+                let deferred = $q.defer();
+                let arWork = [];
+
+                let arExtension = [], arValueSet=[];
+
+                artifacts.logical.forEach(function (art) {
+                    arWork.push(lookForExtensions(art)) //can do this in a single call as at most one HTTP call is needed
+
+                    //now look for Valuesets. Need to do this here as there can be multiple per model
+                    let url = art.reference.reference;
+                    console.log(url)
+
+                    getResourceAsync(url).then(
+                        function(SD) {
+                            //console.log(SD)
+                            SD.snapshot.element.forEach(function (ed) {
+                                if (ed.binding) {
+                                    arWork.push(processCoded(url,ed));
+                                }
+                            })
+                        }, function(err) {
+                            console.log(err)
+                        }
+                    )
+
+                });
+
+                //now perform all the async tasks...
+                //does seem to work, although work items are added asynchronoiusly...
+                if (arWork.length > 0) {
+                    $q.all(arWork).then(
+                        function () {
+                            deferred.resolve({extensions:arExtension,valueSets:arValueSet})
+                        }
+                    )
+
+                } else {
+                    deferred.resolve({})
+                }
+
+
+                return deferred.promise;
+                //--------------------------------------------
+                
+                
+                //look for coded data in an ed
+                function processCoded(url,ed) {
+                    let deferred = $q.defer();
+                    let item = {url:url,ed:ed};
+                    if (! ed.binding) {
+                        item.note = "There was no binding";
+                        deferred.resolve();
+                        return;
+                    }
+
+                    item.valueSetUrl=ed.binding.valueSet
+                    item.strength= ed.binding.strength;
+
+                    if (ed.binding.valueSet) {
+                        let ar = ed.binding.valueSet.split('|')
+
+                        let url = termServerUrl + "ValueSet?url="+ar[0];
+                        $http.get(url).then(
+                            function (data) {
+                                //will be a Bundle
+                                if (data.data && data.data.entry && data.data.entry.length > 0) {
+                                    let ValueSet = data.data.entry[0].resource;
+                                    item.valueSet = ValueSet
+                                    if (data.data.entry.length > 1) {
+                                        item.note = "There was more than one VS with this url on the term server"
+                                    }
+                                } else {
+                                    //The VS was not found on the term server...
+                                    item.note = "The VS was not found on the Terminology server"
+                                }
+
+                            },
+                            function (err) {
+                                console.log(err)
+                            }
+                        ).finally(function () {
+                            arValueSet.push(item)
+                            deferred.resolve();
+                        })
+                    } else {
+                        //There is no valueSet
+                        item.note = "There was no ValueSet in the binding";
+                        deferred.resolve();
+                    }
+
+
+
+
+
+
+                    return deferred.promise;
+                    
+                }
+
+                function lookForExtensions(art){
+                    let deferred = $q.defer();
+
+                    let url = art.reference.reference;
+
+                    console.log(url)
+
+                    getResourceAsync(url).then(
+                        function(SD) {
+                            //console.log(SD)
+                            SD.snapshot.element.forEach(function (ed) {
+                                //look for extension mapping...
+                                if (ed.mapping) {
+                                    ed.mapping.forEach(function (map) {
+                                        if (map.identity == 'fhir' && map.map.indexOf('xtension')>-1) {
+                                            //this is mapped to an extension
+                                            //let ar = url.split('/')
+
+                                            let item = {url:url,ed:ed};
+                                            let arExt = getExtension(ed,extExtensionUrl);
+                                            if (arExt.length > 0) {
+                                                item.extensionUrl = arExt[0].valueString;
+                                            }
+                                            arExtension.push(item)
+                                            //console.log(ed)
+                                        }
+                                    })
+                                }
+                                //now for any bound ValueSets. Even if it is an extension, the logical model should still have the ValueSet binding...
+                                if (ed.binding) {
+                                    let item = {valueSet:ed.binding.valueSet,ed:ed}
+                                    item.strength = ed.binding.strength;
+                                    
+                                }
+
+
+
+                            })
+
+                            deferred.resolve();
+
+                        },
+                        function (err) {
+                            console.log(err)
+                        }
+                    )
+
+
+
+
+
+
+                    return deferred.promise;
+                }
+
+
+            },
 
             getModelBaseType :function(SD) {
 

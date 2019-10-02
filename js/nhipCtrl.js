@@ -21,6 +21,7 @@ angular.module("sampleApp")
 
             $scope.selectIG = function(igCode) {
                 clearDetail()
+                delete $scope.analysis;
                 nhipSvc.getIG(igCode).then(
                     function(data) {
                         $scope.artifacts = data;
@@ -31,7 +32,44 @@ angular.module("sampleApp")
                 );
             };
 
-            $scope.input.igCode = "nzRegistry";
+            $scope.analyse = function(){
+                console.log($scope.artifacts);
+                nhipSvc.analyseIG($scope.artifacts).then(
+                    function (vo) {
+                        //this gets called before all the Valuesets have been located - but as it's a reference, it 'catches up'
+
+                        if (! $scope.selectedArtifact) {
+                            $scope.input.showAllAnalysis = true;
+                        }
+
+
+                        $scope.analysis = vo;
+                        console.log(vo)
+
+                        //wait a second before sorting. This is a  bit scruffy...
+                        $timeout(function(){
+                            vo.extensions.sort(function(a,b){
+                                if (a.url > b.url) {
+                                    return 1
+                                } else {
+                                    return -1
+                                }
+                            })
+                            vo.valueSets.sort(function(a,b){
+                                if (a.url > b.url) {
+                                    return 1
+                                } else {
+                                    return -1
+                                }
+                            })
+
+                            console.log(vo)
+                        },1000)
+                })
+            }
+
+            //$scope.input.igCode = "nzRegistry";
+            $scope.input.igCode = "nhip";
             $scope.selectIG($scope.input.igCode);
 
             //for the iframe
@@ -148,7 +186,7 @@ angular.module("sampleApp")
                 $('#resourceTree').jstree('destroy');
             }
             //get the resource references by the artifact (artifact is the entry in the IG)
-            $scope.showWaiting = true;
+           // $scope.showWaiting = true;
             $scope.selectItem = function(typ,art) {
                 clearDetail();
 
@@ -161,6 +199,7 @@ angular.module("sampleApp")
                         $scope.selectedArtifact = art;
                         $scope.selectedResource = resource;
                         //console.log(resource)
+                        //delete $scope.input.showAllAnalysis;
 
                         switch (resource.resourceType) {
 
@@ -168,10 +207,12 @@ angular.module("sampleApp")
 
                                 break;
                             case 'StructureDefinition' :
+                                //a LM
+                                $scope.input.showAllAnalysis = false;
                                 $scope.baseTypeForModel = nhipSvc.getModelBaseType($scope.selectedResource);
                                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.selectedResource);  //create a new tree
 
-                                console.log($scope.treeData);
+                                //console.log($scope.treeData);
                                 //collapse all but the root...
                                 $scope.treeData.forEach(function(node){
                                     node.state = node.state || {}
