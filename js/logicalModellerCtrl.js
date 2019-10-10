@@ -34,13 +34,25 @@ angular.module("sampleApp")
             $scope.appConfigSvc = appConfigSvc
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
 
-            $scope.showComments = true;
+            //whether or not to show the comments (and allow them to be created)
+            $scope.input.showComments = false;  //default is no
+            $scope.setAllowComments = function(flag){
+                //fired by th=e chackbox. If contains the value prior to the change
 
+                let item = $scope.treeData[0]
+                if (item && item.data && item.data.header) {
+                    item.data.header.enableComments = ! flag;
+
+                }
+
+                makeSD();       //builds a new SD
+                $scope.isDirty = true;
+            }
 
 
             $scope.EDDisplayDEP = function(url){
                 alert(url)
-            }
+            };
 
             GetDataFromServer.registerAccess('logical');
 
@@ -73,15 +85,12 @@ angular.module("sampleApp")
 
             //change the email of the model editor. Would be nice to be able to check that the email is valid...
             $scope.changeEditor = function(){
-
                 var email = $window.prompt('Enter new editor email');
                 if (email) {
                     $scope.treeData[0].data.header.editor = email;
                     makeSD();
                     $scope.isDirty = true
                 }
-
-
             };
 
             //can the current user edit the model. todo - this has become cruftly...
@@ -103,9 +112,6 @@ angular.module("sampleApp")
                             }
                         }
 
-                        //if ($scope.treeData[0].data.header.editor == $scope.Practitioner.telecom[0].value) {
-                          //  return true
-                        //} else {return false;}
                     }
 
                     else {
@@ -869,30 +875,9 @@ angular.module("sampleApp")
 
 
             };
-/*
-            //view and change servers
-            $scope.setServersDEP = function(){
-                $uibModal.open({
-                    templateUrl: 'modalTemplates/setServers.html',
-                    //size: 'lg',
-                    controller: 'setServersCtrl'
-                }).result.then(function () {
 
-
-                    if (appConfigSvc.getCurrentConformanceServer().url !== appConfigSvc.getCurrentDataServer().url) {
-                        modalService.showModal({}, {bodyText: "The Conformance and Data servers should really be the same. Odd things will occur otherwise."});
-                    }
-
-
-                    getPalette($scope.Practitioner);       //get the palette of logical models
-                    $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
-                    loadAllModels();
-
-                })
-            };
-*/
             //merge the referenced model into this one at this point
-            $scope.mergeModel = function(url){
+            $scope.mergeModelDEP = function(url){
                 $scope.canSaveModel = false;        //to prevent the base model from being replaced... 
                 var modelToMerge = logicalModelSvc.getModelFromBundle($scope.bundleModels,url);
 
@@ -913,132 +898,8 @@ angular.module("sampleApp")
 
 
 
-            }
-/*
-            $scope.showCommentEntryDEP = function(comment,index) {
-
-
-                return ((comment.levelKey == $scope.currentLevelKey) || comment.level==1);
-            }
-
-            */
-/*
-            $scope.showConversationDEP = function(levelKey) {
-                $scope.currentLevelKey = levelKey;
-
-            }
-
-            */
-/*
-            $scope.saveCommentDEP = function() {
-                //save the comment. For now, a single comment only...
-                var QuestionnaireResponse;
-                if ($scope.taskOutputs.length == 0) {
-                    //create a new QuestionnaireResponse and add it to the task...
-                    var type = {text: 'QuestionnaireResponse'}
-                    QuestionnaireResponse = {resourceType: 'QuestionnaireResponse', item: [],status:'completed'};
-                    QuestionnaireResponse.item.push({linkId:'general', answer:[{valueString: $scope.input.mdComment}]}   );
-                    QuestionnaireResponse.id = 't' + new Date().getTime();
-                    QuestionnaireResponse.authored = moment().format();
-
-                    $scope.showWaiting = true;
-                    SaveDataToServer.addOutputToTask($scope.commentTask,QuestionnaireResponse,type).then(
-                        function(){
-                            modalService.showModal({}, {bodyText: "Comment saved"});
-                            getAllComments();
-                           // alert('Comment saved')
-                        },function(err){
-                            alert('error adding QuestionnaireResponse: '+angular.toJson(err))
-                        }
-                    ).finally(function(){
-                        $scope.showWaiting = false;
-                    })
-
-
-                } else {
-                    //update an existing one...
-                    QuestionnaireResponse = $scope.taskOutputs[0];      //these are only QuestionnaireResponse resources right now...
-                    QuestionnaireResponse.item = QuestionnaireResponse.item || [];    //should be unnessecary...
-                    QuestionnaireResponse.authored = moment().format();
-                    QuestionnaireResponse.item[0] = {linkId:'general', answer:[{valueString: $scope.input.mdComment}]};
-                    $scope.showWaiting = true;
-                    SaveDataToServer.saveResource(QuestionnaireResponse).then(
-                        function(){
-                            modalService.showModal({}, {bodyText: "Comment updated"});
-                            getAllComments();
-                        },
-                        function(err) {
-                            alert('error updating QuestionnaireResponse: '+angular.toJson(err))
-                        }
-                    ).finally(function(){
-                        $scope.showWaiting = false;
-                    })
-                }
-
-
-
-
-
-
-                
-            };
-*/
-
-           /*
-            $scope.saveCommentDEP = function() {
-                //save the comment. For now, a single comment only...
-                var Communication;
-                if ($scope.taskOutputs.length == 0) {
-                    //create a new communication and add it to the task...
-                    var type = {text: 'Communication'}
-                    Communication = {resourceType: 'Communication', payload: []};
-                    Communication.payload.push({contentString: $scope.input.mdComment});
-                    Communication.id = 't' + new Date().getTime();
-                    Communication.sent = moment().format();
-
-                    $scope.showWaiting = true;
-                    SaveDataToServer.addOutputToTask($scope.commentTask,Communication,type).then(
-                        function(){
-                            modalService.showModal({}, {bodyText: "Comment saved"});
-                            getAllComments();
-                            // alert('Comment saved')
-                        },function(err){
-                            alert('error adding Communication: '+angular.toJson(err))
-                        }
-                    ).finally(function(){
-                        $scope.showWaiting = false;
-                    })
-
-
-                } else {
-                    //update an existing one...
-                    Communication = $scope.taskOutputs[0];      //these are only Communication resources right now...
-                    Communication.payload = Communication.payload || [];    //should be unnessecary...
-                    Communication.payload[0] = ({contentString: $scope.input.mdComment});
-                    $scope.showWaiting = true;
-                    SaveDataToServer.saveResource(Communication).then(
-                        function(){
-                            modalService.showModal({}, {bodyText: "Comment updated"});
-                            getAllComments();
-                        },
-                        function(err) {
-                            alert('error updating Communication: '+angular.toJson(err))
-                        }
-                    ).finally(function(){
-                        $scope.showWaiting = false;
-                    })
-                }
-
-
-
-
-
-
-
             };
 
-
-            */
             $scope.updateDoc = function(){
 
                 logicalModelSvc.generateHTML($scope.treeData).then(
@@ -2212,17 +2073,10 @@ angular.module("sampleApp")
 
                 //smartPut will attempt to refresh the access token if the endpoint is protected by SMART
                 projectSvc.smartPut(url,SDToSave).then(
-
-                //$http.put(url,SDToSave).then(
                     function(data) {
 
                         loadAllModels();        //todo - do we really need a re-load after every save???
-/*
-                        if (!$scope.initialLM) {
-                            //if there wasn't a model passed in, re-load the list
-                            loadAllModels();
-                        }
-                        */
+
 
                         var res = data.data;
                         var oo;
@@ -2274,7 +2128,7 @@ angular.module("sampleApp")
                 delete $scope.commentTask;      //the task to comment on this model...
                 //delete $scope.input.mdComment;  //the comment
                 delete $scope.taskOutputs;      //the outputs of the task (Communication resource currently)
-                delete $scope.isFilteredModel;  //true if this model is filtered...
+                //delete $scope.isFilteredModel;  //true if this model is filtered...
 
                // $scope.$broadcast('loadTasks',entry)
 
@@ -2283,9 +2137,10 @@ angular.module("sampleApp")
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource);
 
-                //is this a filtered model? (if so, we will hide the filter tab)
-                if (entry.resource.url.indexOf('--')> -1) {
-                    $scope.isFilteredModel = true;
+
+                let item = $scope.treeData[0]
+                if (item && item.data && item.data.header) {
+                    $scope.input.showComments = item.data.header.enableComments;
                 }
 
 
@@ -2298,17 +2153,6 @@ angular.module("sampleApp")
 
 
                 logicalModelSvc.openTopLevelOnly($scope.treeData);
-
-
-                /* - is this used???
-                //temp little routine to generate a mapping file -
-                var map = []
-                $scope.relativeMappings.forEach(function(m) {
-
-                    map.push({description: m.branch.data.path,v2:m.sourceMap,fhir:m.targetMap})
-                })
-
-                */
 
 
                 var baseType = $scope.treeData[0].data.header.baseType
@@ -2326,18 +2170,18 @@ angular.module("sampleApp")
 
 
                 //var vo = logicalModelSvc.makeReferencedMapsModel(entry.resource,$scope.bundleModels);   //todo - may not be the right place...
-                var vo = logicalModelSvc.makeReferencedMapsModel(entry.resource);   //todo - may not be the right place...
+               // var vo = logicalModelSvc.makeReferencedMapsModel(entry.resource);   //todo - may not be the right place...
 
                 //so that we can draw a table with the references in it...
-                $scope.modelReferences = vo.references;
-                $scope.uniqueModelsList = vo.lstNodes;
+             //   $scope.modelReferences = vo.references;
+            //    $scope.uniqueModelsList = vo.lstNodes;
 
-                var b = logicalModelSvc.makeDocBundleWithComposition(entry.resource)
+              //  var b = logicalModelSvc.makeDocBundleWithComposition(entry.resource)
 
-                $scope.docBundle = b;
+               // $scope.docBundle = b;
 
-                var allNodesObj = vo.nodes;
-
+               // var allNodesObj = vo.nodes;
+/*
                 var container = document.getElementById('refLogicalModel');
 
                 var options = {
@@ -2378,7 +2222,7 @@ angular.module("sampleApp")
 
 
                 });
-
+*/
                 $scope.rootName = $scope.treeData[0].id;        //the id of the first element is the 'type' of the logical model
                 drawTree();
 

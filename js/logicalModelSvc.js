@@ -1883,7 +1883,7 @@ angular.module("sampleApp")
 
             },
 
-            makeReferencedMapsModel: function (SD) {
+            makeReferencedMapsModelDEP: function (SD) {
                 //builds the model that has all the models referenced by the indicated SD, recursively...
 
                 var that = this;
@@ -1983,7 +1983,7 @@ angular.module("sampleApp")
 
             },
 
-            makeDocBundleWithComposition : function(SD) {
+            makeDocBundleWithCompositionDEP : function(SD) {
 
               //  return;
 
@@ -2304,7 +2304,7 @@ angular.module("sampleApp")
                 return deferred.promise;
             },
 
-                getOptionsFromValueSet: function (element) {
+            getOptionsFromValueSet: function (element) {
                 //return the expanded set of options from the ValueSet
                 var deferred = $q.defer();
 
@@ -2726,9 +2726,10 @@ angular.module("sampleApp")
                 var lmReviewReasonUrl = appConfigSvc.config().standardExtensionUrl.lmReviewReason;
                 var misuseUrl = appConfigSvc.config().standardExtensionUrl.misuse;
                 var edStatusUrl = appConfigSvc.config().standardExtensionUrl.edStatus;
-
                 var lmElementLinkUrl = appConfigSvc.config().standardExtensionUrl.lmElementLink;
                 var autoExpandUrl = appConfigSvc.config().standardExtensionUrl.autoExpand;
+
+                var enableCommentsUrl = appConfigSvc.config().standardExtensionUrl.enableComments;
 
                 if (!lmElementLinkUrl) {
                     alert("You must restart clinFHIR (clinfhir.com) then reload Logical Modeller to reset updated config")
@@ -2738,15 +2739,14 @@ angular.module("sampleApp")
                 var cntExtension = 0;
                 var arTree = [];
                 if (sd && sd.snapshot && sd.snapshot.element) {
-
                     sd.snapshot.element.forEach(function (ed,inx) {
                         var include = true;
 
                         var path = ed.path;     //this is always unique in a logical model...
                         var arPath = path.split('.');
-                        var item = {data:{}}
+                        var item = {data:{}};
 
-                        item.id = path
+                        item.id = path;
 
                         item.data.idFromSD = ed.id;   //retain the original id - won't change even of the path changes...
 
@@ -2806,6 +2806,12 @@ angular.module("sampleApp")
                             var ext1 = Utilities.getSingleExtensionValue(sd, editorUrl);
                             if (ext1 && ext1.valueString) {
                                 item.data.header.editor = ext1.valueString;
+                            }
+
+                            //see if this model enables comments
+                            var ext1 = Utilities.getSingleExtensionValue(sd, enableCommentsUrl);
+                            if (ext1 && ext1.valueBoolean) {
+                                item.data.header.enableComments = ext1.valueBoolean;
                             }
 
 
@@ -3119,6 +3125,7 @@ angular.module("sampleApp")
                 var edStatusUrl = appConfigSvc.config().standardExtensionUrl.edStatus;
                 var lmElementLinkUrl = appConfigSvc.config().standardExtensionUrl.lmElementLink;
 
+                let enableCommentsUrl = appConfigSvc.config().standardExtensionUrl.enableComments;
                 //todo - should use Utile.addExtension...
                 var sd = {resourceType: 'StructureDefinition'};
                 if (currentUser) {
@@ -3131,6 +3138,10 @@ angular.module("sampleApp")
 
                 if (header.editor) {
                     Utilities.addExtensionOnce(sd, editorUrl, {valueString: header.editor})
+                }
+
+                if (header.enableComments) {
+                    Utilities.addExtensionOnce(sd, enableCommentsUrl, {valueBoolean: header.enableComments})
                 }
 
                 sd.id = scope.rootName;
@@ -3196,7 +3207,6 @@ angular.module("sampleApp")
                         Utilities.addExtensionOnce(ed, simpleExtensionUrl, {valueString: data.fhirMappingExtensionUrl})
                     }
 
-
                     //the 'name'(stu2) or 'label'(r3) is used for the display in the logical model generated from the profile
                     if (fhirVersion == 2) {
                         ed.name = item.text;
@@ -3206,13 +3216,7 @@ angular.module("sampleApp")
                         ed.comment = data.comments;
                     }
 
-
-                    //console.log(data.idFromSD)
                     ed.id = data.idFromSD || data.path;  //gets assigned to the original path when the element is created
-
-                   //  ed.id = data.path;
-
-
                     ed.path = data.path;
                     ed.short = data.short;
                     ed.definition = data.description || 'No description';

@@ -29,10 +29,9 @@ angular.module("sampleApp")
         return {
             makeHTMLFile : function(treedata,hashComments,model,stateHash) {
 
-                var ctr = 0
-                let arReport = []
+                var ctr = 0;
+                let arReport = [];
                 treedata.forEach(function (element) {
-
 
                     let id = element.id;
                     if (element.data && element.data.idFromSD) {

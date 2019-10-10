@@ -101,7 +101,7 @@
     <script>
 
         //https://github.com/rallu/angular-lightweight-markdown-editor
-        angular.module("sampleApp",['ui.bootstrap','ngStorage',"firebase","ngSanitize",
+        angular.module("sampleApp",['ui.bootstrap','ngStorage',"firebase","ngSanitize",'ui.checkbox',
             "angular-lightweight-markdown-editor"]).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
@@ -156,6 +156,9 @@
 
 
     </script>
+
+    <script src="js/libs/angular-bootstrap-checkbox.js"></script>
+
     <script src="js/logicalModellerCtrl.js"></script>
     <script src="js/modalDialogSvc.js"></script>
     <script src="js/resourceSvc.js"></script>
@@ -291,8 +294,8 @@
                     <div class="navbar-text clickable" ng-hide="LMDetailVisible" ng-click="showDetailSelector()">Show Detail</div>
 
 
-                    <div class="navbar-text clickable" ng-show="showComments" ng-click="showComments = ! showComments">Hide Comments</div>
-                    <div class="navbar-text clickable" ng-hide="showComments" ng-click="showComments = ! showComments">Show Comments</div>
+                    <div class="navbar-text clickable" ng-show="input.showComments" ng-click="input.showComments = ! input.showComments">Hide Comments</div>
+                    <div class="navbar-text clickable" ng-hide="input.showComments" ng-click="input.showComments = ! input.showComments">Show Comments</div>
 
                     <form ng-show="isDirty" class="navbar-form">
                         <button ng-show="isDirty && canSaveModel"
@@ -422,7 +425,7 @@
             <!--
 
             <div ng-controller="newFormCtrl" ng-show="false && treeData.length > 0">
-                <!-- experimental
+
                 <h3>Form</h3>
                 <table class="table table-bordered table-condensed">
                     <tr><th>Element</th><th></th><th>DataType</th><th>Data</th><th>Input</th></tr>
@@ -871,6 +874,7 @@
 
                         </uib-tab>
 
+<!--
 
                         <uib-tab heading="References" ng-show="1==2">
                             <br/>
@@ -923,7 +927,7 @@
 
                         </uib-tab>
 
-
+-->
 
                         <uib-tab heading="Mind Map"  select="redrawProfileGraph()"  deselect="input.graphTabIsSelected = false">
                             <div>
@@ -1014,16 +1018,8 @@
                     </uib-tabset>
                 </uib-tab>
 
-<!--
-                <uib-tab heading="Filter" ng-hide="isFilteredModel">
-                    <div ng-controller="lmFilterCtrl">
-                        <ng-include src="'/includes/lmFilter.html'"></ng-include>
-                    </div>
 
-                </uib-tab>
-                -->
-
-                <uib-tab ng-show="showComments">
+                <uib-tab ng-show="input.showComments">
 
                     <uib-tab-heading>Comments
                         <span class="badge"> {{taskList.length}}</span>
@@ -1292,7 +1288,7 @@
                                 </tr>
 
 
-                                <tr ng-show="selectedNode.data.idFromSD && showComments">
+                                <tr ng-show="selectedNode.data.idFromSD && input.showComments">
                                     <td>User Comments</td>
                                     <td>
                                         <div ng-controller="taskCtrl">
@@ -1479,64 +1475,30 @@
                                         </td>
                                     </tr>
 
+                                    <tr ng-show="((Practitioner.telecom[0].value == treeData[0].data.header.editor) ||
+                                            Practitioner.telecom[0].value && !  treeData[0].data.header.editor)">
+                                        <td>Allow comments</td>
+                                        <td>
 
+
+                                                <checkbox ng-model="input.showComments" ng-click="setAllowComments(input.showComments)"></checkbox>
+
+
+
+                                            <!--{{treeData[0].data.header.enableComments}}-->
+                                        </td>
+                                    </tr>
 
 
                                     <tr ng-show="treeData[0].data.header.mapping">
                                         <td>Mapping</td><td>{{treeData[0].data.header.mapping}}</td></tr>
 
-                                   <!-- <tr ng-show="treeData[0].data.header.SDUrl">
-                                        <td >Profile Url<div>(When generated)</div></td><td>{{treeData[0].data.header.SDUrl + '-cf-profile'}}</td>
-                                    </tr>
-                                    -->
+
 
 
                                 </table>
                             </uib-tab>
 
-                           <!--
-                            <uib-tab>
-
-                                <uib-tab-heading>Comments
-                                    <span class="badge"> {{taskList.length}}</span>
-                                </uib-tab-heading>
-
-                                <div>
-
-                                    <a class="btn btn-link pull-right" download="{{downloadTaskName}}.csv"
-                                       href="{{downloadTaskContent}}" title="{{downloadTaskName}}" >
-                                        Download CSV of list
-                                    </a>
-                                    <hr/>
-
-                                    <table class="table table-bordered">
-                                        <tr><th>Path</th><th>Comment</th><th>Email</th><th># notes</th><th></th></tr>
-                                        <tr ng-repeat="task in taskList | orderBy: 'path'">
-                                            <td>{{task.currentPath | dropFirstInPath}}
-                                                <div ng-show="task.currentPath !== task.path">
-                                                    <em>({{task.path | dropFirstInPath}})</em>
-                                                </div>
-
-                                            </td>
-
-                                            <td>{{task.description}}</td>
-                                            <td>{{task.requesterDisplay}}</td>
-                                            <td> <span class="badge" ng-show="task.notes.length > 0"
-                                                       uib-popover="There are  {{task.notes.length}} notes on this comment"
-                                                       popover-placement="left"
-                                                       popover-trigger="'mouseenter'">
-                                                {{task.notes.length}}</span></td>
-                                            <td><i class="glyphicon glyphicon-edit clickable" ng-click="lmEditTask(task)"></i></td>
-                                        </tr>
-                                    </table>
-
-
-
-                                </div>
-
-                            </uib-tab>
-
--->
 
 
                             <uib-tab heading="History">
@@ -1572,126 +1534,11 @@
 
 
 
-<!--
-                            <uib-tab ng-show="input.modelChat && 1==2">
-                                <uib-tab-heading>Comments <span class="badge">{{input.modelChat.length-1}}</span> </uib-tab-heading>
-
-                                <div ng-repeat = "comment in input.modelChat" >
-                                    <div ng-show="showCommentEntry(comment,$index)"
-                                            ng-style="{ 'margin-left': comment.level * 15 }"
-                                            class="chatItem"
-                                            >
-
-                                        <div class="row" style="margin-bottom: 8px">
-                                            <div class="col-md-12 col-sm-12">
-                                                <span><strong>{{comment.comment.user.email}}</strong></span>
-                                                {{comment.levelKey}}
-                                                <span class="pull-right">{{comment.comment.date | getAgeSeconds}}</span>
-                                            </div>
-
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-md-12 col-sm-12">
-                                                // .path is present in the 'top' chat of a conversation, .display otherwise
-                                                {{comment.comment.display}} {{comment.comment.path}}
-                                            </div>
-
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-md-8 col-sm-8">
-                                                <span style="margin-right: 6px" ng-show = "comment.level == 1" class=" clickable"
-                                                    ng-click="showConversation(comment.levelKey)" >Show Conversation</span>
-
-                                            </div>
-                                            <div class="col-md-4 col-sm-4">
-
-                                                //Show the new comment box
-                                                <div style="margin: 6px" ng-hide="newCommentboxInx == $index"
-                                                     class="pull-right clickable" ng-click="input.newCommentboxInx = $index">
-
-                                                    <span ng-show="firebase.auth().currentUser">
-                                                        <span ng-show = "comment.level == 0">New comment</span>
-                                                        <span ng-hide = "comment.level == 0">Reply</span>
-                                                    </span>
-
-                                                </div>
-
-
-
-                                            </div>
-                                        </div>
-
-                                        <div class="row" ng-show="input.newCommentboxInx==$index">
-                                            <div class="col-md-12 col-sm-12">
-                                                <textarea  class="form-control" ng-model="input.newComment"></textarea>
-                                                <div>
-                                                    <div class="pull-right clickable" ng-click="saveComment(comment)">Save</div>
-                                                    <div style="margin-right: 10px"
-                                                         class="pull-right clickable" ng-click="input.newCommentboxInx = -1">Cancel</div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-
-
-                                    </div>
-
-                                    <div class="row" ng-show="comment.level == 1">
-                                        <hr style="margin:3px" />
-                                    </div>
-
-                                </div>
-
-                            </uib-tab>
-                            -->
 
                         </uib-tabset>
 
                     </uib-tab>
-<!--
-                    <uib-tab heading="Export">
-                        <table class="table">
-                            <tr>
-                                <td><button class=" btn btn-primary" ng-click="generateFHIRProfile()">Generate Profile</button></td>
-                                <td>
-                                    <p>This will create a Profile resource from the Logical Model. This makes sense when you've
-                                    created the model with a base type, and have added extensions or otherwise changed the
-                                        contents of the base type.</p>
-                                    <p>Child nodes of elements that are references to other resources will be ignored.</p>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><button class=" btn btn-primary" ng-click="generateIG()">Generate Implementation Guide</button></td>
-                                <td>
-                                    <p>Create an Implementation Guide from the model. This is useful if the model is describing a multi-resource
-                                    model (like a Document) and will extract all the referenced profiles, ValueSets and Extension
-                                        Definitions from the model and create an Implementation Guide that references all those artifacts.</p>
-                                    <p><em><strong>Under development</strong></em></p>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><button class=" btn btn-primary" ng-click="generateQ()">Generate Questionnaire</button></td></td>
-                                <td>
-                                    <p>Create a Questionnaire resource that has entries for all elements in the model. Any references
-                                        to resources or profiles will be ignored - only the elements with other datatypes will be included.</p>
-                                    <p><em><strong>Under development</strong></em></p>
-                                </td>
-                            </tr>
-                        </table>
 
-
-                        <div class="row">
-                            <div class="col-sm-12 col-md-12">
-
-
-
-
-                            </div>
-                        </div>
-                    </uib-tab>
--->
                     <uib-tab ng-show = "selectedNode && debug" heading="TreeJson">
                         <pre>{{selectedNode | json}}</pre>
                     </uib-tab>
@@ -1699,75 +1546,7 @@
                     <uib-tab ng-show = "selectedNode && debug" heading="EDJson">
                         <pre>{{selectedED | json}}</pre>
                     </uib-tab>
-<!--
 
-                    <uib-tab ng-show="1==2" heading="Comments" >
-                        <br/>
-                        <uib-tabset>
-                            <uib-tab heading="All Comments">
-                                <br/>
-                                <table class="table table-bordered">
-                                    <tr ng-repeat = "item in allComments">
-                                        <td width="20%">
-                                            {{item.task.owner.display}}
-                                            <div>{{item.comment.authored | date}}</div>
-                                        </td>
-                                        <td>
-                                            <div ng-repeat="c in item.comment.item">
-                                                <div ng-repeat="a in c.answer">
-                                                    <p ng-bind-html="a.valueString |markDown"></p>
-                                                </div>
-
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </uib-tab>
-                            <uib-tab heading="Add/Update Comment" ng-show="Practitioner">
-                                <br/>
-                                <div ng-show="commentTask">
-
-                                    <form name="form">
-                                        <markdown-editor  ng-model="input.mdComment"
-                                                          text-preview="Preview"
-                                                          text-provide-text="Site name"
-                                                          text-provide-link="Site link"
-
-                                                          name="thearea"
-                                                          placeholder="Enter your comments about this version of the model"
-                                                          options="mdOptions" >
-
-                                        </markdown-editor>
-                                    </form>
-                                    <div class="row">
-                                        <div class="col-sm-12 col-md-12">
-                                            <div class="pull-right"><button class="btn btn-link" ng-click="saveComment()">Save</button> </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-                                <div ng-hide="commentTask">
-                                    <p><button ng-click="createTask()" class="btn btn-default">Click here </button> to add a comment about this model</p>
-                                    <!--
-                                    <p>Click <span ng-click="createTask()" class="clickable">here</span> to add a comment about this model</p>
-                                </div>
-                            </uib-tab>
-
-                            <uib-tab heading="Json">
-                                <pre ng-show="commentTask">{{commentTask | json}}</pre>
-
-                                <pre ng-show="taskOutputs">{{taskOutputs | json}}</pre>
-
-                                <pre ng-show="allComments">{{allComments | json}}</pre>
-                            </uib-tab>
-                        </uib-tabset>
-
-
-                    </uib-tab>
-
-
--->
 
                 </uib-tabset>
 

@@ -111,7 +111,6 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             $scope.showVSBrowserDialog.open(vs);        //the open method defined in the directive...
         };
 
-
         $scope.viewVS = function(uri) {
             //var url = appConfigSvc
             $scope.showVSBrowserDialog.open(null, uri);
@@ -142,7 +141,6 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             }
 
         });
-
 
         $scope.makeReport = function() {
             console.log( $scope.hashComments)
@@ -756,7 +754,6 @@ angular.module("sampleApp").controller('taskManagerCtrl',
                     }
                 }
 
-
                 newTasks.push(iTask);
                 hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
             }
@@ -771,7 +768,6 @@ angular.module("sampleApp").controller('taskManagerCtrl',
             tasks.forEach(function (iTask) {
                 hashNumberOfComments[iTask.path] = hashNumberOfComments[iTask.path] || 0
                 hashNumberOfComments[iTask.path] ++
-              //  hashEmail[iTask.requesterDisplay] = iTask.requesterDisplay
 
                 $scope.hashComments[iTask.path] = $scope.hashComments[iTask.path] || []
                 $scope.hashComments[iTask.path].push(iTask)
