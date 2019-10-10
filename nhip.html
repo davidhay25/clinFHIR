@@ -33,12 +33,12 @@
         });
 
         angular.module("sampleApp").constant("moment", moment);
-/*
+
         angular.module("sampleApp").config(['$compileProvider', function ($compileProvider) {
             $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
             //$compileProvider.aHrefSanitizationWhitelist(/^\s*(|blob|):/);
         }]);
-*/
+
     </script>
 
     <style>
@@ -48,6 +48,9 @@
         .isExtension {
             color: #4183c4;
             border-bottom: 1px dotted #000;
+        }
+        .error {
+
         }
     </style>
 
@@ -809,23 +812,32 @@
                     <button class="btn btn-link" ng-hide= "analysis" ng-click="analyse()">Perform analysis</button>
 
 
-                    <div class="pull-right">
-                        <input type="checkbox" ng-model="input.showAllAnalysis"/>
+                    <div class="pull-right"  ng-show="analysis">
+                        <input type="checkbox" ng-model="input.showAllAnalysis"/> Show all
                     </div>
                     <br/>
                     <uib-tabset ng-show="analysis">
                         <uib-tab heading="Extensions">
                             <table class="table table-bordered">
-                                <tr><th>Model</th><th>Path</th><th>Extension Url</th></tr>
+                                <tr><th>Model</th><th>Path</th><th>Extension Url</th><th>Definition</th></tr>
                                 <tr ng-repeat="ext in analysis.extensions"
                                     ng-show="selectedArtifact.reference.reference == ext.url || input.showAllAnalysis">
                                     <td>{{ext.url| referenceType}}</td>
                                     <td>{{ext.ed.path | dropFirstInPath}}</td>
                                     <td>{{ext.extensionUrl}}</td>
+                                    <td>{{ext.ed.definition}}</td>
                                 </tr>
                             </table>
                         </uib-tab>
                         <uib-tab heading="ValueSets">
+
+                            <div>
+                                <a class="btn btn-link pull-right" download="{{vsDwnloadLinkJsonName}}"
+                                   href="{{vsDownloadLinkJsonContent}}" title="{{vsDwnloadLinkJsonName}}" >
+                                    Download CSV of full table
+                                </a>
+                            </div>
+
                             <table class="table table-bordered">
                                 <tr><th>Model</th><th>Path</th><th>ValueSet Url</th><th>Description</th><th>Strength</th><th>CodeSystem Urls</th><th>Note</th></tr>
                                 <tr ng-repeat="vs in analysis.valueSets"
@@ -840,7 +852,7 @@
                                     <td>{{vs.valueSet.description}}</td>
                                     <td>{{vs.strength}}</td>
                                     <td>
-                                        <div ng-repeat = "inc in vs.valueSet.compose.include">{{inc.system}}</div>
+                                        <div ng-repeat = "inc in vs.codeSystems">{{inc}}</div>
                                     </td>
                                     <td>{{vs.note}}</td>
                                 </tr>

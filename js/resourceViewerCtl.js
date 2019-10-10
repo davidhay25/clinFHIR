@@ -257,7 +257,7 @@ angular.module("sampleApp")
 
                 },1000)
 
-            }
+            };
 
 
             //generate the document graph from the bundle
@@ -493,36 +493,7 @@ angular.module("sampleApp")
                         console.log(resource)
                         if (resource) {
                             loadPatientById(resource);
-                            /*
-                            $scope.currentPatient = resource;
-                            //load the existing resources for this patient...
-                            appConfigSvc.setCurrentPatient(resource);
-                            $scope.waiting = true;
-                             supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
-                                //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
 
-                                function(data){
-                                    if (data.DocumentReference) {
-                                        $scope.documentReferenceList = data.DocumentReference.entry;
-                                    }
-
-                                    //need to make sure the patient resource is in the allPatients object (set in renderPatientDetails)
-                                    if (! data.Patient) {
-                                        var patientBundle = {resourceType:'Bundle',total:1,entry:[{resource:resource}]}
-                                        data.Patient = patientBundle
-                                    }
-
-                                    renderPatientDetails(data)
-                                    $scope.$broadcast('patientObservations',data['Observation']);//used to draw the observation charts...
-                                 },
-                                 function(err){
-                                    console.log(err)
-                             }).finally(
-                                 function(){
-                                     $scope.waiting = false;
-                                 }
-                             )
-*/
                         }
                     }
                 )

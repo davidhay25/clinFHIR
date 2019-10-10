@@ -29,15 +29,24 @@ angular.module("sampleApp")
         return {
             makeHTMLFile : function(treedata,hashComments,model,stateHash) {
 
-
+                var ctr = 0
                 let arReport = []
                 treedata.forEach(function (element) {
-                    console.log(element)
-                    let arComments = hashComments[element.id]
+
+
+                    let id = element.id;
+                    if (element.data && element.data.idFromSD) {
+                        id = element.data.idFromSD
+                    }
+
+                    //let arComments = hashComments[element.id]
+                    let arComments = hashComments[id]
                     if (arComments) {
                         arReport.push(addTaggedLine('h2',element.id))
 
                         arComments.forEach(function (comment) {
+                            console.log(ctr++)
+
                             arReport.push("<table width='100%'>")
                             //arReport.push("<col style='width:50%'>")
                             //arReport.push("<col width='50%'>")

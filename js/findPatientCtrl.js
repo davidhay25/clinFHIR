@@ -6,13 +6,13 @@ angular.module("sampleApp")
                 $scope.input={mode:'find',gender:'male'};   //will be replaced by name randomizer
                 $scope.input.dob = new Date(1982,9,31);     //will be replaced by name randomizer
                 $scope.outcome = {log:[]};
-
+                $scope.appConfigSvc = appConfigSvc;
 
                 $scope.input.createSamples = true;
                 //when the 'Add new patient' is selected...
                 $scope.seletNewPatientOption = function(){
 
-                    $scope.input.mode='new'
+                    $scope.input.mode='new';
                     $scope.waiting = true;
                     supportSvc.getRandomName().then(
                         function(data) {

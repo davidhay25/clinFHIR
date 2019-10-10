@@ -1,6 +1,6 @@
 angular.module("sampleApp")
 
-    .service('nhipSvc', function($q,$http,taskSvc,appConfigSvc) {
+    .service('nhipSvc', function($q,$http,taskSvc,appConfigSvc,$filter) {
 
         let serverUrl = "http://home.clinfhir.com:8054/baseR4/";
         let termServerUrl = "https://ontoserver.csiro.au/stu3-latest/";
@@ -131,9 +131,85 @@ angular.module("sampleApp")
 
         return {
 
+            makeDownload : function(ar,typ) {
+                //make a csv download for a valueset or extension analyis
+               let download = "";
+               if (typ == 'valueSet') {
+                   download ="Model,Path,ValueSetUrl,Description,Strength,CodeSystem Urls,Note\n";
+                    ar.forEach(function (vs) {
+                        let lne = $filter("referenceType")(vs.url)+ ',';
+                        lne += $filter('dropFirstInPath')(vs.ed.path)+ ',';
+                        lne += vs.valueSetUrl + ',';
+                        if (vs.valueSet) {
+                            lne += makeSafe(vs.valueSet.description);
+                        }
+                        lne +=  ',';
+                        lne += vs.strength + ',';
+
+                        if (vs.codeSystems) {
+                            vs.codeSystems.forEach(function (cs) {
+                                lne += cs + " ";
+                            })
+                        }
+
+
+                        /*
+                        if (vs.valueSet && vs.valueSet.compose && vs.valueSet.compose.include) {
+                            vs.valueSet.compose.include.forEach(function (inc) {
+                                lne += inc.system + " ";
+                            });
+                        }
+                        */
+
+
+                        lne += ",";
+
+                        lne += makeSafe(vs.note);
+                        download += lne + "\n";
+                    })
+               }
+
+
+
+                return download;
+
+
+
+
+                function getStringExtensionValue(ed,url) {
+                    var ext = Utilities.getSingleExtensionValue(ed,url); //in case this is an extension
+                    if (ext && ext.valueString) {
+                        return ext.valueString
+                    } else {
+                        return "";
+                    }
+                }
+
+                //remove comma's and convert " -> '
+                function makeSafe(s) {
+                    if (s) {
+                        //the string 'definition' is inserted if no comment is entered (it is mandatory in the ED)
+                        if (s == 'definition' || s == 'No description') {
+                            return ""
+                        }
+
+                        s = s.replace(/"/g, "'");
+                        s = s.replace(/,/g, "-");
+                        return '"' + s + '"';
+                    } else {
+                        return "";
+                    }
+
+
+                }
+
+
+            },
+
             analyseIG : function(artifacts) {
                 let deferred = $q.defer();
                 let arWork = [];
+
 
                 let arExtension = [], arValueSet=[];
 
@@ -200,6 +276,24 @@ angular.module("sampleApp")
                                 if (data.data && data.data.entry && data.data.entry.length > 0) {
                                     let ValueSet = data.data.entry[0].resource;
                                     item.valueSet = ValueSet
+
+
+                                    //get the codesystems in use
+                                    item.codeSystems = []
+                                    let hash = {}
+                                    if (ValueSet.compose && ValueSet.compose.include) {
+                                        ValueSet.compose.include.forEach(function (inc) {
+                                            let sys = inc.system;
+                                            if (sys && !hash[sys]) {
+                                                item.codeSystems.push(sys)
+                                                hash[sys] = 'x'
+                                            }
+
+                                        });
+                                    }
+
+
+
                                     if (data.data.entry.length > 1) {
                                         item.note = "There was more than one VS with this url on the term server"
                                     }

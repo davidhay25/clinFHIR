@@ -60,15 +60,26 @@
                 <div uib-alert class="alert-warning" ng-show="nomatch">
                     Sorry, there were no patients matching that name
                 </div>
-                <ul class="list-group">
-                    <li class="list-group-item" ng-repeat="resource in matchingPatientsList">
 
-                        <div style="cursor:pointer" ng-click="selectNewPatient(resource)">
-                            {{ResourceUtilsSvc.getOneLineSummaryOfResource(resource)}}
-                        </div>
+                <div class="row">
+                    <div class="col-md-6  col-sm-6">
+                        <ul class="list-group">
+                            <li class="list-group-item" ng-repeat="resource in matchingPatientsList">
 
-                    </li>
-                </ul>
+                                <div style="cursor:pointer">
+                                    <span class="clickable" ng-click="selectNewPatient(resource)">{{ResourceUtilsSvc.getOneLineSummaryOfResource(resource)}}</span>
+                                    <span class="clickableDotted pull-right" ng-click="input.selectedPatient = resource">View</span>
+                                </div>
+
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6  col-sm-6">
+                        <pre ng-show="input.selectedPatient">{{input.selectedPatient | json}}</pre>
+                    </div>
+                </div>
+
+
 
             </div>
         </div>
@@ -188,12 +199,8 @@
             </div>
 
             <div class="col-md-8 col-sm-8">
-                <div class="pull-right">{{config.getCurrentDataServer().url}}</div>
+                <div class="pull-right">{{appConfigSvc.getCurrentDataServer().url}}</div>
 
-                <!--
-                <button class="btn btn-warning" ng-hide="showLog" ng-click="cancel()">Cancel</button>
-                <button class="btn btn-primary" ng-show="allowClose" ng-click="$close()">Close</button>
-                -->
             </div>
         </div>
 

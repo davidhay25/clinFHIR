@@ -23,7 +23,6 @@ angular.module("sampleApp").controller('taskManagerCtrl',
         let ws = new WebSocket(wsUrl);
 
 
-
         //the url of the Implementation Guide
         let IgUrl =  $scope.conformanceServer.url + 'ImplementationGuide/cf-artifacts-au3';
 
@@ -89,9 +88,9 @@ angular.module("sampleApp").controller('taskManagerCtrl',
 
         $scope.displayServers = function(){
             let servers = "";
-            servers += '<div>Data: ' + appConfigSvc.getCurrentDataServer().name + "</div>"
-            servers += '<div>Conf: ' + appConfigSvc.getCurrentConformanceServer().name + "</div>"
-            servers += '<div>Term: ' + appConfigSvc.getCurrentTerminologyServer().name + "</div>"
+            servers += '<div>Data: ' + appConfigSvc.getCurrentDataServer().name + "</div>";
+            servers += '<div>Conf: ' + appConfigSvc.getCurrentConformanceServer().name + "</div>";
+            servers += '<div>Term: ' + appConfigSvc.getCurrentTerminologyServer().name + "</div>";
             return servers;
         };
 
@@ -116,7 +115,7 @@ angular.module("sampleApp").controller('taskManagerCtrl',
         $scope.viewVS = function(uri) {
             //var url = appConfigSvc
             $scope.showVSBrowserDialog.open(null, uri);
-        }
+        };
 
         $scope.logout=function(){
             firebase.auth().signOut().then(function() {

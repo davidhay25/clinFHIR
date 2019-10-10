@@ -44,7 +44,7 @@ angular.module("sampleApp")
 
 
                         $scope.analysis = vo;
-                        console.log(vo)
+                        //console.log(vo)
 
                         //wait a second before sorting. This is a  bit scruffy...
                         $timeout(function(){
@@ -63,10 +63,24 @@ angular.module("sampleApp")
                                 }
                             })
 
-                            console.log(vo)
+
+                            makeVSDownload()
+
+                            //console.log(vo)
                         },1000)
                 })
             }
+
+
+            function makeVSDownload() {
+                var download = nhipSvc.makeDownload($scope.analysis.valueSets,"valueSet");
+
+                $scope.vsDownloadLinkJsonContent = window.URL.createObjectURL(new Blob([download],
+                    {type: "text/text"}));
+                var now = moment().format();
+                $scope.vsDwnloadLinkJsonName = $scope.input.igCode + '-ValueSet-' + now + '.csv';
+            }
+
 
             //$scope.input.igCode = "nzRegistry";
             $scope.input.igCode = "nhip";

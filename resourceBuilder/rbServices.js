@@ -3104,9 +3104,14 @@ console.log(summary);
                         break;
                     case "Patient" :
                         if (resource.name) {
-                            var smry = getHumanNameSummary(resource.name[0])
-                            smry += " "+ resource.gender;
-                            smry += " "+ resource.birthDate;
+                            var smry = getHumanNameSummary(resource.name[0]);
+                            if (resource.gender) {
+                                smry += " "+ resource.gender;
+                            }
+                            if (resource.birthDate){
+                                smry += " "+ resource.birthDate;
+                            }
+
 
                             return smry;   //only the forst name
                         } else {
