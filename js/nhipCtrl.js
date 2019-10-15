@@ -1,6 +1,6 @@
 angular.module("sampleApp")
     .controller('nhipCtrl',
-        function ($scope,$firebaseAuth,$uibModal,modalService,nhipSvc,logicalModelSvc,$http,$sce,appConfigSvc,v2ToFhirSvc,$timeout) {
+        function ($scope,$firebaseAuth,$uibModal,modalService,nhipSvc,logicalModelSvc,$http,$sce,appConfigSvc,v2ToFhirSvc,$timeout,$location) {
 
             $scope.selectedGroup = 'logical';       //initial group to display
             $scope.input = {};
@@ -25,6 +25,14 @@ angular.module("sampleApp")
                 nhipSvc.getIG(igCode).then(
                     function(data) {
                         $scope.artifacts = data;
+
+
+                        var hash = $location.hash();
+
+                        if (hash) {
+                            console.log(hash);
+
+                        }
 
                         console.log(data)
 
@@ -72,6 +80,8 @@ angular.module("sampleApp")
             }
 
 
+
+
             function makeVSDownload() {
                 var download = nhipSvc.makeDownload($scope.analysis.valueSets,"valueSet");
 
@@ -83,7 +93,7 @@ angular.module("sampleApp")
 
 
             //$scope.input.igCode = "nzRegistry";
-            $scope.input.igCode = "nhip";
+            $scope.input.igCode = "nzRegistry";
             $scope.selectIG($scope.input.igCode);
 
             //for the iframe

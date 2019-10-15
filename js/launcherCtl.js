@@ -20,10 +20,10 @@ angular.module("sampleApp")
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
             firebase.auth().onAuthStateChanged(function(user) {
 
-
+console.log(user)
                 if (user) {
                     $scope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
-                    $scope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+                   // $scope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
                     //logicalModelSvc.setCurrentUser(user);
 
 

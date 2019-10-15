@@ -292,11 +292,11 @@
 
                     <div class="navbar-text clickable" ng-show="LMDetailVisible" ng-click="hideDetailSelector()">Hide Detail</div>
                     <div class="navbar-text clickable" ng-hide="LMDetailVisible" ng-click="showDetailSelector()">Show Detail</div>
-
+<!--
 
                     <div class="navbar-text clickable" ng-show="input.showComments" ng-click="input.showComments = ! input.showComments">Hide Comments</div>
                     <div class="navbar-text clickable" ng-hide="input.showComments" ng-click="input.showComments = ! input.showComments">Show Comments</div>
-
+-->
                     <form ng-show="isDirty" class="navbar-form">
                         <button ng-show="isDirty && canSaveModel"
                                 class="btn btn-success pull-right" ng-click="saveModel()">Save model</button>
@@ -359,8 +359,6 @@
                 <div class="col-md-4 col-sm-4">
 
                     <button ng-show="Practitioner" class="btn btn-link pull-right" ng-click="newModel()">New Model</button>
-                   <!-- <button ng-show="firebase.auth().currentUser" class="btn btn-link pull-right" ng-click="newModel()">New Model</button>
--->
 
 
                 </div>
@@ -422,50 +420,6 @@
         </div>
         <div ng-class="midPaneClass">
 
-            <!--
-
-            <div ng-controller="newFormCtrl" ng-show="false && treeData.length > 0">
-
-                <h3>Form</h3>
-                <table class="table table-bordered table-condensed">
-                    <tr><th>Element</th><th></th><th>DataType</th><th>Data</th><th>Input</th></tr>
-                    <tr ng-repeat="row in formModel">
-
-                        <td>
-
-                            <div  ng-style="{ 'padding-left': (row.data.path | pathindent) }"
-                                  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path| lastInPath}}</div>
-                        </td>
-                        <td>
-                            <div ng-show="row.data.max=='*'">
-                                <i class="glyphicon glyphicon-plus-sign clickable" ng-click="addRow(row.id)"></i>
-                            </div>
-                        </td>
-
-                        <td>{{row.data.type[0].code}}
-
-                            <div ng-show="row.data.type[0].targetProfile">-> {{row.data.type[0].targetProfile | getLogicalID}}</div>
-
-
-                        </td>
-
-                        <td>
-                            <div ng-show="showEdit(row.data.type[0].code)">
-                                <input class="form-control" ng-model="form[row.id]">
-                            </div>
-                        </td>
-                        <td>
-
-                                <i class="glyphicon glyphicon-edit clickable" ng-click="editRow(row.id)"></i>
-
-                        </td>
-
-                    </tr>
-
-                </table>
-            </div>
-
--->
 
 
             <div ng-show="isHistory" class="alert alert-warning">
@@ -597,9 +551,7 @@
                                             <td>{{ed.definition}}
                                                 <div>{{ed.comment}}</div>
                                             </td>
-                                            <!--
-                                            <td>{{ed.comment}}</td>
-                                            -->
+
                                             <td>
                                                 <div ng-repeat="map in ed.mapping">{{map.identity}}:{{map.map | showMapOnly}}</div>
 
@@ -629,41 +581,6 @@
 
                                 </uib-tab>
 
-                                <uib-tab heading="Differences from base" ng-show="1==2 && differenceFromBase">
-                                    <h5>Elements added to the base</h5>
-                                    <table>
-                                        <tr ng-repeat = "diff in differenceFromBase.added">
-                                            <td>
-                                                {{diff.path}}
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    <h5>Elements removed from the base</h5>
-                                    <table>
-                                        <tr ng-repeat = "diff in differenceFromBase.removed">
-                                            <td>
-                                                {{diff.path}}
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    <h5>Elements changed compared to the base</h5>
-                                    <table>
-                                        <tr ng-repeat = "diff in differenceFromBase.changed">
-                                            <td>
-                                                {{diff.ed.path}}
-                                            </td>
-                                            <td>
-                                                <ul>
-                                                    <li ng-repeat="change in diff.list">
-                                                        {{change.display}}
-                                                    </li>
-                                                </ul>
-                                            </td>
-                                        </tr>
-                                    </table>
-
-
-                                </uib-tab>
 
 
                                 <uib-tab heading="Mappings by Identity">
@@ -874,60 +791,7 @@
 
                         </uib-tab>
 
-<!--
 
-                        <uib-tab heading="References" ng-show="1==2">
-                            <br/>
-
-
-                            <uib-tabset>
-
-                                <uib-tab heading="From this model">
-                                    <table class="table table-bordered table-condensed">
-                                        <tr><th>Path</th><th>Referenced Model</th><th>Description</th></tr>
-                                        <tr ng-repeat="row in treeData" ng-show="row.data.isReference">
-                                            <td>
-                                                <div  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path | dropFirstInPath}}</div>
-                                            </td>
-                                            <td>{{row.data.referenceUrl | getLogicalID}}</td>
-                                            <td>{{row.data.description}}</td>
-
-                                        </tr>
-                                    </table>
-                                </uib-tab>
-                                <uib-tab heading="Graph" select="redrawReferencesChart()">
-                                    <div id="refLogicalModel"></div>
-                                </uib-tab>
-
-                                <uib-tab heading="Sample Document">
-                                    <button class="btn btn-link pull-right" ng-click="editLMDoc()">Edit</button>
-                                    <div class="clearfix"></div>
-
-                                    <pre>{{docBundle | json}}</pre>
-                                </uib-tab>
-
-                                <uib-tab heading="All references">
-                                    <table class="table table-bordered table-condensed">
-                                        <tr><th>Source Model</th><th>Path</th><th>Target Model</th></tr>
-                                        <tr ng-repeat="row in modelReferences">
-
-                                            <td>{{row.src | getLogicalID}}</td>
-                                            <td>
-                                                <div  ng-click="selectNodeFromTable(row.path)" class="clickable" >{{row.path | dropFirstInPath}}</div>
-                                            </td>
-
-
-                                            <td>{{row.targ | getLogicalID}}</td>
-
-                                        </tr>
-                                    </table>
-                                </uib-tab>
-
-                            </uib-tabset>
-
-                        </uib-tab>
-
--->
 
                         <uib-tab heading="Mind Map"  select="redrawProfileGraph()"  deselect="input.graphTabIsSelected = false">
                             <div>
@@ -971,27 +835,15 @@
                             <br/>
 
                             <iframe id="htmlDoc" width="100%" height = "600px"></iframe>
-<!--
-                            <div class="md">
-                                <p ng-bind-html="mdDoc |markDown"></p>
-                            </div>
-                            -->
+
                         </uib-tab>
-                        <!--
-                        <uib-tab heading="MD Text">
-                            <br/>
-                            <div>
-                                <pre>{{mdDoc}}</pre>
-                            </div>
-                        </uib-tab>
-                        -->
                     </uib-tabset>
 
 
                 </uib-tab>
 
 
-                <uib-tab heading="Dev">
+                <uib-tab ng-show="1==2" heading="Dev">
                     <br />
                     <uib-tabset>
 
@@ -1026,12 +878,7 @@
                     </uib-tab-heading>
                     <br/>
 
-<!--
-                        <a class="btn btn-link pull-right" download="{{downloadTaskName}}.csv"
-                           href="{{downloadTaskContent}}" title="{{downloadTaskName}}" >
-                            Download CSV of list
-                        </a>
-                        -->
+
 
                         <div class="designerScroll">
                             <table class="table table-bordered">
@@ -1077,9 +924,7 @@
                             <div class="row">
                                 <div class="col-md-8 col-sm-8">
                                     <h4>{{selectedNode.text}}</h4>
-                                    <!--
-                                    <h4>Element path <em>{{selectedNode.text}}</em> properties</h4>
-                                    -->
+
                                 </div>
                                 <div class="col-md-4 col-sm-4">
                                     <div class="pull-right">
@@ -1092,14 +937,11 @@
                             </div>
 
                             <table class="table table-bordered">
-                                <!--<tr><td width="20%">Name</td><td>{{selectedNode.data.name}}</td></tr> -->
+
                                 <tr>
                                     <td width="20%">Name</td>
                                     <td>{{selectedNode.data.name}}
 
-<!--
-                                        <div>{{selectedNode.data.idFromSD}}</div>
--->
 
                                     </td>
                                 </tr>
@@ -1479,13 +1321,18 @@
                                             Practitioner.telecom[0].value && !  treeData[0].data.header.editor)">
                                         <td>Allow comments</td>
                                         <td>
+                                               <checkbox ng-model="input.showComments" ng-click="setAllowComments(input.showComments)"></checkbox>
 
+                                        </td>
+                                    </tr>
 
-                                                <checkbox ng-model="input.showComments" ng-click="setAllowComments(input.showComments)"></checkbox>
+                                    <tr ng-show="((Practitioner.telecom[0].value == treeData[0].data.header.editor) ||
+                                            Practitioner.telecom[0].value && !  treeData[0].data.header.editor)">
+                                        <td>Delete model</td>
+                                        <td>
 
+                                            <button class="btn btn-danger" ng-click="deleteModel()">Delete Model</button>
 
-
-                                            <!--{{treeData[0].data.header.enableComments}}-->
                                         </td>
                                     </tr>
 

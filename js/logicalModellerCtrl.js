@@ -50,9 +50,27 @@ angular.module("sampleApp")
             }
 
 
-            $scope.EDDisplayDEP = function(url){
-                alert(url)
+            $scope.deleteModel = function(){
+
+                var modalOptions = {
+                    closeButtonText: "No, I changed my mind",
+                    actionButtonText: 'Yes, please remove it',
+                    headerText: 'Delete model',
+                    bodyText: 'Do you wish to delete this model? (It will be marked as deleted so can be recovered via the FHIR API).'
+                };
+
+                modalService.showModal({}, modalOptions).then(
+                    function (result) {
+                        let url = appConfigSvc.getCurrentConformanceServer().url+ "StructureDefinition/" + $scope.SD.id;
+                       //let
+                    }
+                );
+
+
+                alert(modelId)
             };
+
+
 
             GetDataFromServer.registerAccess('logical');
 
@@ -159,6 +177,9 @@ angular.module("sampleApp")
                 });
 
             };
+
+
+
 
             //if a shortcut has been used there will be a hash so load that
             var hash = $location.hash();
@@ -1997,6 +2018,22 @@ angular.module("sampleApp")
                                         function(){
                                             drawTree();
                                             makeSD();
+
+                                            //b4 cens - add the modelurl
+                                            if ($scope.treeData && $scope.treeData[0].data && $scope.treeData[0].data.header) {
+
+                                                $scope.treeData[0].data.header.SDUrl = $scope.SD.url;
+                                                $scope.treeData[0].data.header.SDID = $scope.SD.id;
+                                                $scope.treeData[0].data.header.purpose = $scope.SD.purpose;
+
+
+                                            }
+/* <tr><td>Model ID on server</td><td>{{treeData[0].data.header.SDID}}</td></tr>
+                                    <tr><td>Model Title</td><td>{{treeData[0].data.header.title}}</td></tr>
+                                    <tr><td>Model Purpose</td><td>{{treeData[0].data.header.purpose}}</td></tr*/
+
+//item.data.header.SDUrl = sd.url;
+                                            //$scope.SD
                                             //add it to the list so we can see it
                                             $scope.bundleModels.entry.push({resource:$scope.SD})
                                             $scope.currentType = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
@@ -2388,9 +2425,10 @@ angular.module("sampleApp")
 
             }
 
-            //If based on a single FHIR resource, check for differences from that base
+            //If based on a single FHIR resource, check for differences from that base - don't delete as might be useful
             function checkDifferences(resource) {
-                delete $scope.differenceFromBase
+                delete $scope.differenceFromBase;
+                return; //temp
                 logicalModelSvc.differenceFromBase(resource).then(
                     function (analysis) {
                         $scope.differenceFromBase = analysis;
@@ -3053,7 +3091,7 @@ angular.module("sampleApp")
 
 
                //temp disable createGraphOfProfile();     //update the graph display...
-                checkDifferences($scope.SD)
+               // checkDifferences($scope.SD)
 
             };
 
