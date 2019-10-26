@@ -1,7 +1,7 @@
 
 angular.module("sampleApp")
     .controller('resourceViewerCtrl',
-        function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,sessionSvc,questionnaireSvc,
+        function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,sessionSvc,
                   $uibModal, $timeout,GetDataFromServer,modalService,ResourceUtilsSvc,builderSvc,$window,$http,$location,
                   $firebaseObject,Utilities) {
 
@@ -81,6 +81,9 @@ angular.module("sampleApp")
             };
 
 
+
+
+
             //if a shortcut has been used there will be a hash so load that
             var hash = $location.hash();
             if (hash) {
@@ -109,6 +112,30 @@ angular.module("sampleApp")
                     }
                 )
             }
+
+
+
+            //if the user has passed in parameters
+            let search = $location.search();
+            console.log(search)
+            //the data server. assume one only passed in...
+            if (search.data) {
+                appConfigSvc.setServerType('data',search.data);
+                if (search.patientid) {
+                    var url = search.data + "Patient/"+search.patientid;
+
+                    $http.get(url).then(
+                        function(data) {
+                            loadPatientById(data.data)
+                        },
+                        function(err) {
+                            alert("Error loading patient with url: " + url)
+                        }
+                    );
+                }
+            }
+
+
 
 
             $scope.isSMART = appConfigSvc.getCurrentDataServer().smart;     //if true, this server requires SMART
@@ -146,7 +173,7 @@ angular.module("sampleApp")
                 renderPatientDetails($scope.allResources,true)
             }
 
-
+/*
             //find all the questionnaires (authored by CF) on the conformance server...
             questionnaireSvc.findQ().then(
                 function(bundle) {
@@ -154,11 +181,11 @@ angular.module("sampleApp")
                 }
             )
 
-            $scope.selectQ = function(Q) {
+            $scope.selectQDEP = function(Q) {
                 $scope.currentQ = Q;
             }
 
-
+*/
             $scope.showGQL = appConfigSvc.getCurrentDataServer().name == 'Grahames STU3 server';
 
             $scope.displayServers = "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>"
@@ -170,11 +197,6 @@ angular.module("sampleApp")
                 console.log(patientResource)
             });
 
-
-            //load a bundle (used by the document function)
-            $scope.loadBundle = function() {
-
-            };
 
             //when a document is selected in from the list of documents...
             $scope.selectDocument = function(docRef) {
@@ -442,8 +464,6 @@ angular.module("sampleApp")
 
             //show the section text (html)
             $scope.showText = function(section){
-
-
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
                     keyboard: false,       //same as above.
@@ -720,8 +740,6 @@ angular.module("sampleApp")
             }
 
             $scope.fitGraphInContainer = function(containerId) {
-
-
                 if ($scope.graph[containerId]) {
 
                     //this event is commonly called by tab.select() which I think is fired before the tab contents are shown.
@@ -730,7 +748,6 @@ angular.module("sampleApp")
                         $scope.graph[containerId].fit()
                         console.log('fitting...')
                     },500            )
-
                 }
             };
 
@@ -796,7 +813,7 @@ angular.module("sampleApp")
                 $('#resourceTree').jstree('destroy');
                 $('#resourceTree').jstree(
                     {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
-                )
+                );
 
                 $('#graphResourceTree').jstree('destroy');
                 $('#graphResourceTree').jstree(

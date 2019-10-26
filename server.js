@@ -16,6 +16,8 @@ var orionModule = require("./serverModuleOrion.js")
 var smartModule = require("./serverModuleSMART.js")
 
 
+var iphoneModule = require("./serverModuleIphone.js")
+iphoneModule.setup(app)
 
 process.on('uncaughtException', function(err) {
     console.log('>>>>>>>>>>>>>>> Caught exception: ' + err);

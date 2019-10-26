@@ -418,6 +418,9 @@ angular.module("sampleApp")
                     }
                 }
 
+                //if the server url is not one of the named ones...
+                return {url:$localStorage.config.servers.data,name:$localStorage.config.servers.data}
+
                 //return dataServer;
             },
             getCurrentConformanceServer : function() {

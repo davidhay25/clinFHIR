@@ -7,13 +7,21 @@ let syncRequest = require('sync-request');
 
 const baseTypeExt = "http://clinfhir.com/fhir/StructureDefinition/baseTypeForModel";
 const extDefExt = "http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl";
-const extElementStatus = "http://clinfhir.com/fhir/StructureDefinition/edStatus";
+const extElementStatus = "http://clinfhir.com/fhir/StructureDefinition/edStatus";   //include, exclude etc
+const fileRoot="/Users/davidhay/Dropbox/contracting/MOH/ResourcesForRegistryIG/profiles/";      //where the profile will be stored
 
-let remoteFhirServer = "http://home.clinfhir.com:8040/baseDstu3/";
+
+let remoteFhirServer = "http://home.clinfhir.com:8054/baseR4/";      //where the LM is stored...
+let validationServer = "http://home.clinfhir.com:8054/baseR4/";      //to validate the created profile
+
 let arFixedElements=["id","meta","text","meta","language","implicitRules","contained","modifierExtension"];   //elements not in the model, but stil belong in the profile
 
 
-let modelId = "NzNHIPatient";
+let modelId = "HpiPractitioner";
+let fileName = "structuredefinition-hpipractitioner.json";
+
+let fullFileName = fileRoot + fileName;
+
 //get the model
 
 let options = {};
@@ -35,6 +43,8 @@ let err = [];
 let modelPathHash = {};     //a hash of all the elements by mapped path
 let rootExtensions = [];     //a list of extensions on the root
 let baseExtensionsHash = {}; //hash of extensions for a base path
+
+//scan the model and build a hash of all the elements in the model
 model.snapshot.element.forEach(function(ed,inx){
     let modelPath = ed.path;
     //modelHashByMappedPath[modelPath] = ed;
@@ -49,7 +59,6 @@ model.snapshot.element.forEach(function(ed,inx){
     if (inx > 0 && elementStatus !== 'excluded') {      //not the first element or excluded elements...
 
         let mapPath = getMappedPath(ed);        //the path in the base resource that this element is mapped to...
-       // modelHashByMappedPath[mapPath] = ed;
 
         if (! mapPath) {
             //there is no mapping path.
@@ -58,9 +67,8 @@ model.snapshot.element.forEach(function(ed,inx){
             let ar = modelPath.split('.');
             ar.pop();
             let mp = ar.join('.');
-         //   if (! rootExtensions[mp]) {
-                console.log("The model path " + modelPath + " has no FHIR mapping")
-          //  }
+            console.log("Error:The model path " + modelPath + " has no FHIR mapping")
+
 
 
         } else {
@@ -109,29 +117,30 @@ model.snapshot.element.forEach(function(ed,inx){
 
 
 //get the base type.
-console.log('Loading base type...');
+//console.log('Loading base type ('+baseType+')...');
 let baseUrl = remoteFhirServer + "StructureDefinition/" + baseType;
-console.log("Load base type: "+baseUrl)
+console.log("Load base type: "+baseUrl);
 
+//retrieve the base resource type. Will build a differential by comparing this to the mapped elements in the model
 response = syncRequest('GET', baseUrl, options);
 
 let baseModel = JSON.parse(response.body.toString())
-
+//console.log('base:',baseModel)
 let profile = {resourceType:'StructureDefinition'};
-let rootName = "nhipatient"
+let rootName = "nhipatient";
 profile.url = "http://hl7.org.nz/fhir/StructureDefinition/"+rootName;
 profile.id=rootName;
 profile.name = rootName;
 profile.version = "0.1";
 profile.status="draft";
 profile.derivation ='constraint';
-profile.type='Patient';     //todo get from extension
-profile.baseDefinition = "http://hl7.org/fhir/StructureDefinition/Patient";
-profile.fhirVersion = "3.0.1";
+profile.type=baseType; //'Patient';     //todo get from extension
+profile.baseDefinition = "http://hl7.org/fhir/StructureDefinition/"+baseType;
+profile.fhirVersion = baseModel.version; //"3.0.1";      //todo
 profile.kind="resource";
 profile.abstract=false;
 
-profile.differential = {element:[]}
+profile.differential = {element:[]};
 
 let top = {};
 top.id = baseType;
@@ -170,7 +179,7 @@ let extensionCount = 0;
 
     }
 
-})
+});
 
 
 //iterate through the base model. The profile needs to be in this order
@@ -180,14 +189,14 @@ baseModel.snapshot.element.forEach(function(ed,inx){
 
         if (!modelPathHash[basePath]) {
             //There is no element in the model mapped to this one - or it has been excluded...
-            console.log('Warning: ' + basePath + " not found")
+            //console.log('Warning: ' + basePath + " not found")
 
             //just make sure this isn't one of the elements in the profile, even if not in the model
             let ar = basePath.split('.');
 
-            //arFixedElements are elements like text, contained that generally aren't in the model, but shoudl not be excluded from the profile
+            //arFixedElements are elements like text, contained that generally aren't in the model, but should not be excluded from the profile
             if (arFixedElements.indexOf(ar[1]) == -1){
-                //cleanED(newEd,baseType)
+
 
                 //if the parent element is already in the diff, then don't add it
                 let parentInDiff = false;
@@ -202,28 +211,34 @@ baseModel.snapshot.element.forEach(function(ed,inx){
                     ed.max = "0";
                     ed.min = 0;  //todo - is there a situation where the base min = 1??
                     profile.differential.element.push(ed);
-                    console.log('Warning: ' + basePath + " not found, min & max set to 0 in the diff")
+                    console.log('Info: ' + basePath + " not found, min & max set to 0 in the diff")
                 } else {
 
 
                 }
-
             }
 
         } else if (modelPathHash[ed.path].length >1) {
             //there is more than one model element mapped to this one - it must be sliced...
-            console.log('sliced element:'+ed.path)
+            console.log('Info:sliced element:'+ed.path)
 
             addSlices(baseType,profile.differential.element,ed,modelPathHash[ed.path])
         }
 
         else {
-            //this element has a mapping in the model. Is it different to the base...
-            let isEDDifferent = isDifferent(ed)
+            //this element in the base has a mapping in the model. Is it different to the base?.\
+
+            let newED = updateED(ed);
+            if (newED) {
+                profile.differential.element.push(newED);
+            }
+
+            /*
+            let isEDDifferent = isDifferent(ed);
+
             if (isEDDifferent) {
 
                 if (isEDDifferent.type == 'minmax') {
-
 
                     let hash = modelPathHash[ed.path];  //the ed from the model that is mapped to this path from the base...
                     if (hash) {
@@ -231,6 +246,7 @@ baseModel.snapshot.element.forEach(function(ed,inx){
 
                             let newEd = hash[0].ed
 
+                            console.log(newEd)
                             cleanED(newEd, baseType)
                             profile.differential.element.push(newEd);
                         } else {
@@ -242,6 +258,7 @@ baseModel.snapshot.element.forEach(function(ed,inx){
                 }
 
             }
+            */
 
             //are there any immediate children of this node that are mapped to an extension?
             if (baseExtensionsHash[basePath]) {
@@ -258,10 +275,11 @@ baseModel.snapshot.element.forEach(function(ed,inx){
 });
 
 
-fs.writeFileSync("/Users/davidhay/nhiIG/resources/structuredefinition-nhipatient.json",JSON.stringify(profile))
+//fs.writeFileSync("/Users/davidhay/nhiIG/resources/structuredefinition-nhipatient.json",JSON.stringify(profile))
+fs.writeFileSync(fullFileName,JSON.stringify(profile))
+
 
 function addSlices(baseType,diff,baseED,mappings) {
-
     //get the data type from the first mapping
     let type = mappings[0].ed.type;
     let code = type[0].code
@@ -288,6 +306,7 @@ function addSlices(baseType,diff,baseED,mappings) {
 
 
             break;
+
     }
 
 }
@@ -330,8 +349,52 @@ function cleanED(modelED,baseType) {
 }
 
 
+//update the base ED from the differences in the model (based on the path)
+function updateED(baseED) {
+
+    let cloneED = JSON.parse(JSON.stringify(baseED));
+
+    //set the base values...
+    cloneED.base = cloneED.base || {}
+    cloneED.base.min = cloneED.min;
+    cloneED.base.max = cloneED.max;
+
+    //ignore extensions for now...
+    if (baseED.path.indexOf('xtension') > -1) {
+        return null;
+    }
+
+    let path = baseED.path;     //the path in the base ED
+    let mEd = modelPathHash[path];  //the ed in the model that is mapped to this element
+    if (! mEd) {
+        //must have been deleted from the model. Change the max to "0"
+        cloneED.max = "0"
+        return cloneED; //{type:'missing',msg: "ED from path "+ path + ' not present in model'};
+    }
+
+    let diff = false;       //if there are no differences, then we won't return an ED at all and it won't appear in the diff...
+    let modelED =  mEd[0].ed;
+    if (cloneED.min !== modelED.min) {
+        cloneED.min = modelED.min;
+        //console.log('min',mEd.min, mEd)
+        diff = true;
+    }
+
+    if (cloneED.max !== modelED.max) {
+        cloneED.max = modelED.max;
+        diff = true;
+    }
+
+    if (diff) {
+        return cloneED;
+    } else {
+        return null;
+    }
+
+}
+
 //returns true if the mapped ed is different to that in the base resource
-function isDifferent(baseED) {
+function isDifferentDEP(baseED) {
 
     //ignore extensions for now...
     if (baseED.path.indexOf('xtension') > -1) {
