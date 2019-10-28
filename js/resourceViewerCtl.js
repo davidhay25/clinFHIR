@@ -90,7 +90,6 @@ angular.module("sampleApp")
                 $scope.waiting = true;
                 $scope.loadedFromBookmark = true;
                 var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
-                // console.log(sc)
                 sc.$loaded().then(
                     function(){
 
@@ -170,7 +169,9 @@ angular.module("sampleApp")
 
 
             $scope.showPatientInGraph = function(){
-                renderPatientDetails($scope.allResources,true)
+                $scope.patientShown = !  $scope.patientShown;
+
+                renderPatientDetails($scope.allResources,$scope.patientShown)
             }
 
 /*
@@ -203,14 +204,94 @@ angular.module("sampleApp")
 
                 $scope.documentReference = docRef;
                 delete $scope.docAttachment;
+                delete $scope.graphNotes;
 
                 //$scope.docAttachments = []
 
                 if (docRef.content && docRef.content.length > 0) {
-                    var con = docRef.content[0];        //only the first one...
-
-                    // docRef.content.forEach(function (con) {
+                    let con = docRef.content[0];        //The first one is the bundle...
                     var url = con.attachment.url;      //assume a complete url to the document bundle...
+
+
+                    if (con.attachment.data) {
+                        let bundle = angular.fromJson(atob(con.attachment.data));
+                        if (bundle.entry) {
+                            let lst = [];
+                            bundle.entry.forEach(function (entry) {
+                                let fullUrl = entry.fullUrl;
+                                if (fullUrl) {
+                                    let ar = fullUrl.split('/');
+                                    let id = ar[ar.length-1];
+                                    let type = ar[ar.length-2]
+                                    if ($scope.allResources && $scope.allResources[type] && $scope.allResources[type].entry) {
+                                        console.log($scope.allResources[type])
+                                        $scope.allResources[type].entry.forEach(function (entry) {
+                                            let resource = entry.resource;
+                                            if (resource && resource.id == id) {
+                                                console.log(resource);
+                                                lst.push(resource)
+
+                                            }
+                                        })
+                                    }
+                                }
+                            });
+                            var graphData = resourceCreatorSvc.createGraphOfInstances(lst,true);
+
+
+                            //draw the network graph
+                            var container = document.getElementById('graphGraph');
+
+                            var network = new vis.Network(container, graphData, {});
+                            network.on("click", function (obj) {
+                                var nodeId = obj.nodes[0];  //get the first node
+                                var selectedGraphNode = graphData.nodes.get(nodeId);
+
+                                console.log(selectedGraphNode);
+
+                                delete $scope.selectedGraphResource;
+
+                                $scope.selectedGraphResource = selectedGraphNode.resource;
+
+                                $scope.$digest();
+
+                                //draw the tree view
+                                let treeData = resourceCreatorSvc.buildResourceTree($scope.selectedGraphResource);
+
+                                //show the tree of this version
+                                $('#graphGraphResourceTree').jstree('destroy');
+                                $('#graphGraphResourceTree').jstree(
+                                    {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+                                );
+
+
+                            });
+
+
+
+
+
+
+//selectedGraphResource
+
+                            console.log(graphData)
+                        }
+
+                        //console.log(bundle);
+
+                        //if there's a graph then look for any notes
+                        if (docRef.content.length > 1) {
+                            let conNotes = docRef.content[1];
+                            if (conNotes.attachment && conNotes.attachment.data) {
+
+                            }
+                            $scope.graphNotes = atob(conNotes.attachment.data)
+                        }
+
+                    }
+
+
+
                     if (url) {
                         GetDataFromServer.adHocFHIRQuery(url).then(
                             function (data) {
