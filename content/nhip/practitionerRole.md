@@ -12,13 +12,7 @@ The PractitionerRole (PR) resource is a ‘linking’ resource that represents a
 *   There is a creator extension that is a reference to the Organization and person (as a Practitioner) that created the resource. In the image below, the 2 resources to the right indicate the person and organization that created the record.
 
 
-
-<p id="gdcalert1" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/HPI0.png). Store image on your image server and adjust path/filename if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert2">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/HPI0.png "image_tooltip")
-
-
+> todo insert image here
 
 ### Resource Identifiers
 

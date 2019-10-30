@@ -538,11 +538,20 @@ angular.module("sampleApp")
                         if (IG.definition.page) {
                             let topPage = IG.definition.page
                             //thereArePages = true;
-                            queries.push(getContentFile(topPage.title,topPage.nameUrl));
+
+                            let firstTab = {title:topPage.title};
+                            tabs.push(firstTab)
+                            //tabs.push({url:url,title:title,contents:data.data})
+                            queries.push(getContentFile(firstTab,topPage.nameUrl));
+
+                            //queries.push(getContentFile(topPage.title,topPage.nameUrl));
 
                             if (topPage.page) {
                                 topPage.page.forEach(function (page) {
-                                    queries.push(getContentFile(page.title,page.nameUrl));
+                                    let tab = {title:page.title};
+                                    tabs.push(tab)
+                                    //tabs.push({url:url,title:title,contents:data.data})
+                                    queries.push(getContentFile(tab,page.nameUrl));
                                 })
                             }
                         }
@@ -617,12 +626,13 @@ angular.module("sampleApp")
                 return deferred.promise;
 
 
-                function getContentFile(title,nameUrl) {
+                function getContentFile(tab,nameUrl) {
                     let url = "content/nhip/"+ nameUrl;
                     return $http.get(url).then(
                         function (data) {
                             console.log(data)
-                            tabs.push({url:url,title:title,contents:data.data})
+                            tab.contents = data.data;
+                           // tabs.push({url:url,title:title,contents:data.data})
 
                         },
                         function(err) {
