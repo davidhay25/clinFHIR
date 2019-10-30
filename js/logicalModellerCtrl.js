@@ -52,6 +52,9 @@ angular.module("sampleApp")
 
             //edit description, comments and usageGuide in a single dialog
             $scope.lmEditElementDoc = function(row){
+
+                $scope.selectNodeFromTable(row.data.path);  //to display the detail
+
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
                     keyboard: false,       //same as above.

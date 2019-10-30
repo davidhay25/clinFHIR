@@ -840,25 +840,26 @@
 
                         <uib-tab heading="Edit">
                             <br/>
+                            <div class="designerScroll">
+                                <table class="table table-bordered table-condensed">
+                                    <tr><th>Element</th><th>Description</th><th>Comments</th><th>Usage Notes</th></tr>
+                                    <tr ng-repeat="row in treeData">
 
-                            <table class="table table-bordered table-condensed">
-                                <tr><th>Element</th><th>Description</th><th>Comments</th><th>Usage Notes</th></tr>
-                                <tr ng-repeat="row in treeData">
+                                        <td>
 
-                                    <td>
-
-                                        <div  ng-style="{ 'padding-left': (row.data.path | pathindent) }"
-                                              ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path| lastInPath}}</div>
-                                    </td>
+                                            <div  ng-style="{ 'padding-left': (row.data.path | pathindent) }"
+                                                  ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path| lastInPath}}</div>
+                                        </td>
 
 
-                                    <td>{{row.data.description}}</td>
-                                    <td>{{row.data.comments}}</td>
-                                    <td>{{row.data.usageGuide}}</td>
-                                    <td><i class="glyphicon glyphicon-edit clickable" ng-click="lmEditElementDoc(row)"></i></td>
-                                </tr>
+                                        <td>{{row.data.description}}</td>
+                                        <td>{{row.data.comments}}</td>
+                                        <td>{{row.data.usageGuide}}</td>
+                                        <td><i class="glyphicon glyphicon-edit clickable" ng-click="lmEditElementDoc(row)"></i></td>
+                                    </tr>
 
-                            </table>
+                                </table>
+                            </div>
 
                         </uib-tab>
 
