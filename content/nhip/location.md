@@ -1,4 +1,3 @@
-### Location
 
 The Location resource is how facilities are represented. Examples are:
 

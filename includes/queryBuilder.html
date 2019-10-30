@@ -1,0 +1,75 @@
+<div>
+
+
+
+
+
+    <div class="row">
+        <div class="col-md-2">
+            <h3>Query builder</h3>
+
+        </div>
+        <div class="col-md-2">
+            <div class="btn-group">
+                <label style="margin:3px" class="btn btn-default" ng-model="input.qType" uib-btn-radio="'search'">Search</label>
+
+                <label style="margin:3px" class="btn btn-default" ng-model="input.qType" uib-btn-radio="'read'">Read</label>
+
+
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div ng-show="input.qType=='read'">
+                This will retrieve a single resource by id. Enter the id into the query box below
+            </div>
+            <div ng-show="input.qType=='search'">
+                This will search for resources. Enter the querystring into the boc below
+            </div>
+
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">
+            <select class="form-control" ng-model="input.type" ng-change="setQUrl()"
+                    ng-options="type for type in input.qTypes">
+
+            </select>
+
+        </div>
+        <div class="col-md-8">
+            <input type="text" ng-show = "input.qType =='search'" class="form-control" ng-model="input.queryString" ng-change="setQUrl()"
+                   placeholder="Enter query string eg name=smith for a Patient"/>
+
+            <input type="text" ng-show = "input.qType =='read'"class="form-control" ng-model="input.queryId" ng-change="setQUrl()"
+                   placeholder="Enter the resource id"/>
+
+        </div>
+        <div class="col-md-1">
+            <button class="btn btn-primary" ng-click="executeQuery()">Execute</button>
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-md-1">
+            Query:
+        </div>
+        <div class="col-md-11">
+            <em>{{qUrl}}</em>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-4">
+            <div>Status:{{qResult.status}}</div>
+        </div>
+        <div class="col-md-8">
+            <pre>{{qResult.data | json}}</pre>
+        </div>
+    </div>
+
+
+
+</div>

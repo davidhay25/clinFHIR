@@ -29,6 +29,10 @@ angular.module("sampleApp")
                     function(data) {
                         $scope.artifacts = data.artifacts;
                         $scope.tabs = data.tabs;
+
+                        $scope.tabs.splice(2,0,{title:'Resources',includeUrl:"/includes/oneModel.html"})
+                        $scope.tabs.splice(7,0,{title:'Query Builder',includeUrl:"/includes/queryBuilder.html"})
+
                         $scope.showTabsInView = true;
                         var hash = $location.hash();
 
@@ -41,6 +45,41 @@ angular.module("sampleApp")
 
                     }
                 );
+            };
+
+            //funcctions for query builder
+            $scope.input.qTypes = ["Practitioner","Organization","PractitionerRole","Location"];
+            $scope.input.qType = "search"
+            $scope.setQUrl = function() {
+                $scope.qUrl = $scope.input.type;
+
+                if ($scope.input.qType == 'search'){
+                    if ($scope.input.queryString) {
+                        $scope.qUrl += "?" +$scope.input.queryString
+                    }
+                }
+
+                if ($scope.input.qType == 'read'){
+                    if ($scope.input.queryId) {
+                        $scope.qUrl += "/" +$scope.input.queryId
+                    }
+                }
+            };
+
+            $scope.executeQuery = function(){
+                delete $scope.result;
+                let url = "http://home.clinfhir.com:8054/baseR4/"+$scope.qUrl
+                $http.get(url).then(
+                    function(data) {
+                        $scope.qResult = data
+                        console.log(data)
+                    },
+                    function(err) {
+                        $scope.qResult = err
+                        console.log(err)
+                    }
+                )
+
             };
 
             $scope.analyse = function(){

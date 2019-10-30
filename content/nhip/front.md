@@ -1,4 +1,4 @@
-# Front Page
+
 
 The HPI ([Health Practitioner Index](https://www.health.govt.nz/our-work/health-identity/health-provider-index)) is a national service that holds information about the providers of healthcare in New Zealand, including the organizations where they work and the facilities that they work from. The entities that are supported are:
 

@@ -1,4 +1,4 @@
-## Practitioner
+
 
 The Practitioner resource represents any provider of healthcare - not restricted to those with formal qualifications. 
 

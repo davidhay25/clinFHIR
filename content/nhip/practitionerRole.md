@@ -1,7 +1,5 @@
 
 
-## PractitionerRole
-
 The PractitionerRole (PR) resource is a ‘linking’ resource that represents a Practitioner resource working for an Organization at a Location in some particular role. The following diagram shows the relationships (Note that there can be multiple Location resources, but only a single Practitioner or Organization)
 
 

@@ -1,0 +1,1301 @@
+<div class="row">
+    <div class="col-md-2">
+        <!--
+                    <div class="btn-group" ng-click="selectIG(input.igCode)">
+                        <label class="btn btn-default" ng-model="input.igCode" uib-btn-radio="'nzRegistry'">Identity</label>
+
+                    </div>
+
+        -->
+
+        <br/><br/>
+
+
+        <div class="list-group">
+
+            <div class="designerScroll">
+                <div ng-class="{'list-group-item':true,'listItemSelected':art==selectedArtifact}"
+                     style="cursor: pointer"
+                     ng-repeat="art in artifacts.logical">
+                    <div ng-click="selectItem('logical',art)">
+                        <div>{{art.reference.reference | referenceType}}</div>
+                        {{art.name}}
+                        <div>{{art.title}}</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!--
+
+                            <uib-accordion>
+                                <div uib-accordion-group class="panel-default" is-open="true">
+                                    <uib-accordion-heading>
+                                <span ng-click="showAccordianGroup('logical')">
+                                    <div class="text-center text-info">
+                                        <strong>Logical Models</strong>
+                                    </div>
+                                </span>
+                                    </uib-accordion-heading>
+                                    <div class="list-group">
+
+                                        <div class="designerScroll">
+                                            <div ng-class="{'list-group-item':true,'listItemSelected':art==selectedArtifact}"
+                                                 style="cursor: pointer"
+                                                 ng-repeat="art in artifacts.logical">
+                                                <div ng-click="selectItem('logical',art)">
+                                                    <div>{{art.reference.reference | referenceType}}</div>
+                                                    {{art.name}}
+                                                    <div>{{art.title}}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+
+                                <div uib-accordion-group class="panel-default">
+                                    <uib-accordion-heading>
+                                <span ng-click="showAccordianGroup('valueset')">
+                                    <div class="text-center text-info">
+                                        <strong>ValueSets</strong>
+                                    </div>
+                                </span>
+
+                                    </uib-accordion-heading>
+                                    <div class="list-group">
+                                        <div ng-class="{'list-group-item':true}"
+                                             style="cursor: pointer"
+                                             ng-repeat="art in artifacts.valueset">
+                                            <div ng-click="selectItem('valueset',art)">
+                                                {{art.name}}
+                                                <div>{{art.title}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+
+
+                                <div uib-accordion-group class="panel-default">
+                                    <uib-accordion-heading>
+                                <span ng-click="showAccordianGroup('namingsystem')">
+                                    <div class="text-center text-info">
+                                        <strong>Naming Systems</strong>
+                                    </div>
+                                </span>
+
+                                    </uib-accordion-heading>
+                                    <div class="list-group">
+                                        <div ng-class="{'list-group-item':true}"
+                                             style="cursor: pointer"
+                                             ng-repeat="art in artifacts.namingsystem">
+                                            <div ng-click="selectItem('namingsystem',art)">
+                                                {{art.name}}
+                                                <div>{{art.title}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+
+                                <div uib-accordion-group class="panel-default">
+                                    <uib-accordion-heading>
+                            <span ng-click="showAccordianGroup('example')">
+                                    <div class="text-center text-info">
+                                        <strong>Examples</strong>
+                                    </div>
+                                </span>
+                                    </uib-accordion-heading>
+                                </div>
+
+                                <div uib-accordion-group class="panel-default">
+                                    <uib-accordion-heading>
+                            <span ng-click="showAccordianGroup('graph')">
+                                    <div class="text-center text-info">
+                                        <strong>Graphs</strong>
+                                    </div>
+                                </span>
+                                    </uib-accordion-heading>
+                                </div>
+
+                                <div uib-accordion-group class="panel-default">
+                                    <uib-accordion-heading>
+                        <span ng-click="showAccordianGroup('analysis')">
+                                <div class="text-center text-info">
+                                    <strong>Analysis</strong>
+                                </div>
+                            </span>
+                                    </uib-accordion-heading>
+                                    <button class="btn btn-link" ng-click="analyse()">Refresh</button>
+                                </div>
+
+                            </uib-accordion>
+
+
+                           -->
+
+
+    </div>
+    <div class="col-md-10">
+
+
+        <div ng-show="selectedGroup == 'logical' && selectedResource">
+
+
+
+            <uib-tabset ng-show="selectedArtifact">
+
+                <uib-tab heading="Description">
+
+                    <div ng-hide="arDocs.length > 0" >
+                        <br/>
+                        <div class="row">
+                            <div class="col-md-2">
+                                Purpose
+                            </div>
+                            <div class="col-md-10">
+                                <p ng-bind-html="selectedResource.purpose | markDown"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                Last updated
+                            </div>
+                            <div class="col-md-10">
+                                {{selectedResource.meta.lastUpdated | date}}  {{selectedResource.meta.lastUpdated | getAgeSeconds:true}}
+                            </div>
+                        </div>
+                        <!--<pre>{{selectedResource | json}}</pre>
+                        <pre>{{selectedArtifact | json}}</pre>-->
+
+                        <div ng-show="selectedArtifact.profileForLM">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    Profile
+                                </div>
+                                <div class="col-md-5">
+                                    {{appConfigSvc.getCurrentConformanceServer().url}}{{selectedArtifact.profileForLM}}
+                                </div>
+                                <div class="col-md-5">
+                                    <em>This is the location of the formal FHIR Profile for this Logical Model (ie, how an instance will be represented 'on the wire')</em>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                    <div class="doc" ng-repeat = "doc in arDocs">
+                        <p ng-bind-html="doc.contents | markDown"></p>
+                    </div>
+
+
+
+                </uib-tab>
+
+                <uib-tab heading="Tree view">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="designerScroll" id="lmTreeView"></div>
+
+                        </div>
+                        <div class="col-md-6">
+                            <div ng-show="selectedNode">
+                                <div class="row">
+                                    <div class="col-md-8 col-sm-8">
+                                        <h4>{{selectedNode.text}}</h4>
+
+                                    </div>
+                                    <div class="col-md-4 col-sm-4">
+                                        <div class="pull-right">
+                                            <input style="margin-top: 15px"
+                                                   ng-click="setClinicalView(clinicalView)"
+                                                   type = "checkbox" ng-model="clinicalView"/> Clinical View
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <table class="table table-bordered">
+
+                                    <tr>
+                                        <td width="20%">Name</td>
+                                        <td>{{selectedNode.data.name}}
+
+
+                                        </td>
+                                    </tr>
+
+
+
+
+                                    <tr ng-show = "selectedNode.data.edStatus && (selectedNode.data.edStatus !== 'included')" class="required">
+                                        <td>Status</td><td>{{selectedNode.data.edStatus}}
+
+                                        <span class="pull-right"><em>{{statusDescription[selectedNode.data.edStatus]}}</em></span>
+
+
+                                    </td>
+                                    </tr>
+
+
+                                    <tr ng-show="selectedNode.data.lmReviewReason">
+                                        <td>Reason for review</td>
+                                        <td>
+                                            {{selectedNode.data.lmReviewReason}}
+
+                                        </td>
+                                    </tr>
+                                    <tr ng-show="selectedNode.data.alias">
+                                        <td width="20%">Alias</td>
+                                        <td>
+                                            <ul>
+                                                <li ng-repeat="al in selectedNode.data.alias track by $index">
+                                                    {{al}}
+                                                </li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+
+
+                                    <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
+                                    <tr><td>Description</td>
+                                        <td>
+                                            {{selectedNode.data.description}}
+
+                                        </td>
+                                    </tr>
+
+
+
+
+
+                                    <tr ng-show="selectedNode.data.usageGuide">
+                                        <td>Usage Guide</td>
+                                        <td>
+                                            {{selectedNode.data.usageGuide}}
+
+                                        </td>
+                                    </tr>
+                                    <tr ng-show="selectedNode.data.misuse">
+                                        <td>Misuse</td>
+                                        <td>
+                                            {{selectedNode.data.misuse}}
+
+                                        </td>
+                                    </tr>
+                                    <tr ng-show="selectedNode.data.legacy">
+                                        <td>Legacy issues</td>
+                                        <td>
+                                            {{selectedNode.data.legacy}}
+
+                                        </td>
+                                    </tr>
+
+                                    <tr ng-show="selectedNode.data.mappingFromED.length > 0 && ! clinicalView"><td>Mappings</td><td>
+                                        <table class="table table-condensed table-bordered"  style="margin-bottom: 2px">
+                                            <tr><th>Identity</th><th>Map</th><th>Comment</th></tr>
+                                            <tr ng-repeat="map in selectedNode.data.mappingFromED">
+                                                <td>{{map.identity}}</td>
+                                                <td>{{map.map}}</td>
+                                                <td>{{map.comment}}</td>
+                                            </tr>
+                                        </table>
+
+                                    </td></tr>
+
+
+
+
+
+                                    <tr ng-show="selectedNode.data.fhirMappingExtensionUrl && ! clinicalView"><td>Extension Url</td>
+
+                                        <td>
+                                            <a href="#" ng-click="editExtension(selectedNode.data.fhirMappingExtensionUrl)">{{selectedNode.data.fhirMappingExtensionUrl}}</a>
+                                        </td>
+
+                                    </tr>
+
+                                    <tr ng-show="selectedNode.data.comments"><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>
+
+                                    <tr><td>Multiplicity</td><td>{{selectedNode.data.min}}..{{selectedNode.data.max}}</td></tr>
+
+                                    <tr ng-show="selectedNode.data.analysis">
+                                        <td>Extension data</td>
+                                        <td>{{selectedNode.data.analysis | json}}</td>
+                                    </tr>
+
+                                    <tr><td>Datatypes</td>
+                                        <td>
+                                            <div ng-repeat = "typ in selectedNode.data.type">
+
+
+                                                <div ng-hide = "typ.code == 'Reference'">
+
+
+                                                    <a ng-hide="typ.code == 'Dosage'" ng-href="{{rootForDataType}}{{typ.code}}" target="_blank">
+                                                        <i class="glyphicon glyphicon-eye-open clickable"></i>
+                                                    </a>
+
+
+                                                    {{typ.code}}
+                                                    <span class="clickable pull-right"
+                                                          ng-click="viewDataType(typ.code)">View elements</span>
+                                                </div>
+
+
+                                                <div ng-show = "typ.code == 'Reference'">
+                                                    <div ng-repeat = 'targetProfile in typ.targetProfile'>
+                                                    <span ng-show="isCoreType(targetProfile)">
+                                                    <a ng-href="{{fhirRoot}}{{targetProfile | getLogicalID}}.html" target="_blank">
+
+
+                                                        <i class="glyphicon glyphicon-eye-open clickable"></i>
+                                                    </a>
+
+                                                </span>
+
+
+                                                        <span class="clickable pull-right" ng-click="viewReferencedModel(targetProfile)">View elements</span>
+                                                        Reference -> {{targetProfile | getLogicalID}}
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+
+                                            <span ng-show="selectedNode.data.selectedValueSet">
+
+                                         <span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.valueSet)">
+                                            {{selectedNode.data.selectedValueSet.valueSet}}</span>
+                                            ({{selectedNode.data.selectedValueSet.strength}})
+
+                                    </span>
+
+
+                                        </td>
+
+
+                                    </tr>
+
+
+
+
+                                    <tr ng-show="selectedNode.data.conceptMap">
+                                        <td>ConceptMap</td>
+                                        <td><a href="#" ng-click="showConceptMap(selectedNode.data.conceptMap)">{{selectedNode.data.conceptMap}}</a></td></tr>
+
+                                    <tr ng-show="selectedNode.data.mapping"><td>Mapping notes</td><td>
+                                        {{selectedNode.data.mapping}}
+
+
+                                    </td></tr>
+                                    <tr ng-show="selectedNode.data.fixedString">
+                                        <td>Fixed</td><td>{{selectedNode.data.fixedString}}</td>
+                                    </tr>
+
+
+                                </table>
+
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-3">
+
+
+                            <div class="list-group" style="margin-top: 16px">
+
+
+                                <div class="list-group-item" ng-repeat="task in tasks track by $index"
+                                     ng-if = "task.path==selectedNode.id || task.path==selectedNode.data.idFromSD">
+                                    {{task.description}}
+                                    <div><em class="pull-right"> {{task.requesterReference.display}}</em></div>
+
+                                    <div ng-show="task.notes.length >0">
+                                        <hr/>
+                                        <div ng-repeat="note in task.notes">
+
+                                            <div style="margin-left: 20px" >{{note.text}}</div>
+                                            <div><em class="pull-right">{{note.authorString}}</em></div>
+                                            <br/><br/>
+                                        </div>
+
+                                    </div>
+                                    <div class="clearfix"></div>
+
+                                    <!-- <pre>{{task | json}}</pre>-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </uib-tab>
+
+
+
+                <uib-tab heading="Table view">
+                    <br/>
+                    <table class="table table-bordered table-condensed">
+                        <tr>
+
+                            <th>Element</th><th>DataType</th><th>Mult.</th><th>Description & Comments</th><th>Element Specific</th></tr>
+                        <tr  ng-show="showTableElement(row)" ng-repeat="row in treeData">
+
+                            <td>
+
+                                <div  ng-style="{ 'padding-left': (row.data.path | pathindent) }"
+                                      ng-click="selectNodeFromTable(row.data.path)" >{{row.data.path| lastInPath}}</div>
+                            </td>
+                            <td>
+                                <div ng-repeat="type in row.data.type">
+                                    {{type.code}}
+                                    <div ng-repeat="profile in type.targetProfile">
+                                        <span class="reference">--> {{profile | referenceType}}</span>
+                                    </div>
+
+
+
+                                </div>
+
+                                <div ng-show="row.data.isExtension">
+                                    <div class="isExtension"
+                                         uib-popover="{{row.data.fhirMappingExtensionUrl}}"
+                                         popover-placement="top"
+                                         popover-trigger="'mouseenter'">
+                                        (Extension)
+                                    </div>
+                                </div>
+
+                            </td>
+
+                            <td>{{row.data.min}}..{{row.data.max}}</td>
+                            <td>
+                                {{row.data.description}}
+                                <div>{{row.data.ed.comment}}</div>
+                                <div>{{row.data.usageGuide}}</div>
+
+                            </td>
+                            <td>
+                                <div ng-show="row.data.selectedValueSet">
+                                    <span class="clickable" ng-click="viewVS(row.data.selectedValueSet.valueSet)">
+                                            {{row.data.selectedValueSet.valueSet}}</span>
+                                    ({{row.data.selectedValueSet.strength}})
+                                </div>
+
+
+
+                            </td>
+                        </tr>
+
+                    </table>
+                    <em>Summary data only. Elements marked as 'excluded' in the model are not shown here</em>
+
+                </uib-tab>
+
+                <uib-tab heading="ValueSets">
+
+                    <div>
+                        <a class="btn btn-link pull-right" download="{{vsDwnloadLinkJsonName}}"
+                           href="{{vsDownloadLinkJsonContent}}" title="{{vsDwnloadLinkJsonName}}" >
+                            Download CSV of full table
+                        </a>
+                    </div>
+
+                    <table class="table table-bordered">
+                        <tr><th>Model</th><th>Path</th><th>ValueSet Url</th><th>Description</th><th>Strength</th><th>CodeSystem Urls</th><th>Note</th></tr>
+                        <tr ng-repeat="vs in analysis.valueSets"
+                            ng-show="selectedArtifact.reference.reference == vs.url || input.showAllAnalysis">
+                            <td>{{vs.url | referenceType}}</td>
+                            <td>{{vs.ed.path | dropFirstInPath}}</td>
+                            <td>
+                                         <span class="clickable" ng-click="viewVS(vs.valueSetUrl)">
+                                            {{vs.valueSetUrl}}
+                                         </span>
+                            </td>
+                            <td>{{vs.valueSet.description}}</td>
+                            <td>{{vs.strength}}</td>
+                            <td>
+                                <div ng-repeat = "inc in vs.codeSystems">{{inc}}</div>
+                            </td>
+                            <td>{{vs.note}}</td>
+                        </tr>
+                    </table>
+                </uib-tab>
+
+                <uib-tab heading="Extensions">
+                    <table class="table table-bordered">
+                        <tr><th>Model</th><th>Path</th><th>Extension Url</th><th>Definition</th></tr>
+                        <tr ng-repeat="ext in analysis.extensions"
+                            ng-show="selectedArtifact.reference.reference == ext.url || input.showAllAnalysis">
+                            <td>{{ext.url| referenceType}}</td>
+                            <td>{{ext.ed.path | dropFirstInPath}}</td>
+                            <td>{{ext.extensionUrl}}</td>
+                            <td>{{ext.ed.definition}}</td>
+                        </tr>
+                    </table>
+                </uib-tab>
+
+                <uib-tab heading="Examples">
+
+                    <br/>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="list-group">
+                                <div class="list-group-item" ng-repeat="art in artifacts.example"
+                                     style="cursor: pointer"
+                                     ng-show="baseTypeForModel == art.baseType">
+                                    <div ng-click="selectExample(art)">{{art.name}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div ng-show="selectedExampleJson">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="rounded-box">
+                                            <p ng-bind-html="selectedExampleJson.text.div"></p>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{appConfigSvc.getCurrentConformanceServer().url}}{{selectedArtifact.reference.reference}}
+                                    </div>
+                                </div>
+
+                                <uib-tabset ng-show="selectedExampleJson">
+                                    <uib-tab heading="Json">
+                                        <pre>{{selectedExampleJson | json}}</pre>
+                                    </uib-tab>
+
+                                    <uib-tab heading="Xml">
+                                        <pre>{{selectedExampleXml}}</pre>
+                                    </uib-tab>
+                                    <uib-tab heading="Tree">
+                                        <div class="pull-right">
+                                            <button class="btn btn-link iconSpacing" ng-click="collapseAll()">Collapse all</button>
+                                            <button class="btn btn-link iconSpacing" ng-click="expandAll()">Expand all</button>
+                                        </div>
+                                        <div id="exampleTree"></div>
+                                    </uib-tab>
+
+                                </uib-tabset>
+
+
+                            </div>
+
+
+
+                        </div>
+                    </div>
+
+
+
+
+
+
+                </uib-tab>
+
+
+
+
+                <uib-tab heading="More Information" ng-show="selectedArtifact.moreInfo">
+
+
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div ng-class="{'list-group-item':true,'listItemSelected':mi1==mi}"
+                                 style="cursor: pointer"
+                                 ng-repeat="mi1 in selectedArtifact.moreInfo">
+                                <div ng-click="selectMI(mi1)">
+                                    <div>{{mi1.title}}</div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-10">
+                            <div ng-show = "mi">
+                                <iframe ng-src = "{{trustSrc(mi)}}"  width="100%" height = "600px"></iframe>
+                            </div>
+
+                        </div>
+                    </div>
+                </uib-tab>
+            </uib-tabset>
+        </div>
+
+
+        <!--
+                            <uib-tabset>
+                                <uib-tab heading="Resources">
+
+                                    <div ng-show="selectedGroup == 'valueset' && selectedResource">
+
+                                        <div class="banner">ValueSet: {{selectedArtifact.name}}</div>
+                                        <uib-tabset>
+
+
+                                            <uib-tab heading="Description">
+                                                <br/>
+
+                                                <div class="row">
+                                                    <div class="col-sm-6 col-md-6">
+                                                        <div class="row">
+                                                            <div class="col-sm-2 col-md-2">Name</div>
+                                                            <div class="col-sm-10 col-md-10">{{selectedValueset.name}}</div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-sm-2 col-md-2">Description</div>
+                                                            <div class="col-sm-10 col-md-10">{{selectedValueset.description}}</div>
+                                                        </div>
+                                                        <div class="row" ng-show="selectedValueset.valueSet">
+                                                            <div class="col-sm-2 col-md-2">ValueSet</div>
+                                                            <div class="col-sm-10 col-md-10">{{selectedValueset.valueSet}}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6 col-md-6">
+                                                        <div class="row">
+                                                            <div class="col-sm-2 col-md-2">Url</div>
+                                                            <div class="col-sm-10 col-md-10">{{selectedValueset.url}}</div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-sm-2 col-md-2">Publisher</div>
+                                                            <div class="col-sm-10 col-md-10">{{selectedValueset.publisher}}</div>
+                                                        </div>
+                                                        <div class="row" ng-show="selectedValueset.content">
+                                                            <div class="col-sm-2 col-md-2">Content</div>
+                                                            <div class="col-sm-10 col-md-10">{{selectedValueset.content}}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <br/>
+                                                <a href="#" ng-show="selectedValueset.resourceType=='ValueSet'" class="clickableDotted"
+                                                   ng-click="showValueSet(selectedValueset.url)">Explore ValueSet</a>
+
+
+
+                                                <div ng-show="igGraphHash[selectedItem.url].usedBy">
+                                                    <h5>Used By:
+                                                        <ul class="list-unstyled">
+                                                            <li ng-repeat="url in igGraphHash[selectedValueset.url].usedBy track by $index">
+                                                                {{url}}
+                                                            </li>
+                                                        </ul>
+                                                    </h5>
+
+                                                </div>
+
+                                                <br/> <br/>
+                                                <div ng-show="valueSetOptions">
+                                                    <h5>Options</h5>
+                                                    <table class="table table-bordered">
+                                                        <tr><th>Code</th><th>Display</th><th>System</th></tr>
+                                                        <tr ng-repeat="option in valueSetOptions">
+                                                            <td>{{option.code}}</td>
+                                                            <td>{{option.display}}</td>
+                                                            <td>{{option.system}}</td>
+                                                        </tr>
+                                                    </table>
+
+                                                    <br/>
+                                                </div>
+
+
+
+                                                <div class="alert alert-error" ng-show="valueSetExpandError">
+                                                    <h4>Errors expanding ValueSet</h4>
+                                                    <table class="table">
+                                                        <tr><th>Code</th><th>Severity</th><th>details</th><th>Diagnostics</th></tr>
+                                                        <tr ng-repeat="iss in valueSetExpandError.issue">
+                                                            <td>{{iss.code}}</td>
+                                                            <td>{{iss.severity}}</td>
+                                                            <td><pre ng-show="iss.details">{{iss.details}}</pre></td>
+                                                            <td>{{iss.diagnostics}}</td>
+                                                        </tr>
+                                                    </table>
+
+
+
+                                                </div>
+
+
+
+
+
+                                            </uib-tab>
+
+
+                                            <uib-tab heading="Json">
+                                                <pre>{{selectedResource | json}}</pre>
+                                            </uib-tab>
+                                        </uib-tabset>
+
+                                    </div>
+
+                                    <div ng-show="selectedGroup == 'namingsystem' && selectedResource">
+
+                                        <div class="banner">Naming System: {{selectedArtifact.name}}</div>
+                                        <uib-tabset>
+                                            <uib-tab heading="Details">
+                                                <br/>
+                                                <div class="row">
+                                                    <div class="col-md-1">
+                                                        <strong>Description</strong>
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        {{selectedResource.description}}
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-1">
+
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        ({{selectedResource.kind}})
+                                                    </div>
+                                                </div>
+                                                <br/>
+
+
+                                                <table class="table table-bordered">
+                                                    <tr><th>Type</th><th>Value</th><th>Comment</th></tr>
+                                                    <tr ng-repeat="id in selectedResource.uniqueId">
+                                                        <td>{{id.type}}</td>
+                                                        <td>{{id.value}}</td>
+                                                        <td>{{id.comment}}</td>
+                                                    </tr>
+                                                </table>
+
+                                            </uib-tab>
+
+                                            <uib-tab heading="Json">
+                                                <pre>{{selectedResource | json}}</pre>
+                                            </uib-tab>
+
+
+                                        </uib-tabset>
+
+
+
+                                    </div>
+
+                                    <div ng-show="selectedGroup == 'logical' && selectedResource">
+
+                                        <div class="banner">Logical model: {{selectedResource.title}}</div>
+
+                                        <uib-tabset ng-show="selectedArtifact">
+
+                                            <uib-tab heading="Description">
+
+                                                <div ng-hide="arDocs.length > 0" >
+                                                    <br/>
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+                                                            Purpose
+                                                        </div>
+                                                        <div class="col-md-10">
+                                                            <p ng-bind-html="selectedResource.purpose | markDown"></p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+                                                            Last updated
+                                                        </div>
+                                                        <div class="col-md-10">
+                                                            {{selectedResource.meta.lastUpdated | date}}  {{selectedResource.meta.lastUpdated | getAgeSeconds:true}}
+                                                        </div>
+                                                    </div>
+
+                                                    <div ng-show="selectedArtifact.profileForLM">
+                                                        <div class="row">
+                                                            <div class="col-md-2">
+                                                                Profile
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                {{appConfigSvc.getCurrentConformanceServer().url}}{{selectedArtifact.profileForLM}}
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <em>This is the location of the formal FHIR Profile for this Logical Model (ie, how an instance will be represented 'on the wire')</em>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+
+                                                </div>
+
+                                                <div class="doc" ng-repeat = "doc in arDocs">
+                                                    <p ng-bind-html="doc.contents | markDown"></p>
+                                                </div>
+
+
+
+                                            </uib-tab>
+
+                                            <uib-tab heading="Tree view">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="designerScroll" id="lmTreeView"></div>
+
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div ng-show="selectedNode">
+                                                            <div class="row">
+                                                                <div class="col-md-8 col-sm-8">
+                                                                    <h4>{{selectedNode.text}}</h4>
+
+                                                                </div>
+                                                                <div class="col-md-4 col-sm-4">
+                                                                    <div class="pull-right">
+                                                                        <input style="margin-top: 15px"
+                                                                               ng-click="setClinicalView(clinicalView)"
+                                                                               type = "checkbox" ng-model="clinicalView"/> Clinical View
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+
+                                                            <table class="table table-bordered">
+
+                                                                <tr>
+                                                                    <td width="20%">Name</td>
+                                                                    <td>{{selectedNode.data.name}}
+
+
+                                                                    </td>
+                                                                </tr>
+
+
+
+
+                                                                <tr ng-show = "selectedNode.data.edStatus && (selectedNode.data.edStatus !== 'included')" class="required">
+                                                                    <td>Status</td><td>{{selectedNode.data.edStatus}}
+
+                                                                    <span class="pull-right"><em>{{statusDescription[selectedNode.data.edStatus]}}</em></span>
+
+
+                                                                </td>
+                                                                </tr>
+
+
+                                                                <tr ng-show="selectedNode.data.lmReviewReason">
+                                                                    <td>Reason for review</td>
+                                                                    <td>
+                                                                        {{selectedNode.data.lmReviewReason}}
+
+                                                                    </td>
+                                                                </tr>
+                                                                <tr ng-show="selectedNode.data.alias">
+                                                                    <td width="20%">Alias</td>
+                                                                    <td>
+                                                                        <ul>
+                                                                            <li ng-repeat="al in selectedNode.data.alias track by $index">
+                                                                                {{al}}
+                                                                            </li>
+                                                                        </ul>
+                                                                    </td>
+                                                                </tr>
+
+
+                                                                <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
+                                                                <tr><td>Description</td>
+                                                                    <td>
+                                                                        {{selectedNode.data.description}}
+
+                                                                    </td>
+                                                                </tr>
+
+
+
+
+
+                                                                <tr ng-show="selectedNode.data.usageGuide">
+                                                                    <td>Usage Guide</td>
+                                                                    <td>
+                                                                        {{selectedNode.data.usageGuide}}
+
+                                                                    </td>
+                                                                </tr>
+                                                                <tr ng-show="selectedNode.data.misuse">
+                                                                    <td>Misuse</td>
+                                                                    <td>
+                                                                        {{selectedNode.data.misuse}}
+
+                                                                    </td>
+                                                                </tr>
+                                                                <tr ng-show="selectedNode.data.legacy">
+                                                                    <td>Legacy issues</td>
+                                                                    <td>
+                                                                        {{selectedNode.data.legacy}}
+
+                                                                    </td>
+                                                                </tr>
+
+                                                                <tr ng-show="selectedNode.data.mappingFromED.length > 0 && ! clinicalView"><td>Mappings</td><td>
+                                                                    <table class="table table-condensed table-bordered"  style="margin-bottom: 2px">
+                                                                        <tr><th>Identity</th><th>Map</th><th>Comment</th></tr>
+                                                                        <tr ng-repeat="map in selectedNode.data.mappingFromED">
+                                                                            <td>{{map.identity}}</td>
+                                                                            <td>{{map.map}}</td>
+                                                                            <td>{{map.comment}}</td>
+                                                                        </tr>
+                                                                    </table>
+
+                                                                </td></tr>
+
+
+
+
+
+                                                                <tr ng-show="selectedNode.data.fhirMappingExtensionUrl && ! clinicalView"><td>Extension Url</td>
+
+                                                                    <td>
+                                                                        <a href="#" ng-click="editExtension(selectedNode.data.fhirMappingExtensionUrl)">{{selectedNode.data.fhirMappingExtensionUrl}}</a>
+                                                                    </td>
+
+                                                                </tr>
+
+                                                                <tr ng-show="selectedNode.data.comments"><td>Comments</td><td>{{selectedNode.data.comments}}</td></tr>
+
+                                                                <tr><td>Multiplicity</td><td>{{selectedNode.data.min}}..{{selectedNode.data.max}}</td></tr>
+
+                                                                <tr ng-show="selectedNode.data.analysis">
+                                                                    <td>Extension data</td>
+                                                                    <td>{{selectedNode.data.analysis | json}}</td>
+                                                                </tr>
+
+                                                                <tr><td>Datatypes</td>
+                                                                    <td>
+                                                                        <div ng-repeat = "typ in selectedNode.data.type">
+
+
+                                                                            <div ng-hide = "typ.code == 'Reference'">
+
+
+                                                                                <a ng-hide="typ.code == 'Dosage'" ng-href="{{rootForDataType}}{{typ.code}}" target="_blank">
+                                                                                    <i class="glyphicon glyphicon-eye-open clickable"></i>
+                                                                                </a>
+
+
+                                                                                {{typ.code}}
+                                                                                <span class="clickable pull-right"
+                                                                                      ng-click="viewDataType(typ.code)">View elements</span>
+                                                                            </div>
+
+
+                                                                            <div ng-show = "typ.code == 'Reference'">
+                                                                                <div ng-repeat = 'targetProfile in typ.targetProfile'>
+                                                            <span ng-show="isCoreType(targetProfile)">
+                                                            <a ng-href="{{fhirRoot}}{{targetProfile | getLogicalID}}.html" target="_blank">
+
+
+                                                                <i class="glyphicon glyphicon-eye-open clickable"></i>
+                                                            </a>
+
+                                                        </span>
+
+
+                                                                                    <span class="clickable pull-right" ng-click="viewReferencedModel(targetProfile)">View elements</span>
+                                                                                    Reference -> {{targetProfile | getLogicalID}}
+                                                                                </div>
+
+
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <span ng-show="selectedNode.data.selectedValueSet">
+
+                                                 <span class="clickable" ng-click="viewVS(selectedNode.data.selectedValueSet.valueSet)">
+                                                    {{selectedNode.data.selectedValueSet.valueSet}}</span>
+                                                    ({{selectedNode.data.selectedValueSet.strength}})
+
+                                            </span>
+
+
+                                                                    </td>
+
+
+                                                                </tr>
+
+
+
+
+                                                                <tr ng-show="selectedNode.data.conceptMap">
+                                                                    <td>ConceptMap</td>
+                                                                    <td><a href="#" ng-click="showConceptMap(selectedNode.data.conceptMap)">{{selectedNode.data.conceptMap}}</a></td></tr>
+
+                                                                <tr ng-show="selectedNode.data.mapping"><td>Mapping notes</td><td>
+                                                                    {{selectedNode.data.mapping}}
+
+
+                                                                </td></tr>
+                                                                <tr ng-show="selectedNode.data.fixedString">
+                                                                    <td>Fixed</td><td>{{selectedNode.data.fixedString}}</td>
+                                                                </tr>
+
+
+                                                            </table>
+
+                                                        </div>
+                                                    </div>
+
+
+                                                    <div class="col-md-3">
+
+
+                                                        <div class="list-group" style="margin-top: 16px">
+
+
+                                                            <div class="list-group-item" ng-repeat="task in tasks track by $index"
+                                                                 ng-if = "task.path==selectedNode.id || task.path==selectedNode.data.idFromSD">
+                                                                {{task.description}}
+                                                                <div><em class="pull-right"> {{task.requesterReference.display}}</em></div>
+
+                                                                <div ng-show="task.notes.length >0">
+                                                                    <hr/>
+                                                                    <div ng-repeat="note in task.notes">
+
+                                                                        <div style="margin-left: 20px" >{{note.text}}</div>
+                                                                        <div><em class="pull-right">{{note.authorString}}</em></div>
+                                                                        <br/><br/>
+                                                                    </div>
+
+                                                                </div>
+                                                                <div class="clearfix"></div>
+
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </uib-tab>
+
+
+
+                                            <uib-tab heading="Table view">
+                                                <br/>
+                                                <table class="table table-bordered table-condensed">
+                                                    <tr>
+
+                                                        <th>Element</th><th>DataType</th><th>Mult.</th><th>Description & Comments</th><th>Element Specific</th></tr>
+                                                    <tr  ng-show="showTableElement(row)" ng-repeat="row in treeData">
+
+                                                        <td>
+
+                                                            <div  ng-style="{ 'padding-left': (row.data.path | pathindent) }"
+                                                                  ng-click="selectNodeFromTable(row.data.path)" >{{row.data.path| lastInPath}}</div>
+                                                        </td>
+                                                        <td>
+                                                            <div ng-repeat="type in row.data.type">
+                                                                {{type.code}}
+                                                                <div ng-repeat="profile in type.targetProfile">
+                                                                    <span class="reference">-> {{profile | referenceType}}</span>
+                                                                </div>
+
+
+
+                                                            </div>
+
+                                                            <div ng-show="row.data.isExtension">
+                                                                <div class="isExtension"
+                                                                     uib-popover="{{row.data.fhirMappingExtensionUrl}}"
+                                                                     popover-placement="top"
+                                                                     popover-trigger="'mouseenter'">
+                                                                    (Extension)
+                                                                </div>
+                                                            </div>
+
+                                                        </td>
+
+                                                        <td>{{row.data.min}}..{{row.data.max}}</td>
+                                                        <td>
+                                                            {{row.data.description}}
+                                                            <div>{{row.data.ed.comment}}</div>
+                                                            <div>{{row.data.usageGuide}}</div>
+
+                                                        </td>
+                                                        <td>
+                                                            <div ng-show="row.data.selectedValueSet">
+                                            <span class="clickable" ng-click="viewVS(row.data.selectedValueSet.valueSet)">
+                                                    {{row.data.selectedValueSet.valueSet}}</span>
+                                                                ({{row.data.selectedValueSet.strength}})
+                                                            </div>
+
+
+
+                                                        </td>
+                                                    </tr>
+
+                                                </table>
+                                                <em>Summary data only. Elements marked as 'excluded' in the model are not shown here</em>
+
+                                            </uib-tab>
+
+
+                                            <uib-tab heading="Examples">
+
+                                                <br/>
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="list-group">
+                                                            <div class="list-group-item" ng-repeat="art in artifacts.example"
+                                                                 style="cursor: pointer"
+                                                                 ng-show="baseTypeForModel == art.baseType">
+                                                                <div ng-click="selectExample(art)">{{art.name}}</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <div ng-show="selectedExampleJson">
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="rounded-box">
+                                                                        <p ng-bind-html="selectedExampleJson.text.div"></p>
+
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    {{appConfigSvc.getCurrentConformanceServer().url}}{{selectedArtifact.reference.reference}}
+                                                                </div>
+                                                            </div>
+
+                                                            <uib-tabset ng-show="selectedExampleJson">
+                                                                <uib-tab heading="Json">
+                                                                    <pre>{{selectedExampleJson | json}}</pre>
+                                                                </uib-tab>
+
+                                                                <uib-tab heading="Xml">
+                                                                    <pre>{{selectedExampleXml}}</pre>
+                                                                </uib-tab>
+                                                                <uib-tab heading="Tree">
+                                                                    <div class="pull-right">
+                                                                        <button class="btn btn-link iconSpacing" ng-click="collapseAll()">Collapse all</button>
+                                                                        <button class="btn btn-link iconSpacing" ng-click="expandAll()">Expand all</button>
+                                                                    </div>
+                                                                    <div id="exampleTree"></div>
+                                                                </uib-tab>
+
+                                                            </uib-tabset>
+
+
+                                                        </div>
+
+
+
+                                                    </div>
+                                                </div>
+
+
+
+
+
+
+                                            </uib-tab>
+
+
+
+
+                                            <uib-tab heading="More Information" ng-show="selectedArtifact.moreInfo">
+
+
+                                                <div class="row">
+                                                    <div class="col-md-2">
+                                                        <div ng-class="{'list-group-item':true,'listItemSelected':mi1==mi}"
+                                                             style="cursor: pointer"
+                                                             ng-repeat="mi1 in selectedArtifact.moreInfo">
+                                                            <div ng-click="selectMI(mi1)">
+                                                                <div>{{mi1.title}}</div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-10">
+                                                        <div ng-show = "mi">
+                                                            <iframe ng-src = "{{trustSrc(mi)}}"  width="100%" height = "600px"></iframe>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </uib-tab>
+                                        </uib-tabset>
+                                    </div>
+
+
+                                </uib-tab>
+                                <uib-tab heading="IG Analysis">
+                                    <button class="btn btn-link" ng-hide= "analysis" ng-click="analyse()">Perform analysis</button>
+
+
+                                    <div class="pull-right"  ng-show="analysis">
+                                        <input type="checkbox" ng-model="input.showAllAnalysis"/> Show all
+                                    </div>
+                                    <br/>
+                                    <uib-tabset ng-show="analysis">
+                                        <uib-tab heading="Extensions">
+                                            <table class="table table-bordered">
+                                                <tr><th>Model</th><th>Path</th><th>Extension Url</th><th>Definition</th></tr>
+                                                <tr ng-repeat="ext in analysis.extensions"
+                                                    ng-show="selectedArtifact.reference.reference == ext.url || input.showAllAnalysis">
+                                                    <td>{{ext.url| referenceType}}</td>
+                                                    <td>{{ext.ed.path | dropFirstInPath}}</td>
+                                                    <td>{{ext.extensionUrl}}</td>
+                                                    <td>{{ext.ed.definition}}</td>
+                                                </tr>
+                                            </table>
+                                        </uib-tab>
+                                        <uib-tab heading="ValueSets">
+
+                                            <div>
+                                                <a class="btn btn-link pull-right" download="{{vsDwnloadLinkJsonName}}"
+                                                   href="{{vsDownloadLinkJsonContent}}" title="{{vsDwnloadLinkJsonName}}" >
+                                                    Download CSV of full table
+                                                </a>
+                                            </div>
+
+                                            <table class="table table-bordered">
+                                                <tr><th>Model</th><th>Path</th><th>ValueSet Url</th><th>Description</th><th>Strength</th><th>CodeSystem Urls</th><th>Note</th></tr>
+                                                <tr ng-repeat="vs in analysis.valueSets"
+                                                    ng-show="selectedArtifact.reference.reference == vs.url || input.showAllAnalysis">
+                                                    <td>{{vs.url | referenceType}}</td>
+                                                    <td>{{vs.ed.path | dropFirstInPath}}</td>
+                                                    <td>
+                                                 <span class="clickable" ng-click="viewVS(vs.valueSetUrl)">
+                                                    {{vs.valueSetUrl}}
+                                                 </span>
+                                                    </td>
+                                                    <td>{{vs.valueSet.description}}</td>
+                                                    <td>{{vs.strength}}</td>
+                                                    <td>
+                                                        <div ng-repeat = "inc in vs.codeSystems">{{inc}}</div>
+                                                    </td>
+                                                    <td>{{vs.note}}</td>
+                                                </tr>
+                                            </table>
+                                        </uib-tab>
+                                    </uib-tabset>
+
+
+
+
+
+                                </uib-tab>
+                            </uib-tabset>
+
+
+
+        -->
+
+
+
+    </div>
+</div>
