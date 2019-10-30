@@ -72,7 +72,7 @@ angular.module("sampleApp")
                     row.data.description = row.data.description || "No description";
                     row.data.comments = cloneRow.data.comments;
                     row.data.usageGuide = cloneRow.data.usageGuide;
-                    $scope.isDirty = true
+                    $scope.isDirty = true;
                     makeSD();
                 })
             };
