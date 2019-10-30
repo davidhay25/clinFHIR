@@ -20,13 +20,16 @@ angular.module("sampleApp")
             );
 
             $scope.selectIG = function(igCode) {
-                clearDetail()
+                clearDetail();
+                $scope.showTabsInView = false;
+                $scope.activeTabIndex = 0;
+
                 delete $scope.analysis;
                 nhipSvc.getIG(igCode).then(
                     function(data) {
-                        $scope.artifacts = data;
-
-
+                        $scope.artifacts = data.artifacts;
+                        $scope.tabs = data.tabs;
+                        $scope.showTabsInView = true;
                         var hash = $location.hash();
 
                         if (hash) {
@@ -204,6 +207,7 @@ angular.module("sampleApp")
                 delete $scope.selectedED;
                 delete $scope.tasks;
                 delete $scope.mi;
+                delete $scope.arDocs;
 
                 delete $scope.selectedExampleJson;
                 $('#exampleTree').jstree('destroy');
@@ -213,6 +217,14 @@ angular.module("sampleApp")
            // $scope.showWaiting = true;
             $scope.selectItem = function(typ,art) {
                 clearDetail();
+
+                nhipSvc.getDocsForItem(art).then(
+                    function(arDocs) {
+                        console.log(arDocs);
+                        $scope.arDocs = arDocs;
+                    }
+                );
+
 
                 //$scope.mi={url:'about:blank'}
                 $scope.showWaiting = true;
@@ -235,7 +247,7 @@ angular.module("sampleApp")
                                 $scope.input.showAllAnalysis = false;
                                 $scope.baseTypeForModel = nhipSvc.getModelBaseType($scope.selectedResource);
                                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.selectedResource);  //create a new tree
-
+//console.log($scope.treeData)
                                 //console.log($scope.treeData);
                                 //collapse all but the root...
                                 $scope.treeData.forEach(function(node){
@@ -267,6 +279,7 @@ angular.module("sampleApp")
                 ).finally(
                     function () {
                         $scope.showWaiting = false;
+                        $scope.analyse()
                     }
                 )
             };

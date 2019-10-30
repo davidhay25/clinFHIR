@@ -837,6 +837,31 @@
                             <iframe id="htmlDoc" width="100%" height = "600px"></iframe>
 
                         </uib-tab>
+
+                        <uib-tab heading="Edit">
+                            <br/>
+
+                            <table class="table table-bordered table-condensed">
+                                <tr><th>Element</th><th>Description</th><th>Comments</th><th>Usage Notes</th></tr>
+                                <tr ng-repeat="row in treeData">
+
+                                    <td>
+
+                                        <div  ng-style="{ 'padding-left': (row.data.path | pathindent) }"
+                                              ng-click="selectNodeFromTable(row.data.path)" class="clickable" >{{row.data.path| lastInPath}}</div>
+                                    </td>
+
+
+                                    <td>{{row.data.description}}</td>
+                                    <td>{{row.data.comments}}</td>
+                                    <td>{{row.data.usageGuide}}</td>
+                                    <td><i class="glyphicon glyphicon-edit clickable" ng-click="lmEditElementDoc(row)"></i></td>
+                                </tr>
+
+                            </table>
+
+                        </uib-tab>
+
                     </uib-tabset>
 
 

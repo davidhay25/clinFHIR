@@ -12,6 +12,8 @@ angular.module("sampleApp")
         let extProfileForLM = "http://clinfhir.com/StructureDefinition/profileForLM";
         let extExtensionUrl = "http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl";
 
+        let docKey = "http://clinfhir.com/StructureDefinition/docKey";
+
         var pathExtUrl = appConfigSvc.config().standardExtensionUrl.path;
 
 
@@ -129,7 +131,43 @@ angular.module("sampleApp")
         }
 
 
+
+
         return {
+
+            getDocsForItem : function(art){
+                let deferred = $q.defer();
+                //retrieve documentation files
+                let ar = getExtension(art,docKey);      //all the extensions with document keys in it
+                let arDocs = [];                        //will contain the retrieve docs
+                console.log(ar);
+                let arQuery = [];
+                ar.forEach(function (ext) {
+                    //todo - for now, assume that all the docs are in the cf tree...
+                    arQuery.push(getFile(ext));
+                });
+
+                $q.all(arQuery).then(function(){
+                    deferred.resolve(arDocs);
+                })
+
+                return deferred.promise;
+
+                function getFile(ext) {
+                    let url = "content/nhip/"+ ext.valueString;
+                    return $http.get(url).then(
+                        function (data) {
+                            console.log(data)
+                            arDocs.push({url:url,contents:data.data})
+
+                        },
+                        function(err) {
+                            console.log(err)
+                        }
+                    )
+                }
+
+            },
 
             makeDownload : function(ar,typ) {
                 //make a csv download for a valueset or extension analyis
@@ -481,17 +519,42 @@ angular.module("sampleApp")
                 //assume the IG is on the conformance server (serverUrl)
                 let deferred = $q.defer();
                 let fullUrl = serverUrl + "ImplementationGuide/" + igCode;
+                let tabs = [];  //will return a set of tabs. These are the equivalent to the formal IG tool
+
 
                // let url = "http://home.clinfhir.com:8054/baseR4/ImplementationGuide/nhip";
                 $http.get(fullUrl).then(
                     function (data) {
                         let IG = data.data;
+                        if (! IG.definition) {
+                            deferred.reject('No definition');
+                            return;
+                        }
+
+                        //get the pages.
+                        //let thereArePages = false;
+                        let queries = [];
+
+                        if (IG.definition.page) {
+                            let topPage = IG.definition.page
+                            //thereArePages = true;
+                            queries.push(getContentFile(topPage.title,topPage.nameUrl));
+
+                            if (topPage.page) {
+                                topPage.page.forEach(function (page) {
+                                    queries.push(getContentFile(page.title,page.nameUrl));
+                                })
+                            }
+                        }
+
+
                         let artifacts = {};
                         IG.definition.resource.forEach(function (res) {
                             if (res.reference && res.reference.reference) {
 
 
                                 //get the moreinfo, if any
+                                //todo - moreinfo is deprecated (I think) - but keep it as it does allow a reference to an external link so may be halpful
                                 let moreInfo = getExtension(res, extIGMoreInfo);
                                 //console.log(res,moreInfo);
                                 moreInfo.forEach(function (ext) {
@@ -524,7 +587,7 @@ angular.module("sampleApp")
                                     let code = typ[0].valueCode;
                                     artifacts[code] = artifacts[code] || [];
                                     artifacts[code].push(res)
-                                    //console.log(res)
+
                                 } else {
                                     //this might be an extension
                                     if (res.exampleBoolean || res.exampleCanonical) {
@@ -532,17 +595,44 @@ angular.module("sampleApp")
                                         let ar = res.reference.reference.split('/');
                                         res.baseType = ar[0]
                                         artifacts.example.push(res)
-
-
                                     }
                                 }
                             }
                         });
 
-                        deferred.resolve(artifacts)
+                        if (queries.length == 0) {
+                            //if there are no pages, then can resolve...
+                            deferred.resolve({artifacts:artifacts})
+                        } else {
+                            // ... Otherwise get all the pages into tabs...
+                            $q.all(queries).then(
+                                function(){
+                                    deferred.resolve({artifacts:artifacts,tabs:tabs})
+                                }
+                            )
+                        }
+
                     }
                 );
                 return deferred.promise;
+
+
+                function getContentFile(title,nameUrl) {
+                    let url = "content/nhip/"+ nameUrl;
+                    return $http.get(url).then(
+                        function (data) {
+                            console.log(data)
+                            tabs.push({url:url,title:title,contents:data.data})
+
+                        },
+                        function(err) {
+                            console.log(err)
+                        }
+                    )
+                }
+
+
+
                 }
 
         }

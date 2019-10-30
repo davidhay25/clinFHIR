@@ -50,6 +50,33 @@ angular.module("sampleApp")
             }
 
 
+            //edit description, comments and usageGuide in a single dialog
+            $scope.lmEditElementDoc = function(row){
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop.
+                    keyboard: false,       //same as above.
+                    size: 'lg',
+                    templateUrl: 'modalTemplates/lmDocs.html',
+                    controller: function($scope,row){
+                        $scope.row = angular.copy(row);
+                        $scope.save=function(){
+                            $scope.$close($scope.row)
+                        }
+                    }, resolve : {
+                        row : function(){
+                            return row;
+                        }
+                    }
+                }).result.then(function(cloneRow){
+                    row.data.description = cloneRow.data.description;
+                    row.data.description = row.data.description || "No description";
+                    row.data.comments = cloneRow.data.comments;
+                    row.data.usageGuide = cloneRow.data.usageGuide;
+                    $scope.isDirty = true
+                    makeSD();
+                })
+            };
+
             $scope.deleteModel = function(){
 
                 var modalOptions = {
@@ -2066,27 +2093,6 @@ angular.module("sampleApp")
 
 
 
-
-/* hide for the moment...
-            //add the v2 datatypes here. todo - perhaps there's a 'model source' property that selects from different data types?
-            $scope.dataTypes.push({code: 'CE',description: 'v2 CE Coded Entity'});
-            $scope.dataTypes.push({code: 'CM',description: 'v2 CM Composite'});
-            $scope.dataTypes.push({code: 'CWE',description: 'v2 CWE Coded With Exceptions'});
-            $scope.dataTypes.push({code: 'CX',description: 'v2 CX Extended CompositeId'});
-            $scope.dataTypes.push({code: 'EI',description: 'v2 EI Entity Identifier'});
-            $scope.dataTypes.push({code: 'HD',description: 'v2 HD Hierarchic Descriptor'});
-            $scope.dataTypes.push({code: 'IS',description: 'v2 ID Coded, HL7 Defined'});
-            $scope.dataTypes.push({code: 'IS',description: 'v2 IS Coded, User Defined'});
-            $scope.dataTypes.push({code: 'PL',description: 'v2 PL Person Location'});
-            $scope.dataTypes.push({code: 'SI',description: 'v2 SI Sequence Id'});
-            $scope.dataTypes.push({code: 'ST',description: 'v2 ST String'});
-            $scope.dataTypes.push({code: 'TS',description: 'v2 TS Timestamp'});
-            $scope.dataTypes.push({code: 'XAD',description: 'v2 XAD Extended Address'});
-            $scope.dataTypes.push({code: 'XCN',description: 'v2 XCN Extended name + ID for Persons'});
-            $scope.dataTypes.push({code: 'XPN',description: 'v2 XPN Extended Person Name'});
-            $scope.dataTypes.push({code: 'XTN',description: 'v2 XTN Extended Telecommunications Number'});
-*/
-
             $scope.saveModel = function() {
                 
                 var url = $scope.conformanceServer.url + "StructureDefinition/" + $scope.SD.id;
@@ -2700,13 +2706,10 @@ angular.module("sampleApp")
                 }).result.then(
                     function(result) {
 
-
                         if (result.editNode) {
                             //editing an existing node - replace the data property in the node with the results......
                             $scope.treeData.forEach(function (item, index) {
                                 if (item.id == result.editNode.id) {
-
-
 
                                     var clone = angular.copy(result)
                                     delete clone.editNode;
@@ -2718,19 +2721,13 @@ angular.module("sampleApp")
                                         item.data.ed = {path:item.id}
                                     }
 
-
                                     item.data.edStatus = clone.edStatus;       //so the tree display is updated...
-
                                     logicalModelSvc.decorateTreeItem(item,item.data.ed);
-
                                     item.text = clone.name;
-
                                     item.data.pathSegment = clone.name;     //this will re-write the path in setPath() below....
-
                                     $scope.selectedNode = item;
                                 }
                             })
-                            //updateInstanceGraph();
 
                         } else {
                             //this is a new node
@@ -2786,8 +2783,6 @@ angular.module("sampleApp")
                                     }
 
 
-
-
                                     newNode.data.min = child.min;
                                     newNode.data.max = child.max;
 
@@ -2798,12 +2793,6 @@ angular.module("sampleApp")
                                     }
 
 
-                                    /* if (ed.binding) {
-                                     item.data.selectedValueSet = {strength: ed.binding.strength};
-                                     item.data.selectedValueSet.vs = {url: ed.binding.valueSetUri};
-                                     item.data.selectedValueSet.vs.name = ed.binding.description;
-                                     }*/
-
                                     $scope.treeData.push(newNode);
 
 
@@ -2813,6 +2802,7 @@ angular.module("sampleApp")
                             }
 
                         }
+
 
                         //set all the element paths...
                         var rootNodeId = $scope.treeData[0].data.path;

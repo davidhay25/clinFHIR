@@ -1,0 +1,61 @@
+
+<div>
+
+    <style>
+        .spacer {
+            margin-bottom: 8px;
+        }
+    </style>
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-6 col-sm-6">
+                <h3 class="modal-title">Documentation</h3>
+
+            </div>
+            <div class="col-md-6 col-sm-6 ">
+                <div class="pull-right">
+                    <button  class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+                    <button  class="btn btn-primary" ng-click="save()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-body">
+
+
+
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <strong>Description</strong>
+                <textarea rows = "5" class="form-control" ng-model="row.data.description"></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <strong>Comments</strong>
+                <textarea  rows = "5" class="form-control" ng-model="row.data.comments"></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <strong>Usage Guide</strong>
+                <textarea  rows = "5" class="form-control" ng-model="row.data.usageGuide"></textarea>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <div ng-show="url" >POST {{url}}</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
