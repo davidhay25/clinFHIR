@@ -21,7 +21,7 @@
     <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
     <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
 
-    <title>nHIP</title>
+    <title>HPI</title>
 
     <script>
 
@@ -91,20 +91,21 @@
 
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
         <div class="col-md-5">
-            <a class="navbar-brand" href="#">nHIP on FHIR</a>
+            <a class="navbar-brand" href="#">New Zealand HPI Implementation Guide</a>
         </div>
 
         <div class="col-md-4">
+            <!--
             <div class="navbar-text">
                 <div class="btn-group" ng-click="selectIG(input.igCode)">
                     <label class="btn btn-default" ng-model="input.igCode" uib-btn-radio="'nzRegistry'">Identity</label>
-                    <!--
+
                     <label class="btn btn-default" ng-model="input.igCode" uib-btn-radio="'nhip'">Clinical</label>
 
-    -->
+
                 </div>
             </div>
-
+-->
         </div>
 
 
@@ -128,6 +129,8 @@
 
         <uib-tab ng-if="tabs.length > 0" heading="Downloads">
             <p>Download of all artifacts - Profiles, Extension Definitions, Terminology</p>
+
+            CapabilityStatement
 
         </uib-tab>
 

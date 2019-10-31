@@ -135,6 +135,31 @@ angular.module("sampleApp")
 
         return {
 
+            getCapabilityStatement : function(code) {
+                let deferred = $q.defer();
+                let fullUrl = serverUrl + "CapabilityStatement/" + code;
+
+                let capStmt;
+                let resourceDef = {}
+                $http.get(fullUrl).then(
+                    function(data) {
+                        capStmt = data.data;
+                        if (capStmt.rest) {
+                            capStmt.rest[0].resource.forEach(function(resourceDesc){
+                                resourceDef[resourceDesc.type] = resourceDesc
+                            })
+                        }
+
+                        deferred.resolve({'capStmt':capStmt,'resourceDef':resourceDef})
+
+                    }
+                )
+
+
+                return deferred.promise;
+
+            },
+
             getDocsForItem : function(art){
                 let deferred = $q.defer();
                 //retrieve documentation files

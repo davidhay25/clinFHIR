@@ -30,8 +30,8 @@ angular.module("sampleApp")
                         $scope.artifacts = data.artifacts;
                         $scope.tabs = data.tabs;
 
-                        $scope.tabs.splice(2,0,{title:'Resources',includeUrl:"/includes/oneModel.html"})
-                        $scope.tabs.splice(7,0,{title:'Query Builder',includeUrl:"/includes/queryBuilder.html"})
+                        $scope.tabs.splice(3,0,{title:'Resources',includeUrl:"/includes/oneModel.html"})
+                        $scope.tabs.splice(8,0,{title:'Query Builder',includeUrl:"/includes/queryBuilder.html"})
 
                         $scope.showTabsInView = true;
                         var hash = $location.hash();
@@ -45,6 +45,16 @@ angular.module("sampleApp")
 
                     }
                 );
+
+               //neet separate capability statement & IG...
+               nhipSvc.getCapabilityStatement('hpi').then(
+                   function(data) {
+                       console.log(data)
+                       $scope.capStmt = data.capStmt;
+                       $scope.resourceDef = data.resourceDef;
+                   }
+               )
+
             };
 
             //funcctions for query builder
@@ -257,6 +267,7 @@ angular.module("sampleApp")
             $scope.selectItem = function(typ,art) {
                 clearDetail();
 
+
                 nhipSvc.getDocsForItem(art).then(
                     function(arDocs) {
                         console.log(arDocs);
@@ -276,6 +287,8 @@ angular.module("sampleApp")
                         //console.log(resource)
                         //delete $scope.input.showAllAnalysis;
 
+
+
                         switch (resource.resourceType) {
 
                             case 'NamingSystem' :
@@ -286,8 +299,10 @@ angular.module("sampleApp")
                                 $scope.input.showAllAnalysis = false;
                                 $scope.baseTypeForModel = nhipSvc.getModelBaseType($scope.selectedResource);
                                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.selectedResource);  //create a new tree
-//console.log($scope.treeData)
-                                //console.log($scope.treeData);
+
+                                //let canonicalUrl = $scope.selectedResource.url;
+                                //let capStmtElement
+
                                 //collapse all but the root...
                                 $scope.treeData.forEach(function(node){
                                     node.state = node.state || {}

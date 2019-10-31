@@ -8,8 +8,20 @@ The following notes apply to all resources in this implementation.
 Resources can be expressed either as Json or XML, and both formats are supported by this implementation.
 
 
+### Notes on identifiers
+
+* Describe identifiers
+    * especially importance of system
+    * 'use' element (as applied to Practitioner.iedntifier)
+* Summary of identifier systems
+    * possibly move from individual resources
+
 ### Id and Identifiers
 
+
+
+
+    
 All of the FHIR resources in this implementation have both an id and an identifier.
 
 The id is the ‘physical’ identity of the resource, and the identifier is the business identifier. The difference between the two is that the id uniquely identifies the resource on the server where it is located. If the resource is copied from one server to another then it will (almost certainly) be different - much as a primary key in a database changes if a record is moved between databases. 
